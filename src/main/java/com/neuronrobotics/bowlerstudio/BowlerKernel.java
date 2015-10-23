@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio;
 
 import java.io.File;
 import java.util.ArrayList;
+
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.imageprovider.OpenCVJNILoader;
 import com.sun.speech.freetts.ProcessException;
@@ -9,6 +10,12 @@ import com.sun.speech.freetts.VoiceManager;
 import com.sun.speech.freetts.en.us.FeatureProcessors.WordNumSyls;
 
 public class BowlerKernel{
+	
+	private static void fail(){
+		System.err.println("Usage: BowlerScriptKernel scripts <file 1> .. <file n> # This will load one script after the next ");
+		System.err.println("Usage: BowlerScriptKernel pipe <file 1> .. <file n> # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable ");
+		System.exit(1);
+	}
 
     /**
      * @param args the command line arguments
@@ -16,8 +23,10 @@ public class BowlerKernel{
      */
     @SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-    	
-            OpenCVJNILoader.load();              // Loads the OpenCV JNI (java native interface)
+    		if(args.length==0){
+    			fail();
+    		}
+    		OpenCVJNILoader.load();              // Loads the OpenCV JNI (java native interface)
     		boolean startLoadingScripts=false;
     		for(String s :args){
     			if(startLoadingScripts){
@@ -26,6 +35,7 @@ public class BowlerKernel{
     				}catch(Error e)
     				{
     					e.printStackTrace();
+    					fail();
     				}
     			}
     			if(s.contains("scripts")){
@@ -42,6 +52,7 @@ public class BowlerKernel{
     				}catch(Error e)
     				{
     					e.printStackTrace();
+    					fail();
     				}
     			}
     			if(s.contains("pipe")){
