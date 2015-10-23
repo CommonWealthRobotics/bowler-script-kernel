@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry exported="true" kind="lib" path="classes">
+		<attributes>
+			<attribute name="optional" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="org.springsource.ide.eclipse.gradle.classpathcontainer"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CHDK-PTP-Java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JCSG-git"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/WalnutiQ"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java-bowler-git"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
