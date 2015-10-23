@@ -1,4 +1,6 @@
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
@@ -163,7 +165,7 @@ dependencies {
 // create a fat-jar (class files plus dependencies
 // excludes VRL.jar (plugin jar files must not start with 'vrl-\\d+')
 jar {
-	jar.baseName= "BowlerStudio";
+	jar.baseName= "BowlerScriptingKernel";
 	doFirst {
 		
 		// dependencies except VRL
@@ -200,6 +202,5 @@ jar {
 task run(type: JavaExec) {
 	classpath = sourceSets.main.runtimeClasspath
 	main = mainClass;
-	//    jvmArgs = ['-Dprism.forceGPU=true', '-Dprism.verbose=true']
-	jvmArgs = ['-Dprism.forceGPU=true']
+	//    jvmArgs = ['-Dprism.forceGPU=true', '-Dprism.verbose=true']ssh 
 }

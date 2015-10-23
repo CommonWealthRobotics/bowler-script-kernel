@@ -21,7 +21,6 @@ public class GroovyHelper implements IScriptingLanguage{
 				.addStarImports(ScriptingEngine.getImports())
 				.addStaticStars(
 						"com.neuronrobotics.sdk.util.ThreadUtil",
-						"com.neuronrobotics.bowlerstudio.scripting.ScriptingEngineWidget",
 						"eu.mihosoft.vrl.v3d.Transform"));
 
 		Binding binding = new Binding();
