@@ -342,6 +342,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		        	l.onLogin(loginID);
 		        }
 		        ScriptingEngine.setAutoupdate(true);
+		        System.out.println("Login as "+loginID+"");
 	   	 	}else{
 	   	 		System.err.println("Bad login credentials for "+loginID);
 	   	 		github=null;
@@ -353,8 +354,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			System.out.println("Login failed");
 			github=null;
 		}
-		if(github==null)
+		if(github==null){
+			ThreadUtil.wait(200);
 			return gitHubLogin();
+		}
 		else
 			return github;
 	}
@@ -387,15 +390,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			}
 			
 			if(github==null){
-				ThreadUtil.wait(200);
+				
 				login();	
 			}
 			
 		}
 		
-		if(github.getRateLimit().remaining<2){
-			System.err.println("##Github Is Rate Limiting You## Disabling autoupdate");
-			setAutoupdate(false);
+		try{
+			if(github.getRateLimit().remaining<2){
+				System.err.println("##Github Is Rate Limiting You## Disabling autoupdate");
+				setAutoupdate(false);
+			}
+		}catch(IOException e){
+			logout();
+			
 		}
 			
 		
