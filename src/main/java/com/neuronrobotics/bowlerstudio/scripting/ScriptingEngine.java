@@ -6,8 +6,10 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Scanner;
 
 import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -46,6 +49,7 @@ import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GHGistFile;
 import org.kohsuke.github.GitHub;
 import org.python.util.PythonInterpreter;
+
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.common.Log;
@@ -66,7 +70,7 @@ import clojure.lang.RT;
 
 
 public class ScriptingEngine extends BorderPane{// this subclasses boarder pane for the widgets sake, because multiple inheritance is TOO hard for java...
-	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 2000;
+	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 60000;
 	/**
 	 * 
 	 */
@@ -74,6 +78,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 	private static final Map<String,Long> fileLastLoaded = new HashMap<String,Long>();
 
 	private static boolean hasnetwork=false;
+	private static boolean autoupdate=false;
 	
 	private static final String[] imports = new String[] { "haar",
 			"java.awt",
@@ -113,6 +118,48 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 	private static ArrayList<IGithubLoginListener> loginListeners = new ArrayList<IGithubLoginListener>();
 
 	private static ArrayList<IScriptingLanguage> langauges=new ArrayList<>();
+	
+	private static IGitHubLoginManager loginManager= new IGitHubLoginManager() {
+		
+		@Override
+		public String[] prompt() {
+			String []creds = new String[]{"",""};
+			System.out.println("#Github Login Prompt#");
+			System.out.println("For anynomous mode hit enter twice");
+			System.out.print("Github Username: ");
+			// create a scanner so we can read the command-line input
+			BufferedReader buf = new BufferedReader (new InputStreamReader (System.in));
+
+		   do{
+			   try {
+				creds[0] = buf.readLine ();
+			} catch (IOException e) {
+				return null;
+			}
+			   if(creds[0].equals("")){
+				   System.out.println("No username, using anynomous login");
+				   return null;
+			   }
+			   if(creds[0].contains("@")){
+				   System.err.print("###ERROR Enter the Username not the Email Address### ");
+				   System.out.print("Github Username: ");
+				   creds[0]=null;
+			   }
+		   }while(creds[0]==null);
+		    
+		    System.out.print("Github Password: ");
+		    try {
+				creds[1] = buf.readLine ();
+				 if(creds[1].equals("")){
+					   System.out.println("No password, using anynomous login");
+					   return null;
+				   }
+			} catch (IOException e) {
+				return null;
+			}
+			return creds;
+		}
+	};
  	static{
  		
 		try {                                                                                                                                                                                                                                 
@@ -133,6 +180,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 //		if(scriptingDir.exists()){
 //			workspace=scriptingDir;
 //		}
+		logout();
 		loadLoginData();
 		addScriptingLanguage(new ClojureHelper());
 		addScriptingLanguage(new GroovyHelper());
@@ -160,11 +208,12 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 			    }
 				
 				
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				logout();
+				//e.printStackTrace();
 			}
 		}
+ 		
  	}
  	
  	
@@ -208,36 +257,16 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 			return;
 		loginID=null;
 
-//		Platform.runLater(() -> {
-//			GithubLoginDialog myDialog = new GithubLoginDialog(BowlerStudio.getPrimaryStage());
-//			do{
-//		        myDialog.sizeToScene();
-//		        myDialog.showAndWait();
-//		        loginID = myDialog.getUsername();
-//		        pw=myDialog.getPw();
-//			}while(loginID==null);
-//		});
-//        while(loginID==null)ThreadUtil.wait(100);
+		gitHubLogin();
         
-        String content= "login="+loginID+"\n";
-        content+= "password="+pw+"\n";
-        pw=null;
-        PrintWriter out = new PrintWriter(getCreds().getAbsoluteFile());
-        out.println(content);
-        out.flush();
-        out.close();
-        github = GitHub.connect();
-        
-        for(IGithubLoginListener l:loginListeners){
-        	l.onLogin(loginID);
-        }
 	}
 
 	public static void logout(){
-		new RuntimeException("Logout callsed").printStackTrace();
+		//new RuntimeException("Logout callsed").printStackTrace();
 		if(getCreds()!= null)
 		try {
-			Files.delete(getCreds().toPath());
+			if(getCreds().exists())
+				Files.delete(getCreds().toPath());
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -248,6 +277,54 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
         	l.onLogout(loginID);
         }
         loginID=null;
+	}
+	
+	public static GitHub gitHubLogin(){
+		String[] creds = loginManager.prompt();
+		
+		if(creds==null)
+			try {
+				System.err.println("Using anynomous login, autoupdate disabled");
+				ScriptingEngine.setAutoupdate(false);
+				logout();
+				github=GitHub.connectAnonymously();
+				return github;
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				return null;
+			}
+		loginID = creds[0];
+		pw= creds[1];
+        
+        String content= "login="+loginID+"\n";
+        content+= "password="+pw+"\n";
+        PrintWriter out;
+		try {
+			out = new PrintWriter(getCreds().getAbsoluteFile());
+	        out.println(content);
+	        out.flush();
+	        out.close();
+	   	 	github = GitHub.connect();
+	   	 	if(github.isCredentialValid()){
+		        for(IGithubLoginListener l:loginListeners){
+		        	l.onLogin(loginID);
+		        }
+		        ScriptingEngine.setAutoupdate(true);
+	   	 	}else{
+	   	 		System.err.println("Bad login credentials for "+loginID);
+	   	 		github=null;
+				pw= null;
+	   	 	}
+	   	 		
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Login failed");
+			github=null;
+		}
+		if(github==null)
+			return gitHubLogin();
+		else
+			return github;
 	}
 
 	private static void waitForLogin(String id) throws IOException, InvalidRemoteException, TransportException, GitAPIException{
@@ -269,67 +346,26 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 				try{
 					github = GitHub.connect();
 				}catch(IOException ex){
-					ex.printStackTrace();
+					logout();
 				}
 			}else{
 				getCreds().createNewFile();
 			}
 			
 			if(github==null){
-				Platform.runLater(() -> {
-					Alert alert = new Alert(AlertType.CONFIRMATION);
-					alert.setTitle("GitHub Login Missing");
-					alert.setHeaderText("To use BowlerStudio at full speed login with github");
-					alert.setContentText("What would you like to do?");
-	
-					ButtonType buttonTypeOne = new ButtonType("Use Anonymously");
-					ButtonType buttonTypeTwo = new ButtonType("Login");
-					
-					alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo);
-					Optional<ButtonType> result = alert.showAndWait();
-					new Thread(){
-						public void run(){
-							if (result.get() == buttonTypeOne){
-								try {
-									github = GitHub.connectAnonymously();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							} else  {
-								logout();
-								try {
-									login();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							} 
-						}
-					}.start();
-
-				});
-
+				ThreadUtil.wait(200);
+				login();	
 			}
 			
 		}
 		
-		while(github==null){
-			ThreadUtil.wait(100);
-		}
 		loadLoginData();
-		if(cp == null){
-			cp = new UsernamePasswordCredentialsProvider(loginID, pw);
 
-		}
 		File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
 		if(!gistDir.exists()){
 			gistDir.mkdir();
 		}
-		
-		
 
-		
 		GHGist gist;
 		try{
 			gist = github.getGist(id);
@@ -347,6 +383,12 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 			System.out.println("Cloning files to: "+localPath);
 			 //Clone the repo
 		    Git.cloneRepository().setURI(remotePath).setDirectory(new File(localPath)).call();
+		}
+	    if(!isAutoupdate())
+	    	return;
+	    
+		if(cp == null){
+			cp = new UsernamePasswordCredentialsProvider(loginID, pw);
 		}
 	    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 	    Git git = new Git(localRepo);
@@ -593,6 +635,26 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 
 	public static String[] getImports() {
 		return imports;
+	}
+
+
+	public static IGitHubLoginManager getLoginManager() {
+		return loginManager;
+	}
+
+
+	public static void setLoginManager(IGitHubLoginManager loginManager) {
+		ScriptingEngine.loginManager = loginManager;
+	}
+
+
+	public static boolean isAutoupdate() {
+		return autoupdate;
+	}
+
+
+	public static void setAutoupdate(boolean autoupdate) {
+		ScriptingEngine.autoupdate = autoupdate;
 	}
 
 
