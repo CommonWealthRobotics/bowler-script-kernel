@@ -1,15 +1,8 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
-import eu.mihosoft.vrl.v3d.CSG;
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
-
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,19 +14,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Map.Entry;
-import java.util.Scanner;
-
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -42,8 +27,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -51,39 +34,21 @@ import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHGist;
-import org.kohsuke.github.GHGistFile;
 import org.kohsuke.github.GitHub;
-import org.python.util.PythonInterpreter;
-
-import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
-import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.common.Log;
-import com.neuronrobotics.sdk.dyio.DyIOChannelMode;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
-import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Tab;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
-import clojure.java.api.Clojure;
-import clojure.lang.Symbol;
-import clojure.lang.Var;
-import clojure.lang.RT;
 
 
-public class ScriptingEngine extends BorderPane{// this subclasses boarder pane for the widgets sake, because multiple inheritance is TOO hard for java...
+public class ScriptingEngine {// this subclasses boarder pane for the widgets sake, because multiple inheritance is TOO hard for java...
 	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 60000;
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
 	private static final Map<String,Long> fileLastLoaded = new HashMap<String,Long>();
 
 	private static boolean hasnetwork=false;
@@ -117,7 +82,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 	private static File creds=null;
 
 	//private static GHGist gist;
-	protected File currentFile = null;
+
 	
 	private static File workspace;
 	private static File lastFile;
@@ -310,7 +275,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 		return null;
 	}
 
-	private String returnFirstGist(String html) {
+	private static String returnFirstGist(String html) {
 		// Log.debug(html);
 		String slug = html.split("//gist.github.com/")[1];
 		String js = slug.split(".js")[0];
@@ -319,7 +284,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 		return id;
 	}
 
-	public String getCurrentGist(String addr, WebEngine engine) {
+	public static String getCurrentGist(String addr, WebEngine engine) {
 		String gist = urlToGist(addr);
 		if (gist == null) {
 			try {
