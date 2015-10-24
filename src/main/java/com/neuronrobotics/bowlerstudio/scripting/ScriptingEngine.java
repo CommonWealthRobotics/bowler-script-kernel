@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -32,6 +33,13 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.Scanner;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -63,6 +71,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.web.WebEngine;
 import clojure.java.api.Clojure;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
@@ -140,11 +149,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 				   System.out.println("No username, using anynomous login");
 				   return null;
 			   }
-			   if(creds[0].contains("@")){
-				   System.err.print("###ERROR Enter the Username not the Email Address### ");
-				   System.out.print("Github Username: ");
-				   creds[0]=null;
-			   }
+
 		   }while(creds[0]==null);
 		    
 		    System.out.print("Github Password: ");
@@ -172,15 +177,11 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 	        // we assuming we have no access to the server and run off of the chached gists.    
 	    	hasnetwork= false;                                                                                                                                                                                                                              
 	    }  
- 		File scriptingDir = new File(System.getProperty("user.home")+"/git/BowlerStudio/src/main/resources/com/neuronrobotics/bowlerstudio/");
 		workspace = new File(System.getProperty("user.home")+"/bowler-workspace/");
 		if(!workspace.exists()){
 			workspace.mkdir();
 		}
-//		if(scriptingDir.exists()){
-//			workspace=scriptingDir;
-//		}
-		logout();
+
 		loadLoginData();
 		addScriptingLanguage(new ClojureHelper());
 		addScriptingLanguage(new GroovyHelper());
@@ -279,20 +280,86 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
         loginID=null;
 	}
 	
+	private static GitHub setupAnyonmous(){
+		System.err.println("Using anynomous login, autoupdate disabled");
+		ScriptingEngine.setAutoupdate(false);
+		logout();
+		try {
+			github=GitHub.connectAnonymously();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return github;
+	}
+	
+	public static String urlToGist(String in) {
+		String domain = in.split("//")[1];
+		String[] tokens = domain.split("/");
+		if (tokens[0].toLowerCase().contains("gist.github.com")
+				&& tokens.length >= 2) {
+			try{
+				String id = tokens[2].split("#")[0];
+				Log.debug("Gist URL Detected " + id);
+				return id;
+			}catch(ArrayIndexOutOfBoundsException e){
+				return "d4312a0787456ec27a2a";
+			}
+		}
+
+		return null;
+	}
+
+	private String returnFirstGist(String html) {
+		// Log.debug(html);
+		String slug = html.split("//gist.github.com/")[1];
+		String js = slug.split(".js")[0];
+		String id = js.split("/")[1];
+
+		return id;
+	}
+
+	public String getCurrentGist(String addr, WebEngine engine) {
+		String gist = urlToGist(addr);
+		if (gist == null) {
+			try {
+				Log.debug("Non Gist URL Detected");
+				String html;
+				TransformerFactory tf = TransformerFactory.newInstance();
+				Transformer t = tf.newTransformer();
+				StringWriter sw = new StringWriter();
+				t.transform(new DOMSource(engine.getDocument()),
+						new StreamResult(sw));
+				html = sw.getBuffer().toString();
+				return returnFirstGist(html);
+			} catch (TransformerConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TransformerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		return gist;
+	}
+	
 	public static GitHub gitHubLogin(){
 		String[] creds = loginManager.prompt();
+		   
 		
-		if(creds==null)
-			try {
-				System.err.println("Using anynomous login, autoupdate disabled");
-				ScriptingEngine.setAutoupdate(false);
-				logout();
-				github=GitHub.connectAnonymously();
-				return github;
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				return null;
-			}
+		if(creds==null){
+			return setupAnyonmous();
+		}else{
+			if(creds[0].contains("@")){
+			   System.err.print("###ERROR Enter the Username not the Email Address### ");
+			   return gitHubLogin();
+		   }if(creds[0].equals("") || creds[1].equals("") ){
+			   System.err.print("###No Username or password### ");
+			   return setupAnyonmous();
+		   }
+		}
+		
 		loginID = creds[0];
 		pw= creds[1];
         
