@@ -326,6 +326,8 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 		else
 			return github;
 	}
+	
+	
 
 	private static void waitForLogin(String id) throws IOException, InvalidRemoteException, TransportException, GitAPIException{
 		try {                                                                                                                                                                                                                                 
@@ -359,27 +361,30 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 			
 		}
 		
+		if(github.getRateLimit().remaining<2){
+			System.err.println("##Github Is Rate Limiting You## Disabling autoupdate");
+			setAutoupdate(false);
+		}
+			
+		
 		loadLoginData();
 
 		File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
 		if(!gistDir.exists()){
 			gistDir.mkdir();
 		}
-
-		GHGist gist;
-		try{
-			gist = github.getGist(id);
-		}catch(IOException ex){
-			//ex.printStackTrace();
-			
-			return;
-		}
 		String localPath=gistDir.getAbsolutePath();
-		String remotePath = gist.getGitPullUrl();
 		File gitRepoFile = new File(localPath + "/.git");
 		
-	
 		if(!gitRepoFile.exists()){
+			GHGist gist;
+			try{
+				gist = github.getGist(id);
+			}catch(IOException ex){
+				ex.printStackTrace();
+				return;
+			}
+			String remotePath = gist.getGitPullUrl();
 			System.out.println("Cloning files to: "+localPath);
 			 //Clone the repo
 		    Git.cloneRepository().setURI(remotePath).setDirectory(new File(localPath)).call();
@@ -407,6 +412,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 		    	ex.printStackTrace();
 		    }
 	    }
+	    git.close();
 	}
 	
 
@@ -489,10 +495,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 				
 				return;
 			}
-			
-			
-			
-			
+
 			String localPath=gistDir.getAbsolutePath();
 			String remotePath = gist.getGitPullUrl();
 			File gitRepoFile = new File(localPath + "/.git");
@@ -515,6 +518,7 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 		    }catch(Exception ex){
 		    	ex.printStackTrace();
 		    }
+		    git.close();
 		} catch (InterruptedIOException e) {
 			System.out.println("Gist Rate limited");
 		} catch (MalformedURLException ex) {
@@ -653,8 +657,21 @@ public class ScriptingEngine extends BorderPane{// this subclasses boarder pane 
 	}
 
 
-	public static void setAutoupdate(boolean autoupdate) {
+	public static boolean setAutoupdate(boolean autoupdate) {
+		if(autoupdate){
+			loadLoginData();
+			if(pw==null||loginID==null)
+				try {
+					login();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if(pw==null||loginID==null)
+				return false;
+		}
 		ScriptingEngine.autoupdate = autoupdate;
+		return ScriptingEngine.autoupdate;
 	}
 
 
