@@ -5,11 +5,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
+import java.util.LinkedList;
+import java.util.List;
 
 import jline.ConsoleReader;
 import jline.Terminal;
-
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.ShellType;
@@ -108,6 +108,12 @@ public class BowlerKernel {
 		reader.addTriggeredAction(Terminal.CTRL_C, e -> {
 			System.exit(0);
 		});
+		
+		
+		reader.getHistory().addToHistory("dyio.setValue(0,128)");
+		reader.getHistory().addToHistory("println dyio.getValue(0)");
+		reader.getHistory().addToHistory("println \"Hello world!\"");
+		
 		reader.setBellEnabled(false);
 		reader.setDebug(new PrintWriter(new FileWriter("writer.debug", true)));
 		
@@ -126,8 +132,22 @@ public class BowlerKernel {
 						|| line.equalsIgnoreCase("exit")) {
 					break;
 				}
-				System.out.println("Result= "+ScriptingEngine.inlineScriptRun(line, null,
-						st));
+				if (line.equalsIgnoreCase("history")
+						|| line.equalsIgnoreCase("h")) {
+					List<String> h = reader.getHistory().getHistoryList();
+					for(String s:h){
+						System.out.println(s);
+					}
+					continue;
+				}
+				try {
+					System.out.println("Result= "+ScriptingEngine.inlineScriptRun(line, null,
+							st));
+				}catch (Error e) {
+					e.printStackTrace();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
