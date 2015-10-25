@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -28,6 +29,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -37,6 +39,7 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GitHub;
+
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
@@ -170,6 +173,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			        }
 			        if(line.contains("password")){
 			        	pw = line.split("=")[1];
+			        	// password loaded, we can now autoupdate
+			        	ScriptingEngine.setAutoupdate(true);
 			        }
 			    }
 				
@@ -429,9 +434,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			 //Clone the repo
 		    Git.cloneRepository().setURI(remotePath).setDirectory(new File(localPath)).call();
 		}
+		
 	    if(!isAutoupdate())
 	    	return;
-	    
+	    System.out.println("Autoupdating " +id);
 		if(cp == null){
 			cp = new UsernamePasswordCredentialsProvider(loginID, pw);
 		}
@@ -439,7 +445,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	    Git git = new Git(localRepo);
 	    for(int i=0;i<10;i++){
 		    try{
-		    	git.pull().setCredentialsProvider(cp).call();// updates to the latest version
+		    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
+		    	System.out.println("Pull completed "+ret);
 		    	//git.commit().setMessage("Updates any changes").call();
 		    	//git.push().setCredentialsProvider(cp).call();
 		    	return;
@@ -582,6 +589,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
 			if(System.currentTimeMillis()>lastTime+TIME_TO_WAIT_BETWEEN_GIT_PULL || !gistDir.exists())// wait 2 seconds before re-downloading the file
 				waitForLogin(id);
+			else
+				System.out.println("Not updating git repo, its been only "+(System.currentTimeMillis()-lastTime)+
+						" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
 			
 
 		    if(FileName==null||FileName.length()<1){
