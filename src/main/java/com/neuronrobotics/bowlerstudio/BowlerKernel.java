@@ -109,7 +109,8 @@ public class BowlerKernel {
 			System.exit(0);
 		});
 		
-		
+		reader.getHistory().addToHistory("println SDKBuildInfo.getVersion()");
+		reader.getHistory().addToHistory("for(int i=0;i<1000000;i++) { println dyio.getValue(0) }");
 		reader.getHistory().addToHistory("dyio.setValue(0,128)");
 		reader.getHistory().addToHistory("println dyio.getValue(0)");
 		reader.getHistory().addToHistory("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
