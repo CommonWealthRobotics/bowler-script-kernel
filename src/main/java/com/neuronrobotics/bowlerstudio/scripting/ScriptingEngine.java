@@ -48,7 +48,7 @@ import javafx.scene.web.WebEngine;
 
 
 public class ScriptingEngine {// this subclasses boarder pane for the widgets sake, because multiple inheritance is TOO hard for java...
-	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 60000;
+	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 10000;
 	/**
 	 * 
 	 */
@@ -585,12 +585,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		try {	
 			if(fileLastLoaded.get(id) ==null ){
 				// forces the first time the files is accessed by the application tou pull an update
-				fileLastLoaded.put(id, System.currentTimeMillis()-TIME_TO_WAIT_BETWEEN_GIT_PULL);
+				fileLastLoaded.put(id, System.currentTimeMillis()-TIME_TO_WAIT_BETWEEN_GIT_PULL*2);
 			}
 			long lastTime =fileLastLoaded.get(id);
 			File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
-			if(System.currentTimeMillis()>lastTime+TIME_TO_WAIT_BETWEEN_GIT_PULL || !gistDir.exists())// wait 2 seconds before re-downloading the file
+			if((System.currentTimeMillis()-lastTime)>TIME_TO_WAIT_BETWEEN_GIT_PULL || !gistDir.exists())// wait 2 seconds before re-downloading the file
+			{	
+				System.out.println("Updating git repo, its been "+(System.currentTimeMillis()-lastTime)+
+						" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
+				fileLastLoaded.put(id, System.currentTimeMillis());
 				waitForLogin(id);
+				
+			}
 			else
 				System.out.println("Not updating git repo, its been only "+(System.currentTimeMillis()-lastTime)+
 						" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
