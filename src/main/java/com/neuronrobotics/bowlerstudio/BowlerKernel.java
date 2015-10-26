@@ -113,6 +113,8 @@ public class BowlerKernel {
 		reader.getHistory().addToHistory("dyio.setValue(0,128)");
 		reader.getHistory().addToHistory("println dyio.getValue(0)");
 		reader.getHistory().addToHistory("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
+		reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
+		reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
 		reader.getHistory().addToHistory("println \"Hello world!\"");
 		
 		reader.setBellEnabled(false);
