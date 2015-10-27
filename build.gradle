@@ -38,56 +38,62 @@ File buildDir = file(".");
 Properties props = new Properties()
 props.load(new FileInputStream(buildDir.getAbsolutePath()+"/src/main/resources/com/neuronrobotics/bowlerstudio/build.properties"))
 
-		boolean is64Bit() {
-			////System.out.println("Arch: "+getOsArch());
-			return getOsArch().startsWith("x86_64") || getOsArch().startsWith("amd64");
-		}
-		 boolean isARM() {
-			return getOsArch().startsWith("arm");
-		}
-		 boolean isCortexA8(){
-			if(isARM()){
-				//TODO check for cortex a8 vs arm9 generic
-				return true;
-			}
-			return false;
-		}
-		 boolean isWindows() {
-			////System.out.println("OS name: "+getOsName());
-			return getOsName().toLowerCase().startsWith("windows") ||getOsName().toLowerCase().startsWith("microsoft") || getOsName().toLowerCase().startsWith("ms");
-		}
-		
-		 boolean isLinux() {
-			return getOsName().toLowerCase().startsWith("linux");
-		}
-		
-		 boolean isOSX() {
-			return getOsName().toLowerCase().startsWith("mac");
-		}
-		
-		 String getExtension() {
-			if(isWindows()) {
-				return ".dll";
-			}
-			
-			if(isLinux()) {
-				return ".so";
-			}
-			
-			if(isOSX()) {
-				return ".jnilib";
-			}
-			
-			return "";
-		}
-		
-		String getOsName() {	
-			return System.getProperty("os.name");
-		}
-		
-		String getOsArch() {
-			return System.getProperty("os.arch");
-		}
+boolean is64Bit() {
+	////System.out.println("Arch: "+getOsArch());
+	return getOsArch().startsWith("x86_64") || getOsArch().startsWith("amd64");
+}
+ boolean isARM() {
+	return getOsArch().startsWith("arm");
+}
+ boolean isCortexA8(){
+	if(isARM()){
+		//TODO check for cortex a8 vs arm9 generic
+		return true;
+	}
+	return false;
+}
+ boolean isWindows() {
+	////System.out.println("OS name: "+getOsName());
+	return getOsName().toLowerCase().startsWith("windows") ||getOsName().toLowerCase().startsWith("microsoft") || getOsName().toLowerCase().startsWith("ms");
+}
+
+ boolean isLinux() {
+	return getOsName().toLowerCase().startsWith("linux");
+}
+
+ boolean isOSX() {
+	return getOsName().toLowerCase().startsWith("mac");
+}
+
+ String getExtension() {
+	if(isWindows()) {
+		return ".dll";
+	}
+	
+	if(isLinux()) {
+		return ".so";
+	}
+	
+	if(isOSX()) {
+		return ".jnilib";
+	}
+	
+	return "";
+}
+
+String getOsName() {	
+	return System.getProperty("os.name");
+}
+
+String getOsArch() {
+	return System.getProperty("os.arch");
+}
+
+group = "com.neuronrobotics"
+archivesBaseName = "bowler-script-kernel"
+version = props."app.version"
+
+
 
 repositories {
 	mavenCentral()
@@ -184,6 +190,20 @@ dependencies {
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
 
+task javadocJar(type: Jar) {
+	classifier = 'javadoc'
+	from javadoc
+}
+
+task sourcesJar(type: Jar) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+artifacts {
+	archives javadocJar, sourcesJar
+}
+
 // create a fat-jar (class files plus dependencies
 // excludes VRL.jar (plugin jar files must not start with 'vrl-\\d+')
 jar {
@@ -220,6 +240,52 @@ jar {
 		    )
 		}
 }
+
+
+uploadArchives {
+	repositories {
+	  mavenDeployer {
+		beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+  
+		repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+		  authentication(userName: ossrhUsername, password: ossrhPassword)
+		}
+  
+		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+		  authentication(userName: ossrhUsername, password: ossrhPassword)
+		}
+  
+		pom.project {
+		  name 'Bowler Scripting Kernel'
+		  packaging 'jar'
+		  // optionally artifactId can be defined here
+		  description 'A command line utility for accsing the bowler framework.'
+		  url 'http://neuronrobotics.com'
+  
+		  scm {
+			connection 			'scm:git:https://github.com/NeuronRobotics/bowler-script-kernel.git'
+			developerConnection 'scm:git:git@github.com:NeuronRobotics/bowler-script-kernel.git'
+			url 'https://github.com/NeuronRobotics/bowler-script-kernel'
+		  }
+  
+		  licenses {
+			license {
+			  name 'The Apache License, Version 2.0'
+			  url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+			}
+		  }
+  
+		  developers {
+			developer {
+			  id 'madhephaestus'
+			  name 'Kevin Harrington'
+			  email 'kharrington@neuronrobotics.com'
+			}
+		  }
+		}
+	  }
+	}
+  }
 
 //task run(type: JavaExec) {
 //	classpath = sourceSets.main.runtimeClasspath
