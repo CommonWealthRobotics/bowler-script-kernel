@@ -432,14 +432,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 				return;
 			}
 			String remotePath = gist.getGitPullUrl();
-			System.out.println("Cloning files to: "+localPath);
+			//System.out.println("Cloning files to: "+localPath);
 			 //Clone the repo
 		    Git.cloneRepository().setURI(remotePath).setDirectory(new File(localPath)).call();
 		}
 		
 	    if(!isAutoupdate())
 	    	return;
-	    System.out.println("Autoupdating " +id);
+	    //System.out.println("Autoupdating " +id);
 		if(cp == null){
 			cp = new UsernamePasswordCredentialsProvider(loginID, pw);
 		}
@@ -447,9 +447,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	    Git git = new Git(localRepo);
 	    for(int i=0;i<10;i++){
 		    try{
+		    	git.commit().setMessage("Updates any changes").call();
 		    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
-		    	System.out.println("Pull completed "+ret);
-		    	//git.commit().setMessage("Updates any changes").call();
+		    	//System.out.println("Pull completed "+ret);
+		    	//
 		    	//git.push().setCredentialsProvider(cp).call();
 		    	return;
 		    }catch(Exception ex){
@@ -591,15 +592,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
 			if((System.currentTimeMillis()-lastTime)>TIME_TO_WAIT_BETWEEN_GIT_PULL || !gistDir.exists())// wait 2 seconds before re-downloading the file
 			{	
-				System.out.println("Updating git repo, its been "+(System.currentTimeMillis()-lastTime)+
-						" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
+//				System.out.println("Updating git repo, its been "+(System.currentTimeMillis()-lastTime)+
+//						" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
 				fileLastLoaded.put(id, System.currentTimeMillis());
 				waitForLogin(id);
 				
 			}
 			else
-				System.out.println("Not updating git repo, its been only "+(System.currentTimeMillis()-lastTime)+
-						" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
+//				System.out.println("Not updating git repo, its been only "+(System.currentTimeMillis()-lastTime)+
+//						" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
 			
 
 		    if(FileName==null||FileName.length()<1){

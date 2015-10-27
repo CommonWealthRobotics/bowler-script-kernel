@@ -1,6 +1,24 @@
+buildscript {
+	ext {
+		springBootVersion = '1.2.7.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath('io.spring.gradle:dependency-management-plugin:0.5.2.RELEASE')
+	}
+}
+
+
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
+
+apply plugin: 'spring-boot'
+apply plugin: 'io.spring.dependency-management'
+
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
@@ -77,7 +95,9 @@ repositories {
 	maven { url 'http://repo.jenkins-ci.org/public/' }
 	maven { url 'http://clojars.org/repo' }
 	maven { url 'http://jline.sourceforge.net/m2repo' }
-	
+	maven {
+		url 'http://repo.spring.io/milestone'
+	}
 }
 
 task wrapper(type: Wrapper) { gradleVersion = '2.1' }
@@ -159,7 +179,7 @@ dependencies {
 	compile group:'de.huxhorn.sulky', name:'de.huxhorn.sulky.3rdparty.jlayer', version:'1.0'
 	compile group:'com.googlecode.json-simple', name:'json-simple', version:'1.1'
 	compile 'com.fifesoft:rsyntaxtextarea:2.5.6'
-	
+    //compile("org.springframework.boot:spring-boot-starter-web:1.2.7.RELEASE")
 	
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
@@ -201,8 +221,8 @@ jar {
 		}
 }
 
-task run(type: JavaExec) {
-	classpath = sourceSets.main.runtimeClasspath
-	main = mainClass;
-	//    jvmArgs = ['-Dprism.forceGPU=true', '-Dprism.verbose=true']ssh 
-}
+//task run(type: JavaExec) {
+//	classpath = sourceSets.main.runtimeClasspath
+//	main = mainClass;
+//	//    jvmArgs = ['-Dprism.forceGPU=true', '-Dprism.verbose=true']ssh 
+//}

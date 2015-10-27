@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+//import org.springframework.boot.SpringApplication;
+//import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+//import org.springframework.context.annotation.ComponentScan;
+//import org.springframework.context.annotation.Configuration;
+
 import jline.ConsoleReader;
 import jline.Terminal;
 
@@ -84,7 +89,7 @@ public class BowlerKernel {
 			if (runShell) {
 				try {
 					st = ShellType.getFromSlug(s);
-				} catch (Error e) {
+				} catch (Exception e) {
 					st = ShellType.GROOVY;
 				}
 				break;
@@ -128,6 +133,9 @@ public class BowlerKernel {
 				
 			}
 		});
+		
+		//SpringApplication.run(SpringBowlerUI.class, new String[]{});
+		
 		String line;
 		try {
 			while ((line = reader.readLine("Bowler " + st.getNameOfShell()
