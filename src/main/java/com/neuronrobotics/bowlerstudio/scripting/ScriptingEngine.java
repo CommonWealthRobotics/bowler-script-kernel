@@ -447,9 +447,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	    Git git = new Git(localRepo);
 	    for(int i=0;i<10;i++){
 		    try{
+		    	git.commit().setMessage("Updates any changes").call();
 		    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
 		    	//System.out.println("Pull completed "+ret);
-		    	//git.commit().setMessage("Updates any changes").call();
+		    	//
 		    	//git.push().setCredentialsProvider(cp).call();
 		    	return;
 		    }catch(Exception ex){
