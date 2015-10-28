@@ -8,7 +8,7 @@ import clojure.lang.Symbol;
 import clojure.lang.Var;
 
 /**
- * Class containing static utility methods for Java->Clojure interop
+ * Class containing static utility methods for Java to Clojure interop
  * 
  * @author Mike https://github.com/mikera/clojure-utils/blob/master/src/main/java/mikera/cljutils/Clojure.java
  *
