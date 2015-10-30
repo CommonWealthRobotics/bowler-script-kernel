@@ -89,9 +89,6 @@ String getOsArch() {
 	return System.getProperty("os.arch");
 }
 
-group = "com.neuronrobotics"
-archivesBaseName = "bowler-script-kernel"
-version = props."app.version"
 
 
 
@@ -146,9 +143,13 @@ dependencies {
 	compile "edu.cmu.sphinx:sphinx4-data:1.0-SNAPSHOT"
 			
 	compile project(':JCSG')
-	compile project(':CHDK-PTP-Java')
+	//compile project(':CHDK-PTP-Java')
+	compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
 	compile project(':java-bowler')
+	//compile "com.neuronrobotics:java-bowler:3.14.36"
 	compile project(':WalnutiQ')
+	
+	
 	
 	String basedir =System.getenv("OPENCV_DIR")+"/../../java/opencv-249.jar";
 	println("OPENCV_DIR="+basedir);
@@ -190,19 +191,6 @@ dependencies {
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
 
-task javadocJar(type: Jar) {
-	classifier = 'javadoc'
-	from javadoc
-}
-
-task sourcesJar(type: Jar) {
-	classifier = 'sources'
-	from sourceSets.main.allSource
-}
-
-artifacts {
-	archives javadocJar, sourcesJar
-}
 
 // create a fat-jar (class files plus dependencies
 // excludes VRL.jar (plugin jar files must not start with 'vrl-\\d+')
@@ -241,6 +229,27 @@ jar {
 		}
 }
 
+group = "com.neuronrobotics"
+archivesBaseName = "bowler-script-kernel"
+version = props."app.version"
+
+task javadocJar(type: Jar) {
+	classifier = 'javadoc'
+	from javadoc
+}
+
+task sourcesJar(type: Jar) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+artifacts {
+	archives javadocJar, sourcesJar, jar
+}
+
+signing {
+	sign configurations.archives
+}
 
 uploadArchives {
 	repositories {

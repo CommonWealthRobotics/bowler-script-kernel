@@ -20,3 +20,5 @@ hs_err_pid*
 .project
 .classpath
 /.settings*
+/writer.debug
+/gradle.properties
