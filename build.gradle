@@ -89,11 +89,12 @@ String getOsArch() {
 	return System.getProperty("os.arch");
 }
 
-
+//https://oss.sonatype.org/service/local/repositories/releases/content/com/neuronrobotics/nrjavaserial/3.10.1/nrjavaserial-3.10.1.jar
 
 
 repositories {
 	mavenCentral()
+	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/'  }
 	maven { url 'http://repo.jenkins-ci.org/public/' }
 	maven { url 'http://clojars.org/repo' }
@@ -142,12 +143,14 @@ dependencies {
 	compile "edu.cmu.sphinx:sphinx4-core:1.0-SNAPSHOT"
 	compile "edu.cmu.sphinx:sphinx4-data:1.0-SNAPSHOT"
 			
-	compile project(':JCSG')
+	//compile project(':JCSG')
+	compile "com.neuronrobotics:JCSG:0.0.3"
 	//compile project(':CHDK-PTP-Java')
 	compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
-	compile project(':java-bowler')
-	//compile "com.neuronrobotics:java-bowler:3.14.36"
-	compile project(':WalnutiQ')
+	//compile project(':java-bowler')
+	compile "com.neuronrobotics:java-bowler:3.14.37"
+	//compile project(':WalnutiQ')
+	compile "com.neuronrobotics:JCSG:0.0.1"
 	
 	
 	

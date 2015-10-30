@@ -1,9 +1,0 @@
-[submodule "java-bowler"]
-	path = java-bowler
-	url = https://github.com/NeuronRobotics/java-bowler.git
-[submodule "JCSG"]
-	path = JCSG
-	url = https://github.com/ThreeCSG/JCSG.git
-[submodule "WalnutiQ"]
-	path = WalnutiQ
-	url = https://github.com/NeuronRobotics/WalnutiQ.git
