@@ -1,5 +1,6 @@
 language: java
-install: /bin/true
+install: 
+  -sudo apt-get install libopencv2.4-java
 script: 
   - ./gradlew compileJava jar javadoc test 
 cache:
@@ -10,4 +11,4 @@ jdk:
   - oraclejdk8
 
 # for running tests on Travis CI container infrastructure for faster builds
-sudo: false
+sudo: true
