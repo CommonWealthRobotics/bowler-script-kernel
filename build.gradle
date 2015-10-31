@@ -110,8 +110,6 @@ repositories {
 	}
 }
 
-task wrapper(type: Wrapper) { gradleVersion = '2.1' }
-
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.10'
 
