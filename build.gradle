@@ -212,9 +212,6 @@ jar {
 				}
 	}
 
-	// project class files compiled from source
-	from files(sourceSets.main.output.classesDir)
-
 	manifest {  
 	    attributes(	
 	    				"Main-Class": mainClass,
