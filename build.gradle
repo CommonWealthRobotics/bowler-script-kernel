@@ -23,6 +23,10 @@ apply plugin: 'signing'
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
+task wrapper(type: Wrapper, description: 'Creates and deploys the Gradle wrapper to the current directory.') {
+	gradleVersion = '2.1'
+}
+
 // NetBeans will automatically add "run" and "debug" tasks relying on the
 // "mainClass" property. You may however define the property prior executing
 // tasks by passing a "-PmainClass=<QUALIFIED_CLASS_NAME>" argument.
