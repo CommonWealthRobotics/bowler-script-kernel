@@ -4,9 +4,23 @@ consists of a modular scripting environment. This engine passes Lists of JVM obj
 
 ##All platforms 
  You need to use the installer from 
- 
-# https://github.com/NeuronRobotics/BowlerStudio/releases
+ * [BowlerStudio Installer](https://github.com/NeuronRobotics/BowlerStudio/releases)
 
+# Embed as a library in your projects
+##Maven
+```
+<dependency>
+  <groupId>com.neuronrobotics</groupId>
+  <artifactId>BowlerScriptingKernel</artifactId>
+  <version>0.4.27</version>
+</dependency>
+```
+##Gradle
+```
+dependencies {
+ compile "com.neuronrobotics:BowlerScriptingKernel:0.4.27"
+}
+```
 ###Macs Only
 
 In the terminal before running the jar you must run:
