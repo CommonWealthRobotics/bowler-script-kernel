@@ -150,7 +150,7 @@ dependencies {
 	//compile project(':java-bowler')
 	compile "com.neuronrobotics:java-bowler:3.15.0"
 	//compile project(':WalnutiQ')
-	compile "com.neuronrobotics:WalnutiQ:0.0.1"
+	compile "com.neuronrobotics:WalnutiQ:2.3.1"
 	
 	
 	
