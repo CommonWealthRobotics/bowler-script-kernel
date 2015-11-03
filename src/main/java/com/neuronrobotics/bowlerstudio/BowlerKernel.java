@@ -1,8 +1,14 @@
 package com.neuronrobotics.bowlerstudio;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -13,7 +19,15 @@ import java.util.List;
 //import org.springframework.context.annotation.ComponentScan;
 //import org.springframework.context.annotation.Configuration;
 
+
+
+
+
+
+
+
 import jline.ConsoleReader;
+import jline.History;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -32,7 +46,7 @@ public class BowlerKernel {
 				.println("java -jar BowlerScriptKernel.jar -p <file 1> .. <file n> # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable ");
 		System.err
 				.println("java -jar BowlerScriptKernel.jar -r <Groovy Jython or Clojure> (Optional)(-s or -p)<file 1> .. <file n> # This will start a shell in the requested langauge and run the files provided. ");
-
+		
 		System.exit(1);
 	}
 
@@ -83,14 +97,14 @@ public class BowlerKernel {
 			}
 		}
 		boolean runShell = false;
-		ShellType st = ShellType.GROOVY;
+		ShellType shellTypeStorage = ShellType.GROOVY;
 		for (String s : args) {
 
 			if (runShell) {
 				try {
-					st = ShellType.getFromSlug(s);
+					shellTypeStorage = ShellType.getFromSlug(s);
 				} catch (Exception e) {
-					st = ShellType.GROOVY;
+					shellTypeStorage = ShellType.GROOVY;
 				}
 				break;
 			}
@@ -99,7 +113,7 @@ public class BowlerKernel {
 			}
 		}
 		System.out.println("Starting Bowler REPL in langauge: "
-				+ st.getNameOfShell());
+				+ shellTypeStorage.getNameOfShell());
 		// sample from
 		// http://jline.sourceforge.net/testapidocs/src-html/jline/example/Example.html
 
@@ -114,13 +128,30 @@ public class BowlerKernel {
 			System.exit(0);
 		});
 		
-		reader.getHistory().addToHistory("println SDKBuildInfo.getVersion()");
-		reader.getHistory().addToHistory("for(int i=0;i<1000000;i++) { println dyio.getValue(0) }");
-		reader.getHistory().addToHistory("dyio.setValue(0,128)");
-		reader.getHistory().addToHistory("println dyio.getValue(0)");
-		reader.getHistory().addToHistory("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
-		reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
-		reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
+		File historyFile= new File(ScriptingEngine.getWorkspace().getAbsolutePath()+"/bowler.history");
+		if(!historyFile.exists()){
+			historyFile.createNewFile();
+			reader.getHistory().addToHistory("println SDKBuildInfo.getVersion()");
+			reader.getHistory().addToHistory("for(int i=0;i<1000000;i++) { println dyio.getValue(0) }");
+			reader.getHistory().addToHistory("dyio.setValue(0,128)");
+			reader.getHistory().addToHistory("println dyio.getValue(0)");
+			reader.getHistory().addToHistory("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
+			reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
+			reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
+			writeHistory(historyFile,reader.getHistory());
+		}else{
+			// Construct BufferedReader from FileReader
+			BufferedReader br = new BufferedReader(new FileReader(historyFile));
+		 
+			String line = null;
+			while ((line = br.readLine()) != null) {
+				reader.getHistory().addToHistory(line);
+			}
+		 
+			br.close();
+		}
+		
+		
 		reader.getHistory().addToHistory("println \"Hello world!\"");
 		
 		reader.setBellEnabled(false);
@@ -129,8 +160,8 @@ public class BowlerKernel {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				System.out.println("Closing terminal");
 				
+				writeHistory(historyFile,reader.getHistory());
 			}
 		});
 		
@@ -138,7 +169,7 @@ public class BowlerKernel {
 		
 		String line;
 		try {
-			while ((line = reader.readLine("Bowler " + st.getNameOfShell()
+			while ((line = reader.readLine("Bowler " + shellTypeStorage.getNameOfShell()
 					+ "> ")) != null) {
 				if (line.equalsIgnoreCase("quit")
 						|| line.equalsIgnoreCase("exit")) {
@@ -152,9 +183,19 @@ public class BowlerKernel {
 					}
 					continue;
 				}
+				if(line.startsWith("shellType")){
+					try {
+						shellTypeStorage = ShellType.getFromSlug(line.split(" ")[1]);
+					} catch (Exception e) {
+						shellTypeStorage = ShellType.GROOVY;
+					}
+					continue;
+				}
 				try {
-					System.out.println("Result= "+ScriptingEngine.inlineScriptRun(line, null,
-							st));
+					ret =ScriptingEngine.inlineScriptRun(line, null,
+							shellTypeStorage);
+					if(ret !=null)
+						System.out.println(ret);
 				}catch (Error e) {
 					e.printStackTrace();
 				}catch (Exception e) {
@@ -164,8 +205,34 @@ public class BowlerKernel {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			
+			writeHistory(historyFile,reader.getHistory());
 		}
+		
+	}
+	
+	public static void writeHistory(File historyFile,History history){
+		System.out.println("Saving history");
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(historyFile);
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+			
+			List<String> h = history.getHistoryList();
+			for(String s:h){
+				bw.write(s);
+				bw.newLine();
+			}
+		 
+			bw.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	 
+
 	}
 
 	public static int speak(String msg){
