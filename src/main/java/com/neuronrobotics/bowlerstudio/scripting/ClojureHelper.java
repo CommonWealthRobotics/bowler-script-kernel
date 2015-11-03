@@ -72,7 +72,7 @@ public class ClojureHelper implements IScriptingLanguage{
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) {
 		Object ret = ClojureHelper.eval(code);
-		System.out.println("Clojure returned of type="+ret.getClass()+" value="+ret);
+		//System.out.println("Clojure returned of type="+ret.getClass()+" value="+ret);
 		return ret;
 	}
 

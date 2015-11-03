@@ -138,6 +138,13 @@ public class BowlerKernel {
 			reader.getHistory().addToHistory("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
 			reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
 			reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
+			reader.getHistory().addToHistory("shellType Clojure #Switches shell to Clojure");
+			reader.getHistory().addToHistory("shellType Jython #Switches shell to Python");
+			reader.getHistory().addToHistory("shellType Groovy #Switches shell to Groovy/Java");
+
+			reader.getHistory().addToHistory("println \"Hello world!\"");
+			
+			
 			writeHistory(historyFile,reader.getHistory());
 		}else{
 			// Construct BufferedReader from FileReader
@@ -150,10 +157,6 @@ public class BowlerKernel {
 		 
 			br.close();
 		}
-		
-		
-		reader.getHistory().addToHistory("println \"Hello world!\"");
-		
 		reader.setBellEnabled(false);
 		reader.setDebug(new PrintWriter(new FileWriter("writer.debug", true)));
 		
@@ -167,7 +170,7 @@ public class BowlerKernel {
 		
 		//SpringApplication.run(SpringBowlerUI.class, new String[]{});
 		
-		String line;
+		String line;		
 		try {
 			while ((line = reader.readLine("Bowler " + shellTypeStorage.getNameOfShell()
 					+ "> ")) != null) {
@@ -204,9 +207,7 @@ public class BowlerKernel {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			writeHistory(historyFile,reader.getHistory());
-		}
+		} 
 		
 	}
 	
