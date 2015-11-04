@@ -112,6 +112,7 @@ public class BowlerKernel {
 				runShell = true;
 			}
 		}
+		
 		System.out.println("Starting Bowler REPL in langauge: "
 				+ shellTypeStorage.getNameOfShell());
 		// sample from
