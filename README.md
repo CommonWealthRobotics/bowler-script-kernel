@@ -12,13 +12,13 @@ consists of a modular scripting environment. This engine passes Lists of JVM obj
 <dependency>
   <groupId>com.neuronrobotics</groupId>
   <artifactId>BowlerScriptingKernel</artifactId>
-  <version>0.4.27</version>
+  <version>0.4.28</version>
 </dependency>
 ```
 ##Gradle
 ```
 dependencies {
- compile "com.neuronrobotics:BowlerScriptingKernel:0.4.27"
+ compile "com.neuronrobotics:BowlerScriptingKernel:0.4.28"
 }
 ```
 ###Macs Only
