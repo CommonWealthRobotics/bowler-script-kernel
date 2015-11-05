@@ -42,7 +42,7 @@ public class HaarDetector  implements IObjectDetector{
 	
 	public List<Detection> getObjects(BufferedImage in, BufferedImage disp){
 		Mat inputImage = new Mat();
-		AbstractImageProvider.bufferedImageToMat(in,inputImage);
+		OpenCVImageConversionFactory.bufferedImageToMat(in,inputImage);
 		try{
 			Mat localImage = new Mat();
 			Size s =new Size(in.getWidth(),in.getHeight());
@@ -58,7 +58,7 @@ public class HaarDetector  implements IObjectDetector{
 				myArray.add(new Detection((r.x/scale), (r.y/scale), (r.width/scale)));
 			}
 			Mat displayImage = new Mat();
-			AbstractImageProvider.bufferedImageToMat(disp,displayImage);
+			OpenCVImageConversionFactory.bufferedImageToMat(disp,displayImage);
 			Point center=null;// 
 			//System.out.println(String.format("Detected %s faces", myArray.length));
 			// Draw a bounding box around each face.
@@ -73,7 +73,7 @@ public class HaarDetector  implements IObjectDetector{
 				Core.ellipse(displayImage, center,objectSize, 0, 0, 360, new Scalar(255, 0,
 						255), 4, 8, 0);
 		    }
-		    AbstractImageProvider.matToBufferedImage(displayImage).copyData(disp.getRaster());
+		    OpenCVImageConversionFactory.matToBufferedImage(displayImage).copyData(disp.getRaster());
 		    
 			return myArray;
 		} catch (CvException |NullPointerException |IllegalArgumentException e2) {

@@ -266,7 +266,7 @@ public class SalientDetector implements IObjectDetector {
 		
 		Mat original = new Mat(); // original webcam image
 		
-		AbstractImageProvider.bufferedImageToMat(inImg, original);// ACCESS
+		OpenCVImageConversionFactory.bufferedImageToMat(inImg, original);// ACCESS
 		
 		if (original.empty() == false){ // Prevent runtime exception incase bowler derps and doesn't give a frame
 			
@@ -483,7 +483,7 @@ public class SalientDetector implements IObjectDetector {
 												}
 												
 												Core.rectangle(ObjFound, STAGE1_BOXES.get(a1).tl(), STAGE1_BOXES.get(a1).br(), YellowBox, 2,8,0);
-												AbstractImageProvider.deepCopy(AbstractImageProvider.matToBufferedImage(ObjFound), disp);
+												AbstractImageProvider.deepCopy(OpenCVImageConversionFactory.matToBufferedImage(ObjFound), disp);
 
 												double m = (double)returnArea_X;
 												double n = (double)returnArea_Y;

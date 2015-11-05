@@ -34,7 +34,7 @@ public class WhiteBlobDetect  implements IObjectDetector{
 
 	public List<Detection> getObjects(BufferedImage in, BufferedImage disp){
 		Mat inputImage = new Mat();
-		AbstractImageProvider.bufferedImageToMat(in,inputImage);
+		OpenCVImageConversionFactory.bufferedImageToMat(in,inputImage);
 		Mat displayImage = new Mat();
 		ArrayList<Detection > ret =new ArrayList<>();
 		KeyPoint[] detects = getObjects(inputImage,displayImage);

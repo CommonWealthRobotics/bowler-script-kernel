@@ -50,7 +50,7 @@ public class OpenCVImageProvider extends AbstractImageProvider{
 		
 		getVc().read(m);
 		try{
-			AbstractImageProvider.deepCopy(AbstractImageProvider.matToBufferedImage(m),imageData);
+			AbstractImageProvider.deepCopy(OpenCVImageConversionFactory.matToBufferedImage(m),imageData);
 		}catch(Exception ex){
 			if(InterruptedException.class.isInstance(ex))throw new RuntimeException(ex);
 		}

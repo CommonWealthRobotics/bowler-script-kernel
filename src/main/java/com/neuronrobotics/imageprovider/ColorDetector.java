@@ -62,7 +62,7 @@ public class ColorDetector implements IObjectDetector{
 
 	public List<Detection> getObjects(BufferedImage in, BufferedImage disp){
 		Mat inputImage = new Mat();
-		AbstractImageProvider.bufferedImageToMat(in,inputImage);
+		OpenCVImageConversionFactory.bufferedImageToMat(in,inputImage);
 		Mat displayImage = new Mat();
 		// One way to select a range of colors by Hue
 		Imgproc.cvtColor(inputImage, hsv_image, Imgproc.COLOR_BGR2HSV);
@@ -144,7 +144,7 @@ public class ColorDetector implements IObjectDetector{
 		}
 		
 		
-		AbstractImageProvider.deepCopy(AbstractImageProvider.matToBufferedImage(displayImage),disp);
+		AbstractImageProvider.deepCopy(OpenCVImageConversionFactory.matToBufferedImage(displayImage),disp);
 		return myArray;
 	}
 }
