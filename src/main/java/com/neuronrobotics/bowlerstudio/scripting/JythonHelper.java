@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import javafx.scene.control.Tab;
 
+import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
@@ -14,38 +15,16 @@ import com.neuronrobotics.sdk.common.Log;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public class JythonHelper implements IScriptingLanguage{
-
+	PythonInterpreter interp;
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) {
 		Properties props = new Properties();
 		PythonInterpreter.initialize(System.getProperties(), props,
 				new String[] { "" });
-		PythonInterpreter interp = new PythonInterpreter();
-
-		interp.exec("import sys");
-		for (String s : ScriptingEngine.getImports()) {
-
-			// s = "import "+s;
-			//System.err.println(s);
-			if(!s.contains("mihosoft")&&
-					!s.contains("haar")&&
-					!s.contains("com.neuronrobotics.sdk.addons.kinematics")
-					) {
-				interp.exec("import "+s);
-			} else {
-				//from http://stevegilham.blogspot.com/2007/03/standalone-jython-importerror-no-module.html
-				try {
-					String[] names = s.split("\\.");
-					String packname = (names.length>0?names[names.length-1]:s);
-					Log.error("Forcing "+s+" as "+packname);
-					interp.exec("sys.packageManager.makeJavaPackage(" + s
-							+ ", " +packname + ", None)");
-
-					interp.exec("import "+packname);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
+		if(interp==null){
+			interp = new PythonInterpreter();
+	
+			interp.exec("import sys");
 		}
 
 		for (String pm : DeviceManager.listConnectedDevice(null)) {
@@ -66,6 +45,9 @@ public class JythonHelper implements IScriptingLanguage{
 
 		interp.exec(code);
 		ArrayList<Object> results = new ArrayList<>();
+		
+		PyObject localVariables = interp.getLocals();
+		
 		try{
 			results.add(interp.get("csg",CSG.class));
 		}catch(Exception e){

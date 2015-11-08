@@ -46,7 +46,6 @@ public class GroovyHelper implements IScriptingLanguage{
 				.getClassLoader(), binding, cc);
 		//System.out.println(code + "\n\nStart\n\n");
 		Script script = shell.parse(code);
-
 		return script.run();
 	}
 

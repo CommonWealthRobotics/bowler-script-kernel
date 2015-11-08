@@ -57,7 +57,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	private static boolean hasnetwork=false;
 	private static boolean autoupdate=false;
 	
-	private static final String[] imports = new String[] { "haar",
+	private static final String[] imports = new String[] { //"haar",
 			"java.awt",
 			"eu.mihosoft.vrl.v3d",
 			"eu.mihosoft.vrl.v3d.samples",
