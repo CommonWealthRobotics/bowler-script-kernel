@@ -101,11 +101,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	private static IGitHubLoginManager loginManager= new IGitHubLoginManager() {
 		
 		@Override
-		public String[] prompt() {
+		public String[] prompt(String username) {
+			if(username!=null){
+				if(username.equals(""))
+					username=null;
+			}
 			String []creds = new String[]{"",""};
 			System.out.println("#Github Login Prompt#");
 			System.out.println("For anynomous mode hit enter twice");
-			System.out.print("Github Username: ");
+			System.out.print("Github Username: "+username!=null?"("+username+")":"");
 			// create a scanner so we can read the command-line input
 			BufferedReader buf = new BufferedReader (new InputStreamReader (System.in));
 
@@ -115,11 +119,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			} catch (IOException e) {
 				return null;
 			}
-			   if(creds[0].equals("")){
+			   if(creds[0].equals("")&& (username==null)){
 				   System.out.println("No username, using anynomous login");
 				   return null;
-			   }
-
+			   }else
+				   creds[0]=username;
 		   }while(creds[0]==null);
 		    
 		    System.out.print("Github Password: ");
@@ -317,7 +321,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 	
 	public static GitHub gitHubLogin(){
-		String[] creds = loginManager.prompt();
+		String[] creds = loginManager.prompt(loginID);
 		   
 		
 		if(creds==null){
@@ -344,12 +348,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	        out.flush();
 	        out.close();
 	   	 	github = GitHub.connect();
+	   	
 	   	 	if(github.isCredentialValid()){
 		        for(IGithubLoginListener l:loginListeners){
 		        	l.onLogin(loginID);
 		        }
 		        ScriptingEngine.setAutoupdate(true);
-		        System.out.println("Login as "+loginID+"");
+		        System.out.println("Success Login as "+loginID+"");
 	   	 	}else{
 	   	 		System.err.println("Bad login credentials for "+loginID);
 	   	 		github=null;
@@ -416,55 +421,93 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		
 		loadLoginData();
 
-		File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
-		if(!gistDir.exists()){
-			gistDir.mkdir();
-		}
-		String localPath=gistDir.getAbsolutePath();
-		File gitRepoFile = new File(localPath + "/.git");
-		
-		if(!gitRepoFile.exists()){
-			GHGist gist;
-			try{
-				gist = github.getGist(id);
-			}catch(IOException ex){
-				ex.printStackTrace();
-				return;
+
+	    for(int i=0;i<2;i++){
+			File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
+			if(!gistDir.exists()){
+				gistDir.mkdir();
 			}
-			String remotePath = gist.getGitPullUrl();
-			//System.out.println("Cloning files to: "+localPath);
-			 //Clone the repo
-		    Git.cloneRepository().setURI(remotePath).setDirectory(new File(localPath)).call();
-		}
-		
-	    if(!isAutoupdate())
-	    	return;
-	    //System.out.println("Autoupdating " +id);
-		if(cp == null){
-			cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-		}
-	    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-	    Git git = new Git(localRepo);
-	    for(int i=0;i<10;i++){
+			String localPath=gistDir.getAbsolutePath();
+			File gitRepoFile = new File(localPath + "/.git");
+			System.out.println("Username: "+loginID+":"+pw);
+			
+			if(!gitRepoFile.exists()){
+				if(cp == null){
+					cp = new UsernamePasswordCredentialsProvider(loginID, pw);
+				}
+				GHGist gist;
+				try{
+					gist = github.getGist(id);
+				}catch(IOException ex){
+					ex.printStackTrace();
+					return;
+				}
+				String remotePath = gist.getGitPullUrl();
+				System.out.println("Cloning files to: "+localPath);
+				System.out.println("Cloning files from: "+remotePath);
+				 //Clone the repo
+				try{
+				    Git.cloneRepository()
+				    .setURI(remotePath)
+				    .setDirectory(new File(localPath))
+				    .setCredentialsProvider(cp)
+				    .call();
+				}catch(Exception e){
+					//e.printStackTrace();
+					deleteFolder(new File(localPath ));
+					remotePath="git@gist.github.com:"+id+".git";
+					 Git.cloneRepository()
+					    .setURI("git@gist.github.com:"+id+".git")
+					    .setDirectory(new File(localPath))
+					    .call();
+				}
+				
+			}
+			
+		    if(!isAutoupdate())
+		    	return;
+		    //System.out.println("Autoupdating " +id);
+			if(cp == null){
+				cp = new UsernamePasswordCredentialsProvider(loginID, pw);
+			}
+		    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
+		    //https://gist.github.com/0e6454891a3b3f7c8f28.git
+		    Git git = new Git(localRepo);
 		    try{
-		    	git.commit().setMessage("Updates any changes").call();
 		    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
 		    	//System.out.println("Pull completed "+ret);
 		    	//
 		    	//git.push().setCredentialsProvider(cp).call();
+		    	git.close();
 		    	return;
 		    }catch(Exception ex){
 		    	try {
-		    	    Files.delete(gitRepoFile.toPath());
+		    	    //Files.delete(gitRepoFile.toPath());
+		    		ex.printStackTrace();
+		    		System.err.println("Error in gist, hosing: "+gitRepoFile);
+		    		deleteFolder(new File(localPath ));
 		    	} catch (Exception x) {
 		    		x.printStackTrace();
 		    	} 
-		    	ex.printStackTrace();
 		    }
+		    git.close();
 	    }
-	    git.close();
+
 	}
 	
+	private static void deleteFolder(File folder) {
+	    File[] files = folder.listFiles();
+	    if(files!=null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	            if(f.isDirectory()) {
+	                deleteFolder(f);
+	            } else {
+	                f.delete();
+	            }
+	        }
+	    }
+	    folder.delete();
+	}
 
 	public static ArrayList<String> filesInGist(String gistcode, String extnetion) {
 		ArrayList<String> f=new ArrayList<>();
