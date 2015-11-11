@@ -429,7 +429,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			}
 			String localPath=gistDir.getAbsolutePath();
 			File gitRepoFile = new File(localPath + "/.git");
-			System.out.println("Username: "+loginID+":"+pw);
+			
 			
 			if(!gitRepoFile.exists()){
 				if(cp == null){
