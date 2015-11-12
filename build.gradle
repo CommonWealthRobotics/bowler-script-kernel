@@ -152,7 +152,8 @@ dependencies {
 	//compile project(':CHDK-PTP-Java')
 	compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
 	//compile project(':java-bowler')
-	compile "com.neuronrobotics:java-bowler:3.15.0"
+	compile "com.neuronrobotics:java-bowler:3.16.3"
+	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.16.3-jar-with-dependencies.jar'])
 	//compile project(':WalnutiQ')
 	compile "com.neuronrobotics:WalnutiQ:2.3.1"
 	
