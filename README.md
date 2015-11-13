@@ -5,6 +5,24 @@ consists of a modular scripting environment. This engine passes Lists of JVM obj
 ##All platforms 
  You need to use the installer from 
  * [BowlerStudio Installer](https://github.com/NeuronRobotics/BowlerStudio/releases)
+ 
+##Usage
+This will let you pass code snippets directly to the scripting engine
+```
+Object returnVal = ScriptingEngine.inlineScriptRun(String code, ArrayList<Object> args,ShellType activeType)
+```
+
+This will let you load code directly out of a github gist:
+This code will load this github gist:
+https://gist.github.com/madhephaestus/d4312a0787456ec27a2a
+
+<script src="https://gist.github.com/madhephaestus/d4312a0787456ec27a2a.js"></script>
+
+```
+Object returnVal = ScriptingEngine.inlineGistScriptRun("d4312a0787456ec27a2a", "helloWorld.groovy" ,null) 
+```
+
+
 
 # Embed as a library in your projects
 ##Maven
