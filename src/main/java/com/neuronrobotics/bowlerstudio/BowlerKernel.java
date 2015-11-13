@@ -62,7 +62,7 @@ public class BowlerKernel {
 //		
 //		ArrayList<CSG>  cad = (ArrayList<CSG> )ScriptingEngine.inlineGistScriptRun("4814b39ee72e9f590757", "javaCad.groovy" , null);
 //		System.out.println(servo.exists()+" exists: "+servo);
-//		
+		
 		boolean startLoadingScripts = false;
 		Object ret = null;
 		for (String s : args) {

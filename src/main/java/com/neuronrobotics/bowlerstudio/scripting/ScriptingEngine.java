@@ -690,10 +690,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		String[] gistData = codeFromGit(gitURL,Filename);
 		return inlineScriptRun(gistData[0], args,setFilename(gistData[1]));
 	}
+	public static File fileFromGit(String remoteURI, String fileInRepo ) throws InvalidRemoteException, TransportException, GitAPIException, IOException{
+		return fileFromGit(remoteURI,"master",fileInRepo);
+	}
 	//git@github.com:NeuronRobotics/BowlerStudioVitamins.git
 	//or
 	//https://github.com/NeuronRobotics/BowlerStudioVitamins.git
-	public static File fileFromGit(String remoteURI, String fileInRepo ) throws InvalidRemoteException, TransportException, GitAPIException, IOException{
+	public static File fileFromGit(String remoteURI,String branch, String fileInRepo ) throws InvalidRemoteException, TransportException, GitAPIException, IOException{
 		String[] colinSplit =remoteURI.split(":");
 		
 		String gitSplit =colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
@@ -717,6 +720,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			 //Clone the repo
 		    Git.cloneRepository()
 		    .setURI(remoteURI)
+		    .setBranch(branch)
 		    .setDirectory(new File(localPath))
 		    .setCredentialsProvider(cp)
 		    .call();
