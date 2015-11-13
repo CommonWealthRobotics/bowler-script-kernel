@@ -98,6 +98,11 @@ import javafx.scene.Node;
  */
 public class Jfx3dManager extends JFXPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6744581340628622682L;
+
 	/** The root. */
 	private final Group root = new Group();
 	

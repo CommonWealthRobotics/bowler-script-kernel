@@ -111,19 +111,15 @@ repositories {
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.10'
+	compile 'gov.nist.math:jama:1.0.2'
 
 	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6'
-	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6', classifier: 'sources'
 
 	compile group: 'org.reactfx', name: 'reactfx', version: '2.0-SNAPSHOT'
-	compile group: 'org.reactfx', name: 'reactfx', version: '2.0-SNAPSHOT', classifier: 'sources'
 
 	compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.3.7';
-	compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.3.7', classifier: 'sources';
-	compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.3.7', classifier: 'javadoc';
 
 	compile group: 'org.controlsfx', name: 'controlsfx', version: '8.0.6'
-	compile group: 'org.controlsfx', name: 'controlsfx', version: '8.0.6', classifier: 'sources'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.7'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.2.3'
@@ -147,12 +143,12 @@ dependencies {
 	compile "edu.cmu.sphinx:sphinx4-data:1.0-SNAPSHOT"
 			
 	//compile project(':JCSG')
-	compile "com.neuronrobotics:JCSG:0.0.3"
+	compile "com.neuronrobotics:JCSG:0.1.1"
 	//compile project(':CHDK-PTP-Java')
 	compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
 	//compile project(':java-bowler')
-	compile "com.neuronrobotics:java-bowler:3.16.3"
-	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.16.3-jar-with-dependencies.jar'])
+	compile "com.neuronrobotics:java-bowler:3.16.4"
+	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.16.4-jar-with-dependencies.jar'])
 	//compile project(':WalnutiQ')
 	compile "com.neuronrobotics:WalnutiQ:2.3.1"
 	
@@ -175,15 +171,6 @@ dependencies {
 		//compile files('/usr/share/java/opencv-249.jar')
 		compile fileTree (dir: '/usr/share/java/', includes: ['*opencv-24*.jar'])
 	}
-	
-//	compile group: 'org.bytedeco', name: 'javacv', version: '0.9';
-//	compile group: 'org.bytedeco', name: 'javacpp', version: '0.9';
-//	 //found at https://github.com/bytedeco/javacv/issues/122
-//	compile group: 'org.bytedeco.javacpp-presets', name: 'opencv', version: '2.4.9-0.9', classifier: "linux-x86";		
-//	compile group: 'org.bytedeco.javacpp-presets', name: 'opencv', version: '2.4.9-0.9', classifier: "linux-x86_64";	
-//	compile group: 'org.bytedeco.javacpp-presets', name: 'opencv', version: '2.4.9-0.9', classifier: "macosx-x86_64";	
-//	compile group: 'org.bytedeco.javacpp-presets', name: 'opencv', version: '2.4.9-0.9', classifier: "windows-x86";		
-//	compile group: 'org.bytedeco.javacpp-presets', name: 'opencv', version: '2.4.9-0.9', classifier: "windows-x86_64";
 	
 	compile group: 'jfree', name: 'jfreechart', version: '1.0.12'
 	compile group: 'jexcelapi', name: 'jxl', version: '2.4.2'
