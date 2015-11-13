@@ -37,6 +37,6 @@ public class Vitamins {
 				e.printStackTrace();
 			}
 		}
-		return fileLastLoaded.get(resource).clone() ;
+		return fileLastLoaded.get(resource.getAbsolutePath()).clone() ;
 	}
 }

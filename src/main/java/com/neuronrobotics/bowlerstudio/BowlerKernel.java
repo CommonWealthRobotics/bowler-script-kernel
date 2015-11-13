@@ -19,13 +19,6 @@ import java.util.List;
 //import org.springframework.context.annotation.ComponentScan;
 //import org.springframework.context.annotation.Configuration;
 
-
-
-
-
-
-
-
 import jline.ConsoleReader;
 import jline.History;
 import jline.Terminal;
@@ -36,8 +29,10 @@ import com.neuronrobotics.imageprovider.OpenCVJNILoader;
 import com.sun.speech.freetts.ProcessException;
 import com.sun.speech.freetts.VoiceManager;
 import com.sun.speech.freetts.en.us.FeatureProcessors.WordNumSyls;
-
+import eu.mihosoft.vrl.v3d.*;
 public class BowlerKernel {
+
+	private static final String CSG = null;
 
 	private static void fail() {
 		System.err
@@ -62,6 +57,12 @@ public class BowlerKernel {
 			fail();
 		}
 		OpenCVJNILoader.load(); // Loads the OpenCV JNI (java native interface)
+//		File servo = ScriptingEngine.fileFromGit("https://github.com/NeuronRobotics/BowlerStudioVitamins.git",
+//							"BowlerStudioVitamins/stl/servo/smallservo.stl");
+//		
+//		ArrayList<CSG>  cad = (ArrayList<CSG> )ScriptingEngine.inlineGistScriptRun("4814b39ee72e9f590757", "javaCad.groovy" , null);
+//		System.out.println(servo.exists()+" exists: "+servo);
+//		
 		boolean startLoadingScripts = false;
 		Object ret = null;
 		for (String s : args) {
