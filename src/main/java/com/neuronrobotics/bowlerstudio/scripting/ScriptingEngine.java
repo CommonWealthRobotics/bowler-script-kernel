@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.Transformer;
@@ -286,17 +287,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return null;
 	}
 
-	private static String returnFirstGist(String html) {
+	private static List<String> returnFirstGist(String html) {
 		// Log.debug(html);
-		String slug = html.split("//gist.github.com/")[1];
-		String js = slug.split(".js")[0];
-		String id = js.split("/")[1];
-
-		return id;
+		ArrayList<String > ret = new ArrayList<>();
+		String [] gists = html.split("//gist.github.com/");
+		for(int i=1;i<gists.length;i++){
+			String slug = gists[i];
+			String js = slug.split(".js")[0];
+			String id = js.split("/")[1];
+			ret.add(id);
+		}
+		return ret;
 	}
 
-	public static String getCurrentGist(String addr, WebEngine engine) {
+	public static List<String>  getCurrentGist(String addr, WebEngine engine) {
 		String gist = urlToGist(addr);
+		
 		if (gist == null) {
 			try {
 				Log.debug("Non Gist URL Detected");
@@ -317,7 +323,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			}
 
 		}
-		return gist;
+		ArrayList<String > ret = new ArrayList<>();
+		ret.add(gist);
+		return ret;
 	}
 	
 	public static GitHub gitHubLogin(){
