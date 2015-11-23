@@ -33,7 +33,34 @@ import eu.mihosoft.vrl.v3d.*;
 public class BowlerKernel {
 
 	private static final String CSG = null;
+	private static File historyFile= new File(ScriptingEngine.getWorkspace().getAbsolutePath()+"/bowler.history");
+	static{
+		historyFile= new File(ScriptingEngine.getWorkspace().getAbsolutePath()+"/bowler.history");
+		ArrayList<String> history=new ArrayList<>();
+		if(!historyFile.exists()){
+			try {
+				historyFile.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			history.add("println SDKBuildInfo.getVersion()");
+			history.add("for(int i=0;i<1000000;i++) { println dyio.getValue(0) }");
+			history.add("dyio.setValue(0,128)");
+			history.add("println dyio.getValue(0)");
+			history.add("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
+			history.add("DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
+			history.add("DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
+			history.add("shellType Clojure #Switches shell to Clojure");
+			history.add("shellType Jython #Switches shell to Python");
+			history.add("shellType Groovy #Switches shell to Groovy/Java");
 
+			history.add("println \"Hello world!\"");
+			
+			
+			writeHistory(history);
+		}
+	}
 	private static void fail() {
 		System.err
 				.println("Usage: \r\njava -jar BowlerScriptKernel.jar -s <file 1> .. <file n> # This will load one script after the next ");
@@ -130,7 +157,7 @@ public class BowlerKernel {
 			System.exit(0);
 		});
 		
-		File historyFile= new File(ScriptingEngine.getWorkspace().getAbsolutePath()+"/bowler.history");
+
 		if(!historyFile.exists()){
 			historyFile.createNewFile();
 			reader.getHistory().addToHistory("println SDKBuildInfo.getVersion()");
@@ -147,17 +174,12 @@ public class BowlerKernel {
 			reader.getHistory().addToHistory("println \"Hello world!\"");
 			
 			
-			writeHistory(historyFile,reader.getHistory());
+			writeHistory(reader.getHistory().getHistoryList());
 		}else{
-			// Construct BufferedReader from FileReader
-			BufferedReader br = new BufferedReader(new FileReader(historyFile));
-		 
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				reader.getHistory().addToHistory(line);
+			List<String> history = loadHistory();
+			for( String h:history){
+				reader.getHistory().addToHistory(h);
 			}
-		 
-			br.close();
 		}
 		reader.setBellEnabled(false);
 		reader.setDebug(new PrintWriter(new FileWriter("writer.debug", true)));
@@ -166,7 +188,7 @@ public class BowlerKernel {
 			@Override
 			public void run() {
 				
-				writeHistory(historyFile,reader.getHistory());
+				writeHistory(reader.getHistory().getHistoryList());
 			}
 		});
 		
@@ -213,15 +235,26 @@ public class BowlerKernel {
 		
 	}
 	
-	public static void writeHistory(File historyFile,History history){
+	public static ArrayList<String> loadHistory() throws IOException{
+		ArrayList<String> history=new ArrayList<>();
+		// Construct BufferedReader from FileReader
+		BufferedReader br = new BufferedReader(new FileReader(historyFile));
+	 
+		String line = null;
+		while ((line = br.readLine()) != null) {
+			history.add(line);
+		}
+		br.close();
+		return history;
+	}
+	
+	public static void writeHistory(List<String> history){
 		System.out.println("Saving history");
 		FileOutputStream fos;
 		try {
 			fos = new FileOutputStream(historyFile);
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-			
-			List<String> h = history.getHistoryList();
-			for(String s:h){
+			for(String s:history){
 				bw.write(s);
 				bw.newLine();
 			}
