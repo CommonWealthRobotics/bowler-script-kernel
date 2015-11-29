@@ -1,6 +1,9 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 
 import clojure.lang.RT;
@@ -70,12 +73,25 @@ public class ClojureHelper implements IScriptingLanguage{
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) {
-		Object ret = ClojureHelper.eval(code);
+	public Object inlineScriptRun(File code, ArrayList<Object> args) {
+		byte[] bytes;
+		try {
+			bytes = Files.readAllBytes(code.toPath());
+			String s = new String(bytes, "UTF-8");
+			return inlineScriptRun(s,args);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		//System.out.println("Clojure returned of type="+ret.getClass()+" value="+ret);
-		return ret;
+		return null;
 	}
-
+	
+	@Override
+	public Object inlineScriptRun(String code, ArrayList<Object> args) {
+		
+		return ClojureHelper.eval(code);
+	}
 	@Override
 	public ShellType getShellType() {
 		return ShellType.CLOJURE;

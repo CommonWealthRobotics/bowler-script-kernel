@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
+import java.io.File;
 import java.util.ArrayList;
 /**
  * Adding additional language support to bowler studio
@@ -13,6 +14,14 @@ import java.util.ArrayList;
  *
  */
 public interface IScriptingLanguage {
+	/**
+	 * This interface is for adding additional language support. 
+	 * @param code file content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	public abstract Object inlineScriptRun(File code, ArrayList<Object> args);
+	
 	/**
 	 * This interface is for adding additional language support. 
 	 * @param code the text content of the code to be executed

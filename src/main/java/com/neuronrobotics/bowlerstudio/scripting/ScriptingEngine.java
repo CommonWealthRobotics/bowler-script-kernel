@@ -677,26 +677,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 
 	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception{
-		byte[] bytes;
 
-		try {
-			bytes = Files.readAllBytes(f.toPath());
-			String s = new String(bytes, "UTF-8");
-			return inlineScriptRun(s, args,setFilename(f.getName()) );
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		return inlineScriptRun(f, args,setFilename(f.getName()) );
 	}
 
 	public static Object inlineGistScriptRun(String gistID, String Filename ,ArrayList<Object> args)  throws Exception{
 		String[] gistData = codeFromGistID(gistID,Filename);
-		return inlineScriptRun(gistData[0], args,setFilename(gistData[1]));
+		return inlineScriptRun(new File(gistData[2]), args,setFilename(gistData[1]));
 	}
 	public static Object gitScriptRun(String gitURL, String Filename ,ArrayList<Object> args)  throws Exception{
 		String[] gistData = codeFromGit(gitURL,Filename);
-		return inlineScriptRun(gistData[0], args,setFilename(gistData[1]));
+		return inlineScriptRun(new File(gistData[2]), args,setFilename(gistData[1]));
 	}
 	public static File fileFromGit(String remoteURI, String fileInRepo ) throws InvalidRemoteException, TransportException, GitAPIException, IOException{
 		return fileFromGit(remoteURI,"master",fileInRepo);
@@ -814,7 +805,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		ScriptingEngine.creds = creds;
 	}
 	
-	public static Object inlineScriptRun(String code, ArrayList<Object> args,ShellType activeType) {
+	public static Object inlineScriptRun(File code, ArrayList<Object> args,ShellType activeType) {
 		
 		for (IScriptingLanguage l:langauges){
 			if(l.getShellType() == activeType){
@@ -823,7 +814,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		}
 		return null;
 	}
-
+	
+	public static Object inlineScriptRun(String line, ArrayList<Object>  args, ShellType shellTypeStorage) {
+		
+		for (IScriptingLanguage l:langauges){
+			if(l.getShellType() == shellTypeStorage){
+				return l.inlineScriptRun(line, args);
+			}
+		}
+		return null;
+	}
+	
 	public static String[] getImports() {
 		return imports;
 	}
@@ -860,6 +861,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		ScriptingEngine.autoupdate = autoupdate;
 		return ScriptingEngine.autoupdate;
 	}
+
+
+
 
 
 

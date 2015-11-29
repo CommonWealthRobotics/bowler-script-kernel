@@ -1,5 +1,8 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -16,6 +19,8 @@ import eu.mihosoft.vrl.v3d.CSG;
 
 public class JythonHelper implements IScriptingLanguage{
 	PythonInterpreter interp;
+	
+
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) {
 		Properties props = new Properties();
@@ -42,7 +47,6 @@ public class JythonHelper implements IScriptingLanguage{
 					+ bad);
 		}
 		interp.set("args", args);
-
 		interp.exec(code);
 		ArrayList<Object> results = new ArrayList<>();
 		
@@ -69,6 +73,22 @@ public class JythonHelper implements IScriptingLanguage{
 	}
 
 	@Override
+	public Object inlineScriptRun(File code, ArrayList<Object> args) {
+		byte[] bytes;
+		try {
+			bytes = Files.readAllBytes(code.toPath());
+			String s = new String(bytes, "UTF-8");
+			return inlineScriptRun(s, args);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+
+	@Override
 	public ShellType getShellType() {
 		return ShellType.JYTHON;
 	}
@@ -81,5 +101,7 @@ public class JythonHelper implements IScriptingLanguage{
 		}
 		return false;
 	}
+
+
 
 }

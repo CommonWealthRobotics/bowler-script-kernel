@@ -161,19 +161,14 @@ public class BowlerKernel {
 		if(!historyFile.exists()){
 			historyFile.createNewFile();
 			reader.getHistory().addToHistory("println SDKBuildInfo.getVersion()");
-			reader.getHistory().addToHistory("for(int i=0;i<1000000;i++) { println dyio.getValue(0) }");
+			reader.getHistory().addToHistory("for(int i=0;i<100;i++) { println dyio.getValue(0) }");
 			reader.getHistory().addToHistory("dyio.setValue(0,128)");
 			reader.getHistory().addToHistory("println dyio.getValue(0)");
 			reader.getHistory().addToHistory("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
 			reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
 			reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
-			reader.getHistory().addToHistory("shellType Clojure #Switches shell to Clojure");
-			reader.getHistory().addToHistory("shellType Jython #Switches shell to Python");
-			reader.getHistory().addToHistory("shellType Groovy #Switches shell to Groovy/Java");
-
+			reader.getHistory().addToHistory("BowlerKernel.speak(\"Text to speech works like this\")");
 			reader.getHistory().addToHistory("println \"Hello world!\"");
-			
-			
 			writeHistory(reader.getHistory().getHistoryList());
 		}else{
 			List<String> history = loadHistory();
