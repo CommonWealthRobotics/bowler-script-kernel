@@ -815,7 +815,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return null;
 	}
 	
-	public static Object inlineScriptRun(String line, ArrayList<Object>  args, ShellType shellTypeStorage) {
+	public static Object inlineScriptStringRun(String line, ArrayList<Object>  args, ShellType shellTypeStorage) {
 		
 		for (IScriptingLanguage l:langauges){
 			if(l.getShellType() == shellTypeStorage){
@@ -860,6 +860,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		}
 		ScriptingEngine.autoupdate = autoupdate;
 		return ScriptingEngine.autoupdate;
+	}
+
+	public static File fileFromGistID(String string, String string2) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		// TODO Auto-generated method stub
+		return fileFromGit("https://gist.github.com/"+string+".git",string2);
 	}
 
 

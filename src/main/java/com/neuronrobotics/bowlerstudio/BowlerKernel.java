@@ -214,7 +214,7 @@ public class BowlerKernel {
 					continue;
 				}
 				try {
-					ret =ScriptingEngine.inlineScriptRun(line, null,
+					ret =ScriptingEngine.inlineScriptStringRun(line, null,
 							shellTypeStorage);
 					if(ret !=null)
 						System.out.println(ret);
