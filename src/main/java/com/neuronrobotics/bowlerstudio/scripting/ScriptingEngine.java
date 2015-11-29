@@ -84,6 +84,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			"com.neuronrobotics.bowlerstudio.vitamins.Vitamins"};
 
 	private static GitHub github;
+	private  static HashMap<String,File> filesRun = new HashMap<>();
 
 	private static File creds=null;
 
@@ -805,10 +806,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		ScriptingEngine.creds = creds;
 	}
 	
+	public static File getFileEngineRunByName(String filename){
+		return filesRun.get(filename);
+	}
+	
 	public static Object inlineScriptRun(File code, ArrayList<Object> args,ShellType activeType) {
-		
+		if(filesRun.get(code.getName()) == null ){
+			filesRun.put(code.getName(),code);
+			System.out.println("Loading "+code.getAbsolutePath());
+		}
+			
 		for (IScriptingLanguage l:langauges){
 			if(l.getShellType() == activeType){
+				
 				return l.inlineScriptRun(code, args);
 			}
 		}
