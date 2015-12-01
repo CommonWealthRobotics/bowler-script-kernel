@@ -176,14 +176,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 				BufferedReader br = new BufferedReader(isr);
 			
 			    while ((line = br.readLine()) != null) {
-			        if(line.contains("login")){
+			        if(line.startsWith("login")||line.startsWith("username")){
 			        	loginID = line.split("=")[1];
 			        }
-			        if(line.contains("password")){
+			        if(line.startsWith("password") ){
 			        	pw = line.split("=")[1];
-			        	// password loaded, we can now autoupdate
-			        	ScriptingEngine.setAutoupdate(true);
 			        }
+			    }
+			    if(pw != null&& loginID != null){
+			    	// password loaded, we can now autoupdate
+		        	ScriptingEngine.setAutoupdate(true);
 			    }
 				
 				
@@ -856,7 +858,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 
 	public static boolean setAutoupdate(boolean autoupdate) {
-		if(autoupdate){
+		
+		if(autoupdate && !ScriptingEngine.autoupdate){
+			ScriptingEngine.autoupdate=true;// prevents recoursion loop from calling loadLoginData
 			loadLoginData();
 			if(pw==null||loginID==null)
 				try {
