@@ -265,8 +265,11 @@ public class BowlerKernel {
 	 
 
 	}
-
 	public static int speak(String msg){
+		
+		return speak( msg, 175.0, 120.0, 41.0, 1.0, 1.0);
+	}
+	public static int speak(String msg, Double rate, Double pitch, Double range, Double shift, Double volume){
 		System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
 		VoiceManager voiceManager = VoiceManager.getInstance();
 		com.sun.speech.freetts.Voice voice = voiceManager
@@ -274,10 +277,17 @@ public class BowlerKernel {
 		Thread t = new Thread() {
 			public void run() {
 				setName("Speaking Thread");
-
-				
+				System.out.println(""+voice.getRate());
+				System.out.println(""+voice.getPitch());
+				System.out.println(""+voice.getPitchRange());
+				System.out.println(""+voice.getPitchShift());
+				System.out.println(""+voice.getVolume());
 				if(voice !=null){
-					voice.setRate(100f);
+					voice.setRate(120f);
+					voice.setPitch(pitch.floatValue());
+					voice.setPitchRange(range.floatValue());
+					voice.setPitchShift(shift.floatValue());
+					voice.setVolume(volume.floatValue());
 					voice.allocate();
 					voice.speak(msg);
 					voice.deallocate();
