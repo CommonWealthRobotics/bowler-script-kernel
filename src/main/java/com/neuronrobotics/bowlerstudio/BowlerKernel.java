@@ -277,7 +277,7 @@ public class BowlerKernel {
 
 				
 				if(voice !=null){
-					voice.setRate(200f);
+					voice.setRate(100f);
 					voice.allocate();
 					voice.speak(msg);
 					voice.deallocate();
