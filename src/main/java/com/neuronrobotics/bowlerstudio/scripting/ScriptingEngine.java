@@ -188,8 +188,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			    	// password loaded, we can now autoupdate
 		        	ScriptingEngine.setAutoupdate(true);
 			    }
-				
-				
+				if(cp == null){
+					cp = new UsernamePasswordCredentialsProvider(loginID, pw);
+				}
 			} catch (Exception e) {
 				logout();
 				//e.printStackTrace();
@@ -240,7 +241,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		loginID=null;
 
 		gitHubLogin();
-        
+		if(cp == null){
+			cp = new UsernamePasswordCredentialsProvider(loginID, pw);
+		}
 	}
 
 	public static void logout(){
@@ -704,9 +707,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		
 		
 		if(!gitRepoFile.exists()){
-			if(cp == null){
-				cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-			}
 
 			System.out.println("Cloning files to: "+localPath);
 			System.out.println("Cloning files from: "+remoteURI);
