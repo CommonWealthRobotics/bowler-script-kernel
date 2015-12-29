@@ -277,11 +277,11 @@ public class BowlerKernel {
 		Thread t = new Thread() {
 			public void run() {
 				setName("Speaking Thread");
-				System.out.println(""+voice.getRate());
-				System.out.println(""+voice.getPitch());
-				System.out.println(""+voice.getPitchRange());
-				System.out.println(""+voice.getPitchShift());
-				System.out.println(""+voice.getVolume());
+				System.out.println("Rate "+voice.getRate());
+				System.out.println("Pitch hertz "+voice.getPitch());
+				System.out.println("PitchRange "+voice.getPitchRange());
+				System.out.println("PitchShift "+voice.getPitchShift());
+				System.out.println("Volume "+voice.getVolume());
 				if(voice !=null){
 					voice.setRate(120f);
 					voice.setPitch(pitch.floatValue());
