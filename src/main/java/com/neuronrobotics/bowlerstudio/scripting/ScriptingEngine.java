@@ -40,6 +40,7 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GitHub;
+import org.python.antlr.ast.ExceptHandler;
 
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
@@ -386,8 +387,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 	
 	
-
-	private static void waitForLogin(String id) throws IOException, InvalidRemoteException, TransportException, GitAPIException{
+	/**
+	 * 
+	 * @param id The GistID we are waiting to see
+	 * @throws IOException
+	 * @throws InvalidRemoteException
+	 * @throws TransportException
+	 * @throws GitAPIException
+	 */
+	private static void waitForLogin() throws IOException, InvalidRemoteException, TransportException, GitAPIException{
 		try {                                                                                                                                                                                                                                 
 	        final URL url = new URL("http://github.com");                                                                                                                                                                                 
 	        final URLConnection conn = url.openConnection();                                                                                                                                                                                  
@@ -432,78 +440,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		
 		loadLoginData();
 
-
-	    for(int i=0;i<2;i++){
-			File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
-			if(!gistDir.exists()){
-				gistDir.mkdir();
-			}
-			String localPath=gistDir.getAbsolutePath();
-			File gitRepoFile = new File(localPath + "/.git");
-			
-			
-			if(!gitRepoFile.exists()){
-				if(cp == null){
-					cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-				}
-				GHGist gist;
-				try{
-					gist = github.getGist(id);
-				}catch(IOException ex){
-					ex.printStackTrace();
-					return;
-				}
-				String remotePath = gist.getGitPullUrl();
-				System.out.println("Cloning files to: "+localPath);
-				System.out.println("Cloning files from: "+remotePath);
-				 //Clone the repo
-				try{
-				    Git.cloneRepository()
-				    .setURI(remotePath)
-				    .setDirectory(new File(localPath))
-				    .setCredentialsProvider(cp)
-				    .call();
-				}catch(Exception e){
-					//e.printStackTrace();
-					deleteFolder(new File(localPath ));
-					remotePath="git@gist.github.com:"+id+".git";
-					 Git.cloneRepository()
-					    .setURI("git@gist.github.com:"+id+".git")
-					    .setDirectory(new File(localPath))
-					    .call();
-				}
-				
-			}
-			
-		    if(!isAutoupdate())
-		    	return;
-		    //System.out.println("Autoupdating " +id);
-			if(cp == null){
-				cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-			}
-		    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-		    //https://gist.github.com/0e6454891a3b3f7c8f28.git
-		    Git git = new Git(localRepo);
-		    try{
-		    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
-		    	//System.out.println("Pull completed "+ret);
-		    	//
-		    	//git.push().setCredentialsProvider(cp).call();
-		    	git.close();
-		    	return;
-		    }catch(Exception ex){
-		    	try {
-		    	    //Files.delete(gitRepoFile.toPath());
-		    		ex.printStackTrace();
-		    		System.err.println("Error in gist, hosing: "+gitRepoFile);
-		    		deleteFolder(new File(localPath ));
-		    	} catch (Exception x) {
-		    		x.printStackTrace();
-		    	} 
-		    }
-		    git.close();
-	    }
-
 	}
 	
 	private static void deleteFolder(File folder) {
@@ -521,11 +457,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 
 	public static ArrayList<String> filesInGist(String gistcode, String extnetion) {
+
+		return filesInGit("https://gist.github.com/"+gistcode+".git","master",  extnetion);
+	}
+	public static ArrayList<String> filesInGit(String remote,String branch, String extnetion) {
 		ArrayList<String> f=new ArrayList<>();
 		try {
 			
-			waitForLogin(gistcode);
-			File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+gistcode);
+			waitForLogin();
+			File gistDir=cloneRepo( remote,branch);
 			for (final File fileEntry : gistDir.listFiles()) {
 				if(!fileEntry.getName().endsWith(".git"))
 					if(extnetion==null)
@@ -553,7 +493,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		}
 		return null;
 	}
-
 	
 	public static ArrayList<String> filesInGist(String id){
 		return filesInGist(id, null);
@@ -561,7 +500,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	
 	public static String getUserIdOfGist(String id){
 		try {
-			waitForLogin(id);
+			waitForLogin();
 			Log.debug("Loading Gist: " + id);
 			GHGist gist;
 			try{
@@ -578,36 +517,27 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		
 	}
 	
-	public static void pushCodeToGistID(String id, String FileName, String content )  throws Exception{
-		File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+id);
+	public static void pushCodeToGistID(String id, String FileName, String content , String commitMessage)  throws Exception{
+		
+		pushCodeToGit("https://gist.github.com/"+id+".git", "master", FileName, content, commitMessage);;
+	}
+	public static void pushCodeToGit(String id,String branch, String FileName, String content , String commitMessage)  throws Exception{
+		if(loginID==null)
+			login();
+		if(loginID==null)
+			return;//No login info means there is no way to publish
+		File gistDir=cloneRepo( id,branch);
 		File desired = new File(gistDir.getAbsoluteFile()+"/"+FileName);
-		if(!gistDir.exists()){
-			gistDir.mkdir();
-		}
+
 		FileUtils.writeStringToFile(desired, content);
 		if(!hasnetwork){
 			return;
 		}
 		try {	
-			waitForLogin(id);	
-			Log.debug("Loading Gist: " + id);
-			GHGist gist;
-			try{
-				gist = github.getGist(id);
-			}catch(IOException ex){
-				//ex.printStackTrace();
-				
-				return;
-			}
-
+			waitForLogin();	
 			String localPath=gistDir.getAbsolutePath();
-			String remotePath = gist.getGitPullUrl();
 			File gitRepoFile = new File(localPath + "/.git");
-			if(!gitRepoFile.exists()){
-				System.out.println("Cloning files to: "+localPath);
-				 //Clone the repo
-			    Git.cloneRepository().setURI(remotePath).setDirectory(new File(localPath)).call();
-			}
+
 		    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		    Git git = new Git(localRepo);
 		    try{
@@ -617,8 +547,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		    		git.add().addFilepattern(FileName).call();
 		    	}
 		    	FileUtils.writeStringToFile(desired, content);
-		    	git.commit().setAll(true).setMessage("Updates any changes").call();
+		    	git.commit().setAll(true).setMessage(commitMessage).call();
 		    	git.push().setCredentialsProvider(cp).call();
+		    	System.out.println("Pushed file: "+desired);
 		    }catch(Exception ex){
 		    	ex.printStackTrace();
 		    }
@@ -633,7 +564,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		}
 		return ;
 	}
-	
 	
 	public static String[] codeFromGit(String id, String FileName)  throws Exception{
 		try {	
@@ -699,6 +629,68 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	//or
 	//https://github.com/NeuronRobotics/BowlerStudioVitamins.git
 	public static File fileFromGit(String remoteURI,String branch, String fileInRepo ) throws InvalidRemoteException, TransportException, GitAPIException, IOException{
+		File gitRepoFile =cloneRepo(remoteURI,branch);
+		String id  = gitRepoFile.getAbsolutePath();
+		if(fileLastLoaded.get(id) ==null ){
+			// forces the first time the files is accessed by the application tou pull an update
+			fileLastLoaded.put(id, System.currentTimeMillis()-TIME_TO_WAIT_BETWEEN_GIT_PULL*2);
+		}
+		long lastTime =fileLastLoaded.get(id);
+		if((System.currentTimeMillis()-lastTime)>TIME_TO_WAIT_BETWEEN_GIT_PULL || !gitRepoFile.exists())// wait 2 seconds before re-downloading the file
+		{	
+//			System.out.println("Updating git repo, its been "+(System.currentTimeMillis()-lastTime)+
+//					" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
+			fileLastLoaded.put(id, System.currentTimeMillis());
+		    if(isAutoupdate()){
+			    //System.out.println("Autoupdating " +id);
+				if(cp == null){
+					cp = new UsernamePasswordCredentialsProvider(loginID, pw);
+				}
+			    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile()+"/.git");
+			    //https://gist.github.com/0e6454891a3b3f7c8f28.git
+			    Git git = new Git(localRepo);
+			    try{
+			    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
+			    	//System.out.println("Pull completed "+ret);
+			    	//
+			    	//git.push().setCredentialsProvider(cp).call();
+			    	git.close();
+			    }catch(Exception ex){
+			    	try {
+			    	    //Files.delete(gitRepoFile.toPath());
+			    		ex.printStackTrace();
+			    		System.err.println("Error in gist, hosing: "+gitRepoFile);
+			    		deleteFolder(gitRepoFile);
+			    	} catch (Exception x) {
+			    		x.printStackTrace();
+			    	} 
+			    }
+			    git.close();
+		    }
+			
+		}
+		
+		return new File(gitRepoFile.getAbsolutePath()+"/"+fileInRepo);
+	}
+	
+	/**
+	 * Gist variant of accessing local directories
+	 * @param id
+	 * @param branch
+	 * @return
+	 */
+	private static File cloneGistRepo(String id){
+		return cloneRepo("https://gist.github.com/"+id+".git", "master");
+	}
+	
+	/**
+	 * THis function retreves the local cached version of a given git repository. If it does not exist, it clones it. 
+	 * @param remoteURI
+	 * @param branch
+	 * @return The local directory containint the .git
+	 */
+	private static File cloneRepo(String remoteURI,String branch){
+		//new Exception().printStackTrace();
 		String[] colinSplit =remoteURI.split(":");
 		
 		String gitSplit =colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
@@ -720,54 +712,43 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			System.out.println("Cloning files from: "+remoteURI);
 			
 			 //Clone the repo
-		    Git.cloneRepository()
-		    .setURI(remoteURI)
-		    .setBranch(branch)
-		    .setDirectory(new File(localPath))
-		    .setCredentialsProvider(cp)
-		    .call();
+		    try {
+				Git.cloneRepository()
+				.setURI(remoteURI)
+				.setBranch(branch)
+				.setDirectory(new File(localPath))
+				.setCredentialsProvider(cp)
+				.call();
+			} catch (InvalidRemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TransportException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (GitAPIException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-		String id  = gitRepoFile.getAbsolutePath();
-		if(fileLastLoaded.get(id) ==null ){
-			// forces the first time the files is accessed by the application tou pull an update
-			fileLastLoaded.put(id, System.currentTimeMillis()-TIME_TO_WAIT_BETWEEN_GIT_PULL*2);
-		}
-		long lastTime =fileLastLoaded.get(id);
-		if((System.currentTimeMillis()-lastTime)>TIME_TO_WAIT_BETWEEN_GIT_PULL || !gistDir.exists())// wait 2 seconds before re-downloading the file
-		{	
-//			System.out.println("Updating git repo, its been "+(System.currentTimeMillis()-lastTime)+
-//					" need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
-			fileLastLoaded.put(id, System.currentTimeMillis());
-		    if(isAutoupdate()){
-			    //System.out.println("Autoupdating " +id);
-				if(cp == null){
-					cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-				}
-			    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
+
+		return gistDir;
+	}
+	
+	public static Git locateGit(File f) throws IOException{
+		File gitRepoFile =f;
+		while(gitRepoFile!=null){
+			gitRepoFile = gitRepoFile.getParentFile();
+			if(new File(gitRepoFile.getAbsolutePath()+"/.git").exists()){
+				System.err.println("Fount git repo for file: "+gitRepoFile);
+				Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile()+"/.git");
 			    //https://gist.github.com/0e6454891a3b3f7c8f28.git
-			    Git git = new Git(localRepo);
-			    try{
-			    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
-			    	//System.out.println("Pull completed "+ret);
-			    	//
-			    	//git.push().setCredentialsProvider(cp).call();
-			    	git.close();
-			    }catch(Exception ex){
-			    	try {
-			    	    //Files.delete(gitRepoFile.toPath());
-			    		ex.printStackTrace();
-			    		System.err.println("Error in gist, hosing: "+gitRepoFile);
-			    		deleteFolder(new File(localPath ));
-			    	} catch (Exception x) {
-			    		x.printStackTrace();
-			    	} 
-			    }
-			    git.close();
-		    }
-			
+			    return new Git(localRepo);
+
+			}else
+				System.err.println("NOT GIT: "+gitRepoFile);
 		}
-		
-		return new File(gistDir+"/"+fileInRepo);
+
+		return null;
 	}
 	
 	public static String getText(URL website) throws Exception {
@@ -879,6 +860,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	public static File fileFromGistID(String string, String string2) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		// TODO Auto-generated method stub
 		return fileFromGit("https://gist.github.com/"+string+".git",string2);
+	}
+
+
+	public static String findLocalPath(File currentFile, Git git) {
+		File dir = git.getRepository().getDirectory().getParentFile();
+		
+		return dir.toURI().relativize(currentFile.toURI()).getPath();
 	}
 
 
