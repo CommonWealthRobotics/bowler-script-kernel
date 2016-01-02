@@ -241,9 +241,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		loginID=null;
 
 		gitHubLogin();
-		if(cp == null){
-			cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-		}
+
 	}
 
 	public static void logout(){
@@ -365,11 +363,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	   	 	github = GitHub.connect();
 	   	
 	   	 	if(github.isCredentialValid()){
+	   	 		cp = new UsernamePasswordCredentialsProvider(loginID, pw);
 		        for(IGithubLoginListener l:loginListeners){
 		        	l.onLogin(loginID);
 		        }
 		        ScriptingEngine.setAutoupdate(true);
 		        System.out.println("Success Login as "+loginID+"");
+				
 	   	 	}else{
 	   	 		System.err.println("Bad login credentials for "+loginID);
 	   	 		github=null;
@@ -867,6 +867,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		File dir = git.getRepository().getDirectory().getParentFile();
 		
 		return dir.toURI().relativize(currentFile.toURI()).getPath();
+	}
+
+
+	public static boolean checkOwner(File currentFile) {
+		try {
+			waitForLogin();
+			Git git = locateGit(currentFile);
+			git.pull().setCredentialsProvider(cp).call();// updates to the latest version
+			git.push().setCredentialsProvider(cp).call();
+			git.close();
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 
 
