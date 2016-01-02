@@ -255,7 +255,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		github=null;
+		setGithub(null);
         for(IGithubLoginListener l:loginListeners){
         	l.onLogout(loginID);
         }
@@ -267,12 +267,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		ScriptingEngine.setAutoupdate(false);
 		logout();
 		try {
-			github=GitHub.connectAnonymously();
+			setGithub(GitHub.connectAnonymously());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return github;
+		return getGithub();
 	}
 	
 	public static String urlToGist(String in) {
@@ -360,9 +360,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	        out.println(content);
 	        out.flush();
 	        out.close();
-	   	 	github = GitHub.connect();
+	   	 	setGithub(GitHub.connect());
 	   	
-	   	 	if(github.isCredentialValid()){
+	   	 	if(getGithub().isCredentialValid()){
 	   	 		cp = new UsernamePasswordCredentialsProvider(loginID, pw);
 		        for(IGithubLoginListener l:loginListeners){
 		        	l.onLogin(loginID);
@@ -372,21 +372,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 				
 	   	 	}else{
 	   	 		System.err.println("Bad login credentials for "+loginID);
-	   	 		github=null;
+	   	 		setGithub(null);
 				pw= null;
 	   	 	}
 	   	 		
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("Login failed");
-			github=null;
+			setGithub(null);
 		}
-		if(github==null){
+		if(getGithub()==null){
 			ThreadUtil.wait(200);
 			return gitHubLogin();
 		}
 		else
-			return github;
+			return getGithub();
 	}
 	
 	
@@ -411,11 +411,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	    }  
 		if(!hasnetwork)
 			return;
-		if(github == null){
+		if(getGithub() == null){
 
 			if (getCreds().exists()){
 				try{
-					github = GitHub.connect();
+					setGithub(GitHub.connect());
 				}catch(IOException ex){
 					logout();
 				}
@@ -423,7 +423,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 				getCreds().createNewFile();
 			}
 			
-			if(github==null){
+			if(getGithub()==null){
 				
 				login();	
 			}
@@ -431,7 +431,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		}
 		
 		try{
-			if(github.getRateLimit().remaining<2){
+			if(getGithub().getRateLimit().remaining<2){
 				System.err.println("##Github Is Rate Limiting You## Disabling autoupdate");
 				setAutoupdate(false);
 			}
@@ -507,7 +507,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			Log.debug("Loading Gist: " + id);
 			GHGist gist;
 			try{
-				gist = github.getGist(id);
+				gist = getGithub().getGist(id);
 				return gist.getOwner().getLogin();
 			}catch(IOException ex){
 				ex.printStackTrace();
@@ -888,10 +888,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	
 	public static GHGist fork(String currentGist) {
 		
-		if(github!=null){
+		if(getGithub()!=null){
 			try {
 				waitForLogin();
-				GHGist incoming = github.getGist(currentGist);
+				GHGist incoming = getGithub().getGist(currentGist);
 				return incoming.fork();
 				
 			} catch (Exception e) {
@@ -901,6 +901,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		}
 		
 		return null;
+	}
+
+
+	public static GitHub getGithub() {
+		return github;
+	}
+
+
+	public static void setGithub(GitHub github) {
+		ScriptingEngine.github = github;
 	}
 
 
