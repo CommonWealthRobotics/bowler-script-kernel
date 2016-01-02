@@ -739,13 +739,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		while(gitRepoFile!=null){
 			gitRepoFile = gitRepoFile.getParentFile();
 			if(new File(gitRepoFile.getAbsolutePath()+"/.git").exists()){
-				System.err.println("Fount git repo for file: "+gitRepoFile);
+				//System.err.println("Fount git repo for file: "+gitRepoFile);
 				Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile()+"/.git");
-			    //https://gist.github.com/0e6454891a3b3f7c8f28.git
 			    return new Git(localRepo);
 
-			}else
-				System.err.println("NOT GIT: "+gitRepoFile);
+			}
 		}
 
 		return null;
