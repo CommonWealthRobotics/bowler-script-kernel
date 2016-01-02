@@ -5,7 +5,9 @@ import java.util.EnumSet;
 public enum ShellType {
 	GROOVY("Groovy"), 
 	JYTHON("Jython"),
-	CLOJURE("Clojure");
+	CLOJURE("Clojure"),
+	ROBOT("Robot XML"),
+	NONE("None");
 	
 	private String nameOfShell;
 

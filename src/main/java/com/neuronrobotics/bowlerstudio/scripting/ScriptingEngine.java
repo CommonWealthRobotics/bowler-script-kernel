@@ -163,6 +163,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		addScriptingLanguage(new ClojureHelper());
 		addScriptingLanguage(new GroovyHelper());
 		addScriptingLanguage(new JythonHelper());
+		addScriptingLanguage(new RobotHelper());
+		
+		
 
 	}
  	
