@@ -879,10 +879,28 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			git.close();
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 		return false;
+	}
+
+	
+	public static GHGist fork(String currentGist) {
+		
+		if(github!=null){
+			try {
+				waitForLogin();
+				GHGist incoming = github.getGist(currentGist);
+				return incoming.fork();
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
 	}
 
 
