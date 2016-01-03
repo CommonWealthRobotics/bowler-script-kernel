@@ -24,7 +24,17 @@ public class RobotHelper implements IScriptingLanguage{
 		try {
 			bytes = Files.readAllBytes(code.toPath());
 			String s = new String(bytes, "UTF-8");
-			return inlineScriptRun(s,args);
+			MobileBase mb;
+			try {
+				mb = new MobileBase(IOUtils.toInputStream(s, "UTF-8"));
+				
+				mb.setSelfSource(ScriptingEngine.findGistTagFromFile(code));
+				return mb;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -36,7 +46,7 @@ public class RobotHelper implements IScriptingLanguage{
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) {
 		
-		MobileBase mb;
+		MobileBase mb=null;
 		try {
 			mb = new MobileBase(IOUtils.toInputStream(code, "UTF-8"));
 		} catch (IOException e) {

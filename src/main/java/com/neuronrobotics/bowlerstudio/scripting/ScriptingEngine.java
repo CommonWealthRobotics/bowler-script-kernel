@@ -279,6 +279,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 	
 	public static String urlToGist(String in) {
+		
+		if(in.endsWith(".git")){
+			in=in.substring(0, in.lastIndexOf('.'));
+		}
 		String domain = in.split("//")[1];
 		String[] tokens = domain.split("/");
 		if (tokens[0].toLowerCase().contains("gist.github.com")
@@ -288,7 +292,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 				Log.debug("Gist URL Detected " + id);
 				return id;
 			}catch(ArrayIndexOutOfBoundsException e){
-				return "d4312a0787456ec27a2a";
+				try{
+					String id = tokens[1].split("#")[0];
+					Log.debug("Gist URL Detected " + id);
+					return id;
+				}catch(ArrayIndexOutOfBoundsException ex){
+					Log.error("Parsing "+in+" failed to find gist");
+					return "d4312a0787456ec27a2a";
+				}
 			}
 		}
 
@@ -722,16 +733,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 				.setDirectory(new File(localPath))
 				.setCredentialsProvider(cp)
 				.call();
-			} catch (InvalidRemoteException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (TransportException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (GitAPIException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			} catch (Exception e) {
+				Log.error("Failed to clone "+remoteURI+" "+e);
+			} 
 		}
 
 		return gistDir;
@@ -869,7 +873,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		
 		return dir.toURI().relativize(currentFile.toURI()).getPath();
 	}
-
+	
+	public static String [] findGistTagFromFile(File currentFile) {
+		try {
+			Git git = locateGit(currentFile);
+			
+			return new String[]{urlToGist(git.getRepository().getConfig().getString("remote", "origin", "url")),findLocalPath( currentFile,  git)};
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return new String[2];
+	}
 
 	public static boolean checkOwner(File currentFile) {
 		try {
@@ -902,6 +918,34 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		}
 		
 		return null;
+	}
+	
+	public static String [] forkGistFile(String [] incoming){
+		GitHub github = ScriptingEngine.getGithub();
+		try {
+			GHGist incomingGist = github.getGist(incoming[0]);
+			File incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
+			if(!ScriptingEngine.checkOwner(incomingFile)){
+				incomingGist = incomingGist.fork();
+				incoming[0] = ScriptingEngine.urlToGist(incomingGist.getHtmlUrl());
+				//sync the new file to the disk
+				incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return incoming;
 	}
 
 
