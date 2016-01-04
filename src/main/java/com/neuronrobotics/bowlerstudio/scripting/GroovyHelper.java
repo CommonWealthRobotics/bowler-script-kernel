@@ -18,7 +18,7 @@ import com.neuronrobotics.sdk.common.DeviceManager;
 public class GroovyHelper implements IScriptingLanguage{
 
 
-	private Object inline(Object code, ArrayList<Object> args) {
+	private Object inline(Object code, ArrayList<Object> args) throws Exception {
 		CompilerConfiguration cc = new CompilerConfiguration();
 		cc.addCompilationCustomizers(new ImportCustomizer()
 				.addStarImports(ScriptingEngine.getImports())
@@ -49,22 +49,14 @@ public class GroovyHelper implements IScriptingLanguage{
 				.getClassLoader(), binding, cc);
 		//System.out.println(code + "\n\nStart\n\n");
 		Script script;
-		try {
-			if(String.class.isInstance(code))
-				script = shell.parse((String)code);
-			else if(File.class.isInstance(code))
-				script = shell.parse((File)code);
-			else 
-				return null;
-			return script.run();
-		} catch (CompilationFailedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		if(String.class.isInstance(code))
+			script = shell.parse((String)code);
+		else if(File.class.isInstance(code))
+			script = shell.parse((File)code);
+		else 
+			return null;
+		return script.run();
+
 	}
 	
 	
@@ -86,14 +78,14 @@ public class GroovyHelper implements IScriptingLanguage{
 
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) {
+	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
 		return inline(code, args);
 	}
 
 
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) {
+	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
 		return inline(code, args);
 	}
 

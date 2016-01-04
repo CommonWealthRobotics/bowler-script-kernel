@@ -798,7 +798,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return filesRun.get(filename);
 	}
 	
-	public static Object inlineScriptRun(File code, ArrayList<Object> args,ShellType activeType) {
+	public static Object inlineScriptRun(File code, ArrayList<Object> args,ShellType activeType) throws Exception {
 		if(filesRun.get(code.getName()) == null ){
 			filesRun.put(code.getName(),code);
 			System.out.println("Loading "+code.getAbsolutePath());
@@ -813,7 +813,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return null;
 	}
 	
-	public static Object inlineScriptStringRun(String line, ArrayList<Object>  args, ShellType shellTypeStorage) {
+	public static Object inlineScriptStringRun(String line, ArrayList<Object>  args, ShellType shellTypeStorage) throws Exception {
 		
 		for (IScriptingLanguage l:langauges){
 			if(l.getShellType() == shellTypeStorage){

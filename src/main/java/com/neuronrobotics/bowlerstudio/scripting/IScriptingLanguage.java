@@ -20,15 +20,16 @@ public interface IScriptingLanguage {
 	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public abstract Object inlineScriptRun(File code, ArrayList<Object> args);
+	public abstract Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception;
 	
 	/**
 	 * This interface is for adding additional language support. 
 	 * @param code the text content of the code to be executed
 	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
+	 * @throws Exception 
 	 */
-	public abstract Object inlineScriptRun(String code, ArrayList<Object> args);
+	public abstract Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception;
 	
 	/**
 	 * Returns the shell type of this language
