@@ -146,7 +146,7 @@ dependencies {
 			
 	compile "com.neuronrobotics:JCSG:0.1.8"
 	compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
-	compile "com.neuronrobotics:java-bowler:3.16.6"
+	compile "com.neuronrobotics:java-bowler:3.16.7"
 	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.16.4-jar-with-dependencies.jar'])
 	compile "com.neuronrobotics:WalnutiQ:2.3.1"
 	
@@ -179,6 +179,10 @@ dependencies {
 	compile group:'com.googlecode.json-simple', name:'json-simple', version:'1.1'
 	compile 'com.fifesoft:rsyntaxtextarea:2.5.6'
     //compile("org.springframework.boot:spring-boot-starter-web:1.2.7.RELEASE")
+    
+    compile 'com.google.code.gson:gson:2.5'
+	compile 'org.apache.httpcomponents:httpclient:4.5.1'
+	
 	
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
