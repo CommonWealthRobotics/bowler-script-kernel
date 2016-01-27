@@ -269,14 +269,13 @@ public class BowlerKernel {
 		
 		return speak( msg, 175.0, 120.0, 41.0, 1.0, 1.0);
 	}
+	@SuppressWarnings("unused")
 	public static int speak(String msg, Double rate, Double pitch, Double range, Double shift, Double volume){
 		System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
 		VoiceManager voiceManager = VoiceManager.getInstance();
 		com.sun.speech.freetts.Voice voice = voiceManager
 				.getVoice("kevin16");
-		Thread t = new Thread() {
-			public void run() {
-				setName("Speaking Thread");
+
 				System.out.println("Rate "+voice.getRate());
 				System.out.println("Pitch hertz "+voice.getPitch());
 				System.out.println("PitchRange "+voice.getPitchRange());
@@ -298,9 +297,8 @@ public class BowlerKernel {
 					  System.out.println("    " + voices[i].getName() + " ("+ voices[i].getDomain()+ " domain)");
 					}
 				}
-			}
-		};
-		t.start();
+			
+
 		WordNumSyls feature = (WordNumSyls)voice.getFeatureProcessor("word_numsyls");
 		if(feature!=null)
 		try {
