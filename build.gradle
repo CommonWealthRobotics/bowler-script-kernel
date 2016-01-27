@@ -182,7 +182,7 @@ dependencies {
     
     compile 'com.google.code.gson:gson:2.5'
 	compile 'org.apache.httpcomponents:httpclient:4.5.1'
-	
+	compile 'cz.advel.jbullet:jbullet:20101010-1'
 	
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
