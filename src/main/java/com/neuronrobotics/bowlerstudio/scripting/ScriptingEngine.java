@@ -38,6 +38,12 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GitHub;
 import org.python.antlr.ast.ExceptHandler;
@@ -309,12 +315,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	private static List<String> returnFirstGist(String html) {
 		// Log.debug(html);
 		ArrayList<String > ret = new ArrayList<>();
-		String [] gists = html.split("//gist.github.com/");
-		for(int i=1;i<gists.length;i++){
-			String slug = gists[i];
-			String js = slug.split(".js")[0];
-			String id = js.split("/")[1];
-			ret.add(id);
+		Document doc = Jsoup.parse(html);
+		Elements links = doc.select("script");
+		for(int i=0;i<links.size();i++){
+			Element e=links.get(i);
+			///System.out.println("Found gist embed: "+e);
+			Attributes n = e.attributes();
+			String jSSource= n.get("src");
+			if(jSSource.contains("https://gist.github.com/")){
+				//System.out.println("Source = "+jSSource);
+				String slug = jSSource;
+				String js = slug.split(".js")[0];
+				String []id = js.split("/");
+				ret.add(id[id.length-1]);
+			}
 		}
 		return ret;
 	}
@@ -477,6 +491,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 		return filesInGit("https://gist.github.com/"+gistcode+".git","master",  extnetion);
 	}
+
 	public static ArrayList<String> filesInGit(String remote,String branch, String extnetion) {
 		ArrayList<String> f=new ArrayList<>();
 		try {

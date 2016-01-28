@@ -184,6 +184,7 @@ dependencies {
 	compile 'org.apache.httpcomponents:httpclient:4.5.1'
 	compile 'cz.advel.jbullet:jbullet:20101010-1'
 	
+	compile 'org.jsoup:jsoup:1.8.3'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
 
