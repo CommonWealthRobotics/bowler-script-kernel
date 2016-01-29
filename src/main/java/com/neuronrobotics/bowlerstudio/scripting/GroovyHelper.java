@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.codehaus.groovy.control.customizers.*;
 
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.DeviceManager;
@@ -24,7 +24,8 @@ public class GroovyHelper implements IScriptingLanguage{
 				.addStarImports(ScriptingEngine.getImports())
 				.addStaticStars(
 						"com.neuronrobotics.sdk.util.ThreadUtil",
-						"eu.mihosoft.vrl.v3d.Transform"));
+						"eu.mihosoft.vrl.v3d.Transform")
+				);
 
 		Binding binding = new Binding();
 		for (String pm : DeviceManager.listConnectedDevice(null)) {
@@ -44,6 +45,7 @@ public class GroovyHelper implements IScriptingLanguage{
 //					+ bad);
 		}
 		binding.setVariable("args", args);
+
 
 		GroovyShell shell = new GroovyShell(GroovyHelper.class
 				.getClassLoader(), binding, cc);
