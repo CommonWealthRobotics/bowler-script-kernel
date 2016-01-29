@@ -269,46 +269,46 @@ public class BowlerKernel {
 		
 		return speak( msg, 175.0, 120.0, 41.0, 1.0, 1.0);
 	}
+
 	@SuppressWarnings("unused")
-	public static int speak(String msg, Double rate, Double pitch, Double range, Double shift, Double volume){
+	public static int speak(String msg, Double rate, Double pitch, Double range, Double shift, Double volume) {
 		System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
 		VoiceManager voiceManager = VoiceManager.getInstance();
-		com.sun.speech.freetts.Voice voice = voiceManager
-				.getVoice("kevin16");
+		com.sun.speech.freetts.Voice voice = voiceManager.getVoice("kevin16");
 
-				System.out.println("Rate "+voice.getRate());
-				System.out.println("Pitch hertz "+voice.getPitch());
-				System.out.println("PitchRange "+voice.getPitchRange());
-				System.out.println("PitchShift "+voice.getPitchShift());
-				System.out.println("Volume "+voice.getVolume());
-				if(voice !=null){
-					voice.setRate(120f);
-					voice.setPitch(pitch.floatValue());
-					voice.setPitchRange(range.floatValue());
-					voice.setPitchShift(shift.floatValue());
-					voice.setVolume(volume.floatValue());
-					voice.allocate();
-					voice.speak(msg);
-					voice.deallocate();
-				}else{
-					System.out.println("All voices available:");
-					com.sun.speech.freetts.Voice[] voices=voiceManager.getVoices();
-					for (int i=0; i < voices.length; i++) {
-					  System.out.println("    " + voices[i].getName() + " ("+ voices[i].getDomain()+ " domain)");
-					}
-				}
-			
+		System.out.println("Rate " + voice.getRate());
+		System.out.println("Pitch hertz " + voice.getPitch());
+		System.out.println("PitchRange " + voice.getPitchRange());
+		System.out.println("PitchShift " + voice.getPitchShift());
+		System.out.println("Volume " + voice.getVolume());
+		if (voice != null) {
+			voice.setRate(rate.floatValue());
+			voice.setPitch(pitch.floatValue());
+			voice.setPitchRange(range.floatValue());
+			voice.setPitchShift(shift.floatValue());
+			voice.setVolume(volume.floatValue());
+			voice.allocate();
+			voice.speak(msg);
+			voice.deallocate();
+		} else {
+			System.out.println("All voices available:");
+			com.sun.speech.freetts.Voice[] voices = voiceManager.getVoices();
+			for (int i = 0; i < voices.length; i++) {
+				System.out.println("    " + voices[i].getName() + " (" + voices[i].getDomain() + " domain)");
+			}
+		}
 
-//		WordNumSyls feature = (WordNumSyls)voice.getFeatureProcessor("word_numsyls");
-//		if(feature!=null)
-//		try {
-//			
-//			System.out.println("Syllables# = "+feature.process(null));
-//		} catch (ProcessException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		
+		// WordNumSyls feature =
+		// (WordNumSyls)voice.getFeatureProcessor("word_numsyls");
+		// if(feature!=null)
+		// try {
+		//
+		// System.out.println("Syllables# = "+feature.process(null));
+		// } catch (ProcessException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		//
 		return 0;
 	}
 
