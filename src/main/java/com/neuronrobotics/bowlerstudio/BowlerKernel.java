@@ -299,16 +299,16 @@ public class BowlerKernel {
 				}
 			
 
-		WordNumSyls feature = (WordNumSyls)voice.getFeatureProcessor("word_numsyls");
-		if(feature!=null)
-		try {
-			
-			System.out.println("Syllables# = "+feature.process(null));
-		} catch (ProcessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+//		WordNumSyls feature = (WordNumSyls)voice.getFeatureProcessor("word_numsyls");
+//		if(feature!=null)
+//		try {
+//			
+//			System.out.println("Syllables# = "+feature.process(null));
+//		} catch (ProcessException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
 		return 0;
 	}
 
