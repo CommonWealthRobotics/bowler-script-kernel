@@ -123,8 +123,8 @@ dependencies {
 	compile group: 'org.controlsfx', name: 'controlsfx', version: '8.0.6'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.7'
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.2.3'
-	compile group: 'org.kohsuke.stapler', name: 'stapler-jetty', version: '1.1'
+	compile 'org.kohsuke.stapler:stapler:1.237'
+
 	
 	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.0.1.201506240215-r'
 	
@@ -188,16 +188,17 @@ dependencies {
 	
 	//Deep Learning 4 j and dependancies
 	/*
+	*/
 	compile 'org.deeplearning4j:deeplearning4j-core:0.4-rc3.8'
 	compile 'org.nd4j:nd4j-x86:0.4-rc3.8'
 	compile 'org.deeplearning4j:deeplearning4j-nlp:0.4-rc3.8'
 	compile 'org.deeplearning4j:deeplearning4j-ui:0.4-rc3.8'
 	
-	compile 'com.google.guava:guava:19.0'
+	//compile 'com.google.guava:guava:19.0'
 	compile 'org.nd4j:canova-nd4j-image:0.0.0.14'
 	compile 'org.nd4j:canova-nd4j-codec:0.0.0.14'
 	compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1'
-	*/
+	
 	
 	
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
