@@ -188,7 +188,6 @@ dependencies {
 	
 	//Deep Learning 4 j and dependancies
 	/*
-	*/
 	compile 'org.deeplearning4j:deeplearning4j-core:0.4-rc3.8'
 	compile 'org.nd4j:nd4j-x86:0.4-rc3.8'
 	compile 'org.deeplearning4j:deeplearning4j-nlp:0.4-rc3.8'
@@ -198,7 +197,7 @@ dependencies {
 	compile 'org.nd4j:canova-nd4j-image:0.0.0.14'
 	compile 'org.nd4j:canova-nd4j-codec:0.0.0.14'
 	compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1'
-	
+	*/
 	
 	
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
