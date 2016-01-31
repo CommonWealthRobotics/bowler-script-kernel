@@ -101,6 +101,7 @@ repositories {
 	mavenCentral()
 	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/'  }
+	maven { url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'  }
 	maven { url 'http://repo.jenkins-ci.org/public/' }
 	maven { url 'http://clojars.org/repo' }
 	maven { url 'http://jline.sourceforge.net/m2repo' }
@@ -181,10 +182,24 @@ dependencies {
     //compile("org.springframework.boot:spring-boot-starter-web:1.2.7.RELEASE")
     
     compile 'com.google.code.gson:gson:2.5'
+    compile 'org.jsoup:jsoup:1.8.3'
 	compile 'org.apache.httpcomponents:httpclient:4.5.1'
 	compile 'cz.advel.jbullet:jbullet:20101010-1'
 	
-	compile 'org.jsoup:jsoup:1.8.3'
+	//Deep Learning 4 j and dependancies
+	/*
+	compile 'org.deeplearning4j:deeplearning4j-core:0.4-rc3.8'
+	compile 'org.nd4j:nd4j-x86:0.4-rc3.8'
+	compile 'org.deeplearning4j:deeplearning4j-nlp:0.4-rc3.8'
+	compile 'org.deeplearning4j:deeplearning4j-ui:0.4-rc3.8'
+	
+	compile 'com.google.guava:guava:19.0'
+	compile 'org.nd4j:canova-nd4j-image:0.0.0.14'
+	compile 'org.nd4j:canova-nd4j-codec:0.0.0.14'
+	compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1'
+	*/
+	
+	
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
 
