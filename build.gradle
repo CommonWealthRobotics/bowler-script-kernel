@@ -189,8 +189,11 @@ dependencies {
 	//Deep Learning 4 j and dependancies
 	/*
 	compile 'org.deeplearning4j:deeplearning4j-core:0.4-rc3.8'
-	compile 'org.nd4j:nd4j-x86:0.4-rc3.8'
+
+	//compile 'org.nd4j:nd4j-x86:0.4-rc3.8'
+	
 	compile 'org.deeplearning4j:deeplearning4j-nlp:0.4-rc3.8'
+	
 	compile 'org.deeplearning4j:deeplearning4j-ui:0.4-rc3.8'
 	
 	//compile 'com.google.guava:guava:19.0'
