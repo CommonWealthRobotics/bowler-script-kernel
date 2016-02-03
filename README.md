@@ -56,7 +56,7 @@ export OPENCV_DIR=<path to yout BowlerStudio.app>BowlerStudio.app/Contents/MacOS
   java -jar BowlerScriptKernel.jar -p .. # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable
   
   java -jar BowlerScriptKernel.jar -r <Groovy,Clojure,Jython> #Starts a repl fo interactive robot coding
-  
+```
 #Adding additional languages
 
 ##Create Enum
