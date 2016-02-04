@@ -103,7 +103,7 @@ Second create a class with methods for running a script. To do this implement IS
 ```
 ##Add execution class to ScriptingEngine
 
-Finaly in the static {} method of Scripting engine, add your new Scripting languages to the internal list of supported languages. 
+Finally in the static {} method of ScriptingEngine, add your new Scripting languages to the internal list of supported languages. 
 
 ```
   addScriptingLanguage(new NewScriptHelper());
