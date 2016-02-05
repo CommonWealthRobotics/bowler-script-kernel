@@ -202,6 +202,8 @@ dependencies {
 	compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1'
 	*/
 	
+	compile 'javax.media:jmf:2.1.1e'
+	
 	
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
