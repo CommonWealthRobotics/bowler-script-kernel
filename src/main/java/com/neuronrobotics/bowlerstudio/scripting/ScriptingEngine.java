@@ -106,49 +106,49 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	private static ArrayList<IGithubLoginListener> loginListeners = new ArrayList<IGithubLoginListener>();
 
 	private static ArrayList<IScriptingLanguage> langauges=new ArrayList<>();
-	
-	private static IGitHubLoginManager loginManager= new IGitHubLoginManager() {
-		
+
+	private static IGitHubLoginManager loginManager = new IGitHubLoginManager() {
+
 		@Override
 		public String[] prompt(String username) {
-			if(username!=null){
-				if(username.equals(""))
-					username=null;
+			if (username != null) {
+				if (username.equals(""))
+					username = null;
 			}
-			String []creds = new String[]{"",""};
+			String[] creds = new String[] { "", "" };
 			System.out.println("#Github Login Prompt#");
 			System.out.println("For anynomous mode hit enter twice");
-			System.out.print("Github Username: "+username!=null?"("+username+")":"");
+			System.out.print("Github Username: " + username != null ? "(" + username + ")" : "");
 			// create a scanner so we can read the command-line input
-			BufferedReader buf = new BufferedReader (new InputStreamReader (System.in));
+			BufferedReader buf = new BufferedReader(new InputStreamReader(System.in));
 
-		   do{
-			   try {
-				creds[0] = buf.readLine ();
-			} catch (IOException e) {
-				return null;
-			}
-			   if(creds[0].equals("")&& (username==null)){
-				   System.out.println("No username, using anynomous login");
-				   return null;
-			   }else
-				   creds[0]=username;
-		   }while(creds[0]==null);
-		    
-		    System.out.print("Github Password: ");
-		    try {
-				creds[1] = buf.readLine ();
-				 if(creds[1].equals("")){
-					   System.out.println("No password, using anynomous login");
-					   return null;
-				   }
+			do {
+				try {
+					creds[0] = buf.readLine();
+				} catch (IOException e) {
+					return null;
+				}
+				if (creds[0].equals("") && (username == null)) {
+					System.out.println("No username, using anynomous login");
+					return null;
+				} else
+					creds[0] = username;
+			} while (creds[0] == null);
+
+			System.out.print("Github Password: ");
+			try {
+				creds[1] = buf.readLine();
+				if (creds[1].equals("")) {
+					System.out.println("No password, using anynomous login");
+				}
 			} catch (IOException e) {
 				return null;
 			}
 			return creds;
 		}
 	};
- 	static{
+
+	static {
  		
 		try {                                                                                                                                                                                                                                 
 	        final URL url = new URL("http://github.com");                                                                                                                                                                                 
@@ -165,7 +165,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			workspace.mkdir();
 		}
 
-		loadLoginData();
+		try {
+			loadLoginData();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		addScriptingLanguage(new ClojureHelper());
 		addScriptingLanguage(new GroovyHelper());
 		addScriptingLanguage(new JythonHelper());
@@ -175,7 +180,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 	}
  	
- 	private static void loadLoginData(){
+ 	private static void loadLoginData() throws IOException{
  		if(loginID == null && getCreds().exists() && hasnetwork){
 			try {
 				String line;
@@ -253,17 +258,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 	}
 
-	public static void logout(){
+	public static void logout() throws IOException{
 		//new RuntimeException("Logout callsed").printStackTrace();
 		if(getCreds()!= null)
-		try {
+	
 			if(getCreds().exists())
 				Files.delete(getCreds().toPath());
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		setGithub(null);
         for(IGithubLoginListener l:loginListeners){
         	l.onLogout(loginID);
@@ -271,16 +272,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
         loginID=null;
 	}
 	
-	private static GitHub setupAnyonmous(){
+	private static GitHub setupAnyonmous() throws IOException{
 		System.err.println("Using anynomous login, autoupdate disabled");
 		ScriptingEngine.setAutoupdate(false);
 		logout();
-		try {
-			setGithub(GitHub.connectAnonymously());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
+		setGithub(GitHub.connectAnonymously());
+
 		return getGithub();
 	}
 	
@@ -361,7 +359,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return ret;
 	}
 	
-	public static GitHub gitHubLogin(){
+	public static GitHub gitHubLogin() throws IOException{
 		String[] creds = loginManager.prompt(loginID);
 		   
 		
@@ -487,14 +485,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	    folder.delete();
 	}
 
-	public static ArrayList<String> filesInGist(String gistcode, String extnetion) {
+	public static ArrayList<String> filesInGist(String gistcode, String extnetion) throws Exception {
 
 		return filesInGit("https://gist.github.com/"+gistcode+".git","master",  extnetion);
 	}
 
-	public static ArrayList<String> filesInGit(String remote,String branch, String extnetion) {
+	public static ArrayList<String> filesInGit(String remote,String branch, String extnetion) throws Exception {
 		ArrayList<String> f=new ArrayList<>();
-		try {
+
 			
 			waitForLogin();
 			File gistDir=cloneRepo( remote,branch);
@@ -506,47 +504,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 						f.add(fileEntry.getName());
 		    }
 			return f;
-		} catch (InterruptedIOException e) {
-			System.out.println("Gist Rate limited, you realy should login to github");
-		} catch (MalformedURLException ex) {
-			// ex.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidRemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransportException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (GitAPIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+
 	}
 	
-	public static ArrayList<String> filesInGist(String id){
+	public static ArrayList<String> filesInGist(String id) throws Exception{
 		return filesInGist(id, null);
 	}
 	
-	public static String getUserIdOfGist(String id){
-		try {
+	public static String getUserIdOfGist(String id) throws Exception{
+		
 			waitForLogin();
 			Log.debug("Loading Gist: " + id);
 			GHGist gist;
-			try{
-				gist = getGithub().getGist(id);
-				return gist.getOwner().getLogin();
-			}catch(IOException ex){
-				ex.printStackTrace();
-			}
-		} catch (IOException | GitAPIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		return null;
-		
+
+			gist = getGithub().getGist(id);
+			return gist.getOwner().getLogin();
+	
 	}
 	
 	public static void pushCodeToGistID(String id, String FileName, String content , String commitMessage)  throws Exception{
@@ -565,7 +538,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		if(!hasnetwork){
 			return;
 		}
-		try {	
+
 			waitForLogin();	
 			String localPath=gistDir.getAbsolutePath();
 			File gitRepoFile = new File(localPath + "/.git");
@@ -583,61 +556,36 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		    	git.push().setCredentialsProvider(cp).call();
 		    	System.out.println("Pushed file: "+desired);
 		    }catch(Exception ex){
-		    	ex.printStackTrace();
+		    	 git.close();
+		    	 throw ex;
 		    }
 		    git.close();
-		} catch (InterruptedIOException e) {
-			System.out.println("Gist Rate limited");
-		} catch (MalformedURLException ex) {
-			// ex.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return ;
+
 	}
 	
 	public static String[] codeFromGit(String id, String FileName)  throws Exception{
-		try {	
-
-		    File targetFile = fileFromGit(id,FileName);
-			if(targetFile.exists()){
-				//System.err.println("Loading file: "+targetFile.getAbsoluteFile());
-				//Target file is ready to go
-				 String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())), StandardCharsets.UTF_8);
-				 return new String[] { text, FileName , targetFile.getAbsolutePath()};
-			}
-
-		} catch (InterruptedIOException e) {
-			System.out.println("Gist Rate limited");
-		} catch (MalformedURLException ex) {
-			// ex.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	
+	    File targetFile = fileFromGit(id,FileName);
+		if(targetFile.exists()){
+			//System.err.println("Loading file: "+targetFile.getAbsoluteFile());
+			//Target file is ready to go
+			 String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())), StandardCharsets.UTF_8);
+			 return new String[] { text, FileName , targetFile.getAbsolutePath()};
 		}
+
 		return null;
 	}
 	
 	public static String[] codeFromGistID(String id, String FileName)  throws Exception{
-		try {	
-
-		    File targetFile = fileFromGit("https://gist.github.com/"+id+".git",FileName);
-			if(targetFile.exists()){
-				//System.err.println("Loading file: "+targetFile.getAbsoluteFile());
-				//Target file is ready to go
-				 String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())), StandardCharsets.UTF_8);
-				 return new String[] { text, FileName , targetFile.getAbsolutePath()};
-			}
-
-		} catch (InterruptedIOException e) {
-			System.out.println("Gist Rate limited");
-		} catch (MalformedURLException ex) {
-			// ex.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	
+	    File targetFile = fileFromGit("https://gist.github.com/"+id+".git",FileName);
+		if(targetFile.exists()){
+			//System.err.println("Loading file: "+targetFile.getAbsoluteFile());
+			//Target file is ready to go
+			 String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())), StandardCharsets.UTF_8);
+			 return new String[] { text, FileName , targetFile.getAbsolutePath()};
 		}
+
 		return null;
 	}
 
@@ -858,18 +806,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 
 
-	public static boolean setAutoupdate(boolean autoupdate) {
+	public static boolean setAutoupdate(boolean autoupdate) throws IOException {
 		
 		if(autoupdate && !ScriptingEngine.autoupdate){
 			ScriptingEngine.autoupdate=true;// prevents recoursion loop from calling loadLoginData
 			loadLoginData();
 			if(pw==null||loginID==null)
-				try {
 					login();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
 			if(pw==null||loginID==null)
 				return false;
 		}
@@ -889,17 +833,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return dir.toURI().relativize(currentFile.toURI()).getPath();
 	}
 	
-	public static String [] findGistTagFromFile(File currentFile) {
-		try {
-			Git git = locateGit(currentFile);
-			
-			return new String[]{urlToGist(git.getRepository().getConfig().getString("remote", "origin", "url")),findLocalPath( currentFile,  git)};
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public static String [] findGistTagFromFile(File currentFile) throws IOException {
+	
+		Git git = locateGit(currentFile);
 		
-		return new String[2];
+		return new String[]{urlToGist(git.getRepository().getConfig().getString("remote", "origin", "url")),findLocalPath( currentFile,  git)};
 	}
 
 	public static boolean checkOwner(File currentFile) {
@@ -911,54 +849,38 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			git.close();
 			return true;
 		} catch (Exception e) {
-			//e.printStackTrace();
+			//just return false, the exception is it failing to push
 		}
 		
 		return false;
 	}
 
 	
-	public static GHGist fork(String currentGist) {
+	public static GHGist fork(String currentGist) throws Exception {
 		
 		if(getGithub()!=null){
-			try {
-				waitForLogin();
-				GHGist incoming = getGithub().getGist(currentGist);
-				return incoming.fork();
-				
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			waitForLogin();
+			GHGist incoming = getGithub().getGist(currentGist);
+			return incoming.fork();
+
 		}
 		
 		return null;
 	}
 	
-	public static String [] forkGistFile(String [] incoming){
+	public static String [] forkGistFile(String [] incoming) throws Exception{
 		GitHub github = ScriptingEngine.getGithub();
-		try {
-			GHGist incomingGist = github.getGist(incoming[0]);
-			File incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
-			if(!ScriptingEngine.checkOwner(incomingFile)){
-				incomingGist = incomingGist.fork();
-				incoming[0] = ScriptingEngine.urlToGist(incomingGist.getHtmlUrl());
-				//sync the new file to the disk
-				incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidRemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransportException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (GitAPIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		GHGist incomingGist = github.getGist(incoming[0]);
+		File incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
+		if(!ScriptingEngine.checkOwner(incomingFile)){
+			incomingGist = incomingGist.fork();
+			incoming[0] = ScriptingEngine.urlToGist(incomingGist.getHtmlUrl());
+			//sync the new file to the disk
+			incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
 		}
+
 		
 		return incoming;
 	}

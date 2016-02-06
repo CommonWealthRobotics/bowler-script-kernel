@@ -38,8 +38,7 @@ public class GroovyHelper implements IScriptingLanguage{
 						Class.forName(bad.getClass().getName())
 								.cast(bad));
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw e;
 			}
 //			System.err.println("Device " + bad.getScriptingName() + " is "
 //					+ bad);
