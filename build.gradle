@@ -205,7 +205,6 @@ dependencies {
 	
 	compile 'javax.media:jmf:2.1.1e'
 	
-	
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 }
 
