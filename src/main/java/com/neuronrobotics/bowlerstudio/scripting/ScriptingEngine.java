@@ -862,6 +862,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 			waitForLogin();
 			GHGist incoming = getGithub().getGist(currentGist);
+	        for(IGithubLoginListener l:loginListeners){
+	        	l.onLogin(loginID);
+	        }
 			return incoming.fork();
 
 		}
@@ -880,7 +883,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			//sync the new file to the disk
 			incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
 		}
-
+        for(IGithubLoginListener l:loginListeners){
+        	l.onLogin(loginID);
+        }
 		
 		return incoming;
 	}
