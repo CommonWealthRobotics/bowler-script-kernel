@@ -124,6 +124,7 @@ dependencies {
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.7'
 	compile 'org.kohsuke.stapler:stapler:1.237'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.2.3'
 
 	
 	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.0.1.201506240215-r'
