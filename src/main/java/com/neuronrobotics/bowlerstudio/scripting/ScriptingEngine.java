@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
@@ -29,6 +30,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -526,40 +528,58 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		
 		pushCodeToGit("https://gist.github.com/"+id+".git", "master", FileName, content, commitMessage);;
 	}
-	public static void pushCodeToGit(String id,String branch, String FileName, String content , String commitMessage)  throws Exception{
-		if(loginID==null)
-			login();
-		if(loginID==null)
-			return;//No login info means there is no way to publish
-		File gistDir=cloneRepo( id,branch);
-		File desired = new File(gistDir.getAbsoluteFile()+"/"+FileName);
 
-		FileUtils.writeStringToFile(desired, content);
-		if(!hasnetwork){
+	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage)
+			throws Exception {
+		if (loginID == null)
+			login();
+		if (loginID == null)
+			return;// No login info means there is no way to publish
+		File gistDir = cloneRepo(id, branch);
+		File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
+		if (!hasnetwork) {
+			OutputStream out = null;
+			try {
+				out = FileUtils.openOutputStream(desired, false);
+				IOUtils.write(content, out);
+				out.close(); // don't swallow close Exception if copy completes
+								// normally
+			} finally {
+				IOUtils.closeQuietly(out);
+			}
 			return;
 		}
 
-			waitForLogin();	
-			String localPath=gistDir.getAbsolutePath();
-			File gitRepoFile = new File(localPath + "/.git");
+		waitForLogin();
+		String localPath = gistDir.getAbsolutePath();
+		File gitRepoFile = new File(localPath + "/.git");
 
-		    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-		    Git git = new Git(localRepo);
-		    try{
-		    	git.pull().setCredentialsProvider(cp).call();// updates to the latest version
-		    	if(!desired.exists()){
-		    		desired.createNewFile();
-		    		git.add().addFilepattern(FileName).call();
-		    	}
-		    	FileUtils.writeStringToFile(desired, content);
-		    	git.commit().setAll(true).setMessage(commitMessage).call();
-		    	git.push().setCredentialsProvider(cp).call();
-		    	System.out.println("Pushed file: "+desired);
-		    }catch(Exception ex){
-		    	 git.close();
-		    	 throw ex;
-		    }
-		    git.close();
+		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
+		Git git = new Git(localRepo);
+		try {
+			git.pull().setCredentialsProvider(cp).call();// updates to the
+															// latest version
+			if (!desired.exists()) {
+				desired.createNewFile();
+				git.add().addFilepattern(FileName).call();
+			}
+			OutputStream out = null;
+			try {
+				out = FileUtils.openOutputStream(desired, false);
+				IOUtils.write(content, out);
+				out.close(); // don't swallow close Exception if copy completes
+								// normally
+			} finally {
+				IOUtils.closeQuietly(out);
+			}
+			git.commit().setAll(true).setMessage(commitMessage).call();
+			git.push().setCredentialsProvider(cp).call();
+			System.out.println("Pushed file: " + desired);
+		} catch (Exception ex) {
+			git.close();
+			throw ex;
+		}
+		git.close();
 
 	}
 	
