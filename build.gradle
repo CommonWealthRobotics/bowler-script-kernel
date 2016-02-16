@@ -261,7 +261,7 @@ task sourcesJar(type: Jar) {
 artifacts {
 	archives javadocJar, sourcesJar, jar
 }
-
+/*
 signing {
 	sign configurations.archives
 }
@@ -310,7 +310,7 @@ uploadArchives {
 	  }
 	}
   }
-
+*/
 //task run(type: JavaExec) {
 //	classpath = sourceSets.main.runtimeClasspath
 //	main = mainClass;
