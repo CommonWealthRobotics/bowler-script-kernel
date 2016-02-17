@@ -396,7 +396,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		        for(IGithubLoginListener l:loginListeners){
 		        	l.onLogin(loginID);
 		        }
-		        ScriptingEngine.setAutoupdate(true);
 		        System.out.println("Success Login as "+loginID+"");
 				
 	   	 	}else{
