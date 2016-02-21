@@ -16,12 +16,12 @@ public interface ICadGenerator {
 	 * @param dh the list of DH configurations
 	 * @return simulatable CAD objects
 	 */
-	ArrayList<CSG> generateCad(DHParameterKinematics dh, boolean toManufacture );
+	ArrayList<CSG> generateCad(DHParameterKinematics dh, int linkIndex);
 	/**
 	 * This function should generate the body and any limbs of a given base. 
 	 * the user should attach any listeners from the DH link for simulation
 	 * @param base the base to generate
 	 * @return simulatable CAD objects
 	 */
-	ArrayList<CSG> generateBody(MobileBase base , boolean toManufacture);
+	ArrayList<CSG> generateBody(MobileBase base );
 }
