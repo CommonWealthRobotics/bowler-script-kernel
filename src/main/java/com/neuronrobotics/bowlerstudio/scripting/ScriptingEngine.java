@@ -631,7 +631,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 		return inlineScriptRun(f, args,setFilename(f.getName()) );
 	}
-
+	@Deprecated
 	public static Object inlineGistScriptRun(String gistID, String Filename ,ArrayList<Object> args)  throws Exception{
 		String[] gistData = codeFromGistID(gistID,Filename);
 		return inlineScriptRun(new File(gistData[2]), args,setFilename(gistData[1]));
