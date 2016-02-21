@@ -871,11 +871,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return dir.toURI().relativize(currentFile.toURI()).getPath();
 	}
 	
-	public static String [] findGistTagFromFile(File currentFile) throws IOException {
+	public static String [] findGitTagFromFile(File currentFile) throws IOException {
 	
 		Git git = locateGit(currentFile);
 		
-		return new String[]{urlToGist(git.getRepository().getConfig().getString("remote", "origin", "url")),findLocalPath( currentFile,  git)};
+		return new String[]{git.getRepository().getConfig().getString("remote", "origin", "url"),findLocalPath( currentFile,  git)};
 	}
 
 	public static boolean checkOwner(File currentFile) {

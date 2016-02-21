@@ -28,7 +28,7 @@ public class RobotHelper implements IScriptingLanguage{
 			try {
 				mb = new MobileBase(IOUtils.toInputStream(s, "UTF-8"));
 				
-				mb.setSelfSource(ScriptingEngine.findGistTagFromFile(code));
+				mb.setGitSelfSource(ScriptingEngine.findGitTagFromFile(code));
 				return mb;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
