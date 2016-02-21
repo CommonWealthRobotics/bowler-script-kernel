@@ -487,7 +487,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	    folder.delete();
 	}
 
-	public static ArrayList<String> filesInGist(String gistcode, String extnetion) throws Exception {
+	private static ArrayList<String> filesInGist(String gistcode, String extnetion) throws Exception {
 
 		return filesInGit("https://gist.github.com/"+gistcode+".git","master",  extnetion);
 	}
@@ -508,8 +508,26 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			return f;
 
 	}
+	public static ArrayList<String> filesInGit(String remote) throws Exception {
+		String branch="master";
+		String extnetion=null;
+		ArrayList<String> f=new ArrayList<>();
+
+			
+			waitForLogin();
+			File gistDir=cloneRepo( remote,branch);
+			for (final File fileEntry : gistDir.listFiles()) {
+				if(!fileEntry.getName().endsWith(".git"))
+					if(extnetion==null)
+						f.add(fileEntry.getName());
+					else if(fileEntry.getName().endsWith(extnetion))
+						f.add(fileEntry.getName());
+		    }
+			return f;
+
+	}
 	
-	public static ArrayList<String> filesInGist(String id) throws Exception{
+	private static ArrayList<String> filesInGist(String id) throws Exception{
 		return filesInGist(id, null);
 	}
 	
@@ -524,7 +542,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	
 	}
 	
-	public static void pushCodeToGistID(String id, String FileName, String content , String commitMessage)  throws Exception{
+	private static void pushCodeToGistID(String id, String FileName, String content , String commitMessage)  throws Exception{
 		
 		pushCodeToGit("https://gist.github.com/"+id+".git", "master", FileName, content, commitMessage);;
 	}
@@ -596,7 +614,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return null;
 	}
 	
-	public static String[] codeFromGistID(String id, String FileName)  throws Exception{
+	private static String[] codeFromGistID(String id, String FileName)  throws Exception{
 	
 	    File targetFile = fileFromGit("https://gist.github.com/"+id+".git",FileName);
 		if(targetFile.exists()){
@@ -614,7 +632,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return inlineScriptRun(f, args,setFilename(f.getName()) );
 	}
 
-	public static Object inlineGistScriptRun(String gistID, String Filename ,ArrayList<Object> args)  throws Exception{
+	private static Object inlineGistScriptRun(String gistID, String Filename ,ArrayList<Object> args)  throws Exception{
 		String[] gistData = codeFromGistID(gistID,Filename);
 		return inlineScriptRun(new File(gistData[2]), args,setFilename(gistData[1]));
 	}
@@ -841,7 +859,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return ScriptingEngine.autoupdate;
 	}
 
-	public static File fileFromGistID(String string, String string2) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+	private static File fileFromGistID(String string, String string2) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		// TODO Auto-generated method stub
 		return fileFromGit("https://gist.github.com/"+string+".git",string2);
 	}
@@ -894,14 +912,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	
 	public static String [] forkGistFile(String [] incoming) throws Exception{
 		GitHub github = ScriptingEngine.getGithub();
-
-		GHGist incomingGist = github.getGist(incoming[0]);
-		File incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
+		
+		String id = null;
+		if(incoming[0].endsWith(".git"))
+			id=urlToGist(incoming[0]);
+		else
+			id=incoming[0];
+		
+		GHGist incomingGist = github.getGist(id);
+		File incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
 		if(!ScriptingEngine.checkOwner(incomingFile)){
 			incomingGist = incomingGist.fork();
 			incoming[0] = ScriptingEngine.urlToGist(incomingGist.getHtmlUrl());
 			//sync the new file to the disk
-			incomingFile = ScriptingEngine.fileFromGistID(incoming[0], incoming[1]);
+			incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
 		}
         for(IGithubLoginListener l:loginListeners){
         	l.onLogin(loginID);
