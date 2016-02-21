@@ -910,20 +910,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return null;
 	}
 	
-	public static String [] forkGistFile(String [] incoming) throws Exception{
+	public static String [] forkGitFile(String [] incoming) throws Exception{
 		GitHub github = ScriptingEngine.getGithub();
 		
 		String id = null;
 		if(incoming[0].endsWith(".git"))
 			id=urlToGist(incoming[0]);
-		else
+		else{
 			id=incoming[0];
-		
+			incoming[0] = "https://gist.github.com/"+id+".git";
+		}
 		GHGist incomingGist = github.getGist(id);
 		File incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
 		if(!ScriptingEngine.checkOwner(incomingFile)){
 			incomingGist = incomingGist.fork();
-			incoming[0] = ScriptingEngine.urlToGist(incomingGist.getHtmlUrl());
+			incoming[0] = "https://gist.github.com/"+ScriptingEngine.urlToGist(incomingGist.getHtmlUrl())+".git";
 			//sync the new file to the disk
 			incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
 		}
