@@ -77,8 +77,8 @@ public class MobileBasePhysicsManager {
 				// Build a hinge based on the link and mass
 				HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(simplecad.get(l),linkLoc, conf.getMassKg());
 				hingePhysicsManager.setController((currentState, target, seconds) -> {
-					
-					return 0;
+					double error = target-currentState;
+					return (error/seconds)*0.5;
 				});
 				RigidBody linkSection = hingePhysicsManager.getFallRigidBody();
 //				// Setup some damping on the m_bodies
@@ -102,7 +102,7 @@ public class MobileBasePhysicsManager {
 				//set the link constraint based on DH parameters
 				TransformFactory.nrToBullet(new TransformNR(step), localB);
 				// build the hinge constraint			
-				joint6DOF= new HingeConstraint(body, linkSection, localA, localB);
+				joint6DOF= new HingeConstraint(lastLink, linkSection, localA, localB);
 				
 				lastLink = linkSection;
 				hingePhysicsManager.setConstraint(joint6DOF);

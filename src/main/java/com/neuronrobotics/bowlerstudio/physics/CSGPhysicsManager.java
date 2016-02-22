@@ -26,7 +26,7 @@ public class CSGPhysicsManager {
 	
 	private RigidBody fallRigidBody;
 	private Affine ballLocation;
-	private CSG baseCSG;
+	protected CSG baseCSG;
 
 	public CSGPhysicsManager(int sphereSize, Vector3f start, double mass){
 		this.setBaseCSG(new Sphere(sphereSize).toCSG());
