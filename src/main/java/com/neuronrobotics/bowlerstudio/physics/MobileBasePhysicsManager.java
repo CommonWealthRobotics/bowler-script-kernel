@@ -30,7 +30,6 @@ public class MobileBasePhysicsManager {
 
 	
 	private HashMap<DHLink, CSG> simplecad;
-	private HashMap<DHLink, Generic6DofConstraint> constraints=new HashMap<>();
 	private float lift=20;
 	public MobileBasePhysicsManager(MobileBase base, CSG baseCad , 
 			HashMap<DHLink, CSG> simplecad ){
@@ -44,7 +43,8 @@ public class MobileBasePhysicsManager {
 			minz = baseCad.getMinZ();
 		System.out.println("Minimum z = "+minz);
 		Transform start = new Transform();
-		TransformFactory.affineToBullet(baseCad.getManipulator(), start);
+		
+		TransformFactory.nrToBullet(base.getFiducialToGlobalTransform(), start);
 		start.origin.z=(float) (start.origin.z-minz+lift);
 		Platform.runLater(()->TransformFactory.bulletToAffine(baseCad.getManipulator(), start));
 		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start, base.getMassKg());
@@ -88,23 +88,24 @@ public class MobileBasePhysicsManager {
 				TransformFactory.nrToBullet(new TransformNR(step), localB);
 				if(i==0){					
 					joint6DOF= new Generic6DofConstraint(body, linkSection, localA, localB, true);
+					tmp.setConstraint(joint6DOF);
 				}else{
 					joint6DOF= new Generic6DofConstraint(lastLink, linkSection, localA, localB, true);
 				}
 				lastLink = linkSection;
-				tmp.setConstraint(joint6DOF);
-				constraints.put(l, joint6DOF);
+				//tmp.setConstraint(joint6DOF);
+				int index=i;
 				abstractLink.addLinkListener(new ILinkListener() {
 					@Override
 					public void onLinkPositionUpdate(AbstractLink source, double engineeringUnitsValue) {
-						//System.out.println(engineeringUnitsValue);
-						if(source==abstractLink){
-							Vector3f t = new Vector3f();
-							t.set((float) Math.toRadians(engineeringUnitsValue)-BulletGlobals.FLT_EPSILON, -BulletGlobals.FLT_EPSILON, -BulletGlobals.FLT_EPSILON);
-							joint6DOF.setAngularLowerLimit(t);
-							t.set((float) Math.toRadians(engineeringUnitsValue)+BulletGlobals.FLT_EPSILON, BulletGlobals.FLT_EPSILON, BulletGlobals.FLT_EPSILON);
-							joint6DOF.setAngularUpperLimit(t);
-						}
+						System.out.println("Link "+index+" value="+engineeringUnitsValue);
+						PhysicsEngine.get().getDynamicsWorld().removeConstraint(joint6DOF);
+						Vector3f t = new Vector3f();
+						t.set((float) Math.toRadians(engineeringUnitsValue)-BulletGlobals.FLT_EPSILON, -BulletGlobals.FLT_EPSILON, -BulletGlobals.FLT_EPSILON);
+						joint6DOF.setAngularLowerLimit(t);
+						t.set((float) Math.toRadians(engineeringUnitsValue)+BulletGlobals.FLT_EPSILON, BulletGlobals.FLT_EPSILON, BulletGlobals.FLT_EPSILON);
+						joint6DOF.setAngularUpperLimit(t);
+						PhysicsEngine.get().getDynamicsWorld().addConstraint(joint6DOF);
 					}
 					@Override
 					public void onLinkLimit(AbstractLink source, PIDLimitEvent event) {}

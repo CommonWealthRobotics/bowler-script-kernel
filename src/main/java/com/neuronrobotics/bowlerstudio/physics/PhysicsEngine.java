@@ -99,6 +99,8 @@ public class PhysicsEngine {
 						long took = (System.currentTimeMillis() - start);
 						if (took < msTime)
 							ThreadUtil.wait((int) (msTime - took));
+						else
+							System.out.println("Real time physics broken: "+took);
 					}catch(Exception E){
 						E.printStackTrace();
 					}
@@ -112,7 +114,7 @@ public class PhysicsEngine {
 		runEngine=false;
 	}
 	public static void step(float timeStep){
-		get().getDynamicsWorld().stepSimulation(timeStep , 10);
+		get().getDynamicsWorld().stepSimulation(timeStep , 20);
 		for(CSGPhysicsManager o:get().getPhysicsObjects()){
 			o.update();
 		}
