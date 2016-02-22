@@ -116,7 +116,7 @@ public class PhysicsEngine {
 	public static void step(float timeStep){
 		get().getDynamicsWorld().stepSimulation(timeStep , 20);
 		for(CSGPhysicsManager o:get().getPhysicsObjects()){
-			o.update();
+			o.update( timeStep);
 		}
 	}
 	
@@ -128,8 +128,10 @@ public class PhysicsEngine {
 		if(!get().getPhysicsObjects().contains(manager)){
 			get().getPhysicsObjects().add(manager);
 			get().getDynamicsWorld().addRigidBody(manager.getFallRigidBody());
-			if(manager.getConstraint()!=null)
-				get().getDynamicsWorld().addConstraint(manager.getConstraint(), true);
+			if(HingeCSGPhysicsManager.class.isInstance(manager)){
+				if(((HingeCSGPhysicsManager) manager).getConstraint()!=null)
+					get().getDynamicsWorld().addConstraint(((HingeCSGPhysicsManager) manager).getConstraint(), true);
+			}
 		}
 	}
 	
@@ -144,8 +146,10 @@ public class PhysicsEngine {
 		ThreadUtil.wait((int) (msTime));
 		for(CSGPhysicsManager o:get().getPhysicsObjects()){
 			get().getDynamicsWorld().removeRigidBody(o.getFallRigidBody());
-			if(o.getConstraint()!=null)
-				get().getDynamicsWorld().removeConstraint(o.getConstraint());
+			if(HingeCSGPhysicsManager.class.isInstance(o)){
+				if(((HingeCSGPhysicsManager) o).getConstraint()!=null)
+					get().getDynamicsWorld().removeConstraint(((HingeCSGPhysicsManager) o).getConstraint());
+			}
 		}
 		get().getPhysicsObjects().clear();
 		

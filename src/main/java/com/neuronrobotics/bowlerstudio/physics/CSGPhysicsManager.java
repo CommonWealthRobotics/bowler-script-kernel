@@ -7,6 +7,7 @@ import javax.vecmath.Vector3f;
 import com.bulletphysics.collision.shapes.*;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
+import com.bulletphysics.dynamics.constraintsolver.HingeConstraint;
 import com.bulletphysics.dynamics.constraintsolver.TypedConstraint;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
@@ -26,24 +27,14 @@ public class CSGPhysicsManager {
 	private RigidBody fallRigidBody;
 	private Affine ballLocation;
 	private CSG baseCSG;
-	private TypedConstraint constraint;
+
 	public CSGPhysicsManager(int sphereSize, Vector3f start, double mass){
 		this.setBaseCSG(new Sphere(sphereSize).toCSG());
 		CollisionShape fallShape = new SphereShape((float) (baseCSG.getMaxX()-baseCSG.getMinX())/2);
 		setup(fallShape,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
 	}
 	public CSGPhysicsManager(CSG baseCSG, Vector3f start, double mass){
-		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
-		
-		
-		ObjectArrayList<Vector3f> arg0= new ObjectArrayList<>();
-		for( Polygon p:baseCSG.getPolygons()){
-			for( Vertex v:p.vertices){
-				arg0.add(new Vector3f((float)v.getX(), (float)v.getY(), (float)v.getZ()));
-			}
-		}
-		CollisionShape fallShape =  new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
-		setup(fallShape,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
+		this(baseCSG,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
 	}
 	
 //	public CSGPhysicsManager(CSG baseCSG,  double mass){
@@ -86,12 +77,12 @@ public class CSGPhysicsManager {
 				fallInertia);
 		fallRigidBodyCI.additionalDamping = true;
 		setFallRigidBody(new RigidBody(fallRigidBodyCI));
-		update();
+		update(40);
 	}
 	
 
 	
-	public void update(){
+	public void update(float timeStep){
 		Transform trans = new Transform();
 		fallRigidBody.getMotionState().getWorldTransform(trans);
 		Platform.runLater(() -> {
@@ -119,10 +110,5 @@ public class CSGPhysicsManager {
 		this.baseCSG = baseCSG;
 	}
 
-	public TypedConstraint getConstraint() {
-		return constraint;
-	}
-	public void setConstraint(TypedConstraint constraint) {
-		this.constraint = constraint;
-	}
+
 }
