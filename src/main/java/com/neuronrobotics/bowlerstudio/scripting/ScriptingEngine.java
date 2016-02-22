@@ -91,7 +91,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			"javafx.scene.transform", "javafx.scene.shape",
 			"java.awt.image.BufferedImage",
 			"com.neuronrobotics.bowlerstudio.vitamins.Vitamins",
-			"com.neuronrobotics.bowlerkernel.BowlerDatabase"};
+			"com.neuronrobotics.bowlerkernel.BowlerDatabase",
+			"com.neuronrobotics.bowlerstudio.physics.PhysicsEngine",
+			"com.neuronrobotics.bowlerstudio.physics.CSGPhysicsManager",
+			"com.neuronrobotics.bowlerstudio.physics.MobileBasePhysicsManager"};
 
 	private static GitHub github;
 	private  static HashMap<String,File> filesRun = new HashMap<>();

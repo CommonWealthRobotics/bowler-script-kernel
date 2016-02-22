@@ -56,57 +56,59 @@ public class PhysicsEngine {
 		// set the gravity of our world
 		getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98));
 		
-		setGroundShape(new StaticPlaneShape(new Vector3f(0, 0, 1), 1));
+		setGroundShape(new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
 
 	}
 
-	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-		File servoFile = ScriptingEngine.fileFromGit("https://github.com/NeuronRobotics/BowlerStudioVitamins.git",
-				"BowlerStudioVitamins/stl/servo/smallservo.stl");
-		// Load the .CSG from the disk and cache it in memory
-		CSG servo = Vitamins.get(servoFile);
-
-		PhysicsEngine.add(new CSGPhysicsManager(
-				servo, 
-				new Vector3f(6, 2, 180),
-				10));
-		PhysicsEngine.add(new CSGPhysicsManager(
-				new Sphere(20 * 2).toCSG(), 
-				new Vector3f(0, 0, 100),
-				20));
-		
-		int msLoopTime = 16;
-
-		for (int i = 0; i < 300 && !Thread.interrupted(); i++) {
-			long start = System.currentTimeMillis();
-			PhysicsEngine.stepMs(msLoopTime);
-			long took = (System.currentTimeMillis() - start);
-			if (took < msLoopTime)
-				ThreadUtil.wait((int) (msLoopTime - took));
-		 }
-	}
+//	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+//		File servoFile = ScriptingEngine.fileFromGit("https://github.com/NeuronRobotics/BowlerStudioVitamins.git",
+//				"BowlerStudioVitamins/stl/servo/smallservo.stl");
+//		// Load the .CSG from the disk and cache it in memory
+//		CSG servo = Vitamins.get(servoFile);
+//
+//		PhysicsEngine.add(new CSGPhysicsManager(
+//				servo, 
+//				new Vector3f(6, 2, 180),
+//				10));
+//		PhysicsEngine.add(new CSGPhysicsManager(
+//				new Sphere(20 * 2).toCSG(), 
+//				new Vector3f(0, 0, 100),
+//				20));
+//		
+//		int msLoopTime = 16;
+//
+//		for (int i = 0; i < 300 && !Thread.interrupted(); i++) {
+//			long start = System.currentTimeMillis();
+//			PhysicsEngine.stepMs(msLoopTime);
+//			long took = (System.currentTimeMillis() - start);
+//			if (took < msLoopTime)
+//				ThreadUtil.wait((int) (msLoopTime - took));
+//		 }
+//	}
+//	
 	
-	
-	public void startPhysicsThread(int msTime){
-		this.msTime=msTime;
-		if(physicsThread!=null){
+	public static void startPhysicsThread(int ms){
+		msTime=ms;
+		if(physicsThread==null){
 			runEngine=true;
-			physicsThread=new Thread(){
-				public void run(){
-					setName("Physics Thread");
-					while(runEngine){
+			physicsThread=new Thread(()->{
+				while(runEngine){
+					try{
 						long start = System.currentTimeMillis();
 						PhysicsEngine.stepMs(msTime);
 						long took = (System.currentTimeMillis() - start);
 						if (took < msTime)
 							ThreadUtil.wait((int) (msTime - took));
+					}catch(Exception E){
+						E.printStackTrace();
 					}
 				}
-			};
+			});
 			physicsThread.start();
 		}
 	}
-	public void stopPhysicsThread(){
+	public static void stopPhysicsThread(){
+		physicsThread=null;
 		runEngine=false;
 	}
 	public static void step(float timeStep){
@@ -124,6 +126,8 @@ public class PhysicsEngine {
 		if(!get().getPhysicsObjects().contains(manager)){
 			get().getPhysicsObjects().add(manager);
 			get().getDynamicsWorld().addRigidBody(manager.getFallRigidBody());
+			if(manager.getConstraint()!=null)
+				get().getDynamicsWorld().addConstraint(manager.getConstraint(), true);
 		}
 	}
 	
@@ -134,10 +138,15 @@ public class PhysicsEngine {
 		}
 	}
 	public static void clear(){
+		stopPhysicsThread();
+		ThreadUtil.wait((int) (msTime));
 		for(CSGPhysicsManager o:get().getPhysicsObjects()){
 			get().getDynamicsWorld().removeRigidBody(o.getFallRigidBody());
+			if(o.getConstraint()!=null)
+				get().getDynamicsWorld().removeConstraint(o.getConstraint());
 		}
 		get().getPhysicsObjects().clear();
+		
 		
 	}
 	public static PhysicsEngine get() {
@@ -207,19 +216,19 @@ public class PhysicsEngine {
 		return groundShape;
 	}
 
-	public void setGroundShape(CollisionShape groundShape) {
+	public void setGroundShape(CollisionShape cs ){
 		if(groundRigidBody!=null){
 			getDynamicsWorld().removeRigidBody(groundRigidBody); // add our ground to the
 		}
-		this.groundShape = groundShape;
+		this.groundShape = cs;
 		// setup the motion state
 		DefaultMotionState groundMotionState = new DefaultMotionState(
-				new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(0, -1, 0), 1.0f)));
+				new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(0, 0, 0), 1.0f)));
 
-		RigidBodyConstructionInfo groundRigidBodyCI = new RigidBodyConstructionInfo(0, groundMotionState, getGroundShape(),
+		RigidBodyConstructionInfo groundRigidBodyCI = new RigidBodyConstructionInfo(0, groundMotionState, groundShape,
 				new Vector3f(0, 0, 0));
 		groundRigidBody = new RigidBody(groundRigidBodyCI);
-		getDynamicsWorld().addRigidBody(groundRigidBody); // add our ground to the
+		dynamicsWorld.addRigidBody(groundRigidBody); // add our ground to the
 	}
 
 	public ArrayList<CSGPhysicsManager> getPhysicsObjects() {

@@ -34,10 +34,10 @@ public class TransformFactory extends com.neuronrobotics.sdk.addons.kinematics.T
 	}
 	
 	public static void bulletToAffine(Affine affine,com.bulletphysics.linearmath.Transform bullet){
-		TransformFactory.getTransform(bulletToNr(bullet), affine);
+		TransformFactory.nrToAffine(bulletToNr(bullet), affine);
 	}
 	public static void affineToBullet(Affine affine,com.bulletphysics.linearmath.Transform bullet){
-		TransformNR nr = getTransform(affine);
+		TransformNR nr = affineToNr(affine);
 		nrToBullet(nr,bullet);
 	}
 }
