@@ -1,4 +1,4 @@
-package com.neuronrobotics.bowlerstudio.threed;
+package com.neuronrobotics.bowlerstudio.physics;
 
 import java.io.File;
 import java.io.IOException;

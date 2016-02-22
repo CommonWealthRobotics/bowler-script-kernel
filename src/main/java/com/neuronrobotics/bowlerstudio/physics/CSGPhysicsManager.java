@@ -1,4 +1,4 @@
-package com.neuronrobotics.bowlerstudio.threed;
+package com.neuronrobotics.bowlerstudio.physics;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
@@ -10,7 +10,6 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
-import com.neuronrobotics.sdk.addons.kinematics.TransformFactory;
 //import com.neuronrobotics.sdk.addons.kinematics.gui.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
@@ -29,7 +28,7 @@ public class CSGPhysicsManager {
 	public CSGPhysicsManager(int sphereSize, Vector3f start, double mass){
 		this.setBaseCSG(new Sphere(sphereSize).toCSG());
 		CollisionShape fallShape = new SphereShape((float) (baseCSG.getMaxX()-baseCSG.getMinX())/2);
-		setup(fallShape,new Quat4f(0, 0, 0, 1),start,mass);
+		setup(fallShape,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
 	}
 	public CSGPhysicsManager(CSG baseCSG, Vector3f start, double mass){
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
@@ -42,7 +41,7 @@ public class CSGPhysicsManager {
 			}
 		}
 		CollisionShape fallShape =  new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
-		setup(fallShape,new Quat4f(0, 0, 0, 1),start,mass);
+		setup(fallShape,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
 	}
 	
 	public CSGPhysicsManager(CSG baseCSG,  double mass){
@@ -57,24 +56,15 @@ public class CSGPhysicsManager {
 		}
 		TransformNR startPose = TransformFactory.getTransform(baseCSG.getManipulator());
 		CollisionShape fallShape =  new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
-		
-		setup(fallShape,new Quat4f(
-				(float)startPose.getRotation().getRotationMatrix2QuaturnionZ(),
-				(float)startPose.getRotation().getRotationMatrix2QuaturnionY(), 
-				(float)startPose.getRotation().getRotationMatrix2QuaturnionX(), 
-				(float) startPose.getRotation().getRotationMatrix2QuaturnionW()),
-				new Vector3f(new float[]{
-						(float)startPose.getX(),
-						(float)startPose.getY(),
-						(float)startPose.getZ(),
-						
-				}),mass);
+		Transform tr= new Transform();
+		TransformFactory.nrToBullet(startPose, tr);
+		setup(fallShape,tr,mass);
 	}
 	
-	private void setup(CollisionShape fallShape,Quat4f orentation ,Vector3f start, double mass ){
+	private void setup(CollisionShape fallShape,Transform pose, double mass ){
 		// setup the motion state for the ball
 		DefaultMotionState fallMotionState = new DefaultMotionState(
-				new Transform(new Matrix4f(orentation, start, 1.0f)));
+				pose);
 		// This we're going to give mass so it responds to gravity
 		Vector3f fallInertia = new Vector3f(0, 0, 0);
 		fallShape.calculateLocalInertia((float) mass, fallInertia);
@@ -89,12 +79,7 @@ public class CSGPhysicsManager {
 		Platform.runLater(() -> {
 			Transform trans = new Transform();
 			fallRigidBody.getMotionState().getWorldTransform(trans);
-			Quat4f out= new Quat4f();
-			trans.getRotation(out);
-			TransformNR  tr = new TransformNR(trans.origin.x,
-					trans.origin.y,
-					trans.origin.z, out.w, out.x, out.y, out.z);
-			TransformFactory.getTransform(tr, ballLocation);
+			TransformFactory.bulletToAffine(ballLocation, trans);
 		});
 	}
 
