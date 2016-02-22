@@ -58,7 +58,7 @@ import javafx.scene.web.WebEngine;
 
 
 public class ScriptingEngine {// this subclasses boarder pane for the widgets sake, because multiple inheritance is TOO hard for java...
-	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 10000;
+	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 100000;
 	/**
 	 * 
 	 */
@@ -631,7 +631,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 		return inlineScriptRun(f, args,setFilename(f.getName()) );
 	}
-	@Deprecated
 	public static Object inlineGistScriptRun(String gistID, String Filename ,ArrayList<Object> args)  throws Exception{
 		String[] gistData = codeFromGistID(gistID,Filename);
 		return inlineScriptRun(new File(gistData[2]), args,setFilename(gistData[1]));

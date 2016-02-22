@@ -47,6 +47,11 @@ public class PhysicsEngine {
 	private ArrayList<CSGPhysicsManager> objects =new ArrayList<>();
 	private RigidBody groundRigidBody;
 	
+	private static boolean runEngine = false;
+	private static int msTime=16;
+	
+	private static Thread physicsThread = null;
+	
 	public PhysicsEngine() throws Exception {
 		// set the gravity of our world
 		getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98));
@@ -81,6 +86,29 @@ public class PhysicsEngine {
 		 }
 	}
 	
+	
+	public void startPhysicsThread(int msTime){
+		this.msTime=msTime;
+		if(physicsThread!=null){
+			runEngine=true;
+			physicsThread=new Thread(){
+				public void run(){
+					setName("Physics Thread");
+					while(runEngine){
+						long start = System.currentTimeMillis();
+						PhysicsEngine.stepMs(msTime);
+						long took = (System.currentTimeMillis() - start);
+						if (took < msTime)
+							ThreadUtil.wait((int) (msTime - took));
+					}
+				}
+			};
+			physicsThread.start();
+		}
+	}
+	public void stopPhysicsThread(){
+		runEngine=false;
+	}
 	public static void step(float timeStep){
 		get().getDynamicsWorld().stepSimulation(timeStep , 10);
 		for(CSGPhysicsManager o:get().getPhysicsObjects()){
