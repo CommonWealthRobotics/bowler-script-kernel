@@ -44,14 +44,16 @@ public class MobileBasePhysicsManager {
 			minz = baseCad.getMinZ();
 		System.out.println("Minimum z = "+minz);
 		Transform start = new Transform();
-		
+		TransformNR globe= base.getFiducialToGlobalTransform();
+		globe.translateZ(-minz+lift);
+		base.setFiducialToGlobalTransform(globe);
 		TransformFactory.nrToBullet(base.getFiducialToGlobalTransform(), start);
-		start.origin.z=(float) (start.origin.z-minz+lift);
 		Platform.runLater(()->TransformFactory.bulletToAffine(baseCad.getManipulator(), start));
 		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start, base.getMassKg());
 		RigidBody body = baseManager.getFallRigidBody();
 		PhysicsEngine.add(baseManager);
-		for(DHParameterKinematics dh:base.getAllDHChains()){
+		for(int j=0;j<base.getAllDHChains().size();j++){
+			DHParameterKinematics dh=base.getAllDHChains().get(j);
 			RigidBody lastLink=body;
 			ArrayList<TransformNR> cached = dh.getDhChain().getCachedChain();
 			for(int i=0;i<dh.getNumberOfLinks();i++){
@@ -98,20 +100,24 @@ public class MobileBasePhysicsManager {
 				else
 					step= l.DhStep(Math.toRadians(0));
 				// set up the center of mass offset from the centroid of the links
-				TransformFactory.nrToBullet(conf.getCenterOfMassFromCentroid(), localA);
+				if(i==0){
+					
+					TransformFactory.nrToBullet(dh.forwardOffset(new TransformNR()), localA);
+				}
+					
 				//set the link constraint based on DH parameters
-				TransformFactory.nrToBullet(new TransformNR(step), localB);
+				TransformFactory.nrToBullet(new TransformNR(step).inverse(), localB);
 				// build the hinge constraint			
 				joint6DOF= new HingeConstraint(lastLink, linkSection, localA, localB);
-				
+				joint6DOF.setLimit(	(float)Math.toRadians(abstractLink.getMinEngineeringUnits()),
+								(float)Math.toRadians(abstractLink.getMaxEngineeringUnits()));
 				lastLink = linkSection;
 				hingePhysicsManager.setConstraint(joint6DOF);
-				int index=i;
 				abstractLink.addLinkListener(new ILinkListener() {
 					@Override
 					public void onLinkPositionUpdate(AbstractLink source, double engineeringUnitsValue) {
-						System.out.println("Link "+index+" value="+engineeringUnitsValue);
-						hingePhysicsManager.setTarget(engineeringUnitsValue);
+						//System.out.println("Link "+index+" value="+engineeringUnitsValue);
+						hingePhysicsManager.setTarget(Math.toRadians(engineeringUnitsValue));
 					}
 					@Override
 					public void onLinkLimit(AbstractLink source, PIDLimitEvent event) {}

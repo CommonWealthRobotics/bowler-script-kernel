@@ -92,7 +92,7 @@ public class PhysicsEngine {
 		if(physicsThread==null){
 			runEngine=true;
 			physicsThread=new Thread(()->{
-				while(runEngine){
+				while(runEngine&& mainEngine!=null){
 					try{
 						long start = System.currentTimeMillis();
 						PhysicsEngine.stepMs(msTime);
@@ -143,7 +143,7 @@ public class PhysicsEngine {
 	}
 	public static void clear(){
 		stopPhysicsThread();
-		ThreadUtil.wait((int) (msTime));
+		ThreadUtil.wait((int) (msTime*2));
 		for(CSGPhysicsManager o:get().getPhysicsObjects()){
 			get().getDynamicsWorld().removeRigidBody(o.getFallRigidBody());
 			if(HingeCSGPhysicsManager.class.isInstance(o)){
@@ -152,7 +152,7 @@ public class PhysicsEngine {
 			}
 		}
 		get().getPhysicsObjects().clear();
-		
+		mainEngine=null;
 		
 	}
 	public static PhysicsEngine get() {

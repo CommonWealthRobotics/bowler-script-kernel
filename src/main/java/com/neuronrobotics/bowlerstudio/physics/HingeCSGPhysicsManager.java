@@ -11,11 +11,11 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager{
 	private HingeConstraint constraint=null;
 	private IClosedLoopController controller=null;
 	private double target=0;
-	private float muscleStrength=(float) 0.1;
+	private float muscleStrength=(float) 1000;
 	boolean flagBroken=false;
 	public HingeCSGPhysicsManager(CSG baseCSG, Transform pose, double mass) {
 		super(baseCSG, pose, mass);
-		baseCSG.setColor(Color.GREENYELLOW);
+		baseCSG.setColor(Color.YELLOW);
 	}
 	@Override
 	public void update(float timeStep){
@@ -24,9 +24,10 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager{
 			double velocity = getController().compute(constraint.getHingeAngle(), getTarget(),timeStep);
 			constraint.enableAngularMotor(true, (float) velocity, getMuscleStrength());
 			if(constraint.getAppliedImpulse()>muscleStrength){
-				baseCSG.setColor(Color.GHOSTWHITE);
+				baseCSG.setColor(Color.RED);
+				flagBroken=true;
 			}
-		}else{
+		}else if (constraint!=null){
 			constraint.enableAngularMotor(false, 0, 0);
 		}
 	}
