@@ -1,9 +1,12 @@
 package com.neuronrobotics.bowlerstudio.physics;
 
+import javax.vecmath.Matrix4d;
 import javax.vecmath.Quat4f;
 
+import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
+import Jama.Matrix;
 import javafx.scene.transform.Affine;
 
 // TODO: Auto-generated Javadoc
@@ -40,4 +43,42 @@ public class TransformFactory extends com.neuronrobotics.sdk.addons.kinematics.T
 		TransformNR nr = affineToNr(affine);
 		nrToBullet(nr,bullet);
 	}
+	public static eu.mihosoft.vrl.v3d.Transform  nrToCSG(TransformNR nr){
+		Matrix vals =nr.getMatrixTransform();
+		double [] elemenents = new double[]{ 
+			vals.get(0, 0),
+			vals.get(0, 1),
+			vals.get(0, 2),
+			vals.get(0, 3),
+			
+			vals.get(1, 0),
+			vals.get(1, 1),
+			vals.get(1, 2),
+			vals.get(1, 3),
+			
+			vals.get(2, 0),
+			vals.get(2, 1),
+			vals.get(2, 2),
+			vals.get(2, 3),
+			
+			vals.get(3, 0),
+			vals.get(3, 1),
+			vals.get(3, 2),
+			vals.get(3, 3),
+		};
+		
+		
+		Matrix4d rotation=	new Matrix4d(elemenents);
+		return new eu.mihosoft.vrl.v3d.Transform(rotation);
+	}
+	
+	public static TransformNR csgToNR(eu.mihosoft.vrl.v3d.Transform csg){
+		Matrix4d rotation = csg.getInternalMatrix();
+		Matrix start= new TransformNR().getMatrixTransform();
+		for(int i=0;i<4;i++)
+			for(int j=0;j<4;j++)
+				start.set(i, j, rotation.getElement(i, j));
+		return new TransformNR();
+	}
+	
 }
