@@ -30,6 +30,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Sphere;
+import javafx.application.Platform;
 
 public class PhysicsEngine {
 	private static PhysicsEngine mainEngine;
@@ -115,9 +116,11 @@ public class PhysicsEngine {
 	}
 	public static void step(float timeStep){
 		get().getDynamicsWorld().stepSimulation(timeStep , 20);
-		for(CSGPhysicsManager o:get().getPhysicsObjects()){
-			o.update( timeStep);
-		}
+		Platform.runLater(()->{
+			for(CSGPhysicsManager o:get().getPhysicsObjects()){
+				o.update( timeStep);
+			}
+		});
 	}
 	
 	public static void stepMs(double timeStep){

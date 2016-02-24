@@ -15,7 +15,6 @@ import javafx.scene.transform.Affine;
  */
 public class TransformFactory extends com.neuronrobotics.sdk.addons.kinematics.TransformFactory{
 	
-	
 	public static void nrToBullet(TransformNR nr,com.bulletphysics.linearmath.Transform bullet){
 		bullet.origin.set(
 				(float)nr.getX(), 
@@ -29,7 +28,7 @@ public class TransformFactory extends com.neuronrobotics.sdk.addons.kinematics.T
 	}
 	
 	public static TransformNR bulletToNr(com.bulletphysics.linearmath.Transform bullet){
-		Quat4f out= new Quat4f();
+		 Quat4f out= new Quat4f();
 		bullet.getRotation(out);
 		return new TransformNR(bullet.origin.x,
 				bullet.origin.y,
@@ -37,7 +36,45 @@ public class TransformFactory extends com.neuronrobotics.sdk.addons.kinematics.T
 	}
 	
 	public static void bulletToAffine(Affine affine,com.bulletphysics.linearmath.Transform bullet){
-		TransformFactory.nrToAffine(bulletToNr(bullet), affine);
+		 Quat4f out= new Quat4f();
+		bullet.getRotation(out);
+		
+		double w = out.w;
+		double x=out.x;
+		double y=out.y;
+		double z=out.z;
+		double norm = Math.sqrt(w * w + x * x + y * y + z * z);
+		// we explicitly test norm against one here, saving a division
+		// at the cost of a test and branch. Is it worth it?
+		double s = (norm == 1f) ? 2f : (norm > 0f) ? 2f / norm : 0;
+		// compute xs/ys/zs first to save 6 multiplications, since xs/ys/zs
+		// will be used 2-4 times each.
+		double xs = x * s;
+		double ys = y * s;
+		double zs = z * s;
+		double xx = x * xs;
+		double xy = x * ys;
+		double xz = x * zs;
+		double xw = w * xs;
+		double yy = y * ys;
+		double yz = y * zs;
+		double yw = w * ys;
+		double zz = z * zs;
+		double zw = w * zs;
+		
+		
+		affine.setMxx(1 - (yy + zz));
+		affine.setMxy((xy - zw));
+		affine.setMxz(xz + yw);
+		affine.setMyx(xy + zw);
+		affine.setMyy(1 - (xx + zz));
+		affine.setMyz(yz - xw);
+		affine.setMzx(xz - yw);
+		affine.setMzy(yz + xw);
+		affine.setMzz( 1 - (xx + yy));
+		affine.setTx(bullet.origin.x);
+		affine.setTy(bullet.origin.y);
+		affine.setTz(bullet.origin.z);
 	}
 	public static void affineToBullet(Affine affine,com.bulletphysics.linearmath.Transform bullet){
 		TransformNR nr = affineToNr(affine);

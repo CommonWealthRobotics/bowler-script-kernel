@@ -48,7 +48,12 @@ public class MobileBasePhysicsManager {
 		globe.translateZ(-minz+lift);
 		base.setFiducialToGlobalTransform(globe);
 		TransformFactory.nrToBullet(base.getFiducialToGlobalTransform(), start);
-		Platform.runLater(()->TransformFactory.bulletToAffine(baseCad.getManipulator(), start));
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				TransformFactory.bulletToAffine(baseCad.getManipulator(), start);
+			}
+		});
 		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start, base.getMassKg());
 		RigidBody body = baseManager.getFallRigidBody();
 		PhysicsEngine.add(baseManager);
@@ -73,14 +78,23 @@ public class MobileBasePhysicsManager {
 				Transform linkLoc= new Transform();
 				TransformFactory.nrToBullet(localLink, linkLoc);
 				// Set the manipulator to the location from the kinematics, needs to be in UI thread to touch manipulator
-				Platform.runLater(()->TransformFactory.nrToAffine(localLink, manipulator));
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						TransformFactory.nrToAffine(localLink, manipulator);
+					}
+				});
 				ThreadUtil.wait(16);
 				simplecad.get(l).setManipulator(manipulator);
 				// Build a hinge based on the link and mass
 				HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(simplecad.get(l),linkLoc, conf.getMassKg());
-				hingePhysicsManager.setController((currentState, target, seconds) -> {
-					double error = target-currentState;
-					return (error/seconds)*0.5;
+				hingePhysicsManager.setMuscleStrength(1);
+				hingePhysicsManager.setController(new IClosedLoopController() {
+					@Override
+					public double compute(double currentState, double target, double seconds) {
+						double error = target-currentState;
+						return (error/seconds)*0.5;
+					}
 				});
 				RigidBody linkSection = hingePhysicsManager.getFallRigidBody();
 //				// Setup some damping on the m_bodies
@@ -127,16 +141,5 @@ public class MobileBasePhysicsManager {
 			}
 			
 		}
-	}
-	
-	
-	
-	public ArrayList<CSG> getCSG(){
-		ArrayList<CSG> vals=new ArrayList<>();
-		Set<DHLink> keys = simplecad.keySet();
-		for(DHLink l:keys){
-			vals.add(simplecad.get(l));
-		}
-		return vals;
 	}
 }

@@ -27,7 +27,7 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager{
 				baseCSG.setColor(Color.RED);
 				flagBroken=true;
 			}
-		}else if (constraint!=null){
+		}else if (constraint!=null && flagBroken){
 			constraint.enableAngularMotor(false, 0, 0);
 		}
 	}
