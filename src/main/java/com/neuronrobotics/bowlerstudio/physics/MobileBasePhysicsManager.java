@@ -45,9 +45,10 @@ public class MobileBasePhysicsManager {
 		System.out.println("Minimum z = "+minz);
 		Transform start = new Transform();
 		TransformNR globe= base.getFiducialToGlobalTransform();
-		globe.translateZ(-minz+lift);
+
 		base.setFiducialToGlobalTransform(globe);
 		TransformFactory.nrToBullet(base.getFiducialToGlobalTransform(), start);
+		start.origin.z=(float) (start.origin.z-minz+lift);
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -64,6 +65,13 @@ public class MobileBasePhysicsManager {
 			for(int i=0;i<dh.getNumberOfLinks();i++){
 				//DH parameters
 				DHLink l = dh.getDhChain().getLinks().get(i);
+				// Check for singularities and just jog it off the singularity. 
+				if(l.getAlpha()%90==0){
+					l.setAlpha(l.getAlpha()+.01);
+				}
+				if(l.getTheta()%90==0){
+					l.setTheta(l.getTheta()+.01);
+				}					
 				// Hardware to engineering units configuration
 				LinkConfiguration conf = dh.getLinkConfiguration(i);
 				// Engineering units to kinematics link (limits and hardware type abstraction)
@@ -98,9 +106,9 @@ public class MobileBasePhysicsManager {
 				});
 				RigidBody linkSection = hingePhysicsManager.getFallRigidBody();
 //				// Setup some damping on the m_bodies
-//				linkSection.setDamping(0.05f, 0.85f);
-//				linkSection.setDeactivationTime(0.8f);
-//				linkSection.setSleepingThresholds(1.6f, 2.5f);
+				linkSection.setDamping(0.05f, 0.85f);
+				linkSection.setDeactivationTime(0.8f);
+				linkSection.setSleepingThresholds(1.6f, 2.5f);
 //				
 				HingeConstraint joint6DOF;
 				Transform localA = new Transform();

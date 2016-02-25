@@ -116,11 +116,11 @@ public class PhysicsEngine {
 	}
 	public static void step(float timeStep){
 		get().getDynamicsWorld().stepSimulation(timeStep , 20);
-		Platform.runLater(()->{
+		//Platform.runLater(()->{
 			for(CSGPhysicsManager o:get().getPhysicsObjects()){
 				o.update( timeStep);
 			}
-		});
+		//});
 	}
 	
 	public static void stepMs(double timeStep){

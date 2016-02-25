@@ -86,7 +86,7 @@ public class CSGPhysicsManager {
 		Transform trans = new Transform();
 		fallRigidBody.getMotionState().getWorldTransform(trans);
 		
-			TransformFactory.bulletToAffine(ballLocation, trans);
+		Platform.runLater(()->TransformFactory.bulletToAffine(ballLocation, trans));
 		
 	}
 
