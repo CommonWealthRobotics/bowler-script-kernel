@@ -142,6 +142,10 @@ public class PhysicsEngine {
 		if(get().getPhysicsObjects().contains(manager)){
 			get().getPhysicsObjects().remove(manager);
 			get().getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
+			if(HingeCSGPhysicsManager.class.isInstance(manager)){
+				if(((HingeCSGPhysicsManager) manager).getConstraint()!=null)
+					get().getDynamicsWorld().removeConstraint(((HingeCSGPhysicsManager) manager).getConstraint());
+			}
 		}
 	}
 	public static void clear(){
