@@ -99,19 +99,17 @@ String getOsArch() {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://repository-bubblecloud.forge.cloudbees.com/release/'}
+	maven { url 'https://clojars.org/repo' }
 	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
+	maven { url 'https://jline.sourceforge.net/m2repo' }
+	maven { url 'https://repo.spring.io/milestone'}
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/'  }
 	maven { url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'  }
-	maven { url 'http://repo.jenkins-ci.org/public/' }
-	maven { url 'http://clojars.org/repo' }
-	maven { url 'http://jline.sourceforge.net/m2repo' }
-	maven {
-		url 'http://repo.spring.io/milestone'
-	}
+	maven { url 'https://jenkinsci.artifactoryonline.com/jenkinsci/public/' }
 }
 
 dependencies {
-	testCompile group: 'junit', name: 'junit', version: '4.10'
 	compile 'gov.nist.math:jama:1.0.2'
 
 	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6'
@@ -124,7 +122,6 @@ dependencies {
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.7'
 	compile 'org.kohsuke.stapler:stapler:1.237'
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.2.3'
 
 	
 	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '4.0.1.201506240215-r'
@@ -140,9 +137,9 @@ dependencies {
 	compile group:'org.python',name:'jython-standalone',version:'2.5.2'
 	compile 'org.clojure:clojure:1.7.0'
 	compile 'org.clojure:tools.nrepl:0.2.10'
-	compile "overtone:overtone:0.9.1"
-	compile "edu.cmu.sphinx:sphinx4-core:5prealpha-SNAPSHOT"
-	compile "edu.cmu.sphinx:sphinx4-data:5prealpha-SNAPSHOT"
+	//compile "overtone:overtone:0.9.1"
+	//compile "edu.cmu.sphinx:sphinx4-core:5prealpha-SNAPSHOT"
+	//compile "edu.cmu.sphinx:sphinx4-data:5prealpha-SNAPSHOT"
 	compile group: 'java3d', name: 'vecmath', version: '1.3.1'
     compile 'org.slf4j:slf4j-simple:1.6.1'
 			
