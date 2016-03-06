@@ -25,8 +25,9 @@ import javafx.scene.transform.Affine;
 public class CSGPhysicsManager {
 	
 	private RigidBody fallRigidBody;
-	private Affine ballLocation;
+	private Affine ballLocation = new Affine();
 	protected CSG baseCSG;
+	private Transform updateTransform = new Transform();
 
 	public CSGPhysicsManager(int sphereSize, Vector3f start, double mass){
 		this.setBaseCSG(new Sphere(sphereSize).toCSG());
@@ -53,6 +54,7 @@ public class CSGPhysicsManager {
 //		TransformFactory.nrToBullet(startPose, tr);
 //		setup(fallShape,tr,mass);
 //	}
+	
 	public CSGPhysicsManager(CSG baseCSG, Transform pose,  double mass){
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 		
@@ -66,7 +68,7 @@ public class CSGPhysicsManager {
 		CollisionShape fallShape =  new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
 		setup(fallShape,pose,mass);
 	}
-	private void setup(CollisionShape fallShape,Transform pose, double mass ){
+	public void setup(CollisionShape fallShape,Transform pose, double mass ){
 		// setup the motion state for the ball
 		DefaultMotionState fallMotionState = new DefaultMotionState(
 				pose);
@@ -81,12 +83,11 @@ public class CSGPhysicsManager {
 	}
 	
 
-	
 	public void update(float timeStep){
-		Transform trans = new Transform();
-		fallRigidBody.getMotionState().getWorldTransform(trans);
 		
-		Platform.runLater(()->TransformFactory.bulletToAffine(ballLocation, trans));
+		fallRigidBody.getMotionState().getWorldTransform(updateTransform);
+		
+		Platform.runLater(()->TransformFactory.bulletToAffine(ballLocation, updateTransform));
 		
 	}
 
@@ -105,7 +106,7 @@ public class CSGPhysicsManager {
 	}
 
 	public void setBaseCSG(CSG baseCSG) {
-		ballLocation = new Affine();
+		
 		baseCSG.setManipulator(ballLocation);
 		this.baseCSG = baseCSG;
 	}
