@@ -85,11 +85,13 @@ public class CSGPhysicsManager {
 
 	public void update(float timeStep){
 		
-		fallRigidBody.getMotionState().getWorldTransform(updateTransform);
+		fallRigidBody.getMotionState().getWorldTransform(getUpdateTransform());
 		
-		Platform.runLater(()->TransformFactory.bulletToAffine(ballLocation, updateTransform));
+		
 		
 	}
+	
+	
 
 
 	public RigidBody getFallRigidBody() {
@@ -107,8 +109,20 @@ public class CSGPhysicsManager {
 
 	public void setBaseCSG(CSG baseCSG) {
 		
-		baseCSG.setManipulator(ballLocation);
+		baseCSG.setManipulator(getBallLocation());
 		this.baseCSG = baseCSG;
+	}
+	public Transform getUpdateTransform() {
+		return updateTransform;
+	}
+	public void setUpdateTransform(Transform updateTransform) {
+		this.updateTransform = updateTransform;
+	}
+	public Affine getBallLocation() {
+		return ballLocation;
+	}
+	public void setBallLocation(Affine ballLocation) {
+		this.ballLocation = ballLocation;
 	}
 
 

@@ -115,12 +115,15 @@ public class PhysicsEngine {
 		runEngine=false;
 	}
 	public static void step(float timeStep){
-		get().getDynamicsWorld().stepSimulation(timeStep , 20);
-		//Platform.runLater(()->{
+		get().getDynamicsWorld().stepSimulation(timeStep , 10);
+		
 			for(CSGPhysicsManager o:get().getPhysicsObjects()){
 				o.update( timeStep);
 			}
-		//});
+			Platform.runLater(()->{
+				for(CSGPhysicsManager o:get().getPhysicsObjects())
+				TransformFactory.bulletToAffine(o.getBallLocation(), o.getUpdateTransform());
+			});
 	}
 	
 	public static void stepMs(double timeStep){
