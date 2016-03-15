@@ -2,6 +2,7 @@ package com.neuronrobotics.imageprovider;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,10 +14,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.features2d.KeyPoint;
+
+import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 // any java file starting with i is the interface
 
@@ -25,7 +31,25 @@ public class OpenCVTest  {
 	private RGBColorDetector mainFilter;
 
 	public void run() { 
-		HaarDetector faceDetectorObject = new HaarDetector();
+		
+		File harr = null;
+		try {
+			harr = ScriptingEngine.fileFromGit("https://github.com/madhephaestus/DefaultHaarCascade.git",
+													"haarcascade_frontalface_default.xml");
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		HaarDetector faceDetectorObject = new HaarDetector(harr);
 
 		BufferedImage inputImage = AbstractImageProvider.newBufferImage(640,480);
 		BufferedImage displayImage =  AbstractImageProvider.newBufferImage(640,480);

@@ -1,6 +1,5 @@
 package com.neuronrobotics.imageprovider;
 
-import haar.HaarFactory;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -23,20 +22,11 @@ public class HaarDetector  implements IObjectDetector{
 	private MatOfRect faceDetections = new MatOfRect();;
 	private CascadeClassifier faceDetector ;
 	private double scale=.3;
-	
-	public HaarDetector(String cascade){
-		this(HaarFactory.jarResourceToFile(cascade));
-	}
+
 	public HaarDetector(File cascade){
 		// Create a face detector from the cascade file in the resources
 	    // directory.
 		faceDetector = new CascadeClassifier(cascade.getAbsolutePath());
-	}
-	public HaarDetector(){
-
-		// Create a face detector from the cascade file in the resources
-	    // directory.
-		this("haarcascade_frontalface_default.xml");
 	}
 
 	
