@@ -115,15 +115,18 @@ public class PhysicsEngine {
 		runEngine=false;
 	}
 	public static void step(float timeStep){
-		get().getDynamicsWorld().stepSimulation(timeStep , 10);
-		
-			for(CSGPhysicsManager o:get().getPhysicsObjects()){
-				o.update( timeStep);
-			}
-			Platform.runLater(()->{
-				for(CSGPhysicsManager o:get().getPhysicsObjects())
+		long startTime = System.currentTimeMillis();
+		get().getDynamicsWorld().stepSimulation(timeStep , 5);
+		if( (((float)(System.currentTimeMillis()- startTime))/1000.0f)>timeStep){
+			//System.out.println(" Compute took too long "+timeStep);
+		}
+		for(CSGPhysicsManager o:get().getPhysicsObjects()){
+			o.update( timeStep);
+		}
+		Platform.runLater(()->{
+			for(CSGPhysicsManager o:get().getPhysicsObjects())
 				TransformFactory.bulletToAffine(o.getBallLocation(), o.getUpdateTransform());
-			});
+		});
 	}
 	
 	public static void stepMs(double timeStep){

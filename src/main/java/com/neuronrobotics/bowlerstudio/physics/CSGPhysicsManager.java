@@ -83,12 +83,8 @@ public class CSGPhysicsManager {
 	}
 	
 
-	public void update(float timeStep){
-		
+	public void update(float timeStep){		
 		fallRigidBody.getMotionState().getWorldTransform(getUpdateTransform());
-		
-		
-		
 	}
 	
 	
