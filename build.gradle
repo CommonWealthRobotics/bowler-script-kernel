@@ -148,7 +148,7 @@ dependencies {
 	compile "com.neuronrobotics:java-bowler:3.18.3"
 	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.18.1-jar-with-dependencies.jar'])
 	//compile fileTree (dir: '../JCSG/build/libs/', includes: ['JCSG-0.6.1.jar'])
-	compile "com.neuronrobotics:WalnutiQ:2.3.2"
+	compile "com.neuronrobotics:WalnutiQ:2.3.3"
 	
 	
 	
