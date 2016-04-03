@@ -93,8 +93,8 @@ public class Vitamins {
 		return getConfiguration(type,"script");
 	}
 	public static void setScript(String type, String git, String file) throws Exception{
-		newParameter(type,"script","git",git);
-		newParameter(type,"script","file",file);
+		setParameter(type,"script","git",git);
+		setParameter(type,"script","file",file);
 	}
 	public static HashMap<String, Object> getConfiguration(String type,String id){
 		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
@@ -148,7 +148,7 @@ public class Vitamins {
 		
 	}
 	
-	public static void newParameter(String type, String id, String parameterName, Object parameter) throws Exception{
+	public static void setParameter(String type, String id, String parameterName, Object parameter) throws Exception{
 		
 		HashMap<String, Object> config = getConfiguration( type, id);
 		config.put(parameterName, parameter);
@@ -196,13 +196,13 @@ public class Vitamins {
 			folder = ScriptingEngine
 					.fileFromGit(
 							gitRpoDatabase,// git repo, change this if you fork this demo
-						"json"// File from within the Git repo
+						"json/hobbyServo.json"// File from within the Git repo
 					);
-			File[] listOfFiles = folder.listFiles();
+			File[] listOfFiles = folder.getParentFile().listFiles();
 			
 			for(File f:listOfFiles){
-				if(!f.isDirectory())
-					types.add(f.getName().split(".")[0]);
+				if(!f.isDirectory() && f.getName().endsWith(".json"))
+					types.add(f.getName().substring(0, f.getName().indexOf(".json")));
 			}
 			
 		} catch (Exception e) {
