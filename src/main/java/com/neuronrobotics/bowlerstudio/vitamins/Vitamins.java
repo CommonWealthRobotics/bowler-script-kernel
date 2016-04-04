@@ -101,7 +101,7 @@ public class Vitamins {
 		if(database.get(id)==null){
 			database.put(id, new  HashMap<String, Object>());
 		}
-		return getDatabase(type).get(id);
+		return database.get(id);
 	}
 	
 	public static void saveDatabase(String type) throws Exception{
@@ -144,7 +144,7 @@ public class Vitamins {
 		}
 		
 		getConfiguration( type, id);
-		saveDatabase(type);
+		//saveDatabase(type);
 		
 	}
 	
@@ -152,7 +152,7 @@ public class Vitamins {
 		
 		HashMap<String, Object> config = getConfiguration( type, id);
 		config.put(parameterName, parameter);
-		saveDatabase(type);
+		//saveDatabase(type);
 	}
 	
 	public static HashMap<String,HashMap<String,Object>> getDatabase(String type){
