@@ -23,7 +23,14 @@ apply plugin: 'maven'
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-
+sourceSets {
+	
+	test {
+		java {
+			srcDirs = ["test/java/src" ]  // Note @Peter's comment below
+		}
+	}
+}
 task wrapper(type: Wrapper, description: 'Creates and deploys the Gradle wrapper to the current directory.') {
 	gradleVersion = '2.1'
 }
