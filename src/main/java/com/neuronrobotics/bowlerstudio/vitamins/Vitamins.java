@@ -41,18 +41,7 @@ public class Vitamins {
 	private static Type TT_mapStringString = new TypeToken<HashMap<String,HashMap<String,Object>>>(){}.getType();
 	//chreat the gson object, this is the parsing factory
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-	public static CSG get(String resource ){
-		if(fileLastLoaded.get(resource) ==null ){
-			// forces the first time the files is accessed by the application tou pull an update
-			try {
-				fileLastLoaded.put(resource,STL.file(NativeResource.inJarLoad(IVitamin.class,resource).toPath()) );
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return fileLastLoaded.get(resource).clone() ;
-	}
+
 	public static CSG get(File resource ){
 		
 		if(fileLastLoaded.get(resource.getAbsolutePath()) ==null ){
