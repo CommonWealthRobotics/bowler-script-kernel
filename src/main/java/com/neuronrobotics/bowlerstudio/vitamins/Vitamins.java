@@ -90,6 +90,11 @@ public class Vitamins {
 		if(database.get(id)==null){
 			database.put(id, new  HashMap<String, Object>());
 		}
+		if(database.get(id).isEmpty()){
+			//check to see if this is emptybecause it is a new file in the upstream database
+			databaseSet.remove(type);
+			database =  getDatabase(type);
+		}
 		return database.get(id);
 	}
 	
