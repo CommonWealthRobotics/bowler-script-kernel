@@ -76,8 +76,8 @@ public class Vitamins {
 			servoMeasurments.add(id);
 			newVitamin=(CSG)ScriptingEngine
             .gitScriptRun(
-            		script.get("git").toString(), // git location of the library
-            		script.get("file").toString(), // file to load
+            		script.get("scriptGit").toString(), // git location of the library
+            		script.get("scriptFile").toString(), // file to load
                       servoMeasurments
             );
 			
@@ -90,11 +90,11 @@ public class Vitamins {
 	
 	
 	public static HashMap<String, Object> getScript(String type){
-		return getConfiguration(type,"script");
+		return getConfiguration(type,"meta");
 	}
 	public static void setScript(String type, String git, String file) throws Exception{
-		setParameter(type,"script","git",git);
-		setParameter(type,"script","file",file);
+		setParameter(type,"meta","scriptGit",git);
+		setParameter(type,"meta","scriptFile",file);
 	}
 	public static HashMap<String, Object> getConfiguration(String type,String id){
 		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
@@ -129,7 +129,7 @@ public class Vitamins {
 		if(database.keySet().size()>0){
 			String exampleKey =null;
 			for(String key: database.keySet()){
-				if(!key.contains("script")){
+				if(!key.contains("meta")){
 					exampleKey=key;
 				}
 			}
@@ -218,7 +218,7 @@ public class Vitamins {
 		HashMap<String, HashMap<String, Object>> database = getDatabase( type);
 		Set<String> keys = database.keySet();
 		for(String s:keys){
-			if(!s.contains("script"))
+			if(!s.contains("meta"))
 				types.add(s);
 		}
 		
