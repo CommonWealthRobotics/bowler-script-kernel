@@ -71,7 +71,7 @@ public class Vitamins {
 		
 		if(fileLastLoaded.get(type+id) ==null ){
 			CSG newVitamin=null;
-			HashMap<String, Object> script = getScript( type);
+			HashMap<String, Object> script = getMeta( type);
 			ArrayList<Object> servoMeasurments = new ArrayList<Object>();
 			servoMeasurments.add(id);
 			newVitamin=(CSG)ScriptingEngine
@@ -89,7 +89,7 @@ public class Vitamins {
 	
 	
 	
-	public static HashMap<String, Object> getScript(String type){
+	public static HashMap<String, Object> getMeta(String type){
 		return getConfiguration(type,"meta");
 	}
 	public static void setScript(String type, String git, String file) throws Exception{
