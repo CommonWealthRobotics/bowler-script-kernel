@@ -173,6 +173,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 		try {
 			loadLoginData();
+			runLogin();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -392,20 +393,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	        out.println(content);
 	        out.flush();
 	        out.close();
-	   	 	setGithub(GitHub.connect());
-	   	
-	   	 	if(getGithub().isCredentialValid()){
-	   	 		cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-		        for(IGithubLoginListener l:loginListeners){
-		        	l.onLogin(loginID);
-		        }
-		        System.out.println("Success Login as "+loginID+"");
-				
-	   	 	}else{
-	   	 		System.err.println("Bad login credentials for "+loginID);
-	   	 		setGithub(null);
-				pw= null;
-	   	 	}
+	        runLogin();
 	   	 		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -418,6 +406,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		}
 		else
 			return getGithub();
+	}
+	
+	private static void runLogin() throws IOException{
+		setGithub(GitHub.connect());
+	   	
+   	 	if(getGithub().isCredentialValid()){
+   	 		cp = new UsernamePasswordCredentialsProvider(loginID, pw);
+	        for(IGithubLoginListener l:loginListeners){
+	        	l.onLogin(loginID);
+	        }
+	        System.out.println("Success Login as "+loginID+"");
+			
+   	 	}else{
+   	 		System.err.println("Bad login credentials for "+loginID);
+   	 		setGithub(null);
+			pw= null;
+   	 	}
 	}
 	
 	
