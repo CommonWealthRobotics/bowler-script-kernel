@@ -495,50 +495,52 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	    folder.delete();
 	}
 
-	private static ArrayList<String> filesInGist(String gistcode, String extnetion) throws Exception {
-
-		return filesInGit("https://gist.github.com/"+gistcode+".git","master",  extnetion);
+//	private static ArrayList<String> filesInGist(String gistcode, String extnetion) throws Exception {
+//
+//		return filesInGit("https://gist.github.com/"+gistcode+".git","master",  extnetion);
+//	}
+	
+	private static void loadFilesToList(ArrayList<String> f,File directory, String extnetion){
+		for (final File fileEntry : directory.listFiles()) {
+			if(fileEntry.isDirectory()){
+				loadFilesToList(f,fileEntry,extnetion);
+			}else{
+				if(!fileEntry.getName().endsWith(".git"))
+					if(extnetion==null){
+						if(!fileEntry.getName().endsWith(extnetion))
+							break;
+						boolean supportedExtention=false;
+						for(IScriptingLanguage l:langauges){
+							if(l.isSupportedFileExtenetion(fileEntry.getName())){
+								supportedExtention=true;
+							}
+						}
+						if(supportedExtention)
+							f.add(findLocalPath(fileEntry));
+					}
+			}
+	    }
 	}
 
 	public static ArrayList<String> filesInGit(String remote,String branch, String extnetion) throws Exception {
 		ArrayList<String> f=new ArrayList<>();
 
 			
-			waitForLogin();
-			File gistDir=cloneRepo( remote,branch);
-			for (final File fileEntry : gistDir.listFiles()) {
-				if(!fileEntry.getName().endsWith(".git"))
-					if(extnetion==null)
-						f.add(fileEntry.getName());
-					else if(fileEntry.getName().endsWith(extnetion))
-						f.add(fileEntry.getName());
-		    }
-			return f;
+		waitForLogin();
+		File gistDir=cloneRepo( remote,branch);
+		loadFilesToList(f,gistDir,extnetion);
+
+		return f;
 
 	}
 	public static ArrayList<String> filesInGit(String remote) throws Exception {
-		String branch="master";
-		String extnetion=null;
-		ArrayList<String> f=new ArrayList<>();
-
-			
-			waitForLogin();
-			File gistDir=cloneRepo( remote,branch);
-			for (final File fileEntry : gistDir.listFiles()) {
-				if(!fileEntry.getName().endsWith(".git"))
-					if(extnetion==null)
-						f.add(fileEntry.getName());
-					else if(fileEntry.getName().endsWith(extnetion))
-						f.add(fileEntry.getName());
-		    }
-			return f;
-
+		return filesInGit(remote,"master", null);
 	}
 	
-	private static ArrayList<String> filesInGist(String id) throws Exception{
-		return filesInGist(id, null);
-	}
-	
+//	private static ArrayList<String> filesInGist(String id) throws Exception{
+//		return filesInGist(id, null);
+//	}
+//	
 	public static String getUserIdOfGist(String id) throws Exception{
 		
 			waitForLogin();
@@ -550,10 +552,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	
 	}
 	
-	private static void pushCodeToGistID(String id, String FileName, String content , String commitMessage)  throws Exception{
-		
-		pushCodeToGit("https://gist.github.com/"+id+".git", "master", FileName, content, commitMessage);;
-	}
+//	private static void pushCodeToGistID(String id, String FileName, String content , String commitMessage)  throws Exception{
+//		
+//		pushCodeToGit("https://gist.github.com/"+id+".git", "master", FileName, content, commitMessage);;
+//	}
 
 	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage)
 			throws Exception {
@@ -876,6 +878,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		File dir = git.getRepository().getDirectory().getParentFile();
 		
 		return dir.toURI().relativize(currentFile.toURI()).getPath();
+	}
+	public static String findLocalPath(File currentFile) {
+		Git git;
+		try {
+			git = locateGit(currentFile);
+			return findLocalPath(currentFile,git);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return currentFile.getName();
+				
 	}
 	
 	public static String [] findGitTagFromFile(File currentFile) throws IOException {
