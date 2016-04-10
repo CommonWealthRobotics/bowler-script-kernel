@@ -63,8 +63,8 @@ public class GroovyHelper implements IScriptingLanguage{
 	
 
 	@Override
-	public ShellType getShellType() {
-		return ShellType.GROOVY;
+	public String getShellType() {
+		return "Groovy";
 	}
 
 	@Override

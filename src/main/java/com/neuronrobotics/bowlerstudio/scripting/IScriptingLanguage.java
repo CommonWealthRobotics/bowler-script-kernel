@@ -35,7 +35,7 @@ public interface IScriptingLanguage {
 	 * Returns the shell type of this language
 	 * @return
 	 */
-	public abstract ShellType getShellType();
+	public abstract String getShellType();
 	/**
 	 * This function should return true is the filename provided is of a supported file extension. 
 	 * This function may never be called if this language is only used internally. 

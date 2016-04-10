@@ -241,13 +241,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return workspace;
 	}
 
-	public static ShellType setFilename(String name) {
+	public static String getShellType(String name) {
 		for (IScriptingLanguage l:langauges){
 			if(l.isSupportedFileExtenetion(name))
 				return l.getShellType();
 		}
 
-		return ShellType.GROOVY;
+		return "Groovy";
 	}
 	
 	public static String getLoginID(){
@@ -506,18 +506,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 				loadFilesToList(f,fileEntry,extnetion);
 			}else{
 				if(!fileEntry.getName().endsWith(".git"))
-					if(extnetion==null){
+					if(extnetion!=null)
 						if(!fileEntry.getName().endsWith(extnetion))
-							break;
-						boolean supportedExtention=false;
-						for(IScriptingLanguage l:langauges){
-							if(l.isSupportedFileExtenetion(fileEntry.getName())){
-								supportedExtention=true;
-							}
+							continue;// skip this file as it fails the filter from the user
+					boolean supportedExtention=false;
+					for(IScriptingLanguage l:langauges){
+						if(l.isSupportedFileExtenetion(fileEntry.getName())){
+							supportedExtention=true;
 						}
-						if(supportedExtention)
-							f.add(findLocalPath(fileEntry));
 					}
+					if(supportedExtention)// make sure the file has a supported runtime
+						f.add(findLocalPath(fileEntry));
+					
 			}
 	    }
 	}
@@ -639,15 +639,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception{
 
-		return inlineScriptRun(f, args,setFilename(f.getName()) );
+		return inlineScriptRun(f, args,getShellType(f.getName()) );
 	}
 	public static Object inlineGistScriptRun(String gistID, String Filename ,ArrayList<Object> args)  throws Exception{
 		String[] gistData = codeFromGistID(gistID,Filename);
-		return inlineScriptRun(new File(gistData[2]), args,setFilename(gistData[1]));
+		return inlineScriptRun(new File(gistData[2]), args,getShellType(gistData[1]));
 	}
 	public static Object gitScriptRun(String gitURL, String Filename ,ArrayList<Object> args)  throws Exception{
 		String[] gistData = codeFromGit(gitURL,Filename);
-		return inlineScriptRun(new File(gistData[2]), args,setFilename(gistData[1]));
+		return inlineScriptRun(new File(gistData[2]), args,getShellType(gistData[1]));
 	}
 	public static File fileFromGit(String remoteURI, String fileInRepo ) throws InvalidRemoteException, TransportException, GitAPIException, IOException{
 		return fileFromGit(remoteURI,"master",fileInRepo);
@@ -808,7 +808,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return filesRun.get(filename);
 	}
 	
-	public static Object inlineScriptRun(File code, ArrayList<Object> args,ShellType activeType) throws Exception {
+	public static Object inlineScriptRun(File code, ArrayList<Object> args,String activeType) throws Exception {
 		if(filesRun.get(code.getName()) == null ){
 			filesRun.put(code.getName(),code);
 			System.out.println("Loading "+code.getAbsolutePath());
@@ -823,7 +823,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return null;
 	}
 	
-	public static Object inlineScriptStringRun(String line, ArrayList<Object>  args, ShellType shellTypeStorage) throws Exception {
+	public static Object inlineScriptStringRun(String line, ArrayList<Object>  args, String shellTypeStorage) throws Exception {
 		
 		for (IScriptingLanguage l:langauges){
 			if(l.getShellType() == shellTypeStorage){

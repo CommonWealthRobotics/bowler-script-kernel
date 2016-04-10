@@ -89,8 +89,8 @@ public class JythonHelper implements IScriptingLanguage{
 	
 
 	@Override
-	public ShellType getShellType() {
-		return ShellType.JYTHON;
+	public String getShellType() {
+		return "Jython";
 	}
 
 	@Override

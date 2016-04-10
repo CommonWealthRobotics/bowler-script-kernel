@@ -24,7 +24,6 @@ import jline.History;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-import com.neuronrobotics.bowlerstudio.scripting.ShellType;
 import com.neuronrobotics.imageprovider.OpenCVJNILoader;
 import com.sun.speech.freetts.ProcessException;
 import com.sun.speech.freetts.VoiceManager;
@@ -125,14 +124,15 @@ public class BowlerKernel {
 			}
 		}
 		boolean runShell = false;
-		ShellType shellTypeStorage = ShellType.GROOVY;
+		String groovy = "Groovy";
+		String shellTypeStorage =groovy;
 		for (String s : args) {
 
 			if (runShell) {
 				try {
-					shellTypeStorage = ShellType.getFromSlug(s);
+					shellTypeStorage = s;
 				} catch (Exception e) {
-					shellTypeStorage = ShellType.GROOVY;
+					shellTypeStorage = groovy;
 				}
 				break;
 			}
@@ -142,7 +142,7 @@ public class BowlerKernel {
 		}
 		
 		System.out.println("Starting Bowler REPL in langauge: "
-				+ shellTypeStorage.getNameOfShell());
+				+ shellTypeStorage);
 		// sample from
 		// http://jline.sourceforge.net/testapidocs/src-html/jline/example/Example.html
 
@@ -191,7 +191,7 @@ public class BowlerKernel {
 		
 		String line;		
 		try {
-			while ((line = reader.readLine("Bowler " + shellTypeStorage.getNameOfShell()
+			while ((line = reader.readLine("Bowler " + shellTypeStorage
 					+ "> ")) != null) {
 				if (line.equalsIgnoreCase("quit")
 						|| line.equalsIgnoreCase("exit")) {
@@ -207,9 +207,9 @@ public class BowlerKernel {
 				}
 				if(line.startsWith("shellType")){
 					try {
-						shellTypeStorage = ShellType.getFromSlug(line.split(" ")[1]);
+						shellTypeStorage = line.split(" ")[1];
 					} catch (Exception e) {
-						shellTypeStorage = ShellType.GROOVY;
+						shellTypeStorage = groovy;
 					}
 					continue;
 				}

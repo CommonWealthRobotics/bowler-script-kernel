@@ -58,8 +58,8 @@ public class RobotHelper implements IScriptingLanguage{
 		return mb;
 	}
 	@Override
-	public ShellType getShellType() {
-		return ShellType.ROBOT;
+	public String getShellType() {
+		return "RobotXML";
 	}
 
 	@Override

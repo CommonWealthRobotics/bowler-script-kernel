@@ -93,8 +93,8 @@ public class ClojureHelper implements IScriptingLanguage{
 		return ClojureHelper.eval(code);
 	}
 	@Override
-	public ShellType getShellType() {
-		return ShellType.CLOJURE;
+	public String getShellType() {
+		return "Clojure";
 	}
 
 	@Override
