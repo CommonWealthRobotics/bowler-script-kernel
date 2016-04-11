@@ -106,6 +106,12 @@ public class ClojureHelper implements IScriptingLanguage{
 		}		
 		return false;
 	}
+
+	@Override
+	public boolean getIsTextFile() {
+		// TODO Auto-generated method stub
+		return true;
+	}
 	
 }
 

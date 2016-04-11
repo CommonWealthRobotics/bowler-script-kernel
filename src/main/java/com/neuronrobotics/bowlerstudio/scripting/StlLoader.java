@@ -34,4 +34,10 @@ public class StlLoader implements IScriptingLanguage {
 		return false;
 	}
 
+	@Override
+	public boolean getIsTextFile() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

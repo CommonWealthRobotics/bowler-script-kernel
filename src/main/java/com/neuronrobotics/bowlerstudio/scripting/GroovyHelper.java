@@ -90,4 +90,12 @@ public class GroovyHelper implements IScriptingLanguage{
 		return inline(code, args);
 	}
 
+
+
+	@Override
+	public boolean getIsTextFile() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 }

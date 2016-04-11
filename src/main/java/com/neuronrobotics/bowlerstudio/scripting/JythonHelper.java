@@ -102,6 +102,12 @@ public class JythonHelper implements IScriptingLanguage{
 		return false;
 	}
 
+	@Override
+	public boolean getIsTextFile() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 
 
 }

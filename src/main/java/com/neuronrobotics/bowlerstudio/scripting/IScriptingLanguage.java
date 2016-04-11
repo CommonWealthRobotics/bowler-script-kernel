@@ -2,6 +2,8 @@ package com.neuronrobotics.bowlerstudio.scripting;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import javafx.scene.Group;
 /**
  * Adding additional language support to bowler studio
  * THis interface is for adding new scripting languages
@@ -43,4 +45,10 @@ public interface IScriptingLanguage {
 	 * @return true if the file extension is supported, false otherwise.
 	 */
 	public abstract boolean isSupportedFileExtenetion(String filename);
+	/**
+	 * This function returns if this is a binary file or a text file
+	 * @return true if the file is a text file.
+	 */
+	public boolean getIsTextFile();
+	
 }
