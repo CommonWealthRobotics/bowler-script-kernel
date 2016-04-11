@@ -967,7 +967,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		ScriptingEngine.github = github;
 	}
 	
-	public List<String> getAllLangauges(){
+	public static List<String> getAllLangauges(){
 		ArrayList<String> langs=new ArrayList<>();
 		for (IScriptingLanguage L:langauges){
 			langs.add(L.getShellType());
