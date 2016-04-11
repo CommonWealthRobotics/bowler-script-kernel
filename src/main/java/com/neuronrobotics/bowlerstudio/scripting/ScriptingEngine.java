@@ -221,7 +221,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
  	
  	
  	public static void addScriptingLanguage(IScriptingLanguage lang){
- 		langauges.add(lang);
+ 		getLangauges().add(lang);
  	}
  	
  	public static void addIGithubLoginListener(IGithubLoginListener l){
@@ -241,7 +241,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 
 	public static String getShellType(String name) {
-		for (IScriptingLanguage l:langauges){
+		for (IScriptingLanguage l:getLangauges()){
 			if(l.isSupportedFileExtenetion(name))
 				return l.getShellType();
 		}
@@ -509,7 +509,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 						if(!fileEntry.getName().endsWith(extnetion))
 							continue;// skip this file as it fails the filter from the user
 					boolean supportedExtention=false;
-					for(IScriptingLanguage l:langauges){
+					for(IScriptingLanguage l:getLangauges()){
 						if(l.isSupportedFileExtenetion(fileEntry.getName())){
 							supportedExtention=true;
 						}
@@ -813,7 +813,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			System.out.println("Loading "+code.getAbsolutePath());
 		}
 			
-		for (IScriptingLanguage l:langauges){
+		for (IScriptingLanguage l:getLangauges()){
 			if(l.getShellType() == activeType){
 				
 				return l.inlineScriptRun(code, args);
@@ -824,7 +824,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	
 	public static Object inlineScriptStringRun(String line, ArrayList<Object>  args, String shellTypeStorage) throws Exception {
 		
-		for (IScriptingLanguage l:langauges){
+		for (IScriptingLanguage l:getLangauges()){
 			if(l.getShellType() == shellTypeStorage){
 				return l.inlineScriptRun(line, args);
 			}
@@ -968,11 +968,26 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	
 	public static List<String> getAllLangauges(){
 		ArrayList<String> langs=new ArrayList<>();
-		for (IScriptingLanguage L:langauges){
+		for (IScriptingLanguage L:getLangauges()){
 			langs.add(L.getShellType());
 		}
 		return langs;
 	}
+
+
+	private static ArrayList<IScriptingLanguage>  getLangauges() {
+		return langauges;
+	}
+
+
+	public static HashMap<String,IScriptingLanguage> getLangaugesMap() {
+		HashMap<String,IScriptingLanguage>  langs=new HashMap<>();
+		for(IScriptingLanguage l:langauges){
+			langs.put(l.getShellType(), l);
+		}
+		return langs;
+	}
+
 
 
 
