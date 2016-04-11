@@ -23,6 +23,7 @@ public class JsonRunner implements IScriptingLanguage {
 		String jsonString = null;
 		InputStream inPut = null;
 		inPut = FileUtils.openInputStream(code);
+		jsonString= IOUtils.toString(inPut);
 		return inlineScriptRun(jsonString,args);
 	}
 

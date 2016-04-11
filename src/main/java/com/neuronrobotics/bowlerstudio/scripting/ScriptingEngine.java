@@ -183,7 +183,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		addScriptingLanguage(new JythonHelper());
 		addScriptingLanguage(new RobotHelper());
 		addScriptingLanguage(new StlLoader());
-
+		addScriptingLanguage(new JsonRunner());
 	}
  	
  	private static void loadLoginData() throws IOException{
