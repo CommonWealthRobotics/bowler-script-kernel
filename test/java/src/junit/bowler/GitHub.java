@@ -3,6 +3,7 @@ package junit.bowler;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,6 +60,12 @@ public class GitHub {
 		PagedIterable<GHRepository> watching = self.listSubscriptions();
 		for(GHRepository g:watching){
 			System.out.println("Watching "+g.getOwnerName()+" "+g.getFullName());
+		}
+		ArrayList<String> listofFiles = ScriptingEngine.filesInGit("https://github.com/madhephaestus/clojure-utils.git", "master", null);
+		if(listofFiles.size()==0)
+			fail();
+		for(String s: listofFiles){
+			System.out.println("Files "+s);
 		}
 	}
 

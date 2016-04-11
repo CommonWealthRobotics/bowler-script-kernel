@@ -182,6 +182,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		addScriptingLanguage(new GroovyHelper());
 		addScriptingLanguage(new JythonHelper());
 		addScriptingLanguage(new RobotHelper());
+		addScriptingLanguage(new StlLoader());
 		
 		
 
