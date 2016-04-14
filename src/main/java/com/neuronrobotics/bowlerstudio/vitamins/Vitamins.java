@@ -107,14 +107,14 @@ public class Vitamins {
 		String jsonString = gson.toJson(getDatabase( type), TT_mapStringString); 
 		try{
 			ScriptingEngine.pushCodeToGit(
-				gitRpoDatabase,// git repo, change this if you fork this demo
+					getGitRpoDatabase() ,// git repo, change this if you fork this demo
 				"master", // branch or tag
 				"json/"+type+".json", // local path to the file in git
 				jsonString, // content of the file
 				"Pushing changed Database");//commit message
 			
 		}catch(org.eclipse.jgit.api.errors.TransportException ex){
-			System.out.println("You need to fork "+gitRpoDatabase+" to have permission to save");
+			System.out.println("You need to fork "+getGitRpoDatabase() +" to have permission to save");
 			System.out.println("You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
 			throw ex;
 		}
@@ -192,7 +192,7 @@ public class Vitamins {
 		try {
 			folder = ScriptingEngine
 					.fileFromGit(
-							gitRpoDatabase,// git repo, change this if you fork this demo
+							getGitRpoDatabase() ,// git repo, change this if you fork this demo
 						"json/hobbyServo.json"// File from within the Git repo
 					);
 			File[] listOfFiles = folder.getParentFile().listFiles();
@@ -234,7 +234,7 @@ public class Vitamins {
 				if(myRepo.contentEquals("Hardware-Dimensions")){
 					GHRepository ghrepo= myPublic.get(myRepo);
 					String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "http://");
-					System.out.println("Using my version of assets: "+myAssets);
+					System.out.println("Using my version of Viamins: "+myAssets);
 					setGitRpoDatabase(myAssets);
 				}
 			}
