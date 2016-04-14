@@ -27,6 +27,8 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.kohsuke.github.GHMyself;
+import org.kohsuke.github.GHRepository;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -41,6 +43,7 @@ public class Vitamins {
 	private static Type TT_mapStringString = new TypeToken<HashMap<String,HashMap<String,Object>>>(){}.getType();
 	//chreat the gson object, this is the parsing factory
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+	private static boolean checked;
 
 	public static CSG get(File resource ){
 		
@@ -163,7 +166,7 @@ public class Vitamins {
 			try {
 				f = ScriptingEngine
 										.fileFromGit(
-												gitRpoDatabase,// git repo, change this if you fork this demo
+												getGitRpoDatabase(),// git repo, change this if you fork this demo
 											"json/"+type+".json"// File from within the Git repo
 										);
 				inPut = FileUtils.openInputStream(f);
@@ -220,7 +223,22 @@ public class Vitamins {
 	}
 	
 	
-	public static String getGitRpoDatabase() {
+	public static String getGitRpoDatabase() throws IOException {
+		if(!checked){
+			checked=true;
+			ScriptingEngine.setAutoupdate(true);
+			org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
+			GHMyself self = github.getMyself();
+			Map<String, GHRepository> myPublic = self.getAllRepositories();
+			for (String myRepo :myPublic.keySet()){
+				if(myRepo.contentEquals("Hardware-Dimensions")){
+					GHRepository ghrepo= myPublic.get(myRepo);
+					String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "http://");
+					System.out.println("Using my version of assets: "+myAssets);
+					setGitRpoDatabase(myAssets);
+				}
+			}
+		}
 		return gitRpoDatabase;
 	}
 	public static void setGitRpoDatabase(String gitRpoDatabase) {
