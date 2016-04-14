@@ -8,6 +8,7 @@ import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
 
+import org.codehaus.groovy.transform.tailrec.TailRecursiveASTTransformation;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -55,10 +56,9 @@ public class PhysicsEngine {
 	
 	public PhysicsEngine() throws Exception {
 		// set the gravity of our world
-		getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98));
+		getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98*6));
 		
 		setGroundShape(new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
-
 	}
 
 //	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
