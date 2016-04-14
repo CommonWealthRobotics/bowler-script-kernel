@@ -551,12 +551,28 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	
 	}
 	
-//	private static void pushCodeToGistID(String id, String FileName, String content , String commitMessage)  throws Exception{
-//		
-//		pushCodeToGit("https://gist.github.com/"+id+".git", "master", FileName, content, commitMessage);;
-//	}
+	public static File createFile(String git, String fileName, String commitMessage) throws Exception{
+		pushCodeToGit(git,"master",fileName,null,commitMessage);
+		return fileFromGit(git, fileName);
+	}
+	
+	
+	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage) throws Exception{
+		if (loginID == null)
+			login();
+		if (loginID == null)
+			return;// No login info means there is no way to publish
+		File gistDir = cloneRepo(id, branch);
+		File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
-	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage)
+		boolean flagNewFile =false;
+		if (!desired.exists()) {
+			desired.createNewFile();
+			flagNewFile=true;
+		}
+		pushCodeToGit(id,branch,FileName,content,commitMessage,flagNewFile);
+	}
+	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage,boolean flagNewFile)
 			throws Exception {
 		if (loginID == null)
 			login();
@@ -564,7 +580,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			return;// No login info means there is no way to publish
 		File gistDir = cloneRepo(id, branch);
 		File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
-		if (!hasnetwork) {
+
+		
+		if (!hasnetwork && content!=null) {
 			OutputStream out = null;
 			try {
 				out = FileUtils.openOutputStream(desired, false);
@@ -586,18 +604,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		try {
 			git.pull().setCredentialsProvider(cp).call();// updates to the
 															// latest version
-			if (!desired.exists()) {
-				desired.createNewFile();
+			if (flagNewFile) {
 				git.add().addFilepattern(FileName).call();
 			}
-			OutputStream out = null;
-			try {
-				out = FileUtils.openOutputStream(desired, false);
-				IOUtils.write(content, out);
-				out.close(); // don't swallow close Exception if copy completes
-								// normally
-			} finally {
-				IOUtils.closeQuietly(out);
+			if(content!=null){
+				OutputStream out = null;
+				try {
+					out = FileUtils.openOutputStream(desired, false);
+					IOUtils.write(content, out);
+					out.close(); // don't swallow close Exception if copy completes
+									// normally
+				} finally {
+					IOUtils.closeQuietly(out);
+				}
 			}
 			git.commit().setAll(true).setMessage(commitMessage).call();
 			git.push().setCredentialsProvider(cp).call();
@@ -699,23 +718,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		return new File(gitRepoFile.getAbsolutePath()+"/"+fileInRepo);
 	}
 	
-	/**
-	 * Gist variant of accessing local directories
-	 * @param id
-	 * @param branch
-	 * @return
-	 */
-	private static File cloneGistRepo(String id){
-		return cloneRepo("https://gist.github.com/"+id+".git", "master");
-	}
-	
+
 	/**
 	 * THis function retreves the local cached version of a given git repository. If it does not exist, it clones it. 
 	 * @param remoteURI
 	 * @param branch
 	 * @return The local directory containint the .git
 	 */
-	private static File cloneRepo(String remoteURI,String branch){
+	public static File cloneRepo(String remoteURI,String branch){
 		//new Exception().printStackTrace();
 		String[] colinSplit =remoteURI.split(":");
 		
