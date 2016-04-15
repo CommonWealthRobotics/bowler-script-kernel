@@ -22,7 +22,7 @@ import eu.mihosoft.vrl.v3d.Vertex;
 import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
-public class CSGPhysicsManager {
+public class CSGPhysicsManager implements IPhysicsManager{
 	
 	private RigidBody fallRigidBody;
 	private Affine ballLocation = new Affine();
@@ -58,9 +58,28 @@ public class CSGPhysicsManager {
 	public CSGPhysicsManager(CSG baseCSG, Transform pose,  double mass){
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 		
+		double xcenter = baseCSG.getMaxX()/2+baseCSG.getMinX()/2;
+		double ycenter = baseCSG.getMaxY()/2+baseCSG.getMinY()/2;
+		double zcenter = baseCSG.getMaxZ()/2+baseCSG.getMinZ()/2;
+		CSG finalCSG = baseCSG;
+		TransformNR poseToMove = TransformFactory.bulletToNr(pose);
+		if(baseCSG.getMaxX()<0 ||baseCSG.getMinX()>0 ){
+			finalCSG=finalCSG.movex(-xcenter);
+			poseToMove.translateX(xcenter);
+		}
+		if(baseCSG.getMaxY()<0 ||baseCSG.getMinY()>0 ){
+			finalCSG=finalCSG.movey(-ycenter);
+			poseToMove.translateY(ycenter);
+		}
+		if(baseCSG.getMaxZ()<0 ||baseCSG.getMinZ()>0 ){
+			finalCSG=finalCSG.movez(-zcenter);
+			poseToMove.translateZ(zcenter);
+		}
+		
+		TransformFactory.nrToBullet(poseToMove, pose);
 		
 		ObjectArrayList<Vector3f> arg0= new ObjectArrayList<>();
-		for( Polygon p:baseCSG.getPolygons()){
+		for( Polygon p:finalCSG.getPolygons()){
 			for( Vertex v:p.vertices){
 				arg0.add(new Vector3f((float)v.getX(), (float)v.getY(), (float)v.getZ()));
 			}
@@ -105,7 +124,7 @@ public class CSGPhysicsManager {
 
 	public void setBaseCSG(CSG baseCSG) {
 		
-		baseCSG.setManipulator(getBallLocation());
+		baseCSG.setManipulator(getRigidBodyLocation());
 		this.baseCSG = baseCSG;
 	}
 	public Transform getUpdateTransform() {
@@ -114,7 +133,7 @@ public class CSGPhysicsManager {
 	public void setUpdateTransform(Transform updateTransform) {
 		this.updateTransform = updateTransform;
 	}
-	public Affine getBallLocation() {
+	public Affine getRigidBodyLocation() {
 		return ballLocation;
 	}
 	public void setBallLocation(Affine ballLocation) {

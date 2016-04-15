@@ -28,6 +28,9 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager{
 			if(constraint.getAppliedImpulse()>muscleStrength){
 				baseCSG.setColor(Color.RED);
 				flagBroken=true;
+				PhysicsEngine.remove(this);
+				setConstraint(null);
+				PhysicsEngine.add (this);
 			}
 		}else if (constraint!=null && flagBroken){
 			constraint.enableAngularMotor(false, 0, 0);

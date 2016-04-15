@@ -46,7 +46,7 @@ public class PhysicsEngine {
 	// setup our collision shapes
 	private CollisionShape groundShape =null;
 	
-	private ArrayList<CSGPhysicsManager> objects =new ArrayList<>();
+	private ArrayList<IPhysicsManager> objects =new ArrayList<>();
 	private RigidBody groundRigidBody;
 	
 	private static boolean runEngine = false;
@@ -67,11 +67,11 @@ public class PhysicsEngine {
 //		// Load the .CSG from the disk and cache it in memory
 //		CSG servo = Vitamins.get(servoFile);
 //
-//		PhysicsEngine.add(new CSGPhysicsManager(
+//		PhysicsEngine.add(new IPhysicsManager(
 //				servo, 
 //				new Vector3f(6, 2, 180),
 //				10));
-//		PhysicsEngine.add(new CSGPhysicsManager(
+//		PhysicsEngine.add(new IPhysicsManager(
 //				new Sphere(20 * 2).toCSG(), 
 //				new Vector3f(0, 0, 100),
 //				20));
@@ -120,12 +120,12 @@ public class PhysicsEngine {
 		if( (((float)(System.currentTimeMillis()- startTime))/1000.0f)>timeStep){
 			//System.out.println(" Compute took too long "+timeStep);
 		}
-		for(CSGPhysicsManager o:get().getPhysicsObjects()){
+		for(IPhysicsManager o:get().getPhysicsObjects()){
 			o.update( timeStep);
 		}
 		Platform.runLater(()->{
-			for(CSGPhysicsManager o:get().getPhysicsObjects())
-				TransformFactory.bulletToAffine(o.getBallLocation(), o.getUpdateTransform());
+			for(IPhysicsManager o:get().getPhysicsObjects())
+				TransformFactory.bulletToAffine(o.getRigidBodyLocation(), o.getUpdateTransform());
 		});
 	}
 	
@@ -133,7 +133,7 @@ public class PhysicsEngine {
 		step((float) ((float) timeStep / 1000.0));
 	}
 	
-	public static void add(CSGPhysicsManager manager){
+	public static void add(IPhysicsManager manager){
 		if(!get().getPhysicsObjects().contains(manager)){
 			get().getPhysicsObjects().add(manager);
 			get().getDynamicsWorld().addRigidBody(manager.getFallRigidBody());
@@ -144,7 +144,7 @@ public class PhysicsEngine {
 		}
 	}
 	
-	public static void remove(CSGPhysicsManager manager){
+	public static void remove(IPhysicsManager manager){
 		if(get().getPhysicsObjects().contains(manager)){
 			get().getPhysicsObjects().remove(manager);
 			get().getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
@@ -157,7 +157,7 @@ public class PhysicsEngine {
 	public static void clear(){
 		stopPhysicsThread();
 		ThreadUtil.wait((int) (msTime*2));
-		for(CSGPhysicsManager o:get().getPhysicsObjects()){
+		for(IPhysicsManager o:get().getPhysicsObjects()){
 			get().getDynamicsWorld().removeRigidBody(o.getFallRigidBody());
 			if(HingeCSGPhysicsManager.class.isInstance(o)){
 				if(((HingeCSGPhysicsManager) o).getConstraint()!=null)
@@ -182,7 +182,7 @@ public class PhysicsEngine {
 	
 	public static ArrayList<CSG> getCsgFromEngine(){
 		ArrayList<CSG> csg = new ArrayList<>();
-		for(CSGPhysicsManager o:get().getPhysicsObjects()){
+		for(IPhysicsManager o:get().getPhysicsObjects()){
 			csg.add(o.getBaseCSG());
 		}
 		return csg;
@@ -250,11 +250,11 @@ public class PhysicsEngine {
 		dynamicsWorld.addRigidBody(groundRigidBody); // add our ground to the
 	}
 
-	public ArrayList<CSGPhysicsManager> getPhysicsObjects() {
+	public ArrayList<IPhysicsManager> getPhysicsObjects() {
 		return objects;
 	}
 
-	public void setObjects(ArrayList<CSGPhysicsManager> objects) {
+	public void setObjects(ArrayList<IPhysicsManager> objects) {
 		this.objects = objects;
 	}
 
