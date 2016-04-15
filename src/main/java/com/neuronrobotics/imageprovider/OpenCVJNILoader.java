@@ -56,7 +56,7 @@ public class OpenCVJNILoader {
 			if(basedir == null)
 				throw new RuntimeException("OPENCV_DIR was not found, environment variable OPENCV_DIR needs to be set");
 			System.err.println("OPENCV_DIR found at "+ basedir);
-			if((!NativeResource.is64Bit() && basedir.contains("x64"))){
+			if((!System.getProperty("sun.arch.data.model").contains("32") && basedir.contains("x64"))){
 				
 				basedir.replace("x64", "x86");
 				System.err.println("OPENCV_DIR environment variable is not set correctly");
