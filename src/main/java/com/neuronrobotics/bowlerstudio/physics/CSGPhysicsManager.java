@@ -40,26 +40,29 @@ public class CSGPhysicsManager  implements IPhysicsManager{
 	
 	public CSGPhysicsManager(CSG baseCSG, Transform pose,  double mass, boolean adjustCenter){
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
-		
-		double xcenter = baseCSG.getMaxX()/2+baseCSG.getMinX()/2;
-		double ycenter = baseCSG.getMaxY()/2+baseCSG.getMinY()/2;
-		double zcenter = baseCSG.getMaxZ()/2+baseCSG.getMinZ()/2;
 		CSG finalCSG = baseCSG;
-		TransformNR poseToMove = TransformFactory.bulletToNr(pose);
-		if(baseCSG.getMaxX()<0 ||baseCSG.getMinX()>0 ){
-			finalCSG=finalCSG.movex(-xcenter);
-			poseToMove.translateX(xcenter);
-		}
-		if(baseCSG.getMaxY()<0 ||baseCSG.getMinY()>0 ){
-			finalCSG=finalCSG.movey(-ycenter);
-			poseToMove.translateY(ycenter);
-		}
-		if(baseCSG.getMaxZ()<0 ||baseCSG.getMinZ()>0 ){
-			finalCSG=finalCSG.movez(-zcenter);
-			poseToMove.translateZ(zcenter);
+		if(adjustCenter){
+			double xcenter = baseCSG.getMaxX()/2+baseCSG.getMinX()/2;
+			double ycenter = baseCSG.getMaxY()/2+baseCSG.getMinY()/2;
+			double zcenter = baseCSG.getMaxZ()/2+baseCSG.getMinZ()/2;
+			
+			TransformNR poseToMove = TransformFactory.bulletToNr(pose);
+			if(baseCSG.getMaxX()<0 ||baseCSG.getMinX()>0 ){
+				finalCSG=finalCSG.movex(-xcenter);
+				poseToMove.translateX(xcenter);
+			}
+			if(baseCSG.getMaxY()<0 ||baseCSG.getMinY()>0 ){
+				finalCSG=finalCSG.movey(-ycenter);
+				poseToMove.translateY(ycenter);
+			}
+			if(baseCSG.getMaxZ()<0 ||baseCSG.getMinZ()>0 ){
+				finalCSG=finalCSG.movez(-zcenter);
+				poseToMove.translateZ(zcenter);
+			}
+			TransformFactory.nrToBullet(poseToMove, pose);
 		}
 		
-		TransformFactory.nrToBullet(poseToMove, pose);
+		
 		this.setBaseCSG(finalCSG);// force a hull of the shape to simplify physics
 		ObjectArrayList<Vector3f> arg0= new ObjectArrayList<>();
 		for( Polygon p:finalCSG.getPolygons()){
