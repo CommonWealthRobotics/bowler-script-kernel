@@ -20,4 +20,4 @@ jdk:
 
 # for running tests on Travis CI container infrastructure for faster builds
 sudo: true
-dist: trusted
+dist: trusty
