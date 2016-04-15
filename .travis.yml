@@ -5,10 +5,9 @@ install:
   - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ trusty universe multiverse"
   - sudo apt-get update -qq
   - sudo apt-get install -y --force-yes gradle libopencv2.4-jni  libopencv2.4-java  libdc1394-22-dev libdc1394-22 libdc1394-utils
-  - sudo updatedb
+  - sudo ln /dev/null /dev/raw1394
   
 script:
-  - locate opencv-24|grep .jar
   - gradle compileJava jar javadoc test 
 cache:
   directories:
