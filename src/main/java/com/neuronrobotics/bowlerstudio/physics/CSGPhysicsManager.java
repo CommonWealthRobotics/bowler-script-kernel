@@ -22,7 +22,7 @@ import eu.mihosoft.vrl.v3d.Vertex;
 import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
-public class CSGPhysicsManager implements IPhysicsManager{
+public class CSGPhysicsManager  implements IPhysicsManager{
 	
 	private RigidBody fallRigidBody;
 	private Affine ballLocation = new Affine();
@@ -37,23 +37,6 @@ public class CSGPhysicsManager implements IPhysicsManager{
 	public CSGPhysicsManager(CSG baseCSG, Vector3f start, double mass){
 		this(baseCSG,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
 	}
-	
-//	public CSGPhysicsManager(CSG baseCSG,  double mass){
-//		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
-//		
-//		
-//		ObjectArrayList<Vector3f> arg0= new ObjectArrayList<>();
-//		for( Polygon p:baseCSG.getPolygons()){
-//			for( Vertex v:p.vertices){
-//				arg0.add(new Vector3f((float)v.getX(), (float)v.getY(), (float)v.getZ()));
-//			}
-//		}
-//		TransformNR startPose = TransformFactory.affineToNr(baseCSG.getManipulator());
-//		CollisionShape fallShape =  new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
-//		Transform tr= new Transform();
-//		TransformFactory.nrToBullet(startPose, tr);
-//		setup(fallShape,tr,mass);
-//	}
 	
 	public CSGPhysicsManager(CSG baseCSG, Transform pose,  double mass){
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
@@ -77,7 +60,7 @@ public class CSGPhysicsManager implements IPhysicsManager{
 		}
 		
 		TransformFactory.nrToBullet(poseToMove, pose);
-		
+		this.setBaseCSG(finalCSG);// force a hull of the shape to simplify physics
 		ObjectArrayList<Vector3f> arg0= new ObjectArrayList<>();
 		for( Polygon p:finalCSG.getPolygons()){
 			for( Vertex v:p.vertices){
