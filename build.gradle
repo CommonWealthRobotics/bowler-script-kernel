@@ -174,7 +174,10 @@ dependencies {
 	}
 	if(isLinux()){
 		//compile files('/usr/share/java/opencv-249.jar')
-		compile fileTree (dir: '/usr/share/java/', includes: ['*opencv-24*.jar'])
+		if(new File("/usr/share/OpenCV/java/").exists())
+			compile fileTree (dir: '/usr/share/OpenCV/java/', includes: ['*opencv-24*.jar'])
+		else
+			compile fileTree (dir: '/usr/share/java/', includes: ['*opencv-24*.jar'])
 	}
 	
 	compile group: 'jfree', name: 'jfreechart', version: '1.0.12'
