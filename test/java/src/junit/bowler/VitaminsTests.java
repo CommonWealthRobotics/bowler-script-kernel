@@ -10,6 +10,7 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 /**
@@ -27,6 +28,12 @@ public class VitaminsTests {
 
 	@Test
 	public void test() {
+		try{
+			ScriptingEngine.setupAnyonmous();
+			
+		}catch (Exception ex){
+			System.out.println("User not logged in, test can not run");
+		}
 		for(String vitaminsType: Vitamins.listVitaminTypes()){
 			HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
 			System.out.println("Type = "+vitaminsType);

@@ -21,7 +21,8 @@ public class JsonTester {
 	@Test
 	public void test() throws Exception{
 		try{
-			ScriptingEngine.setAutoupdate(true);
+			ScriptingEngine.setupAnyonmous();
+			//ScriptingEngine.setAutoupdate(true);
 		}catch (Exception ex){
 			System.out.println("User not logged in, test can not run");
 		}

@@ -230,18 +230,20 @@ public class Vitamins {
 	public static String getGitRpoDatabase() throws IOException {
 		if(!checked){
 			checked=true;
-			ScriptingEngine.setAutoupdate(true);
-			org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
-			GHMyself self = github.getMyself();
-			Map<String, GHRepository> myPublic = self.getAllRepositories();
-			for (String myRepo :myPublic.keySet()){
-				GHRepository ghrepo= myPublic.get(myRepo);
-				if(myRepo.contentEquals("Hardware-Dimensions") && 
-						ghrepo.getOwnerName().contentEquals(self.getLogin())){
-					
-					String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "http://");
-					System.out.println("Using my version of Viamins: "+myAssets);
-					setGitRpoDatabase(myAssets);
+			if(ScriptingEngine.getLoginID()!=null){
+				ScriptingEngine.setAutoupdate(true);
+				org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
+				GHMyself self = github.getMyself();
+				Map<String, GHRepository> myPublic = self.getAllRepositories();
+				for (String myRepo :myPublic.keySet()){
+					GHRepository ghrepo= myPublic.get(myRepo);
+					if(myRepo.contentEquals("Hardware-Dimensions") && 
+							ghrepo.getOwnerName().contentEquals(self.getLogin())){
+						
+						String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "http://");
+						System.out.println("Using my version of Viamins: "+myAssets);
+						setGitRpoDatabase(myAssets);
+					}
 				}
 			}
 		}

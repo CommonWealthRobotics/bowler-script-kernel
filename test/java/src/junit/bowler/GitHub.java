@@ -22,6 +22,9 @@ public class GitHub {
 	@Test
 	public void test() throws Exception {
 		try{
+			if(ScriptingEngine.getLoginID()==null){
+				return;
+			}
 			ScriptingEngine.setAutoupdate(true);
 		}catch (Exception ex){
 			System.out.println("User not logged in, test can not run");

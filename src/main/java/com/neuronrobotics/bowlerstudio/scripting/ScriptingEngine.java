@@ -117,6 +117,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 		@Override
 		public String[] prompt(String username) {
+			new RuntimeException("Login required").printStackTrace();
+			
 			if (username != null) {
 				if (username.equals(""))
 					username = null;
@@ -173,7 +175,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 		try {
 			loadLoginData();
-			runLogin();
+			//runLogin();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -278,7 +280,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
         loginID=null;
 	}
 	
-	private static GitHub setupAnyonmous() throws IOException{
+	public static GitHub setupAnyonmous() throws IOException{
 		System.err.println("Using anynomous login, autoupdate disabled");
 		ScriptingEngine.setAutoupdate(false);
 		logout();
