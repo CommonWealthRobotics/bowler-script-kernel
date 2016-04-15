@@ -1,5 +1,8 @@
 language: java
-install: 
+install:
+  - sudo apt-get update -qq
+  - sudo apt-get upgrade -y --force-yes 
+  - sudo do-release-upgrade -f DistUpgradeViewNonInteractive 
   - sudo add-apt-repository ppa:cwchien/gradle -y
   - sudo apt-add-repository ppa:webupd8team/java -y
   - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ xenial universe multiverse"
