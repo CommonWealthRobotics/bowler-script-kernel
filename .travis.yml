@@ -3,10 +3,10 @@ install:
   - sudo add-apt-repository ppa:cwchien/gradle -y
   - sudo apt-add-repository ppa:webupd8team/java -y
   - sudo apt-get update -qq
-  - sudo apt-get install -y --force-yes gradle libopencv2.4-java oracle-java8-installer oracle-java8-set-default
+  - sudo apt-get install -y --force-yes gradle libopencv2.4-java libopencv2.4-jni
   
 script: 
-  - ./gradlew compileJava jar javadoc test 
+  - gradle compileJava jar javadoc test 
 cache:
   directories:
   - $HOME/.m2
@@ -16,3 +16,4 @@ jdk:
 
 # for running tests on Travis CI container infrastructure for faster builds
 sudo: true
+dist: xenial
