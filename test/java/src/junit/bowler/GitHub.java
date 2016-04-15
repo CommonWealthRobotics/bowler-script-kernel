@@ -21,7 +21,11 @@ public class GitHub {
 
 	@Test
 	public void test() throws Exception {
-		ScriptingEngine.setAutoupdate(true);
+		try{
+			ScriptingEngine.setAutoupdate(true);
+		}catch (Exception ex){
+			System.out.println("User not logged in, test can not run");
+		}
 		org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
 		while (github == null) {
 			github = ScriptingEngine.getGithub();

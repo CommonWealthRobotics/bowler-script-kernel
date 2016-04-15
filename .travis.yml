@@ -7,6 +7,7 @@ install:
   - sudo apt-get install -y --force-yes gradle libopencv2.4-jni  libopencv2.4-java  libdc1394-22-dev libdc1394-22 libdc1394-utils
   - sudo ln /dev/null /dev/raw1394
   
+  
 script:
   - gradle compileJava jar javadoc test 
 cache:

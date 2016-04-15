@@ -20,6 +20,11 @@ public class JsonTester {
 
 	@Test
 	public void test() throws Exception{
+		try{
+			ScriptingEngine.setAutoupdate(true);
+		}catch (Exception ex){
+			System.out.println("User not logged in, test can not run");
+		}
 		File f = ScriptingEngine
 				.fileFromGit(
 						"https://github.com/madhephaestus/BowlerStudioExampleRobots.git",// git repo, change this if you fork this demo
