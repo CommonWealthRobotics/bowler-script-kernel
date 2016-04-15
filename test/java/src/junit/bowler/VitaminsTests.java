@@ -32,9 +32,9 @@ public class VitaminsTests {
 			System.out.println("Type = "+vitaminsType);
 			for(String vitaminSize:Vitamins.listVitaminSizes(vitaminsType)){
 				if(!meta.isEmpty()){
-					System.out.println("Meta configurations");
+					System.out.println("Meta configurations"+meta);
 					try {
-						Vitamins.get(vitaminsType,vitaminSize);
+						//System.out.println(Vitamins.get(vitaminsType,vitaminSize));
 					} catch (Exception e) {
 						e.printStackTrace();
 						fail();
