@@ -16,7 +16,7 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager{
 	boolean flagBroken=false;
 	private double velocity;
 	public HingeCSGPhysicsManager(CSG baseCSG, Transform pose, double mass) {
-		super(baseCSG, pose, mass);
+		super(baseCSG, pose, mass,false);
 		baseCSG.setColor(Color.YELLOW);
 	}
 	@Override

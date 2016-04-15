@@ -35,10 +35,10 @@ public class CSGPhysicsManager  implements IPhysicsManager{
 		setup(fallShape,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
 	}
 	public CSGPhysicsManager(CSG baseCSG, Vector3f start, double mass){
-		this(baseCSG,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
+		this(baseCSG,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass,true);
 	}
 	
-	public CSGPhysicsManager(CSG baseCSG, Transform pose,  double mass){
+	public CSGPhysicsManager(CSG baseCSG, Transform pose,  double mass, boolean adjustCenter){
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 		
 		double xcenter = baseCSG.getMaxX()/2+baseCSG.getMinX()/2;

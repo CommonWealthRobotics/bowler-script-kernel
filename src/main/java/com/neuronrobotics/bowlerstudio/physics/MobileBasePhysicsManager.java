@@ -59,7 +59,7 @@ public class MobileBasePhysicsManager {
 				TransformFactory.bulletToAffine(baseCad.getManipulator(), start);
 			}
 		});
-		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start,0.01);
+		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start,0.01,false);
 		RigidBody body = baseManager.getFallRigidBody();
 		PhysicsEngine.get()
 			.getDynamicsWorld()
