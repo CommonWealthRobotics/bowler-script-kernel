@@ -14,26 +14,37 @@ public class OpenCVJNILoader {
 		if( resource!=null)
 			return;
 		resource= new NativeResource();
-		
+		//+Core.NATIVE_LIBRARY_NAME+".so"
+		//+Core.NATIVE_LIBRARY_NAME+".so"
 		if(NativeResource.isLinux()){
 			String [] possibleLocals = new String[]{
-					"/usr/local/share/OpenCV/java/lib"+Core.NATIVE_LIBRARY_NAME+".so",
-					"/usr/lib/jni/lib"+Core.NATIVE_LIBRARY_NAME+".so"
+					"/usr/local/share/OpenCV/java/lib/",
+					"/usr/lib/jni/lib/"
 			};
 			String erBack ="";
-			for(String lo:possibleLocals){
-				if(new File(lo).exists()){
-					try{
-						System.load(lo);
-						Mat m  = Mat.eye(3, 3, CvType.CV_8UC1);
-						return;
-					}catch(Error e){
-						//try the next one
-						erBack+=" "+e.getMessage();
-						e.printStackTrace();
+			for(String local:possibleLocals){
+				File libDirectory = new File(local);
+				if(libDirectory.exists()&& libDirectory.isDirectory()){
+					File [] possibleLibs = libDirectory.listFiles();
+					for(File f:possibleLibs){
+						if(!f.isDirectory() && 
+							f.getName().contains("opencv_java24")&& 
+							f.getName().endsWith(".so")){
+							try{
+								System.load(f.getAbsolutePath());
+								Mat m  = Mat.eye(3, 3, CvType.CV_8UC1);
+								System.out.println("Loading opencv lib "+f.getAbsolutePath());
+								return;
+							}catch(Error e){
+								//try the next one
+								erBack+=" "+e.getMessage();
+								e.printStackTrace();
+							}
+						}
 					}
+
 				}else{
-					erBack+="No file "+lo;
+					erBack+="No file "+local;
 				}
 			}
 			
