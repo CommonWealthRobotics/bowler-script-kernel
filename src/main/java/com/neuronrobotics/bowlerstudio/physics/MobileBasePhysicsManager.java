@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.vecmath.Vector3f;
 
 import com.bulletphysics.BulletGlobals;
+import com.bulletphysics.collision.shapes.CollisionShape;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.Generic6DofConstraint;
@@ -33,6 +34,8 @@ public class MobileBasePhysicsManager {
 	
 	private HashMap<DHLink, CSG> simplecad;
 	private float lift=20;
+	private ArrayList<ILinkListener> linkListeners=new ArrayList<>();
+	public static final float LIFT_EPS = 0.0000001f;
 	public MobileBasePhysicsManager(MobileBase base, CSG baseCad , 
 			HashMap<DHLink, CSG> simplecad ){
 		this.simplecad = simplecad;
@@ -45,9 +48,9 @@ public class MobileBasePhysicsManager {
 			minz = baseCad.getMinZ();
 		System.out.println("Minimum z = "+minz);
 		Transform start = new Transform();
+		base.setFiducialToGlobalTransform(new TransformNR());
 		TransformNR globe= base.getFiducialToGlobalTransform();
-
-		base.setFiducialToGlobalTransform(globe);
+		
 		TransformFactory.nrToBullet(base.getFiducialToGlobalTransform(), start);
 		start.origin.z=(float) (start.origin.z-minz+lift);
 		Platform.runLater(new Runnable() {
@@ -56,25 +59,51 @@ public class MobileBasePhysicsManager {
 				TransformFactory.bulletToAffine(baseCad.getManipulator(), start);
 			}
 		});
-		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start, base.getMassKg());
+		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start,0.01);
 		RigidBody body = baseManager.getFallRigidBody();
+		PhysicsEngine.get()
+			.getDynamicsWorld()
+			.setGravity(new Vector3f(0, 0, (float) -98*6));
 		PhysicsEngine.add(baseManager);
 		for(int j=0;j<base.getAllDHChains().size();j++){
 			DHParameterKinematics dh=base.getAllDHChains().get(j);
 			RigidBody lastLink=body;
+			Matrix previousStep=null;
 			ArrayList<TransformNR> cached = dh.getDhChain().getCachedChain();
 			for(int i=0;i<dh.getNumberOfLinks();i++){
-				//DH parameters
-				DHLink l = dh.getDhChain().getLinks().get(i);
-				// Check for singularities and just jog it off the singularity. 
-				if(l.getAlpha()%90==0){
-					l.setAlpha(l.getAlpha()+.01);
-				}
-				if(l.getTheta()%90==0){
-					l.setTheta(l.getTheta()+.01);
-				}					
 				// Hardware to engineering units configuration
 				LinkConfiguration conf = dh.getLinkConfiguration(i);
+				//DH parameters
+				DHLink l = dh.getDhChain().getLinks().get(i);
+				boolean flagAlpha=false;
+				boolean flagTheta=false;
+				double jogAmount=0.001;
+				// Check for singularities and just jog it off the singularity. 
+				if(Math.toDegrees(l.getAlpha())%90<jogAmount){
+					l.setAlpha(l.getAlpha()+Math.toRadians(jogAmount));
+					cached = dh.getDhChain().getCachedChain();
+					flagAlpha=true;
+				}
+				if(Math.toDegrees(l.getTheta())%90<jogAmount){
+					l.setTheta(l.getTheta()+Math.toRadians(jogAmount));
+					cached = dh.getDhChain().getCachedChain();
+					flagTheta=true;
+				}
+				// use the DH parameters to calculate the offset of the link at 0 degrees
+				Matrix step;
+				if(conf.getType().isPrismatic())
+					step= l.DhStepInversePrismatic(0);
+				else
+					step= l.DhStepInverseRotory(Math.toRadians(0));
+				// correct jog for singularity. 
+				
+				if(flagAlpha){
+					l.setAlpha(l.getAlpha()-Math.toRadians(jogAmount));	
+				}
+				if(flagTheta){
+					l.setTheta(l.getTheta()-Math.toRadians(jogAmount));	
+				}	
+				
 				// Engineering units to kinematics link (limits and hardware type abstraction)
 				AbstractLink abstractLink = dh.getAbstractLink(i);
 				// Transform used by the UI to render the location of the object
@@ -86,6 +115,7 @@ public class MobileBasePhysicsManager {
 				// Bullet engine transform object
 				Transform linkLoc= new Transform();
 				TransformFactory.nrToBullet(localLink, linkLoc);
+				linkLoc.origin.z=(float) (linkLoc.origin.z-minz+lift);
 				// Set the manipulator to the location from the kinematics, needs to be in UI thread to touch manipulator
 				Platform.runLater(new Runnable() {
 					@Override
@@ -95,56 +125,99 @@ public class MobileBasePhysicsManager {
 				});
 				ThreadUtil.wait(16);
 				simplecad.get(l).setManipulator(manipulator);
+				double mass=conf.getMassKg();
+				if(conf.getType().isTool())
+				 mass=0.0001;
+
+				CSG cadPart = simplecad.get(l)
+							.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse()));
 				// Build a hinge based on the link and mass
-				HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(simplecad.get(l),linkLoc, conf.getMassKg());
-				hingePhysicsManager.setMuscleStrength(1);
-				hingePhysicsManager.setController(new IClosedLoopController() {
-					@Override
-					public double compute(double currentState, double target, double seconds) {
-						double error = target-currentState;
-						return (error/seconds)*0.5;
-					}
-				});
+				HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(cadPart,linkLoc, mass);
+				hingePhysicsManager.setMuscleStrength(1000000);
+				CSG baseCSG = simplecad.get(l);
+				try{
+					
+					//CollisionShape fallShape=new com.bulletphysics.collision.shapes.CapsuleShape((float)2, (float)l.getR()/4);
+					float xdim =(float) (baseCSG.getMaxX()-baseCSG.getMinX());
+					float ydim =(float) (baseCSG.getMaxY()-baseCSG.getMinY());
+					float zdim =(float) (baseCSG.getMaxY()-baseCSG.getMinY());
+					CollisionShape fallShape=new com.bulletphysics.collision.shapes.BoxShape(
+						new Vector3f(	xdim,
+									ydim,
+									zdim));
+					CSGPhysicsManager m = hingePhysicsManager;
+					linkLoc.origin.x = (float) (linkLoc.origin.x +baseCSG.getMaxX());
+					linkLoc.origin.y = (float) (linkLoc.origin.y +baseCSG.getMaxY());
+					linkLoc.origin.z = (float) (linkLoc.origin.z +baseCSG.getMaxZ());
+					//m.setup(fallShape,linkLoc,(double)mass)
+				}catch(Exception ex){
+					ex.printStackTrace();
+				}
+				
+
 				RigidBody linkSection = hingePhysicsManager.getFallRigidBody();
 //				// Setup some damping on the m_bodies
+				/*
+				 * 			
+				 * 	bodies[i].setDamping(0.05f, 0.85f);
+					bodies[i].setDeactivationTime(0.8f);
+					bodies[i].setSleepingThresholds(1.6f, 2.5f);
+			
+				 */
 				linkSection.setDamping(0.05f, 0.85f);
 				linkSection.setDeactivationTime(0.8f);
 				linkSection.setSleepingThresholds(1.6f, 2.5f);
-//				
+				
 				HingeConstraint joint6DOF;
 				Transform localA = new Transform();
 				Transform localB= new Transform();
 				localA.setIdentity();
 				localB.setIdentity();
-				// use the DH parameters to calculate the offset of the link at 0 degrees
-				Matrix step;
-				if(conf.getType().isPrismatic())
-					step= l.DhStep(0);
-				else
-					step= l.DhStep(Math.toRadians(0));
+
 				// set up the center of mass offset from the centroid of the links
 				if(i==0){
 					
 					TransformFactory.nrToBullet(dh.forwardOffset(new TransformNR()), localA);
-				}
-					
+				}else
+					TransformFactory.nrToBullet(new TransformNR(previousStep.inverse()), localA);
 				//set the link constraint based on DH parameters
-				TransformFactory.nrToBullet(new TransformNR(step).inverse(), localB);
+				TransformFactory.nrToBullet(new TransformNR(), localB);
+				previousStep = step;
 				// build the hinge constraint			
 				joint6DOF= new HingeConstraint(lastLink, linkSection, localA, localB);
-				joint6DOF.setLimit(	(float)Math.toRadians(abstractLink.getMinEngineeringUnits()),
-								(float)Math.toRadians(abstractLink.getMaxEngineeringUnits()));
+				joint6DOF.setLimit(	-(float)Math.toRadians(abstractLink.getMinEngineeringUnits()),
+								-(float)Math.toRadians(abstractLink.getMaxEngineeringUnits()));
+								
 				lastLink = linkSection;
-				hingePhysicsManager.setConstraint(joint6DOF);
-				abstractLink.addLinkListener(new ILinkListener() {
+				if(i<3)hingePhysicsManager.setConstraint(joint6DOF);
+				ILinkListener ll=new ILinkListener() {
 					@Override
 					public void onLinkPositionUpdate(AbstractLink source, double engineeringUnitsValue) {
-						//System.out.println("Link "+index+" value="+engineeringUnitsValue);
-						hingePhysicsManager.setTarget(Math.toRadians(engineeringUnitsValue));
+						//System.out.println(" value="+engineeringUnitsValue);
+						hingePhysicsManager.setTarget(Math.toRadians(-engineeringUnitsValue));
+						//joint6DOF.setLimit(	(float) Math.toRadians(-engineeringUnitsValue )- LIFT_EPS,
+						//				(float) Math.toRadians(-engineeringUnitsValue )+ LIFT_EPS);
 					}
 					@Override
-					public void onLinkLimit(AbstractLink source, PIDLimitEvent event) {}
-				});
+					public void onLinkLimit(AbstractLink source, PIDLimitEvent event) {
+						//println event
+					}
+				};
+				if(!conf.getType().isTool()){
+					hingePhysicsManager.setController(new IClosedLoopController() {
+						
+						@Override
+						public double compute(double currentState, double target, double seconds) {
+							double error = target-currentState;
+							return (error/seconds)*2;
+							//return 0
+						}
+					});
+					abstractLink.addLinkListener(ll);linkListeners.add(ll);
+				}
+				
+				
+				
 				abstractLink.getCurrentPosition();
 				PhysicsEngine.add(hingePhysicsManager);
 			}
