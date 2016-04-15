@@ -49,7 +49,7 @@ public class MobileBasePhysicsManager {
 		System.out.println("Minimum z = "+minz);
 		Transform start = new Transform();
 		base.setFiducialToGlobalTransform(new TransformNR());
-		TransformNR globe= base.getFiducialToGlobalTransform();
+		//TransformNR globe= base.getFiducialToGlobalTransform();
 		
 		TransformFactory.nrToBullet(base.getFiducialToGlobalTransform(), start);
 		start.origin.z=(float) (start.origin.z-minz+lift);
@@ -134,36 +134,10 @@ public class MobileBasePhysicsManager {
 				// Build a hinge based on the link and mass
 				HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(cadPart,linkLoc, mass);
 				hingePhysicsManager.setMuscleStrength(1000000);
-				CSG baseCSG = simplecad.get(l);
-				try{
-					
-					//CollisionShape fallShape=new com.bulletphysics.collision.shapes.CapsuleShape((float)2, (float)l.getR()/4);
-					float xdim =(float) (baseCSG.getMaxX()-baseCSG.getMinX());
-					float ydim =(float) (baseCSG.getMaxY()-baseCSG.getMinY());
-					float zdim =(float) (baseCSG.getMaxY()-baseCSG.getMinY());
-					CollisionShape fallShape=new com.bulletphysics.collision.shapes.BoxShape(
-						new Vector3f(	xdim,
-									ydim,
-									zdim));
-					CSGPhysicsManager m = hingePhysicsManager;
-					linkLoc.origin.x = (float) (linkLoc.origin.x +baseCSG.getMaxX());
-					linkLoc.origin.y = (float) (linkLoc.origin.y +baseCSG.getMaxY());
-					linkLoc.origin.z = (float) (linkLoc.origin.z +baseCSG.getMaxZ());
-					//m.setup(fallShape,linkLoc,(double)mass)
-				}catch(Exception ex){
-					ex.printStackTrace();
-				}
 				
 
 				RigidBody linkSection = hingePhysicsManager.getFallRigidBody();
 //				// Setup some damping on the m_bodies
-				/*
-				 * 			
-				 * 	bodies[i].setDamping(0.05f, 0.85f);
-					bodies[i].setDeactivationTime(0.8f);
-					bodies[i].setSleepingThresholds(1.6f, 2.5f);
-			
-				 */
 				linkSection.setDamping(0.05f, 0.85f);
 				linkSection.setDeactivationTime(0.8f);
 				linkSection.setSleepingThresholds(1.6f, 2.5f);
