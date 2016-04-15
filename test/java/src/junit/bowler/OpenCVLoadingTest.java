@@ -10,13 +10,9 @@ public class OpenCVLoadingTest {
 
 	@Test
 	public void test() {
-		try{
+		
 			OpenCVJNILoader.load();
-		}catch(Exception e){
-			fail(e.getMessage());
-		}catch(Error e){
-			fail(e.getMessage());
-		}
+
 	}
 
 }

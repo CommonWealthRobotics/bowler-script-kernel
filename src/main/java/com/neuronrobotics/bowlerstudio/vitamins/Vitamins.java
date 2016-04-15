@@ -98,6 +98,9 @@ public class Vitamins {
 			databaseSet.remove(type);
 			database =  getDatabase(type);
 		}
+		if(database.get(id)==null){
+			database.put(id, new  HashMap<String, Object>());
+		}
 		return database.get(id);
 	}
 	
@@ -174,7 +177,8 @@ public class Vitamins {
 				jsonString= IOUtils.toString(inPut);
 				// perfoem the GSON parse
 				HashMap<String,HashMap<String,Object>> database=gson.fromJson(jsonString, TT_mapStringString);
-	
+				if(database==null)
+					throw new RuntimeException("create a new one");
 				databaseSet.put(type, database);
 				
 			} catch (Exception e) {

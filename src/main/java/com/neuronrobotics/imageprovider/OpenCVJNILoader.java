@@ -19,14 +19,16 @@ public class OpenCVJNILoader {
 		if(NativeResource.isLinux()){
 			String [] possibleLocals = new String[]{
 					"/usr/local/share/OpenCV/java/lib/",
-					"/usr/lib/jni/lib/"
+					"/usr/lib/jni/lib/",
+					"/usr/lib/jni/"
 			};
 			String erBack ="";
 			for(String local:possibleLocals){
 				File libDirectory = new File(local);
-				if(libDirectory.exists()&& libDirectory.isDirectory()){
+				if( libDirectory.isDirectory()){
 					File [] possibleLibs = libDirectory.listFiles();
 					for(File f:possibleLibs){
+						//System.out.println("Checking file: "+f);
 						if(!f.isDirectory() && 
 							f.getName().contains("opencv_java24")&& 
 							f.getName().endsWith(".so")){
