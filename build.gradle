@@ -175,7 +175,7 @@ dependencies {
 	if(isLinux()){
 		//compile files('/usr/share/java/opencv-249.jar')
 		if(new File("/usr/share/OpenCV/java/").exists()){
-			printl "Using the legacy opencv dir"
+			System.out.println("Using the legacy opencv dir ")
 			compile fileTree (dir: '/usr/share/OpenCV/java/', includes: ['*opencv-24*.jar'])
 		}else{
 			compile fileTree (dir: '/usr/share/java/', includes: ['*opencv-24*.jar'])

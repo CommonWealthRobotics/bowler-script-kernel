@@ -9,7 +9,6 @@ install:
   
 script:
   - locate opencv-24|grep .jar
-  - export OPENCV_DIR=/usr/share/OpenCV/
   - gradle compileJava jar javadoc test 
 cache:
   directories:
