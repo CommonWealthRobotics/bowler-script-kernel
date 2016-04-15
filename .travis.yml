@@ -6,9 +6,11 @@ install:
   - sudo apt-get update -qq
   - sudo apt-get install -y --force-yes gradle libopencv2.4-jni
   - sudo updatedb
-  - locate opencv-|grep .jar
   
-script: 
+script:
+  - ls -al /usr/share/OpenCV/java/
+  - ls -al /usr/share/java/
+  - export OPENCV_DIR=/usr/share/OpenCV/
   - gradle compileJava jar javadoc test 
 cache:
   directories:
