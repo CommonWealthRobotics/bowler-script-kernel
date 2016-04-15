@@ -231,8 +231,10 @@ public class Vitamins {
 			GHMyself self = github.getMyself();
 			Map<String, GHRepository> myPublic = self.getAllRepositories();
 			for (String myRepo :myPublic.keySet()){
-				if(myRepo.contentEquals("Hardware-Dimensions")){
-					GHRepository ghrepo= myPublic.get(myRepo);
+				GHRepository ghrepo= myPublic.get(myRepo);
+				if(myRepo.contentEquals("Hardware-Dimensions") && 
+						ghrepo.getOwnerName().contentEquals(self.getLogin())){
+					
 					String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "http://");
 					System.out.println("Using my version of Viamins: "+myAssets);
 					setGitRpoDatabase(myAssets);
