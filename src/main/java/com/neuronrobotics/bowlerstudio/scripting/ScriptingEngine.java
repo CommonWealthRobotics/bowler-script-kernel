@@ -175,7 +175,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 		try {
 			loadLoginData();
-			runLogin();
+			//runLogin();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
