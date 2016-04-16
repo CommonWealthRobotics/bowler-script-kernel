@@ -248,7 +248,7 @@ public class Vitamins {
 					if(myRepo.contentEquals("Hardware-Dimensions") && 
 							ghrepo.getOwnerName().contentEquals(self.getLogin())){
 						
-						String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "http://");
+						String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "https://");
 						System.out.println("Using my version of Viamins: "+myAssets);
 						setGitRpoDatabase(myAssets);
 					}
