@@ -38,7 +38,8 @@ public class Vitamins {
 	private static final Map<String,CSG> fileLastLoaded = new HashMap<String,CSG>();
 	private static final Map<String,HashMap<String,HashMap<String,Object>>> databaseSet = 
 			new HashMap<String, HashMap<String,HashMap<String,Object>>>();
-	private static String gitRpoDatabase = "https://github.com/madhephaestus/Hardware-Dimensions.git";
+	private static final String defaultgitRpoDatabase = "https://github.com/madhephaestus/Hardware-Dimensions.git";
+	private static String gitRpoDatabase = defaultgitRpoDatabase;
 	//Create the type, this tells GSON what datatypes to instantiate when parsing and saving the json
 	private static Type TT_mapStringString = new TypeToken<HashMap<String,HashMap<String,Object>>>(){}.getType();
 	//chreat the gson object, this is the parsing factory
@@ -62,18 +63,25 @@ public class Vitamins {
 	public static CSG get(String type,String id) throws Exception{
 		
 		if(fileLastLoaded.get(type+id) ==null ){
-			CSG newVitamin=null;
-			HashMap<String, Object> script = getMeta( type);
-			ArrayList<Object> servoMeasurments = new ArrayList<Object>();
-			servoMeasurments.add(id);
-			newVitamin=(CSG)ScriptingEngine
-            .gitScriptRun(
-            		script.get("scriptGit").toString(), // git location of the library
-            		script.get("scriptFile").toString(), // file to load
-                      servoMeasurments
-            );
-			
-			fileLastLoaded.put(type+id, newVitamin );
+			try{
+				CSG newVitamin=null;
+				HashMap<String, Object> script = getMeta( type);
+				ArrayList<Object> servoMeasurments = new ArrayList<Object>();
+				servoMeasurments.add(id);
+				newVitamin=(CSG)ScriptingEngine
+	            .gitScriptRun(
+	            		script.get("scriptGit").toString(), // git location of the library
+	            		script.get("scriptFile").toString(), // file to load
+	                      servoMeasurments
+	            );
+				
+				fileLastLoaded.put(type+id, newVitamin );
+			}catch(Exception e){
+				gitRpoDatabase = defaultgitRpoDatabase;
+				databaseSet.clear();
+				fileLastLoaded.clear();
+				return get( type, id);
+			}
 
 		}
 		return fileLastLoaded.get(type+id).clone() ;

@@ -745,18 +745,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 			System.out.println("Cloning files to: "+localPath);
 			System.out.println("Cloning files from: "+remoteURI);
-			
-			 //Clone the repo
-		    try {
-				Git.cloneRepository()
-				.setURI(remoteURI)
-				.setBranch(branch)
-				.setDirectory(new File(localPath))
-				.setCredentialsProvider(cp)
-				.call();
-			} catch (Exception e) {
-				Log.error("Failed to clone "+remoteURI+" "+e);
-			} 
+			for(int i=0;i<5;i++){
+				 //Clone the repo
+			    try {
+					Git.cloneRepository()
+					.setURI(remoteURI)
+					.setBranch(branch)
+					.setDirectory(new File(localPath))
+					.setCredentialsProvider(cp)
+					.call();
+					return gistDir;
+				} catch (Exception e) {
+					Log.error("Failed to clone "+remoteURI+" "+e);
+					deleteFolder(new File(localPath));
+				}
+			   ThreadUtil.wait(200*i);
+			}
 		}
 
 		return gistDir;
