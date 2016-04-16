@@ -59,7 +59,7 @@ public class MobileBasePhysicsManager {
 				TransformFactory.bulletToAffine(baseCad.getManipulator(), start);
 			}
 		});
-		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start,0.01,false);
+		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start,0.1,false);
 		RigidBody body = baseManager.getFallRigidBody();
 		PhysicsEngine.get()
 			.getDynamicsWorld()
@@ -126,8 +126,6 @@ public class MobileBasePhysicsManager {
 				ThreadUtil.wait(16);
 				simplecad.get(l).setManipulator(manipulator);
 				double mass=conf.getMassKg();
-				if(conf.getType().isTool())
-				 mass=0.0001;
 
 				CSG cadPart = simplecad.get(l)
 							.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse()));
