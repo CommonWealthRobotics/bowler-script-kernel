@@ -181,7 +181,7 @@ public class MobileBasePhysicsManager {
 						@Override
 						public double compute(double currentState, double target, double seconds) {
 							double error = target-currentState;
-							return (error/seconds)*2;
+							return (error/seconds)*50.0/(seconds*1000.0);
 							//return 0
 						}
 					});
