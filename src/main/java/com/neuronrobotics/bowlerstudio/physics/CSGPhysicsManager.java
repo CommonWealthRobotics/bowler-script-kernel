@@ -47,15 +47,15 @@ public class CSGPhysicsManager  implements IPhysicsManager{
 			double zcenter = baseCSG.getMaxZ()/2+baseCSG.getMinZ()/2;
 			
 			TransformNR poseToMove = TransformFactory.bulletToNr(pose);
-			if(baseCSG.getMaxX()<0 ||baseCSG.getMinX()>0 ){
+			if(baseCSG.getMaxX()<1 ||baseCSG.getMinX()>-1 ){
 				finalCSG=finalCSG.movex(-xcenter);
 				poseToMove.translateX(xcenter);
 			}
-			if(baseCSG.getMaxY()<0 ||baseCSG.getMinY()>0 ){
+			if(baseCSG.getMaxY()<1 ||baseCSG.getMinY()>-1 ){
 				finalCSG=finalCSG.movey(-ycenter);
 				poseToMove.translateY(ycenter);
 			}
-			if(baseCSG.getMaxZ()<0 ||baseCSG.getMinZ()>0 ){
+			if(baseCSG.getMaxZ()<1 ||baseCSG.getMinZ()>-1 ){
 				finalCSG=finalCSG.movez(-zcenter);
 				poseToMove.translateZ(zcenter);
 			}
