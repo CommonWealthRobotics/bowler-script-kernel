@@ -38,7 +38,7 @@ Object returnVal = ScriptingEngine.inlineGistScriptRun("d4312a0787456ec27a2a", "
 ##Gradle
 ```
 dependencies {
- compile "com.neuronrobotics:BowlerScriptingKernel:0.11.0"
+ compile "com.neuronrobotics:BowlerScriptingKernel:0.16.0"
 }
 ```
 ###Macs Only
