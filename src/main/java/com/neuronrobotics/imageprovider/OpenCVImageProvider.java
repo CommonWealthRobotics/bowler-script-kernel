@@ -48,9 +48,9 @@ public class OpenCVImageProvider extends AbstractImageProvider{
 		if (!getVc().isOpened())
 			return false;
 		
-		getVc().read(m);
+
 		try{
-			AbstractImageProvider.deepCopy(OpenCVImageConversionFactory.matToBufferedImage(m),imageData);
+			AbstractImageProvider.deepCopy(captureNewImage(),imageData);
 		}catch(Exception ex){
 			if(InterruptedException.class.isInstance(ex))throw new RuntimeException(ex);
 		}
@@ -84,6 +84,12 @@ public class OpenCVImageProvider extends AbstractImageProvider{
 	public ArrayList<String> getNamespacesImp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public BufferedImage captureNewImage() {
+		getVc().read(m);
+		return OpenCVImageConversionFactory.matToBufferedImage(m);
 	}
 
 }

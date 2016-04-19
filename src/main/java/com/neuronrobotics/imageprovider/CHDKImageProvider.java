@@ -29,13 +29,9 @@ public class CHDKImageProvider extends AbstractImageProvider {
 			try {
 				// Thread.sleep(3000);
 				//bufferedImageToMat(cam.getPicture(), imageData);
-				AbstractImageProvider.deepCopy(cam.getPicture(),imageData);
+				AbstractImageProvider.deepCopy(captureNewImage(),imageData);
 				return true;
-			} catch (CameraConnectionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
-			} catch (CameraShootException e) {
+			}  catch (RuntimeException e) {
 				e.printStackTrace();
 
 				failure++;
@@ -65,6 +61,16 @@ public class CHDKImageProvider extends AbstractImageProvider {
 	public ArrayList<String> getNamespacesImp() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public BufferedImage captureNewImage() {
+		// TODO Auto-generated method stub
+		try {
+			return cam.getPicture();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		} 
 	}
 
 }
