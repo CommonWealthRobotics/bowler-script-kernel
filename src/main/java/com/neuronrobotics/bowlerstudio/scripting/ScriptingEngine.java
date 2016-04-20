@@ -690,29 +690,34 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			fileLastLoaded.put(id, System.currentTimeMillis());
 		    if(isAutoupdate()){
 			    //System.out.println("Autoupdating " +id);
-				if(cp == null){
-					cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-				}
-			    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile()+"/.git");
-			    //https://gist.github.com/0e6454891a3b3f7c8f28.git
-			    Git git = new Git(localRepo);
-			    try{
-			    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
-			    	//System.out.println("Pull completed "+ret);
-			    	//
-			    	//git.push().setCredentialsProvider(cp).call();
-			    	git.close();
-			    }catch(Exception ex){
-			    	try {
-			    	    //Files.delete(gitRepoFile.toPath());
-			    		ex.printStackTrace();
-			    		System.err.println("Error in gist, hosing: "+gitRepoFile);
-			    		deleteFolder(gitRepoFile);
-			    	} catch (Exception x) {
-			    		x.printStackTrace();
-			    	} 
-			    }
-			    git.close();
+		    	try{
+					if(cp == null){
+						cp = new UsernamePasswordCredentialsProvider(loginID, pw);
+					}
+				    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile()+"/.git");
+				    //https://gist.github.com/0e6454891a3b3f7c8f28.git
+				    Git git = new Git(localRepo);
+				    try{
+				    	PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates to the latest version
+				    	//System.out.println("Pull completed "+ret);
+				    	//
+				    	//git.push().setCredentialsProvider(cp).call();
+				    	git.close();
+				    }catch(Exception ex){
+				    	try {
+				    	    //Files.delete(gitRepoFile.toPath());
+				    		ex.printStackTrace();
+				    		System.err.println("Error in gist, hosing: "+gitRepoFile);
+				    		deleteFolder(gitRepoFile);
+				    	} catch (Exception x) {
+				    		x.printStackTrace();
+				    	} 
+				    }
+				    git.close();
+		    	}catch(NullPointerException ex){
+		    		setAutoupdate(false);
+		    	}
+
 		    }
 			
 		}
