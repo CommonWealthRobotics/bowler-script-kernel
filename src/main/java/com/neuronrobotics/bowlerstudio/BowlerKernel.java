@@ -276,10 +276,10 @@ public class BowlerKernel {
 		VoiceManager voiceManager = VoiceManager.getInstance();
 		com.sun.speech.freetts.Voice voice = voiceManager.getVoice("kevin16");
 
-		System.out.println("Rate " + voice.getRate());
-		System.out.println("Pitch hertz " + voice.getPitch());
-		System.out.println("PitchRange " + voice.getPitchRange());
-		System.out.println("PitchShift " + voice.getPitchShift());
+		System.out.println("Rate " + rate);
+		System.out.println("Pitch hertz " + pitch);
+		System.out.println("PitchRange " + range);
+		System.out.println("PitchShift " + volume);
 		System.out.println("Volume " + voice.getVolume());
 		if (voice != null) {
 			voice.setRate(rate.floatValue());
