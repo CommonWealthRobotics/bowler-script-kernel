@@ -279,8 +279,8 @@ public class BowlerKernel {
 		System.out.println("Rate " + rate);
 		System.out.println("Pitch hertz " + pitch);
 		System.out.println("PitchRange " + range);
-		System.out.println("PitchShift " + volume);
-		System.out.println("Volume " + voice.getVolume());
+		System.out.println("PitchShift " + shift);
+		System.out.println("Volume " + volume);
 		if (voice != null) {
 			voice.setRate(rate.floatValue());
 			voice.setPitch(pitch.floatValue());
