@@ -15,7 +15,8 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 public class ConfigurationDatabase {
 	private static final String repo = "BowlerStudioConfiguration";
-	private static String gitSource = "https://github.com/NeuronRobotics/" + repo + ".git"; // madhephaestus
+	private static String defaultgitSource = "https://github.com/NeuronRobotics/" + repo + ".git";
+	private static String gitSource = null; // madhephaestus
 	private static String dbFile= "database.json";
 	private static boolean checked;
 	private static HashMap<String,HashMap<String,Object>> database=null;
@@ -92,14 +93,23 @@ public class ConfigurationDatabase {
 				for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
 					if (entry.getKey().contentEquals(repo)) {
 						GHRepository ghrepo = entry.getValue();
-						String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "https://");
-						System.out.println("Using my version of assets: " + myAssets);
-						setGitSource(myAssets);
+						setRepo(ghrepo);
 					}
+				}
+				if(gitSource==null){
+					GHRepository  defaultRep = github.getRepository("NeuronRobotics/" + repo);
+					GHRepository  forkedRep =  defaultRep.fork();
+					setRepo(forkedRep);
 				}
 			}
 		return gitSource;
 
+	}
+
+	private static void setRepo(GHRepository forkedRep) {
+		String myAssets = forkedRep.getGitTransportUrl().replaceAll("git://", "https://");
+		System.out.println("Using my version of configuration database: " + myAssets);
+		setGitSource(myAssets);
 	}
 	
 	private static void setGitSource(String myAssets) {
