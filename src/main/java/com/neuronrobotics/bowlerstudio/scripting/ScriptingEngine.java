@@ -1010,6 +1010,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 
 
+	public static boolean hasNetwork() {
+
+		return hasnetwork;
+	}
+
+
 
 
 
