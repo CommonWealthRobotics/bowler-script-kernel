@@ -221,7 +221,9 @@ dependencies {
 	compile 'org.nd4j:canova-nd4j-codec:0.0.0.14'
 	compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1'
 	*/
-	
+	// JScience:
+    compile 'org.jscience:jscience:4.3.1'
+    
 	compile 'javax.media:jmf:2.1.1e'
 	
 	testCompile 'junit:junit:4.10'
