@@ -15,7 +15,7 @@ import org.codehaus.groovy.control.customizers.*;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.DeviceManager;
 
-public class GroovyHelper implements IScriptingLanguage{
+public class GroovyHelper implements IScriptingLanguage,IScriptingLanguageDebugger{
 
 
 	private Object inline(Object code, ArrayList<Object> args) throws Exception {
@@ -96,6 +96,21 @@ public class GroovyHelper implements IScriptingLanguage{
 	public boolean getIsTextFile() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+
+
+	@Override
+	public IDebugScriptRunner compileDebug(File f) {
+		// TODO Auto-generated method stub
+		return new IDebugScriptRunner() {
+			
+			@Override
+			public String[] step() {
+				// TODO Auto-generated method stub
+				return new String[]{"fileame.groovy","345"};
+			}
+		};
 	}
 
 }
