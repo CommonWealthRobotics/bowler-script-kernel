@@ -175,7 +175,7 @@ public class MobileBasePhysicsManager {
 						//println event
 					}
 				};
-				if(!conf.getType().isTool()){
+				if(!conf.isPassive()){
 					hingePhysicsManager.setController(new IClosedLoopController() {
 						
 						@Override
