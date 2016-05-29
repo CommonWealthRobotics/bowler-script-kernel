@@ -28,7 +28,7 @@ public class CSGPhysicsManager  implements IPhysicsManager{
 	private Affine ballLocation = new Affine();
 	protected CSG baseCSG;
 	private Transform updateTransform = new Transform();
-
+	private IPhysicsUpdate updateManager = null;
 	public CSGPhysicsManager(int sphereSize, Vector3f start, double mass){
 		this.setBaseCSG(new Sphere(sphereSize).toCSG());
 		CollisionShape fallShape = new SphereShape((float) (baseCSG.getMaxX()-baseCSG.getMinX())/2);
@@ -90,6 +90,9 @@ public class CSGPhysicsManager  implements IPhysicsManager{
 
 	public void update(float timeStep){		
 		fallRigidBody.getMotionState().getWorldTransform(getUpdateTransform());
+		if(getUpdateManager()!=null){
+			getUpdateManager().update(timeStep);
+		}
 	}
 	
 	
@@ -124,6 +127,12 @@ public class CSGPhysicsManager  implements IPhysicsManager{
 	}
 	public void setBallLocation(Affine ballLocation) {
 		this.ballLocation = ballLocation;
+	}
+	public IPhysicsUpdate getUpdateManager() {
+		return updateManager;
+	}
+	public void setUpdateManager(IPhysicsUpdate updateManager) {
+		this.updateManager = updateManager;
 	}
 
 
