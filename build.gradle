@@ -160,7 +160,7 @@ dependencies {
 			
 	compile "com.neuronrobotics:JCSG:0.6.4"
 	compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
-	compile "com.neuronrobotics:java-bowler:3.20.2"
+	compile "com.neuronrobotics:java-bowler:3.20.3"
 	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.18.1-jar-with-dependencies.jar'])
 	//compile fileTree (dir: '../JCSG/build/libs/', includes: ['JCSG-0.6.4.jar'])
 	compile "com.neuronrobotics:WalnutiQ:2.3.3"
@@ -332,5 +332,5 @@ uploadArchives {
 	  }
 	}
   }
-*/
 
+*/
