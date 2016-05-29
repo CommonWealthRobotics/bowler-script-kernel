@@ -19,6 +19,7 @@ import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.imu.IMUUpdate;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.IClosedLoopController;
 import com.neuronrobotics.sdk.pid.PIDLimitEvent;
@@ -61,6 +62,37 @@ public class MobileBasePhysicsManager {
 		});
 		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start,0.1,false);
 		RigidBody body = baseManager.getFallRigidBody();
+		baseManager.setUpdateManager(new IPhysicsUpdate() {
+			Vector3f oldavelocity = new Vector3f(0f,0f,0f);
+			Vector3f oldvelocity = new Vector3f(0f,0f,0f);
+			@Override
+			public void update(float timeStep) {
+				Vector3f avelocity = new Vector3f();
+				Vector3f velocity = new Vector3f();
+				body.getAngularVelocity(avelocity);
+				body.getLinearVelocity(velocity);
+				//A=DeltaV / DeltaT
+				Double rotxAcceleration = (double) ((oldavelocity.x - avelocity.x)/timeStep);
+				Double rotyAcceleration = (double) ((oldavelocity.y - avelocity.y)/timeStep);
+				Double rotzAcceleration = (double) ((oldavelocity.z - avelocity.z)/timeStep);
+				Double xAcceleration = (double) ((oldvelocity.x - velocity.x)/timeStep);
+				Double yAcceleration = (double) ((oldvelocity.y -velocity.y)/timeStep);
+				Double zAcceleration = (double) ((oldvelocity.z - velocity.z)/timeStep);
+				// tell the virtual IMU the system updated
+				base.getImu().setVirtualState(new IMUUpdate(
+						xAcceleration, 
+						yAcceleration, 
+						zAcceleration, 
+						rotxAcceleration, 
+						rotyAcceleration, 
+						rotzAcceleration));
+				//update the old variables
+				oldavelocity.set(avelocity);
+				oldvelocity.set(velocity);
+				
+			}
+		});
+		
 		PhysicsEngine.get()
 			.getDynamicsWorld()
 			.setGravity(new Vector3f(0, 0, (float) -98*6));
@@ -135,6 +167,36 @@ public class MobileBasePhysicsManager {
 				
 
 				RigidBody linkSection = hingePhysicsManager.getFallRigidBody();
+				
+				hingePhysicsManager.setUpdateManager(new IPhysicsUpdate() {
+					Vector3f oldavelocity = new Vector3f(0f,0f,0f);
+					Vector3f oldvelocity = new Vector3f(0f,0f,0f);
+					@Override
+					public void update(float timeStep) {
+						Vector3f avelocity = new Vector3f();
+						Vector3f velocity = new Vector3f();
+						linkSection.getAngularVelocity(avelocity);
+						linkSection.getLinearVelocity(velocity);
+						//A=DeltaV / DeltaT
+						Double rotxAcceleration = (double) ((oldavelocity.x - avelocity.x)/timeStep);
+						Double rotyAcceleration = (double) ((oldavelocity.y - avelocity.y)/timeStep);
+						Double rotzAcceleration = (double) ((oldavelocity.z - avelocity.z)/timeStep);
+						Double xAcceleration = (double) ((oldvelocity.x - velocity.x)/timeStep);
+						Double yAcceleration = (double) ((oldvelocity.y -velocity.y)/timeStep);
+						Double zAcceleration = (double) ((oldvelocity.z - velocity.z)/timeStep);
+						abstractLink.getImu().setVirtualState(new IMUUpdate(
+								xAcceleration, 
+								yAcceleration, 
+								zAcceleration, 
+								rotxAcceleration, 
+								rotyAcceleration, 
+								rotzAcceleration));
+						//update the old variables
+						oldavelocity.set(avelocity);
+						oldvelocity.set(velocity);
+						
+					}
+				});
 //				// Setup some damping on the m_bodies
 				linkSection.setDamping(0.05f, 0.85f);
 				linkSection.setDeactivationTime(0.8f);
