@@ -69,15 +69,18 @@ public class MobileBasePhysicsManager {
 			public void update(float timeStep) {
 				Vector3f avelocity = new Vector3f();
 				Vector3f velocity = new Vector3f();
+				Vector3f gravity = new Vector3f();
 				body.getAngularVelocity(avelocity);
 				body.getLinearVelocity(velocity);
+				
+				body.getGravity(gravity);
 				//A=DeltaV / DeltaT
 				Double rotxAcceleration = (double) ((oldavelocity.x - avelocity.x)/timeStep);
 				Double rotyAcceleration = (double) ((oldavelocity.y - avelocity.y)/timeStep);
 				Double rotzAcceleration = (double) ((oldavelocity.z - avelocity.z)/timeStep);
-				Double xAcceleration = (double) ((oldvelocity.x - velocity.x)/timeStep);
-				Double yAcceleration = (double) ((oldvelocity.y -velocity.y)/timeStep);
-				Double zAcceleration = (double) ((oldvelocity.z - velocity.z)/timeStep);
+				Double xAcceleration = (double) ((oldvelocity.x - velocity.x)/timeStep) +gravity.x ;
+				Double yAcceleration = (double) ((oldvelocity.y -velocity.y)/timeStep)+gravity.y;
+				Double zAcceleration = (double) ((oldvelocity.z - velocity.z)/timeStep+gravity.z);
 				// tell the virtual IMU the system updated
 				base.getImu().setVirtualState(new IMUUpdate(
 						xAcceleration, 
@@ -175,15 +178,19 @@ public class MobileBasePhysicsManager {
 					public void update(float timeStep) {
 						Vector3f avelocity = new Vector3f();
 						Vector3f velocity = new Vector3f();
+						Vector3f gravity = new Vector3f();
 						linkSection.getAngularVelocity(avelocity);
 						linkSection.getLinearVelocity(velocity);
+						
+						linkSection.getGravity(gravity);
+						
 						//A=DeltaV / DeltaT
 						Double rotxAcceleration = (double) ((oldavelocity.x - avelocity.x)/timeStep);
 						Double rotyAcceleration = (double) ((oldavelocity.y - avelocity.y)/timeStep);
 						Double rotzAcceleration = (double) ((oldavelocity.z - avelocity.z)/timeStep);
-						Double xAcceleration = (double) ((oldvelocity.x - velocity.x)/timeStep);
-						Double yAcceleration = (double) ((oldvelocity.y -velocity.y)/timeStep);
-						Double zAcceleration = (double) ((oldvelocity.z - velocity.z)/timeStep);
+						Double xAcceleration = (double) ((oldvelocity.x - velocity.x)/timeStep) +gravity.x ;
+						Double yAcceleration = (double) ((oldvelocity.y -velocity.y)/timeStep)+gravity.y;
+						Double zAcceleration = (double) ((oldvelocity.z - velocity.z)/timeStep+gravity.z);
 						abstractLink.getImu().setVirtualState(new IMUUpdate(
 								xAcceleration, 
 								yAcceleration, 
