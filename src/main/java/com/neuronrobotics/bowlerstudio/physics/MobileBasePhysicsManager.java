@@ -36,7 +36,7 @@ import javafx.scene.transform.Affine;
 public class MobileBasePhysicsManager {
 
 	
-	private static final int PhysicsGravityScalar = 60;
+	private static final float PhysicsGravityScalar = 6;
 	private HashMap<DHLink, CSG> simplecad;
 	private float lift=20;
 	private ArrayList<ILinkListener> linkListeners=new ArrayList<>();
@@ -119,7 +119,7 @@ public class MobileBasePhysicsManager {
 		
 		PhysicsEngine.get()
 			.getDynamicsWorld()
-			.setGravity(new Vector3f(0, 0, (float) -9.8*PhysicsGravityScalar));
+			.setGravity(new Vector3f(0, 0, (float) -98*PhysicsGravityScalar));
 		PhysicsEngine.add(baseManager);
 		for(int j=0;j<base.getAllDHChains().size();j++){
 			DHParameterKinematics dh=base.getAllDHChains().get(j);
