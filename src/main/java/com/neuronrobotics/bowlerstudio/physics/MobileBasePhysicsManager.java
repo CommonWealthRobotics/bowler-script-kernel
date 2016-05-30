@@ -36,6 +36,7 @@ import javafx.scene.transform.Affine;
 public class MobileBasePhysicsManager {
 
 	
+	private static final int PhysicsGravityScalar = 60;
 	private HashMap<DHLink, CSG> simplecad;
 	private float lift=20;
 	private ArrayList<ILinkListener> linkListeners=new ArrayList<>();
@@ -47,18 +48,20 @@ public class MobileBasePhysicsManager {
 			Vector3f oldvelocity = new Vector3f(0f,0f,0f);
 			Vector3f gravity = new Vector3f();
 			private Quat4f orentation = new Quat4f();
+			Transform gravTrans = new Transform();
+			Transform orentTrans = new Transform();
+			Vector3f avelocity = new Vector3f();
+			Vector3f velocity = new Vector3f();
 			@Override
 			public void update(float timeStep) {
-				Vector3f avelocity = new Vector3f();
-				Vector3f velocity = new Vector3f();
+				
 				
 				body.getAngularVelocity(avelocity);
 				body.getLinearVelocity(velocity);
 				
 				body.getGravity(gravity);
 				body.getOrientation(orentation );
-				Transform gravTrans = new Transform();
-				Transform orentTrans = new Transform();
+				
 				
 				TransformFactory.nrToBullet(new TransformNR(gravity.x, gravity.y, gravity.z,new RotationNR()), gravTrans);
 				TransformFactory.nrToBullet(new TransformNR(0,0,0, orentation.w, orentation.x, orentation.y, orentation.z), orentTrans);
@@ -69,9 +72,9 @@ public class MobileBasePhysicsManager {
 				Double rotxAcceleration = (double) ((oldavelocity.x - avelocity.x)/timeStep);
 				Double rotyAcceleration = (double) ((oldavelocity.y - avelocity.y)/timeStep);
 				Double rotzAcceleration = (double) ((oldavelocity.z - avelocity.z)/timeStep);
-				Double xAcceleration = (double) ((oldvelocity.x - velocity.x)/timeStep) +orentTrans.origin.x ;
-				Double yAcceleration = (double) ((oldvelocity.y -velocity.y)/timeStep)+orentTrans.origin.y;
-				Double zAcceleration = (double) ((oldvelocity.z - velocity.z)/timeStep+orentTrans.origin.z);
+				Double xAcceleration = (double) ((oldvelocity.x - velocity.x)/timeStep) +(orentTrans.origin.x/PhysicsGravityScalar) ;
+				Double yAcceleration = (double) ((oldvelocity.y -velocity.y)/timeStep)+(orentTrans.origin.y/PhysicsGravityScalar);
+				Double zAcceleration = (double) ((oldvelocity.z - velocity.z)/timeStep)+(orentTrans.origin.z/PhysicsGravityScalar);
 				// tell the virtual IMU the system updated
 				base.setVirtualState(new IMUUpdate(
 						xAcceleration, 
@@ -116,7 +119,7 @@ public class MobileBasePhysicsManager {
 		
 		PhysicsEngine.get()
 			.getDynamicsWorld()
-			.setGravity(new Vector3f(0, 0, (float) -98*6));
+			.setGravity(new Vector3f(0, 0, (float) -9.8*PhysicsGravityScalar));
 		PhysicsEngine.add(baseManager);
 		for(int j=0;j<base.getAllDHChains().size();j++){
 			DHParameterKinematics dh=base.getAllDHChains().get(j);
