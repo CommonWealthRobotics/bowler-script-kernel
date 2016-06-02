@@ -106,6 +106,7 @@ String getOsArch() {
 
 repositories {
 	mavenCentral()
+	jcenter()
 	maven { url 'https://repository-bubblecloud.forge.cloudbees.com/release/'}
 	maven { url 'https://clojars.org/repo' }
 	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
@@ -227,7 +228,8 @@ dependencies {
 	compile 'javax.media:jmf:2.1.1e'
 	
 	//Weka 
-	compile group: 'nz.ac.waikato.cms.weka', name: 'weka-stable', version: '3.8.0'
+	compile 'nz.ac.waikato.cms.weka:weka-stable:3.6.13'
+
 	
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
