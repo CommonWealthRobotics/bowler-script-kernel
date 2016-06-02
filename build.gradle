@@ -227,7 +227,7 @@ dependencies {
 	compile 'javax.media:jmf:2.1.1e'
 	
 	//Weka 
-	compile group: 'nz.ac.waikato.cms.weka', name: 'weka-stable', version: '3.6.6'
+	compile group: 'nz.ac.waikato.cms.weka', name: 'weka-stable', version: '3.8.0'
 	
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
@@ -335,5 +335,5 @@ uploadArchives {
 	  }
 	}
   }
-
 */
+
