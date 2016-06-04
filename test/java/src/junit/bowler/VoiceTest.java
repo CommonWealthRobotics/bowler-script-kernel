@@ -10,7 +10,7 @@ public class VoiceTest {
 
 	@Test
 	public void test() {
-		BowlerKernel.speak("Testing voice");
+		//BowlerKernel.speak("Testing voice");
 	}
 
 }
