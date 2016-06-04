@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class SDKBuildInfo.
  */
