@@ -83,15 +83,16 @@ public class ArduinoLoader implements IScriptingLanguage {
 
 	@Override
 	public String getShellType() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Arduino";
 	}
 
 	@Override
 	public boolean isSupportedFileExtenetion(String filename) {
-		if(	filename.endsWith(".c")||
-			filename.endsWith(".h")||
-			filename.endsWith(".ino")	
+		if(	filename.toLowerCase().endsWith(".c")||
+			filename.toLowerCase().endsWith(".h")||
+			filename.toLowerCase().endsWith(".hpp")||
+			filename.toLowerCase().endsWith(".cpp")||
+			filename.toLowerCase().endsWith(".ino")	
 				)
 			return true;
 		return false;
