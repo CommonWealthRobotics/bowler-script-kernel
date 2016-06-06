@@ -186,6 +186,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		addScriptingLanguage(new RobotHelper());
 		addScriptingLanguage(new StlLoader());
 		addScriptingLanguage(new JsonRunner());
+		addScriptingLanguage(new ArduinoLoader());
 	}
  	
  	private static void loadLoginData() throws IOException{
