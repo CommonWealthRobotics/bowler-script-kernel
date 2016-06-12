@@ -17,12 +17,12 @@ public class ArduinoLoaderTest {
 
 	@Test
 	public void test() throws Exception {
-//		String board = "uno";
-//		String port = "/dev/ttyACM0";
-//		ArrayList<Object> params = new ArrayList<>() ;
-//		params.add(board);
-//		params.add(port);
-//		ScriptingEngine.gitScriptRun("https://github.com/madhephaestus/Blink.git", "Blink.ino", params);
+		String board = "uno";
+		String port = "/dev/ttyACM0";
+		ArrayList<Object> params = new ArrayList<>() ;
+		params.add(board);
+		params.add(port);
+		ScriptingEngine.gitScriptRun("https://github.com/madhephaestus/Blink.git", "Blink.ino", params);
 		
 	}
 
