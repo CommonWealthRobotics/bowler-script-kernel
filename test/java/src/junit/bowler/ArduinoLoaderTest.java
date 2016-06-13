@@ -13,17 +13,27 @@ import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
+import gnu.io.NRSerialPort;
+
 public class ArduinoLoaderTest {
+
+	private static final String portname = "/dev/ttyACM0";
+	private boolean hasPort;
 
 	@Test
 	public void test() throws Exception {
-		String board = "uno";
-		String port = "/dev/ttyACM0";
-		ArrayList<Object> params = new ArrayList<>() ;
-		params.add(board);
-		params.add(port);
-		ScriptingEngine.gitScriptRun("https://github.com/madhephaestus/Blink.git", "Blink.ino", params);
-		
+		hasPort = false;
+		for (String s : NRSerialPort.getAvailableSerialPorts()) {
+			if (s.contentEquals(portname))
+				hasPort = true;
+		}
+		if (hasPort) {
+			String board = "uno";
+			ArrayList<Object> params = new ArrayList<>() ;
+			params.add(board);
+			params.add(portname);
+			ScriptingEngine.gitScriptRun("https://github.com/madhephaestus/Blink.git", "Blink.ino", params);
+		}
 	}
 
 }
