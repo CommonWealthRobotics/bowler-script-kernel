@@ -89,6 +89,7 @@ public class ConfigurationDatabase {
 	public static String getGitSource() throws Exception {
 		if (ScriptingEngine.hasNetwork()){
 			if(!checked){
+				checked = true;
 				if (ScriptingEngine.isLoginSuccess()) {
 					
 					ScriptingEngine.setAutoupdate(true);
@@ -110,7 +111,7 @@ public class ConfigurationDatabase {
 					ConfigurationDatabase.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
 				}
 			}
-			checked = true;
+			
 		}else{
 			ConfigurationDatabase.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
 		}
