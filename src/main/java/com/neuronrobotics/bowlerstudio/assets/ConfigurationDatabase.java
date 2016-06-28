@@ -15,6 +15,8 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 public class ConfigurationDatabase {
 	private static final String repo = "BowlerStudioConfiguration";
+	private static final String HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT = "https://github.com/NeuronRobotics/"+repo+".git";
+
 	private static String gitSource = null; // madhephaestus
 	private static String dbFile= "database.json";
 	private static boolean checked;
@@ -85,25 +87,33 @@ public class ConfigurationDatabase {
 	}
 
 	public static String getGitSource() throws Exception {
-		if (ScriptingEngine.hasNetwork())
-			if (!checked && ScriptingEngine.isLoginSuccess()) {
-				checked = true;
-				ScriptingEngine.setAutoupdate(true);
-				org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
-				GHMyself self = github.getMyself();
-				Map<String, GHRepository> myPublic = self.getAllRepositories();
-				for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
-					if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName().equals(self.getName())) {
-						GHRepository ghrepo = entry.getValue();
-						setRepo(ghrepo);
+		if (ScriptingEngine.hasNetwork()){
+			if(!checked){
+				if (ScriptingEngine.isLoginSuccess()) {
+					
+					ScriptingEngine.setAutoupdate(true);
+					org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
+					GHMyself self = github.getMyself();
+					Map<String, GHRepository> myPublic = self.getAllRepositories();
+					for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
+						if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName().equals(self.getName())) {
+							GHRepository ghrepo = entry.getValue();
+							setRepo(ghrepo);
+						}
 					}
-				}
-				if(gitSource==null){
-					GHRepository  defaultRep = github.getRepository("NeuronRobotics/" + repo);
-					GHRepository  forkedRep =  defaultRep.fork();
-					setRepo(forkedRep);
+					if(gitSource==null){
+						GHRepository  defaultRep = github.getRepository("NeuronRobotics/" + repo);
+						GHRepository  forkedRep =  defaultRep.fork();
+						setRepo(forkedRep);
+					}
+				}else{
+					ConfigurationDatabase.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
 				}
 			}
+			checked = true;
+		}else{
+			ConfigurationDatabase.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
+		}
 		return gitSource;
 
 	}
@@ -114,7 +124,7 @@ public class ConfigurationDatabase {
 		setGitSource(myAssets);
 	}
 	
-	private static void setGitSource(String myAssets) {
+	public static void setGitSource(String myAssets) {
 		database=null;
 		gitSource=myAssets;
 		getDatabase();
