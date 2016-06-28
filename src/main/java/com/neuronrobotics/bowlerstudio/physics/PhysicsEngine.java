@@ -36,32 +36,32 @@ import javafx.application.Platform;
 public class PhysicsEngine {
 	private  static PhysicsCore mainEngine;
 
-//	public static void startPhysicsThread(int ms){
-//		mainEngine.startPhysicsThread(ms);
-//	}
-//	public static void stopPhysicsThread(){
-//		mainEngine.stopPhysicsThread();
-//	}
-//	public static void step(float timeStep){
-//		mainEngine.step(timeStep);
-//	}
-//	
-//	public static void stepMs(double timeStep){
-//		mainEngine.stepMs(timeStep);
-//	}
-//	
-//	public static void add(IPhysicsManager manager){
-//		mainEngine.add(manager);
-//	}
-//	
-//	public static void remove(IPhysicsManager manager){
-//		mainEngine.remove(manager);
-//	}
-//	public static void clear(){
-//		mainEngine.clear();
-//		mainEngine=null;
-//		
-//	}
+	public static void startPhysicsThread(int ms){
+		mainEngine.startPhysicsThread(ms);
+	}
+	public static void stopPhysicsThread(){
+		mainEngine.stopPhysicsThread();
+	}
+	public static void step(float timeStep){
+		mainEngine.step(timeStep);
+	}
+	
+	public static void stepMs(double timeStep){
+		mainEngine.stepMs(timeStep);
+	}
+	
+	public static void add(IPhysicsManager manager){
+		mainEngine.add(manager);
+	}
+	
+	public static void remove(IPhysicsManager manager){
+		mainEngine.remove(manager);
+	}
+	public static void clear(){
+		mainEngine.clear();
+		mainEngine=null;
+		
+	}
 	public static PhysicsCore get() {
 		if (mainEngine == null)
 			try {
@@ -73,11 +73,11 @@ public class PhysicsEngine {
 		return mainEngine;
 
 	}
-//	
-//	public static ArrayList<CSG> getCsgFromEngine(){
-//
-//		return mainEngine.getCsgFromEngine();
-//	}
+	
+	public static ArrayList<CSG> getCsgFromEngine(){
+
+		return mainEngine.getCsgFromEngine();
+	}
 
 
 	
