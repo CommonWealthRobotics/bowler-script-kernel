@@ -155,6 +155,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			return creds;
 		}
 	};
+	private static boolean loginSuccess=false;
 
 	static {
  		
@@ -279,6 +280,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
         	l.onLogout(loginID);
         }
         loginID=null;
+        
 	}
 	
 	public static GitHub setupAnyonmous() throws IOException{
@@ -419,7 +421,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	        	l.onLogin(loginID);
 	        }
 	        System.out.println("Success Login as "+loginID+"");
-			
+			setLoginSuccess(true);
    	 	}else{
    	 		System.err.println("Bad login credentials for "+loginID);
    	 		setGithub(null);
@@ -815,7 +817,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		ScriptingEngine.lastFile = lastFile;
 	}
 
-	public static File getCreds() {
+	private static File getCreds() {
 		if(creds == null)
 			setCreds(new File(System.getProperty("user.home")+"/.github"));
 		return creds;
@@ -986,6 +988,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 
 	public static void setGithub(GitHub github) {
 		ScriptingEngine.github = github;
+		if(github==null)
+			setLoginSuccess(false);
 	}
 	
 	public static List<String> getAllLangauges(){
@@ -1014,6 +1018,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	public static boolean hasNetwork() {
 
 		return hasnetwork;
+	}
+
+
+	public static boolean isLoginSuccess() {
+		return loginSuccess;
+	}
+
+
+	public static void setLoginSuccess(boolean loginSuccess) {
+		ScriptingEngine.loginSuccess = loginSuccess;
 	}
 
 

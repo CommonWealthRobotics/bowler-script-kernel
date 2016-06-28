@@ -73,6 +73,8 @@ public class ConfigurationDatabase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if(database==null)
+			database=new HashMap<String, HashMap<String, Object>>();
 		return database;
 	}
 
@@ -84,7 +86,7 @@ public class ConfigurationDatabase {
 
 	public static String getGitSource() throws Exception {
 		if (ScriptingEngine.hasNetwork())
-			if (!checked && ScriptingEngine.getCreds().exists()) {
+			if (!checked && ScriptingEngine.isLoginSuccess()) {
 				checked = true;
 				ScriptingEngine.setAutoupdate(true);
 				org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
