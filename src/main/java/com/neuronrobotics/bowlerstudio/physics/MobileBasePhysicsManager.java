@@ -92,6 +92,10 @@ public class MobileBasePhysicsManager {
 	}
 	public MobileBasePhysicsManager(MobileBase base, CSG baseCad , 
 			HashMap<DHLink, CSG> simplecad ){
+		this(base,baseCad,simplecad,PhysicsEngine.get());
+	}
+	public MobileBasePhysicsManager(MobileBase base, CSG baseCad , 
+			HashMap<DHLink, CSG> simplecad, PhysicsCore core ){
 		this.simplecad = simplecad;
 		double minz =0;
 		for(DHParameterKinematics dh:base.getAllDHChains()){
@@ -113,14 +117,14 @@ public class MobileBasePhysicsManager {
 				TransformFactory.bulletToAffine(baseCad.getManipulator(), start);
 			}
 		});
-		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start,0.1,false);
+		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad,start,0.1,false,core);
 		RigidBody body = baseManager.getFallRigidBody();
 		baseManager.setUpdateManager(getUpdater(body,base.getImu()));
 		
-		PhysicsEngine.get()
+		core
 			.getDynamicsWorld()
 			.setGravity(new Vector3f(0, 0, (float) -98*PhysicsGravityScalar));
-		PhysicsEngine.add(baseManager);
+		core.add(baseManager);
 		for(int j=0;j<base.getAllDHChains().size();j++){
 			DHParameterKinematics dh=base.getAllDHChains().get(j);
 			RigidBody lastLink=body;
@@ -186,7 +190,7 @@ public class MobileBasePhysicsManager {
 				CSG cadPart = simplecad.get(l)
 							.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse()));
 				// Build a hinge based on the link and mass
-				HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(cadPart,linkLoc, mass);
+				HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(cadPart,linkLoc, mass,core);
 				hingePhysicsManager.setMuscleStrength(1000000);
 				
 
@@ -249,7 +253,7 @@ public class MobileBasePhysicsManager {
 				
 				
 				abstractLink.getCurrentPosition();
-				PhysicsEngine.add(hingePhysicsManager);
+				core.add(hingePhysicsManager);
 			}
 			
 		}

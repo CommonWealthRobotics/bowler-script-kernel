@@ -29,16 +29,16 @@ public class CSGPhysicsManager  implements IPhysicsManager{
 	protected CSG baseCSG;
 	private Transform updateTransform = new Transform();
 	private IPhysicsUpdate updateManager = null;
-	public CSGPhysicsManager(int sphereSize, Vector3f start, double mass){
+	public CSGPhysicsManager(int sphereSize, Vector3f start, double mass,PhysicsCore core){
 		this.setBaseCSG(new Sphere(sphereSize).toCSG());
 		CollisionShape fallShape = new SphereShape((float) (baseCSG.getMaxX()-baseCSG.getMinX())/2);
-		setup(fallShape,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass);
+		setup(fallShape,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass,core);
 	}
-	public CSGPhysicsManager(CSG baseCSG, Vector3f start, double mass){
-		this(baseCSG,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass,true);
+	public CSGPhysicsManager(CSG baseCSG, Vector3f start, double mass,PhysicsCore core){
+		this(baseCSG,new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)),mass,true, core);
 	}
 	
-	public CSGPhysicsManager(CSG baseCSG, Transform pose,  double mass, boolean adjustCenter){
+	public CSGPhysicsManager(CSG baseCSG, Transform pose,  double mass, boolean adjustCenter, PhysicsCore core){
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 		CSG finalCSG = baseCSG;
 		if(adjustCenter){
@@ -71,9 +71,9 @@ public class CSGPhysicsManager  implements IPhysicsManager{
 			}
 		}
 		CollisionShape fallShape =  new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
-		setup(fallShape,pose,mass);
+		setup(fallShape,pose,mass,core);
 	}
-	public void setup(CollisionShape fallShape,Transform pose, double mass ){
+	public void setup(CollisionShape fallShape,Transform pose, double mass, PhysicsCore core ){
 		// setup the motion state for the ball
 		DefaultMotionState fallMotionState = new DefaultMotionState(
 				pose);

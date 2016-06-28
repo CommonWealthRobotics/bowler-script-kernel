@@ -15,8 +15,10 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager{
 	private float muscleStrength=(float) 1000;
 	boolean flagBroken=false;
 	private double velocity;
-	public HingeCSGPhysicsManager(CSG baseCSG, Transform pose, double mass) {
-		super(baseCSG, pose, mass,false);
+	private PhysicsCore core;
+	public HingeCSGPhysicsManager(CSG baseCSG, Transform pose, double mass,PhysicsCore core) {
+		super(baseCSG, pose, mass,false,core);
+		this.core = core;
 		baseCSG.setColor(Color.YELLOW);
 	}
 	@Override
@@ -28,9 +30,9 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager{
 			if(constraint.getAppliedImpulse()>muscleStrength){
 				baseCSG.setColor(Color.RED);
 				flagBroken=true;
-				PhysicsEngine.remove(this);
+				core.remove(this);
 				setConstraint(null);
-				PhysicsEngine.add (this);
+				core.add (this);
 			}
 		}else if (constraint!=null && flagBroken){
 			constraint.enableAngularMotor(false, 0, 0);
