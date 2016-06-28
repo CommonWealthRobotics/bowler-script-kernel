@@ -87,33 +87,29 @@ public class ConfigurationDatabase {
 	}
 
 	public static String getGitSource() throws Exception {
-		if (ScriptingEngine.hasNetwork()){
-			if(!checked){
-				checked = true;
-				if (ScriptingEngine.isLoginSuccess()) {
-					
-					ScriptingEngine.setAutoupdate(true);
-					org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
-					GHMyself self = github.getMyself();
-					Map<String, GHRepository> myPublic = self.getAllRepositories();
-					for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
-						if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName().equals(self.getName())) {
-							GHRepository ghrepo = entry.getValue();
-							setRepo(ghrepo);
-						}
+		if(!checked){
+			checked = true;
+			if (ScriptingEngine.hasNetwork()&&ScriptingEngine.isLoginSuccess()) {
+
+				ScriptingEngine.setAutoupdate(true);
+				org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
+				GHMyself self = github.getMyself();
+				Map<String, GHRepository> myPublic = self.getAllRepositories();
+				for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
+					if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName().equals(self.getName())) {
+						GHRepository ghrepo = entry.getValue();
+						setRepo(ghrepo);
 					}
-					if(gitSource==null){
-						GHRepository  defaultRep = github.getRepository("NeuronRobotics/" + repo);
-						GHRepository  forkedRep =  defaultRep.fork();
-						setRepo(forkedRep);
-					}
-				}else{
-					ConfigurationDatabase.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
 				}
+				if(gitSource==null){
+					GHRepository  defaultRep = github.getRepository("NeuronRobotics/" + repo);
+					GHRepository  forkedRep =  defaultRep.fork();
+					setRepo(forkedRep);
+				}
+			}else{
+				ConfigurationDatabase.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
 			}
 			
-		}else{
-			ConfigurationDatabase.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
 		}
 		return gitSource;
 
