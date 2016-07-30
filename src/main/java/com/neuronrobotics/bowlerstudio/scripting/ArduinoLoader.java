@@ -49,7 +49,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 		
 		System.out.println("Arduino Load: \n"+execString);
 		run(getARDUINOExec()+" --install-library BowlerCom");
-		//run(getARDUINOExec()+" --get-pref ");
+		run(getARDUINOExec()+" --install-boards Intel:arc32");
 		run(execString);
 		
 		return null;
