@@ -13,6 +13,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 	
 	private static String defaultPort = null;
 	private static String defaultBoard = null;
+	private static boolean loadedBowler=false;
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -48,14 +49,22 @@ public class ArduinoLoader implements IScriptingLanguage {
 		execString += " --upload "+ino.getAbsolutePath();
 		
 		System.out.println("Arduino Load: \n"+execString);
-		run(getARDUINOExec()+" --install-library BowlerCom");
-		run(getARDUINOExec()+" --install-boards Intel:arc32");
+		if(!loadedBowler){
+			loadedBowler=true;
+			run(getARDUINOExec()+" --install-library BowlerCom");
+		}
 		run(execString);
 		
 		return null;
 	}
 	
-	public void run(String execString)throws Exception {
+	public static void installBoard(String product,String arch) throws Exception{
+		run(getARDUINOExec()+" --install-boards "+product+":"+arch);
+	}
+	public static void installLibrary(String lib) throws Exception{
+		run(getARDUINOExec()+" --install-library "+lib);
+	}
+	public static void run(String execString)throws Exception {
 		 // Get runtime
         java.lang.Runtime rt = java.lang.Runtime.getRuntime();
         // Start a new process
