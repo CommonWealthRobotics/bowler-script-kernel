@@ -66,16 +66,19 @@ public class Vitamins {
 			try{
 				CSG newVitamin=null;
 				HashMap<String, Object> script = getMeta( type);
-				ArrayList<Object> servoMeasurments = new ArrayList<Object>();
-				servoMeasurments.add(id);
-				newVitamin=(CSG)ScriptingEngine
-	            .gitScriptRun(
-	            		script.get("scriptGit").toString(), // git location of the library
-	            		script.get("scriptFile").toString(), // file to load
-	                      servoMeasurments
-	            );
-				
-				fileLastLoaded.put(type+id, newVitamin );
+				Object file = script.get("scriptGit");
+				Object repo = script.get("scriptFile");
+				if(file!=null&&repo!=null){
+					ArrayList<Object> servoMeasurments = new ArrayList<Object>();
+					servoMeasurments.add(id);
+					newVitamin=(CSG)ScriptingEngine
+		            .gitScriptRun(
+		            		script.get("scriptGit").toString(), // git location of the library
+		            		script.get("scriptFile").toString(), // file to load
+		                      servoMeasurments
+		            );
+					fileLastLoaded.put(type+id, newVitamin );
+				}
 			}catch(Exception e){
 				gitRpoDatabase = defaultgitRpoDatabase;
 				databaseSet.clear();
