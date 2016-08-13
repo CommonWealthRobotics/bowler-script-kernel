@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.neuronrobotics.imageprovider.NativeResource;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.STL;
@@ -61,8 +62,8 @@ public class Vitamins {
 	}
 	
 	public static CSG get(String type,String id) throws Exception{
-		
-		if(fileLastLoaded.get(type+id) ==null ){
+		String key = type+id;
+		if(fileLastLoaded.get(key) ==null ){
 			try{
 				CSG newVitamin=null;
 				HashMap<String, Object> script = getMeta( type);
@@ -77,9 +78,12 @@ public class Vitamins {
 		            		script.get("scriptFile").toString(), // file to load
 		                      servoMeasurments
 		            );
-					fileLastLoaded.put(type+id, newVitamin );
+					fileLastLoaded.put(key, newVitamin );
+				}else{
+					Log.error(key+" Failed to load from script");
 				}
 			}catch(Exception e){
+				e.printStackTrace();
 				gitRpoDatabase = defaultgitRpoDatabase;
 				databaseSet.clear();
 				fileLastLoaded.clear();
@@ -87,7 +91,10 @@ public class Vitamins {
 			}
 
 		}
-		return fileLastLoaded.get(type+id).clone() ;
+		
+		CSG vitToGet = fileLastLoaded.get(type+id);
+		//System.err.println("Loading "+vitToGet);
+		return vitToGet;
 	}
 	
 	
