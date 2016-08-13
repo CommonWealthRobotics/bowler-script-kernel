@@ -11,6 +11,7 @@ import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.STL;
+import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
@@ -67,6 +68,10 @@ public class Vitamins {
 			try{
 				CSG newVitamin=null;
 				HashMap<String, Object> script = getMeta( type);
+				StringParameter size = new StringParameter(	type+" Default",
+						id,
+						Vitamins.listVitaminSizes(type));
+				size.setStrValue(id);
 				Object file = script.get("scriptGit");
 				Object repo = script.get("scriptFile");
 				if(file!=null&&repo!=null){
