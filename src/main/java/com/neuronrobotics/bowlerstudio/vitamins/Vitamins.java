@@ -37,6 +37,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 public class Vitamins {
 	
+	private static String jsonRootDir = "json/";
 	private static final Map<String,CSG> fileLastLoaded = new HashMap<String,CSG>();
 	private static final Map<String,HashMap<String,HashMap<String,Object>>> databaseSet = 
 			new HashMap<String, HashMap<String,HashMap<String,Object>>>();
@@ -62,33 +63,16 @@ public class Vitamins {
 		return fileLastLoaded.get(resource.getAbsolutePath()).clone() ;
 	}
 	
-	public static CSG get(String type,String id) throws Exception{
-		String key = type+id;
+	public static CSG get(String type,String id, String purchasingVariant) throws Exception{
+		String key = type+id+purchasingVariant;
 		if(fileLastLoaded.get(key) ==null ){
+			
 			try{
-				CSG newVitamin=null;
-				HashMap<String, Object> script = getMeta( type);
-				StringParameter size = new StringParameter(	type+" Default",
-						id,
-						Vitamins.listVitaminSizes(type));
-				size.setStrValue(id);
-				Object file = script.get("scriptGit");
-				Object repo = script.get("scriptFile");
-				if(file!=null&&repo!=null){
-					ArrayList<Object> servoMeasurments = new ArrayList<Object>();
-					servoMeasurments.add(id);
-					newVitamin=(CSG)ScriptingEngine
-		            .gitScriptRun(
-		            		script.get("scriptGit").toString(), // git location of the library
-		            		script.get("scriptFile").toString(), // file to load
-		                      servoMeasurments
-		            );
-					fileLastLoaded.put(key, newVitamin );
-				}else{
-					Log.error(key+" Failed to load from script");
-				}
+				fileLastLoaded.put(key, get( type, id) );
 			}catch(Exception e){
 				e.printStackTrace();
+				e.printStackTrace(System.out);
+				
 				gitRpoDatabase = defaultgitRpoDatabase;
 				databaseSet.clear();
 				fileLastLoaded.clear();
@@ -100,6 +84,41 @@ public class Vitamins {
 		CSG vitToGet = fileLastLoaded.get(type+id);
 		//System.err.println("Loading "+vitToGet);
 		return vitToGet;
+	}
+	
+	public static CSG get(String type,String id) throws Exception{
+		String key = type+id;
+
+		try{
+			CSG newVitamin=null;
+			HashMap<String, Object> script = getMeta( type);
+			StringParameter size = new StringParameter(	type+" Default",
+					id,
+					Vitamins.listVitaminSizes(type));
+			size.setStrValue(id);
+			Object file = script.get("scriptGit");
+			Object repo = script.get("scriptFile");
+			if(file!=null&&repo!=null){
+				ArrayList<Object> servoMeasurments = new ArrayList<Object>();
+				servoMeasurments.add(id);
+				newVitamin=(CSG)ScriptingEngine
+	            .gitScriptRun(
+	            		script.get("scriptGit").toString(), // git location of the library
+	            		script.get("scriptFile").toString(), // file to load
+	                      servoMeasurments
+	            );
+				return newVitamin ;
+			}else{
+				Log.error(key+" Failed to load from script");
+				return null;
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			gitRpoDatabase = defaultgitRpoDatabase;
+			databaseSet.clear();
+			fileLastLoaded.clear();
+			return get( type, id);
+		}
 	}
 	
 	
@@ -135,7 +154,7 @@ public class Vitamins {
 			ScriptingEngine.pushCodeToGit(
 					getGitRpoDatabase() ,// git repo, change this if you fork this demo
 				"master", // branch or tag
-				"json/"+type+".json", // local path to the file in git
+				getRootFolder()+type+".json", // local path to the file in git
 				jsonString, // content of the file
 				"Pushing changed Database");//commit message
 			
@@ -193,7 +212,7 @@ public class Vitamins {
 				f = ScriptingEngine
 										.fileFromGit(
 												getGitRpoDatabase(),// git repo, change this if you fork this demo
-											"json/"+type+".json"// File from within the Git repo
+											getRootFolder()+type+".json"// File from within the Git repo
 										);
 				inPut = FileUtils.openInputStream(f);
 				
@@ -211,6 +230,10 @@ public class Vitamins {
 		return databaseSet.get(type);
 
 	}
+
+	private static String getRootFolder() {
+		return getJsonRootDir();
+	}
 	
 	public static ArrayList<String> listVitaminTypes(){
 		
@@ -220,7 +243,7 @@ public class Vitamins {
 			folder = ScriptingEngine
 					.fileFromGit(
 							getGitRpoDatabase() ,// git repo, change this if you fork this demo
-						"json/hobbyServo.json"// File from within the Git repo
+						getRootFolder() + "hobbyServo.json"
 					);
 			File[] listOfFiles = folder.getParentFile().listFiles();
 			
@@ -274,6 +297,14 @@ public class Vitamins {
 	}
 	public static void setGitRpoDatabase(String gitRpoDatabase) {
 		Vitamins.gitRpoDatabase = gitRpoDatabase;
+	}
+
+	public static String getJsonRootDir() {
+		return jsonRootDir;
+	}
+
+	public static void setJsonRootDir(String jsonRootDir) {
+		Vitamins.jsonRootDir = jsonRootDir;
 	}
 	
 	
