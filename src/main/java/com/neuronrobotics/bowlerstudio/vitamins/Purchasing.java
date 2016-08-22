@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.neuronrobotics.imageprovider.NativeResource;
 import com.neuronrobotics.sdk.common.Log;
@@ -21,6 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -192,14 +197,34 @@ public class Purchasing {
 	public static ArrayList<String> listVitaminVariants(String type, String size){
 		
 		ArrayList<String> types = new ArrayList<String>();
-		HashMap<String, HashMap<String, PurchasingData>> database = getDatabase( type);
+		HashMap<String, PurchasingData> database = getDatabase( type).get(size);
 		Set<String> keys = database.keySet();
-		for(String s:keys){
-			HashMap<String, PurchasingData> purchaseData = database.get(s);
-			for(String variant:purchaseData.keySet()){
-				if(!variant.endsWith("variant-1"))// exclude the stub generated purhcasing data
+		
+		for(String variant:keys){
+			PurchasingData pd = database.get(variant);
+			if(!variant.endsWith("variant-1"))// exclude the stub generated purhcasing data
+			{
+				try{
+					URL u = new URL (pd.getAPIUrl() );
+					HttpURLConnection huc =  ( HttpURLConnection )  u.openConnection (); 
+					huc.setRequestMethod ("GET");  //OR  huc.setRequestMethod ("HEAD"); 
+					huc.connect () ; 
+					huc.getResponseCode() ;
+					huc.disconnect();
+					u = new URL (pd.getCartUrl() );
+					huc =  ( HttpURLConnection )  u.openConnection (); 
+					huc.setRequestMethod ("GET");  //OR  huc.setRequestMethod ("HEAD"); 
+					huc.connect () ; 
+					huc.getResponseCode() ;
+					huc.disconnect();
 					types.add(variant);
+				}catch (java.net.ConnectException ce){
+					// server or cart is not availible, reject vitamin
+				}catch(Exception ex){
+					ex.printStackTrace();
+				}
 			}
+			
 		}
 		
 		return types;
