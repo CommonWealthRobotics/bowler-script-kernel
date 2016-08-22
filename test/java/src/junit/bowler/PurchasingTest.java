@@ -50,26 +50,23 @@ public class PurchasingTest {
 			
 			for(String vit:Vitamins.listVitaminSizes(vitaminsType)){
 				String vitaminSize=vit;
-
-				try{
-					//System.out.println("\tConfig = "+vitaminSize);
-					HashMap<String, PurchasingData> config = Purchasing.getConfiguration(vitaminsType, vitaminSize);
-					//System.out.println(config);
-//					for(String param: config.keySet()){
-//						System.out.println("\t\t"+param+" = "+config.get(param));
-//					}
-					String key = vitaminSize+"-variant-1";
-					PurchasingData pd = new PurchasingData();
-					Purchasing.setParameter(vitaminsType, vitaminSize, key, pd);
-					
-				}catch (Exception e){
-					e.printStackTrace();
+				for(String variant:Purchasing.listVitaminVariants(vitaminsType, vitaminSize)){
+					try{
+						//System.out.println("\tConfig = "+vitaminSize);
+						PurchasingData purchasing = Purchasing.get(vitaminsType, vitaminSize, variant);
+						if(purchasing!=null)
+							System.out.println("Purchasing: "+purchasing+" = "+" "+variant);
+						else
+							System.out.println("FAILED: "+vitaminsType+" "+ vitaminSize+" "+variant);
+			
+					}catch (Exception e){
+						e.printStackTrace();
+					}
 				}
-
 
 			}
 			
-			System.out.println(Purchasing.makeJson(vitaminsType));
+			//System.out.println(Purchasing.makeJson(vitaminsType));
 		}
 //		for(String vitaminsType: Vitamins.listVitaminTypes())
 //		try {

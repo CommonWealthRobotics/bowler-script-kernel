@@ -228,7 +228,7 @@ public class Vitamins {
 				inPut = FileUtils.openInputStream(f);
 				
 				jsonString= IOUtils.toString(inPut);
-				System.out.println("Loading "+jsonString);
+				//System.out.println("Loading "+jsonString);
 				// perfoem the GSON parse
 				HashMap<String,HashMap<String,Object>> database=gson.fromJson(jsonString, TT_mapStringString);
 				if(database==null)
@@ -314,7 +314,7 @@ public class Vitamins {
 							ghrepo.getOwnerName().contentEquals(self.getLogin())){
 						
 						String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "https://");
-						System.out.println("Using my version of Viamins: "+myAssets);
+						//System.out.println("Using my version of Viamins: "+myAssets);
 						setGitRpoDatabase(myAssets);
 					}
 				}
