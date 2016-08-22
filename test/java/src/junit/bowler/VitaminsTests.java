@@ -5,6 +5,7 @@ package junit.bowler;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import org.junit.Before;
@@ -28,12 +29,19 @@ public class VitaminsTests {
 
 	@Test
 	public void test() {
-		try{
-			ScriptingEngine.setupAnyonmous();
-			
-		}catch (Exception ex){
-			System.out.println("User not logged in, test can not run");
+		try {
+			ScriptingEngine.runLogin();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
+		if(!ScriptingEngine.isLoginSuccess())
+			try{
+				ScriptingEngine.setupAnyonmous();
+				
+			}catch (Exception ex){
+				System.out.println("User not logged in, test can not run");
+			}
 		for(String vitaminsType: Vitamins.listVitaminTypes()){
 			HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
 			System.out.println("Type = "+vitaminsType);
@@ -54,6 +62,13 @@ public class VitaminsTests {
 				}
 				
 			}
+			System.out.println(Vitamins.makeJson(vitaminsType));
+//			try {
+//				Vitamins.saveDatabase(vitaminsType);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		}
 	}
 

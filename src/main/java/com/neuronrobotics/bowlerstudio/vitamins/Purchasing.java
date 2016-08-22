@@ -189,6 +189,31 @@ public class Purchasing {
 		return types;
 	}
 	
+	public static ArrayList<String> listVitaminVariants(String type, String size){
+		
+		ArrayList<String> types = new ArrayList<String>();
+		HashMap<String, HashMap<String, PurchasingData>> database = getDatabase( type);
+		Set<String> keys = database.keySet();
+		for(String s:keys){
+			HashMap<String, PurchasingData> purchaseData = database.get(s);
+			for(String variant:purchaseData.keySet()){
+				if(!variant.endsWith("variant-1"))// exclude the stub generated purhcasing data
+					types.add(variant);
+			}
+		}
+		
+		return types;
+	}
+	
+	public static PurchasingData get(String type,String size, String variant){
+		try{
+			return getDatabase( type).get(size).get(variant);
+		}catch (NullPointerException ex){
+			throw new RuntimeException("Vitamin "+type+" "+size+" "+variant+" does not exist");
+		}
+	}
+	
+	
 	
 	public static String getGitRpoDatabase() throws IOException {
 		return gitRpoDatabase;

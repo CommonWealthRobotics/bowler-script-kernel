@@ -11,6 +11,9 @@ import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.STL;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
+import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -22,8 +25,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
+import org.apache.batik.parser.LengthPairListParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -66,6 +71,12 @@ public class Vitamins {
 	public static CSG get(String type,String id, String purchasingVariant) throws Exception{
 		String key = type+id+purchasingVariant;
 		if(fileLastLoaded.get(key) ==null ){
+			PurchasingData purchasData = Purchasing.get(type, id, purchasingVariant);
+			for(String variable:purchasData.getVariantParameters().keySet() ){
+				double data = purchasData.getVariantParameters().get(variable);
+				LengthParameter parameter = new LengthParameter(variable, data, (ArrayList<Double>) Arrays.asList(data,data));
+				parameter.setMM(data);
+			}
 			
 			try{
 				fileLastLoaded.put(key, get( type, id) );
@@ -135,21 +146,16 @@ public class Vitamins {
 		if(database.get(id)==null){
 			database.put(id, new  HashMap<String, Object>());
 		}
-		if(database.get(id).isEmpty()){
-			//check to see if this is emptybecause it is a new file in the upstream database
-			databaseSet.remove(type);
-			database =  getDatabase(type);
-		}
-		if(database.get(id)==null){
-			database.put(id, new  HashMap<String, Object>());
-		}
 		return database.get(id);
+	}
+	public static String makeJson(String type) {
+		return gson.toJson(getDatabase( type), TT_mapStringString);
 	}
 	
 	public static void saveDatabase(String type) throws Exception{
 		
 		// Save contents and publish them
-		String jsonString = gson.toJson(getDatabase( type), TT_mapStringString); 
+		String jsonString = makeJson(type); 
 		try{
 			ScriptingEngine.pushCodeToGit(
 					getGitRpoDatabase() ,// git repo, change this if you fork this demo
@@ -193,7 +199,12 @@ public class Vitamins {
 	public static void setParameter(String type, String id, String parameterName, Object parameter) throws Exception{
 		
 		HashMap<String, Object> config = getConfiguration( type, id);
-		config.put(parameterName, parameter);
+		try{
+			config.put(parameterName, Double.parseDouble(parameter.toString()));
+		}catch(NumberFormatException ex){
+			config.put(parameterName,parameter);
+		}
+		
 		//saveDatabase(type);
 	}
 	
@@ -217,13 +228,29 @@ public class Vitamins {
 				inPut = FileUtils.openInputStream(f);
 				
 				jsonString= IOUtils.toString(inPut);
+				System.out.println("Loading "+jsonString);
 				// perfoem the GSON parse
 				HashMap<String,HashMap<String,Object>> database=gson.fromJson(jsonString, TT_mapStringString);
 				if(database==null)
 					throw new RuntimeException("create a new one");
 				databaseSet.put(type, database);
 				
+				for(String key:databaseSet.get(type).keySet() ){
+					HashMap<String,Object> conf = database.get(key);
+					for (String confKey: conf.keySet()){
+						try{
+							double num =Double.parseDouble(conf.get(confKey).toString());
+							conf.put(confKey,num);
+						}catch (NumberFormatException ex){
+							//ex.printStackTrace();
+							// leave as a string
+							conf.put(confKey,conf.get(confKey).toString());
+						}
+					}
+				}
+				
 			} catch (Exception e) {
+				e.printStackTrace();
 				databaseSet.put(type, new HashMap<String,HashMap<String,Object>>());
 			}
 		}
