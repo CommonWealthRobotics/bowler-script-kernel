@@ -3,32 +3,29 @@ package com.neuronrobotics.bowlerstudio.vitamins;
 import java.util.HashMap;
 
 public class PurchasingData {
-	private String size;
-	private String variant;
-	private HashMap<String, String> variantParameters;
+	private HashMap<String, Double> variantParameters ;
 	private HashMap<Integer, Double>  pricsUSD;
 	private String 	urlAPI;
 	private String 	db;
 	private String serverType;
 	private String cartURL;
 	
-	public HashMap<String, String> getVariantParameters() {
+	public PurchasingData(){
+		variantParameters = new HashMap<>();
+		variantParameters.put("Bolt Length", 10.0);
+		pricsUSD = new HashMap<>();
+		pricsUSD.put(1, 0.02);
+		urlAPI = "http://localhost:8069/";
+		db="testdatabse" ;
+		serverType="odoo";
+		cartURL="http://localhost:8069/shop/product/m3-socket-cap-screw-73";
+	}
+	
+	public HashMap<String, Double> getVariantParameters() {
 		return variantParameters;
 	}
-	public void setVariantParameters(HashMap<String, String> variantParameters) {
+	public void setVariantParameters(HashMap<String, Double> variantParameters) {
 		this.variantParameters = variantParameters;
-	}
-	public String getVariant() {
-		return variant;
-	}
-	public void setVariant(String variant) {
-		this.variant = variant;
-	}
-	public String getSize() {
-		return size;
-	}
-	public void setSize(String size) {
-		this.size = size;
 	}
 
 	public double getPricsUSD(int qty) {
@@ -61,6 +58,22 @@ public class PurchasingData {
 	}
 	public void setCartUrl(String cartURL) {
 		this.cartURL = cartURL;
+	}
+	@Override
+	public String toString(){
+		String s = "\n";
+		s+="urlAPI "+urlAPI+"\n";
+		s+="db "+db+"\n";
+		s+="serverType "+serverType+"\n";
+		s+="cartURL "+cartURL+"\n";
+		for(String key: variantParameters.keySet()){
+			s+="variable "+key+" to "+variantParameters.get(key)+"\n";
+		}
+		for(Integer key: pricsUSD.keySet()){
+			s+="Price at "+key+" = "+pricsUSD.get(key)+"\n";
+		}
+		
+		return s;
 	}
 	
 }
