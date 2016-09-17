@@ -118,14 +118,17 @@ repositories {
 }
 
 dependencies {
+	
 	compile 'gov.nist.math:jama:1.0.2'
 
 	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6'
 
 	compile group: 'org.reactfx', name: 'reactfx', version: '2.0-SNAPSHOT'
-
+		
 	compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.3.7';
-
+//make grapes work
+		compile group: 'org.apache.ivy', name:'ivy', version:'2.2.0'
+			
 	compile group: 'org.controlsfx', name: 'controlsfx', version: '8.0.6'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.7'
@@ -229,6 +232,9 @@ dependencies {
 	
 	//Weka 
 	compile 'nz.ac.waikato.cms.weka:weka-stable:3.6.13'
+	
+	//Firmata
+	compile 'com.github.kurbatov:firmata4j:2.3.4.1'
 
 	
 	testCompile 'junit:junit:4.10'
