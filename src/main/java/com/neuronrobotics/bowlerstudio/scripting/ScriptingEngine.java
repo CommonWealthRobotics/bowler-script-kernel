@@ -624,7 +624,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 			}
 			git.commit().setAll(true).setMessage(commitMessage).call();
 			git.push().setCredentialsProvider(cp).call();
-			System.out.println("Pushed file: " + desired);
+			System.out.println("PUSH OK! file: " + desired);
 		} catch (Exception ex) {
 			git.close();
 			throw ex;
@@ -647,10 +647,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	}
 	
 	private static String[] codeFromGistID(String id, String FileName)  throws Exception{
-	
-	    File targetFile = fileFromGit("https://gist.github.com/"+id+".git",FileName);
+		String giturl = "https://gist.github.com/"+id+".git";
+		
+	    File targetFile = fileFromGit(giturl,FileName);
 		if(targetFile.exists()){
-			//System.err.println("Loading file: "+targetFile.getAbsoluteFile());
+			System.err.println("Gist at GIT : "+giturl);
 			//Target file is ready to go
 			 String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())), StandardCharsets.UTF_8);
 			 return new String[] { text, FileName , targetFile.getAbsolutePath()};
@@ -750,8 +751,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 		
 		if(!gitRepoFile.exists()){
 
-			System.out.println("Cloning files to: "+localPath);
 			System.out.println("Cloning files from: "+remoteURI);
+			System.out.println("                to: "+localPath);
 			for(int i=0;i<5;i++){
 				 //Clone the repo
 			    try {
@@ -833,7 +834,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	public static Object inlineScriptRun(File code, ArrayList<Object> args,String activeType) throws Exception {
 		if(filesRun.get(code.getName()) == null ){
 			filesRun.put(code.getName(),code);
-			System.out.println("Loading "+code.getAbsolutePath());
+			//System.out.println("Loading "+code.getAbsolutePath());
 		}
 			
 		for (IScriptingLanguage l:getLangauges()){
