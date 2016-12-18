@@ -200,7 +200,6 @@ dependencies {
 	//compile group:'com.github.ellzord', name:'JALSE', version:'1.0.9'
 	
 	compile group:'de.huxhorn.sulky', name:'de.huxhorn.sulky.3rdparty.jlayer', version:'1.0'
-	compile 'com.fifesoft:rsyntaxtextarea:2.5.6'
     //compile("org.springframework.boot:spring-boot-starter-web:1.2.7.RELEASE")
     
     compile 'com.google.code.gson:gson:2.5'
