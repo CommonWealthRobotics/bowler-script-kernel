@@ -46,7 +46,8 @@ public class ArduinoLoader implements IScriptingLanguage {
 			System.out.println("Error: no .ino file found!");
 			return null;
 		}
-		execString += " --upload '"+ino.getAbsolutePath()+"'";
+		execString += " --upload "+ino.getAbsolutePath().replaceAll(" ", "\\ ");
+;
 		
 		System.out.println("Arduino Load: \n"+execString);
 		if(!loadedBowler){
