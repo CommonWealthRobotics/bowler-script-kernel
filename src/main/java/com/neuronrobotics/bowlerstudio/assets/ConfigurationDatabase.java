@@ -15,7 +15,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 public class ConfigurationDatabase {
 	private static final String repo = "BowlerStudioConfiguration";
-	private static final String HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT = "https://github.com/NeuronRobotics/"+repo+".git";
+	private static final String HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT = "https://github.com/CommonWealthRobotics/"+repo+".git";
 
 	private static String gitSource = null; // madhephaestus
 	private static String dbFile= "database.json";
@@ -102,7 +102,7 @@ public class ConfigurationDatabase {
 					}
 				}
 				if(gitSource==null){
-					GHRepository  defaultRep = github.getRepository("NeuronRobotics/" + repo);
+					GHRepository  defaultRep = github.getRepository("CommonWealthRobotics/" + repo);
 					GHRepository  forkedRep =  defaultRep.fork();
 					setRepo(forkedRep);
 				}

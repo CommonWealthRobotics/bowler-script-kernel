@@ -675,9 +675,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets sa
 	public static File fileFromGit(String remoteURI, String fileInRepo ) throws InvalidRemoteException, TransportException, GitAPIException, IOException{
 		return fileFromGit(remoteURI,"master",fileInRepo);
 	}
-	//git@github.com:NeuronRobotics/BowlerStudioVitamins.git
+	//git@github.com:CommonWealthRobotics/BowlerStudioVitamins.git
 	//or
-	//https://github.com/NeuronRobotics/BowlerStudioVitamins.git
+	//https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git
 	public static File fileFromGit(String remoteURI,String branch, String fileInRepo ) throws InvalidRemoteException, TransportException, GitAPIException, IOException{
 		File gitRepoFile =cloneRepo(remoteURI,branch);
 		String id  = gitRepoFile.getAbsolutePath();
