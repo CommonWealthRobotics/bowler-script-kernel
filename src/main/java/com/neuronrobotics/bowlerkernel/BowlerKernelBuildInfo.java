@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
  */
 public class BowlerKernelBuildInfo {
 	/** The Constant NAME. */
-	private static final String NAME = "Neuron Robotics SDK "
+	private static final String NAME = "CommonWealthRobotics SDK "
 			+ getProtocolVersion() + "." + getSDKVersion() + "("
 			+ getBuildVersion() + ")";
 
