@@ -1,14 +1,13 @@
-#Bowler Kernel Scripting environment
+# Bowler Kernel Scripting environment
 
 [![Join the chat at https://gitter.im/NeuronRobotics/bowler-script-kernel](https://badges.gitter.im/NeuronRobotics/bowler-script-kernel.svg)](https://gitter.im/NeuronRobotics/bowler-script-kernel?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-This is the core kernel mechanism for the Bowler operating system. it
-consists of a modular scripting environment. This engine passes Lists of JVM objects back and forth across languages. This lets you mix Java, Groovy, Clojure and Python within a single memory sharing application. The sources are stored in git repos and hyperlink at the source level to add modules. You can call this application from the command line like bash and pass it scripts to run sequentially or pipe the output from one into the input of another.
+This is the core kernel mechanism for the Bowler operating system. It consists of a modular scripting environment. This engine passes Lists of JVM objects back and forth across languages, letting you mix Java, Groovy, Clojure and Python within a single memory sharing application. The sources are stored in git repos and hyperlink at the source level to add modules. You can call this application from the command line like bash and pass it scripts to run sequentially or pipe the output from one into the input of another.
 
-##All platforms 
+## All platforms 
  You need to use the installer from 
  * [BowlerStudio Installer](https://github.com/NeuronRobotics/BowlerStudio/releases)
  
-##Usage
+## Usage
 This will let you pass code snippets directly to the scripting engine
 ```
 Object returnVal = ScriptingEngine.inlineScriptRun(String code, ArrayList<Object> args,ShellType activeType)
@@ -27,7 +26,7 @@ Object returnVal = ScriptingEngine.inlineGistScriptRun("d4312a0787456ec27a2a", "
 
 
 # Embed as a library in your projects
-##Maven
+## Maven
 ```
 <dependency>
   <groupId>com.neuronrobotics</groupId>
@@ -35,19 +34,19 @@ Object returnVal = ScriptingEngine.inlineGistScriptRun("d4312a0787456ec27a2a", "
   <version>0.25.0</version>
 </dependency>
 ```
-##Gradle
+## Gradle
 ```
 dependencies {
  compile "com.neuronrobotics:BowlerScriptingKernel:0.25.0"
 }
 ```
-###Macs Only
+### Macs Only
 
-In the terminal before running the jar you must run:
+In Terminal, before running the jar you must run:
 ```
 export OPENCV_DIR=<path to yout BowlerStudio.app>BowlerStudio.app/Contents/MacOS/opencv249build/
 ```
-##All platforms 
+## All platforms 
 ```
   Usage: 
   
@@ -57,16 +56,16 @@ export OPENCV_DIR=<path to yout BowlerStudio.app>BowlerStudio.app/Contents/MacOS
   
   java -jar BowlerScriptKernel.jar -r <Groovy,Clojure,Jython> #Starts a repl fo interactive robot coding
 ```
-#Adding additional languages
+# Adding additional languages
 
-##Create Enum
-First, add a field to com.neuronrobotics.bowlerstudio.scripting.ShellType
+## Create Enum
+First, add a field to com.neuronrobotics.bowlerstudio.scripting.ShellType:
 ```
   NEWSCRIPT("Display name of NewScript"),
 ```
 
-##Create execution class
-Second create a class with methods for running a script. To do this implement IScriptingLanguage.
+## Create execution class
+Second, create a class with methods for running a script. To do this implement IScriptingLanguage:
 
 ```
   package com.neuronrobotics.bowlerstudio.scripting;
@@ -101,9 +100,9 @@ Second create a class with methods for running a script. To do this implement IS
   
   }
 ```
-##Add execution class to ScriptingEngine
+## Add execution class to ScriptingEngine
 
-Finally in the static {} method of ScriptingEngine, add your new Scripting languages to the internal list of supported languages. 
+Finally, in the static method of ScriptingEngine, add your new Scripting languages to the internal list of supported languages:
 
 ```
   addScriptingLanguage(new NewScriptHelper());
