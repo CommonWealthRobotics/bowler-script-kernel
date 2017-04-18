@@ -41,7 +41,9 @@ public class JettyTest {
 			System.out.println("User not logged in, test can not run");
 		}
 		File indexOfTutorial = ScriptingEngine
-				.fileFromGit("https://github.com/CommonWealthRobotics/CommonWealthRobotics.github.io.git", "index.html");
+				.fileFromGit("https://github.com/CommonWealthRobotics/CommonWealthRobotics.github.io.git",
+						"master",// the default branch is source, so this needs to be specified
+						"index.html");
 
 		// HOME_Local_URL = indexOfTutorial.toURI().toString().replace("file:/",
 		// "file:///");
