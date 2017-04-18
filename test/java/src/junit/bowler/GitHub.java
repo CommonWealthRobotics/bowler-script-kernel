@@ -81,6 +81,7 @@ public class GitHub {
 		String asstsRepo="https://github.com/madhephaestus/BowlerStudioImageAssets.git";
 		
 		// https://github.com/madhephaestus/BowlerStudioImageAssets.git
+		ScriptingEngine.deleteRepo(asstsRepo);
 		List<Ref> call = ScriptingEngine.listBranches(asstsRepo);
 		System.out.println("Branches # " + call.size());
 		if (call.size() > 0) {
@@ -90,6 +91,7 @@ public class GitHub {
 			fail();
 		}
 		
+		ScriptingEngine.checkout(asstsRepo, call.get(0).getName());
 		call = ScriptingEngine.listLocalBranches(asstsRepo);
 		System.out.println("Local Branches # " + call.size());
 		if (call.size() > 0) {
@@ -100,23 +102,12 @@ public class GitHub {
 			fail();
 		}
 		//System.out.println("Creating branch # " );
-		ScriptingEngine.checkout(asstsRepo, "0.20.8");
-		try{
-			ScriptingEngine.deleteBranch(asstsRepo, "0.20.0");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		try{
-			ScriptingEngine.deleteBranch(asstsRepo, "0.20.9");
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		ScriptingEngine.newBranch(asstsRepo, "0.20.0");
-		try{
-			ScriptingEngine.deleteBranch(asstsRepo, "0.20.0");
-		}catch(Exception e){
-			e.printStackTrace();
-		}		
+//		ScriptingEngine.newBranch(asstsRepo, "0.20.0");
+//		try{
+//			ScriptingEngine.deleteBranch(asstsRepo, "0.20.0");
+//		}catch(Exception e){
+//			e.printStackTrace();
+//		}		
 		System.out.println("Current Branch # " +  ScriptingEngine.getFullBranch(asstsRepo));
 	}
 

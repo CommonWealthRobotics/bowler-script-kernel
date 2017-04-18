@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -43,6 +44,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.CredentialsProvider;
@@ -477,8 +479,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		loadLoginData();
 
 	}
+	public static void deleteRepo(String remoteURI){
 
-	private static void deleteFolder(File folder) {
+		File gitRepoFile = uriToFile(remoteURI);
+		deleteFolder(gitRepoFile.getParentFile());
+	}
+	public static void deleteCache() {
+		deleteFolder(new File(getWorkspace().getAbsolutePath() + "/gitcache/" ));
+	}
+	public static void deleteFolder(File folder) {
 		File[] files = folder.listFiles();
 		if (files != null) { // some JVMs return null for empty dirs
 			for (File f : files) {
@@ -486,6 +495,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					deleteFolder(f);
 				} else {
 					f.delete();
+					System.out.println("Deleting "+f.getAbsolutePath());
 				}
 			}
 		}
@@ -832,7 +842,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void newBranch(String remoteURI, String newBranch)
-			throws IOException, InvalidRemoteException, TransportException, GitAPIException {
+			throws Exception {
 		for (String s : listBranchNames(remoteURI)) {
 			if (s.contains(newBranch)) {
 				throw new RuntimeException(newBranch + " can not be created because " + s + " is to similar");
@@ -866,28 +876,56 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		git.close();
 
 	}
-
-	public static List<Ref> listBranches(String remoteURI) throws IOException {
+	
+	
+	private static boolean hasAtLeastOneReference(Git git) throws Exception {
+		Repository repo=git.getRepository();
+		Config storedConfig = repo.getConfig();
+		Set<String> uriList = repo.getConfig().getSubsections("remote");
+		String remoteURI=null;
+		for(String remoteName:uriList){
+			if(remoteURI==null)
+				remoteURI=storedConfig.getString("remote", remoteName, "url");;
+		}
+		long startTime = System.currentTimeMillis();
+		while(System.currentTimeMillis()<(startTime+2000)){
+		    for (Ref ref : repo.getAllRefs().values()) {
+		        if (ref.getObjectId() != null){
+		        	List<Ref> branchList = listBranches(remoteURI,git);
+		        	if(branchList.size()>0){
+		        		//System.out.println("Found "+branchList.size()+" branches");
+		        		return true;
+		        	}
+		        }
+		    }
+		}
+		throw new RuntimeException("No references or branches found!");
+	}
+	public static List<Ref> listBranches(String remoteURI) throws Exception {
 
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
 			gitRepoFile = cloneRepo(remoteURI, null);
+			return listBranches(remoteURI);
 		}
-
+		
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		// https://gist.github.com/0e6454891a3b3f7c8f28.git
+		List<Ref> Ret = new ArrayList<>();
 		Git git = new Git(localRepo);
-		try {
-			List<Ref> list = git.branchList().setListMode(ListMode.ALL).call();
-			git.close();
-			return list;
-		} catch (Exception ex) {
-
-		}
+		Ret=listBranches(remoteURI,git);
 		git.close();
-		return new ArrayList<>();
+		return Ret;
 	}
-
+	public static List<Ref> listBranches(String remoteURI,Git git) throws Exception {
+		
+		// https://gist.github.com/0e6454891a3b3f7c8f28.git
+		//System.out.println("Listing references from: "+remoteURI);
+		//System.out.println("                  branch: "+getFullBranch(remoteURI));
+		List<Ref> list = git.branchList().setListMode(ListMode.ALL).call();
+		//System.out.println("                  size  : "+list.size());
+		return list;
+	}
 	public static List<Ref> listLocalBranches(String remoteURI) throws IOException {
 
 		File gitRepoFile = uriToFile(remoteURI);
@@ -909,7 +947,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return new ArrayList<>();
 	}
 
-	public static List<String> listBranchNames(String remoteURI) throws IOException {
+	public static List<String> listBranchNames(String remoteURI) throws Exception {
 		ArrayList<String> branchNames = new ArrayList<>();
 
 		List<Ref> list = listBranches(remoteURI);
@@ -928,7 +966,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void checkout(String remoteURI, String branch) throws IOException {
 		//cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
-		String currentBranch=getFullBranch(remoteURI);
+		//String currentBranch=getFullBranch(remoteURI);
 		Repository localRepo = new FileRepository(gitRepoFile);
 //		if (!branch.contains("heads")) {
 //			branch = "heads/" + branch;
@@ -936,14 +974,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 //		if (!branch.contains("refs")) {
 //			branch = "refs/" + branch;
 //		}
-		System.out.println("Checking out "+branch+" : "+gitRepoFile.getAbsolutePath() );
+		//System.out.println("Checking out "+branch+" : "+gitRepoFile.getAbsolutePath() );
 		Git git = new Git(localRepo);
 		try {
 			git
 				.pull()
 				.setCredentialsProvider(cp)
 				.call();
-			git.checkout().setName(branch).call();
+			git
+				.checkout()
+				.setName(branch)
+				.call();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -971,13 +1012,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		
 		String gitSplit =colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
 		
-		File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+gitSplit);
+		File gistDir=new File(getWorkspace().getAbsolutePath()+"/gitcache/"+gitSplit);
 		if(!gistDir.exists()){
 			gistDir.mkdir();
 		}
 		String localPath=gistDir.getAbsolutePath();
 		File gitRepoFile = new File(localPath + "/.git");
-		
+		File dir = new File(localPath);
 		
 		if(!gitRepoFile.exists()){
 
@@ -986,15 +1027,36 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			for(int i=0;i<5;i++){
 				 //Clone the repo
 			    try {
-					Git.cloneRepository()
-					.setURI(remoteURI)
-					.setBranch(branch)
-					.setDirectory(new File(localPath))
-					.setCredentialsProvider(cp)
-					.call();
-					return gistDir;
+			    	if(branch == null){
+						Git git = Git.cloneRepository()
+						.setURI(remoteURI)
+						.setDirectory(dir)
+						.setCredentialsProvider(cp)
+						.call();
+			    		hasAtLeastOneReference(git);
+			    		branch=getFullBranch(remoteURI);
+			    		checkout(remoteURI, branch);
+						hasAtLeastOneReference(git);
+						git.close();
+						
+			    	}else{
+			    		Git git = Git.cloneRepository()
+						.setURI(remoteURI)
+						.setBranch(branch)
+						.setDirectory(dir)
+						.setCredentialsProvider(cp)
+						.call();
+			    		hasAtLeastOneReference(git);
+			    		checkout(remoteURI, branch);
+						hasAtLeastOneReference(git);
+			    		git.close();
+
+			    	}
+			    	
+					break;
 				} catch (Exception e) {
 					Log.error("Failed to clone "+remoteURI+" "+e);
+					e.printStackTrace();
 					deleteFolder(new File(localPath));
 				}
 			   ThreadUtil.wait(200*i);
@@ -1002,8 +1064,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		if (branch != null) {
 			try {
-
-				checkout(remoteURI, branch);
+		    	checkout(remoteURI, branch);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
