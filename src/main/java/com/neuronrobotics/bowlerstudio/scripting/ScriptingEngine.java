@@ -962,12 +962,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		File gitRepoFile = uriToFile(remoteURI);
 		//String currentBranch=getFullBranch(remoteURI);
 		Repository localRepo = new FileRepository(gitRepoFile);
-//		if (!branch.contains("heads")) {
-//			branch = "heads/" + branch;
-//		}
-//		if (!branch.contains("refs")) {
-//			branch = "refs/" + branch;
-//		}
+		if (!branch.contains("heads")) {
+			branch = "heads/" + branch;
+		}
+		if (!branch.contains("refs")) {
+			branch = "refs/" + branch;
+		}
 		//System.out.println("Checking out "+branch+" : "+gitRepoFile.getAbsolutePath() );
 		Git git = new Git(localRepo);
 		try {
