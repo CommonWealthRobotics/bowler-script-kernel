@@ -1017,7 +1017,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if(!gitRepoFile.exists()){
 
 			System.out.println("Cloning files from: "+remoteURI);
+			System.out.println("            branch: "+branch);
 			System.out.println("                to: "+localPath);
+			
+
 			for(int i=0;i<5;i++){
 				 //Clone the repo
 			    try {
