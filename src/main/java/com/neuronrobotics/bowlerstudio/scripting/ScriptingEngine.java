@@ -966,44 +966,38 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @return The local directory containing the .git
 	 */
 	public static File cloneRepo(String remoteURI, String branch) {
-		// new Exception().printStackTrace();
-		 String[] colinSplit =remoteURI.split(":");
+		//new Exception().printStackTrace();
+		String[] colinSplit =remoteURI.split(":");
 		
-		 String gitSplit =colinSplit[1].substring(0,
-		 colinSplit[1].lastIndexOf('.'));
+		String gitSplit =colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
 		
-		 File gistDir=new
-		 File(getWorkspace().getAbsolutePath()+"/gitcache/"+gitSplit);
-		 if(!gistDir.exists()){
-		 gistDir.mkdir();
-		 }
-		 String localPath=gistDir.getAbsolutePath();
-		 File gitRepoFile =new File(localPath+"/.git");
+		File gistDir=new File(getWorkspace().getAbsolutePath()+"/gistcache/"+gitSplit);
+		if(!gistDir.exists()){
+			gistDir.mkdir();
+		}
+		String localPath=gistDir.getAbsolutePath();
+		File gitRepoFile = new File(localPath + "/.git");
+		
+		
+		if(!gitRepoFile.exists()){
 
-		if (!gitRepoFile.exists()) {
-			//File gistDir = gitRepoFile.getParentFile();
-			//String localPath = gistDir.getAbsolutePath();
-			String gitFile=gitRepoFile.getAbsolutePath();
-			localPath =gitFile.substring(0, gitFile.lastIndexOf('.'));
-			
-			for (int i = 0; i < 5&&!gitRepoFile.exists(); i++) {
-				System.out.println("Cloning files from: " + remoteURI);
-				System.out.println("   try "+i+"        to: " + localPath);
-				// Clone the repo
-				try {
+			System.out.println("Cloning files from: "+remoteURI);
+			System.out.println("                to: "+localPath);
+			for(int i=0;i<5;i++){
+				 //Clone the repo
+			    try {
 					Git.cloneRepository()
-							.setURI(remoteURI)
-							.setBranch(branch)
-							.setBranchesToClone(Arrays.asList(branch) )
-
-							.setDirectory(new File(localPath))
-							.setCredentialsProvider(cp)
-							.call();
+					.setURI(remoteURI)
+					.setBranch(branch)
+					.setDirectory(new File(localPath))
+					.setCredentialsProvider(cp)
+					.call();
+					return gistDir;
 				} catch (Exception e) {
-					Log.error("Failed to clone " + remoteURI + " " + e);
+					Log.error("Failed to clone "+remoteURI+" "+e);
 					deleteFolder(new File(localPath));
 				}
-				ThreadUtil.wait(200 * i);
+			   ThreadUtil.wait(200*i);
 			}
 		}
 		if (branch != null) {
@@ -1015,9 +1009,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				e.printStackTrace();
 			}
 		}
-		String gitFile=gitRepoFile.getAbsolutePath();
-		localPath =gitFile.substring(0, gitFile.lastIndexOf('.'));
-		return new File(localPath);
+		return gistDir;
+
 	}
 
 	public static Git locateGit(File f) throws IOException {
