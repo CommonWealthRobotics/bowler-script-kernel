@@ -502,12 +502,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		folder.delete();
 	}
 
-	// private static ArrayList<String> filesInGist(String gistcode, String
-	// extnetion) throws Exception {
-	//
-	// return filesInGit("https://gist.github.com/"+gistcode+".git","master",
-	// extnetion);
-	// }
 
 	private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {
 		for (final File fileEntry : directory.listFiles()) {
@@ -545,7 +539,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static ArrayList<String> filesInGit(String remote) throws Exception {
-		return filesInGit(remote, "master", null);
+		return filesInGit(remote, ScriptingEngine.getFullBranch(remote), null);
 	}
 
 	// private static ArrayList<String> filesInGist(String id) throws Exception{
@@ -564,7 +558,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static File createFile(String git, String fileName, String commitMessage) throws Exception {
-		pushCodeToGit(git, "master", fileName, null, commitMessage);
+		pushCodeToGit(git,ScriptingEngine.getFullBranch(git), fileName, null, commitMessage);
 		return fileFromGit(git, fileName);
 	}
 
@@ -689,7 +683,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static File fileFromGit(String remoteURI, String fileInRepo)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-		return fileFromGit(remoteURI, "master", fileInRepo);
+		return fileFromGit(remoteURI, ScriptingEngine.getFullBranch(remoteURI), fileInRepo);
 	}
 
 	// git@github.com:CommonWealthRobotics/BowlerStudioVitamins.git

@@ -71,8 +71,9 @@ public class GitHub {
 		for (GHRepository g : watching) {
 			System.out.println("Watching " + g.getOwnerName() + " " + g.getFullName());
 		}
-		ArrayList<String> listofFiles = ScriptingEngine.filesInGit("https://github.com/madhephaestus/clojure-utils.git",
-				"master", null);
+		String gitURL ="https://github.com/madhephaestus/clojure-utils.git";
+		ArrayList<String> listofFiles = ScriptingEngine.filesInGit(gitURL,
+				ScriptingEngine.getFullBranch(gitURL), null);
 		if (listofFiles.size() == 0)
 			fail();
 		for (String s : listofFiles) {

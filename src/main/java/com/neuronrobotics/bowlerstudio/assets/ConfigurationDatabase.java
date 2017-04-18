@@ -57,7 +57,7 @@ public class ConfigurationDatabase {
 			 writeOut  =gson.toJson(database, TT_mapStringString); 
 		}
 		try {
-			ScriptingEngine.pushCodeToGit( getGitSource(),"master", getDbFile(), writeOut, "Saving database");
+			ScriptingEngine.pushCodeToGit( getGitSource(),ScriptingEngine.getFullBranch(getGitSource()), getDbFile(), writeOut, "Saving database");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
