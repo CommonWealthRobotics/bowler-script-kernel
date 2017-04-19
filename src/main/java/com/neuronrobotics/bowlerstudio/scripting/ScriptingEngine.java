@@ -940,7 +940,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		git.close();
 		return new ArrayList<>();
 	}
+	public static List<String> listLocalBranchNames(String remoteURI) throws Exception {
+		ArrayList<String> branchNames = new ArrayList<>();
 
+		List<Ref> list = listLocalBranches(remoteURI);
+		for (Ref ref : list) {
+			// System.out.println("Branch: " + ref + " " + ref.getName() + " " +
+			// ref.getObjectId().getName());
+			branchNames.add(ref.getName());
+		}
+		return branchNames;
+	}
 	public static List<String> listBranchNames(String remoteURI) throws Exception {
 		ArrayList<String> branchNames = new ArrayList<>();
 
