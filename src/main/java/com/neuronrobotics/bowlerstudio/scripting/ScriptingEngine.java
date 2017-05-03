@@ -47,6 +47,7 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -479,14 +480,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		loadLoginData();
 
 	}
-	public static void deleteRepo(String remoteURI){
+
+	public static void deleteRepo(String remoteURI) {
 
 		File gitRepoFile = uriToFile(remoteURI);
 		deleteFolder(gitRepoFile.getParentFile());
 	}
+
 	public static void deleteCache() {
-		deleteFolder(new File(getWorkspace().getAbsolutePath() + "/gitcache/" ));
+		deleteFolder(new File(getWorkspace().getAbsolutePath() + "/gitcache/"));
 	}
+
 	public static void deleteFolder(File folder) {
 		File[] files = folder.listFiles();
 		if (files != null) { // some JVMs return null for empty dirs
@@ -495,13 +499,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					deleteFolder(f);
 				} else {
 					f.delete();
-					System.out.println("Deleting "+f.getAbsolutePath());
+					System.out.println("Deleting " + f.getAbsolutePath());
 				}
 			}
 		}
 		folder.delete();
 	}
-
 
 	private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {
 		for (final File fileEntry : directory.listFiles()) {
@@ -558,7 +561,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static File createFile(String git, String fileName, String commitMessage) throws Exception {
-		pushCodeToGit(git,ScriptingEngine.getFullBranch(git), fileName, null, commitMessage);
+		pushCodeToGit(git, ScriptingEngine.getFullBranch(git), fileName, null, commitMessage);
 		return fileFromGit(git, fileName);
 	}
 
@@ -790,14 +793,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return branch;
 	}
 
-	public static void deleteBranch(String remoteURI, String toDelete) throws Exception{
-		boolean found =false;
+	public static void deleteBranch(String remoteURI, String toDelete) throws Exception {
+		boolean found = false;
 		for (String s : listBranchNames(remoteURI)) {
 			if (s.contains(toDelete)) {
-				found=true;
+				found = true;
 			}
 		}
-		if(!found)
+		if (!found)
 			throw new RuntimeException(toDelete + " can not be deleted because it does not exist");
 
 		File gitRepoFile = uriToFile(remoteURI);
@@ -806,9 +809,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-//		CreateBranchCommand bcc = null;
-//		CheckoutCommand checkout;
-//		String source = getFullBranch(remoteURI);
+		// CreateBranchCommand bcc = null;
+		// CheckoutCommand checkout;
+		// String source = getFullBranch(remoteURI);
 
 		Git git;
 
@@ -819,7 +822,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (!toDelete.contains("refs")) {
 			toDelete = "refs/" + toDelete;
 		}
-		Exception ex=null;
+		Exception ex = null;
 		try {
 			// delete branch 'branchToDelete' locally
 			git.branchDelete().setBranchNames(toDelete).call();
@@ -828,15 +831,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			RefSpec refSpec = new RefSpec().setSource(null).setDestination(toDelete);
 			git.push().setRefSpecs(refSpec).setRemote("origin").setCredentialsProvider(cp).call();
 		} catch (Exception e) {
-			ex=e;
+			ex = e;
 		}
 		git.close();
-		if(ex!=null)
+		if (ex != null)
 			throw ex;
 	}
 
-	public static void newBranch(String remoteURI, String newBranch)
-			throws Exception {
+	public static void newBranch(String remoteURI, String newBranch) throws Exception {
 		for (String s : listBranchNames(remoteURI)) {
 			if (s.contains(newBranch)) {
 				throw new RuntimeException(newBranch + " can not be created because " + s + " is to similar");
@@ -870,31 +872,33 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		git.close();
 
 	}
-	
-	
+
 	private static boolean hasAtLeastOneReference(Git git) throws Exception {
-		Repository repo=git.getRepository();
+		Repository repo = git.getRepository();
 		Config storedConfig = repo.getConfig();
 		Set<String> uriList = repo.getConfig().getSubsections("remote");
-		String remoteURI=null;
-		for(String remoteName:uriList){
-			if(remoteURI==null)
-				remoteURI=storedConfig.getString("remote", remoteName, "url");;
+		String remoteURI = null;
+		for (String remoteName : uriList) {
+			if (remoteURI == null)
+				remoteURI = storedConfig.getString("remote", remoteName, "url");
+			;
 		}
 		long startTime = System.currentTimeMillis();
-		while(System.currentTimeMillis()<(startTime+2000)){
-		    for (Ref ref : repo.getAllRefs().values()) {
-		        if (ref.getObjectId() != null){
-		        	List<Ref> branchList = listBranches(remoteURI,git);
-		        	if(branchList.size()>0){
-		        		//System.out.println("Found "+branchList.size()+" branches");
-		        		return true;
-		        	}
-		        }
-		    }
+		while (System.currentTimeMillis() < (startTime + 2000)) {
+			for (Ref ref : repo.getAllRefs().values()) {
+				if (ref.getObjectId() != null) {
+					List<Ref> branchList = listBranches(remoteURI, git);
+					if (branchList.size() > 0) {
+						// System.out.println("Found "+branchList.size()+"
+						// branches");
+						return true;
+					}
+				}
+			}
 		}
 		throw new RuntimeException("No references or branches found!");
 	}
+
 	public static List<Ref> listBranches(String remoteURI) throws Exception {
 
 		File gitRepoFile = uriToFile(remoteURI);
@@ -902,24 +906,26 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			gitRepoFile = cloneRepo(remoteURI, null);
 			return listBranches(remoteURI);
 		}
-		
+
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		// https://gist.github.com/0e6454891a3b3f7c8f28.git
 		List<Ref> Ret = new ArrayList<>();
 		Git git = new Git(localRepo);
-		Ret=listBranches(remoteURI,git);
+		Ret = listBranches(remoteURI, git);
 		git.close();
 		return Ret;
 	}
-	public static List<Ref> listBranches(String remoteURI,Git git) throws Exception {
-		
+
+	public static List<Ref> listBranches(String remoteURI, Git git) throws Exception {
+
 		// https://gist.github.com/0e6454891a3b3f7c8f28.git
-		//System.out.println("Listing references from: "+remoteURI);
-		//System.out.println("                  branch: "+getFullBranch(remoteURI));
+		// System.out.println("Listing references from: "+remoteURI);
+		// System.out.println(" branch: "+getFullBranch(remoteURI));
 		List<Ref> list = git.branchList().setListMode(ListMode.ALL).call();
-		//System.out.println("                  size  : "+list.size());
+		// System.out.println(" size : "+list.size());
 		return list;
 	}
+
 	public static List<Ref> listLocalBranches(String remoteURI) throws IOException {
 
 		File gitRepoFile = uriToFile(remoteURI);
@@ -940,6 +946,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		git.close();
 		return new ArrayList<>();
 	}
+
 	public static List<String> listLocalBranchNames(String remoteURI) throws Exception {
 		ArrayList<String> branchNames = new ArrayList<>();
 
@@ -951,6 +958,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		return branchNames;
 	}
+
 	public static List<String> listBranchNames(String remoteURI) throws Exception {
 		ArrayList<String> branchNames = new ArrayList<>();
 
@@ -968,45 +976,49 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void checkout(String remoteURI, String branch) throws IOException {
-		//cloneRepo(remoteURI, branch);
+		// cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
-		if(!gitRepoFile.exists() ||!gitRepoFile.getAbsolutePath().endsWith(".git") ){
-			System.err.println("Invailid git file!" +gitRepoFile.getAbsolutePath());
-			throw new RuntimeException("Invailid git file!" +gitRepoFile.getAbsolutePath());
+		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
+			System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
+			throw new RuntimeException("Invailid git file!" + gitRepoFile.getAbsolutePath());
 		}
-		//String currentBranch=getFullBranch(remoteURI);
-		Repository localRepo = new FileRepository(gitRepoFile);
-//		if (!branch.contains("heads")) {
-//			branch = "heads/" + branch;
-//		}
-//		if (!branch.contains("refs")) {
-//			branch = "refs/" + branch;
-//		}
-		//System.out.println("Checking out "+branch+" : "+gitRepoFile.getAbsolutePath() );
-		Git git = new Git(localRepo);
-		try {
 
-			git
-				.pull()
-				.setCredentialsProvider(cp)
-				.call();
-			git
-			.checkout()
-			.setName(branch)
-			.call();
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
+		String currentBranch  = getFullBranch(remoteURI);
+		if(currentBranch != null){
+			// String currentBranch=getFullBranch(remoteURI);
+			Repository localRepo = new FileRepository(gitRepoFile);
+//			if (!branch.contains("heads")) {
+//				branch = "heads/" + branch;
+//			}
+//			if (!branch.contains("refs")) {
+//				branch = "refs/" + branch;
+//			}
+			// System.out.println("Checking out "+branch+" :
+			// "+gitRepoFile.getAbsolutePath() );
+			Git git = new Git(localRepo);
+//			StoredConfig config = git.getRepository().getConfig();
+//			config.setString("branch", "master", "merge", "refs/heads/master");
+			if(!currentBranch.contains(branch)){
+				try {
+					git.pull().setCredentialsProvider(cp).call();
+					git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch).call();
+					git.checkout().setName(branch).call();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			git.close();
 		}
-		git.close();
-		
+
 	}
 
-//	public static void checkout(String branch, File gitRepoFile) throws Exception {
-//		String currentBranch=getFullBranch(gitRepoFile);
-//		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
-//
-//	}
+	// public static void checkout(String branch, File gitRepoFile) throws
+	// Exception {
+	// String currentBranch=getFullBranch(gitRepoFile);
+	// Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() +
+	// "/.git");
+	//
+	// }
 
 	/**
 	 * This function retrieves the local cached version of a given git
@@ -1017,68 +1029,60 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @return The local directory containing the .git
 	 */
 	public static File cloneRepo(String remoteURI, String branch) {
-		//new Exception().printStackTrace();
-		String[] colinSplit =remoteURI.split(":");
-		
-		String gitSplit =colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
-		
-		File gistDir=new File(getWorkspace().getAbsolutePath()+"/gitcache/"+gitSplit);
-		if(!gistDir.exists()){
+		// new Exception().printStackTrace();
+		String[] colinSplit = remoteURI.split(":");
+
+		String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
+
+		File gistDir = new File(getWorkspace().getAbsolutePath() + "/gitcache/" + gitSplit);
+		if (!gistDir.exists()) {
 			gistDir.mkdir();
 		}
-		String localPath=gistDir.getAbsolutePath();
+		String localPath = gistDir.getAbsolutePath();
 		File gitRepoFile = new File(localPath + "/.git");
 		File dir = new File(localPath);
-		
-		if(!gitRepoFile.exists()){
 
-			System.out.println("Cloning files from: "+remoteURI);
-			if(branch!=null)
-				System.out.println("            branch: "+branch);
-			System.out.println("                to: "+localPath);
-			
+		if (!gitRepoFile.exists()) {
 
-			for(int i=0;i<5;i++){
-				 //Clone the repo
-			    try {
-			    	if(branch == null){
-						Git git = Git.cloneRepository()
-						.setURI(remoteURI)
-						.setDirectory(dir)
-						.setCredentialsProvider(cp)
-						.call();
-			    		hasAtLeastOneReference(git);
-			    		branch=getFullBranch(remoteURI);
-			    		checkout(remoteURI, branch);
+			System.out.println("Cloning files from: " + remoteURI);
+			if (branch != null)
+				System.out.println("            branch: " + branch);
+			System.out.println("                to: " + localPath);
+
+			for (int i = 0; i < 5; i++) {
+				// Clone the repo
+				try {
+					if (branch == null) {
+						Git git = Git.cloneRepository().setURI(remoteURI).setDirectory(dir).setCredentialsProvider(cp)
+								.call();
+						hasAtLeastOneReference(git);
+						branch = getFullBranch(remoteURI);
+						checkout(remoteURI, branch);
 						hasAtLeastOneReference(git);
 						git.close();
-						
-			    	}else{
-			    		Git git = Git.cloneRepository()
-						.setURI(remoteURI)
-						.setBranch(branch)
-						.setDirectory(dir)
-						.setCredentialsProvider(cp)
-						.call();
-			    		hasAtLeastOneReference(git);
-			    		checkout(remoteURI, branch);
-						hasAtLeastOneReference(git);
-			    		git.close();
 
-			    	}
-			    	
+					} else {
+						Git git = Git.cloneRepository().setURI(remoteURI).setBranch(branch).setDirectory(dir)
+								.setCredentialsProvider(cp).call();
+						hasAtLeastOneReference(git);
+						checkout(remoteURI, branch);
+						hasAtLeastOneReference(git);
+						git.close();
+
+					}
+
 					break;
 				} catch (Exception e) {
-					Log.error("Failed to clone "+remoteURI+" "+e);
+					Log.error("Failed to clone " + remoteURI + " " + e);
 					e.printStackTrace();
 					deleteFolder(new File(localPath));
 				}
-			   ThreadUtil.wait(200*i);
+				ThreadUtil.wait(200 * i);
 			}
 		}
 		if (branch != null) {
 			try {
-		    	checkout(remoteURI, branch);
+				checkout(remoteURI, branch);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
