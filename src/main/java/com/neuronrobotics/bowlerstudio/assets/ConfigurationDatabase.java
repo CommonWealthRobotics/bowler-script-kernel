@@ -53,9 +53,9 @@ public class ConfigurationDatabase {
 	public static void save(){
 		String writeOut=null;
 		getDatabase();
-		synchronized(database){
+		//synchronized(database){
 			 writeOut  =gson.toJson(database, TT_mapStringString); 
-		}
+		//}
 		try {
 			ScriptingEngine.pushCodeToGit( getGitSource(),ScriptingEngine.getFullBranch(getGitSource()), getDbFile(), writeOut, "Saving database");
 		} catch (Exception e) {

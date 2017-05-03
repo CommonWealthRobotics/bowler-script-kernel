@@ -88,7 +88,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"javafx.scene",
 			"javafx.scene.control",
 			"javafx.scene.transform", 
-			"javafx.scene.shape",
 			"eu.mihosoft.vrl.v3d",
 			"eu.mihosoft.vrl.v3d.svg",
 			"eu.mihosoft.vrl.v3d.samples",
