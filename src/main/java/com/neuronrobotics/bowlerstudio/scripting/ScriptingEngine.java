@@ -970,25 +970,31 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void checkout(String remoteURI, String branch) throws IOException {
 		//cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
+		if(!gitRepoFile.exists() ||!gitRepoFile.getAbsolutePath().endsWith(".git") ){
+			System.err.println("Invailid git file!" +gitRepoFile.getAbsolutePath());
+			throw new RuntimeException("Invailid git file!" +gitRepoFile.getAbsolutePath());
+		}
 		//String currentBranch=getFullBranch(remoteURI);
 		Repository localRepo = new FileRepository(gitRepoFile);
-		if (!branch.contains("heads")) {
-			branch = "heads/" + branch;
-		}
-		if (!branch.contains("refs")) {
-			branch = "refs/" + branch;
-		}
+//		if (!branch.contains("heads")) {
+//			branch = "heads/" + branch;
+//		}
+//		if (!branch.contains("refs")) {
+//			branch = "refs/" + branch;
+//		}
 		//System.out.println("Checking out "+branch+" : "+gitRepoFile.getAbsolutePath() );
 		Git git = new Git(localRepo);
 		try {
+
 			git
 				.pull()
 				.setCredentialsProvider(cp)
 				.call();
 			git
-				.checkout()
-				.setName(branch)
-				.call();
+			.checkout()
+			.setName(branch)
+			.call();
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -1027,7 +1033,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if(!gitRepoFile.exists()){
 
 			System.out.println("Cloning files from: "+remoteURI);
-			System.out.println("            branch: "+branch);
+			if(branch!=null)
+				System.out.println("            branch: "+branch);
 			System.out.println("                to: "+localPath);
 			
 
