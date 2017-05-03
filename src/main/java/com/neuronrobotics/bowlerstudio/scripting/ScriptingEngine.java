@@ -81,8 +81,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static boolean autoupdate = false;
 
 	private static final String[] imports = new String[] { // "haar",
-			"java.awt", "eu.mihosoft.vrl.v3d", "eu.mihosoft.vrl.v3d.samples",
-			"com.neuronrobotics.sdk.addons.kinematics.xml", "com.neuronrobotics.sdk.dyio.peripherals",
+			"java.nio.file",
+			"eu.mihosoft.vrl.v3d","eu.mihosoft.vrl.v3d.svg", "eu.mihosoft.vrl.v3d.samples",
+			"eu.mihosoft.vrl.v3d.parametrics",
+			"com.neuronrobotics.bowlerstudio.creature",
+			"com.neuronrobotics.sdk.addons.kinematics.xml","com.neuronrobotics.sdk.addons.kinematics", "com.neuronrobotics.sdk.dyio.peripherals",
 			"com.neuronrobotics.sdk.dyio", "com.neuronrobotics.sdk.common", "com.neuronrobotics.sdk.ui",
 			"com.neuronrobotics.sdk.util", "com.neuronrobotics.sdk.serial", "javafx.scene.control",
 			"com.neuronrobotics.bowlerstudio.scripting", "com.neuronrobotics.sdk.config",
@@ -90,10 +93,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"com.neuronrobotics.bowlerstudio.tabs", "javafx.scene.text", "javafx.scene",
 			"com.neuronrobotics.sdk.addons.kinematics", "com.neuronrobotics.sdk.addons.kinematics.math", "java.util",
 			"com.neuronrobotics.sdk.addons.kinematics.gui", "javafx.scene.transform", "javafx.scene.shape",
-			"java.awt.image.BufferedImage", "com.neuronrobotics.bowlerstudio.vitamins.Vitamins",
-			"com.neuronrobotics.bowlerkernel.BowlerDatabase", "com.neuronrobotics.bowlerstudio.physics.PhysicsEngine",
-			"com.neuronrobotics.bowlerstudio.physics.CSGPhysicsManager",
-			"com.neuronrobotics.bowlerstudio.physics.MobileBasePhysicsManager" };
+			"java.awt.image.BufferedImage", 
+			"com.neuronrobotics.bowlerkernel", "com.neuronrobotics.bowlerstudio.physics",
+			"com.neuronrobotics.bowlerstudio.physics",
+			"com.neuronrobotics.bowlerstudio.vitamins"};
 
 	private static GitHub github;
 	private static HashMap<String, File> filesRun = new HashMap<>();
