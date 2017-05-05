@@ -83,7 +83,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static final String[] imports = new String[] { // "haar",
 			"java.nio.file",
 			"java.util",
-			"java.awt.image.BufferedImage", 
+			"java.awt.image", 
 			"javax.vecmath",
 			"javafx.scene.text",
 			"javafx.scene",
