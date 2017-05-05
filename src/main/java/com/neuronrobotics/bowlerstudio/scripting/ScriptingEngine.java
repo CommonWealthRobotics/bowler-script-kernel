@@ -84,6 +84,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"java.nio.file",
 			"java.util",
 			"java.awt.image.BufferedImage", 
+			"javax.vecmath",
 			"javafx.scene.text",
 			"javafx.scene",
 			"javafx.scene.control",
@@ -112,7 +113,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"com.neuronrobotics.bowlerstudio.physics",
 			"com.neuronrobotics.bowlerstudio.physics",
 			"com.neuronrobotics.bowlerstudio.vitamins",
-			"com.neuronrobotics.bowlerstudio.creature"
+			"com.neuronrobotics.bowlerstudio.creature",
+			"com.neuronrobotics.bowlerstudio.threed"
 };
 
 	private static GitHub github;
