@@ -521,7 +521,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					deleteFolder(f);
 				} else {
 					f.delete();
-					System.out.println("Deleting " + f.getAbsolutePath());
+					//System.out.println("Deleting " + f.getAbsolutePath());
 				}
 			}
 		}

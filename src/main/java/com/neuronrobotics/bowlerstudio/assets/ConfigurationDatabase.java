@@ -117,7 +117,7 @@ public class ConfigurationDatabase {
 
 	private static void setRepo(GHRepository forkedRep) {
 		String myAssets = forkedRep.getGitTransportUrl().replaceAll("git://", "https://");
-		System.out.println("Using my version of configuration database: " + myAssets);
+		//System.out.println("Using my version of configuration database: " + myAssets);
 		setGitSource(myAssets);
 	}
 	

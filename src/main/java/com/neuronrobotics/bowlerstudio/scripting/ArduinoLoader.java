@@ -43,13 +43,13 @@ public class ArduinoLoader implements IScriptingLanguage {
 		HashMap<String,Object> configs = database.get(getDefaultBoard());
 		File ino   = findIno(code);
 		if(ino==null){
-			System.out.println("Error: no .ino file found!");
+			//System.out.println("Error: no .ino file found!");
 			return null;
 		}
 		execString += " --upload "+ino.getAbsolutePath().replaceAll(" ", "\\ ");
 ;
 		
-		System.out.println("Arduino Load: \n"+execString);
+		//System.out.println("Arduino Load: \n"+execString);
 		if(!loadedBowler){
 			loadedBowler=true;
 			run(getARDUINOExec()+" --install-library BowlerCom");
@@ -78,7 +78,7 @@ public class ArduinoLoader implements IScriptingLanguage {
         // And print each line
         String s = null;
         while ((s = reader.readLine()) != null) {
-            System.out.println(s);
+            System.out.println(s);// This is how the scripts output to the print stream
         }
         is.close();
 	}
