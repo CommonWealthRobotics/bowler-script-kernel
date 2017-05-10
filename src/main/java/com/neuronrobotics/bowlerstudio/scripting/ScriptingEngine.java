@@ -84,7 +84,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"java.nio.file",
 			"java.util",
 			"java.awt.image", 
-			"javax.vecmath",
 			"javafx.scene.text",
 			"javafx.scene",
 			"javafx.scene.control",
