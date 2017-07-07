@@ -1,11 +1,11 @@
 # Bowler Kernel Scripting environment
 
-[![Join the chat at https://gitter.im/NeuronRobotics/bowler-script-kernel](https://badges.gitter.im/NeuronRobotics/bowler-script-kernel.svg)](https://gitter.im/NeuronRobotics/bowler-script-kernel?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/CommonWealthRobotics/bowler-script-kernel](https://badges.gitter.im/NeuronRobotics/bowler-script-kernel.svg)](https://gitter.im/NeuronRobotics/bowler-script-kernel?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 This is the core kernel mechanism for the Bowler operating system. It consists of a modular scripting environment. This engine passes Lists of JVM objects back and forth across languages, letting you mix Java, Groovy, Clojure and Python within a single memory sharing application. The sources are stored in git repos and hyperlink at the source level to add modules. You can call this application from the command line like bash and pass it scripts to run sequentially or pipe the output from one into the input of another.
 
 ## All platforms 
  You need to use the installer from 
- * [BowlerStudio Installer](https://github.com/NeuronRobotics/BowlerStudio/releases)
+ * [BowlerStudio Installer](https://github.com/CommonWealthRobotics/BowlerStudio/releases)
  
 ## Usage
 This will let you pass code snippets directly to the scripting engine
@@ -31,13 +31,13 @@ Object returnVal = ScriptingEngine.inlineGistScriptRun("d4312a0787456ec27a2a", "
 <dependency>
   <groupId>com.neuronrobotics</groupId>
   <artifactId>BowlerScriptingKernel</artifactId>
-  <version>0.25.0</version>
+  <version>0.26.6</version>
 </dependency>
 ```
 ## Gradle
 ```
 dependencies {
- compile "com.neuronrobotics:BowlerScriptingKernel:0.25.0"
+ compile "com.neuronrobotics:BowlerScriptingKernel:0.26.6"
 }
 ```
 ### Macs Only
