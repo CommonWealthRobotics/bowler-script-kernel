@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class StudioBuildInfo {
-    private static final String NAME = "Bowler Studio "
-                                       + getProtocolVersion() + "." + getSDKVersion() + "("
-                                       + getBuildVersion() + ")";
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 
+public class StudioBuildInfo {
+    private static Class baseBuildInfoClass = BowlerKernel.class;
     public static String getVersion() {
         String s = getTag("app.version");
+        
         if (s == null)
-            s = "0.0.0";
+            throw new RuntimeException("Failed to load version number");
         return s;
     }
 
@@ -92,7 +92,7 @@ public class StudioBuildInfo {
     }
 
     public static String getSDKVersionString() {
-        return NAME;
+        return getName();
     }
 
     public static boolean isOS64bit() {
@@ -118,4 +118,18 @@ public class StudioBuildInfo {
     public static boolean isUnix() {
         return (isLinux() || isMac());
     }
+
+	public static Class getBaseBuildInfoClass() {
+		return baseBuildInfoClass;
+	}
+
+	public static void setBaseBuildInfoClass(Class c) {
+		baseBuildInfoClass = c;
+	}
+
+	public static String getName() {
+		return "Bowler Studio "
+                + getProtocolVersion() + "." + getSDKVersion() + "("
+                + getBuildVersion() + ")";
+	}
 }
