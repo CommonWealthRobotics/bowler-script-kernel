@@ -88,7 +88,7 @@ public class StudioBuildInfo {
     }
 
     private static InputStream getBuildPropertiesStream() {
-        return StudioBuildInfo.class.getResourceAsStream("build.properties");
+        return baseBuildInfoClass.getResourceAsStream("build.properties");
     }
 
     public static String getSDKVersionString() {
