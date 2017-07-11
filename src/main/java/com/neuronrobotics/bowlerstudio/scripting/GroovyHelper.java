@@ -29,7 +29,7 @@ public class GroovyHelper implements IScriptingLanguage,IScriptingLanguageDebugg
 				);
 
 		Binding binding = new Binding();
-		for (String pm : DeviceManager.listConnectedDevice(null)) {
+		for (String pm : DeviceManager.listConnectedDevice()) {
 			BowlerAbstractDevice bad = DeviceManager.getSpecificDevice(null, pm);
 			try {
 				// groovy needs the objects cas to thier actual type befor
@@ -38,8 +38,8 @@ public class GroovyHelper implements IScriptingLanguage,IScriptingLanguageDebugg
 				binding.setVariable(bad.getScriptingName(),
 						Class.forName(bad.getClass().getName())
 								.cast(bad));
-			} catch (ClassNotFoundException e) {
-				throw e;
+			} catch (Throwable e) {
+				//throw e;
 			}
 //			System.err.println("Device " + bad.getScriptingName() + " is "
 //					+ bad);
