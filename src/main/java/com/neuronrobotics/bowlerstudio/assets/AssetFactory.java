@@ -49,7 +49,8 @@ public class AssetFactory {
                             );
     }
 
-    public static Image loadAsset(String file) throws Exception {
+    @SuppressWarnings("restriction")
+	public static Image loadAsset(String file) throws Exception {
         if (cache.get(file) == null) {
             File f = loadFile(file);
             if (f.getName().endsWith(".fxml")) {
