@@ -994,7 +994,25 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void pull(String remoteURI, String branch) throws IOException {
 		cloneRepo(remoteURI, branch);
 	}
+	public static void checkoutCommit(String remoteURI,String branch, String commitHash) throws IOException {
+		File gitRepoFile = ScriptingEngine.uriToFile(remoteURI);
+		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
+			System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
+			throw new RuntimeException("Invailid git file!" + gitRepoFile.getAbsolutePath());
+		}
+		Repository localRepo = new FileRepository(gitRepoFile);
+		Git git = new Git(localRepo);
+		try {
+			git.checkout().setName(commitHash).call();
+			git.checkout().setCreateBranch( true ).setName( branch ).setStartPoint( commitHash ).call();
 
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		git.close();
+
+	}
 	public static void checkout(String remoteURI, String branch) throws IOException {
 		// cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
