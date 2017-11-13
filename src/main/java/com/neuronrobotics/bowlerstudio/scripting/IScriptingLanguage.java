@@ -34,17 +34,31 @@ public interface IScriptingLanguage {
 	public abstract Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception;
 	
 	/**
-	 * Returns the shell type of this language
+	 * Returns the HashMap key for this language
 	 * @return
 	 */
 	public abstract String getShellType();
+	/**
+	 * Returns the list of supported file extentions
+	 * Convention is to provide just the leters that make up the file extention
+	 * @return
+	 */
+	public abstract ArrayList<String> getFileExtenetion();
+	
 	/**
 	 * This function should return true is the filename provided is of a supported file extension. 
 	 * This function may never be called if this language is only used internally. 
 	 * @param filename the filename of the file to be executed
 	 * @return true if the file extension is supported, false otherwise.
 	 */
-	public abstract boolean isSupportedFileExtenetion(String filename);
+	default boolean isSupportedFileExtenetion(String filename){
+		for(String s:getFileExtenetion()){
+			if(filename.toLowerCase().endsWith(s.toLowerCase())){
+				return true;
+			}
+		}
+		return false;
+	}
 	/**
 	 * This function returns if this is a binary file or a text file
 	 * @return true if the file is a text file.

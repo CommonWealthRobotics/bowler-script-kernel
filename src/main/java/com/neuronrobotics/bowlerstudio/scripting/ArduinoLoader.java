@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.scripting;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class ArduinoLoader implements IScriptingLanguage {
@@ -114,18 +115,6 @@ public class ArduinoLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public boolean isSupportedFileExtenetion(String filename) {
-		if(	filename.toLowerCase().endsWith(".c")||
-			filename.toLowerCase().endsWith(".h")||
-			filename.toLowerCase().endsWith(".hpp")||
-			filename.toLowerCase().endsWith(".cpp")||
-			filename.toLowerCase().endsWith(".ino")	
-				)
-			return true;
-		return false;
-	}
-
-	@Override
 	public boolean getIsTextFile() {
 		return true;
 	}
@@ -152,6 +141,12 @@ public class ArduinoLoader implements IScriptingLanguage {
 
 	public static void setARDUINOExec(String aRDUINO) {
 		ARDUINO = aRDUINO;
+	}
+
+	@Override
+	public ArrayList<String> getFileExtenetion() {
+		// TODO Auto-generated method stub
+		return new ArrayList<>(Arrays.asList("c", "ino","h","cpp","hpp"));
 	}
 
 }

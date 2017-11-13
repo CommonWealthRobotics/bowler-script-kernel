@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
@@ -41,16 +42,12 @@ public class JsonRunner implements IScriptingLanguage {
 	}
 
 	@Override
-	public boolean isSupportedFileExtenetion(String filename) {
-		if (filename.toLowerCase().endsWith(".json")) {
-			return true;
-		}		
-		return false;
-	}
-
-	@Override
 	public boolean getIsTextFile() {
 		return true;
 	}
-
+	@Override
+	public ArrayList<String> getFileExtenetion() {
+		// TODO Auto-generated method stub
+		return new ArrayList<>(Arrays.asList("json"));
+	}
 }

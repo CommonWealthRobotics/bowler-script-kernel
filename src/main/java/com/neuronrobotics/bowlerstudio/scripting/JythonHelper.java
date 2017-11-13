@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 
 import javafx.scene.control.Tab;
@@ -94,20 +95,15 @@ public class JythonHelper implements IScriptingLanguage{
 	}
 
 	@Override
-	public boolean isSupportedFileExtenetion(String filename) {
-		if (filename.toString().toLowerCase().endsWith(".py")
-				|| filename.toString().toLowerCase().endsWith(".jy")) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
 	public boolean getIsTextFile() {
 		// TODO Auto-generated method stub
 		return true;
 	}
 
-
+	@Override
+	public ArrayList<String> getFileExtenetion() {
+		// TODO Auto-generated method stub
+		return new ArrayList<>(Arrays.asList("py", "jy"));
+	}
 
 }

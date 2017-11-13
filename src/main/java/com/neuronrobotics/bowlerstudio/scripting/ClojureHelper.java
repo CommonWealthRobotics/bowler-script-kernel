@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import clojure.lang.RT;
 import clojure.lang.Symbol;
@@ -98,20 +99,16 @@ public class ClojureHelper implements IScriptingLanguage{
 	}
 
 	@Override
-	public boolean isSupportedFileExtenetion(String filename) {
-		if (filename.toLowerCase().endsWith(".clj")
-				|| filename.toLowerCase().endsWith(".cljs")
-				|| filename.toLowerCase().endsWith(".cljc")) {
-			return true;
-		}		
-		return false;
-	}
-
-	@Override
 	public boolean getIsTextFile() {
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
+
+	@Override
+	public ArrayList<String> getFileExtenetion() {
+		// TODO Auto-generated method stub
+		return new ArrayList<>(Arrays.asList("clj", "cljs","cljc"));
+	}
+
 }
 

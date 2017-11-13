@@ -5,17 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
 
-/**
- * Class containing static utility methods for Java to Clojure interop
- * 
- * @author Mike https://github.com/mikera/clojure-utils/blob/master/src/main/java/mikera/cljutils/Clojure.java
- *
- */
 public class RobotHelper implements IScriptingLanguage{
 
 	@Override
@@ -59,21 +54,19 @@ public class RobotHelper implements IScriptingLanguage{
 	}
 	@Override
 	public String getShellType() {
-		return "RobotXML";
-	}
-
-	@Override
-	public boolean isSupportedFileExtenetion(String filename) {
-		if (filename.toLowerCase().endsWith(".xml")) {
-			return true;
-		}		
-		return false;
+		return "MobilBaseXML";
 	}
 
 	@Override
 	public boolean getIsTextFile() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+
+	@Override
+	public ArrayList<String> getFileExtenetion() {
+		// TODO Auto-generated method stub
+		return new ArrayList<>(Arrays.asList("xml"));
 	}
 	
 }

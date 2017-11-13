@@ -131,7 +131,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 											// password);
 	private static ArrayList<IGithubLoginListener> loginListeners = new ArrayList<IGithubLoginListener>();
 
-	private static ArrayList<IScriptingLanguage> langauges = new ArrayList<>();
+	private static HashMap<String, IScriptingLanguage> langauges = new HashMap<>();
 
 	private static IGitHubLoginManager loginManager = new IGitHubLoginManager() {
 
@@ -244,7 +244,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void addScriptingLanguage(IScriptingLanguage lang) {
-		getLangauges().add(lang);
+		langauges.put(lang.getShellType(), lang);
 	}
 
 	public static void addIGithubLoginListener(IGithubLoginListener l) {
@@ -265,7 +265,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static String getShellType(String name) {
-		for (IScriptingLanguage l : getLangauges()) {
+		for (IScriptingLanguage l : langauges.values()) {
 			if (l.isSupportedFileExtenetion(name))
 				return l.getShellType();
 		}
@@ -537,11 +537,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 							continue;// skip this file as it fails the filter
 										// from the user
 				boolean supportedExtention = false;
-				for (IScriptingLanguage l : getLangauges()) {
+				
+				for (IScriptingLanguage l : langauges.values()) {
 					if (l.isSupportedFileExtenetion(fileEntry.getName())) {
 						supportedExtention = true;
 					}
 				}
+				
 				if (supportedExtention)// make sure the file has a supported
 										// runtime
 					f.add(findLocalPath(fileEntry));
@@ -1190,12 +1192,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			filesRun.put(code.getName(), code);
 			// System.out.println("Loading "+code.getAbsolutePath());
 		}
-
-		for (IScriptingLanguage l : getLangauges()) {
-			if (l.getShellType() == activeType) {
-
-				return l.inlineScriptRun(code, args);
-			}
+		if (langauges.get(activeType)!=null){
+			return langauges.get(activeType).inlineScriptRun(code, args);
 		}
 		return null;
 	}
@@ -1203,10 +1201,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
 			throws Exception {
 
-		for (IScriptingLanguage l : getLangauges()) {
-			if (l.getShellType() == shellTypeStorage) {
-				return l.inlineScriptRun(line, args);
-			}
+		if (langauges.get(shellTypeStorage)!=null){
+			return langauges.get(shellTypeStorage).inlineScriptRun(line, args);
 		}
 		return null;
 	}
@@ -1346,22 +1342,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static List<String> getAllLangauges() {
 		ArrayList<String> langs = new ArrayList<>();
-		for (IScriptingLanguage L : getLangauges()) {
-			langs.add(L.getShellType());
+		for (String L :  getLangaugesMap().keySet()) {
+			langs.add(L);
 		}
 		return langs;
 	}
 
-	private static ArrayList<IScriptingLanguage> getLangauges() {
-		return langauges;
-	}
+//	private static ArrayList<IScriptingLanguage> getLangauges() {
+//		ArrayList<IScriptingLanguage> langs = new ArrayList<>();
+//		for (String L : getLangaugesMap().keySet()) {
+//			langs.add(getLangaugesMap().get(L));
+//		}
+//		return langs;
+//	}
 
 	public static HashMap<String, IScriptingLanguage> getLangaugesMap() {
-		HashMap<String, IScriptingLanguage> langs = new HashMap<>();
-		for (IScriptingLanguage l : langauges) {
-			langs.put(l.getShellType(), l);
-		}
-		return langs;
+		return langauges;
 	}
 
 	public static boolean hasNetwork() {

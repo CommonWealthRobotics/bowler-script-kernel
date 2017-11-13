@@ -7,6 +7,7 @@ import groovy.lang.Script;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
@@ -68,16 +69,6 @@ public class GroovyHelper implements IScriptingLanguage,IScriptingLanguageDebugg
 		return "Groovy";
 	}
 
-	@Override
-	public boolean isSupportedFileExtenetion(String name) {
-		if (name.toString().toLowerCase().endsWith(".java")
-				|| name.toString().toLowerCase().endsWith(".groovy")) {
-			return true;
-		}
-		return false;
-	}
-
-
 
 	@Override
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
@@ -99,7 +90,11 @@ public class GroovyHelper implements IScriptingLanguage,IScriptingLanguageDebugg
 		return true;
 	}
 
-
+	@Override
+	public ArrayList<String> getFileExtenetion() {
+		// TODO Auto-generated method stub
+		return new ArrayList<>(Arrays.asList("java", "groovy"));
+	}
 
 	@Override
 	public IDebugScriptRunner compileDebug(File f) {
