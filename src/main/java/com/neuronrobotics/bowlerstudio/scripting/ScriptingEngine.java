@@ -528,25 +528,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {
 		for (final File fileEntry : directory.listFiles()) {
+			if (fileEntry.getAbsolutePath().contains(".git"))
+				continue;// ignore git files
+			if (extnetion != null)
+				if(extnetion.length()>0)
+					if (!fileEntry.getName().endsWith(extnetion))
+						continue;// skip this file as it fails the filter
+									// from the user	
 			if (fileEntry.isDirectory()) {
 				loadFilesToList(f, fileEntry, extnetion);
 			} else {
-				if (!fileEntry.getName().endsWith(".git"))
-					if (extnetion != null)
-						if (!fileEntry.getName().endsWith(extnetion))
-							continue;// skip this file as it fails the filter
-										// from the user
-				boolean supportedExtention = false;
-				
+			
 				for (IScriptingLanguage l : langauges.values()) {
 					if (l.isSupportedFileExtenetion(fileEntry.getName())) {
-						supportedExtention = true;
+						f.add(findLocalPath(fileEntry));
+						break;
 					}
 				}
-				
-				if (supportedExtention)// make sure the file has a supported
-										// runtime
-					f.add(findLocalPath(fileEntry));
 
 			}
 		}

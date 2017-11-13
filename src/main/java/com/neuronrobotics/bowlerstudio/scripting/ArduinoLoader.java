@@ -67,6 +67,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 		run(getARDUINOExec()+" --install-library "+lib);
 	}
 	public static void run(String execString)throws Exception {
+		System.out.println("Running:\n"+execString);
 		 // Get runtime
         java.lang.Runtime rt = java.lang.Runtime.getRuntime();
         // Start a new process
@@ -75,13 +76,22 @@ public class ArduinoLoader implements IScriptingLanguage {
         p.waitFor();
         // Get process' output: its InputStream
         java.io.InputStream is = p.getInputStream();
+        java.io.InputStream err = p.getInputStream();
         java.io.BufferedReader reader = new java.io.BufferedReader(new InputStreamReader(is));
+        java.io.BufferedReader readerErr = new java.io.BufferedReader(new InputStreamReader(err));
+
         // And print each line
         String s = null;
         while ((s = reader.readLine()) != null) {
             System.out.println(s);// This is how the scripts output to the print stream
         }
+        
+        s = null;
+        while ((s = readerErr.readLine()) != null) {
+            System.out.println(s);// This is how the scripts output to the print stream
+        }
         is.close();
+        err.close();
 	}
 	
 	private File findIno(File start){
