@@ -224,24 +224,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			filesRun.put(code.getName(), code);
 			// System.out.println("Loading "+code.getAbsolutePath());
 		}
-		try{
-			String[] gitID = findGitTagFromFile(code);
-			String remoteURI=gitID[0];
 
-			ArrayList<String> f = filesInGit(remoteURI);
-			for (String s:f){
-				if(s.contentEquals("csgDatabase.json")){
-					File dbFile = fileFromGit(gitID[0], s);
-					String branch = getBranch(remoteURI);
-					@SuppressWarnings("resource")
-					String content = new Scanner(code).useDelimiter("\\Z").next();
-					commit(remoteURI,branch,s,content,"saving CSG database",false);
-					CSGDatabase.setDbFile(dbFile);
-				}
-			}
-		}catch(Exception ex){
-			//ignore CSG database
-		}
 		if (langauges.get(shellTypeStorage)!=null){
 			return langauges.get(shellTypeStorage).inlineScriptRun(code, args);
 		}
@@ -658,6 +641,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 	public static void commit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile) throws Exception {
+
 		if (loginID == null)
 			login();
 		if (loginID == null)
@@ -670,10 +654,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		Git git = new Git(localRepo);
-		try {
-			if (!hasnetwork && content != null) 
-			 git.pull().setCredentialsProvider(cp).call();// updates to the
-															// latest version
+		try {												// latest version
 			if (flagNewFile) {
 				git.add().addFilepattern(FileName).call();
 			}
@@ -689,15 +670,40 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					IOUtils.closeQuietly(out);
 				}
 			}
+
 			git.commit().setAll(true).setMessage(commitMessage).call();
 		} catch (Exception ex) {
 			git.close();
+
 			throw ex;
 		}
 		git.close();
+		try{
+			if(!desired.getName().contentEquals("csgDatabase.json")){
+				String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
+				String remoteURI=gitID[0];
+				ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI);
+				for (String s:f){
+					if(s.contentEquals("csgDatabase.json")){
+						
+						File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
+						if(!CSGDatabase.getDbFile().equals(dbFile))
+							CSGDatabase.setDbFile(dbFile);
+						CSGDatabase.saveDatabase();
+						@SuppressWarnings("resource")
+						String c = new Scanner(dbFile).useDelimiter("\\Z").next();
+						ScriptingEngine.commit(remoteURI,branch,s,c,"saving CSG database",false);									
+					}
+				}
+			}
+		}catch(Exception e){
+			//ignore CSG database
+			e.printStackTrace();
+		}
 	}
 	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile) throws Exception {
+		commit(id, branch, FileName, content, commitMessage, flagNewFile);
 		if (loginID == null)
 			login();
 		if (loginID == null)
@@ -742,10 +748,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					IOUtils.closeQuietly(out);
 				}
 			}
-			git.commit().setAll(true).setMessage(commitMessage).call();
 			git.push().setCredentialsProvider(cp).call();
 			System.out.println("PUSH OK! file: " + desired);
 		} catch (Exception ex) {
+			String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
+			String remoteURI=gitID[0];
+			deleteRepo(remoteURI);
 			git.close();
 			throw ex;
 		}
