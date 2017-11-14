@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import javax.xml.transform.Transformer;
@@ -60,11 +61,14 @@ import org.jsoup.select.Elements;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GitHub;
 import org.python.antlr.ast.ExceptHandler;
+import org.python.core.exceptions;
 
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import clojure.lang.ExceptionInfo;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import groovy.beans.ListenerListASTTransformation;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebEngine;
 
@@ -208,6 +212,55 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new RobotHelper());
 		addScriptingLanguage(new JsonRunner());
 		addScriptingLanguage(new ArduinoLoader());
+	}
+	/**
+	 * This interface is for adding additional language support. 
+	 * @param code file content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception {
+		if (filesRun.get(code.getName()) == null) {
+			filesRun.put(code.getName(), code);
+			// System.out.println("Loading "+code.getAbsolutePath());
+		}
+		try{
+			String[] gitID = findGitTagFromFile(code);
+			String remoteURI=gitID[0];
+
+			ArrayList<String> f = filesInGit(remoteURI);
+			for (String s:f){
+				if(s.contentEquals("csgDatabase.json")){
+					File dbFile = fileFromGit(gitID[0], s);
+					String branch = getBranch(remoteURI);
+					@SuppressWarnings("resource")
+					String content = new Scanner(code).useDelimiter("\\Z").next();
+					commit(remoteURI,branch,s,content,"saving CSG database",false);
+					CSGDatabase.setDbFile(dbFile);
+				}
+			}
+		}catch(Exception ex){
+			//ignore CSG database
+		}
+		if (langauges.get(shellTypeStorage)!=null){
+			return langauges.get(shellTypeStorage).inlineScriptRun(code, args);
+		}
+		return null;
+	}
+	/**
+	 * This interface is for adding additional language support. 
+	 * @param code the text content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 * @throws Exception 
+	 */
+	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
+			throws Exception {
+
+		if (langauges.get(shellTypeStorage)!=null){
+			return langauges.get(shellTypeStorage).inlineScriptRun(line, args);
+		}
+		return null;
 	}
 
 	private static void loadLoginData() throws IOException {
@@ -528,7 +581,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {
 		for (final File fileEntry : directory.listFiles()) {
-			if (fileEntry.getAbsolutePath().contains(".git"))
+			
+			if (fileEntry.getName().endsWith(".git")||
+				fileEntry.getName().startsWith(".git")	)
 				continue;// ignore git files
 			if (extnetion != null)
 				if(extnetion.length()>0)
@@ -601,7 +656,46 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		pushCodeToGit(id, branch, FileName, content, commitMessage, flagNewFile);
 	}
+	public static void commit(String id, String branch, String FileName, String content, String commitMessage,
+			boolean flagNewFile) throws Exception {
+		if (loginID == null)
+			login();
+		if (loginID == null)
+			return;// No login info means there is no way to publish
+		File gistDir = cloneRepo(id, branch);
+		File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
+		String localPath = gistDir.getAbsolutePath();
+		File gitRepoFile = new File(localPath + "/.git");
+
+		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
+		Git git = new Git(localRepo);
+		try {
+			if (!hasnetwork && content != null) 
+			 git.pull().setCredentialsProvider(cp).call();// updates to the
+															// latest version
+			if (flagNewFile) {
+				git.add().addFilepattern(FileName).call();
+			}
+			if (content != null) {
+				OutputStream out = null;
+				try {
+					out = FileUtils.openOutputStream(desired, false);
+					IOUtils.write(content, out);
+					out.close(); // don't swallow close Exception if copy
+									// completes
+									// normally
+				} finally {
+					IOUtils.closeQuietly(out);
+				}
+			}
+			git.commit().setAll(true).setMessage(commitMessage).call();
+		} catch (Exception ex) {
+			git.close();
+			throw ex;
+		}
+		git.close();
+	}
 	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile) throws Exception {
 		if (loginID == null)
@@ -1185,25 +1279,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return filesRun.get(filename);
 	}
 
-	public static Object inlineScriptRun(File code, ArrayList<Object> args, String activeType) throws Exception {
-		if (filesRun.get(code.getName()) == null) {
-			filesRun.put(code.getName(), code);
-			// System.out.println("Loading "+code.getAbsolutePath());
-		}
-		if (langauges.get(activeType)!=null){
-			return langauges.get(activeType).inlineScriptRun(code, args);
-		}
-		return null;
-	}
 
-	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
-			throws Exception {
-
-		if (langauges.get(shellTypeStorage)!=null){
-			return langauges.get(shellTypeStorage).inlineScriptRun(line, args);
-		}
-		return null;
-	}
 
 	public static String[] getImports() {
 		return imports;
@@ -1370,5 +1446,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void setLoginSuccess(boolean loginSuccess) {
 		ScriptingEngine.loginSuccess = loginSuccess;
 	}
+	
+
 
 }
