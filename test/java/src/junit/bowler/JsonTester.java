@@ -20,6 +20,7 @@ public class JsonTester {
 
 	@Test
 	public void test() throws Exception{
+		/*
 		try{
 			ScriptingEngine.setupAnyonmous();
 			//ScriptingEngine.setAutoupdate(true);
@@ -40,6 +41,7 @@ public class JsonTester {
 			System.out.println((String)script.get("scriptFile"));						;
 			
 		}
+		*/
 	}
 
 }
