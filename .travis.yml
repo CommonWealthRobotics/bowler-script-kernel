@@ -9,7 +9,7 @@ install:
   
   
 script:
-  - gradle compileJava jar javadoc test 
+  - gradle compileJava javadoc test 
 cache:
   directories:
   - $HOME/.m2
