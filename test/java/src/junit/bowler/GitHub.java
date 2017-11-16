@@ -23,6 +23,7 @@ public class GitHub {
 
 	@Test
 	public void test() throws Exception {
+		/*
 		ScriptingEngine.runLogin();
 		try {
 			if (ScriptingEngine.getLoginID() == null) {
@@ -110,6 +111,7 @@ public class GitHub {
 //			e.printStackTrace();
 //		}		
 		System.out.println("Current Branch # " +  ScriptingEngine.getFullBranch(asstsRepo));
+		*/
 	}
 
 }
