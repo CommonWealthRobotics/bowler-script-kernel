@@ -490,7 +490,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @throws TransportException
 	 * @throws GitAPIException
 	 */
-	private static void waitForLogin() throws IOException, InvalidRemoteException, TransportException, GitAPIException {
+	public static void waitForLogin() throws IOException, InvalidRemoteException, TransportException, GitAPIException {
 		try {
 			final URL url = new URL("http://github.com");
 			final URLConnection conn = url.openConnection();
