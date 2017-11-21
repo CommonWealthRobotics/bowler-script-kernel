@@ -483,7 +483,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	/**
 	 * 
-	 * @param id
+	 * 
 	 *            The GistID we are waiting to see
 	 * @throws IOException
 	 * @throws InvalidRemoteException
