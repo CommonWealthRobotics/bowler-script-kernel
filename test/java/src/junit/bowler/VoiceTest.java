@@ -8,9 +8,9 @@ import com.neuronrobotics.bowlerstudio.BowlerKernel;
 
 public class VoiceTest {
 
-	@Test
-	public void test() {
-		//BowlerKernel.speak("Testing voice");
-	}
+  @Test
+  public void test() {
+    //BowlerKernel.speak("Testing voice");
+  }
 
 }

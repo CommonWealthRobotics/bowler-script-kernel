@@ -18,8 +18,8 @@ import javafx.scene.control.MenuItem;
 
 public class JsonTester {
 
-	@Test
-	public void test() throws Exception{
+  @Test
+  public void test() throws Exception {
 		/*
 		try{
 			ScriptingEngine.setupAnyonmous();
@@ -42,6 +42,6 @@ public class JsonTester {
 			
 		}
 		*/
-	}
+  }
 
 }

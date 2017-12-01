@@ -17,23 +17,23 @@ import gnu.io.NRSerialPort;
 
 public class ArduinoLoaderTest {
 
-	private static final String portname = "/dev/ttyACM0";
-	private boolean hasPort;
+  private static final String portname = "/dev/ttyACM0";
+  private boolean hasPort;
 
-	@Test
-	public void test() throws Exception {
-		hasPort = false;
-		for (String s : NRSerialPort.getAvailableSerialPorts()) {
-			if (s.contentEquals(portname))
-				hasPort = true;
-		}
-		if (hasPort) {
-			String board = "uno";
-			ArrayList<Object> params = new ArrayList<>() ;
-			params.add(board);
-			params.add(portname);
-			ScriptingEngine.gitScriptRun("https://github.com/madhephaestus/Blink.git", "Blink.ino", params);
-		}
-	}
+  @Test
+  public void test() throws Exception {
+    hasPort = false;
+    for (String s : NRSerialPort.getAvailableSerialPorts()) {
+      if (s.contentEquals(portname))
+        hasPort = true;
+    }
+    if (hasPort) {
+      String board = "uno";
+      ArrayList<Object> params = new ArrayList<>();
+      params.add(board);
+      params.add(portname);
+      ScriptingEngine.gitScriptRun("https://github.com/madhephaestus/Blink.git", "Blink.ino", params);
+    }
+  }
 
 }

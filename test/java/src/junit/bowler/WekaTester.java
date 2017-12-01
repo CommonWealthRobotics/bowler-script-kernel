@@ -6,9 +6,9 @@ import org.junit.Test;
 
 public class WekaTester {
 
-	@Test
-	public void test() {
-		//TODO
-	}
+  @Test
+  public void test() {
+    //TODO
+  }
 
 }

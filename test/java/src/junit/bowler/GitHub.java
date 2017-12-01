@@ -21,8 +21,8 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 
 public class GitHub {
 
-	@Test
-	public void test() throws Exception {
+  @Test
+  public void test() throws Exception {
 		/*
 		ScriptingEngine.runLogin();
 		try {
@@ -112,6 +112,6 @@ public class GitHub {
 //		}		
 		System.out.println("Current Branch # " +  ScriptingEngine.getFullBranch(asstsRepo));
 		*/
-	}
+  }
 
 }

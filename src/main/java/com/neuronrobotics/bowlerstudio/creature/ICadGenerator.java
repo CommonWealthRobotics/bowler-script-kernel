@@ -9,6 +9,6 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public interface ICadGenerator extends IgenerateCad,IgenerateBody{
+public interface ICadGenerator extends IgenerateCad, IgenerateBody {
 
 }
