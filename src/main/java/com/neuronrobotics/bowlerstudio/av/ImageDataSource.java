@@ -9,8 +9,8 @@ import javax.media.protocol.PullBufferDataSource;
 import javax.media.protocol.PullBufferStream;
 
 /**
- * A DataSource to read from a list of JPEG image files and turn that into a
- * stream of JMF buffers. The DataSource is not seekable or positionable.
+ * A DataSource to read from a list of JPEG image files and turn that into a stream of JMF buffers.
+ * The DataSource is not seekable or positionable.
  */
 class ImageDataSource extends PullBufferDataSource {
 
@@ -29,8 +29,8 @@ class ImageDataSource extends PullBufferDataSource {
   }
 
   /**
-   * Content type is of RAW since we are sending buffers of video frames
-   * without a container format.
+   * Content type is of RAW since we are sending buffers of video frames without a container
+   * format.
    */
   public String getContentType() {
     return ContentDescriptor.RAW;
@@ -56,8 +56,8 @@ class ImageDataSource extends PullBufferDataSource {
   }
 
   /**
-   * We could have derived the duration from the number of frames and
-   * frame rate. But for the purpose of this program, it's not necessary.
+   * We could have derived the duration from the number of frames and frame rate. But for the
+   * purpose of this program, it's not necessary.
    */
   public Time getDuration() {
     return DURATION_UNKNOWN;

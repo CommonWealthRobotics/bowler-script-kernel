@@ -12,6 +12,7 @@ import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
 public class OpenCVImageProvider extends AbstractImageProvider {
+
   private VideoCapture vc;
   private int camerIndex;
   Mat m = new Mat();
@@ -45,14 +46,16 @@ public class OpenCVImageProvider extends AbstractImageProvider {
 
   @Override
   public boolean captureNewImage(BufferedImage imageData) {
-    if (!getVc().isOpened())
+    if (!getVc().isOpened()) {
       return false;
-
+    }
 
     try {
       AbstractImageProvider.deepCopy(captureNewImage(), imageData);
     } catch (Exception ex) {
-      if (InterruptedException.class.isInstance(ex)) throw new RuntimeException(ex);
+      if (InterruptedException.class.isInstance(ex)) {
+        throw new RuntimeException(ex);
+      }
     }
     return true;
   }
@@ -68,8 +71,9 @@ public class OpenCVImageProvider extends AbstractImageProvider {
 
   @Override
   public void disconnectDeviceImp() {
-    if (vc != null)
+    if (vc != null) {
       vc.release();
+    }
     setVc(null);
 
   }

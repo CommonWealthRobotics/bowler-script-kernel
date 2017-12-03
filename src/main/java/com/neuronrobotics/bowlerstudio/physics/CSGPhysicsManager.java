@@ -35,10 +35,12 @@ public class CSGPhysicsManager implements IPhysicsManager {
   private PhysicsCore core;
 
   public CSGPhysicsManager(ArrayList<CSG> baseCSG, Vector3f start, double mass, PhysicsCore core) {
-    this(baseCSG, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)), mass, true, core);
+    this(baseCSG, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)), mass, true,
+        core);
   }
 
-  protected CSG loadCSGToPoints(CSG baseCSG, boolean adjustCenter, Transform pose, ObjectArrayList<Vector3f> arg0) {
+  protected CSG loadCSGToPoints(CSG baseCSG, boolean adjustCenter, Transform pose,
+      ObjectArrayList<Vector3f> arg0) {
     CSG finalCSG = baseCSG;
 
     if (adjustCenter) {
@@ -70,9 +72,9 @@ public class CSGPhysicsManager implements IPhysicsManager {
     return finalCSG;
   }
 
-  public CSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter, PhysicsCore core) {
+  public CSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass,
+      boolean adjustCenter, PhysicsCore core) {
     this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
-
 
     ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
     for (int i = 0; i < baseCSG.size(); i++) {
@@ -95,7 +97,8 @@ public class CSGPhysicsManager implements IPhysicsManager {
     // This we're going to give mass so it responds to gravity
     Vector3f fallInertia = new Vector3f(0, 0, 0);
     fallShape.calculateLocalInertia((float) mass, fallInertia);
-    RigidBodyConstructionInfo fallRigidBodyCI = new RigidBodyConstructionInfo((float) mass, fallMotionState, fallShape,
+    RigidBodyConstructionInfo fallRigidBodyCI = new RigidBodyConstructionInfo((float) mass,
+        fallMotionState, fallShape,
         fallInertia);
     fallRigidBodyCI.additionalDamping = true;
     setFallRigidBody(new RigidBody(fallRigidBodyCI));
@@ -130,8 +133,9 @@ public class CSGPhysicsManager implements IPhysicsManager {
   }
 
   public void setBaseCSG(ArrayList<CSG> baseCSG) {
-    for (CSG c : baseCSG)
+    for (CSG c : baseCSG) {
       c.setManipulator(getRigidBodyLocation());
+    }
     this.baseCSG = baseCSG;
   }
 

@@ -18,6 +18,7 @@ import org.opencv.imgproc.Imgproc;
 //http://cell0907.blogspot.com/2013/07/tracking-ball-with-javaopencv.html
 
 public class ColorDetector implements IObjectDetector {
+
   private Mat hsv_image = new Mat();
   private Mat thresholded = new Mat();
   private Mat thresholded2 = new Mat();
@@ -37,7 +38,8 @@ public class ColorDetector implements IObjectDetector {
   private Scalar hsv_min2;
   private Scalar hsv_max2;
 
-  public ColorDetector(Mat matImage, Scalar hsv_min, Scalar hsv_max, Scalar hsv_min2, Scalar hsv_max2) {
+  public ColorDetector(Mat matImage, Scalar hsv_min, Scalar hsv_max, Scalar hsv_min2,
+      Scalar hsv_max2) {
     this.hsv_min = hsv_min;
     this.hsv_max = hsv_max;
     this.hsv_min2 = hsv_min2;
@@ -93,7 +95,6 @@ public class ColorDetector implements IObjectDetector {
     Imgproc.HoughCircles(thresholded, circles, Imgproc.CV_HOUGH_GRADIENT,
         2, thresholded.height() / 4, 500, 50, 0, 0);
 
-
     //Make the display image the thresholded image
     thresholded.copyTo(displayImage);
 
@@ -130,7 +131,8 @@ public class ColorDetector implements IObjectDetector {
             displayImage,
             String.format("Circles (" + String.valueOf(data[0]) + ","
                 + String.valueOf(data[1]) + ","
-                + String.valueOf(data[2]) + ")"), new Point(30, 30), 2 // FONT_HERSHEY_SCRIPT_SIMPLEX
+                + String.valueOf(data[2]) + ")"), new Point(30, 30), 2
+            // FONT_HERSHEY_SCRIPT_SIMPLEX
             , .5, new Scalar(100, 10, 10, 255), 3);
         for (int i = 0; i < myArray.size(); i++) {
 
@@ -144,8 +146,8 @@ public class ColorDetector implements IObjectDetector {
       }
     }
 
-
-    AbstractImageProvider.deepCopy(OpenCVImageConversionFactory.matToBufferedImage(displayImage), disp);
+    AbstractImageProvider
+        .deepCopy(OpenCVImageConversionFactory.matToBufferedImage(displayImage), disp);
     return myArray;
   }
 }

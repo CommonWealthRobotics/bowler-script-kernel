@@ -18,6 +18,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.core.CvType;
 
 class Panel extends JPanel {
+
   private static final long serialVersionUID = 1L;
   private BufferedImage image;
 
@@ -81,12 +82,14 @@ class Panel extends JPanel {
     //BufferedImage temp=new BufferedImage(640, 480, BufferedImage.TYPE_3BYTE_BGR);
     BufferedImage temp = getimage();
     //Graphics2D g2 = (Graphics2D)g;
-    if (temp != null)
+    if (temp != null) {
       g.drawImage(temp, 10, 10, temp.getWidth(), temp.getHeight(), this);
+    }
   }
 }
 
 public class Example {
+
   public static void main(String arg[]) {
     // Load the native library.  
     System.loadLibrary("opencv_java245");
@@ -177,13 +180,17 @@ public class Example {
           Core.bitwise_and(thresholded, thresholded2, thresholded);
           // Apply the Hough Transform to find the circles
           Imgproc.GaussianBlur(thresholded, thresholded, new Size(9, 9), 0, 0);
-          Imgproc.HoughCircles(thresholded, circles, Imgproc.CV_HOUGH_GRADIENT, 2, thresholded.height() / 4, 500, 50, 0, 0);
+          Imgproc.HoughCircles(thresholded, circles, Imgproc.CV_HOUGH_GRADIENT, 2,
+              thresholded.height() / 4, 500, 50, 0, 0);
           //Imgproc.Canny(thresholded, thresholded, 500, 250);
           //-- 4. Add some info to the image
-          Core.line(webcam_image, new Point(150, 50), new Point(202, 200), new Scalar(100, 10, 10)/*CV_BGR(100,10,10)*/, 3);
+          Core.line(webcam_image, new Point(150, 50), new Point(202, 200),
+              new Scalar(100, 10, 10)/*CV_BGR(100,10,10)*/, 3);
           Core.circle(webcam_image, new Point(210, 210), 10, new Scalar(100, 10, 10), 3);
           data = webcam_image.get(210, 210);
-          Core.putText(webcam_image, String.format("(" + String.valueOf(data[0]) + "," + String.valueOf(data[1]) + "," + String.valueOf(data[2]) + ")"), new Point(30, 30), 3 //FONT_HERSHEY_SCRIPT_SIMPLEX
+          Core.putText(webcam_image, String.format(
+              "(" + String.valueOf(data[0]) + "," + String.valueOf(data[1]) + "," + String
+                  .valueOf(data[2]) + ")"), new Point(30, 30), 3 //FONT_HERSHEY_SCRIPT_SIMPLEX
               , 1.0, new Scalar(100, 10, 10, 255), 3);
           //int cols = circles.cols();
           int rows = circles.rows();
@@ -195,19 +202,26 @@ public class Example {
             for (int i = 0; i < data2.length; i = i + 3) {
               Point center = new Point(data2[i], data2[i + 1]);
               //Core.ellipse( this, center, new Size( rect.width*0.5, rect.height*0.5), 0, 0, 360, new Scalar( 255, 0, 255 ), 4, 8, 0 );  
-              Core.ellipse(webcam_image, center, new Size((double) data2[i + 2], (double) data2[i + 2]), 0, 0, 360, new Scalar(255, 0, 255), 4, 8, 0);
+              Core.ellipse(webcam_image, center,
+                  new Size((double) data2[i + 2], (double) data2[i + 2]), 0, 0, 360,
+                  new Scalar(255, 0, 255), 4, 8, 0);
             }
           }
-          Core.line(hsv_image, new Point(150, 50), new Point(202, 200), new Scalar(100, 10, 10)/*CV_BGR(100,10,10)*/, 3);
+          Core.line(hsv_image, new Point(150, 50), new Point(202, 200),
+              new Scalar(100, 10, 10)/*CV_BGR(100,10,10)*/, 3);
           Core.circle(hsv_image, new Point(210, 210), 10, new Scalar(100, 10, 10), 3);
           data = hsv_image.get(210, 210);
-          Core.putText(hsv_image, String.format("(" + String.valueOf(data[0]) + "," + String.valueOf(data[1]) + "," + String.valueOf(data[2]) + ")"), new Point(30, 30), 3 //FONT_HERSHEY_SCRIPT_SIMPLEX
+          Core.putText(hsv_image, String.format(
+              "(" + String.valueOf(data[0]) + "," + String.valueOf(data[1]) + "," + String
+                  .valueOf(data[2]) + ")"), new Point(30, 30), 3 //FONT_HERSHEY_SCRIPT_SIMPLEX
               , 1.0, new Scalar(100, 10, 10, 255), 3);
           distance.convertTo(distance, CvType.CV_8UC1);
-          Core.line(distance, new Point(150, 50), new Point(202, 200), new Scalar(100)/*CV_BGR(100,10,10)*/, 3);
+          Core.line(distance, new Point(150, 50), new Point(202, 200),
+              new Scalar(100)/*CV_BGR(100,10,10)*/, 3);
           Core.circle(distance, new Point(210, 210), 10, new Scalar(100), 3);
           data = (double[]) distance.get(210, 210);
-          Core.putText(distance, String.format("(" + String.valueOf(data[0]) + ")"), new Point(30, 30), 3 //FONT_HERSHEY_SCRIPT_SIMPLEX
+          Core.putText(distance, String.format("(" + String.valueOf(data[0]) + ")"),
+              new Point(30, 30), 3 //FONT_HERSHEY_SCRIPT_SIMPLEX
               , 1.0, new Scalar(100), 3);
           //-- 5. Display the image
           panel1.setimagewithMat(webcam_image);

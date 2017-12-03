@@ -35,6 +35,7 @@ import eu.mihosoft.vrl.v3d.Sphere;
 import javafx.application.Platform;
 
 public class PhysicsEngine {
+
   private static PhysicsCore mainEngine;
 
   public static void startPhysicsThread(int ms) {
@@ -68,13 +69,14 @@ public class PhysicsEngine {
   }
 
   public static PhysicsCore get() {
-    if (mainEngine == null)
+    if (mainEngine == null) {
       try {
         mainEngine = new PhysicsCore();
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
+    }
     return mainEngine;
 
   }

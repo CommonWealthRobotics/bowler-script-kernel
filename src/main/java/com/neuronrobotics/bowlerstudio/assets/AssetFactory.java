@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class AssetFactory {
+
   public static final String repo = "BowlerStudioImageAssets";
   private static String gitSource = "https://github.com/madhephaestus/" + repo + ".git";
   private static HashMap<String, Image> cache = new HashMap<>();

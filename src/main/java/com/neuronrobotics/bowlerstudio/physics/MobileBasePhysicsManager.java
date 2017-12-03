@@ -64,11 +64,12 @@ public class MobileBasePhysicsManager {
         body.getGravity(gravity);
         body.getOrientation(orentation);
 
-
-        TransformFactory.nrToBullet(new TransformNR(gravity.x, gravity.y, gravity.z, new RotationNR()),
-            gravTrans);
+        TransformFactory
+            .nrToBullet(new TransformNR(gravity.x, gravity.y, gravity.z, new RotationNR()),
+                gravTrans);
         TransformFactory.nrToBullet(
-            new TransformNR(0, 0, 0, orentation.w, orentation.x, orentation.y, orentation.z), orentTrans);
+            new TransformNR(0, 0, 0, orentation.w, orentation.x, orentation.y, orentation.z),
+            orentTrans);
         orentTrans.inverse();
         orentTrans.mul(gravTrans);
 
@@ -76,15 +77,19 @@ public class MobileBasePhysicsManager {
         Double rotxAcceleration = (double) ((oldavelocity.x - avelocity.x) / timeStep);
         Double rotyAcceleration = (double) ((oldavelocity.y - avelocity.y) / timeStep);
         Double rotzAcceleration = (double) ((oldavelocity.z - avelocity.z) / timeStep);
-        Double xAcceleration = (double) (((oldvelocity.x - velocity.x) / timeStep) / PhysicsGravityScalar)
-            + (orentTrans.origin.x / PhysicsGravityScalar);
-        Double yAcceleration = (double) (((oldvelocity.y - velocity.y) / timeStep) / PhysicsGravityScalar)
-            + (orentTrans.origin.y / PhysicsGravityScalar);
-        Double zAcceleration = (double) (((oldvelocity.z - velocity.z) / timeStep) / PhysicsGravityScalar)
-            + (orentTrans.origin.z / PhysicsGravityScalar);
+        Double xAcceleration =
+            (double) (((oldvelocity.x - velocity.x) / timeStep) / PhysicsGravityScalar)
+                + (orentTrans.origin.x / PhysicsGravityScalar);
+        Double yAcceleration =
+            (double) (((oldvelocity.y - velocity.y) / timeStep) / PhysicsGravityScalar)
+                + (orentTrans.origin.y / PhysicsGravityScalar);
+        Double zAcceleration =
+            (double) (((oldvelocity.z - velocity.z) / timeStep) / PhysicsGravityScalar)
+                + (orentTrans.origin.z / PhysicsGravityScalar);
         // tell the virtual IMU the system updated
-        base.setVirtualState(new IMUUpdate(xAcceleration, yAcceleration, zAcceleration, rotxAcceleration,
-            rotyAcceleration, rotzAcceleration));
+        base.setVirtualState(
+            new IMUUpdate(xAcceleration, yAcceleration, zAcceleration, rotxAcceleration,
+                rotyAcceleration, rotzAcceleration));
         // update the old variables
         oldavelocity.set(avelocity);
         oldvelocity.set(velocity);
@@ -95,21 +100,24 @@ public class MobileBasePhysicsManager {
 
 
   public MobileBasePhysicsManager(MobileBase base, ArrayList<CSG> baseCad,
-                                  HashMap<LinkConfiguration, ArrayList<CSG>> simplecad) {
+      HashMap<LinkConfiguration, ArrayList<CSG>> simplecad) {
     this(base, baseCad, simplecad, PhysicsEngine.get());
   }
 
-  public MobileBasePhysicsManager(MobileBase base, ArrayList<CSG> baseCad, HashMap<LinkConfiguration, ArrayList<CSG>> simplecad,
-                                  PhysicsCore core) {
+  public MobileBasePhysicsManager(MobileBase base, ArrayList<CSG> baseCad,
+      HashMap<LinkConfiguration, ArrayList<CSG>> simplecad,
+      PhysicsCore core) {
     this.simplecad = simplecad;
     double minz = 0;
     for (DHParameterKinematics dh : base.getAllDHChains()) {
-      if (dh.getCurrentTaskSpaceTransform().getZ() < minz)
+      if (dh.getCurrentTaskSpaceTransform().getZ() < minz) {
         minz = dh.getCurrentTaskSpaceTransform().getZ();
+      }
     }
     for (CSG c : baseCad) {
-      if (c.getMinZ() < minz)
+      if (c.getMinZ() < minz) {
         minz = c.getMinZ();
+      }
     }
 
     // System.out.println("Minimum z = "+minz);
@@ -125,7 +133,8 @@ public class MobileBasePhysicsManager {
         TransformFactory.bulletToAffine(baseCad.get(0).getManipulator(), start);
       }
     });
-    CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad, start, base.getMassKg(), false, core);
+    CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad, start, base.getMassKg(), false,
+        core);
     RigidBody body = baseManager.getFallRigidBody();
     baseManager.setUpdateManager(getUpdater(body, base.getImu()));
 
@@ -161,10 +170,11 @@ public class MobileBasePhysicsManager {
           // use the DH parameters to calculate the offset of the link
           // at 0 degrees
           Matrix step;
-          if (conf.isPrismatic())
+          if (conf.isPrismatic()) {
             step = l.DhStepInversePrismatic(0);
-          else
+          } else {
             step = l.DhStepInverseRotory(Math.toRadians(0));
+          }
           // correct jog for singularity.
 
           if (flagAlpha) {
@@ -213,7 +223,8 @@ public class MobileBasePhysicsManager {
             outCad.get(x).setColor(color);
           }
           // Build a hinge based on the link and mass
-          HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(outCad, linkLoc, mass,
+          HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(outCad, linkLoc,
+              mass,
               core);
           HingeCSGPhysicsManager.setMuscleStrength(1000000);
 
@@ -236,8 +247,9 @@ public class MobileBasePhysicsManager {
           if (i == 0) {
 
             TransformFactory.nrToBullet(dh.forwardOffset(new TransformNR()), localA);
-          } else
+          } else {
             TransformFactory.nrToBullet(new TransformNR(previousStep.inverse()), localA);
+          }
           // set the link constraint based on DH parameters
           TransformFactory.nrToBullet(new TransformNR(), localB);
           previousStep = step;
@@ -249,7 +261,6 @@ public class MobileBasePhysicsManager {
           lastLink = linkSection;
 
           hingePhysicsManager.setConstraint(joint6DOF);
-
 
           if (!conf.isPassive()) {
             ILinkListener ll = new ILinkListener() {
