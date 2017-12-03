@@ -17,6 +17,7 @@ import clojure.lang.Var;
  * @author Mike https://github.com/mikera/clojure-utils/blob/master/src/main/java/mikera/cljutils/Clojure.java
  */
 public class ClojureHelper implements IScriptingLanguage {
+
   public static Var REQUIRE = var("clojure.core", "require");
   public static Var META = var("clojure.core", "meta");
   public static Var EVAL = var("clojure.core", "eval");

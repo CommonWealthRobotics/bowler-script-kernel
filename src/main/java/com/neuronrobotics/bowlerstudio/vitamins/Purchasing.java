@@ -82,7 +82,8 @@ public class Purchasing {
 
     } catch (org.eclipse.jgit.api.errors.TransportException ex) {
       System.out.println("You need to fork " + getGitRpoDatabase() + " to have permission to save");
-      System.out.println("You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
+      System.out.println(
+          "You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
       throw ex;
     }
 
@@ -116,7 +117,8 @@ public class Purchasing {
 
   }
 
-  public static void setParameter(String type, String id, String parameterName, PurchasingData parameter) throws Exception {
+  public static void setParameter(String type, String id, String parameterName,
+      PurchasingData parameter) throws Exception {
 
     HashMap<String, PurchasingData> config = getConfiguration(type, id);
     config.put(parameterName, parameter);
@@ -144,9 +146,11 @@ public class Purchasing {
 
         jsonString = IOUtils.toString(inPut);
         // perfoem the GSON parse
-        HashMap<String, HashMap<String, PurchasingData>> database = gson.fromJson(jsonString, TT_mapStringString);
-        if (database == null)
+        HashMap<String, HashMap<String, PurchasingData>> database = gson
+            .fromJson(jsonString, TT_mapStringString);
+        if (database == null) {
           throw new RuntimeException("create a new one");
+        }
         databaseSet.put(type, database);
 
       } catch (Exception e) {
@@ -174,8 +178,9 @@ public class Purchasing {
       File[] listOfFiles = folder.getParentFile().listFiles();
 
       for (File f : listOfFiles) {
-        if (!f.isDirectory() && f.getName().endsWith(".json"))
+        if (!f.isDirectory() && f.getName().endsWith(".json")) {
           types.add(f.getName().substring(0, f.getName().indexOf(".json")));
+        }
       }
 
     } catch (Exception e) {
@@ -191,8 +196,9 @@ public class Purchasing {
     HashMap<String, HashMap<String, PurchasingData>> database = getDatabase(type);
     Set<String> keys = database.keySet();
     for (String s : keys) {
-      if (!s.contains("meta"))
+      if (!s.contains("meta")) {
         types.add(s);
+      }
     }
 
     return types;
@@ -238,7 +244,8 @@ public class Purchasing {
     try {
       return getDatabase(type).get(size).get(variant);
     } catch (NullPointerException ex) {
-      throw new RuntimeException("Vitamin " + type + " " + size + " " + variant + " does not exist");
+      throw new RuntimeException(
+          "Vitamin " + type + " " + size + " " + variant + " does not exist");
     }
   }
 

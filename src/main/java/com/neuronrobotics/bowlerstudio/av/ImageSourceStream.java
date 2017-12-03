@@ -40,8 +40,7 @@ public class ImageSourceStream implements PullBufferStream {
   }
 
   /**
-   * This is called from the Processor to read a frame worth of video
-   * data.
+   * This is called from the Processor to read a frame worth of video data.
    */
   public void read(Buffer buf) throws IOException {
 
@@ -69,8 +68,9 @@ public class ImageSourceStream implements PullBufferStream {
 
     // Check the input buffer type & size.
 
-    if (buf.getData() instanceof byte[])
+    if (buf.getData() instanceof byte[]) {
       data = (byte[]) buf.getData();
+    }
 
     // Check to see the given buffer is big enough for the frame.
     if (data == null || data.length < raFile.length()) {

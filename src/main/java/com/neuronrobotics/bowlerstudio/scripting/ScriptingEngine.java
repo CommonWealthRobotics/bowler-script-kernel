@@ -134,8 +134,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       new RuntimeException("Login required").printStackTrace();
 
       if (username != null) {
-        if (username.equals(""))
+        if (username.equals("")) {
           username = null;
+        }
       }
       String[] creds = new String[]{"", ""};
       System.out.println("#Github Login Prompt#");
@@ -153,8 +154,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         if (creds[0].equals("") && (username == null)) {
           System.out.println("No username, using anynomous login");
           return null;
-        } else
+        } else {
           creds[0] = username;
+        }
       } while (creds[0] == null);
 
       System.out.print("Github Password: ");
@@ -211,7 +213,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
    * @param args the incoming arguments as a list of objects
    * @return the objects returned form the code that ran
    */
-  public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception {
+  public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage)
+      throws Exception {
     if (filesRun.get(code.getName()) == null) {
       filesRun.put(code.getName(), code);
       // System.out.println("Loading "+code.getAbsolutePath());
@@ -230,7 +233,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
    * @param args the incoming arguments as a list of objects
    * @return the objects returned form the code that ran
    */
-  public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
+  public static Object inlineScriptStringRun(String line, ArrayList<Object> args,
+      String shellTypeStorage)
       throws Exception {
 
     if (langauges.get(shellTypeStorage) != null) {
@@ -295,8 +299,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   public static String getShellType(String name) {
     for (IScriptingLanguage l : langauges.values()) {
-      if (l.isSupportedFileExtenetion(name))
+      if (l.isSupportedFileExtenetion(name)) {
         return l.getShellType();
+      }
     }
 
     return "Groovy";
@@ -308,8 +313,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static void login() throws IOException {
-    if (!hasnetwork)
+    if (!hasnetwork) {
       return;
+    }
     loginID = null;
 
     gitHubLogin();
@@ -320,8 +326,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     // new RuntimeException("Logout callsed").printStackTrace();
     if (getCreds() != null)
 
-      if (getCreds().exists())
+    {
+      if (getCreds().exists()) {
         Files.delete(getCreds().toPath());
+      }
+    }
 
     setGithub(null);
     for (IGithubLoginListener l : loginListeners) {
@@ -453,8 +462,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     if (getGithub() == null) {
       ThreadUtil.wait(200);
       return gitHubLogin();
-    } else
+    } else {
       return getGithub();
+    }
   }
 
   public static void runLogin() throws IOException {
@@ -477,7 +487,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   /**
    * The GistID we are waiting to see
    */
-  public static void waitForLogin() throws IOException, InvalidRemoteException, TransportException, GitAPIException {
+  public static void waitForLogin()
+      throws IOException, InvalidRemoteException, TransportException, GitAPIException {
     try {
       final URL url = new URL("http://github.com");
       final URLConnection conn = url.openConnection();
@@ -489,8 +500,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       // chached gists.
       hasnetwork = false;
     }
-    if (!hasnetwork)
+    if (!hasnetwork) {
       return;
+    }
     if (getGithub() == null) {
 
       if (getCreds().exists()) {
@@ -553,12 +565,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     for (final File fileEntry : directory.listFiles()) {
 
       if (fileEntry.getName().endsWith(".git") ||
-          fileEntry.getName().startsWith(".git"))
+          fileEntry.getName().startsWith(".git")) {
         continue;// ignore git files
-      if (extnetion != null)
-        if (extnetion.length() > 0)
-          if (!fileEntry.getName().endsWith(extnetion))
+      }
+      if (extnetion != null) {
+        if (extnetion.length() > 0) {
+          if (!fileEntry.getName().endsWith(extnetion)) {
             continue;// skip this file as it fails the filter
+          }
+        }
+      }
       // from the user
       if (fileEntry.isDirectory()) {
         loadFilesToList(f, fileEntry, extnetion);
@@ -575,7 +591,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     }
   }
 
-  public static ArrayList<String> filesInGit(String remote, String branch, String extnetion) throws Exception {
+  public static ArrayList<String> filesInGit(String remote, String branch, String extnetion)
+      throws Exception {
     ArrayList<String> f = new ArrayList<>();
 
     waitForLogin();
@@ -605,17 +622,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   }
 
-  public static File createFile(String git, String fileName, String commitMessage) throws Exception {
+  public static File createFile(String git, String fileName, String commitMessage)
+      throws Exception {
     pushCodeToGit(git, ScriptingEngine.getFullBranch(git), fileName, null, commitMessage);
     return fileFromGit(git, fileName);
   }
 
-  public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage)
+  public static void pushCodeToGit(String id, String branch, String FileName, String content,
+      String commitMessage)
       throws Exception {
-    if (loginID == null)
+    if (loginID == null) {
       login();
-    if (loginID == null)
+    }
+    if (loginID == null) {
       return;// No login info means there is no way to publish
+    }
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -627,13 +648,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     pushCodeToGit(id, branch, FileName, content, commitMessage, flagNewFile);
   }
 
-  public static void commit(String id, String branch, String FileName, String content, String commitMessage,
-                            boolean flagNewFile) throws Exception {
+  public static void commit(String id, String branch, String FileName, String content,
+      String commitMessage,
+      boolean flagNewFile) throws Exception {
 
-    if (loginID == null)
+    if (loginID == null) {
       login();
-    if (loginID == null)
+    }
+    if (loginID == null) {
       return;// No login info means there is no way to publish
+    }
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -675,8 +699,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
           if (s.contentEquals("csgDatabase.json")) {
 
             File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
-            if (!CSGDatabase.getDbFile().equals(dbFile))
+            if (!CSGDatabase.getDbFile().equals(dbFile)) {
               CSGDatabase.setDbFile(dbFile);
+            }
             CSGDatabase.saveDatabase();
             @SuppressWarnings("resource")
             String c = new Scanner(dbFile).useDelimiter("\\Z").next();
@@ -690,13 +715,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     }
   }
 
-  public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage,
-                                   boolean flagNewFile) throws Exception {
+  public static void pushCodeToGit(String id, String branch, String FileName, String content,
+      String commitMessage,
+      boolean flagNewFile) throws Exception {
     commit(id, branch, FileName, content, commitMessage, flagNewFile);
-    if (loginID == null)
+    if (loginID == null) {
       login();
-    if (loginID == null)
+    }
+    if (loginID == null) {
       return;// No login info means there is no way to publish
+    }
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -785,12 +813,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     return inlineScriptRun(f, args, getShellType(f.getName()));
   }
 
-  public static Object inlineGistScriptRun(String gistID, String Filename, ArrayList<Object> args) throws Exception {
+  public static Object inlineGistScriptRun(String gistID, String Filename, ArrayList<Object> args)
+      throws Exception {
     String[] gistData = codeFromGistID(gistID, Filename);
     return inlineScriptRun(new File(gistData[2]), args, getShellType(gistData[1]));
   }
 
-  public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args) throws Exception {
+  public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args)
+      throws Exception {
     String[] gistData = codeFromGit(gitURL, Filename);
     return inlineScriptRun(new File(gistData[2]), args, getShellType(gistData[1]));
   }
@@ -813,7 +843,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       fileLastLoaded.put(id, System.currentTimeMillis() - TIME_TO_WAIT_BETWEEN_GIT_PULL * 2);
     }
     long lastTime = fileLastLoaded.get(id);
-    if ((System.currentTimeMillis() - lastTime) > TIME_TO_WAIT_BETWEEN_GIT_PULL || !gitRepoFile.exists())// wait
+    if ((System.currentTimeMillis() - lastTime) > TIME_TO_WAIT_BETWEEN_GIT_PULL || !gitRepoFile
+        .exists())// wait
     // 2
     // seconds
     // before
@@ -911,8 +942,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         found = true;
       }
     }
-    if (!found)
+    if (!found) {
       throw new RuntimeException(toDelete + " can not be deleted because it does not exist");
+    }
 
     File gitRepoFile = uriToFile(remoteURI);
     if (!gitRepoFile.exists()) {
@@ -945,14 +977,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       ex = e;
     }
     git.close();
-    if (ex != null)
+    if (ex != null) {
       throw ex;
+    }
   }
 
   public static void newBranch(String remoteURI, String newBranch) throws Exception {
     for (String s : listBranchNames(remoteURI)) {
       if (s.contains(newBranch)) {
-        throw new RuntimeException(newBranch + " can not be created because " + s + " is to similar");
+        throw new RuntimeException(
+            newBranch + " can not be created because " + s + " is to similar");
       }
     }
 
@@ -977,7 +1011,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     checkout.setName(newBranch);
     checkout.call();
     PushCommand pushCommand = git.push();
-    pushCommand.setRemote("origin").setRefSpecs(new RefSpec(newBranch + ":" + newBranch)).setCredentialsProvider(cp)
+    pushCommand.setRemote("origin").setRefSpecs(new RefSpec(newBranch + ":" + newBranch))
+        .setCredentialsProvider(cp)
         .call();
 
     git.close();
@@ -990,8 +1025,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     Set<String> uriList = repo.getConfig().getSubsections("remote");
     String remoteURI = null;
     for (String remoteName : uriList) {
-      if (remoteURI == null)
+      if (remoteURI == null) {
         remoteURI = storedConfig.getString("remote", remoteName, "url");
+      }
       ;
     }
     long startTime = System.currentTimeMillis();
@@ -1086,7 +1122,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     cloneRepo(remoteURI, branch);
   }
 
-  public static void checkoutCommit(String remoteURI, String branch, String commitHash) throws IOException {
+  public static void checkoutCommit(String remoteURI, String branch, String commitHash)
+      throws IOException {
     File gitRepoFile = ScriptingEngine.uriToFile(remoteURI);
     if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
       System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
@@ -1132,7 +1169,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       if (!currentBranch.contains(branch)) {
         try {
           git.pull().setCredentialsProvider(cp).call();
-          git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch).call();
+          git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch)
+              .call();
           git.checkout().setName(branch).call();
         } catch (Exception ex) {
           ex.printStackTrace();
@@ -1152,8 +1190,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   // }
 
   /**
-   * This function retrieves the local cached version of a given git
-   * repository. If it does not exist, it clones it.
+   * This function retrieves the local cached version of a given git repository. If it does not
+   * exist, it clones it.
    *
    * @return The local directory containing the .git
    */
@@ -1174,15 +1212,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     if (!gitRepoFile.exists()) {
 
       System.out.println("Cloning files from: " + remoteURI);
-      if (branch != null)
+      if (branch != null) {
         System.out.println("            branch: " + branch);
+      }
       System.out.println("                to: " + localPath);
 
       for (int i = 0; i < 5; i++) {
         // Clone the repo
         try {
           if (branch == null) {
-            Git git = Git.cloneRepository().setURI(remoteURI).setDirectory(dir).setCredentialsProvider(cp)
+            Git git = Git.cloneRepository().setURI(remoteURI).setDirectory(dir)
+                .setCredentialsProvider(cp)
                 .call();
             hasAtLeastOneReference(git);
             branch = getFullBranch(remoteURI);
@@ -1244,8 +1284,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     StringBuilder response = new StringBuilder();
     String inputLine;
 
-    while ((inputLine = in.readLine()) != null)
+    while ((inputLine = in.readLine()) != null) {
       response.append(inputLine + "\n");
+    }
 
     in.close();
 
@@ -1253,8 +1294,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static File getLastFile() {
-    if (lastFile == null)
+    if (lastFile == null) {
       return getWorkspace();
+    }
     return lastFile;
   }
 
@@ -1263,8 +1305,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   private static File getCreds() {
-    if (creds == null)
+    if (creds == null) {
       setCreds(new File(System.getProperty("user.home") + "/.github"));
+    }
     return creds;
   }
 
@@ -1299,11 +1342,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       ScriptingEngine.autoupdate = true;// prevents recoursion loop from
       // calling loadLoginData
       loadLoginData();
-      if (pw == null || loginID == null)
+      if (pw == null || loginID == null) {
         login();
+      }
 
-      if (pw == null || loginID == null)
+      if (pw == null || loginID == null) {
         return false;
+      }
     }
     ScriptingEngine.autoupdate = autoupdate;
     return ScriptingEngine.autoupdate;
@@ -1379,9 +1424,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     GitHub github = ScriptingEngine.getGithub();
 
     String id = null;
-    if (incoming[0].endsWith(".git"))
+    if (incoming[0].endsWith(".git")) {
       id = urlToGist(incoming[0]);
-    else {
+    } else {
       id = incoming[0];
       incoming[0] = "https://gist.github.com/" + id + ".git";
     }
@@ -1389,7 +1434,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     File incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
     if (!ScriptingEngine.checkOwner(incomingFile)) {
       incomingGist = incomingGist.fork();
-      incoming[0] = "https://gist.github.com/" + ScriptingEngine.urlToGist(incomingGist.getHtmlUrl()) + ".git";
+      incoming[0] =
+          "https://gist.github.com/" + ScriptingEngine.urlToGist(incomingGist.getHtmlUrl())
+              + ".git";
       // sync the new file to the disk
       incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
     }
@@ -1406,8 +1453,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   public static void setGithub(GitHub github) {
     ScriptingEngine.github = github;
-    if (github == null)
+    if (github == null) {
       setLoginSuccess(false);
+    }
   }
 
   public static List<String> getAllLangauges() {

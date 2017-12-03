@@ -17,10 +17,12 @@ import org.opencv.features2d.KeyPoint;
 import org.opencv.imgproc.Imgproc;
 
 public class WhiteBlobDetect implements IObjectDetector {
+
   MatOfKeyPoint matOfKeyPoints = new MatOfKeyPoint();
   Mat prethresh = new Mat();
   Mat postthresh = new Mat();
-  private FeatureDetector RGBblobdetector = FeatureDetector.create(FeatureDetector.PYRAMID_SIMPLEBLOB);
+  private FeatureDetector RGBblobdetector = FeatureDetector
+      .create(FeatureDetector.PYRAMID_SIMPLEBLOB);
   private int minSize;
   private int maxSize;
   Scalar colorKey = new Scalar(0, 0, 255, 0);
@@ -47,13 +49,14 @@ public class WhiteBlobDetect implements IObjectDetector {
   private KeyPoint[] getObjects(Mat inputImage, Mat displayImage) {
 
     Imgproc.cvtColor(inputImage, prethresh, Imgproc.COLOR_RGB2GRAY);
-    Imgproc.threshold(prethresh, postthresh, colorKey.val[1], colorKey.val[0], Imgproc.THRESH_BINARY);
+    Imgproc
+        .threshold(prethresh, postthresh, colorKey.val[1], colorKey.val[0], Imgproc.THRESH_BINARY);
 
-    Mat invertcolormatrix = new Mat(postthresh.rows(), postthresh.cols(), postthresh.type(), new Scalar(255, 255, 255));
+    Mat invertcolormatrix = new Mat(postthresh.rows(), postthresh.cols(), postthresh.type(),
+        new Scalar(255, 255, 255));
     Core.subtract(invertcolormatrix, postthresh, postthresh);
 
     RGBblobdetector.detect(postthresh, matOfKeyPoints);
-
 
     postthresh.copyTo(displayImage);
     Features2d.drawKeypoints(postthresh, matOfKeyPoints, displayImage, new Scalar(0, 0, 255, 0), 0);

@@ -13,7 +13,6 @@ import eu.mihosoft.vrl.v3d.CSG;
 
 public class VehicleCSGPhysicsManager extends CSGPhysicsManager {
 
-
   ////////////////////////////////////////////////////////////////////////////
 
 
@@ -21,8 +20,9 @@ public class VehicleCSGPhysicsManager extends CSGPhysicsManager {
   public VehicleRaycaster vehicleRayCaster;
   private RaycastVehicle vehicle;
 
-  public VehicleCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
-                                  PhysicsCore core) {
+  public VehicleCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass,
+      boolean adjustCenter,
+      PhysicsCore core) {
     super(baseCSG, pose, mass, adjustCenter, core);
 
     vehicleRayCaster = new DefaultVehicleRaycaster(core.getDynamicsWorld());

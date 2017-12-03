@@ -13,6 +13,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public class WheelCSGPhysicsManager extends CSGPhysicsManager {
+
   private IClosedLoopController controller = null;
   private double target = 0;
   private static float muscleStrength = (float) 1000;
@@ -21,7 +22,8 @@ public class WheelCSGPhysicsManager extends CSGPhysicsManager {
   private RaycastVehicle vehicle;
   private final int wheelIndex;
 
-  public WheelCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, PhysicsCore c, RaycastVehicle v, int wheelIndex) {
+  public WheelCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, PhysicsCore c,
+      RaycastVehicle v, int wheelIndex) {
     super(baseCSG, pose, mass, false, c);
     this.vehicle = v;
     this.wheelIndex = wheelIndex;
@@ -43,7 +45,8 @@ public class WheelCSGPhysicsManager extends CSGPhysicsManager {
 
     }
     vehicle.updateWheelTransform(getWheelIndex(), true);
-    TransformNR trans = TransformFactory.bulletToNr(vehicle.getWheelInfo(getWheelIndex()).worldTransform);
+    TransformNR trans = TransformFactory
+        .bulletToNr(vehicle.getWheelInfo(getWheelIndex()).worldTransform);
     //copy in the current wheel location
     TransformFactory.nrToBullet(trans, getUpdateTransform());
   }

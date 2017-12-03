@@ -10,6 +10,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.transform.Affine;
 
 public interface IPhysicsManager {
+
   /**
    * Run the update for this ridgid body. Run any controllers for links
    */

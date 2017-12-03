@@ -18,6 +18,7 @@ import org.opencv.imgproc.Imgproc;
 //http://cell0907.blogspot.com/2013/07/tracking-ball-with-javaopencv.html
 
 public class RGBColorDetector implements IObjectDetector {
+
   private Mat rgb_image = new Mat();
   private Mat thresholded = new Mat();
   private Mat thresholded2 = new Mat();
@@ -37,7 +38,8 @@ public class RGBColorDetector implements IObjectDetector {
   private Scalar rgb_min2;
   private Scalar rgb_max2;
 
-  public RGBColorDetector(Mat matImage, Scalar rgb_min, Scalar rgb_max, Scalar rgb_min2, Scalar rgb_max2) {
+  public RGBColorDetector(Mat matImage, Scalar rgb_min, Scalar rgb_max, Scalar rgb_min2,
+      Scalar rgb_max2) {
     this.rgb_min = rgb_min;
     this.rgb_max = rgb_max;
     this.rgb_min2 = rgb_min2;
@@ -129,7 +131,8 @@ public class RGBColorDetector implements IObjectDetector {
             displayImage,
             String.format("Circles (" + String.valueOf(data[0]) + ","
                 + String.valueOf(data[1]) + ","
-                + String.valueOf(data[2]) + ")"), new Point(30, 30), 2 // FONT_HERSHEY_SCRIPT_SIMPLEX
+                + String.valueOf(data[2]) + ")"), new Point(30, 30), 2
+            // FONT_HERSHEY_SCRIPT_SIMPLEX
             , .5, new Scalar(100, 10, 10, 255), 3);
         for (int i = 0; i < myArray.size(); i++) {
 
@@ -142,7 +145,6 @@ public class RGBColorDetector implements IObjectDetector {
         }
       }
     }
-
 
     OpenCVImageConversionFactory.matToBufferedImage(displayImage).copyData(disp.getRaster());
     return myArray;

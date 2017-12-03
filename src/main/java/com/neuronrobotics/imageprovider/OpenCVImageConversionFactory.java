@@ -7,6 +7,7 @@ import java.awt.image.DataBufferByte;
 import javafx.scene.image.Image;
 
 public class OpenCVImageConversionFactory {
+
   /**
    * Converts/writes a Mat into a BufferedImage.
    *

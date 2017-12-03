@@ -8,13 +8,15 @@ import java.io.InputStreamReader;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 
 public class StudioBuildInfo {
+
   private static Class baseBuildInfoClass = BowlerKernel.class;
 
   public static String getVersion() {
     String s = getTag("app.version");
 
-    if (s == null)
+    if (s == null) {
       throw new RuntimeException("Failed to load version number");
+    }
     return s;
   }
 

@@ -43,11 +43,12 @@ import javax.media.protocol.DataSource;
 import javax.media.datasink.*;
 
 /**
- * This program takes a list of JPEG image files and convert them into a
- * QuickTime movie.
+ * This program takes a list of JPEG image files and convert them into a QuickTime movie.
  */
 public class ImagesToVideo implements ControllerListener, DataSinkListener {
-  public boolean run(int width, int height, int frameRate, ArrayList<File> inFiles, File outputFile) {
+
+  public boolean run(int width, int height, int frameRate, ArrayList<File> inFiles,
+      File outputFile) {
     Vector<String> inputFiles = new Vector<String>();
     for (File f : inFiles) {
       inputFiles.addElement(f.getAbsolutePath());
@@ -61,7 +62,8 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
     return run(width, height, frameRate, inputFiles, oml);
   }
 
-  public boolean run(int width, int height, int frameRate, Vector<String> inFiles, MediaLocator outML) {
+  public boolean run(int width, int height, int frameRate, Vector<String> inFiles,
+      MediaLocator outML) {
     ImageDataSource ids = new ImageDataSource(width, height, frameRate, inFiles);
 
     Processor p;
@@ -152,7 +154,8 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
     DataSource ds;
 
     if ((ds = p.getDataOutput()) == null) {
-      System.err.println("Something is really wrong: the processor does not have an output DataSource");
+      System.err
+          .println("Something is really wrong: the processor does not have an output DataSource");
       return null;
     }
 
@@ -174,14 +177,15 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
   boolean stateTransitionOK = true;
 
   /**
-   * Block until the processor has transitioned to the given state. Return
-   * false if the transition failed.
+   * Block until the processor has transitioned to the given state. Return false if the transition
+   * failed.
    */
   boolean waitForState(Processor p, int state) {
     synchronized (waitSync) {
       try {
-        while (p.getState() < state && stateTransitionOK)
+        while (p.getState() < state && stateTransitionOK) {
           waitSync.wait();
+        }
       } catch (Exception e) {
       }
     }
@@ -220,8 +224,9 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
   boolean waitForFileDone() {
     synchronized (waitFileSync) {
       try {
-        while (!fileDone)
+        while (!fileDone) {
           waitFileSync.wait();
+        }
       } catch (Exception e) {
       }
     }
@@ -249,8 +254,9 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
 
   public static void main(String args[]) {
 
-    if (args.length == 0)
+    if (args.length == 0) {
       prUsage();
+    }
 
     // Parse the arguments.
     int i = 0;
@@ -262,23 +268,27 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
 
       if (args[i].equals("-w")) {
         i++;
-        if (i >= args.length)
+        if (i >= args.length) {
           prUsage();
+        }
         width = new Integer(args[i]).intValue();
       } else if (args[i].equals("-h")) {
         i++;
-        if (i >= args.length)
+        if (i >= args.length) {
           prUsage();
+        }
         height = new Integer(args[i]).intValue();
       } else if (args[i].equals("-f")) {
         i++;
-        if (i >= args.length)
+        if (i >= args.length) {
           prUsage();
+        }
         frameRate = new Integer(args[i]).intValue();
       } else if (args[i].equals("-o")) {
         i++;
-        if (i >= args.length)
+        if (i >= args.length) {
           prUsage();
+        }
         outputURL = args[i];
       } else {
         for (int j = 0; j < 120; j++) {
@@ -288,8 +298,9 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
       i++;
     }
 
-    if (outputURL == null || inputFiles.size() == 0)
+    if (outputURL == null || inputFiles.size() == 0) {
       prUsage();
+    }
 
     // Check for output file extension.
     if (!outputURL.endsWith(".mov") && !outputURL.endsWith(".MOV")) {
@@ -303,8 +314,9 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
     }
 
     // Check the frame rate.
-    if (frameRate < 1)
+    if (frameRate < 1) {
       frameRate = 1;
+    }
 
     // Generate the output media locators.
     MediaLocator oml;
@@ -335,16 +347,19 @@ public class ImagesToVideo implements ControllerListener, DataSinkListener {
 
     MediaLocator ml;
 
-    if (url.indexOf(":") > 0 && (ml = new MediaLocator(url)) != null)
+    if (url.indexOf(":") > 0 && (ml = new MediaLocator(url)) != null) {
       return ml;
+    }
 
     if (url.startsWith(File.separator)) {
-      if ((ml = new MediaLocator("file:" + url)) != null)
+      if ((ml = new MediaLocator("file:" + url)) != null) {
         return ml;
+      }
     } else {
       String file = "file:" + System.getProperty("user.dir") + File.separator + url;
-      if ((ml = new MediaLocator(file)) != null)
+      if ((ml = new MediaLocator(file)) != null) {
         return ml;
+      }
     }
 
     return null;

@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
  * The Class SDKBuildInfo.
  */
 public class BowlerKernelBuildInfo {
+
   /**
    * The Constant NAME.
    */
@@ -23,8 +24,9 @@ public class BowlerKernelBuildInfo {
    */
   public static String getVersion() {
     String s = getTag("app.version");
-    if (s == null)
+    if (s == null) {
       s = "0.0.0";
+    }
     return s;
   }
 

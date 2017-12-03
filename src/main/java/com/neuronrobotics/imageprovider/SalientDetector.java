@@ -149,7 +149,6 @@ public class SalientDetector implements IObjectDetector {
         float a = a_mat_temp[0];
         float b = b_mat_temp[0];
 
-
         if (a <= b) {
           sal_temp[0] = (float) (1 - a / b);
         } else {
@@ -178,7 +177,8 @@ public class SalientDetector implements IObjectDetector {
     return Sal;
   }
 
-  public ArrayList<Rect> SortFindContours(ArrayList<MatOfPoint> a, ArrayList<Rect> b, Mat c, int Horizon, int minArea) {
+  public ArrayList<Rect> SortFindContours(ArrayList<MatOfPoint> a, ArrayList<Rect> b, Mat c,
+      int Horizon, int minArea) {
 
     ArrayList<MatOfPoint> contourFinal = new ArrayList<MatOfPoint>();
 
@@ -233,10 +233,12 @@ public class SalientDetector implements IObjectDetector {
           newY = 250;
           newX = 250;
 
-          test = Imgproc.boundingRect(new MatOfPoint(contourFinal.get(0))); // test = rect around the contour's most outer extremes
+          test = Imgproc.boundingRect(new MatOfPoint(
+              contourFinal.get(0))); // test = rect around the contour's most outer extremes
           area = Imgproc.contourArea(contourFinal.get(0));
         } else {
-          test = Imgproc.boundingRect(new MatOfPoint(contourFinal.get(i))); // test = rect around the contour's most outer extremes
+          test = Imgproc.boundingRect(new MatOfPoint(
+              contourFinal.get(i))); // test = rect around the contour's most outer extremes
           area = Imgproc.contourArea(contourFinal.get(i));
         }
 
@@ -283,7 +285,8 @@ public class SalientDetector implements IObjectDetector {
 
     OpenCVImageConversionFactory.bufferedImageToMat(inImg, original);// ACCESS
 
-    if (original.empty() == false) { // Prevent runtime exception incase bowler derps and doesn't give a frame
+    if (original.empty()
+        == false) { // Prevent runtime exception incase bowler derps and doesn't give a frame
 
       ArrayList<Rect> STAGE1_BOXES = new ArrayList<Rect>();
       ArrayList<Rect> STAGE2_BOXES = new ArrayList<Rect>();
@@ -304,12 +307,14 @@ public class SalientDetector implements IObjectDetector {
         Imgproc.Canny(Canny, Canny, 100, 300, 3, false);
 
         ArrayList<MatOfPoint> contourCanny = new ArrayList<MatOfPoint>();
-        Imgproc.findContours(Canny, contourCanny, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+        Imgproc.findContours(Canny, contourCanny, new Mat(), Imgproc.RETR_EXTERNAL,
+            Imgproc.CHAIN_APPROX_NONE);
 
         STAGE2_BOXES = SortFindContours(contourCanny, STAGE2_BOXES, Canny, Horizon, minArea);
 
         for (int i = 0; i < STAGE2_BOXES.size(); i++) {
-          Core.rectangle(ObjFound, STAGE2_BOXES.get(i).tl(), STAGE2_BOXES.get(i).br(), RedBox, 1, 8, 0);
+          Core.rectangle(ObjFound, STAGE2_BOXES.get(i).tl(), STAGE2_BOXES.get(i).br(), RedBox, 1, 8,
+              0);
         }
       } else if (stage1 == true || stage3 == true) { // captured, now retrieving
 
@@ -322,8 +327,10 @@ public class SalientDetector implements IObjectDetector {
         int Dilate_Max = 5;
         int Dilate_Min = 5;
 
-        Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(Erode_Min, Erode_Max));
-        Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(Dilate_Min, Dilate_Max));
+        Mat erodeElement = Imgproc
+            .getStructuringElement(Imgproc.MORPH_RECT, new Size(Erode_Min, Erode_Max));
+        Mat dilateElement = Imgproc
+            .getStructuringElement(Imgproc.MORPH_RECT, new Size(Dilate_Min, Dilate_Max));
 
         Mat Saliency = new Mat();   // Saliency of image
 
@@ -334,7 +341,8 @@ public class SalientDetector implements IObjectDetector {
             ComparTo = Saliency.clone();
 
             ArrayList<MatOfPoint> compCont = new ArrayList<MatOfPoint>();
-            Imgproc.findContours(ComparTo, compCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+            Imgproc.findContours(ComparTo, compCont, new Mat(), Imgproc.RETR_EXTERNAL,
+                Imgproc.CHAIN_APPROX_NONE);
 
             for (int i = 0; i < compCont.size(); i++) {
               double area = Imgproc.contourArea(compCont.get(i));
@@ -345,13 +353,15 @@ public class SalientDetector implements IObjectDetector {
           } else {
             double total = 0;
             ArrayList<MatOfPoint> currCont = new ArrayList<MatOfPoint>();
-            Imgproc.findContours(Saliency, currCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+            Imgproc.findContours(Saliency, currCont, new Mat(), Imgproc.RETR_EXTERNAL,
+                Imgproc.CHAIN_APPROX_NONE);
             for (int i = 0; i < currCont.size(); i++) {
               double area = Imgproc.contourArea(currCont.get(i));
               total = total + area;
             }
 
-            if (total < CompareTo_Area / 2) { // if total is greater, fine whatever weird lighting happened.
+            if (total < CompareTo_Area
+                / 2) { // if total is greater, fine whatever weird lighting happened.
               Object_Dropped = true;
             }
 
@@ -360,12 +370,14 @@ public class SalientDetector implements IObjectDetector {
 
           ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
-          Imgproc.findContours(Saliency, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+          Imgproc.findContours(Saliency, contours, new Mat(), Imgproc.RETR_EXTERNAL,
+              Imgproc.CHAIN_APPROX_NONE);
 
           STAGE1_BOXES = SortFindContours(contours, STAGE1_BOXES, Saliency, Horizon, minArea);
 
           for (int i = 0; i < STAGE1_BOXES.size(); i++) {
-            Core.rectangle(ObjFound, STAGE1_BOXES.get(i).tl(), STAGE1_BOXES.get(i).br(), RedBox, 1, 8, 0);
+            Core.rectangle(ObjFound, STAGE1_BOXES.get(i).tl(), STAGE1_BOXES.get(i).br(), RedBox, 1,
+                8, 0);
           }
 
           // PROCESS SMALL AREAS ******************************************************************************************************
@@ -388,7 +400,8 @@ public class SalientDetector implements IObjectDetector {
             int edge = 5;
 
             aRect = STAGE1_BOXES.get(a1);  // copy of rect
-            ObjectTemp = original.submat(aRect).clone();                  // cutout of 100x100 or 250x250
+            ObjectTemp = original.submat(aRect)
+                .clone();                  // cutout of 100x100 or 250x250
 
             returnArea_X = (int) (aRect.br().x - (aRect.width / 2));
             returnArea_Y = (int) (aRect.br().y - (aRect.height / 2));
@@ -456,7 +469,8 @@ public class SalientDetector implements IObjectDetector {
               Imgproc.dilate(colorResult, colorResult, dilateElement);
               Imgproc.dilate(colorResult, colorResult, dilateElement);
 
-              Imgproc.findContours(colorResult, resultCont, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+              Imgproc.findContours(colorResult, resultCont, new Mat(), Imgproc.RETR_EXTERNAL,
+                  Imgproc.CHAIN_APPROX_SIMPLE);
 
               if (resultCont.size() >= 1 && resultCont.size() <= numbOfObj) {
                 for (int z = 0; z < resultCont.size(); z++) {
@@ -477,13 +491,15 @@ public class SalientDetector implements IObjectDetector {
                     int centX = (int) br_x - (test.width / 2); // set center X
                     int centY = (int) br_y - (test.width / 2); // set center Y
 
-                    if (tl_x - edge > 0 && tl_y - edge > 0 && br_x + edge < ObjWidth && br_y + edge < ObjHeight) {
+                    if (tl_x - edge > 0 && tl_y - edge > 0 && br_x + edge < ObjWidth
+                        && br_y + edge < ObjHeight) {
                       int X1 = ObjCent - centoffset;
                       int X2 = ObjCent + centoffset;
                       int Y1 = ObjCent - centoffset;
                       int Y2 = ObjCent + centoffset;
 
-                      if (centX >= X1 && centX <= X2 && centY >= Y1 && centY <= Y2) {   // VALID INTERESTING AREA
+                      if (centX >= X1 && centX <= X2 && centY >= Y1
+                          && centY <= Y2) {   // VALID INTERESTING AREA
 
                         stage1_count++;
                         returnArea_X = (int) (aRect.br().x - (aRect.width / 2));
@@ -497,8 +513,11 @@ public class SalientDetector implements IObjectDetector {
                           smallbox = true;
                         }
 
-                        Core.rectangle(ObjFound, STAGE1_BOXES.get(a1).tl(), STAGE1_BOXES.get(a1).br(), YellowBox, 2, 8, 0);
-                        AbstractImageProvider.deepCopy(OpenCVImageConversionFactory.matToBufferedImage(ObjFound), disp);
+                        Core.rectangle(ObjFound, STAGE1_BOXES.get(a1).tl(),
+                            STAGE1_BOXES.get(a1).br(), YellowBox, 2, 8, 0);
+                        AbstractImageProvider
+                            .deepCopy(OpenCVImageConversionFactory.matToBufferedImage(ObjFound),
+                                disp);
 
                         double m = (double) returnArea_X;
                         double n = (double) returnArea_Y;
@@ -533,7 +552,9 @@ public class SalientDetector implements IObjectDetector {
                         Detection INTERESTING = new Detection(m, n, area, confidence);
                         ReturnedArea.add(INTERESTING);
                         countPositiveHits++;
-                        System.out.println("STUFF FOUND" + m + "," + n + " AREA : " + area + " CONFIDENCE : " + confidence);
+                        System.out.println(
+                            "STUFF FOUND" + m + "," + n + " AREA : " + area + " CONFIDENCE : "
+                                + confidence);
 
                       }
                     }

@@ -6,16 +6,15 @@ import java.util.ArrayList;
 import javafx.scene.Group;
 
 /**
- * Adding additional language support to bowler studio
- * THis interface is for adding new scripting languages
- * Add the new langauge in the Static declaration of ScriptingEngine
- * or dynamically via:
+ * Adding additional language support to bowler studio THis interface is for adding new scripting
+ * languages Add the new langauge in the Static declaration of ScriptingEngine or dynamically via:
  *
  * ScriptingEngine.addScriptingLanguage(new IScriptingLanguage());
  *
  * @author hephaestus
  */
 public interface IScriptingLanguage {
+
   /**
    * This interface is for adding additional language support.
    *
@@ -40,8 +39,8 @@ public interface IScriptingLanguage {
   public abstract String getShellType();
 
   /**
-   * Returns the list of supported file extentions
-   * Convention is to provide just the leters that make up the file extention
+   * Returns the list of supported file extentions Convention is to provide just the leters that
+   * make up the file extention
    */
   public abstract ArrayList<String> getFileExtenetion();
 

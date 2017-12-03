@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.vitamins;
 import java.util.HashMap;
 
 public class PurchasingData {
+
   private HashMap<String, Double> variantParameters;
   private HashMap<Integer, Double> pricsUSD;
   private String urlAPI;

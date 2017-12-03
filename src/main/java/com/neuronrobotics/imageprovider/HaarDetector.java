@@ -19,6 +19,7 @@ import org.opencv.objdetect.CascadeClassifier;
 
 
 public class HaarDetector implements IObjectDetector {
+
   private MatOfRect faceDetections = new MatOfRect();
   ;
   private CascadeClassifier faceDetector;
@@ -56,7 +57,6 @@ public class HaarDetector implements IObjectDetector {
       for (Detection rect : myArray) {
         //Core.rectangle(displayImage, rect.pt, new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
         center = new Point(rect.getX() + (rect.getSize() / 2), rect.getY() + (rect.getSize() / 2));
-
 
         Size objectSize = new Size((rect.getSize() / 2),
             (rect.getSize() / 2));

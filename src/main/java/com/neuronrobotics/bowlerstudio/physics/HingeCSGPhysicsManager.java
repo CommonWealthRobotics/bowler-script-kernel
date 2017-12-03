@@ -13,6 +13,7 @@ import javafx.application.Platform;
 import javafx.scene.paint.Color;
 
 public class HingeCSGPhysicsManager extends CSGPhysicsManager {
+
   private HingeConstraint constraint = null;
   private IClosedLoopController controller = null;
   private double target = 0;
@@ -20,7 +21,8 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager {
   boolean flagBroken = false;
   private double velocity;
 
-  public HingeCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, PhysicsCore c) {
+  public HingeCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass,
+      PhysicsCore c) {
     super(baseCSG, pose, mass, false, c);
 
   }
@@ -41,7 +43,9 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager {
         getCore().remove(this);
         setConstraint(null);
         getCore().add(this);
-        System.out.println("ERROR Link Broken, Strength: " + getMuscleStrength() + " applied impluse " + constraint.getAppliedImpulse());
+        System.out.println(
+            "ERROR Link Broken, Strength: " + getMuscleStrength() + " applied impluse " + constraint
+                .getAppliedImpulse());
       }
     } else if (constraint != null && flagBroken) {
       constraint.enableAngularMotor(false, 0, 0);

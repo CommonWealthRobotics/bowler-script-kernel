@@ -34,7 +34,8 @@ import eu.mihosoft.vrl.v3d.*;
 public class BowlerKernel {
 
   private static final String CSG = null;
-  private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
+  private static File historyFile = new File(
+      ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 
   static {
     historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
@@ -50,15 +51,17 @@ public class BowlerKernel {
       history.add("for(int i=0;i<1000000;i++) { println dyio.getValue(0) }");
       history.add("dyio.setValue(0,128)");
       history.add("println dyio.getValue(0)");
-      history.add("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
-      history.add("DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
-      history.add("DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
+      history.add(
+          "ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
+      history.add(
+          "DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
+      history.add(
+          "DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
       history.add("shellType Clojure #Switches shell to Clojure");
       history.add("shellType Jython #Switches shell to Python");
       history.add("shellType Groovy #Switches shell to Groovy/Java");
 
       history.add("println \"Hello world!\"");
-
 
       writeHistory(history);
     }
@@ -66,11 +69,14 @@ public class BowlerKernel {
 
   private static void fail() {
     System.err
-        .println("Usage: \r\njava -jar BowlerScriptKernel.jar -s <file 1> .. <file n> # This will load one script after the next ");
+        .println(
+            "Usage: \r\njava -jar BowlerScriptKernel.jar -s <file 1> .. <file n> # This will load one script after the next ");
     System.err
-        .println("java -jar BowlerScriptKernel.jar -p <file 1> .. <file n> # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable ");
+        .println(
+            "java -jar BowlerScriptKernel.jar -p <file 1> .. <file n> # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable ");
     System.err
-        .println("java -jar BowlerScriptKernel.jar -r <Groovy Jython or Clojure> (Optional)(-s or -p)<file 1> .. <file n> # This will start a shell in the requested langauge and run the files provided. ");
+        .println(
+            "java -jar BowlerScriptKernel.jar -r <Groovy Jython or Clojure> (Optional)(-s or -p)<file 1> .. <file n> # This will start a shell in the requested langauge and run the files provided. ");
 
     System.exit(1);
   }
@@ -159,16 +165,18 @@ public class BowlerKernel {
       System.exit(0);
     });
 
-
     if (!historyFile.exists()) {
       historyFile.createNewFile();
       reader.getHistory().addToHistory("println SDKBuildInfo.getVersion()");
       reader.getHistory().addToHistory("for(int i=0;i<100;i++) { println dyio.getValue(0) }");
       reader.getHistory().addToHistory("dyio.setValue(0,128)");
       reader.getHistory().addToHistory("println dyio.getValue(0)");
-      reader.getHistory().addToHistory("ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
-      reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
-      reader.getHistory().addToHistory("DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
+      reader.getHistory().addToHistory(
+          "ScriptingEngine.inlineGistScriptRun(\"d4312a0787456ec27a2a\", \"helloWorld.groovy\" , null)");
+      reader.getHistory().addToHistory(
+          "DeviceManager.addConnection(new DyIO(ConnectionDialog.promptConnection()),\"dyio\")");
+      reader.getHistory().addToHistory(
+          "DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
       reader.getHistory().addToHistory("BowlerKernel.speak(\"Text to speech works like this\")");
       reader.getHistory().addToHistory("println \"Hello world!\"");
       writeHistory(reader.getHistory().getHistoryList());
@@ -218,8 +226,9 @@ public class BowlerKernel {
         try {
           ret = ScriptingEngine.inlineScriptStringRun(line, null,
               shellTypeStorage);
-          if (ret != null)
+          if (ret != null) {
             System.out.println(ret);
+          }
         } catch (Error e) {
           e.printStackTrace();
         } catch (Exception e) {
@@ -274,8 +283,10 @@ public class BowlerKernel {
   }
 
   @SuppressWarnings("unused")
-  public static int speak(String msg, Double rate, Double pitch, Double range, Double shift, Double volume) {
-    System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
+  public static int speak(String msg, Double rate, Double pitch, Double range, Double shift,
+      Double volume) {
+    System.setProperty("freetts.voices",
+        "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
     VoiceManager voiceManager = VoiceManager.getInstance();
     com.sun.speech.freetts.Voice voice = voiceManager.getVoice("kevin16");
 
@@ -297,7 +308,8 @@ public class BowlerKernel {
       System.out.println("All voices available:");
       com.sun.speech.freetts.Voice[] voices = voiceManager.getVoices();
       for (int i = 0; i < voices.length; i++) {
-        System.out.println("    " + voices[i].getName() + " (" + voices[i].getDomain() + " domain)");
+        System.out
+            .println("    " + voices[i].getName() + " (" + voices[i].getDomain() + " domain)");
       }
     }
 

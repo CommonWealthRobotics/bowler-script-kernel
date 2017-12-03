@@ -15,8 +15,10 @@ import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 public class ConfigurationDatabase {
+
   private static final String repo = "BowlerStudioConfiguration";
-  private static final String HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT = "https://github.com/CommonWealthRobotics/" + repo + ".git";
+  private static final String HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT =
+      "https://github.com/CommonWealthRobotics/" + repo + ".git";
 
   private static String gitSource = null; // madhephaestus
   private static String dbFile = "database.json";
@@ -59,7 +61,9 @@ public class ConfigurationDatabase {
     writeOut = gson.toJson(database, TT_mapStringString);
     //}
     try {
-      ScriptingEngine.pushCodeToGit(getGitSource(), ScriptingEngine.getFullBranch(getGitSource()), getDbFile(), writeOut, "Saving database");
+      ScriptingEngine
+          .pushCodeToGit(getGitSource(), ScriptingEngine.getFullBranch(getGitSource()), getDbFile(),
+              writeOut, "Saving database");
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -68,17 +72,20 @@ public class ConfigurationDatabase {
 
   @SuppressWarnings("unchecked")
   public static HashMap<String, HashMap<String, Object>> getDatabase() {
-    if (database != null)
+    if (database != null) {
       return database;
+    }
     try {
-      database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile(), null);
+      database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
+          .inlineFileScriptRun(loadFile(), null);
 
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    if (database == null)
+    if (database == null) {
       database = new HashMap<String, HashMap<String, Object>>();
+    }
     return database;
   }
 
@@ -98,7 +105,8 @@ public class ConfigurationDatabase {
         GHMyself self = github.getMyself();
         Map<String, GHRepository> myPublic = self.getAllRepositories();
         for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
-          if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName().equals(self.getName())) {
+          if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName()
+              .equals(self.getName())) {
             GHRepository ghrepo = entry.getValue();
             setRepo(ghrepo);
           }
@@ -109,7 +117,8 @@ public class ConfigurationDatabase {
           setRepo(forkedRep);
         }
       } else {
-        ConfigurationDatabase.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
+        ConfigurationDatabase
+            .setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
       }
 
     }

@@ -47,17 +47,17 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
     }
     binding.setVariable("args", args);
 
-
     GroovyShell shell = new GroovyShell(GroovyHelper.class
         .getClassLoader(), binding, cc);
     //System.out.println(code + "\n\nStart\n\n");
     Script script;
-    if (String.class.isInstance(code))
+    if (String.class.isInstance(code)) {
       script = shell.parse((String) code);
-    else if (File.class.isInstance(code))
+    } else if (File.class.isInstance(code)) {
       script = shell.parse((File) code);
-    else
+    } else {
       return null;
+    }
     return script.run();
 
   }

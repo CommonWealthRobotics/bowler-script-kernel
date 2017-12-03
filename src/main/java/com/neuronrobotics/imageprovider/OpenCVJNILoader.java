@@ -9,11 +9,13 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 public class OpenCVJNILoader {
+
   static NativeResource resource = null;
 
   public static void load() {
-    if (resource != null)
+    if (resource != null) {
       return;
+    }
     resource = new NativeResource();
     //+Core.NATIVE_LIBRARY_NAME+".so"
     //+Core.NATIVE_LIBRARY_NAME+".so"
@@ -54,8 +56,10 @@ public class OpenCVJNILoader {
       throw new RuntimeException(erBack);
     } else if (NativeResource.isWindows()) {
       String basedir = System.getenv("OPENCV_DIR");
-      if (basedir == null)
-        throw new RuntimeException("OPENCV_DIR was not found, environment variable OPENCV_DIR needs to be set");
+      if (basedir == null) {
+        throw new RuntimeException(
+            "OPENCV_DIR was not found, environment variable OPENCV_DIR needs to be set");
+      }
       System.err.println("OPENCV_DIR found at " + basedir);
       if ((!System.getProperty("sun.arch.data.model").contains("32") && basedir.contains("x64"))) {
 
@@ -70,8 +74,10 @@ public class OpenCVJNILoader {
       //}
     } else if (NativeResource.isOSX()) {
       String basedir = System.getenv("OPENCV_DIR");
-      if (basedir == null)
-        throw new RuntimeException("OPENCV_DIR was not found, environment variable OPENCV_DIR needs to be set");
+      if (basedir == null) {
+        throw new RuntimeException(
+            "OPENCV_DIR was not found, environment variable OPENCV_DIR needs to be set");
+      }
       //basedir="/Users/hephaestus/Desktop/opencv249build/";
       String lib = basedir.trim() + "/lib/lib" + Core.NATIVE_LIBRARY_NAME + ".dylib";
       System.err.println("OPENCV_DIR found at " + lib);

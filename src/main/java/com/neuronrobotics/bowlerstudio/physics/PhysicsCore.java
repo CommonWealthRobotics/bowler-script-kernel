@@ -32,7 +32,8 @@ public class PhysicsCore {
 
   private SequentialImpulseConstraintSolver solver = new SequentialImpulseConstraintSolver();
 
-  private DiscreteDynamicsWorld dynamicsWorld = new DiscreteDynamicsWorld(dispatcher, broadphase, solver,
+  private DiscreteDynamicsWorld dynamicsWorld = new DiscreteDynamicsWorld(dispatcher, broadphase,
+      solver,
       collisionConfiguration);
   // setup our collision shapes
   private CollisionShape groundShape = null;
@@ -53,7 +54,8 @@ public class PhysicsCore {
 
   public PhysicsCore() throws Exception {
     // set the gravity of our world
-    getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98 * MobileBasePhysicsManager.PhysicsGravityScalar));
+    getDynamicsWorld().setGravity(
+        new Vector3f(0, 0, (float) -98 * MobileBasePhysicsManager.PhysicsGravityScalar));
 
     setGroundShape(new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
   }
@@ -113,7 +115,8 @@ public class PhysicsCore {
     DefaultMotionState groundMotionState = new DefaultMotionState(
         new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), new Vector3f(0, 0, 0), 1.0f)));
 
-    RigidBodyConstructionInfo groundRigidBodyCI = new RigidBodyConstructionInfo(0, groundMotionState, groundShape,
+    RigidBodyConstructionInfo groundRigidBodyCI = new RigidBodyConstructionInfo(0,
+        groundMotionState, groundShape,
         new Vector3f(0, 0, 0));
     groundRigidBody = new RigidBody(groundRigidBodyCI);
     dynamicsWorld.addRigidBody(groundRigidBody); // add our ground to the
@@ -160,10 +163,11 @@ public class PhysicsCore {
             long start = System.currentTimeMillis();
             stepMs(msTime);
             long took = (System.currentTimeMillis() - start);
-            if (took < msTime)
+            if (took < msTime) {
               ThreadUtil.wait((int) (msTime - took));
-            else
+            } else {
               System.out.println("Real time physics broken: " + took);
+            }
           } catch (Exception E) {
             E.printStackTrace();
           }
@@ -176,8 +180,9 @@ public class PhysicsCore {
   public ArrayList<CSG> getCsgFromEngine() {
     ArrayList<CSG> csg = new ArrayList<>();
     for (IPhysicsManager o : getPhysicsObjects()) {
-      for (CSG c : o.getBaseCSG())
+      for (CSG c : o.getBaseCSG()) {
         csg.add(c);
+      }
     }
     return csg;
   }
@@ -199,12 +204,13 @@ public class PhysicsCore {
     }
 
     Platform.runLater(() -> {
-      for (IPhysicsManager o : getPhysicsObjects())
+      for (IPhysicsManager o : getPhysicsObjects()) {
         try {
           TransformFactory.bulletToAffine(o.getRigidBodyLocation(), o.getUpdateTransform());
         } catch (Exception e) {
 
         }
+      }
     });
   }
 
@@ -220,8 +226,10 @@ public class PhysicsCore {
         getDynamicsWorld().addRigidBody(manager.getFallRigidBody());
       }
       if (HingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((HingeCSGPhysicsManager) manager).getConstraint() != null)
-          getDynamicsWorld().addConstraint(((HingeCSGPhysicsManager) manager).getConstraint(), true);
+        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
+          getDynamicsWorld()
+              .addConstraint(((HingeCSGPhysicsManager) manager).getConstraint(), true);
+        }
       }
       if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
         getDynamicsWorld().addVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
@@ -239,8 +247,9 @@ public class PhysicsCore {
         getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
       }
       if (HingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((HingeCSGPhysicsManager) manager).getConstraint() != null)
+        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
           getDynamicsWorld().removeConstraint(((HingeCSGPhysicsManager) manager).getConstraint());
+        }
       }
       if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
         getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
@@ -258,8 +267,9 @@ public class PhysicsCore {
         getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
       }
       if (HingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((HingeCSGPhysicsManager) manager).getConstraint() != null)
+        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
           getDynamicsWorld().removeConstraint(((HingeCSGPhysicsManager) manager).getConstraint());
+        }
       }
       if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
         getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());

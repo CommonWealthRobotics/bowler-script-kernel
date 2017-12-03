@@ -97,8 +97,9 @@ public class ArduinoLoader implements IScriptingLanguage {
   }
 
   private File findIno(File start) {
-    if (start == null)
+    if (start == null) {
       return null;
+    }
     if (start.getName().endsWith(".ino")) {
       return start;
     } else {

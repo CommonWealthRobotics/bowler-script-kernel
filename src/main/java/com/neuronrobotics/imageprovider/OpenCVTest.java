@@ -27,6 +27,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 // any java file starting with i is the interface
 
 public class OpenCVTest {
+
   private ArrayList<IObjectDetector> detectors;
   private RGBColorDetector mainFilter;
 
@@ -72,14 +73,12 @@ public class OpenCVTest {
     Scalar upper1 = new Scalar(360, 255, 255, 0);
     Scalar lower1 = new Scalar(240, 0, 0, 0);
 
-
     imageProviders.add(new OpenCVImageProvider(0));               // Image provider
     imageProviders.get(0).getLatestImage(inputImage, displayImage);
     // Provides the static file to the processors
     imageProviders.add(new StaticFileProvider(new File("image.png")));
 
-
-//		mainFilter = new RGBColorDetector(inputImage, 
+//		mainFilter = new RGBColorDetector(inputImage,
 //				lower,
 //				upper, 
 //				lower1, 
@@ -112,7 +111,8 @@ public class OpenCVTest {
     while (true) {
       try {
         for (int i = 0; i < imageProviders.size(); i++) { //list of image provid
-          imageProviders.get(i).getLatestImage(inputImage, displayImage);                        // capture image
+          imageProviders.get(i)
+              .getLatestImage(inputImage, displayImage);                        // capture image
           iconsCaptured.get(i).setImage(inputImage);  // show raw image
 
           for (int j = 0; j < detectors.size(); j++) {   // list of object detectors
@@ -134,7 +134,6 @@ public class OpenCVTest {
    * @param args
    */
   public static void main(String[] args) { // Main entry for object detection
-
 
     new OpenCVTest().run();              // starts
   }

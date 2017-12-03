@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class JsonRunner implements IScriptingLanguage {
+
   //Create the type, this tells GSON what datatypes to instantiate when parsing and saving the json
   private static Type TT_mapStringString = new TypeToken<HashMap<String, HashMap<String, Object>>>() {
   }.getType();

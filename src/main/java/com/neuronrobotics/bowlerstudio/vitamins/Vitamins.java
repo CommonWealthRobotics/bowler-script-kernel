@@ -79,7 +79,8 @@ public class Vitamins {
       PurchasingData purchasData = Purchasing.get(type, id, purchasingVariant);
       for (String variable : purchasData.getVariantParameters().keySet()) {
         double data = purchasData.getVariantParameters().get(variable);
-        LengthParameter parameter = new LengthParameter(variable, data, (ArrayList<Double>) Arrays.asList(data, data));
+        LengthParameter parameter = new LengthParameter(variable, data,
+            (ArrayList<Double>) Arrays.asList(data, data));
         parameter.setMM(data);
       }
 
@@ -136,10 +137,11 @@ public class Vitamins {
       gitRpoDatabase = defaultgitRpoDatabase;
       databaseSet.clear();
       fileLastLoaded.clear();
-      if (depthGauge < 2)
+      if (depthGauge < 2) {
         return get(type, id, depthGauge + 1);
-      else
+      } else {
         return null;
+      }
     }
   }
 
@@ -178,8 +180,10 @@ public class Vitamins {
           "Pushing changed Database");//commit message
 
     } catch (org.eclipse.jgit.api.errors.TransportException ex) {
-      System.out.println("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
-      System.out.println("You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
+      System.out
+          .println("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
+      System.out.println(
+          "You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
       throw ex;
     }
 
@@ -209,7 +213,8 @@ public class Vitamins {
 
   }
 
-  public static void setParameter(String type, String id, String parameterName, Object parameter) throws Exception {
+  public static void setParameter(String type, String id, String parameterName, Object parameter)
+      throws Exception {
 
     HashMap<String, Object> config = getConfiguration(type, id);
     try {
@@ -243,9 +248,11 @@ public class Vitamins {
         jsonString = IOUtils.toString(inPut);
         //System.out.println("Loading "+jsonString);
         // perfoem the GSON parse
-        HashMap<String, HashMap<String, Object>> database = gson.fromJson(jsonString, TT_mapStringString);
-        if (database == null)
+        HashMap<String, HashMap<String, Object>> database = gson
+            .fromJson(jsonString, TT_mapStringString);
+        if (database == null) {
           throw new RuntimeException("create a new one");
+        }
         databaseSet.put(type, database);
 
         for (String key : databaseSet.get(type).keySet()) {
@@ -288,8 +295,9 @@ public class Vitamins {
       File[] listOfFiles = folder.getParentFile().listFiles();
 
       for (File f : listOfFiles) {
-        if (!f.isDirectory() && f.getName().endsWith(".json"))
+        if (!f.isDirectory() && f.getName().endsWith(".json")) {
           types.add(f.getName().substring(0, f.getName().indexOf(".json")));
+        }
       }
 
     } catch (Exception e) {
@@ -305,8 +313,9 @@ public class Vitamins {
     HashMap<String, HashMap<String, Object>> database = getDatabase(type);
     Set<String> keys = database.keySet();
     for (String s : keys) {
-      if (!s.contains("meta"))
+      if (!s.contains("meta")) {
         types.add(s);
+      }
     }
 
     return types;
