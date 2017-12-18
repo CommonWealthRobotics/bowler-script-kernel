@@ -7,6 +7,7 @@ import java.nio.file.WatchEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -72,6 +73,10 @@ public class MobileBaseCadManager {
       @Override
       public void onDisconnect(BowlerAbstractDevice arg0) {
         bail = true;
+        dhCadGen.clear();
+        DHtoCadMap.clear();
+        LinktoCadMap.clear();
+        BasetoCadMap.clear();
       }
 
       @Override
@@ -571,7 +576,7 @@ public class MobileBaseCadManager {
 
   public static MobileBaseCadManager get(MobileBase device) {
     if (cadmap.get(device) == null) {
-
+      new RuntimeException().printStackTrace();
       MobileBaseCadManager mbcm = new MobileBaseCadManager(device, new IMobileBaseUI() {
 
         @Override
@@ -599,7 +604,7 @@ public class MobileBaseCadManager {
         }
 
         @Override
-        public List<CSG> getVisableCSGs() {
+        public Set<CSG> getVisableCSGs() {
           // TODO Auto-generated method stub
           return null;
         }

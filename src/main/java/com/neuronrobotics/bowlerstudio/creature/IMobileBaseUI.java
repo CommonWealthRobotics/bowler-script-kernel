@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public interface IMobileBaseUI {
@@ -14,7 +15,7 @@ public interface IMobileBaseUI {
   void addCsg(List<CSG> toadd, File source);
   void highlightException(File fileEngineRunByName, Exception ex);
   
-  List<CSG>  getVisableCSGs();
+  Set<CSG>  getVisableCSGs();
   void setSelectedCsg(List<CSG> selectedCsg);
   
   default void selectCsgByFile(File script, int lineNumber){
