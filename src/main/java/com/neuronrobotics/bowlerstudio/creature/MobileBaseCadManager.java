@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -574,9 +576,10 @@ public class MobileBaseCadManager {
 
   public static MobileBaseCadManager get(MobileBase device) {
     if (cadmap.get(device) == null) {
-      new RuntimeException().printStackTrace();
+      new RuntimeException("No Mobile Base Cad Manager UI specified").printStackTrace();
       MobileBaseCadManager mbcm = new MobileBaseCadManager(device, new IMobileBaseUI() {
 
+        private ArrayList<CSG> list = new ArrayList<>();
         @Override
         public void setSelectedCsg(List<CSG> selectedCsg) {
           // TODO Auto-generated method stub
@@ -586,7 +589,8 @@ public class MobileBaseCadManager {
         @Override
         public void setCsg(List<CSG> toadd, File source) {
           // TODO Auto-generated method stub
-
+          list.clear();
+          list.addAll(toadd);
         }
 
         @Override
@@ -598,13 +602,13 @@ public class MobileBaseCadManager {
         @Override
         public Set<CSG> getVisableCSGs() {
           // TODO Auto-generated method stub
-          return null;
+          return  new HashSet<CSG>(list);
         }
 
         @Override
         public void addCsg(List<CSG> toadd, File source) {
           // TODO Auto-generated method stub
-
+          list.addAll(toadd);
         }
       });
       cadmap.put(device, mbcm);
