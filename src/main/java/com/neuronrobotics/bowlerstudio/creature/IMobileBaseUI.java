@@ -9,12 +9,36 @@ import eu.mihosoft.vrl.v3d.CSG;
 
 public interface IMobileBaseUI {
 
- 
+  /**
+   * Replace all objects in the UI with these CSG's
+   * @param toadd
+   * @param source
+   */
   void setCsg(List<CSG> toadd, File source);
+  /**
+   * Add these objects to the UI
+   * @param toadd
+   * @param source
+   */
   void addCsg(List<CSG> toadd, File source);
+  /**
+   * Highlight the lines in a file
+   * @param fileEngineRunByName THe file that was running when the exception occurred
+   * @param ex the stack trace for file names of open files or for open or executed file names. 
+   */
   void highlightException(File fileEngineRunByName, Exception ex);
-  
+  /**
+   * Return the CSG's currently visible in this UI
+   * @return
+   */
   Set<CSG>  getVisableCSGs();
+  /**
+   * Highlight the given list of CSG's
+   * THis should not change the CSG, just highlight it
+   * 
+   * @param selectedCsg the list to highlight
+   * NULL is used as a clear highlights
+   */
   void setSelectedCsg(List<CSG> selectedCsg);
   
   default void selectCsgByFile(File script, int lineNumber){
