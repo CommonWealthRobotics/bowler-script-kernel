@@ -25,9 +25,7 @@ import com.neuronrobotics.sdk.util.IFileChangeListener;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
-import javafx.beans.property.DoubleProperty;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ProgressIndicator;
+import javafx.beans.property.*;
 
 public class MobileBaseCadManager {
 
@@ -63,8 +61,8 @@ public class MobileBaseCadManager {
       }
     }
   };
-  private boolean autoRegen;
-  private DoubleProperty pi;
+  private boolean autoRegen=true;
+  private DoubleProperty pi = new SimpleDoubleProperty(0);
 
   public MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
     this.ui = myUI;
@@ -587,12 +585,6 @@ public class MobileBaseCadManager {
 
         @Override
         public void setCsg(List<CSG> toadd, File source) {
-          // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void progressUpdate() {
           // TODO Auto-generated method stub
 
         }

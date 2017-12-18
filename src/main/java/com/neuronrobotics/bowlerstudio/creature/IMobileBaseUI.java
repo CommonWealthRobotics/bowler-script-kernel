@@ -9,8 +9,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 
 public interface IMobileBaseUI {
 
-  void progressUpdate();
-  
+ 
   void setCsg(List<CSG> toadd, File source);
   void addCsg(List<CSG> toadd, File source);
   void highlightException(File fileEngineRunByName, Exception ex);
