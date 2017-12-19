@@ -586,14 +586,8 @@ public class MobileBaseCadManager {
 
         @Override
         public void highlightException(File fileEngineRunByName, Exception ex) {
-          // TODO Auto-generated method stub
-
+          ex.printStackTrace();
         }
-
-
-
-  
-
         @Override
         public void setAllCSG(Collection<CSG> toAdd, File source) {
           // TODO Auto-generated method stub
