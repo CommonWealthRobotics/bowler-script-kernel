@@ -24,6 +24,7 @@ import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.IDeviceConnectionEventListener;
 import com.neuronrobotics.sdk.pid.PIDLimitEvent;
 import com.neuronrobotics.sdk.util.IFileChangeListener;
+import com.neuronrobotics.sdk.util.ThreadUtil;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
@@ -53,17 +54,33 @@ public class MobileBaseCadManager {
 
     @Override
     public void onFileChange(File fileThatChanged, WatchEvent event) {
+
+      
       try {
-        System.out.println("Re-loading Cad Base Engine");
-        cadEngine = ScriptingEngine.inlineFileScriptRun(fileThatChanged, null);
-        generateCad();
+        new Thread() {
+          public void run() {
+            ThreadUtil.wait((int) ((50*Math.random())+50));
+            try {
+              if (cadGenerating || !getAutoRegen()){
+                System.out.println("No Base reload, building currently");
+                return;
+              }
+              System.out.println("Re-loading Cad Base Engine");
+              cadEngine = ScriptingEngine.inlineFileScriptRun(fileThatChanged, null);
+            } catch (Exception e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            generateCad();
+          }
+        }.start();
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }
   };
-  private boolean autoRegen=true;
+  private boolean autoRegen = true;
   private DoubleProperty pi = new SimpleDoubleProperty(0);
 
   public MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
@@ -87,7 +104,7 @@ public class MobileBaseCadManager {
       }
     });
     setMobileBase(base);
-    
+
     // new Exception().printStackTrace();
   }
 
@@ -380,7 +397,7 @@ public class MobileBaseCadManager {
     this.base = base;
     cadmap.put(base, this);
     MobileBaseLoader.get(base);// load the dependant scripts
-    
+
   }
 
   /**
@@ -498,7 +515,7 @@ public class MobileBaseCadManager {
     new Thread() {
       @Override
       public void run() {
-        System.out.print("\r\nGenerating CAD...");
+        System.out.print("\r\nGenerating CAD...\r\n");
         setName("MobileBaseCadManager Generating cad Thread ");
         // new Exception().printStackTrace();
         MobileBase device = base;
@@ -507,9 +524,10 @@ public class MobileBaseCadManager {
         } catch (Exception e) {
           getUi().highlightException(getCadScript(), e);
         }
-        System.out.print("Done Generating CAD!\r\n");
-        getUi().setCsg(MobileBaseCadManager.this, getCadScript());
+        //System.out.print("\r\nDone Generating CAD!\r\n");
+        getUi().setCsg(MobileBaseCadManager.get(base), getCadScript());
         cadGenerating = false;
+        System.out.print("\r\nDone Generating CAD!\r\n");
       }
     }.start();
   }
@@ -579,7 +597,7 @@ public class MobileBaseCadManager {
 
   public static MobileBaseCadManager get(MobileBase device) {
     if (cadmap.get(device) == null) {
-      //new RuntimeException("No Mobile Base Cad Manager UI specified").printStackTrace();
+      // new RuntimeException("No Mobile Base Cad Manager UI specified").printStackTrace();
       MobileBaseCadManager mbcm = new MobileBaseCadManager(device, new IMobileBaseUI() {
 
         private ArrayList<CSG> list = new ArrayList<>();
@@ -588,32 +606,33 @@ public class MobileBaseCadManager {
         public void highlightException(File fileEngineRunByName, Exception ex) {
           ex.printStackTrace();
         }
+
         @Override
         public void setAllCSG(Collection<CSG> toAdd, File source) {
           // TODO Auto-generated method stub
-       // TODO Auto-generated method stub
+          // TODO Auto-generated method stub
           list.clear();
           list.addAll(toAdd);
         }
 
         @Override
         public void addCSG(Collection<CSG> toAdd, File source) {
-       // TODO Auto-generated method stub
+          // TODO Auto-generated method stub
           list.addAll(toAdd);
 
-          
+
         }
 
         @Override
         public Set<CSG> getVisibleCSGs() {
-       // TODO Auto-generated method stub
-          return  new HashSet<CSG>(list);
+          // TODO Auto-generated method stub
+          return new HashSet<CSG>(list);
         }
 
         @Override
         public void setSelectedCsg(Collection<CSG> selectedCsg) {
           // TODO Auto-generated method stub
-          
+
         }
       });
       cadmap.put(device, mbcm);

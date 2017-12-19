@@ -11,6 +11,7 @@ import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.DhInverseSolver;
 import com.neuronrobotics.sdk.addons.kinematics.IDriveEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.common.DeviceManager;
 
 public class MobileBaseLoader {
   private static HashMap<MobileBase, MobileBaseLoader> map = new HashMap<>();
