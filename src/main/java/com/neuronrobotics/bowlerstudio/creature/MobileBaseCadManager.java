@@ -67,7 +67,7 @@ public class MobileBaseCadManager {
   private DoubleProperty pi = new SimpleDoubleProperty(0);
 
   public MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
-    this.ui = myUI;
+    this.setUi(myUI);
     base.addConnectionEventListener(new IDeviceConnectionEventListener() {
 
       @Override
@@ -86,6 +86,7 @@ public class MobileBaseCadManager {
       }
     });
     setMobileBase(base);
+    
     // new Exception().printStackTrace();
   }
 
@@ -141,13 +142,13 @@ public class MobileBaseCadManager {
       try {
         setDefaultLinkLevelCadEngine();
       } catch (Exception e) {
-        ui.highlightException(null, e);
+        getUi().highlightException(null, e);
       }
       if (getCadScript() != null) {
         try {
           cadEngine = ScriptingEngine.inlineFileScriptRun(getCadScript(), null);
         } catch (Exception e) {
-          ui.highlightException(getCadScript(), e);
+          getUi().highlightException(getCadScript(), e);
         }
       }
     }
@@ -178,12 +179,12 @@ public class MobileBaseCadManager {
         }).start();
       }
     } catch (Exception e) {
-      ui.highlightException(getCadScript(), e);
+      getUi().highlightException(getCadScript(), e);
     }
     System.out.println("Displaying Body");
     getProcesIndictor().set(0.35);
     // clears old robot and places base
-    ui.setCsg(getBasetoCadMap().get(device), getCadScript());
+    getUi().setCsg(getBasetoCadMap().get(device), getCadScript());
     System.out.println("Rendering limbs");
     getProcesIndictor().set(0.4);
     ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
@@ -198,7 +199,7 @@ public class MobileBaseCadManager {
       if (showingStl || !device.isAvailable()) {
         for (CSG csg : arrayList) {
           getAllCad().add(csg);
-          ui.addCsg(csg, getCadScript());
+          getUi().addCsg(csg, getCadScript());
           set(base, (int) i, (int) j);
           j += 1;
         }
@@ -210,7 +211,7 @@ public class MobileBaseCadManager {
         for (CSG csg : linksCad) {
           getAllCad().add(csg);
           arrayList.add(csg);
-          ui.addCsg(csg, getCadScript());
+          getUi().addCsg(csg, getCadScript());
           j += 1;
         }
 
@@ -261,12 +262,12 @@ public class MobileBaseCadManager {
     }
     System.out.println("Found arrangeBed API in CAD engine");
     List<CSG> totalAssembly = bed.arrangeBed(base);
-    ui.setCsg(totalAssembly, getCadScript());
+    getUi().setCsg(totalAssembly, getCadScript());
     File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
     if (!dir.exists())
       dir.mkdirs();
 
-    return new CadFileExporter(ui).generateManufacturingParts(totalAssembly, baseDirForFiles);
+    return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, baseDirForFiles);
   }
 
   private ArrayList<File> _generateStls(MobileBase base, File baseDirForFiles, boolean kinematic)
@@ -317,11 +318,11 @@ public class MobileBaseCadManager {
             FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
             allCadStl.add(stl);
             // totalAssembly.add(tmp);
-            ui.setCsg(totalAssembly, getCadScript());
+            getUi().setCsg(totalAssembly, getCadScript());
             set(base, i, j);
           }
         } catch (Exception ex) {
-          ui.highlightException(getCadScript(), ex);
+          getUi().highlightException(getCadScript(), ex);
         }
         // legAssembly.setManufactuing(new PrepForManufacturing() {
         // public CSG prep(CSG arg0) {
@@ -354,11 +355,11 @@ public class MobileBaseCadManager {
           FileUtil.write(Paths.get(stl.getAbsolutePath()), csg.toStlString());
           allCadStl.add(stl);
           totalAssembly.add(csg);
-          ui.setCsg(totalAssembly, getCadScript());
+          getUi().setCsg(totalAssembly, getCadScript());
           link++;
         }
       } catch (Exception ex) {
-        ui.highlightException(getCadScript(), ex);
+        getUi().highlightException(getCadScript(), ex);
       }
     }
     // ui.setCsg(BasetoCadMap.get(base),getCadScript());
@@ -377,7 +378,8 @@ public class MobileBaseCadManager {
   public void setMobileBase(MobileBase base) {
     this.base = base;
     cadmap.put(base, this);
-
+    MobileBaseLoader.get(base);// load the dependant scripts
+    
   }
 
   /**
@@ -393,7 +395,7 @@ public class MobileBaseCadManager {
       try {
         setDefaultLinkLevelCadEngine();
       } catch (Exception e) {
-        ui.highlightException(getCadScript(), e);
+        getUi().highlightException(getCadScript(), e);
       }
     }
 
@@ -447,7 +449,7 @@ public class MobileBaseCadManager {
       }
       return dhLinks;
     } catch (Exception e) {
-      ui.highlightException(getCadScript(), e);
+      getUi().highlightException(getCadScript(), e);
     }
     return null;
 
@@ -458,7 +460,7 @@ public class MobileBaseCadManager {
     try {
 
       ArrayList<CSG> csg = MobileBaseCadManager.get(base).getBasetoCadMap().get(base);
-      ui.setSelectedCsg(csg);
+      getUi().setSelectedCsg(csg);
     } catch (Exception ex) {
       System.err.println("Base not loaded yet");
     }
@@ -470,7 +472,7 @@ public class MobileBaseCadManager {
 
       ArrayList<CSG> limCad = MobileBaseCadManager.get(base).getDHtoCadMap().get(limb);
 
-      ui.setSelectedCsg(limCad);
+      getUi().setSelectedCsg(limCad);
     } catch (Exception ex) {
       System.err.println("Limb not loaded yet");
     }
@@ -480,7 +482,7 @@ public class MobileBaseCadManager {
     try {
 
       ArrayList<CSG> limCad = MobileBaseCadManager.get(base).getLinktoCadMap().get(limb);
-      ui.setSelectedCsg(limCad);
+      getUi().setSelectedCsg(limCad);
     } catch (Exception ex) {
       System.err.println("Limb not loaded yet");
     }
@@ -502,10 +504,10 @@ public class MobileBaseCadManager {
         try {
           setAllCad(generateBody(device));
         } catch (Exception e) {
-          ui.highlightException(getCadScript(), e);
+          getUi().highlightException(getCadScript(), e);
         }
         System.out.print("Done Generating CAD!\r\n");
-        ui.setCsg(MobileBaseCadManager.this, getCadScript());
+        getUi().setCsg(MobileBaseCadManager.this, getCadScript());
         cadGenerating = false;
       }
     }.start();
@@ -538,7 +540,7 @@ public class MobileBaseCadManager {
       Object defaultDHSolver = ScriptingEngine.inlineFileScriptRun(code, null);
       dhCadGen.put(dh, defaultDHSolver);
     } catch (Exception e) {
-      ui.highlightException(code, e);
+      getUi().highlightException(code, e);
     }
 
     FileWatchDeviceWrapper.watch(dh, code, (fileThatChanged, event) -> {
@@ -549,7 +551,7 @@ public class MobileBaseCadManager {
         dhCadGen.put(dh, d);
         generateCad();
       } catch (Exception ex) {
-        ui.highlightException(code, ex);
+        getUi().highlightException(code, ex);
       }
     });
   }
@@ -576,7 +578,7 @@ public class MobileBaseCadManager {
 
   public static MobileBaseCadManager get(MobileBase device) {
     if (cadmap.get(device) == null) {
-      new RuntimeException("No Mobile Base Cad Manager UI specified").printStackTrace();
+      //new RuntimeException("No Mobile Base Cad Manager UI specified").printStackTrace();
       MobileBaseCadManager mbcm = new MobileBaseCadManager(device, new IMobileBaseUI() {
 
         private ArrayList<CSG> list = new ArrayList<>();
@@ -667,6 +669,14 @@ public class MobileBaseCadManager {
 
   public void setAutoRegen(boolean autoRegen) {
     this.autoRegen = autoRegen;
+  }
+
+  public IMobileBaseUI getUi() {
+    return ui;
+  }
+
+  public void setUi(IMobileBaseUI ui) {
+    this.ui = ui;
   }
 
 }
