@@ -185,7 +185,7 @@ public class MobileBaseCadManager {
     System.out.println("Displaying Body");
     getProcesIndictor().set(0.35);
     // clears old robot and places base
-    getUi().setCsg(getBasetoCadMap().get(device), getCadScript());
+    getUi().setAllCSG(getBasetoCadMap().get(device), getCadScript());
     System.out.println("Rendering limbs");
     getProcesIndictor().set(0.4);
     ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
@@ -263,7 +263,7 @@ public class MobileBaseCadManager {
     }
     System.out.println("Found arrangeBed API in CAD engine");
     List<CSG> totalAssembly = bed.arrangeBed(base);
-    getUi().setCsg(totalAssembly, getCadScript());
+    getUi().setAllCSG(totalAssembly, getCadScript());
     File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
     if (!dir.exists())
       dir.mkdirs();
@@ -319,7 +319,7 @@ public class MobileBaseCadManager {
             FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
             allCadStl.add(stl);
             // totalAssembly.add(tmp);
-            getUi().setCsg(totalAssembly, getCadScript());
+            getUi().setAllCSG(totalAssembly, getCadScript());
             set(base, i, j);
           }
         } catch (Exception ex) {
@@ -356,7 +356,7 @@ public class MobileBaseCadManager {
           FileUtil.write(Paths.get(stl.getAbsolutePath()), csg.toStlString());
           allCadStl.add(stl);
           totalAssembly.add(csg);
-          getUi().setCsg(totalAssembly, getCadScript());
+          getUi().setAllCSG(totalAssembly, getCadScript());
           link++;
         }
       } catch (Exception ex) {
@@ -583,18 +583,6 @@ public class MobileBaseCadManager {
       MobileBaseCadManager mbcm = new MobileBaseCadManager(device, new IMobileBaseUI() {
 
         private ArrayList<CSG> list = new ArrayList<>();
-        @Override
-        public void setSelectedCsg(List<CSG> selectedCsg) {
-          // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void setCsg(List<CSG> toadd, File source) {
-          // TODO Auto-generated method stub
-          list.clear();
-          list.addAll(toadd);
-        }
 
         @Override
         public void highlightException(File fileEngineRunByName, Exception ex) {
@@ -602,16 +590,36 @@ public class MobileBaseCadManager {
 
         }
 
+
+
+  
+
         @Override
-        public Set<CSG> getVisableCSGs() {
+        public void setAllCSG(Collection<CSG> toAdd, File source) {
           // TODO Auto-generated method stub
+       // TODO Auto-generated method stub
+          list.clear();
+          list.addAll(toAdd);
+        }
+
+        @Override
+        public void addCSG(Collection<CSG> toAdd, File source) {
+       // TODO Auto-generated method stub
+          list.addAll(toAdd);
+
+          
+        }
+
+        @Override
+        public Set<CSG> getVisibleCSGs() {
+       // TODO Auto-generated method stub
           return  new HashSet<CSG>(list);
         }
 
         @Override
-        public void addCsg(List<CSG> toadd, File source) {
+        public void setSelectedCsg(Collection<CSG> selectedCsg) {
           // TODO Auto-generated method stub
-          list.addAll(toadd);
+          
         }
       });
       cadmap.put(device, mbcm);

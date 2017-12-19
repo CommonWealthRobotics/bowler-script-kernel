@@ -60,7 +60,7 @@ public class CadFileExporter {
 							svgName =part.toString();
 						}
 						svgParts.add(manufactured);
-						ui.setCsg(svgParts , null);
+						ui.setAllCSG(svgParts , null);
 					}
 				}
 
