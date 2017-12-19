@@ -77,6 +77,7 @@ public class MobileBaseCadManager {
         DHtoCadMap.clear();
         LinktoCadMap.clear();
         BasetoCadMap.clear();
+        cadmap.remove(get(base));
       }
 
       @Override
