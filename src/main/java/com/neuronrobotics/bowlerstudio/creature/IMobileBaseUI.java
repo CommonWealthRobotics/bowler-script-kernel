@@ -3,6 +3,8 @@ package com.neuronrobotics.bowlerstudio.creature;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import eu.mihosoft.vrl.v3d.CSG;
@@ -10,81 +12,86 @@ import eu.mihosoft.vrl.v3d.CSG;
 public interface IMobileBaseUI {
 
   /**
-   * Replace all objects in the UI with these CSG's
-   * @param toadd
-   * @param source
+   * Replace all objects in the UI with these CSGs.
+   *
+   * @param toAdd CSGs to add
+   * @param source script source file
    */
-  void setCsg(List<CSG> toadd, File source);
+  void setAllCSG(Collection<CSG> toAdd, File source);
+
   /**
-   * Add these objects to the UI
-   * @param toadd
-   * @param source
+   * Add these objects to the UI.
+   *
+   * @param toAdd CSGs to add
+   * @param source script source file
    */
-  void addCsg(List<CSG> toadd, File source);
+  void addCSG(Collection<CSG> toAdd, File source);
+
   /**
-   * Highlight the lines in a file
-   * @param fileEngineRunByName THe file that was running when the exception occurred
-   * @param ex the stack trace for file names of open files or for open or executed file names. 
+   * Highlight the exception-causing lines in a file.
+   *
+   * @param fileEngineRunByName The file that was running when the exception occurred
+   * @param ex the stack trace for file names of open files, or for open or executed file names
    */
   void highlightException(File fileEngineRunByName, Exception ex);
+
   /**
-   * Return the CSG's currently visible in this UI
-   * @return
+   * Return the CSGs currently visible in the UI.
+   *
+   * @return visible CSGs
    */
-  Set<CSG>  getVisableCSGs();
+  Set<CSG> getVisibleCSGs();
+
   /**
-   * Highlight the given list of CSG's
-   * THis should not change the CSG, just highlight it
+   * Highlight the given list of CSGs.
+   * This should not change the CSG, just highlight it.
    * 
    * @param selectedCsg the list to highlight
    * NULL is used as a clear highlights
    */
-  void setSelectedCsg(List<CSG> selectedCsg);
+  void setSelectedCsg(Collection<CSG> selectedCsg);
   
   default void selectCsgByFile(File script, int lineNumber){
-    ArrayList<CSG> objsFromScriptLine = new ArrayList<>();
-    // check all visable CSGs
-    for (CSG checker : getVisableCSGs()) {
+    List<CSG> objsFromScriptLine = new ArrayList<>();
+
+    // check all visible CSGs
+    for (CSG checker : getVisibleCSGs()) {
         for (String trace : checker.getCreationEventStackTraceList()) {
             String[] traceParts = trace.split(":");
-            // System.err.println("Seeking: "+script.getName()+" line=
-            // "+lineNumber+" checking from line: "+trace);
-            // System.err.println("TraceParts "+traceParts[0]+" and
-            // "+traceParts[1]);
-            if (traceParts[0].trim().toLowerCase().contains(script.getName().toLowerCase().trim())) {
-                // System.out.println("Script matches");
-                try {
-                    int num = Integer.parseInt(traceParts[1].trim());
+            if (traceParts[0].trim().toLowerCase()
+                .contains(script.getName().toLowerCase().trim())) {
+                  int num = Integer.parseInt(traceParts[1].trim());
 
-                    if (num == lineNumber) {
-                        // System.out.println("MATCH");
-                        objsFromScriptLine.add(checker);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                  if (num == lineNumber) {
+                      objsFromScriptLine.add(checker);
+                  }
             }
         }
     }
+
     if (objsFromScriptLine.size() > 0) {
         setSelectedCsg(objsFromScriptLine);
     }
   }
   
-  default void setCsg(CSG toadd, File source){
-    setCsg(Arrays.asList(toadd),  source);
+  default void setCsg(CSG toAdd, File source){
+    setAllCSG(Collections.singletonList(toAdd),  source);
   }
-  default void setCsg(List<CSG> toadd){
-    setCsg(toadd,  null);
+
+  default void setCsg(List<CSG> toAdd){
+    setAllCSG(toAdd,  null);
   }
   
-  default void setCsg(CSG toadd){
-    setCsg(Arrays.asList(toadd),  null);
+  default void setCsg(CSG toAdd){
+    setAllCSG(Collections.singletonList(toAdd),  null);
   }
+
   default  void setCsg(MobileBaseCadManager thread, File cadScript){
-    setCsg(thread.getAllCad(), cadScript);
+    setAllCSG(thread.getAllCad(), cadScript);
   }
-  default void addCsg(CSG toadd, File source){
-    addCsg(Arrays.asList(toadd),  source);
+
+  default void addCsg(CSG toAdd, File source){
+    addCSG(Collections.singletonList(toAdd),  source);
   }
+
 }
