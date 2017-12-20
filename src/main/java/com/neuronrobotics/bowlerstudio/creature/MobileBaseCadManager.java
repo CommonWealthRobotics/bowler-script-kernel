@@ -55,16 +55,16 @@ public class MobileBaseCadManager {
     @Override
     public void onFileChange(File fileThatChanged, WatchEvent event) {
 
-      
+      if (cadGenerating || !getAutoRegen()){
+        System.out.println("No Base reload, building currently");
+        return;
+      }
       try {
         new Thread() {
           public void run() {
             ThreadUtil.wait((int) ((50*Math.random())+50));
             try {
-              if (cadGenerating || !getAutoRegen()){
-                System.out.println("No Base reload, building currently");
-                return;
-              }
+
               System.out.println("Re-loading Cad Base Engine");
               cadEngine = ScriptingEngine.inlineFileScriptRun(fileThatChanged, null);
             } catch (Exception e) {
