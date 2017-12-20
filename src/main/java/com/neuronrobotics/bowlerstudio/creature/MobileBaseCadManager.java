@@ -128,14 +128,14 @@ public class MobileBaseCadManager {
   }
 
   private IgenerateCad getIgenerateCad() {
-    if (IgenerateBody.class.isInstance(cadEngine)) {
+    if (IgenerateCad.class.isInstance(cadEngine)) {
       return (IgenerateCad) cadEngine;
     }
     throw new RuntimeException("Cad engine does not implement IgenerateCad");
   }
 
   private IgenerateBed getIgenerateBed() {
-    if (IgenerateBody.class.isInstance(cadEngine)) {
+    if (IgenerateBed.class.isInstance(cadEngine)) {
       return (IgenerateBed) cadEngine;
     }
     throw new RuntimeException("Cad engine does not implement IgenerateBed");
