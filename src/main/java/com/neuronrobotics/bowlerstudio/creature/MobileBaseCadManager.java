@@ -55,14 +55,14 @@ public class MobileBaseCadManager {
     @Override
     public void onFileChange(File fileThatChanged, WatchEvent event) {
 
-      if (cadGenerating || !getAutoRegen()){
+      if (cadGenerating || !getAutoRegen()) {
         System.out.println("No Base reload, building currently");
         return;
       }
       try {
         new Thread() {
           public void run() {
-            ThreadUtil.wait((int) ((50*Math.random())+50));
+            ThreadUtil.wait((int) ((50 * Math.random()) + 50));
             try {
 
               System.out.println("Re-loading Cad Base Engine");
@@ -124,21 +124,21 @@ public class MobileBaseCadManager {
     if (IgenerateBody.class.isInstance(cadEngine)) {
       return (IgenerateBody) cadEngine;
     }
-    throw new RuntimeException("Cad engine does not implement IgenerateBody");
+    return null;
   }
 
   private IgenerateCad getIgenerateCad() {
     if (IgenerateCad.class.isInstance(cadEngine)) {
       return (IgenerateCad) cadEngine;
     }
-    throw new RuntimeException("Cad engine does not implement IgenerateCad");
+    return null;
   }
 
   private IgenerateBed getIgenerateBed() {
     if (IgenerateBed.class.isInstance(cadEngine)) {
       return (IgenerateBed) cadEngine;
     }
-    throw new RuntimeException("Cad engine does not implement IgenerateBed");
+    return null;
   }
 
 
@@ -524,7 +524,7 @@ public class MobileBaseCadManager {
         } catch (Exception e) {
           getUi().highlightException(getCadScript(), e);
         }
-        //System.out.print("\r\nDone Generating CAD!\r\n");
+        // System.out.print("\r\nDone Generating CAD!\r\n");
         getUi().setCsg(MobileBaseCadManager.get(base), getCadScript());
         cadGenerating = false;
         System.out.print("\r\nDone Generating CAD!\r\n");
