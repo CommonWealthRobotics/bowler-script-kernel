@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
+import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -18,6 +19,40 @@ public class CadFileExporter {
   IMobileBaseUI  ui;
   public CadFileExporter(IMobileBaseUI myUI){
     ui=myUI;
+  }
+  public CadFileExporter(){
+    ui=new IMobileBaseUI() {
+      
+      @Override
+      public void setSelectedCsg(Collection<CSG> selectedCsg) {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void setAllCSG(Collection<CSG> toAdd, File source) {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public void highlightException(File fileEngineRunByName, Exception ex) {
+        // TODO Auto-generated method stub
+        
+      }
+      
+      @Override
+      public Set<CSG> getVisibleCSGs() {
+        // TODO Auto-generated method stub
+        return null;
+      }
+      
+      @Override
+      public void addCSG(Collection<CSG> toAdd, File source) {
+        // TODO Auto-generated method stub
+        
+      }
+    };
   }
 	public ArrayList<File> generateManufacturingParts(List<CSG> totalAssembly , File baseDirForFiles) throws IOException {
 		ArrayList<File> allCadStl = new ArrayList<>();
