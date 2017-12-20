@@ -77,6 +77,9 @@ public class CadFileExporter {
 		for(CSG part: totalAssembly){
 			String name = part.getName();
 			CSG manufactured = part.prepForManufacturing();
+			if( manufactured==null){
+			  continue;
+			}
 			manufactured.setName(part.getName());
 			nameBase = dir.getAbsolutePath()+"/"+index+"-"+name;
 			index++;
