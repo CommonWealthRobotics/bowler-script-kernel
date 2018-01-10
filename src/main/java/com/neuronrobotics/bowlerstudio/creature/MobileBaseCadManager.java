@@ -528,6 +528,7 @@ public class MobileBaseCadManager {
         getUi().setCsg(MobileBaseCadManager.get(base), getCadScript());
         cadGenerating = false;
         System.out.print("\r\nDone Generating CAD!\r\n");
+        getProcesIndictor().set(1);
       }
     }.start();
   }
