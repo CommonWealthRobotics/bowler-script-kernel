@@ -184,6 +184,7 @@ public class MobileBaseCadManager {
           for (CSG c : newcad) {
             getAllCad().add(c);
           }
+          ui.addCSG(newcad,getCadScript());
         } else
           new Exception().printStackTrace();
         ArrayList<CSG> arrayList = getBasetoCadMap().get(device);
@@ -227,11 +228,14 @@ public class MobileBaseCadManager {
         ArrayList<CSG> linksCad = generateCad(l);
 
         for (CSG csg : linksCad) {
+          
           getAllCad().add(csg);
           arrayList.add(csg);
           getUi().addCsg(csg, getCadScript());
           j += 1;
+          set(base, (int) i, (int) j);
         }
+        
 
       }
 
