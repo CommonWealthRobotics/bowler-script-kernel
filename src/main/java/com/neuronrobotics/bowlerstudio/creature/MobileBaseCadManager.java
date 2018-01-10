@@ -226,14 +226,14 @@ public class MobileBaseCadManager {
 
         arrayList.clear();
         ArrayList<CSG> linksCad = generateCad(l);
-
+        
         for (CSG csg : linksCad) {
           
           getAllCad().add(csg);
           arrayList.add(csg);
           getUi().addCsg(csg, getCadScript());
           j += 1;
-          set(base, (int) i, (int) j);
+          
         }
         
 
@@ -439,6 +439,7 @@ public class MobileBaseCadManager {
 
         if (!bail) {
           ArrayList<CSG> tmp = generatorToUse.generateCad(dh, i);
+          getUi().addCSG(tmp, getCadScript());
           LinkConfiguration configuration = dh.getLinkConfiguration(i);
           if (getLinktoCadMap().get(configuration) == null) {
             getLinktoCadMap().put(configuration, new ArrayList<>());

@@ -13,6 +13,7 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ICSGProgress;
 
 public class MobileBaseLoading {
   int numCSG =0;
@@ -28,6 +29,8 @@ public class MobileBaseLoading {
 
       @Override
       public void addCSG(Collection<CSG> collection, File file) {
+        System.out.println("Adding CSG's # " +collection.size());
+
       }
 
       @Override
@@ -46,7 +49,14 @@ public class MobileBaseLoading {
       }
     };
 
-    
+    CSG.setProgressMoniter(new ICSGProgress() {
+      
+      @Override
+      public void progressUpdate(int currentIndex, int finalIndex, String type, CSG intermediateShape) {
+        // TODO Auto-generated method stub
+        
+      }
+    });
     String[] file = {"https://github.com/madhephaestus/SeriesElasticActuator.git", "seaArm.xml"};
     String xmlContent = ScriptingEngine.codeFromGit(file[0], file[1])[0];
     MobileBase mobileBase = new MobileBase(IOUtils.toInputStream(xmlContent, "UTF-8"));
@@ -59,7 +69,7 @@ public class MobileBaseLoading {
     System.out.println("Waiting for cad to generate");
     ThreadUtil.wait(1000);
     while (MobileBaseCadManager.get(mobileBase).getProcesIndictor().get() < 1 ) {
-      System.out.println("Waiting: " + MobileBaseCadManager.get(mobileBase).getProcesIndictor().get());
+      //System.out.println("Waiting: " + MobileBaseCadManager.get(mobileBase).getProcesIndictor().get());
       ThreadUtil.wait(1000);
     }
     if(numCSG==0)
