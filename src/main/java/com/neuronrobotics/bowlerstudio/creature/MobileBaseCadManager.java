@@ -401,7 +401,7 @@ public class MobileBaseCadManager {
     this.base = base;
     cadmap.put(base, this);
     MobileBaseLoader.get(base);// load the dependant scripts
-
+    base.updatePositions();
   }
 
   /**
