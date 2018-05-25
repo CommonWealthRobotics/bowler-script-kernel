@@ -94,7 +94,7 @@ public class MobileBaseCadManager {
         DHtoCadMap.clear();
         LinktoCadMap.clear();
         BasetoCadMap.clear();
-        cadmap.remove(get(base));
+        cadmap.remove(base);
       }
 
       @Override
@@ -463,7 +463,8 @@ public class MobileBaseCadManager {
 
             @Override
             public void onLinkLimit(AbstractLink arg0, PIDLimitEvent arg1) {
-              selectCsgByLink(base, configuration);
+            	if (getAutoRegen())
+            		selectCsgByLink(base, configuration);
 
             }
           });
