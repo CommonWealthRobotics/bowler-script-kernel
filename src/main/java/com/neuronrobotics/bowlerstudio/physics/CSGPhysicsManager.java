@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.physics;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
@@ -63,7 +64,10 @@ public class CSGPhysicsManager implements IPhysicsManager {
 			TransformFactory.nrToBullet(poseToMove, pose);
 		}
 
-		for (Polygon p : getBoundingBox(finalCSG).getPolygons()) {
+		List<Polygon> polygons = finalCSG.getPolygons();
+		if(polygons.size()>100)
+			 polygons = getBoundingBox(finalCSG).getPolygons();
+		for (Polygon p : polygons) {
 			for (Vertex v : p.vertices) {
 				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
 			}
