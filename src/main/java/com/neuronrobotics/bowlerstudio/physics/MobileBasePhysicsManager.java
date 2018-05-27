@@ -125,7 +125,7 @@ public class MobileBasePhysicsManager {
 		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad, start, base.getMassKg(), false, core);
 		RigidBody body = baseManager.getFallRigidBody();
 		baseManager.setUpdateManager(getUpdater(body, base.getImu()));
-
+		body.setWorldTransform(start);
 		core.getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98 * PhysicsGravityScalar));
 		core.add(baseManager);
 		for (int j = 0; j < base.getAllDHChains().size(); j++) {
@@ -226,7 +226,7 @@ public class MobileBasePhysicsManager {
 					joint6DOF = new HingeConstraint(lastLink, linkSection, localA, localB);
 					joint6DOF.setLimit(-(float) Math.toRadians(abstractLink.getMinEngineeringUnits()),
 							-(float) Math.toRadians(abstractLink.getMaxEngineeringUnits()));
-
+					
 					lastLink = linkSection;
 
 					hingePhysicsManager.setConstraint(joint6DOF);
@@ -265,6 +265,7 @@ public class MobileBasePhysicsManager {
 
 					abstractLink.getCurrentPosition();
 					core.add(hingePhysicsManager);
+					linkSection.setWorldTransform(linkLoc);
 				}
 			}
 		}
