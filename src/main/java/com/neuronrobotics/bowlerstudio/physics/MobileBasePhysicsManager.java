@@ -130,6 +130,7 @@ public class MobileBasePhysicsManager {
 		core.add(baseManager);
 		for (int j = 0; j < base.getAllDHChains().size(); j++) {
 			DHParameterKinematics dh = base.getAllDHChains().get(j);
+			TransformNR limbRoot = dh.getRobotToFiducialTransform();
 			RigidBody lastLink = body;
 			Matrix previousStep = null;
 			// ensure the dh-cache chain is computed and recent
@@ -164,7 +165,11 @@ public class MobileBasePhysicsManager {
 														// manipulaters in the CSG will not conflict for resources here
 					// The DH chain calculated the starting location of the link
 					// in its current configuration
-					TransformNR localLink = cached.get(i);
+					TransformNR localLink;
+					if(i>0)
+						localLink= cached.get(i-1);
+					else
+						localLink=limbRoot.copy();
 					// Lift it in the air so nothing is below the ground to
 					// start.
 					localLink.translateZ(lift);
@@ -201,9 +206,12 @@ public class MobileBasePhysicsManager {
 
 					hingePhysicsManager.setUpdateManager(getUpdater(linkSection, abstractLink.getImu()));
 					// // Setup some damping on the m_bodies
-					linkSection.setDamping(0.5f, 08.5f);
-					linkSection.setDeactivationTime(0.8f);
-					linkSection.setSleepingThresholds(1.6f, 2.5f);
+					//linkSection.setDamping(0.5f, 08.5f);
+					//linkSection.setDeactivationTime(0.8f);
+					//linkSection.setSleepingThresholds(1.6f, 2.5f);
+                	linkSection.setActivationState(com.bulletphysics.collision.dispatch.CollisionObject.DISABLE_DEACTIVATION);
+					
+					//linkSection.set
 
 					HingeConstraint joint6DOF;
 					Transform localA = new Transform();
@@ -226,7 +234,7 @@ public class MobileBasePhysicsManager {
 					joint6DOF = new HingeConstraint(lastLink, linkSection, localA, localB);
 					joint6DOF.setLimit(-(float) Math.toRadians(abstractLink.getMinEngineeringUnits()),
 							-(float) Math.toRadians(abstractLink.getMaxEngineeringUnits()));
-					
+
 					lastLink = linkSection;
 
 					hingePhysicsManager.setConstraint(joint6DOF);

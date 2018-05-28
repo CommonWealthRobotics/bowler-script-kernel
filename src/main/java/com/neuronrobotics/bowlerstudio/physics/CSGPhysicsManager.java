@@ -65,7 +65,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		}
 
 		List<Polygon> polygons = finalCSG.getPolygons();
-		if(polygons.size()>100)
+		if(polygons.size()>1000)
 			 polygons = getBoundingBox(finalCSG).getPolygons();
 		for (Polygon p : polygons) {
 			for (Vertex v : p.vertices) {
