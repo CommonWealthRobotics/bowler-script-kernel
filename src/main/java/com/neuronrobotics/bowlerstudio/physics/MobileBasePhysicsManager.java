@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.physics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +29,8 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 import Jama.Matrix;
 
 import eu.mihosoft.vrl.v3d.CSG;
-
+import eu.mihosoft.vrl.v3d.Vector3d;
+import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -122,7 +124,23 @@ public class MobileBasePhysicsManager {
 				TransformFactory.bulletToAffine(baseCad.get(0).getManipulator(), start);
 			}
 		});
-		CSGPhysicsManager baseManager = new CSGPhysicsManager(baseCad, start, base.getMassKg(), false, core);
+		 ArrayList<Vector3d> points = new ArrayList<eu.mihosoft.vrl.v3d.Vector3d>();
+		for(DHParameterKinematics leg:base.getAllDHChains()){
+			TransformNR limbRoot = leg.getRobotToFiducialTransform();
+			points.add(new  eu.mihosoft.vrl.v3d.Vector3d(
+				limbRoot.getX(),
+				limbRoot.getY(),
+				limbRoot.getZ()));
+			points.add(new  eu.mihosoft.vrl.v3d.Vector3d(
+					limbRoot.getX(),
+					limbRoot.getY(),
+					limbRoot.getZ()+10));
+		}
+		CSG collisionBod = HullUtil.hull(points);
+
+		CSGPhysicsManager baseManager = new CSGPhysicsManager((ArrayList<CSG>) Arrays.asList(collisionBod), start, base.getMassKg(), false, core);
+		baseManager.setBaseCSG(baseCad)	;
+		
 		RigidBody body = baseManager.getFallRigidBody();
 		baseManager.setUpdateManager(getUpdater(body, base.getImu()));
 		body.setWorldTransform(start);

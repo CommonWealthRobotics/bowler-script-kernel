@@ -35,6 +35,21 @@ public class CSGPhysicsManager implements IPhysicsManager {
 	private Transform updateTransform = new Transform();
 	private IPhysicsUpdate updateManager = null;
 	private PhysicsCore core;
+	
+	public CSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
+			PhysicsCore core) {
+		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
+
+		ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
+		for (int i = 0; i < baseCSG.size(); i++) {
+
+			CSG back = loadCSGToPoints(baseCSG.get(i), adjustCenter, pose, arg0);
+			back.setManipulator(baseCSG.get(i).getManipulator());
+			baseCSG.set(i, back);
+		}
+		CollisionShape fallShape = new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
+		setup(fallShape, pose, mass, core);
+	}
 
 	public CSGPhysicsManager(ArrayList<CSG> baseCSG, Vector3f start, double mass, PhysicsCore core) {
 		this(baseCSG, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)), mass, true, core);
@@ -65,8 +80,8 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		}
 
 		List<Polygon> polygons = finalCSG.getPolygons();
-		if(polygons.size()>1000)
-			 polygons = getBoundingBox(finalCSG).getPolygons();
+		//if(polygons.size()>1000)
+		//	 polygons = getBoundingBox(finalCSG).getPolygons();
 		for (Polygon p : polygons) {
 			for (Vertex v : p.vertices) {
 				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
@@ -86,20 +101,6 @@ public class CSGPhysicsManager implements IPhysicsManager {
 						.movey(incoming.getMaxY()).toZMax().movez(incoming.getMaxZ());
 	}
 
-	public CSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
-			PhysicsCore core) {
-		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
-
-		ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
-		for (int i = 0; i < baseCSG.size(); i++) {
-
-			CSG back = loadCSGToPoints(baseCSG.get(i), adjustCenter, pose, arg0);
-			back.setManipulator(baseCSG.get(i).getManipulator());
-			baseCSG.set(i, back);
-		}
-		CollisionShape fallShape = new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
-		setup(fallShape, pose, mass, core);
-	}
 
 	public void setup(CollisionShape fallShape, Transform pose, double mass, PhysicsCore core) {
 		this.setCore(core);
@@ -112,6 +113,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		fallShape.calculateLocalInertia((float) mass, fallInertia);
 		RigidBodyConstructionInfo fallRigidBodyCI = new RigidBodyConstructionInfo((float) mass, fallMotionState,
 				fallShape, fallInertia);
+		
 		fallRigidBodyCI.additionalDamping = true;
 		setFallRigidBody(new RigidBody(fallRigidBodyCI));
 		// update(40);
