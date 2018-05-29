@@ -137,7 +137,7 @@ public class MobileBasePhysicsManager {
 			points.add(new  eu.mihosoft.vrl.v3d.Vector3d(
 					limbRoot.getX(),
 					limbRoot.getY(),
-					limbRoot.getZ()+Maxz));
+					Maxz));
 		}
 		CSG collisionBod = HullUtil.hull(points);
 
