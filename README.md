@@ -31,13 +31,13 @@ Object returnVal = ScriptingEngine.inlineGistScriptRun("d4312a0787456ec27a2a", "
 <dependency>
   <groupId>com.neuronrobotics</groupId>
   <artifactId>BowlerScriptingKernel</artifactId>
-  <version>0.29.0</version>
+  <version>0.32.0</version>
 </dependency>
 ```
 ## Gradle
 ```
 dependencies {
- compile "com.neuronrobotics:BowlerScriptingKernel:0.29.0"
+ compile "com.neuronrobotics:BowlerScriptingKernel:0.32.0"
 }
 ```
 ### Macs Only
