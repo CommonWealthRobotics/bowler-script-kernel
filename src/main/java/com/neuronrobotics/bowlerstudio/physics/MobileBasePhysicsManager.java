@@ -138,7 +138,7 @@ public class MobileBasePhysicsManager {
 		}
 		CSG collisionBod = HullUtil.hull(points);
 
-		CSGPhysicsManager baseManager = new CSGPhysicsManager((ArrayList<CSG>) Arrays.asList(collisionBod), start, base.getMassKg(), false, core);
+		CSGPhysicsManager baseManager = new CSGPhysicsManager((List<CSG>) Arrays.asList(collisionBod), start, base.getMassKg(), false, core);
 		baseManager.setBaseCSG(baseCad)	;
 		
 		RigidBody body = baseManager.getFallRigidBody();

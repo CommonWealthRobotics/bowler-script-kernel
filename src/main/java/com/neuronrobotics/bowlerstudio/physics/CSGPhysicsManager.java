@@ -31,12 +31,12 @@ public class CSGPhysicsManager implements IPhysicsManager {
 
 	private RigidBody fallRigidBody;
 	private final Affine ballLocation = new Affine();
-	protected ArrayList<CSG> baseCSG = null;
+	protected List<CSG> baseCSG = null;
 	private Transform updateTransform = new Transform();
 	private IPhysicsUpdate updateManager = null;
 	private PhysicsCore core;
 	
-	public CSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
+	public CSGPhysicsManager(List<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
 			PhysicsCore core) {
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 
@@ -140,11 +140,11 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		this.fallRigidBody = fallRigidBody;
 	}
 
-	public ArrayList<CSG> getBaseCSG() {
+	public List<CSG> getBaseCSG() {
 		return baseCSG;
 	}
 
-	public void setBaseCSG(ArrayList<CSG> baseCSG) {
+	public void setBaseCSG(List<CSG> baseCSG) {
 		for (CSG c : baseCSG) {
 			c.setManipulator(getRigidBodyLocation());
 		}
