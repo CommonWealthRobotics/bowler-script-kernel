@@ -100,6 +100,7 @@ public class MobileBasePhysicsManager {
 			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad, PhysicsCore core) {
 		this.simplecad = simplecad;
 		double minz = 0;
+		double Maxz =0;
 		for (DHParameterKinematics dh : base.getAllDHChains()) {
 			if (dh.getCurrentTaskSpaceTransform().getZ() < minz) {
 				minz = dh.getCurrentTaskSpaceTransform().getZ();
@@ -109,8 +110,10 @@ public class MobileBasePhysicsManager {
 			if (c.getMinZ() < minz) {
 				minz = c.getMinZ();
 			}
+			if (c.getMaxZ() > Maxz) {
+				Maxz = c.getMaxZ();
+			}
 		}
-
 		// System.out.println("Minimum z = "+minz);
 		Transform start = new Transform();
 		base.setFiducialToGlobalTransform(new TransformNR());
@@ -134,7 +137,7 @@ public class MobileBasePhysicsManager {
 			points.add(new  eu.mihosoft.vrl.v3d.Vector3d(
 					limbRoot.getX(),
 					limbRoot.getY(),
-					limbRoot.getZ()+10));
+					limbRoot.getZ()+Maxz));
 		}
 		CSG collisionBod = HullUtil.hull(points);
 
@@ -208,16 +211,32 @@ public class MobileBasePhysicsManager {
 
 					double mass = conf.getMassKg();
 					ArrayList<CSG> outCad = new ArrayList<>();
+					ArrayList<CSG> collisions = new ArrayList<>();
 					for (int x = 0; x < thisLinkCad.size(); x++) {
 						Color color = thisLinkCad.get(x).getColor();
-						outCad.add(thisLinkCad.get(x)
+						 CSG cad = thisLinkCad.get(x);
+						 CSG tmp = CSGPhysicsManager.getBoundingBox(cad);
+						//tmp=tmp.difference(tmp.toXMax())
+						outCad.add(cad
 								.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse())));
 						outCad.get(x).setManipulator(manipulator);
 						outCad.get(x).setColor(color);
+
+						collisions.add(tmp
+								.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse())));
+						collisions.get(x).setManipulator(manipulator);
+						collisions.get(x).setColor(color);
+
 					}
+					
+					
+					
+					
 					// Build a hinge based on the link and mass
-					HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(outCad, linkLoc, mass,
+					// was outCad
+					HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(collisions, linkLoc, mass,
 							core);
+					hingePhysicsManager.setBaseCSG(outCad);
 					HingeCSGPhysicsManager.setMuscleStrength(1000000);
 
 					RigidBody linkSection = hingePhysicsManager.getFallRigidBody();

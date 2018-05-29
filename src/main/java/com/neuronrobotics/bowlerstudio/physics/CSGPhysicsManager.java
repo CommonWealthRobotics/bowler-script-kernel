@@ -95,7 +95,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 	 * 
 	 * @return A CSG that completely encapsulates the base CSG, centered around it
 	 */
-	public CSG getBoundingBox(CSG incoming) {
+	public static CSG getBoundingBox(CSG incoming) {
 		return new Cube((-incoming.getMinX() + incoming.getMaxX()), (-incoming.getMinY() + incoming.getMaxY()),
 				(-incoming.getMinZ() + incoming.getMaxZ())).toCSG().toXMax().movex(incoming.getMaxX()).toYMax()
 						.movey(incoming.getMaxY()).toZMax().movez(incoming.getMaxZ());
