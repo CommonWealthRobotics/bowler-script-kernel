@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import org.apache.commons.io.IOUtils;
 
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
 
@@ -25,7 +26,7 @@ public class RobotHelper implements IScriptingLanguage {
         mb = new MobileBase(IOUtils.toInputStream(s, "UTF-8"));
 
         mb.setGitSelfSource(ScriptingEngine.findGitTagFromFile(code));
-        return mb;
+        return MobileBaseLoader.get(mb);
       } catch (IOException e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
