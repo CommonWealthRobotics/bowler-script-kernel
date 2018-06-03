@@ -109,12 +109,11 @@ repositories {
 	jcenter()
 	maven { url 'https://repository-bubblecloud.forge.cloudbees.com/release/'}
 	maven { url 'https://clojars.org/repo' }
-	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
 	maven { url 'https://jline.sourceforge.net/m2repo' }
 	maven { url 'https://repo.spring.io/milestone'}
-	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/'  }
-	maven { url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'  }
 	maven { url 'https://jenkinsci.artifactoryonline.com/jenkinsci/public/' }
+	//com.neuronrobotics hosting point
+	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
 }
 
 dependencies {
@@ -167,7 +166,7 @@ dependencies {
 	compile "com.neuronrobotics:java-bowler:3.25.0"
 	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.23.3-jar-with-dependencies.jar'])
 	//compile fileTree (dir: '../JCSG/build/libs/', includes: ['JavaCad-0.8.2.jar'])
-	//compile "com.neuronrobotics:WalnutiQ:2.3.3"
+	//compile "com.neuronroboticsp:WalnutiQ:2.3.3"
 	
 	
 	
