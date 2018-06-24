@@ -1,1 +1,1 @@
-include ':java-bowler'
+include 'java-bowler'
