@@ -52,59 +52,8 @@ export OPENCV_DIR=<path to yout BowlerStudio.app>BowlerStudio.app/Contents/MacOS
   
   java -jar BowlerScriptKernel.jar -s .. # This will load one script after the next
 
-  java -jar BowlerScriptKernel.jar -p .. # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable
+  java -jar BowlerScriptKernel.jar -p .. # This will load one script then take the list of objects returned and pass them to the next script as its 'args' variable
   
   java -jar BowlerScriptKernel.jar -r <Groovy,Clojure,Jython> #Starts a repl for interactive robot coding
 ```
-# Adding additional languages
 
-## Create Enum
-First, add a field to com.neuronrobotics.bowlerstudio.scripting.ShellType:
-```
-  NEWSCRIPT("Display name of NewScript"),
-```
-
-## Create execution class
-Second, create a class with methods for running a script. To do this implement IScriptingLanguage:
-
-```
-  package com.neuronrobotics.bowlerstudio.scripting;
-  import java.io.File;
-  import java.util.ArrayList;
-  public class NewScriptHelper implements IScriptingLanguage {
-
-  	@Override
-  	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-  		// execute code from a file to preserve debugging and stack traces to link to editor
-  		return null;
-  	}
-  
-  	@Override
-  	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
-  		// execute code from a raw string
-  		return null;
-  	}
-  
-  	@Override
-  	public ShellType getShellType() {
-  		return ShellType.NEWSCRIPT;
-  	}
-  
-  	@Override
-  	public boolean isSupportedFileExtenetion(String filename) {
-  		if (name.toString().toLowerCase().endsWith(".newscript")) {
-  			return true;
-  		}
-  		return false;
-  	}
-  
-  }
-```
-## Add execution class to ScriptingEngine
-
-Finally, in the static method of ScriptingEngine, add your new Scripting languages to the internal list of supported languages:
-
-```
-  addScriptingLanguage(new NewScriptHelper());
-
-```
