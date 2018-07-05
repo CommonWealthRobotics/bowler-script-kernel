@@ -99,7 +99,7 @@ public class StudioBuildInfo {
   }
 
   public static boolean isOS64bit() {
-    return (System.getProperty("os.arch").contains("x86_64"));
+    return (System.getProperty("os.arch").contains("64"));
   }
 
   public static boolean isARM() {
