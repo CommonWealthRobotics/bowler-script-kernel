@@ -90,7 +90,9 @@ public class BowlerKernel {
     if (args.length == 0) {
       fail();
     }
-    OpenCVJNILoader.load(); // Loads the OpenCV JNI (java native interface)
+    try {
+    	OpenCVJNILoader.load(); // Loads the OpenCV JNI (java native interface)
+    }catch(Throwable t) {}
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
 //		
