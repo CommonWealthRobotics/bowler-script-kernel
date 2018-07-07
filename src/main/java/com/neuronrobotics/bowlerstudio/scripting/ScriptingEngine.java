@@ -1429,17 +1429,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     ScriptingEngine.loginSuccess = loginSuccess;
   }
   public static String [] copyGitFile(String sourceGit, String targetGit, String filename){
-    
+    String targetFilename = filename;
     String[] WalkingEngine;
+    if(targetGit.contains("gist.github.com")&& filename.contains("/")) {
+    	String[] parts = filename.split("/");
+    	targetFilename =parts[parts.length-1];
+    }
     try {
         WalkingEngine = ScriptingEngine.codeFromGit(sourceGit, filename);
         try {
-            if( null==ScriptingEngine.fileFromGit(targetGit, filename)){
+            if( null==ScriptingEngine.fileFromGit(targetGit, targetFilename)){
                 
-                ScriptingEngine.createFile(targetGit, filename, "copy file");
+                ScriptingEngine.createFile(targetGit, targetFilename, "copy file");
                 while (true) {
                     try {
-                        ScriptingEngine.fileFromGit(targetGit, filename);
+                        ScriptingEngine.fileFromGit(targetGit, targetFilename);
                         break;
                     } catch (Exception e) {
 
@@ -1467,12 +1471,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         }
         String[] newFileCode;
         try {
-            newFileCode = ScriptingEngine.codeFromGit(targetGit, filename);
+            newFileCode = ScriptingEngine.codeFromGit(targetGit, targetFilename);
             if(newFileCode==null)
                 newFileCode=new String[]{""};
             if(!WalkingEngine[0].contentEquals(newFileCode[0])){
-                System.out.println("Copy Content to "+targetGit+"/"+filename);
-                ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), filename, WalkingEngine[0], "copy file content");
+                System.out.println("Copy Content to "+targetGit+"/"+targetFilename);
+                ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename, WalkingEngine[0], "copy file content");
             }
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -1484,7 +1488,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     }
     
     
-    return new String[]{targetGit,filename};
+    return new String[]{targetGit,targetFilename};
 }
 
 }
