@@ -25,3 +25,5 @@ hs_err_pid*
 gradle.properties
 /jbullet-20101010/
 /CSGdatabase.json
+*iml
+.idea
