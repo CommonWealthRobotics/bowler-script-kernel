@@ -50,59 +50,7 @@ File buildDir = file(".");
 Properties props = new Properties()
 props.load(new FileInputStream(buildDir.getAbsolutePath()+"/src/main/resources/com/neuronrobotics/bowlerkernel/build.properties"))
 
-boolean is64Bit() {
-	////System.out.println("Arch: "+getOsArch());
-	return getOsArch().startsWith("x86_64") || getOsArch().startsWith("amd64");
-}
- boolean isARM() {
-	return getOsArch().startsWith("arm");
-}
- boolean isCortexA8(){
-	if(isARM()){
-		//TODO check for cortex a8 vs arm9 generic
-		return true;
-	}
-	return false;
-}
- boolean isWindows() {
-	////System.out.println("OS name: "+getOsName());
-	return getOsName().toLowerCase().startsWith("windows") ||getOsName().toLowerCase().startsWith("microsoft") || getOsName().toLowerCase().startsWith("ms");
-}
-
- boolean isLinux() {
-	return getOsName().toLowerCase().startsWith("linux");
-}
-
- boolean isOSX() {
-	return getOsName().toLowerCase().startsWith("mac");
-}
-
- String getExtension() {
-	if(isWindows()) {
-		return ".dll";
-	}
-	
-	if(isLinux()) {
-		return ".so";
-	}
-	
-	if(isOSX()) {
-		return ".jnilib";
-	}
-	
-	return "";
-}
-
-String getOsName() {	
-	return System.getProperty("os.name");
-}
-
-String getOsArch() {
-	return System.getProperty("os.arch");
-}
-
 //https://oss.sonatype.org/service/local/repositories/releases/content/com/neuronrobotics/nrjavaserial/3.10.1/nrjavaserial-3.10.1.jar
-
 
 repositories {
 	mavenCentral()
@@ -170,34 +118,6 @@ dependencies {
 	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.23.3-jar-with-dependencies.jar'])
 	//compile fileTree (dir: '../JCSG/build/libs/', includes: ['JavaCad-0.8.2.jar'])
 	//compile "com.neuronroboticsp:WalnutiQ:2.3.3"
-	
-	
-	
-	String basedir =System.getenv("OPENCV_DIR")+"/java/opencv-249.jar";
-	
-	if(isWindows()){
-	 	basedir =System.getenv("OPENCV_DIR")+"\\..\\..\\java\\opencv-249.jar";
-		println("OPENCV_DIR="+basedir);
-		compile files(basedir)
-	}
-	if(isOSX()){
-		basedir =System.getenv("OPENCV_DIR")+"../../java/opencv-249.jar";
-		println("OPENCV_DIR="+basedir);
-		if(System.getenv("OPENCV_DIR")!=null)
-			compile files(basedir)
-		else
-			//If you set your OPENCV_DIR environment variable, then we wouldnt have to do hacky things
-			compile files('/Applications/BowlerStudio.app/Contents/MacOS/opencv249build/bin/opencv-249.jar')
-	}
-	if(isLinux()){
-		//compile files('/usr/share/java/opencv-249.jar')
-		if(new File("/usr/share/OpenCV/java/").exists()){
-			System.out.println("Using the legacy opencv dir ")
-			compile fileTree (dir: '/usr/share/OpenCV/java/', includes: ['*opencv-24*.jar'])
-		}else{
-			compile fileTree (dir: '/usr/share/java/', includes: ['*opencv-24*.jar'])
-		}
-	}
 	
 	//compile group: 'jfree', name: 'jfreechart', version: '1.0.12'
 	compile group: 'jexcelapi', name: 'jxl', version: '2.4.2'

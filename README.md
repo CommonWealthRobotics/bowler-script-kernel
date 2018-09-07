@@ -40,12 +40,7 @@ dependencies {
  compile "com.neuronrobotics:BowlerScriptingKernel:0.32.4"
 }
 ```
-### Macs Only
 
-In Terminal, before running the jar you must run:
-```
-export OPENCV_DIR=<path to yout BowlerStudio.app>BowlerStudio.app/Contents/MacOS/opencv249build/
-```
 ## All platforms 
 ```
   Usage: 
