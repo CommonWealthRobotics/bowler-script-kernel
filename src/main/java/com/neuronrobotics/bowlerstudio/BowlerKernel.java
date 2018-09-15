@@ -24,7 +24,6 @@ import jline.History;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-import com.neuronrobotics.imageprovider.OpenCVJNILoader;
 import com.sun.speech.freetts.ProcessException;
 import com.sun.speech.freetts.VoiceManager;
 import com.sun.speech.freetts.en.us.FeatureProcessors.WordNumSyls;
