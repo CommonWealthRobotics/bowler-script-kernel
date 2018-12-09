@@ -24,7 +24,7 @@ import jline.History;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-import com.neuronrobotics.imageprovider.OpenCVJNILoader;
+//import com.neuronrobotics.imageprovider.OpenCVJNILoader;
 import com.sun.speech.freetts.ProcessException;
 import com.sun.speech.freetts.VoiceManager;
 import com.sun.speech.freetts.en.us.FeatureProcessors.WordNumSyls;
@@ -90,9 +90,7 @@ public class BowlerKernel {
     if (args.length == 0) {
       fail();
     }
-    try {
-    	OpenCVJNILoader.load(); // Loads the OpenCV JNI (java native interface)
-    }catch(Throwable t) {}
+
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
 //		
