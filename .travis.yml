@@ -1,4 +1,8 @@
 language: java
+before_install:
+  - "export DISPLAY=:99.0"
+  - "export TERM=dumb"
+  - "sh -e /etc/init.d/xvfb start"
 install:
   - sudo add-apt-repository ppa:cwchien/gradle -y
   - sudo apt-add-repository ppa:webupd8team/java -y
@@ -9,7 +13,7 @@ install:
   
   
 script:
-  - ./gradlew compileJava javadoc test 
+  - TERM=dumb ./gradlew compileJava javadoc test 
 cache:
   directories:
   - $HOME/.m2
