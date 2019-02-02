@@ -26,18 +26,23 @@ Object returnVal = ScriptingEngine.inlineGistScriptRun("d4312a0787456ec27a2a", "
 
 
 # Embed as a library in your projects
+
 ## Maven
+![](https://img.shields.io/nexus/r/https/oss.sonatype.org/com.neuronrobotics/BowlerScriptingKernel.svg?style=flat)
+
+
 ```
 <dependency>
   <groupId>com.neuronrobotics</groupId>
   <artifactId>BowlerScriptingKernel</artifactId>
-  <version>0.32.4</version>
+  <version>VERSION_FROM_BADGE</version>
 </dependency>
 ```
 ## Gradle
+![](https://img.shields.io/nexus/r/https/oss.sonatype.org/com.neuronrobotics/BowlerScriptingKernel.svg?style=flat)
 ```
 dependencies {
- compile "com.neuronrobotics:BowlerScriptingKernel:0.32.4"
+ compile "com.neuronrobotics:BowlerScriptingKernel:VERSION_FROM_BADGE"
 }
 ```
 ### Macs Only
