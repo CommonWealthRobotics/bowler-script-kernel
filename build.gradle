@@ -3,8 +3,7 @@ buildscript {
 		springBootVersion = '1.2.7.RELEASE'
 	}
 	repositories {
-		[  mavenCentral(),
-		jcenter()]
+		[ jcenter(), mavenCentral()]
 	}
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:5.0.0'
@@ -16,6 +15,7 @@ buildscript {
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
+
 apply plugin: 'java'
 apply plugin: 'signing'
 apply plugin: 'maven'
@@ -35,9 +35,7 @@ sourceSets {
 		}
 	}
 }
-task wrapper(type: Wrapper, description: 'Creates and deploys the Gradle wrapper to the current directory.') {
-	gradleVersion = '2.13'
-}
+
 
 // NetBeans will automatically add "run" and "debug" tasks relying on the
 // "mainClass" property. You may however define the property prior executing
@@ -262,21 +260,23 @@ jar {
 		    			"Created-By": "Neuron Robotics Cooperative",
 		    			"Specification-Title": props."app.name",
 		    			"Specification-Version": props."app.version",
-		    			"Specification-Vendor": "Neuron Robotics Cooperative",,
+		    			"Specification-Vendor": "CommonWealth Robotics Cooperative",,
 		    			"Implementation-Title": props."app.name",
 		    			"Implementation-Version" : props."app.version",
-		    			"Implementation-Vendor": "Neuron Robotics Cooperative"
+		    			"Implementation-Vendor": "CommonWealth Robotics Cooperative"
 
 		        		
 		    )
 		}
 }
+
 shadowJar {
-   mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
+   //mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
    baseName = 'BowlerScriptingKernel'
    classifier = "fat"
    version = props."app.version"
 }
+
 group = "com.neuronrobotics"
 archivesBaseName = "bowler-script-kernel"
 version = props."app.version"
@@ -343,6 +343,5 @@ uploadArchives {
 	  }
 	}
   }
-  
+  */
 
-*/
