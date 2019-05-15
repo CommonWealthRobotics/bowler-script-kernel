@@ -19,11 +19,12 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 apply plugin: 'signing'
 apply plugin: 'maven'
-
+apply plugin: 'application'
 
 //apply plugin: 'spring-boot'
 //apply plugin: 'io.spring.dependency-management'
 
+ext.mainClass = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
 
 sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
