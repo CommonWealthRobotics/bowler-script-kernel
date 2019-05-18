@@ -14,6 +14,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
@@ -150,8 +151,28 @@ public class MobileBaseCadManager {
 	private static ICadGenerator getConfigurationDisplay() {
 		if(cadEngineConfiguration==null) {
 			try {
-				cadEngineConfiguration=(ICadGenerator) ScriptingEngine.gitScriptRun(
-						"https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy", null);
+				File confFile = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy");
+				cadEngineConfiguration=(ICadGenerator) ScriptingEngine.inlineFileScriptRun(confFile, null);
+				FileChangeWatcher watcher = FileChangeWatcher.watch(confFile);
+				watcher.addIFileChangeListener(new IFileChangeListener() {
+					
+					@Override
+					public void onFileChange(File fileThatChanged, WatchEvent event) {
+						// TODO Auto-generated method stub
+						try {
+							cadEngineConfiguration=(ICadGenerator) ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy", null);
+							for(MobileBase manager : cadmap.keySet()) {
+								MobileBaseCadManager mobileBaseCadManager = cadmap.get(manager);
+								if(mobileBaseCadManager.autoRegen)
+									if(mobileBaseCadManager.configMode)
+										mobileBaseCadManager.generateCad() ;
+							}
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
