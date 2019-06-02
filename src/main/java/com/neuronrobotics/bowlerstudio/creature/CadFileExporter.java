@@ -88,7 +88,10 @@ public class CadFileExporter {
 			}else{
 
 				for(String format:part.getExportFormats()){
-					
+					if(format.toLowerCase().contains("obj")){
+						allCadStl.add(makeObj(nameBase,manufactured));// default to stl
+						ui.setCsg(manufactured , null);
+					}
 					if(format.toLowerCase().contains("stl")){
 						allCadStl.add(makeStl(nameBase,manufactured));// default to stl
 						ui.setCsg(manufactured , null);
@@ -114,6 +117,13 @@ public class CadFileExporter {
 		File stl = new File(nameBase + ".stl");
 		
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
+		System.out.println("Writing "+stl.getAbsolutePath());
+		return stl;
+	}
+	private File makeObj(String nameBase,CSG tmp ) throws IOException{
+		File stl = new File(nameBase + ".obj");
+		
+		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toObjString());
 		System.out.println("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
