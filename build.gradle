@@ -20,8 +20,8 @@ plugins {
  	id 'eclipse'
  	id 'maven'
 	id 'application'
-	id 'org.openjfx.javafxplugin' version '0.0.7'
-	id 'com.github.johnrengelman.shadow' version '5.0.0'
+	id 'org.openjfx.javafxplugin' 
+	id 'com.github.johnrengelman.shadow' 
 }
 javafx {
     version = "11.0.2"
