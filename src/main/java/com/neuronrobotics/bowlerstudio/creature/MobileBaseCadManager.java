@@ -677,25 +677,33 @@ public class MobileBaseCadManager {
 			MobileBaseCadManager mbcm = new MobileBaseCadManager(device,ui );
 			cadmap.put(device, mbcm);
 		}
-		return cadmap.get(device);
+		MobileBaseCadManager mobileBaseCadManager = cadmap.get(device);
+		if(!IMobileBaseUIlocal.class.isInstance(ui)&&
+			IMobileBaseUIlocal.class.isInstance(mobileBaseCadManager.getUi())	) 
+			mobileBaseCadManager.setUi(ui);
+
+		return mobileBaseCadManager;
 	}
 	public static MobileBaseCadManager get(MobileBase device) {
-		IMobileBaseUIlocal ui2 = new IMobileBaseUIlocal();
-		device.addConnectionEventListener(new IDeviceConnectionEventListener() {
-			
-			@Override
-			public void onDisconnect(BowlerAbstractDevice source) {
-				// TODO Auto-generated method stub
-				ui2.list.clear();
-			}
-			
-			@Override
-			public void onConnect(BowlerAbstractDevice source) {
-				// TODO Auto-generated method stub
+		if (cadmap.get(device) == null) {
+			IMobileBaseUIlocal ui2 = new IMobileBaseUIlocal();
+			device.addConnectionEventListener(new IDeviceConnectionEventListener() {
 				
-			}
-		});
-		return get(device,ui2);
+				@Override
+				public void onDisconnect(BowlerAbstractDevice source) {
+					// TODO Auto-generated method stub
+					ui2.list.clear();
+				}
+				
+				@Override
+				public void onConnect(BowlerAbstractDevice source) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			return get(device,ui2);
+		}
+		return cadmap.get(device);
 	}
 
 	public static HashMap<LinkConfiguration, ArrayList<CSG>> getSimplecad(MobileBase device) {
