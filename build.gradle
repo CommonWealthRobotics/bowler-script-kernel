@@ -283,7 +283,7 @@ jar {
 }
 
 shadowJar {
-   //mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
+   mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
    baseName = 'BowlerScriptingKernel'
    classifier = "fat"
    version = props."app.version"
