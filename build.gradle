@@ -21,14 +21,15 @@ plugins {
  	id 'maven'
 	id 'application'
 	id 'org.openjfx.javafxplugin' version '0.0.7'
-	id 'com.github.johnrengelman.shadow'
+	id 'com.github.johnrengelman.shadow' version '5.0.0'
 }
 javafx {
     version = "11.0.2"
     modules = [ 'javafx.controls',
     'javafx.fxml',
     'javafx.media',
-    'javafx.swing'
+    'javafx.swing',
+    'javafx.web'
      ]
 }
 
