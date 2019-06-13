@@ -53,6 +53,42 @@ public class MobileBaseCadManager {
 	private IMobileBaseUI ui = null;
 	private static ICadGenerator cadEngineConfiguration=null;
 	private boolean configMode=false;
+	private static class  IMobileBaseUIlocal implements IMobileBaseUI{
+
+		public ArrayList<CSG> list = new ArrayList<>();
+
+		@Override
+		public void highlightException(File fileEngineRunByName, Exception ex) {
+			ex.printStackTrace();
+		}
+
+		@Override
+		public void setAllCSG(Collection<CSG> toAdd, File source) {
+			// TODO Auto-generated method stub
+			// TODO Auto-generated method stub
+			list.clear();
+			list.addAll(toAdd);
+		}
+
+		@Override
+		public void addCSG(Collection<CSG> toAdd, File source) {
+			// TODO Auto-generated method stub
+			list.addAll(toAdd);
+
+		}
+
+		@Override
+		public Set<CSG> getVisibleCSGs() {
+			// TODO Auto-generated method stub
+			return new HashSet<CSG>(list);
+		}
+
+		@Override
+		public void setSelectedCsg(Collection<CSG> selectedCsg) {
+			// TODO Auto-generated method stub
+
+		}
+	};
 	private IFileChangeListener cadWatcher = new IFileChangeListener() {
 
 		@Override
@@ -86,7 +122,7 @@ public class MobileBaseCadManager {
 	private boolean autoRegen = true;
 	private DoubleProperty pi = new SimpleDoubleProperty(0);
 
-	public MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
+	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
 		this.setUi(myUI);
 		base.addConnectionEventListener(new IDeviceConnectionEventListener() {
 
@@ -634,50 +670,32 @@ public class MobileBaseCadManager {
 			}
 		this.allCad = allCad;
 	}
-
-	public static MobileBaseCadManager get(MobileBase device) {
+	public static MobileBaseCadManager get(MobileBase device,IMobileBaseUI ui) {
 		if (cadmap.get(device) == null) {
 			// new RuntimeException("No Mobile Base Cad Manager UI
 			// specified").printStackTrace();
-			MobileBaseCadManager mbcm = new MobileBaseCadManager(device, new IMobileBaseUI() {
-
-				private ArrayList<CSG> list = new ArrayList<>();
-
-				@Override
-				public void highlightException(File fileEngineRunByName, Exception ex) {
-					ex.printStackTrace();
-				}
-
-				@Override
-				public void setAllCSG(Collection<CSG> toAdd, File source) {
-					// TODO Auto-generated method stub
-					// TODO Auto-generated method stub
-					list.clear();
-					list.addAll(toAdd);
-				}
-
-				@Override
-				public void addCSG(Collection<CSG> toAdd, File source) {
-					// TODO Auto-generated method stub
-					list.addAll(toAdd);
-
-				}
-
-				@Override
-				public Set<CSG> getVisibleCSGs() {
-					// TODO Auto-generated method stub
-					return new HashSet<CSG>(list);
-				}
-
-				@Override
-				public void setSelectedCsg(Collection<CSG> selectedCsg) {
-					// TODO Auto-generated method stub
-
-				}
-			});
+			MobileBaseCadManager mbcm = new MobileBaseCadManager(device,ui );
 			cadmap.put(device, mbcm);
 		}
 		return cadmap.get(device);
+	}
+	public static MobileBaseCadManager get(MobileBase device) {
+		IMobileBaseUIlocal ui2 = new IMobileBaseUIlocal();
+		device.addConnectionEventListener(new IDeviceConnectionEventListener() {
+			
+			@Override
+			public void onDisconnect(BowlerAbstractDevice source) {
+				// TODO Auto-generated method stub
+				ui2.list.clear();
+			}
+			
+			@Override
+			public void onConnect(BowlerAbstractDevice source) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		return get(device,ui2);
 	}
 
 	public static HashMap<LinkConfiguration, ArrayList<CSG>> getSimplecad(MobileBase device) {
