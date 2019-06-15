@@ -23,7 +23,7 @@ plugins {
 	//id 'org.openjfx.javafxplugin' 
 	id 'com.github.johnrengelman.shadow' 
 }
-/*
+
 javafx {
     version = "11.0.2"
     modules = [ 'javafx.controls',
@@ -33,7 +33,7 @@ javafx {
     'javafx.web'
      ]
 }
-*/
+
 //apply plugin: 'spring-boot'
 //apply plugin: 'io.spring.dependency-management'
 
