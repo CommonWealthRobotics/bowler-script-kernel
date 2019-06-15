@@ -20,12 +20,12 @@ plugins {
  	id 'eclipse'
  	id 'maven'
 	id 'application'
-	//id 'org.openjfx.javafxplugin' 
+	id 'org.openjfx.javafxplugin' 
 	id 'com.github.johnrengelman.shadow' 
 }
 
 javafx {
-    version = "11.0.2"
+    version = "11"
     modules = [ 'javafx.controls',
     'javafx.fxml',
     'javafx.media',
