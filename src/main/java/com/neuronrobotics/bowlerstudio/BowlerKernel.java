@@ -24,10 +24,14 @@ import jline.History;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-//import com.neuronrobotics.imageprovider.OpenCVJNILoader;
-import com.sun.speech.freetts.ProcessException;
-import com.sun.speech.freetts.VoiceManager;
-import com.sun.speech.freetts.en.us.FeatureProcessors.WordNumSyls;
+
+import marytts.signalproc.effects.JetPilotEffect;
+import marytts.signalproc.effects.LpcWhisperiserEffect;
+import marytts.signalproc.effects.RobotiserEffect;
+import marytts.signalproc.effects.VocalTractLinearScalerEffect;
+import marytts.signalproc.effects.ChorusEffectBase;
+import marytts.signalproc.effects.HMMDurationScaleEffect;
+import marytts.signalproc.effects.VolumeEffect;
 
 import eu.mihosoft.vrl.v3d.*;
 
@@ -279,51 +283,71 @@ public class BowlerKernel {
 
   public static int speak(String msg) {
 
-    return speak(msg, 175.0, 120.0, 41.0, 1.0, 1.0);
+    return speak(msg, 200, 0, 100, 1.0, 1.0);
   }
-
   @SuppressWarnings("unused")
-  public static int speak(String msg, Double rate, Double pitch, Double range, Double shift,
-      Double volume) {
-    System.setProperty("freetts.voices",
-        "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
-    VoiceManager voiceManager = VoiceManager.getInstance();
-    com.sun.speech.freetts.Voice voice = voiceManager.getVoice("kevin16");
+  public static int speak(String msg, Number rate, Number pitch, Number range, Number shift,
+      Number volume) {
+		if(rate.doubleValue()>300)
+			rate=300;
+		if(rate.doubleValue()<10)
+			rate=10;
+	TextToSpeech tts = new TextToSpeech();
+	//tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
+	// Setting the Current Voice
+	if(range.doubleValue()>200)
+		tts.setVoice("cmu-slt-hsmm");
+	else if(range.doubleValue()>100)
+		tts.setVoice("dfki-spike-hsmm");
+	else if(range.doubleValue()>50)
+		tts.setVoice("dfki-prudence-hsmm");
+	else 
+		tts.setVoice("dfki-poppy-hsmm");
+	RobotiserEffect vocalTractLSE = new RobotiserEffect(); //russian drunk effect
+	vocalTractLSE.setParams("amount:"+pitch.intValue());
+	
+	// TTS say something that we actually are typing into the first variable
+//	tts.getAudioEffects().stream().forEach(audioEffect -> {
+//		if(audioEffect.getName().contains("Rate")) {
+//		System.out.println("-----Name-----");
+//		System.out.println(audioEffect.getName());
+//		System.out.println("-----Examples-----");
+//		System.out.println(audioEffect.getExampleParameters());
+//		System.out.println("-----Help Text------");
+//		System.out.println(audioEffect.getHelpText() + "\n\n");
+//		}
+//	});
+	String effect ="";
+	if(volume.doubleValue()<0.5) {
+		
+		LpcWhisperiserEffect lpcWhisperiserEffect = new LpcWhisperiserEffect(); //creepy
+		lpcWhisperiserEffect.setParams("amount:"+(50+(50*volume.doubleValue())));
+		effect+="+"+lpcWhisperiserEffect.getFullEffectAsString();
+		volume=1;
+	}
+	if(shift.doubleValue()<1){
+		ChorusEffectBase ce = new ChorusEffectBase();
+		ce.setParams("delay1:"+(int)(366.0*shift.doubleValue())+";amp1:0.54;delay2:600;amp2:-0.10;delay3:250;amp3:0.30");
+		effect+="+"+ce.getFullEffectAsString();
+	}
+	//Apply the effects
+	//----You can add multiple effects by using the method `getFullEffectAsString()` and + symbol to connect with the other effect that you want
+	//----check the example below
+	VolumeEffect volumeEffect = new VolumeEffect(); //be careful with this i almost got heart attack
+	volumeEffect.setParams("amount:"+volume);
 
-    System.out.println("Rate " + rate);
-    System.out.println("Pitch hertz " + pitch);
-    System.out.println("PitchRange " + range);
-    System.out.println("PitchShift " + shift);
-    System.out.println("Volume " + volume);
-    if (voice != null) {
-      voice.setRate(rate.floatValue());
-      voice.setPitch(pitch.floatValue());
-      voice.setPitchRange(range.floatValue());
-      voice.setPitchShift(shift.floatValue());
-      voice.setVolume(volume.floatValue());
-      voice.allocate();
-      voice.speak(msg);
-      voice.deallocate();
-    } else {
-      System.out.println("All voices available:");
-      com.sun.speech.freetts.Voice[] voices = voiceManager.getVoices();
-      for (int i = 0; i < voices.length; i++) {
-        System.out
-            .println("    " + voices[i].getName() + " (" + voices[i].getDomain() + " domain)");
-      }
-    }
-
-    // WordNumSyls feature =
-    // (WordNumSyls)voice.getFeatureProcessor("word_numsyls");
-    // if(feature!=null)
-    // try {
-    //
-    // System.out.println("Syllables# = "+feature.process(null));
-    // } catch (ProcessException e) {
-    // // TODO Auto-generated catch block
-    // e.printStackTrace();
-    // }
-    //
+	HMMDurationScaleEffect ratEff= new HMMDurationScaleEffect();
+	ratEff.setParams("durScale:"+rate.doubleValue()/100.0);
+	
+	effect+="+"+ratEff.getFullEffectAsString();
+	effect+="+"+volumeEffect.getFullEffectAsString();
+	if(pitch.intValue()>0)
+		effect+="+"+vocalTractLSE.getFullEffectAsString();
+	System.out.println(msg+"-->"+effect);
+	tts.getMarytts().setAudioEffects(effect);
+	
+	tts.speak(msg, 2.0f, false, true);
+	
     return 0;
   }
 

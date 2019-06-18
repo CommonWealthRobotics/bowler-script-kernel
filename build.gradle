@@ -244,7 +244,16 @@ dependencies {
 	
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
-	//compile fileTree (dir: 'JCSG/libs', includes: ['*.jar'])
+	compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.2'
+	// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
+	compile group: 'de.dfki.mary', name: 'voice-dfki-poppy-hsmm', version: '5.2'
+	// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
+	compile group: 'de.dfki.mary', name: 'voice-dfki-prudence-hsmm', version: '5.2'
+		// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
+	compile group: 'de.dfki.mary', name: 'voice-dfki-spike-hsmm', version: '5.2'
+	// https://mvnrepository.com/artifact/de.dfki.mary/marytts-lang-en
+	compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.2'
+
 }
 
 
@@ -258,7 +267,7 @@ jar {
 	    attributes(	
 	    				"Main-Class": 'com.neuronrobotics.bowlerstudio.BowlerKernel',
 		    			"Manifest-Version": "1.0",
-		    			"Created-By": "Neuron Robotics Cooperative",
+		    			"Created-By": "CommonWealth Cooperative",
 		    			"Specification-Title": props."app.name",
 		    			"Specification-Version": props."app.version",
 		    			"Specification-Vendor": "CommonWealth Robotics Cooperative",,
