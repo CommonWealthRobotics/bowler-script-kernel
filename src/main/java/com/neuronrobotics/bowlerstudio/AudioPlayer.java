@@ -199,7 +199,7 @@ public class AudioPlayer extends Thread {
 	}
 	
 	/**
-	 * Sets Gain value. Line should be opened before calling this method. Linear scale 0.0 <--> 1.0 Threshold Coef. : 1/2 to avoid saturation.
+	 * Sets Gain value. Line should be opened before calling this method. Linear scale 0.0  1.0 Threshold Coef. : 1/2 to avoid saturation.
 	 * 
 	 * @param fGain
 	 */
