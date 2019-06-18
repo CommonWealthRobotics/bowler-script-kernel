@@ -11,24 +11,18 @@ public class VoiceTest {
   @Test
   public void test() {
 	  BowlerKernel.speak(
-				"This is the default voice",
-				300, //rate 
-				120, //pitch
-				41,  //range
-				1,   //shift
-				1 	//volume
-			);
+				"This is the default voice");
 			BowlerKernel.speak(
 				"we are the borg",
-				300, //rate 
+				100, //rate 
 				120, //pitch
 				41,  //range
 				2,   //shift
-				0.01 	//volume
+				0.4 	//volume
 			);
 			BowlerKernel.speak(
-				"can make",
-				10, //rate 
+				"can make Lots of",
+				300, //rate 
 				220, //pitch
 				81,  //range
 				0.75,   //shift

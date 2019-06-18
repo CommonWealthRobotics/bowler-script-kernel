@@ -282,29 +282,36 @@ public class BowlerKernel {
 
   public static int speak(String msg) {
 
-    return speak(msg, 175.0, 120.0, 41.0, 1.0, 1.0);
+    return speak(msg, 175, 120.0, 41.0, 1.0, 1.0);
   }
   @SuppressWarnings("unused")
   public static int speak(String msg, Number rate, Number pitch, Number range, Number shift,
       Number volume) {
+		if(rate.doubleValue()>300)
+			rate=300;
+		if(rate.doubleValue()<10)
+			rate=10;
 	TextToSpeech tts = new TextToSpeech();
-	//tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
+	tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
 	// Setting the Current Voice
-	tts.setVoice("cmu-slt-hsmm");
+	if(rate.doubleValue()<150)
+		tts.setVoice("cmu-slt-hsmm");
+	else
+		tts.setVoice("dfki-poppy-hsmm");
 	// TTS say something that we actually are typing into the first variable
-	tts.getAudioEffects().stream().forEach(audioEffect -> {
-		//if(audioEffect.getName().contains("Rate")) {
-		System.out.println("-----Name-----");
-		System.out.println(audioEffect.getName());
-		System.out.println("-----Examples-----");
-		System.out.println(audioEffect.getExampleParameters());
-		System.out.println("-----Help Text------");
-		System.out.println(audioEffect.getHelpText() + "\n\n");
-		//}
-	});
+//	tts.getAudioEffects().stream().forEach(audioEffect -> {
+//		//if(audioEffect.getName().contains("Rate")) {
+//		System.out.println("-----Name-----");
+//		System.out.println(audioEffect.getName());
+//		System.out.println("-----Examples-----");
+//		System.out.println(audioEffect.getExampleParameters());
+//		System.out.println("-----Help Text------");
+//		System.out.println(audioEffect.getHelpText() + "\n\n");
+//		//}
+//	});
 	String effect ="";
-	if(volume.doubleValue()<0.4) {
-		volume=0.4;
+	if(volume.doubleValue()<0.5) {
+		volume=0.5;
 		LpcWhisperiserEffect lpcWhisperiserEffect = new LpcWhisperiserEffect(); //creepy
 		lpcWhisperiserEffect.setParams("amount:"+(50+(50*volume.doubleValue())));
 		effect+="+"+lpcWhisperiserEffect.getFullEffectAsString();
@@ -319,10 +326,7 @@ public class BowlerKernel {
 	//----check the example below
 	VolumeEffect volumeEffect = new VolumeEffect(); //be careful with this i almost got heart attack
 	volumeEffect.setParams("amount:"+volume);
-	if(rate.doubleValue()>300)
-		rate=300;
-	if(rate.doubleValue()<10)
-		rate=10;
+
 	HMMDurationScaleEffect ratEff= new HMMDurationScaleEffect();
 	ratEff.setParams("durScale:"+rate.doubleValue()/100.0);
 	
