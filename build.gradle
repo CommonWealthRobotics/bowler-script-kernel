@@ -243,6 +243,7 @@ dependencies {
 	
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
+	compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.2'
 	//compile fileTree (dir: 'JCSG/libs', includes: ['*.jar'])
 }
 
