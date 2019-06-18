@@ -277,7 +277,8 @@ public class BowlerKernel {
 		if (rate.doubleValue() < 10)
 			rate = 10;
 		TextToSpeech tts = new TextToSpeech();
-		//tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
+		//cd ..
+		tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
 		// Setting the Current Voice
 		// tts.setVoice(tts.getAvailableVoices().toArray()[0].toString());
 
