@@ -107,7 +107,7 @@ public class AudioPlayer extends Thread {
 	 */
 	public AudioPlayer(File audioFile, SourceDataLine line, LineListener lineListener) throws IOException, UnsupportedAudioFileException {
 		this.ais = AudioSystem.getAudioInputStream(audioFile);
-		this.line = line;
+		this.setLine(line);
 		this.lineListener = lineListener;
 	}
 	
@@ -118,7 +118,7 @@ public class AudioPlayer extends Thread {
 	 */
 	public AudioPlayer(AudioInputStream ais, SourceDataLine line, LineListener lineListener) {
 		this.ais = ais;
-		this.line = line;
+		this.setLine(line);
 		this.lineListener = lineListener;
 	}
 	
@@ -140,7 +140,7 @@ public class AudioPlayer extends Thread {
 	 */
 	public AudioPlayer(File audioFile, SourceDataLine line, LineListener lineListener, int outputMode) throws IOException, UnsupportedAudioFileException {
 		this.ais = AudioSystem.getAudioInputStream(audioFile);
-		this.line = line;
+		this.setLine(line);
 		this.lineListener = lineListener;
 		this.outputMode = outputMode;
 	}
@@ -159,7 +159,7 @@ public class AudioPlayer extends Thread {
 	 */
 	public AudioPlayer(AudioInputStream ais, SourceDataLine line, LineListener lineListener, int outputMode) {
 		this.ais = ais;
-		this.line = line;
+		this.setLine(line);
 		this.lineListener = lineListener;
 		this.outputMode = outputMode;
 	}
@@ -178,8 +178,8 @@ public class AudioPlayer extends Thread {
 	 * Cancel the AudioPlayer which will cause the Thread to exit
 	 */
 	public void cancel() {
-		if (line != null) {
-			line.stop();
+		if (getLine() != null) {
+			getLine().stop();
 		}
 		exitRequested = true;
 	}
@@ -213,8 +213,8 @@ public class AudioPlayer extends Thread {
 		gain = fGain;
 		
 		// Better type
-		if (line != null && line.isControlSupported(FloatControl.Type.MASTER_GAIN))
-			( (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN) ).setValue((float) ( 20 * Math.log10(fGain <= 0.0 ? 0.0000 : fGain) ));
+		if (getLine() != null && getLine().isControlSupported(FloatControl.Type.MASTER_GAIN))
+			( (FloatControl) getLine().getControl(FloatControl.Type.MASTER_GAIN) ).setValue((float) ( 20 * Math.log10(fGain <= 0.0 ? 0.0000 : fGain) ));
 		// OR (Math.log(fGain == 0.0 ? 0.0000 : fGain) / Math.log(10.0))
 		
 		// if (line != null)
@@ -246,7 +246,7 @@ public class AudioPlayer extends Thread {
 		DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
 		
 		try {
-			if (line == null) {
+			if (getLine() == null) {
 				boolean bIsSupportedDirectly = AudioSystem.isLineSupported(info);
 				if (!bIsSupportedDirectly) {
 					AudioFormat sourceFormat = audioFormat;
@@ -258,18 +258,18 @@ public class AudioPlayer extends Thread {
 					audioFormat = ais.getFormat();
 				}
 				info = new DataLine.Info(SourceDataLine.class, audioFormat);
-				line = (SourceDataLine) AudioSystem.getLine(info);
+				setLine((SourceDataLine) AudioSystem.getLine(info));
 			}
 			if (lineListener != null) {
-				line.addLineListener(lineListener);
+				getLine().addLineListener(lineListener);
 			}
-			line.open(audioFormat);
+			getLine().open(audioFormat);
 		} catch (Exception ex) {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, null, ex);
 			return;
 		}
 		
-		line.start();
+		getLine().start();
 		setGain(getGainValue());
 		
 		int nRead = 0;
@@ -281,13 +281,17 @@ public class AudioPlayer extends Thread {
 				Logger.getLogger(getClass().getName()).log(Level.WARNING, null, ex);
 			}
 			if (nRead >= 0) {
-				line.write(abData, 0, nRead);
+				getLine().write(abData, 0, nRead);
 			}
 		}
 		if (!exitRequested) {
-			line.drain();
+			getLine().drain();
 		}
-		line.close();
+		getLine().close();
+	}
+
+	public void setLine(SourceDataLine line) {
+		this.line = line;
 	}
 	
 }

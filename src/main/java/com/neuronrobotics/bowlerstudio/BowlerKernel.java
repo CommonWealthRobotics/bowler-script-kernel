@@ -28,6 +28,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import marytts.signalproc.effects.JetPilotEffect;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
+import marytts.signalproc.effects.VocalTractLinearScalerEffect;
 import marytts.signalproc.effects.ChorusEffectBase;
 import marytts.signalproc.effects.HMMDurationScaleEffect;
 import marytts.signalproc.effects.VolumeEffect;
@@ -282,7 +283,7 @@ public class BowlerKernel {
 
   public static int speak(String msg) {
 
-    return speak(msg, 175, 120.0, 41.0, 1.0, 1.0);
+    return speak(msg, 175, 0, 175, 1.0, 1.0);
   }
   @SuppressWarnings("unused")
   public static int speak(String msg, Number rate, Number pitch, Number range, Number shift,
@@ -292,29 +293,37 @@ public class BowlerKernel {
 		if(rate.doubleValue()<10)
 			rate=10;
 	TextToSpeech tts = new TextToSpeech();
-	tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
+	//tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
 	// Setting the Current Voice
-	if(rate.doubleValue()<150)
+	if(range.doubleValue()>200)
 		tts.setVoice("cmu-slt-hsmm");
-	else
+	else if(range.doubleValue()>100)
+		tts.setVoice("dfki-spike-hsmm");
+	else if(range.doubleValue()>50)
+		tts.setVoice("dfki-prudence-hsmm");
+	else 
 		tts.setVoice("dfki-poppy-hsmm");
+	RobotiserEffect vocalTractLSE = new RobotiserEffect(); //russian drunk effect
+	vocalTractLSE.setParams("amount:"+pitch.intValue());
+	
 	// TTS say something that we actually are typing into the first variable
-//	tts.getAudioEffects().stream().forEach(audioEffect -> {
-//		//if(audioEffect.getName().contains("Rate")) {
-//		System.out.println("-----Name-----");
-//		System.out.println(audioEffect.getName());
-//		System.out.println("-----Examples-----");
-//		System.out.println(audioEffect.getExampleParameters());
-//		System.out.println("-----Help Text------");
-//		System.out.println(audioEffect.getHelpText() + "\n\n");
-//		//}
-//	});
+	tts.getAudioEffects().stream().forEach(audioEffect -> {
+		if(audioEffect.getName().contains("Rate")) {
+		System.out.println("-----Name-----");
+		System.out.println(audioEffect.getName());
+		System.out.println("-----Examples-----");
+		System.out.println(audioEffect.getExampleParameters());
+		System.out.println("-----Help Text------");
+		System.out.println(audioEffect.getHelpText() + "\n\n");
+		}
+	});
 	String effect ="";
 	if(volume.doubleValue()<0.5) {
-		volume=0.5;
+		
 		LpcWhisperiserEffect lpcWhisperiserEffect = new LpcWhisperiserEffect(); //creepy
 		lpcWhisperiserEffect.setParams("amount:"+(50+(50*volume.doubleValue())));
 		effect+="+"+lpcWhisperiserEffect.getFullEffectAsString();
+		volume=1;
 	}
 	if(shift.doubleValue()<1){
 		ChorusEffectBase ce = new ChorusEffectBase();
@@ -332,7 +341,9 @@ public class BowlerKernel {
 	
 	effect+="+"+ratEff.getFullEffectAsString();
 	effect+="+"+volumeEffect.getFullEffectAsString();
-	System.out.println("\n\n"+effect);
+	if(pitch.intValue()>0)
+		effect+="+"+vocalTractLSE.getFullEffectAsString();
+	System.out.println(msg+"-->"+effect);
 	tts.getMarytts().setAudioEffects(effect);
 	
 	tts.speak(msg, 3.0f, false, true);

@@ -246,6 +246,10 @@ dependencies {
 	compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.2'
 	// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
 	compile group: 'de.dfki.mary', name: 'voice-dfki-poppy-hsmm', version: '5.2'
+	// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
+	compile group: 'de.dfki.mary', name: 'voice-dfki-prudence-hsmm', version: '5.2'
+		// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
+	compile group: 'de.dfki.mary', name: 'voice-dfki-spike-hsmm', version: '5.2'
 	// https://mvnrepository.com/artifact/de.dfki.mary/marytts-lang-en
 	compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.2'
 

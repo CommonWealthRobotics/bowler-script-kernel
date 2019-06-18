@@ -26,7 +26,7 @@ public class TextToSpeech {
 	
 	private AudioPlayer tts;
 	private MaryInterface marytts;
-	
+
 	/**
 	 * Constructor
 	 */
@@ -56,7 +56,6 @@ public class TextToSpeech {
 	 *            <b>False</b> The current Thread calling this method will continue freely after calling this method
 	 */
 	public void speak(String text , float gainValue , boolean daemon , boolean join) {
-		
 		// Stop the previous player
 		stopSpeaking();
 		
