@@ -262,7 +262,7 @@ jar {
 	    attributes(	
 	    				"Main-Class": 'com.neuronrobotics.bowlerstudio.BowlerKernel',
 		    			"Manifest-Version": "1.0",
-		    			"Created-By": "Neuron Robotics Cooperative",
+		    			"Created-By": "CommonWealth Cooperative",
 		    			"Specification-Title": props."app.name",
 		    			"Specification-Version": props."app.version",
 		    			"Specification-Vendor": "CommonWealth Robotics Cooperative",,
