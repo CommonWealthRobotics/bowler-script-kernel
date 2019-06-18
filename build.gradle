@@ -285,6 +285,7 @@ shadowJar {
    baseName = 'BowlerScriptingKernel'
    classifier = "fat"
    version = props."app.version"
+    mergeServiceFiles()
 }
 
 group = "com.neuronrobotics"
