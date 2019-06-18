@@ -283,7 +283,7 @@ public class BowlerKernel {
 
   public static int speak(String msg) {
 
-    return speak(msg, 175, 0, 175, 1.0, 1.0);
+    return speak(msg, 200, 0, 100, 1.0, 1.0);
   }
   @SuppressWarnings("unused")
   public static int speak(String msg, Number rate, Number pitch, Number range, Number shift,
@@ -307,16 +307,16 @@ public class BowlerKernel {
 	vocalTractLSE.setParams("amount:"+pitch.intValue());
 	
 	// TTS say something that we actually are typing into the first variable
-	tts.getAudioEffects().stream().forEach(audioEffect -> {
-		if(audioEffect.getName().contains("Rate")) {
-		System.out.println("-----Name-----");
-		System.out.println(audioEffect.getName());
-		System.out.println("-----Examples-----");
-		System.out.println(audioEffect.getExampleParameters());
-		System.out.println("-----Help Text------");
-		System.out.println(audioEffect.getHelpText() + "\n\n");
-		}
-	});
+//	tts.getAudioEffects().stream().forEach(audioEffect -> {
+//		if(audioEffect.getName().contains("Rate")) {
+//		System.out.println("-----Name-----");
+//		System.out.println(audioEffect.getName());
+//		System.out.println("-----Examples-----");
+//		System.out.println(audioEffect.getExampleParameters());
+//		System.out.println("-----Help Text------");
+//		System.out.println(audioEffect.getHelpText() + "\n\n");
+//		}
+//	});
 	String effect ="";
 	if(volume.doubleValue()<0.5) {
 		
@@ -346,7 +346,7 @@ public class BowlerKernel {
 	System.out.println(msg+"-->"+effect);
 	tts.getMarytts().setAudioEffects(effect);
 	
-	tts.speak(msg, 3.0f, false, true);
+	tts.speak(msg, 2.0f, false, true);
 	
     return 0;
   }

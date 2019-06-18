@@ -12,14 +12,12 @@ public class VoiceTest {
   public void test() {
 	  BowlerKernel.speak(
 				"This is the default voice");
-	  BowlerKernel.speak("Fast talking", 300, 0, 300, 1.0, 1.0);
-	  BowlerKernel.speak("Slow talking", 10, 0, 300, 1.0, 1.0);
 	  BowlerKernel.speak("Voice one", 100, 0, 300, 1.0, 1.0);
 	  BowlerKernel.speak("Voice two", 100, 0, 200, 1.0, 1.0);
 	  BowlerKernel.speak("Voice three", 100, 0, 100, 1.0, 1.0);
 	  BowlerKernel.speak("Voice four", 100, 0, 50, 1.0, 1.0);
 			BowlerKernel.speak(
-				"we are the borg",
+				"we are the borg; resistance is futile",
 				100, //rate 
 				0, //slur
 				300,  //voice
@@ -27,7 +25,7 @@ public class VoiceTest {
 				0.4 	//volume
 			);
 			BowlerKernel.speak(
-				"can make Lots of",
+				"An echoing voice in a stadium",
 				300, //rate 
 				0, //slur
 				300,  //voice
@@ -36,7 +34,7 @@ public class VoiceTest {
 			);
 ////
 			BowlerKernel.speak(
-					"robot voice of starscream",
+					"The robot voice of starscream",
 					100, //rate 
 					90, //slur
 					200,  //voice
