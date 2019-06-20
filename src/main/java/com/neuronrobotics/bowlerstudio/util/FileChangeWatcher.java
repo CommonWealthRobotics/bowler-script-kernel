@@ -81,7 +81,12 @@ public class FileChangeWatcher {
 		}
 		activeListener.clear();
 	}
-
+	public static void close(File fileToWatch) {
+		String path = fileToWatch.getAbsolutePath();
+		if (activeListener.get(path) != null) {
+			activeListener.get(path).close();
+		}
+	}
 	/**
 	 * Start watching a file
 	 * 
@@ -126,7 +131,7 @@ public class FileChangeWatcher {
 			public void run() {
 				setName("File Watcher Thread");
 				//new Exception("Starting File Watcher Thread").printStackTrace();
-
+				
 				while (run) {
 					try {
 						System.err.println("Checking File: " + getFileToWatch().getAbsolutePath());
@@ -330,7 +335,7 @@ public class FileChangeWatcher {
 	 * Close.
 	 */
 	public void close() {
-		new Exception("File watcher closed " + fileToWatch.getAbsolutePath()).printStackTrace();
+		//new Exception("File watcher closed " + fileToWatch.getAbsolutePath()).printStackTrace();
 		this.run = false;
 		try {
 			watcher.close();
