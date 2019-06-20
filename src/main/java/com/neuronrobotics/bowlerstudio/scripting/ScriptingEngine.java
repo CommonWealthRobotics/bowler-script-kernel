@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
+import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
@@ -11,13 +12,19 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.errors.CanceledException;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
+import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidConfigurationException;
 import org.eclipse.jgit.api.errors.InvalidRefNameException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
@@ -524,6 +531,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         if (f.isDirectory()) {
           deleteFolder(f);
         } else {
+        	FileChangeWatcher.close(f);
           f.delete();
           // System.out.println("Deleting " + f.getAbsolutePath());
         }
@@ -1097,9 +1105,71 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static void pull(String remoteURI, String branch) throws IOException {
-    cloneRepo(remoteURI, branch);
-  }
+		File gitRepoFile = uriToFile(remoteURI);
+		if (!gitRepoFile.exists()) {
+			gitRepoFile = cloneRepo(remoteURI, branch);
+		}
 
+		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
+		Git git = new Git(localRepo);
+		// StoredConfig config = git.getRepository().getConfig();
+		// config.setString("branch", "master", "merge", "refs/heads/master");
+
+		try {
+			System.out.print("\r\nPulling " + remoteURI);
+			PullResult result = git.pull().setCredentialsProvider(cp).call();
+			System.out.print(" ... Success! \r\n " + result);
+			System.out.println("");
+		} catch (CheckoutConflictException ex) {
+			for(String p: ex.getConflictingPaths()) {
+				File conf = new File(gitRepoFile.getParent()+"/"+p);
+				System.out.println("\r\nConflict: "+conf);
+				System.out.println("Using upstream and deleting local changes");
+				if(conf.exists()) {
+					FileChangeWatcher.close(conf);
+					conf.delete();
+				}
+			}
+			git.close();
+			pull( remoteURI,  branch);
+		} catch (WrongRepositoryStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (DetachedHeadException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CanceledException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RefNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RefNotAdvertisedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoHeadException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		git.close();
+  }
+  public static void pull(String remoteURI) throws IOException {
+    pull(remoteURI, getBranch(remoteURI));
+    
+  }
   public static void checkoutCommit(String remoteURI, String branch, String commitHash)
       throws IOException {
     File gitRepoFile = ScriptingEngine.uriToFile(remoteURI);
