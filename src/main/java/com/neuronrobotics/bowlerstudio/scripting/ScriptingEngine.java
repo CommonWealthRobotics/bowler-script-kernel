@@ -11,8 +11,12 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
@@ -529,6 +533,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {
+	if(directory==null)
+		return;
     for (final File fileEntry : directory.listFiles()) {
 
       if (fileEntry.getName().endsWith(".git") || fileEntry.getName().startsWith(".git"))
@@ -700,7 +706,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
     Git git = new Git(localRepo);
     try {
+    	try {
       git.pull().setCredentialsProvider(cp).call();// updates to the
+    	}catch (org.eclipse.jgit.api.errors.RefNotAdvertisedException ex) {
+    		System.out.println("Creating new branch master in " +id);
+    	}
       // latest version
       if (flagNewFile) {
         git.add().addFilepattern(FileName).call();
@@ -936,7 +946,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     for (String s : listBranchNames(remoteURI)) {
       if (s.contains(newBranch)) {
         throw new RuntimeException(
-            newBranch + " can not be created because " + s + " is to similar");
+            newBranch + " can not be created because " + s + " is too similar");
       }
     }
 
@@ -946,28 +956,48 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     }
 
     Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-    CreateBranchCommand bcc = null;
-    CheckoutCommand checkout;
     String source = getFullBranch(remoteURI);
 
     Git git;
 
     git = new Git(localRepo);
 
-    bcc = git.branchCreate();
-    checkout = git.checkout();
-    bcc.setName(newBranch).setStartPoint(source).setForce(true).call();
-
-    checkout.setName(newBranch);
-    checkout.call();
-    PushCommand pushCommand = git.push();
-    pushCommand.setRemote("origin").setRefSpecs(new RefSpec(newBranch + ":" + newBranch))
-        .setCredentialsProvider(cp).call();
+    newBranchLocal(newBranch, source, git);
 
     git.close();
 
   }
 
+	private static void newBranchLocal(String newBranch, String remoteURI, Git git)
+			throws GitAPIException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
+			CheckoutConflictException, InvalidRemoteException, TransportException, IOException {
+		 String source = getFullBranch(remoteURI);
+
+	    try {
+	    	CreateBranchCommand setName = git.branchCreate().setName(newBranch);
+			CreateBranchCommand setStartPoint = setName.setStartPoint(source);
+			CreateBranchCommand setForce = setStartPoint.setForce(true);
+			setForce.call();
+	
+	    }catch(org.eclipse.jgit.api.errors.RefNotFoundException ex){
+	    	git.branchCreate().setName(newBranch).call();
+
+	    }
+
+	    PushCommand pushCommand = git.push();
+	    PushCommand setRemote = pushCommand.setRemote("origin");
+		PushCommand setRefSpecs = setRemote.setRefSpecs(new RefSpec(newBranch + ":" + newBranch));
+		PushCommand setCredentialsProvider = setRefSpecs
+	        .setCredentialsProvider(cp);
+		setCredentialsProvider.call();
+		
+		CheckoutCommand checkout;
+	    checkout = git.checkout();
+	    checkout.setName(newBranch);
+	    checkout.call();
+	}
+  
+  
   private static boolean hasAtLeastOneReference(Git git) throws Exception {
     Repository repo = git.getRepository();
     Config storedConfig = repo.getConfig();
@@ -990,7 +1020,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         }
       }
     }
-    throw new RuntimeException("No references or branches found!");
+    
+    return true;
   }
 
   public static List<Ref> listBranches(String remoteURI) throws Exception {
