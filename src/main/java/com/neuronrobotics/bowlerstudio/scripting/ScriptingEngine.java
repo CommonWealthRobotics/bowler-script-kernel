@@ -95,7 +95,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       "com.neuronrobotics.bowlerstudio.physics", "com.neuronrobotics.bowlerstudio.physics",
       "com.neuronrobotics.bowlerstudio.vitamins", "com.neuronrobotics.bowlerstudio.creature",
       "com.neuronrobotics.bowlerstudio.threed"};
-
+  
   private static GitHub github;
   private static HashMap<String, File> filesRun = new HashMap<>();
 
@@ -1116,10 +1116,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		// config.setString("branch", "master", "merge", "refs/heads/master");
 
 		try {
-			System.out.print("\r\nPulling " + remoteURI);
+			System.out.print("Pulling " + remoteURI);
 			PullResult result = git.pull().setCredentialsProvider(cp).call();
-			System.out.print(" ... Success! \r\n " + result);
-			System.out.println("");
+			System.out.println(" ... Success!" );
 		} catch (CheckoutConflictException ex) {
 			for(String p: ex.getConflictingPaths()) {
 				File conf = new File(gitRepoFile.getParent()+"/"+p);
