@@ -37,7 +37,7 @@ public class ConfigurationDatabase {
     }
     return getParamMap(paramsKey).get(objectKey);
   }
-
+  
   public static HashMap<String, Object> getParamMap(String paramsKey) {
     if (getDatabase().get(paramsKey) == null) {
       getDatabase().put(paramsKey, new HashMap<String, Object>());
@@ -94,7 +94,15 @@ public class ConfigurationDatabase {
         getDbFile()
     );
   }
-
+  public static void loginEvent(String username) {
+		checked = false;
+		try {
+			getGitSource();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+  }
   public static String getGitSource() throws Exception {
     if (!checked) {
       checked = true;
@@ -104,6 +112,7 @@ public class ConfigurationDatabase {
         org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
         GHMyself self = github.getMyself();
         Map<String, GHRepository> myPublic = self.getAllRepositories();
+        gitSource=null;
         for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
           if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName()
               .equals(self.getName())) {
@@ -128,11 +137,11 @@ public class ConfigurationDatabase {
 
   private static void setRepo(GHRepository forkedRep) {
     String myAssets = forkedRep.getGitTransportUrl().replaceAll("git://", "https://");
-    //System.out.println("Using my version of configuration database: " + myAssets);
     setGitSource(myAssets);
   }
 
   public static void setGitSource(String myAssets) {
+	System.out.println("Using my version of configuration database: " + myAssets);
     database = null;
     gitSource = myAssets;
     getDatabase();
