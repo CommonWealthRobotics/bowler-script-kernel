@@ -2,17 +2,21 @@ package com.neuronrobotics.bowlerstudio.assets;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
-import javafx.embed.swing.SwingFXUtils;
+//import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 
 import javax.imageio.ImageIO;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 
@@ -51,6 +55,28 @@ public class AssetFactory {
             file// File from within the Git repo
         );
   }
+  
+  public static void writeImage(Image img, File file) {
+	  int width = (int) img.getWidth();
+	  int height = (int) img.getHeight();
+	  PixelReader reader = img.getPixelReader();
+	  byte[] buffer = new byte[width * height * 4];
+	  javafx.scene.image.WritablePixelFormat<ByteBuffer> format = javafx.scene.image.PixelFormat.getByteBgraInstance();
+	  reader.getPixels(0, 0, width, height, format, buffer, 0, width * 4);
+	  try {
+	      BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+	      for(int count = 0; count < buffer.length; count += 4) {
+	          out.write(buffer[count + 2]);
+	          out.write(buffer[count + 1]);
+	          out.write(buffer[count]);
+	          out.write(buffer[count + 3]);
+	      }
+	      out.flush();
+	      out.close();
+	  } catch(IOException e) {
+	      e.printStackTrace();
+	  }
+  }
 
   @SuppressWarnings("restriction")
   public static Image loadAsset(String file) throws Exception {
@@ -78,10 +104,9 @@ public class AssetFactory {
           File imageFile = ScriptingEngine.createFile(getGitSource(), file, "create file");
           try {
             String fileName = imageFile.getName();
-            ImageIO.write(SwingFXUtils.fromFXImage(obj_img, null),
-                fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase(), imageFile);
+            writeImage(obj_img, imageFile);
 
-          } catch (IOException ignored) {
+          } catch (Exception ignored) {
           }
           ScriptingEngine.createFile(getGitSource(), file, "saving new content");
         } catch (Exception e) {
