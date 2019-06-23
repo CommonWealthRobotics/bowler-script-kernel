@@ -101,7 +101,7 @@ public class BowlerKernel {
 				try {
 
 					ret = ScriptingEngine.inlineFileScriptRun(new File(s), null);
-				} catch (Error e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
 				}
@@ -117,7 +117,7 @@ public class BowlerKernel {
 			if (startLoadingScripts) {
 				try {
 					ret = ScriptingEngine.inlineFileScriptRun(new File(s), (ArrayList<Object>) ret);
-				} catch (Error e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
 				}
@@ -134,7 +134,7 @@ public class BowlerKernel {
 			if (runShell) {
 				try {
 					shellTypeStorage = s;
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					shellTypeStorage = groovy;
 				}
 				break;
