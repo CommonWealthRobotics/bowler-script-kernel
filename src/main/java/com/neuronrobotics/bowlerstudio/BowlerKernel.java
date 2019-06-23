@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 //import org.springframework.boot.SpringApplication;
@@ -20,20 +19,15 @@ import java.util.List;
 //import org.springframework.context.annotation.Configuration;
 
 import jline.ConsoleReader;
-import jline.History;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
-import marytts.signalproc.effects.JetPilotEffect;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
-import marytts.signalproc.effects.VocalTractLinearScalerEffect;
 import marytts.signalproc.effects.ChorusEffectBase;
 import marytts.signalproc.effects.HMMDurationScaleEffect;
 import marytts.signalproc.effects.VolumeEffect;
-
-import eu.mihosoft.vrl.v3d.*;
 
 public class BowlerKernel {
 
@@ -83,7 +77,7 @@ public class BowlerKernel {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-		JavaFXInitializer.go();
+		com.neuronrobotics.sdk.addons.kinematics.JavaFXInitializer.go();
 		if (args.length == 0) {
 			fail();
 		}
