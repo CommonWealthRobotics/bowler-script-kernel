@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 //import org.springframework.boot.SpringApplication;
@@ -20,26 +19,21 @@ import java.util.List;
 //import org.springframework.context.annotation.Configuration;
 
 import jline.ConsoleReader;
-import jline.History;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
-import marytts.signalproc.effects.JetPilotEffect;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
-import marytts.signalproc.effects.VocalTractLinearScalerEffect;
 import marytts.signalproc.effects.ChorusEffectBase;
 import marytts.signalproc.effects.HMMDurationScaleEffect;
 import marytts.signalproc.effects.VolumeEffect;
-
-import eu.mihosoft.vrl.v3d.*;
 
 public class BowlerKernel {
 
 	private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
-
+	
 	static {
 		historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 		ArrayList<String> history = new ArrayList<>();
@@ -83,7 +77,7 @@ public class BowlerKernel {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-
+		com.neuronrobotics.sdk.addons.kinematics.JavaFXInitializer.go();
 		if (args.length == 0) {
 			fail();
 		}
@@ -101,7 +95,7 @@ public class BowlerKernel {
 				try {
 
 					ret = ScriptingEngine.inlineFileScriptRun(new File(s), null);
-				} catch (Error e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
 				}
@@ -117,7 +111,7 @@ public class BowlerKernel {
 			if (startLoadingScripts) {
 				try {
 					ret = ScriptingEngine.inlineFileScriptRun(new File(s), (ArrayList<Object>) ret);
-				} catch (Error e) {
+				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
 				}
@@ -134,7 +128,7 @@ public class BowlerKernel {
 			if (runShell) {
 				try {
 					shellTypeStorage = s;
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					shellTypeStorage = groovy;
 				}
 				break;
@@ -143,6 +137,8 @@ public class BowlerKernel {
 				runShell = true;
 			}
 		}
+		if(!runShell)
+			System.exit(0);
 
 		System.out.println("Starting Bowler REPL in langauge: " + shellTypeStorage);
 		// sample from
