@@ -39,7 +39,7 @@ public class BowlerKernel {
 
 	private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
-
+	
 	static {
 		historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 		ArrayList<String> history = new ArrayList<>();
@@ -83,7 +83,7 @@ public class BowlerKernel {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-
+		JavaFXInitializer.go();
 		if (args.length == 0) {
 			fail();
 		}
@@ -143,6 +143,8 @@ public class BowlerKernel {
 				runShell = true;
 			}
 		}
+		if(!runShell)
+			System.exit(0);
 
 		System.out.println("Starting Bowler REPL in langauge: " + shellTypeStorage);
 		// sample from
