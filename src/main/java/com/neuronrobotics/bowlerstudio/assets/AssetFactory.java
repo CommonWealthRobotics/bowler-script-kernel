@@ -112,8 +112,10 @@ public class AssetFactory {
         } catch (Exception e) {
           e.printStackTrace();
         }
-      } else {
+      } else if (f.getName().endsWith(".png"))  {
         cache.put(file, new Image(f.toURI().toString()));
+      }else {
+    	  return null;
       }
     }
     return cache.get(file);
@@ -141,8 +143,10 @@ public class AssetFactory {
   }
 
   public static void loadAllAssets() throws Exception {
+	  System.err.println("Loading assets");
     List<String> files = ScriptingEngine.filesInGit(gitSource, StudioBuildInfo.getVersion(), null);
     for (String file : files) {
+    	System.err.println("Loading asset file: "+file);
       loadAsset(file);
     }
   }
