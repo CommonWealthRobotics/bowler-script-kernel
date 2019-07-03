@@ -33,7 +33,7 @@ public class BowlerKernel {
 
 	private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
-	
+
 	static {
 		historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 		ArrayList<String> history = new ArrayList<>();
@@ -68,8 +68,7 @@ public class BowlerKernel {
 				"java -jar BowlerScriptKernel.jar -p <file 1> .. <file n> # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable ");
 		System.err.println(
 				"java -jar BowlerScriptKernel.jar -r <Groovy Jython or Clojure> (Optional)(-s or -p)<file 1> .. <file n> # This will start a shell in the requested langauge and run the files provided. ");
-		System.err.println(
-				"java -jar BowlerScriptKernel.jar -g <Git repo> <Git file> # this will run a file from git");
+		System.err.println("java -jar BowlerScriptKernel.jar -g <Git repo> <Git file> # this will run a file from git");
 
 		System.exit(1);
 	}
@@ -83,24 +82,30 @@ public class BowlerKernel {
 		if (args.length == 0) {
 			fail();
 		}
-		boolean gitRun =false;
-		String gitRepo=null;
-		String gitFile=null;
+		boolean gitRun = false;
+		String gitRepo = null;
+		String gitFile = null;
 		for (String s : args) {
 
 			if (gitRun) {
-				if(gitRepo==null) {
-					gitRepo=s;
-				}else if(gitFile==null) {
-					gitFile=s;
+				if (gitRepo == null) {
+					gitRepo = s;
+				} else if (gitFile == null) {
+					gitFile = s;
 				}
 			}
 			if (s.contains("git") || s.contains("-g")) {
 				gitRun = true;
 			}
 		}
-		if(gitRun && gitRepo!=null && gitFile!=null)
-			ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
+		if (gitRun && gitRepo != null && gitFile != null)
+			try {
+				ScriptingEngine.pull(gitRepo);
+				ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
+			} catch (Throwable e) {
+				e.printStackTrace();
+				fail();
+			}
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
 //		
@@ -156,9 +161,8 @@ public class BowlerKernel {
 				runShell = true;
 			}
 		}
-		
-		
-		if(!runShell)
+
+		if (!runShell)
 			System.exit(0);
 
 		System.out.println("Starting Bowler REPL in langauge: " + shellTypeStorage);
@@ -188,6 +192,7 @@ public class BowlerKernel {
 			reader.getHistory().addToHistory(
 					"DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
 			reader.getHistory().addToHistory("BowlerKernel.speak(\"Text to speech works like this\")");
+			reader.getHistory().addToHistory("ScriptingEngine.gitScriptRun(\\\"https://github.com/OperationSmallKat/greycat.git\\\", \\\"launch.groovy\\\" , null)");
 			reader.getHistory().addToHistory("println \"Hello world!\"");
 			writeHistory(reader.getHistory().getHistoryList());
 		} else {
@@ -294,7 +299,7 @@ public class BowlerKernel {
 		if (rate.doubleValue() < 10)
 			rate = 10;
 		TextToSpeech tts = new TextToSpeech();
-		//cd ..
+		// cd ..
 		tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
 		// Setting the Current Voice
 		// tts.setVoice(tts.getAvailableVoices().toArray()[0].toString());
