@@ -40,6 +40,7 @@ import org.jsoup.select.Elements;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GitHub;
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -119,7 +120,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
     @Override
     public String[] prompt(String username) {
-      new RuntimeException("Login required").printStackTrace();
+      //new RuntimeException("Login required").printStackTrace();
 
       if (username != null) {
         if (username.equals(""))
@@ -128,30 +129,46 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       String[] creds = new String[] {"", ""};
       System.out.println("#Github Login Prompt#");
       System.out.println("For anynomous mode hit enter twice");
-      System.out.print("Github Username: " + username != null ? "(" + username + ")" : "");
+      System.out.print("Github Username: " + (username != null ? "(" + username + ")" : ""));
       // create a scanner so we can read the command-line input
       BufferedReader buf = new BufferedReader(new InputStreamReader(System.in));
 
       do {
         try {
           creds[0] = buf.readLine();
+          System.out.println("GitHub Username: "+ creds[0]);
+          
         } catch (IOException e) {
+        	e.printStackTrace();
           return null;
         }
         if (creds[0].equals("") && (username == null)) {
           System.out.println("No username, using anynomous login");
           return null;
-        } else
-          creds[0] = username;
+        } 
+
+        try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
       } while (creds[0] == null);
 
-      System.out.print("Github Password: ");
+      //System.out.print("Github Password: ");
       try {
-        creds[1] = buf.readLine();
+    	  Console cons;
+    	  char[] passwd;
+    	  if ((cons = System.console()) != null &&
+    	      (passwd = cons.readPassword("[%s]", "GitHub Password:")) != null) {
+    		  creds[1]=new String(passwd);
+    	      java.util.Arrays.fill(passwd, ' ');
+    	  }
+        //creds[1] = buf.readLine();
         if (creds[1].equals("")) {
           System.out.println("No password, using anynomous login");
         }
-      } catch (IOException e) {
+      } catch (Exception e) {
         return null;
       }
       return creds;
@@ -571,7 +588,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       throws Exception {
     ArrayList<String> f = new ArrayList<>();
 
-    waitForLogin();
+    //waitForLogin();
     File gistDir = cloneRepo(remote, branch);
     loadFilesToList(f, gistDir, extnetion);
 

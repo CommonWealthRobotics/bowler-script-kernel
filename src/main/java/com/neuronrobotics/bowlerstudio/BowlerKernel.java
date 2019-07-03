@@ -79,6 +79,7 @@ public class BowlerKernel {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 		com.neuronrobotics.sdk.addons.kinematics.JavaFXInitializer.go();
+		ScriptingEngine.waitForLogin();
 		if (args.length == 0) {
 			fail();
 		}
