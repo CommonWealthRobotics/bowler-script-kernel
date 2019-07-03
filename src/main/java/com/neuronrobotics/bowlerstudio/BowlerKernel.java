@@ -98,14 +98,36 @@ public class BowlerKernel {
 				gitRun = true;
 			}
 		}
-		if (gitRun && gitRepo != null && gitFile != null)
-			try {
+		if (gitRun && gitRepo != null )
+			
 				ScriptingEngine.pull(gitRepo);
-				ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
-			} catch (Throwable e) {
-				e.printStackTrace();
-				fail();
-			}
+				ArrayList<String> files = ScriptingEngine.filesInGit(gitRepo);
+				boolean fileExists = false;
+				if(gitFile!=null)
+					for(String f:files) {
+						if(f.startsWith(gitFile)) {
+							gitFile=f;
+							fileExists=true;
+						}
+					}
+				if(!fileExists) {
+					System.err.println("\n\nERROR file does not exist: "+gitFile);
+					gitFile=null;
+				}
+				if( gitFile != null)
+					try {
+						ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
+					} catch (Throwable e) {
+						e.printStackTrace();
+						fail();
+					}
+				else {
+					System.out.println("Files in git:");
+					for(String f:files) {
+						System.out.println("\t"+f);
+					}
+				}
+			
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
 //		
