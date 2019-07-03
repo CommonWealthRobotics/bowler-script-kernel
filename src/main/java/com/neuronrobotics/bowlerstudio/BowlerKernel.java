@@ -104,13 +104,16 @@ public class BowlerKernel {
 				ScriptingEngine.pull(gitRepo);
 				ArrayList<String> files = ScriptingEngine.filesInGit(gitRepo);
 				boolean fileExists = false;
-				if(gitFile!=null)
-					for(String f:files) {
-						if(f.startsWith(gitFile)) {
-							gitFile=f;
-							fileExists=true;
-						}
+				if(gitFile==null)
+					gitFile="launch";
+				if(gitFile.endsWith("/"))
+					gitFile+="launch";
+				for(String f:files) {
+					if(f.startsWith(gitFile)) {
+						gitFile=f;
+						fileExists=true;
 					}
+				}
 				if(!fileExists) {
 					System.err.println("\n\nERROR file does not exist: "+gitFile);
 					gitFile=null;
