@@ -45,12 +45,7 @@ dependencies {
  compile "com.neuronrobotics:BowlerScriptingKernel:VERSION_FROM_BADGE"
 }
 ```
-### Macs Only
 
-In Terminal, before running the jar you must run:
-```
-export OPENCV_DIR=<path to yout BowlerStudio.app>BowlerStudio.app/Contents/MacOS/opencv249build/
-```
 ## All platforms 
 ```
   Usage: 
@@ -60,5 +55,7 @@ export OPENCV_DIR=<path to yout BowlerStudio.app>BowlerStudio.app/Contents/MacOS
   java -jar BowlerScriptKernel.jar -p .. # This will load one script then take the list of objects returned and pass them to the next script as its 'args' variable
   
   java -jar BowlerScriptKernel.jar -r <Groovy,Clojure,Jython> #Starts a repl for interactive robot coding
+  
+  java -jar BowlerScriptKernel.jar -g <GIT url>  <File> # Runs a file from its git location
 ```
 
