@@ -76,6 +76,7 @@ public class ConfigurationDatabase {
       return database;
     }
     try {
+    	
       database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
           .inlineFileScriptRun(loadFile(), null);
 
@@ -129,7 +130,8 @@ public class ConfigurationDatabase {
         ConfigurationDatabase
             .setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
       }
-
+     
+	  ScriptingEngine.pull(gitSource);
     }
     return gitSource;
 
