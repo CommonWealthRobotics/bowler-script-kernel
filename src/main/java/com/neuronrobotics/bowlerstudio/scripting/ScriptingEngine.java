@@ -732,7 +732,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     Git git = new Git(localRepo);
     try {
     	try {
-      git.pull().setCredentialsProvider(cp).call();// updates to the
+    		git.pull().setCredentialsProvider(cp).call();// updates to the
     	}catch (org.eclipse.jgit.api.errors.RefNotAdvertisedException ex) {
     		System.out.println("Creating new branch master in " +id);
     	}
@@ -851,17 +851,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
           }
           Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
           // https://gist.github.com/0e6454891a3b3f7c8f28.git
-          Git git = new Git(localRepo);
+          
           try {
-            PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates
-            // to
-            // the
-            // latest
-            // version
-            // System.out.println("Pull completed "+ret);
-            //
-            // git.push().setCredentialsProvider(cp).call();
-            git.close();
+            pull(remoteURI,branch);
           } catch (Exception ex) {
             try {
               // Files.delete(gitRepoFile.toPath());
@@ -872,7 +864,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
               x.printStackTrace();
             }
           }
-          git.close();
         } catch (NullPointerException ex) {
           setAutoupdate(false);
         }
@@ -1227,20 +1218,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       // }
       // System.out.println("Checking out "+branch+" :
       // "+gitRepoFile.getAbsolutePath() );
-      Git git = new Git(localRepo);
+     // Git git = new Git(localRepo);
       // StoredConfig config = git.getRepository().getConfig();
       // config.setString("branch", "master", "merge", "refs/heads/master");
       if (!currentBranch.contains(branch)) {
+    	pull(remoteURI,branch);
+    	Git git = new Git(localRepo);
         try {
-          git.pull().setCredentialsProvider(cp).call();
           git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch)
               .call();
           git.checkout().setName(branch).call();
         } catch (Exception ex) {
           ex.printStackTrace();
         }
+        git.close();
       }
-      git.close();
+      
     }
 
   }
