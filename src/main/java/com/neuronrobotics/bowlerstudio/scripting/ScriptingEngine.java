@@ -1113,6 +1113,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static void pull(String remoteURI, String branch) throws IOException {
+	  if(!hasNetwork())
+		  return;
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
 			gitRepoFile = cloneRepo(remoteURI, branch);
