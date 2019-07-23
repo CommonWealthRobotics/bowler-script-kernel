@@ -625,10 +625,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   public static void pushCodeToGit(String id, String branch, String FileName, String content,
       String commitMessage) throws Exception {
-    if (loginID == null)
-      login();
-    if (loginID == null)
-      return;// No login info means there is no way to publish
+	    if (loginID == null)
+	        login();
+	      if (!hasNetwork())
+	        return;// No login info means there is no way to publish
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -643,10 +643,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   public static void commit(String id, String branch, String FileName, String content,
       String commitMessage, boolean flagNewFile) throws Exception {
 
-    if (loginID == null)
-      login();
-    if (loginID == null)
-      return;// No login info means there is no way to publish
+	    if (loginID == null)
+	        login();
+	      if (!hasNetwork())
+	        return;// No login info means there is no way to publish
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -1178,6 +1178,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		git.close();
   }
   public static void pull(String remoteURI) throws IOException {
+	     if (!hasNetwork())
+		        return;// No login info means there is no way to publish
     pull(remoteURI, getBranch(remoteURI));
     
   }
@@ -1257,6 +1259,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
    * @return The local directory containing the .git
    */
   public static File cloneRepo(String remoteURI, String branch) {
+
+
     // new Exception().printStackTrace();
     String[] colinSplit = remoteURI.split(":");
 
@@ -1271,7 +1275,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     File dir = new File(localPath);
 
     if (!gitRepoFile.exists()) {
-
+	   if (!hasNetwork())
+		        return null;// No login info means there is no way to publish
       System.out.println("Cloning files from: " + remoteURI);
       if (branch != null)
         System.out.println("            branch: " + branch);
