@@ -246,7 +246,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   private static void loadLoginData() throws IOException {
-    if (loginID == null && getCreds().exists() && hasnetwork) {
+    if (loginID == null && getCreds().exists()) {
+    	
       try {
         String line;
 
@@ -267,9 +268,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
           // password loaded, we can now autoupdate
           ScriptingEngine.setAutoupdate(true);
         }
-        if (cp == null) {
-          cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-        }
+        if(hasnetwork)
+	        if (cp == null) {
+	          cp = new UsernamePasswordCredentialsProvider(loginID, pw);
+	        }
       } catch (Exception e) {
         logout();
         // e.printStackTrace();
