@@ -708,7 +708,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     commit(id, branch, FileName, content, commitMessage, flagNewFile);
     if (loginID == null)
       login();
-    if (loginID == null)
+    if (!hasNetwork())
       return;// No login info means there is no way to publish
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
