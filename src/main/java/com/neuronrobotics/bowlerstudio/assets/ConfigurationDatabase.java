@@ -127,8 +127,14 @@ public class ConfigurationDatabase {
           setRepo(forkedRep);
         }
       } else {
-        ConfigurationDatabase
-            .setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
+    	  if (ScriptingEngine.getLoginID() != null) {
+    	        ConfigurationDatabase
+                .setGitSource("https://github.com/"+ScriptingEngine.getLoginID()+"/" + repo + ".git");
+			} else {
+		        ConfigurationDatabase
+	            .setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
+			}
+
       }
      
 	  ScriptingEngine.pull(gitSource);
