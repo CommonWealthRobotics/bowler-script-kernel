@@ -126,7 +126,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     try {
     	PasswordManager.loadLoginData(workspace);
       // runLogin();
-    } catch (IOException e) {
+    } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }

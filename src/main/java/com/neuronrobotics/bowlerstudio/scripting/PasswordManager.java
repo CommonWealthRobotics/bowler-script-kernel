@@ -10,11 +10,22 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.util.List;
-
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GitHub;
+
+import com.google.crypto.tink.Aead;
+import com.google.crypto.tink.CleartextKeysetHandle;
+import com.google.crypto.tink.JsonKeysetReader;
+import com.google.crypto.tink.JsonKeysetWriter;
+import com.google.crypto.tink.KeysetHandle;
+import com.google.crypto.tink.aead.AeadKeyTemplates;
+import com.google.crypto.tink.config.TinkConfig;
 
 public class PasswordManager {
 	private static IGitHubLoginManager loginManager = new IGitHubLoginManager() {
@@ -78,6 +89,12 @@ public class PasswordManager {
 	static {
 
 		checkInternet();
+		try {
+			TinkConfig.register();
+		} catch (GeneralSecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void checkInternet() {
@@ -220,46 +237,82 @@ public class PasswordManager {
 		loginManager = lm;
 	}
 
-	static void loadLoginData(File ws) throws IOException {
+	static void loadLoginData(File ws) throws Exception {
 		workspace=ws;
 		usernamefile = new File(workspace.getAbsoluteFile()+"/username.json");
 		if(!usernamefile.exists())
 			usernamefile=null;
+		KeysetHandle keysetHandle = getKey();
 		passfile = new File(workspace.getAbsoluteFile()+"/timestamp.json");
 		if(!passfile.exists())
 			passfile=null;
-		keyfile = new File(workspace.getAbsoluteFile()+"/loadData.json");
-		if(!keyfile.exists())
-			keyfile=null;
 		if(usernamefile.exists()) {
 			List linesu = Files.readAllLines(Paths.get(usernamefile.toURI()),
 	                StandardCharsets.UTF_8);
 			setLoginID((String) linesu.get(0));
 		}
 		if(hasStoredCredentials()) {
-			List linesp = Files.readAllLines(Paths.get(passfile.toURI()),
-                    StandardCharsets.UTF_8);
-			
-			String p=(String) linesp.get(0);
-			performLogin( getLoginID(), p);
+	
+			byte [] passEncrypt=Files.readAllBytes(Paths.get(passfile.toURI()));
+			// 2. Get the primitive.
+		    Aead aead = keysetHandle.getPrimitive(Aead.class);
+		 // ... or to decrypt a ciphertext.
+		    try {
+			    byte[] decrypted = aead.decrypt(passEncrypt, null);
+				String cleartext = new String(decrypted).trim();
+				performLogin( getLoginID(), cleartext);
+		    }catch (GeneralSecurityException ex) {
+		    	ex.printStackTrace();
+		    	logout();
+		    }
 		}
 	}
-	
-	private static void writeData(String user,String pass) throws IOException {
+	private static KeysetHandle getKey() throws IOException {
+		KeysetHandle keysetHandle=null;
+		keyfile = new File(workspace.getAbsoluteFile()+"/loadData.json");
+		String keysetFilename = keyfile.getAbsolutePath();
+		if(!keyfile.exists()) {
+			// Generate the key material...
+			System.err.println("Creating keyfile ");
+			try {
+				keysetHandle = KeysetHandle.generateNew(
+				    AeadKeyTemplates.AES128_GCM);
+			    // and write it to a file.
+			   
+			    CleartextKeysetHandle.write(keysetHandle, JsonKeysetWriter.withFile(
+			        new File(keysetFilename)));
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else {
+			System.err.println("Loading keyfile ");
+			 try {
+				keysetHandle = CleartextKeysetHandle.read(
+				        JsonKeysetReader.withFile(new File(keysetFilename)));
+			} catch (GeneralSecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return keysetHandle;
+	}
+	private static void writeData(String user,String passcleartext) throws Exception {
 		setLoginID(user);
-		pw=pass;
+		pw=passcleartext;
 		usernamefile = new File(workspace.getAbsoluteFile()+"/username.json");
 		if(!usernamefile.exists())
 			usernamefile.createNewFile();
 		Files.write(Paths.get(usernamefile.toURI()), user.getBytes());
-		passfile = new File(workspace.getAbsoluteFile()+"/timestamp.json");
+		KeysetHandle keysetHandle = getKey();
+		passfile = new File(workspace.getAbsoluteFile()+"/timestamp.json");	
 		if(!passfile.exists())
 			passfile.createNewFile();
-		Files.write(Paths.get(passfile.toURI()), pass.getBytes());
-//		keyfile = new File(workspace.getAbsoluteFile()+"/loadData.json");
-//		if(!keyfile.exists())
-//			keyfile.createNewFile();
-		
+		// 2. Get the primitive.
+	    Aead aead = keysetHandle.getPrimitive(Aead.class);
+		byte[] ciphertext = aead.encrypt(passcleartext.getBytes(), null);
+		Files.write(Paths.get(passfile.toURI()), ciphertext);
+
 	}
 
 	public static CredentialsProvider getCredentialProvider() {
