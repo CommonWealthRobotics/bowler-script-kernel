@@ -330,19 +330,29 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static void deleteFolder(File folder) {
-    File[] files = folder.listFiles();
-    if (files != null) { // some JVMs return null for empty dirs
-      for (File f : files) {
-        if (f.isDirectory()) {
-          deleteFolder(f);
-        } else {
-        	FileChangeWatcher.close(f);
-          f.delete();
-          // System.out.println("Deleting " + f.getAbsolutePath());
-        }
-      }
-    }
-    folder.delete();
+		if (!folder.exists() || !folder.isDirectory())
+			throw new RuntimeException("Folder doesnt exist " + folder);
+		File[] files = folder.listFiles();
+		if (files != null) { // some JVMs return null for empty dirs
+			for (File f : files) {
+				if (f.isDirectory()) {
+					deleteFolder(f);
+				} else {
+					try {
+						FileChangeWatcher.close(f);
+						f.delete();
+					} catch (Throwable t) {
+						t.printStackTrace();
+					}
+					// System.out.println("Deleting " + f.getAbsolutePath());
+				}
+			}
+		}
+		try {
+			folder.delete();
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
   }
 
   private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {

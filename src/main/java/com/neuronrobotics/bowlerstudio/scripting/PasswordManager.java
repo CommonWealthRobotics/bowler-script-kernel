@@ -280,7 +280,7 @@ public class PasswordManager {
 	}
 
 	private static void setLoginID(String loginID) {
-		new RuntimeException(loginID).printStackTrace();
+		//new RuntimeException(loginID).printStackTrace();
 		PasswordManager.loginID = loginID;
 	}
 }
