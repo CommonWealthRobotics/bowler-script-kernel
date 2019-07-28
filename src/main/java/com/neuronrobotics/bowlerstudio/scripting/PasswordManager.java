@@ -191,6 +191,7 @@ public class PasswordManager {
 			setCredentialProvider(new UsernamePasswordCredentialsProvider(u, p));
 			isLoggedIn = true;
 			writeData(u,p);
+			System.out.println("\n\nSuccess Login "+u+"\n\n");
 		}catch(Exception e) {
 			github=null;
 		}
@@ -242,15 +243,15 @@ public class PasswordManager {
 		usernamefile = new File(workspace.getAbsoluteFile()+"/username.json");
 		if(!usernamefile.exists())
 			usernamefile=null;
-		KeysetHandle keysetHandle = getKey();
-		passfile = new File(workspace.getAbsoluteFile()+"/timestamp.json");
-		if(!passfile.exists())
-			passfile=null;
-		if(usernamefile.exists()) {
+		else {
 			List linesu = Files.readAllLines(Paths.get(usernamefile.toURI()),
 	                StandardCharsets.UTF_8);
 			setLoginID((String) linesu.get(0));
 		}
+		KeysetHandle keysetHandle = getKey();
+		passfile = new File(workspace.getAbsoluteFile()+"/timestamp.json");
+		if(!passfile.exists())
+			passfile=null;
 		if(hasStoredCredentials()) {
 	
 			byte [] passEncrypt=Files.readAllBytes(Paths.get(passfile.toURI()));
