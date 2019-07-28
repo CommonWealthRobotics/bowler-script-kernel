@@ -11,7 +11,7 @@ import org.kohsuke.github.GHRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-
+import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 public class ConfigurationDatabase {
@@ -110,7 +110,7 @@ public class ConfigurationDatabase {
       if (ScriptingEngine.hasNetwork() && ScriptingEngine.isLoginSuccess()) {
 
         ScriptingEngine.setAutoupdate(true);
-        org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
+        org.kohsuke.github.GitHub github = PasswordManager.getGithub();
         GHMyself self = github.getMyself();
         Map<String, GHRepository> myPublic = self.getAllRepositories();
         gitSource=null;
@@ -127,9 +127,9 @@ public class ConfigurationDatabase {
           setRepo(forkedRep);
         }
       } else {
-    	  if (ScriptingEngine.getLoginID() != null) {
+    	  if (PasswordManager.getUsername()  != null) {
     	        ConfigurationDatabase
-                .setGitSource("https://github.com/"+ScriptingEngine.getLoginID()+"/" + repo + ".git");
+                .setGitSource("https://github.com/"+PasswordManager.getUsername()+"/" + repo + ".git");
 			} else {
 		        ConfigurationDatabase
 	            .setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
