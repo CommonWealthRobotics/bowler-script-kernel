@@ -77,6 +77,10 @@ public class PasswordManager {
 	};
 	static {
 
+		checkInternet();
+	}
+
+	public static void checkInternet() {
 		try {
 			final URL url = new URL("http://github.com");
 			final URLConnection conn = url.openConnection();
@@ -113,10 +117,11 @@ public class PasswordManager {
 	}
 
 	public static String getUsername() {
-		return loginID;
+		return getLoginID();
 	}
 
 	static synchronized void login() throws IOException {
+		checkInternet();
 		if (!hasnetwork)
 			return;
 		boolean b = !hasStoredCredentials();
@@ -124,7 +129,7 @@ public class PasswordManager {
 		boolean c2 = c && b;
 		if (c2) {
 			String[] creds = loginManager.prompt(PasswordManager.getUsername());
-			loginID = creds[0];
+			setLoginID(creds[0]);
 			pw = creds[1];
 			
 			try {
@@ -146,9 +151,9 @@ public class PasswordManager {
 			return;
 		if(loggedIn())
 			return;
-		if (loginID != null && pw != null) {
+		if (getLoginID() != null && pw != null) {
 			
-			performLogin( loginID, pw);
+			performLogin( getLoginID(), pw);
 
 			if (getGithub() == null) {
 				System.out.println("\nERROR: Wrong Password!\n");
@@ -226,19 +231,22 @@ public class PasswordManager {
 		keyfile = new File(workspace.getAbsoluteFile()+"/loadData.json");
 		if(!keyfile.exists())
 			keyfile=null;
-		if(hasStoredCredentials()) {
+		if(usernamefile.exists()) {
 			List linesu = Files.readAllLines(Paths.get(usernamefile.toURI()),
-                    StandardCharsets.UTF_8);
+	                StandardCharsets.UTF_8);
+			setLoginID((String) linesu.get(0));
+		}
+		if(hasStoredCredentials()) {
 			List linesp = Files.readAllLines(Paths.get(passfile.toURI()),
                     StandardCharsets.UTF_8);
-			String u=(String) linesu.get(0);
+			
 			String p=(String) linesp.get(0);
-			performLogin( u, p);
+			performLogin( getLoginID(), p);
 		}
 	}
 	
 	private static void writeData(String user,String pass) throws IOException {
-		loginID=user;
+		setLoginID(user);
 		pw=pass;
 		usernamefile = new File(workspace.getAbsoluteFile()+"/username.json");
 		if(!usernamefile.exists())
@@ -265,5 +273,14 @@ public class PasswordManager {
 	public static boolean hasNetwork() {
 		// TODO Auto-generated method stub
 		return hasnetwork;
+	}
+
+	public static String getLoginID() {
+		return loginID;
+	}
+
+	private static void setLoginID(String loginID) {
+		new RuntimeException(loginID).printStackTrace();
+		PasswordManager.loginID = loginID;
 	}
 }
