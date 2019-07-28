@@ -78,7 +78,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
    */
   private static final Map<String, Long> fileLastLoaded = new HashMap<String, Long>();
 
-  private static boolean hasnetwork = false;
   private static boolean autoupdate = false;
 
   private static final String[] imports = new String[] { // "haar",
@@ -112,28 +111,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   private static HashMap<String, IScriptingLanguage> langauges = new HashMap<>();
 
-  private static boolean loginSuccess = false;
+
 
   static {
 
-    try {
-      final URL url = new URL("http://github.com");
-      final URLConnection conn = url.openConnection();
-      conn.connect();
-      conn.getInputStream();
-      hasnetwork = true;
-    } catch (Exception e) {
-      // we assuming we have no access to the server and run off of the
-      // chached gists.
-      hasnetwork = false;
-    }
+    PasswordManager.hasNetwork();
     workspace = new File(System.getProperty("user.home") + "/bowler-workspace/");
     if (!workspace.exists()) {
       workspace.mkdir();
     }
-
+    File oldpass = new File(System.getProperty("user.home") + "/.github");
+    if(oldpass.exists())
+    	oldpass.delete();
     try {
-    	PasswordManager.loadLoginData();
+    	PasswordManager.loadLoginData(workspace);
       // runLogin();
     } catch (IOException e) {
       // TODO Auto-generated catch block
@@ -216,19 +207,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static void login() throws IOException {
-    if (!hasnetwork)
+    if (!PasswordManager.hasNetwork())
       return;
     PasswordManager.login();
-    for (IGithubLoginListener l : loginListeners) {
-		l.onLogin(PasswordManager.getUsername());
-	}
+    if(PasswordManager.loggedIn())
+	    for (IGithubLoginListener l : loginListeners) {
+			l.onLogin(PasswordManager.getUsername());
+		}
   }
 
   public static void logout() throws IOException {
-    PasswordManager.logout();
+    
 	for (IGithubLoginListener l : loginListeners) {
 		l.onLogout(PasswordManager.getUsername());
 	}
+	PasswordManager.logout();
   }
 
   public static GitHub setupAnyonmous() throws IOException {
@@ -315,18 +308,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
    */
   public static void waitForLogin()
       throws IOException, InvalidRemoteException, TransportException, GitAPIException {
-    try {
-      final URL url = new URL("http://github.com");
-      final URLConnection conn = url.openConnection();
-      conn.connect();
-      conn.getInputStream();
-      hasnetwork = true;
-    } catch (Exception e) {
-      // we assuming we have no access to the server and run off of the
-      // chached gists.
-      hasnetwork = false;
-    }
-    if (!hasnetwork)
+    if (!PasswordManager.hasNetwork())
       return;
     try {
 		PasswordManager.waitForLogin();
@@ -517,7 +499,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
-    if (!hasnetwork && content != null) {
+    if (!PasswordManager.hasNetwork() && content != null) {
       OutputStream out = null;
       try {
         out = FileUtils.openOutputStream(desired, false);
@@ -1193,7 +1175,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   public static boolean setAutoupdate(boolean autoupdate) throws IOException {
 		if (autoupdate && !ScriptingEngine.autoupdate) {
 			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
-			PasswordManager.setAutoupdate(autoupdate);
+			//PasswordManager.setAutoupdate(autoupdate);
 		}
 		ScriptingEngine.autoupdate = autoupdate;
 		return ScriptingEngine.autoupdate;
@@ -1321,16 +1303,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   public static boolean hasNetwork() {
 
-    return hasnetwork;
+    return PasswordManager.hasNetwork();
   }
 
   public static boolean isLoginSuccess() {
-    return loginSuccess;
+    return PasswordManager.loggedIn();
   }
 
-  public static void setLoginSuccess(boolean loginSuccess) {
-    ScriptingEngine.loginSuccess = loginSuccess;
-  }
+
   public static String [] copyGitFile(String sourceGit, String targetGit, String filename){
     String targetFilename = filename;
     String[] WalkingEngine;
