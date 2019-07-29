@@ -225,6 +225,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static GitHub setupAnyonmous() throws IOException {
+	ScriptingEngine.setAutoupdate(false);
     return PasswordManager.setupAnyonmous();
   }
 
