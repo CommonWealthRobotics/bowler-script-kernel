@@ -16,6 +16,7 @@ import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
+import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
@@ -322,9 +323,9 @@ public class Vitamins {
 		if (!checked) {
 			checked = true;
 			try {
-				if (ScriptingEngine.getLoginID() != null) {
+				if (PasswordManager.getUsername() != null) {
 					ScriptingEngine.setAutoupdate(true);
-					org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
+					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
 					GHMyself self = github.getMyself();
 					Map<String, GHRepository> myPublic = self.getAllRepositories();
 					for (String myRepo : myPublic.keySet()) {

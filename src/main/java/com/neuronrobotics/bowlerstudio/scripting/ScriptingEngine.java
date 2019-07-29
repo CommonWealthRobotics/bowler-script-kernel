@@ -78,7 +78,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
    */
   private static final Map<String, Long> fileLastLoaded = new HashMap<String, Long>();
 
-  private static boolean hasnetwork = false;
   private static boolean autoupdate = false;
 
   private static final String[] imports = new String[] { // "haar",
@@ -97,18 +96,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       "com.neuronrobotics.bowlerstudio.vitamins", "com.neuronrobotics.bowlerstudio.creature",
       "com.neuronrobotics.bowlerstudio.threed"};
   
-  private static GitHub github;
+ 
   private static HashMap<String, File> filesRun = new HashMap<>();
-
-  private static File creds = null;
 
   // private static GHGist gist;
 
   private static File workspace;
   private static File lastFile;
-  private static String loginID = null;
-  private static String pw = null;
-  private static CredentialsProvider cp;// = new
+
   // UsernamePasswordCredentialsProvider(name,
   // password);
   private static ArrayList<IGithubLoginListener> loginListeners =
@@ -116,88 +111,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   private static HashMap<String, IScriptingLanguage> langauges = new HashMap<>();
 
-  private static IGitHubLoginManager loginManager = new IGitHubLoginManager() {
 
-    @Override
-    public String[] prompt(String username) {
-      //new RuntimeException("Login required").printStackTrace();
-
-      if (username != null) {
-        if (username.equals(""))
-          username = null;
-      }
-      String[] creds = new String[] {"", ""};
-      System.out.println("#Github Login Prompt#");
-      System.out.println("For anynomous mode hit enter twice");
-      System.out.print("Github Username: " + (username != null ? "(" + username + ")" : ""));
-      // create a scanner so we can read the command-line input
-      BufferedReader buf = new BufferedReader(new InputStreamReader(System.in));
-
-      do {
-        try {
-          creds[0] = buf.readLine();
-          System.out.println("GitHub Username: "+ creds[0]);
-          
-        } catch (IOException e) {
-        	e.printStackTrace();
-          return null;
-        }
-        if (creds[0].equals("") && (username == null)) {
-          System.out.println("No username, using anynomous login");
-          return null;
-        } 
-
-        try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-      } while (creds[0] == null);
-
-      //System.out.print("Github Password: ");
-      try {
-    	  Console cons;
-    	  char[] passwd;
-    	  if ((cons = System.console()) != null &&
-    	      (passwd = cons.readPassword("[%s]", "GitHub Password:")) != null) {
-    		  creds[1]=new String(passwd);
-    	      java.util.Arrays.fill(passwd, ' ');
-    	  }
-        //creds[1] = buf.readLine();
-        if (creds[1].equals("")) {
-          System.out.println("No password, using anynomous login");
-        }
-      } catch (Exception e) {
-        return null;
-      }
-      return creds;
-    }
-  };
-  private static boolean loginSuccess = false;
 
   static {
 
-    try {
-      final URL url = new URL("http://github.com");
-      final URLConnection conn = url.openConnection();
-      conn.connect();
-      conn.getInputStream();
-      hasnetwork = true;
-    } catch (Exception e) {
-      // we assuming we have no access to the server and run off of the
-      // chached gists.
-      hasnetwork = false;
-    }
+    PasswordManager.hasNetwork();
     workspace = new File(System.getProperty("user.home") + "/bowler-workspace/");
     if (!workspace.exists()) {
       workspace.mkdir();
     }
-
+    File oldpass = new File(System.getProperty("user.home") + "/.github");
+    if(oldpass.exists())
+    	oldpass.delete();
     try {
-      loadLoginData();
+    	PasswordManager.loadLoginData(workspace);
       // runLogin();
-    } catch (IOException e) {
+    } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -245,38 +174,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     return null;
   }
 
-  private static void loadLoginData() throws IOException {
-    if (loginID == null && getCreds().exists() && hasnetwork) {
-      try {
-        String line;
 
-        InputStream fis = new FileInputStream(getCreds().getAbsolutePath());
-        InputStreamReader isr = new InputStreamReader(fis, Charset.forName("UTF-8"));
-        @SuppressWarnings("resource")
-        BufferedReader br = new BufferedReader(isr);
-
-        while ((line = br.readLine()) != null) {
-          if (line.startsWith("login") || line.startsWith("username")) {
-            loginID = line.split("=")[1];
-          }
-          if (line.startsWith("password")) {
-            pw = line.split("=")[1];
-          }
-        }
-        if (pw != null && loginID != null) {
-          // password loaded, we can now autoupdate
-          ScriptingEngine.setAutoupdate(true);
-        }
-        if (cp == null) {
-          cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-        }
-      } catch (Exception e) {
-        logout();
-        // e.printStackTrace();
-      }
-    }
-
-  }
 
   public static void addScriptingLanguage(IScriptingLanguage lang) {
     langauges.put(lang.getShellType(), lang);
@@ -308,43 +206,27 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     return "Groovy";
   }
 
-  public static String getLoginID() {
-
-    return loginID;
-  }
-
   public static void login() throws IOException {
-    if (!hasnetwork)
+    if (!PasswordManager.hasNetwork())
       return;
-    loginID = null;
-
-    gitHubLogin();
-
+    PasswordManager.login();
+    if(PasswordManager.loggedIn())
+	    for (IGithubLoginListener l : loginListeners) {
+			l.onLogin(PasswordManager.getUsername());
+		}
   }
 
   public static void logout() throws IOException {
-    // new RuntimeException("Logout callsed").printStackTrace();
-    if (getCreds() != null)
-
-      if (getCreds().exists())
-        Files.delete(getCreds().toPath());
-
-    setGithub(null);
-    for (IGithubLoginListener l : loginListeners) {
-      l.onLogout(loginID);
-    }
-    loginID = null;
-
+    
+	for (IGithubLoginListener l : loginListeners) {
+		l.onLogout(PasswordManager.getUsername());
+	}
+	PasswordManager.logout();
   }
 
   public static GitHub setupAnyonmous() throws IOException {
-    System.err.println("Using anynomous login, autoupdate disabled");
-    ScriptingEngine.setAutoupdate(false);
-    logout();
-
-    setGithub(GitHub.connectAnonymously());
-
-    return getGithub();
+	ScriptingEngine.setAutoupdate(false);
+    return PasswordManager.setupAnyonmous();
   }
 
   public static String urlToGist(String in) {
@@ -422,112 +304,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     return ret;
   }
 
-  public static GitHub gitHubLogin() throws IOException {
-    String[] creds = loginManager.prompt(loginID);
-
-    if (creds == null) {
-      return setupAnyonmous();
-    } else {
-      if (creds[0].contains("@")) {
-        System.err.print("###ERROR Enter the Username not the Email Address### ");
-        return gitHubLogin();
-      }
-      if (creds[0].equals("") || creds[1].equals("")) {
-        System.err.print("###No Username or password### ");
-        return setupAnyonmous();
-      }
-    }
-
-    loginID = creds[0];
-    pw = creds[1];
-
-    String content = "login=" + loginID + "\n";
-    content += "password=" + pw + "\n";
-    PrintWriter out;
-    try {
-      out = new PrintWriter(getCreds().getAbsoluteFile());
-      out.println(content);
-      out.flush();
-      out.close();
-      runLogin();
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.out.println("Login failed");
-      setGithub(null);
-    }
-    if (getGithub() == null) {
-      ThreadUtil.wait(200);
-      return gitHubLogin();
-    } else
-      return getGithub();
-  }
-
-  public static void runLogin() throws IOException {
-    setGithub(GitHub.connect());
-
-    if (getGithub().isCredentialValid()) {
-      cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-      for (IGithubLoginListener l : loginListeners) {
-        l.onLogin(loginID);
-      }
-      System.out.println("Success Login as " + loginID + "");
-      setLoginSuccess(true);
-    } else {
-      System.err.println("Bad login credentials for " + loginID);
-      setGithub(null);
-      pw = null;
-    }
-  }
-
   /**
    * The GistID we are waiting to see
    */
   public static void waitForLogin()
       throws IOException, InvalidRemoteException, TransportException, GitAPIException {
-    try {
-      final URL url = new URL("http://github.com");
-      final URLConnection conn = url.openConnection();
-      conn.connect();
-      conn.getInputStream();
-      hasnetwork = true;
-    } catch (Exception e) {
-      // we assuming we have no access to the server and run off of the
-      // chached gists.
-      hasnetwork = false;
-    }
-    if (!hasnetwork)
+    if (!PasswordManager.hasNetwork())
       return;
-    if (getGithub() == null) {
-
-      if (getCreds().exists()) {
-        try {
-          setGithub(GitHub.connect());
-        } catch (IOException ex) {
-          logout();
-        }
-      } else {
-        getCreds().createNewFile();
-      }
-
-      if (getGithub() == null) {
-
-        login();
-      }
-
-    }
-
     try {
-      if (getGithub().getRateLimit().remaining < 2) {
-        System.err.println("##Github Is Rate Limiting You## Disabling autoupdate");
-        setAutoupdate(false);
-      }
-    } catch (IOException e) {
-      logout();
-
-    }
-
-    loadLoginData();
+		PasswordManager.waitForLogin();
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 
   }
 
@@ -542,19 +331,29 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static void deleteFolder(File folder) {
-    File[] files = folder.listFiles();
-    if (files != null) { // some JVMs return null for empty dirs
-      for (File f : files) {
-        if (f.isDirectory()) {
-          deleteFolder(f);
-        } else {
-        	FileChangeWatcher.close(f);
-          f.delete();
-          // System.out.println("Deleting " + f.getAbsolutePath());
-        }
-      }
-    }
-    folder.delete();
+		if (!folder.exists() || !folder.isDirectory())
+			throw new RuntimeException("Folder doesnt exist " + folder);
+		File[] files = folder.listFiles();
+		if (files != null) { // some JVMs return null for empty dirs
+			for (File f : files) {
+				if (f.isDirectory()) {
+					deleteFolder(f);
+				} else {
+					try {
+						FileChangeWatcher.close(f);
+						f.delete();
+					} catch (Throwable t) {
+						t.printStackTrace();
+					}
+					// System.out.println("Deleting " + f.getAbsolutePath());
+				}
+			}
+		}
+		try {
+			folder.delete();
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
   }
 
   private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {
@@ -610,7 +409,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     Log.debug("Loading Gist: " + id);
     GHGist gist;
 
-    gist = getGithub().getGist(id);
+    gist = PasswordManager.getGithub().getGist(id);
     return gist.getOwner().getLogin();
 
   }
@@ -623,10 +422,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   public static void pushCodeToGit(String id, String branch, String FileName, String content,
       String commitMessage) throws Exception {
-    if (loginID == null)
-      login();
-    if (loginID == null)
-      return;// No login info means there is no way to publish
+	    if (PasswordManager.getUsername() == null)
+	        login();
+	      if (!hasNetwork())
+	        return;// No login info means there is no way to publish
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -641,10 +440,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   public static void commit(String id, String branch, String FileName, String content,
       String commitMessage, boolean flagNewFile) throws Exception {
 
-    if (loginID == null)
-      login();
-    if (loginID == null)
-      return;// No login info means there is no way to publish
+	    if (PasswordManager.getUsername()  == null)
+	        login();
+	      if (!hasNetwork())
+	        return;// No login info means there is no way to publish
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -704,14 +503,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   public static void pushCodeToGit(String id, String branch, String FileName, String content,
       String commitMessage, boolean flagNewFile) throws Exception {
     commit(id, branch, FileName, content, commitMessage, flagNewFile);
-    if (loginID == null)
+    if (PasswordManager.getUsername()  == null)
       login();
-    if (loginID == null)
+    if (!hasNetwork())
       return;// No login info means there is no way to publish
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
-    if (!hasnetwork && content != null) {
+    if (!PasswordManager.hasNetwork() && content != null) {
       OutputStream out = null;
       try {
         out = FileUtils.openOutputStream(desired, false);
@@ -732,7 +531,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     Git git = new Git(localRepo);
     try {
     	try {
-      git.pull().setCredentialsProvider(cp).call();// updates to the
+    		git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
     	}catch (org.eclipse.jgit.api.errors.RefNotAdvertisedException ex) {
     		System.out.println("Creating new branch master in " +id);
     	}
@@ -752,7 +551,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
           IOUtils.closeQuietly(out);
         }
       }
-      git.push().setCredentialsProvider(cp).call();
+      git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
       System.out.println("PUSH OK! file: " + desired);
     } catch (Exception ex) {
       String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
@@ -846,22 +645,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       if (isAutoupdate()) {
         // System.out.println("Autoupdating " +id);
         try {
-          if (cp == null) {
-            cp = new UsernamePasswordCredentialsProvider(loginID, pw);
-          }
+          
           Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
           // https://gist.github.com/0e6454891a3b3f7c8f28.git
-          Git git = new Git(localRepo);
+          
           try {
-            PullResult ret = git.pull().setCredentialsProvider(cp).call();// updates
-            // to
-            // the
-            // latest
-            // version
-            // System.out.println("Pull completed "+ret);
-            //
-            // git.push().setCredentialsProvider(cp).call();
-            git.close();
+            pull(remoteURI,branch);
           } catch (Exception ex) {
             try {
               // Files.delete(gitRepoFile.toPath());
@@ -872,7 +661,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
               x.printStackTrace();
             }
           }
-          git.close();
         } catch (NullPointerException ex) {
           setAutoupdate(false);
         }
@@ -958,7 +746,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
       // delete branch 'branchToDelete' on remote 'origin'
       RefSpec refSpec = new RefSpec().setSource(null).setDestination(toDelete);
-      git.push().setRefSpecs(refSpec).setRemote("origin").setCredentialsProvider(cp).call();
+      git.push().setRefSpecs(refSpec).setRemote("origin").setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
     } catch (Exception e) {
       ex = e;
     }
@@ -1013,7 +801,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	    PushCommand setRemote = pushCommand.setRemote("origin");
 		PushCommand setRefSpecs = setRemote.setRefSpecs(new RefSpec(newBranch + ":" + newBranch));
 		PushCommand setCredentialsProvider = setRefSpecs
-	        .setCredentialsProvider(cp);
+	        .setCredentialsProvider(PasswordManager.getCredentialProvider());
 		setCredentialsProvider.call();
 		
 		CheckoutCommand checkout;
@@ -1122,6 +910,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static void pull(String remoteURI, String branch) throws IOException {
+	  if(!hasNetwork())
+		  return;
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
 			gitRepoFile = cloneRepo(remoteURI, branch);
@@ -1134,7 +924,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		try {
 			System.out.print("Pulling " + remoteURI);
-			PullResult result = git.pull().setCredentialsProvider(cp).call();
+			PullResult result = git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
 			System.out.println(" ... Success!" );
 		} catch (CheckoutConflictException ex) {
 			for(String p: ex.getConflictingPaths()) {
@@ -1183,6 +973,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		git.close();
   }
   public static void pull(String remoteURI) throws IOException {
+	     if (!hasNetwork())
+		        return;// No login info means there is no way to publish
     pull(remoteURI, getBranch(remoteURI));
     
   }
@@ -1227,20 +1019,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       // }
       // System.out.println("Checking out "+branch+" :
       // "+gitRepoFile.getAbsolutePath() );
-      Git git = new Git(localRepo);
+     // Git git = new Git(localRepo);
       // StoredConfig config = git.getRepository().getConfig();
       // config.setString("branch", "master", "merge", "refs/heads/master");
       if (!currentBranch.contains(branch)) {
+    	pull(remoteURI,branch);
+    	Git git = new Git(localRepo);
         try {
-          git.pull().setCredentialsProvider(cp).call();
           git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch)
               .call();
           git.checkout().setName(branch).call();
         } catch (Exception ex) {
           ex.printStackTrace();
         }
+        git.close();
       }
-      git.close();
+      
     }
 
   }
@@ -1260,6 +1054,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
    * @return The local directory containing the .git
    */
   public static File cloneRepo(String remoteURI, String branch) {
+
+
     // new Exception().printStackTrace();
     String[] colinSplit = remoteURI.split(":");
 
@@ -1274,7 +1070,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     File dir = new File(localPath);
 
     if (!gitRepoFile.exists()) {
-
+	   if (!hasNetwork())
+		        return null;// No login info means there is no way to publish
       System.out.println("Cloning files from: " + remoteURI);
       if (branch != null)
         System.out.println("            branch: " + branch);
@@ -1285,7 +1082,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         try {
           if (branch == null) {
             Git git = Git.cloneRepository().setURI(remoteURI).setDirectory(dir)
-                .setCredentialsProvider(cp).call();
+                .setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
             hasAtLeastOneReference(git);
             branch = getFullBranch(remoteURI);
             checkout(remoteURI, branch);
@@ -1294,7 +1091,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
           } else {
             Git git = Git.cloneRepository().setURI(remoteURI).setBranch(branch).setDirectory(dir)
-                .setCredentialsProvider(cp).call();
+                .setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
             hasAtLeastOneReference(git);
             checkout(remoteURI, branch);
             hasAtLeastOneReference(git);
@@ -1364,15 +1161,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     ScriptingEngine.lastFile = lastFile;
   }
 
-  private static File getCreds() {
-    if (creds == null)
-      setCreds(new File(System.getProperty("user.home") + "/.github"));
-    return creds;
-  }
-
-  public static void setCreds(File creds) {
-    ScriptingEngine.creds = creds;
-  }
 
   public static File getFileEngineRunByName(String filename) {
     return filesRun.get(filename);
@@ -1384,11 +1172,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static IGitHubLoginManager getLoginManager() {
-    return loginManager;
+    return PasswordManager.getLoginManager();
   }
 
-  public static void setLoginManager(IGitHubLoginManager loginManager) {
-    ScriptingEngine.loginManager = loginManager;
+  public static void setLoginManager(IGitHubLoginManager lm) {
+    PasswordManager.setLoginManager(lm);
   }
 
   public static boolean isAutoupdate() {
@@ -1396,19 +1184,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static boolean setAutoupdate(boolean autoupdate) throws IOException {
-
-    if (autoupdate && !ScriptingEngine.autoupdate) {
-      ScriptingEngine.autoupdate = true;// prevents recoursion loop from
-      // calling loadLoginData
-      loadLoginData();
-      if (pw == null || loginID == null)
-        login();
-
-      if (pw == null || loginID == null)
-        return false;
-    }
-    ScriptingEngine.autoupdate = autoupdate;
-    return ScriptingEngine.autoupdate;
+		if (autoupdate && !ScriptingEngine.autoupdate) {
+			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
+			//PasswordManager.setAutoupdate(autoupdate);
+		}
+		ScriptingEngine.autoupdate = autoupdate;
+		return ScriptingEngine.autoupdate;
   }
 
   private static File fileFromGistID(String string, String string2)
@@ -1449,9 +1230,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     try {
       waitForLogin();
       Git git = locateGit(currentFile);
-      git.pull().setCredentialsProvider(cp).call();// updates to the
+      git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
       // latest version
-      git.push().setCredentialsProvider(cp).call();
+      git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
       git.close();
       return true;
     } catch (Exception e) {
@@ -1463,12 +1244,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   public static GHGist fork(String currentGist) throws Exception {
 
-    if (getGithub() != null) {
+    if (PasswordManager.getGithub() != null) {
 
       waitForLogin();
-      GHGist incoming = getGithub().getGist(currentGist);
+      GHGist incoming = PasswordManager.getGithub().getGist(currentGist);
       for (IGithubLoginListener l : loginListeners) {
-        l.onLogin(loginID);
+        l.onLogin(PasswordManager.getUsername());
       }
       return incoming.fork();
 
@@ -1478,7 +1259,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static String[] forkGitFile(String[] incoming) throws Exception {
-    GitHub github = ScriptingEngine.getGithub();
+    GitHub github = PasswordManager.getGithub();
 
     String id = null;
     if (incoming[0].endsWith(".git"))
@@ -1497,21 +1278,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
     }
     for (IGithubLoginListener l : loginListeners) {
-      l.onLogin(loginID);
+      l.onLogin(PasswordManager.getUsername());
     }
 
     return incoming;
   }
 
-  public static GitHub getGithub() {
-    return github;
-  }
+ 
 
-  public static void setGithub(GitHub github) {
-    ScriptingEngine.github = github;
-    if (github == null)
-      setLoginSuccess(false);
-  }
+//  public static void setGithub(GitHub github) {
+//    ScriptingEngine.github = github;
+//    if (github == null)
+//      setLoginSuccess(false);
+//  }
 
   public static List<String> getAllLangauges() {
     ArrayList<String> langs = new ArrayList<>();
@@ -1535,16 +1314,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   public static boolean hasNetwork() {
 
-    return hasnetwork;
+    return PasswordManager.hasNetwork();
   }
 
   public static boolean isLoginSuccess() {
-    return loginSuccess;
+    return PasswordManager.loggedIn();
   }
 
-  public static void setLoginSuccess(boolean loginSuccess) {
-    ScriptingEngine.loginSuccess = loginSuccess;
-  }
+
   public static String [] copyGitFile(String sourceGit, String targetGit, String filename){
     String targetFilename = filename;
     String[] WalkingEngine;

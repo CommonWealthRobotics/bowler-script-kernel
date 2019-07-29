@@ -99,7 +99,7 @@ public class BowlerKernel {
 				gitRun = true;
 			}
 		}
-		if (gitRun && gitRepo != null )
+		if (gitRun && gitRepo != null ) {
 			
 				ScriptingEngine.pull(gitRepo);
 				ArrayList<String> files = ScriptingEngine.filesInGit(gitRepo);
@@ -131,7 +131,7 @@ public class BowlerKernel {
 						System.out.println("\t"+f);
 					}
 				}
-			
+		}
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
 //		
