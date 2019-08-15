@@ -1284,7 +1284,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     return incoming;
   }
 
- 
+  public static String urlToString(URL htmlUrl) {
+		// TODO Auto-generated method stub
+		return htmlUrl.toExternalForm();
+	}
+
+
+public static String urlToGist(URL htmlUrl) {
+	// TODO Auto-generated method stub
+	String externalForm = urlToString( htmlUrl) ;
+	System.out.println(externalForm);
+	return ScriptingEngine.urlToGist(externalForm);
+}
 
 //  public static void setGithub(GitHub github) {
 //    ScriptingEngine.github = github;
