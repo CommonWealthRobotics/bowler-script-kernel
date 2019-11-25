@@ -128,6 +128,8 @@ public class MobileBaseCadManager {
 
 			@Override
 			public void onDisconnect(BowlerAbstractDevice arg0) {
+				if (arg0 !=base)
+					return;
 				bail = true;
 				dhCadGen.clear();
 				DHtoCadMap.clear();
