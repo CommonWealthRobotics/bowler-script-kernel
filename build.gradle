@@ -114,6 +114,7 @@ repositories {
 	maven { url 'https://jenkinsci.artifactoryonline.com/jenkinsci/public/' }
 	//com.neuronrobotics hosting point
 	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
+	maven { url 'https://oss.sonatype.org/service/local/repositories/releases/content/' }
 }
 
 dependencies {
