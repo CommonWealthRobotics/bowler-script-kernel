@@ -939,8 +939,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			git.close();
 			pull( remoteURI,  branch);
 		} catch (WrongRepositoryStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			deleteRepo(remoteURI);
+			pull( remoteURI,  branch);
 		} catch (InvalidConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
