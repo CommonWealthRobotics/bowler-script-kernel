@@ -150,8 +150,9 @@ public class ConfigurationDatabase {
 			}
 
       }
-     
-	  ScriptingEngine.pull(gitSource);
+      
+      ScriptingEngine.pull(gitSource);
+   
     }
     return gitSource;
 
