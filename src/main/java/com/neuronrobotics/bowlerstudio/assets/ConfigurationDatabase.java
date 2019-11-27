@@ -1,10 +1,12 @@
 package com.neuronrobotics.bowlerstudio.assets;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.kohsuke.github.GHMyself;
 import org.kohsuke.github.GHRepository;
 
@@ -64,10 +66,22 @@ public class ConfigurationDatabase {
       ScriptingEngine
           .pushCodeToGit(getGitSource(), ScriptingEngine.getFullBranch(getGitSource()), getDbFile(),
               writeOut, "Saving database");
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+    } catch (WrongRepositoryStateException e) {
+      
+      try {
+		ScriptingEngine.deleteRepo(getGitSource());
+		save();
+	} catch (Exception e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+    } catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
   }
 
   @SuppressWarnings("unchecked")
