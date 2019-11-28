@@ -105,6 +105,8 @@ String getOsArch() {
 
 
 repositories {
+	
+	maven { url 'https://oss.sonatype.org/service/local/repositories/releases/content/' }
 	mavenCentral()
 	jcenter()
 	maven { url 'https://repository-bubblecloud.forge.cloudbees.com/release/'}
@@ -114,7 +116,6 @@ repositories {
 	maven { url 'https://jenkinsci.artifactoryonline.com/jenkinsci/public/' }
 	//com.neuronrobotics hosting point
 	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
-	maven { url 'https://oss.sonatype.org/service/local/repositories/releases/content/' }
 }
 
 dependencies {
@@ -166,7 +167,7 @@ dependencies {
     compile 'org.slf4j:slf4j-simple:1.6.1'
 	
 	
-	compile group: 'com.neuronrobotics', name:'GithubPasswordManager', version:'0.2.1'
+	compile group: 'com.neuronrobotics', name:'GithubPasswordManager', version:'0.2.2'
     //compile "com.neuronrobotics:JavaCad:0.14.0"
     compile project('JCSG')
 	//compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
