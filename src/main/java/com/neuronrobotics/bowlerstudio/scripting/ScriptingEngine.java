@@ -534,6 +534,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     		git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
     	}catch (org.eclipse.jgit.api.errors.RefNotAdvertisedException ex) {
     		System.out.println("Creating new branch master in " +id);
+    	}catch(org.eclipse.jgit.api.errors.TransportException e) {
+    		PasswordManager.checkInternet();
+    		throw e;
     	}
       // latest version
       if (flagNewFile) {
