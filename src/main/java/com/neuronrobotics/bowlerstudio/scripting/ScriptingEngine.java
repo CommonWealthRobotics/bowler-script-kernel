@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.CanceledException;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
@@ -29,6 +30,7 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -103,6 +105,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   private static File workspace;
   private static File lastFile;
+  private static TransportConfigCallback transportConfigCallback = new SshTransportConfigCallback();
 
   // UsernamePasswordCredentialsProvider(name,
   // password);
@@ -530,14 +533,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
     Git git = new Git(localRepo);
     try {
-    	try {
-    		git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
-    	}catch (org.eclipse.jgit.api.errors.RefNotAdvertisedException ex) {
-    		System.out.println("Creating new branch master in " +id);
-    	}catch(org.eclipse.jgit.api.errors.TransportException e) {
-    		PasswordManager.checkInternet();
-    		throw e;
-    	}
+    	
+      pull(id,branch);
+    	
       // latest version
       if (flagNewFile) {
         git.add().addFilepattern(FileName).call();
@@ -554,7 +552,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
           IOUtils.closeQuietly(out);
         }
       }
-      git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+      if(git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
+          git.push().setTransportConfigCallback(transportConfigCallback).call();
+      else
+    	  git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
       System.out.println("PUSH OK! file: " + desired);
     } catch (Exception ex) {
       String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
@@ -922,24 +923,25 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		Git git = new Git(localRepo);
-		// StoredConfig config = git.getRepository().getConfig();
+		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 		// config.setString("branch", "master", "merge", "refs/heads/master");
 
 		try {
-			System.out.print("Pulling " + remoteURI);
-			PullResult result = git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+			System.out.print("Pulling " + ref+"  ");
+			if (ref.startsWith("git@")) {
+				git.pull().setTransportConfigCallback(transportConfigCallback).call();
+			}else {
+				git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+			}
 			System.out.println(" ... Success!" );
 		} catch (CheckoutConflictException ex) {
 			for(String p: ex.getConflictingPaths()) {
 				File conf = new File(gitRepoFile.getParent()+"/"+p);
-				System.out.println("\r\nConflict: "+conf);
+				System.out.println("\r\n\r\n\tConflict: "+conf+"\r\n\r\n");
 				System.out.println("Using upstream and deleting local changes");
-				if(conf.exists()) {
-					FileChangeWatcher.close(conf);
-					conf.delete();
-				}
 			}
 			git.close();
+			deleteFolder(new File(gitRepoFile.getParent()));
 			pull( remoteURI,  branch);
 		} catch (WrongRepositoryStateException e) {
 			deleteRepo(remoteURI);
@@ -966,8 +968,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TransportException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			PasswordManager.checkInternet();
+			
+			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
+				try {
+					git.pull().setTransportConfigCallback(transportConfigCallback).call();
+				}catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}else {
+				e.printStackTrace();
+			}
+			
+			
 		} catch (GitAPIException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1229,20 +1242,39 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         findLocalPath(currentFile, git)};
   }
 
-  public static boolean checkOwner(File currentFile) {
-    try {
-      waitForLogin();
-      Git git = locateGit(currentFile);
-      git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
-      // latest version
-      git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
-      git.close();
-      return true;
-    } catch (Exception e) {
-      // just return false, the exception is it failing to push
-    }
+	public static boolean checkOwner(File currentFile) {
+		Git git;
+		try {
+			git = locateGit(currentFile);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			return false;
+		}
 
-    return false;
+		try {
+			waitForLogin();
+			git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
+			// latest version
+			git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+			git.close();
+			return true;
+		} catch (Exception e) {
+			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
+				try {
+					git.pull().setTransportConfigCallback(transportConfigCallback).call();// updates to the
+					// latest version
+					git.push().setTransportConfigCallback(transportConfigCallback).call();
+					git.close();
+					return true;
+				} catch (Exception ex) {
+					// just return false, the exception is it failing to push
+					ex.printStackTrace();
+				}
+			}
+		}
+		git.close();
+		return false;
   }
 
   public static GHGist fork(String currentGist) throws Exception {
