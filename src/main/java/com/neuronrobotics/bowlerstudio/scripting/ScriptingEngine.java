@@ -29,6 +29,7 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -530,14 +531,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
     Git git = new Git(localRepo);
     try {
-    	try {
-    		git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
-    	}catch (org.eclipse.jgit.api.errors.RefNotAdvertisedException ex) {
-    		System.out.println("Creating new branch master in " +id);
-    	}catch(org.eclipse.jgit.api.errors.TransportException e) {
-    		PasswordManager.checkInternet();
-    		throw e;
-    	}
+    	
+      pull(id,branch);
+    	
       // latest version
       if (flagNewFile) {
         git.add().addFilepattern(FileName).call();
@@ -554,7 +550,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
           IOUtils.closeQuietly(out);
         }
       }
-      git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+      if(git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
+          git.push().call();
+      else
+    	  git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
       System.out.println("PUSH OK! file: " + desired);
     } catch (Exception ex) {
       String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
@@ -922,12 +921,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		Git git = new Git(localRepo);
-		// StoredConfig config = git.getRepository().getConfig();
+		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 		// config.setString("branch", "master", "merge", "refs/heads/master");
 
 		try {
-			System.out.print("Pulling " + remoteURI);
-			PullResult result = git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+			System.out.print("Pulling " + remoteURI+"  ");
+			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
+				git.pull().call();
+			}else {
+				git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+			}
 			System.out.println(" ... Success!" );
 		} catch (CheckoutConflictException ex) {
 			for(String p: ex.getConflictingPaths()) {
@@ -966,8 +969,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TransportException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			PasswordManager.checkInternet();
+			
+			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
+				try {
+					PullResult result = git.pull().call();
+				}catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}else {
+				e.printStackTrace();
+			}
+			
+			
 		} catch (GitAPIException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -1239,7 +1253,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       git.close();
       return true;
     } catch (Exception e) {
-      // just return false, the exception is it failing to push
+    	  try {
+    	      waitForLogin();
+    	      Git git = locateGit(currentFile);
+    	      git.pull().call();// updates to the
+    	      // latest version
+    	      git.push().call();
+    	      git.close();
+    	      return true;
+    	    } catch (Exception ex) {
+    	      // just return false, the exception is it failing to push
+    	    }
     }
 
     return false;
