@@ -937,14 +937,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		} catch (CheckoutConflictException ex) {
 			for(String p: ex.getConflictingPaths()) {
 				File conf = new File(gitRepoFile.getParent()+"/"+p);
-				System.out.println("\r\nConflict: "+conf);
+				System.out.println("\r\n\r\n\tConflict: "+conf+"\r\n\r\n");
 				System.out.println("Using upstream and deleting local changes");
-				if(conf.exists()) {
-					FileChangeWatcher.close(conf);
-					conf.delete();
-				}
 			}
 			git.close();
+			deleteFolder(new File(gitRepoFile.getParent()));
 			pull( remoteURI,  branch);
 		} catch (WrongRepositoryStateException e) {
 			deleteRepo(remoteURI);
