@@ -334,8 +334,7 @@ public class MobileBaseCadManager {
 		DHParameterKinematics dh = limbs.get(limb);
 		double partsTotal = numLimbs * dh.getNumberOfLinks();
 		double progress = ((double) ((limb * dh.getNumberOfLinks()) + link)) / partsTotal;
-		System.out
-				.println("Cad progress " + progress + " limb " + limb + " link " + link + " total parts " + partsTotal);
+		//System.out.println("Cad progress " + progress + " limb " + limb + " link " + link + " total parts " + partsTotal);
 		getProcesIndictor().set(0.333 + (2 * (progress / 3)));
 	}
 
