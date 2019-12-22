@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
+import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
 // TODO: Auto-generated Javadoc
@@ -33,7 +34,9 @@ public class TransformFactory extends com.neuronrobotics.sdk.addons.kinematics.T
 	}
 
 	public static void bulletToAffine(Affine affine, com.bulletphysics.linearmath.Transform bullet) {
-
+		if (!Platform.isFxApplicationThread()) {
+	    	new RuntimeException("This method must be in UI thread!").printStackTrace();
+	    }
 		// synchronized(out){
 		double[][] vals = bulletToNr(bullet).getRotationMatrix().getRotationMatrix();
 		// we explicitly test norm against one here, saving a division
