@@ -914,6 +914,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
 
   public static void pull(String remoteURI, String branch) throws IOException {
+      //new Exception().printStackTrace();
+
 	  if(!hasNetwork())
 		  return;
 		File gitRepoFile = uriToFile(remoteURI);

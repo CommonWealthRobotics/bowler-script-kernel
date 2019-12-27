@@ -62,26 +62,42 @@ public class ConfigurationDatabase {
     //synchronized(database){
     writeOut = gson.toJson(database, TT_mapStringString);
     //}
-    try {
-      ScriptingEngine
-          .pushCodeToGit(getGitSource(), ScriptingEngine.getFullBranch(getGitSource()), getDbFile(),
-              writeOut, "Saving database");
-    } catch (WrongRepositoryStateException e) {
-      
-      try {
-		ScriptingEngine.deleteRepo(getGitSource());
+		for (int i = 0; i < 5; i++) {
+			try {
+				ScriptingEngine.pushCodeToGit(getGitSource(), ScriptingEngine.getFullBranch(getGitSource()),
+						getDbFile(), writeOut, "Saving database");
+				return;
+			} catch (WrongRepositoryStateException e) {
+
+				try {
+					ScriptingEngine.deleteRepo(getGitSource());
+					save();
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}	catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException ex) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		try {
+			ScriptingEngine.deleteRepo(getGitSource());
+			Thread.sleep(500);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		save();
-	} catch (Exception e1) {
-		// TODO Auto-generated catch block
-		e1.printStackTrace();
-	}
-    } catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
   }
 
   @SuppressWarnings("unchecked")
@@ -122,7 +138,6 @@ public class ConfigurationDatabase {
     if (!checked) {
       checked = true;
       if (ScriptingEngine.hasNetwork() && ScriptingEngine.isLoginSuccess()) {
-
         ScriptingEngine.setAutoupdate(true);
         org.kohsuke.github.GitHub github = PasswordManager.getGithub();
         GHMyself self = github.getMyself();
@@ -151,7 +166,8 @@ public class ConfigurationDatabase {
 
       }
       
-      ScriptingEngine.pull(gitSource);
+      //    	ScriptingEngine.pull(gitSource);
+
    
     }
     return gitSource;
