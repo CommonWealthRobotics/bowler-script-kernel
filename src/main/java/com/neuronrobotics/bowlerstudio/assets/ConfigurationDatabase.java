@@ -79,25 +79,26 @@ public class ConfigurationDatabase {
 			}	catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
 				try {
 					Thread.sleep(500);
+					
 				} catch (InterruptedException ex) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
 			} catch (Exception e) {
+				
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				try {
+					ScriptingEngine.deleteRepo(getGitSource());
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 
 		}
-		try {
-			ScriptingEngine.deleteRepo(getGitSource());
-			Thread.sleep(500);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		save();
+
   }
 
   @SuppressWarnings("unchecked")

@@ -233,6 +233,7 @@ public class BowlerKernel {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
+				Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
 
 				writeHistory(reader.getHistory().getHistoryList());
 			}
