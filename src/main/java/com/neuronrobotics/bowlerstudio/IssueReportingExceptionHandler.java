@@ -19,15 +19,16 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
-		reportIssue( e) ;
-		StackTraceElement[] element = e.getStackTrace();
-		
-		if(element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer" )) {
-			System.exit(-5);
-		}
-		System.err.println("Bug Reported:");
-		e.printStackTrace();
-
+		new Thread(()-> {
+			reportIssue( e) ;
+			StackTraceElement[] element = e.getStackTrace();
+			
+			if(element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer" )) {
+				System.exit(-5);
+			}
+			System.err.println("Bug Reported:");
+			e.printStackTrace();
+		}).start();
 	}
 	public static void reportIssue(Throwable t) {
 		StackTraceElement[] element = t.getStackTrace();
