@@ -78,9 +78,10 @@ public class ConfigurationDatabase {
 				}
 			}	catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
 				try {
+					ScriptingEngine.deleteRepo(getGitSource());
 					Thread.sleep(500);
 					
-				} catch (InterruptedException ex) {
+				} catch (Exception ex) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -110,13 +111,14 @@ public class ConfigurationDatabase {
     	
       database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
           .inlineFileScriptRun(loadFile(), null);
-
+      //new Exception().printStackTrace();
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
     if (database == null) {
       database = new HashMap<String, HashMap<String, Object>>();
+      //new Exception().printStackTrace();
     }
     return database;
   }
@@ -143,7 +145,6 @@ public class ConfigurationDatabase {
         org.kohsuke.github.GitHub github = PasswordManager.getGithub();
         GHMyself self = github.getMyself();
         Map<String, GHRepository> myPublic = self.getAllRepositories();
-        gitSource=null;
         for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
           if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName()
               .equals(self.getName())) {
@@ -182,7 +183,11 @@ public class ConfigurationDatabase {
 
   public static void setGitSource(String myAssets) {
 	System.out.println("Using my version of configuration database: " + myAssets);
+	if(myAssets!=null && gitSource!=null && myAssets.contentEquals(gitSource))
+		return;
     database = null;
+    //new Exception("Changing from "+gitSource+" to "+myAssets).printStackTrace();
+
     gitSource = myAssets;
     getDatabase();
   }
