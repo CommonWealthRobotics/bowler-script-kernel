@@ -1028,43 +1028,64 @@ private static boolean ensureExistance(File desired) throws IOException {
 
   }
 
-  public static void checkout(String remoteURI, String branch) throws IOException {
-    // cloneRepo(remoteURI, branch);
-    File gitRepoFile = uriToFile(remoteURI);
-    if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
-      System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
-      throw new RuntimeException("Invailid git file!" + gitRepoFile.getAbsolutePath());
-    }
+	public static void checkout(String remoteURI, String branch) throws IOException {
+		// cloneRepo(remoteURI, branch);
+		File gitRepoFile = uriToFile(remoteURI);
+		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
+			System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
+			throw new RuntimeException("Invailid git file!" + gitRepoFile.getAbsolutePath());
+		}
 
-    String currentBranch = getFullBranch(remoteURI);
-    if (currentBranch != null) {
-      // String currentBranch=getFullBranch(remoteURI);
-      Repository localRepo = new FileRepository(gitRepoFile);
-      // if (!branch.contains("heads")) {
-      // branch = "heads/" + branch;
-      // }
-      // if (!branch.contains("refs")) {
-      // branch = "refs/" + branch;
-      // }
-      // System.out.println("Checking out "+branch+" :
-      // "+gitRepoFile.getAbsolutePath() );
-     // Git git = new Git(localRepo);
-      // StoredConfig config = git.getRepository().getConfig();
-      // config.setString("branch", "master", "merge", "refs/heads/master");
-      if (!currentBranch.contains(branch)) {
-    	pull(remoteURI,branch);
-    	Git git = new Git(localRepo);
-        try {
-          git.branchCreate().setForce(true).setName(branch).setStartPoint("origin/" + branch)
-              .call();
-          git.checkout().setName(branch).call();
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-        git.close();
-      }
-      
-    }
+		String currentBranch = getFullBranch(remoteURI);
+		if (currentBranch != null) {
+			// String currentBranch=getFullBranch(remoteURI);
+			Repository localRepo = new FileRepository(gitRepoFile);
+			// if (!branch.contains("heads")) {
+			// branch = "heads/" + branch;
+			// }
+			// if (!branch.contains("refs")) {
+			// branch = "refs/" + branch;
+			// }
+			// System.out.println("Checking out "+branch+" :
+			// "+gitRepoFile.getAbsolutePath() );
+			// Git git = new Git(localRepo);
+			// StoredConfig config = git.getRepository().getConfig();
+			// config.setString("branch", "master", "merge", "refs/heads/master");
+			if (!currentBranch.contains(branch)) {
+				pull(remoteURI, branch);
+				Git git = new Git(localRepo);
+				try {
+
+					git.checkout().setName(branch).call();
+				} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
+
+					try {
+						git.branchCreate().setForce(true).setName(branch)
+								.setStartPoint("origin/" + getBranch(remoteURI)).call();
+						git.checkout().setName(branch).call();
+					} catch (RefAlreadyExistsException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (RefNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidRefNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CheckoutConflictException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (GitAPIException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				git.close();
+			}
+
+		}
 
   }
 
