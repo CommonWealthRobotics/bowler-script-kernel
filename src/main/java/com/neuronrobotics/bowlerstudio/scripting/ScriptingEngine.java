@@ -432,13 +432,24 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     File gistDir = cloneRepo(id, branch);
     File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
-    boolean flagNewFile = false;
-    if (!desired.exists()) {
-      desired.createNewFile();
-      flagNewFile = true;
-    }
+    boolean flagNewFile = ensureExistance(desired);
     pushCodeToGit(id, branch, FileName, content, commitMessage, flagNewFile);
   }
+
+private static boolean ensureExistance(File desired) throws IOException {
+	boolean createdFlag = false;
+	File parent = desired.getParentFile();
+	if(!parent.exists()) {
+		parent.mkdirs();
+		System.err.println("Creating "+parent.getAbsolutePath());
+	}
+	if (!desired.exists() && parent.exists()) {
+	  System.err.println("Creating "+desired.getAbsolutePath());
+      desired.createNewFile();
+      createdFlag=true;
+    }
+	return createdFlag;
+}
 
   public static void commit(String id, String branch, String FileName, String content,
       String commitMessage, boolean flagNewFile) throws Exception {
@@ -1073,8 +1084,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
    */
   public static File cloneRepo(String remoteURI, String branch) {
 
-
-    // new Exception().printStackTrace();
+	while(remoteURI.endsWith("/"))
+		remoteURI=remoteURI.substring(0, remoteURI.length()-2);
+    if(!remoteURI.endsWith(".git"))
+    	remoteURI=remoteURI+".git";
     String[] colinSplit = remoteURI.split(":");
 
     String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
