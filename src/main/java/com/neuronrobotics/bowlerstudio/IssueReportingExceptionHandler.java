@@ -11,6 +11,7 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
+import com.neuronrobotics.video.OSUtil;
 
 import javafx.application.Platform;
 
@@ -50,7 +51,9 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			if(!stackTraceReported) {
 				String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
 				repo.createIssue(getTitle(element))
-				.body("Auto Reported Issue \r\n"+stacktrace)
+				.body("Auto Reported Issue \r\n"
+						+"OS = "+OSUtil.getOsName()+" "+OSUtil.getOsArch()+" "+(OSUtil.is64Bit()?"x64":"x86")+"\r\n"
+						+stacktrace)
 				.label("BUG")
 				.create();;
 				
