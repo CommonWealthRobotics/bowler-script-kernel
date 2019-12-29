@@ -24,6 +24,9 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		if(element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer" )) {
 			System.exit(-5);
 		}
+		System.err.println("Bug Reported:");
+		e.printStackTrace();
+
 	}
 	public static void reportIssue(Throwable t) {
 		StackTraceElement[] element = t.getStackTrace();

@@ -13,6 +13,7 @@ import org.kohsuke.github.GHRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
@@ -30,7 +31,7 @@ public class ConfigurationDatabase {
   }.getType();
   //chreat the gson object, this is the parsing factory
   private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-
+  private static IssueReportingExceptionHandler reporter =new IssueReportingExceptionHandler();
 
   public static Object getObject(String paramsKey, String objectKey, Object defaultValue) {
     if (getParamMap(paramsKey).get(objectKey) == null) {
@@ -68,7 +69,7 @@ public class ConfigurationDatabase {
 						getDbFile(), writeOut, "Saving database");
 				return;
 			} catch (WrongRepositoryStateException e) {
-				e.printStackTrace();
+				reporter.uncaughtException(Thread.currentThread(), e);
 				try {
 					ScriptingEngine.deleteRepo(getGitSource());
 					Thread.sleep(500);
@@ -77,7 +78,8 @@ public class ConfigurationDatabase {
 					e1.printStackTrace();
 				}
 			}	catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
-				e.printStackTrace();
+				reporter.uncaughtException(Thread.currentThread(), e);
+
 				try {
 					ScriptingEngine.deleteRepo(getGitSource());
 					Thread.sleep(500);
@@ -89,8 +91,8 @@ public class ConfigurationDatabase {
 
 			} catch (Exception e) {
 				
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				reporter.uncaughtException(Thread.currentThread(), e);
+
 				try {
 					ScriptingEngine.deleteRepo(getGitSource());
 				} catch (Exception e1) {
@@ -188,7 +190,7 @@ public class ConfigurationDatabase {
 		return;
     database = null;
     //new Exception("Changing from "+gitSource+" to "+myAssets).printStackTrace();
-
+    checked = false;
     gitSource = myAssets;
     getDatabase();
   }
