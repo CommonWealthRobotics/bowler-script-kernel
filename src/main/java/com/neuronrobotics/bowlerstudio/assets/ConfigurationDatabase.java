@@ -68,15 +68,16 @@ public class ConfigurationDatabase {
 						getDbFile(), writeOut, "Saving database");
 				return;
 			} catch (WrongRepositoryStateException e) {
-
+				e.printStackTrace();
 				try {
 					ScriptingEngine.deleteRepo(getGitSource());
-					save();
+					Thread.sleep(500);
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}	catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
+				e.printStackTrace();
 				try {
 					ScriptingEngine.deleteRepo(getGitSource());
 					Thread.sleep(500);
