@@ -141,40 +141,34 @@ public class ConfigurationDatabase {
 		}
   }
   public static String getGitSource() throws Exception {
-    if (!checked) {
-      checked = true;
-      if (ScriptingEngine.hasNetwork() && ScriptingEngine.isLoginSuccess()) {
-        ScriptingEngine.setAutoupdate(true);
-        org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-        GHMyself self = github.getMyself();
-        Map<String, GHRepository> myPublic = self.getAllRepositories();
-        for (Map.Entry<String, GHRepository> entry : myPublic.entrySet()) {
-          if (entry.getKey().contentEquals(repo) && entry.getValue().getOwnerName()
-              .equals(self.getName())) {
-            GHRepository ghrepo = entry.getValue();
-            setRepo(ghrepo);
-          }
-        }
-        if (gitSource == null) {
-          GHRepository defaultRep = github.getRepository("CommonWealthRobotics/" + repo);
-          GHRepository forkedRep = defaultRep.fork();
-          setRepo(forkedRep);
-        }
-      } else {
-    	  if (PasswordManager.getUsername()  != null) {
-    	        ConfigurationDatabase
-                .setGitSource("https://github.com/"+PasswordManager.getUsername()+"/" + repo + ".git");
-			} else {
-		        ConfigurationDatabase
-	            .setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
+		if (!checked) {
+			if (ScriptingEngine.hasNetwork() && ScriptingEngine.isLoginSuccess()) {
+				ScriptingEngine.setAutoupdate(true);
+				org.kohsuke.github.GitHub github = PasswordManager.getGithub();
+				try {
+					GHRepository myConfigRepo = github.getRepository(PasswordManager.getLoginID() + "/" + repo);
+					setRepo(myConfigRepo);
+					checked = true;
+				} catch (Throwable t) {
+					if (gitSource == null) {
+						GHRepository defaultRep = github.getRepository("CommonWealthRobotics/" + repo);
+						GHRepository forkedRep = defaultRep.fork();
+						setRepo(forkedRep);
+					}
+					if (PasswordManager.getUsername() != null) {
+						ConfigurationDatabase.setGitSource(
+								"https://github.com/" + PasswordManager.getUsername() + "/" + repo + ".git");
+					} else {
+						ConfigurationDatabase
+								.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
+					}
+
+				}
+
+				// ScriptingEngine.pull(gitSource);
 			}
 
-      }
-      
-      //    	ScriptingEngine.pull(gitSource);
-
-   
-    }
+		}
     return gitSource;
 
   }
