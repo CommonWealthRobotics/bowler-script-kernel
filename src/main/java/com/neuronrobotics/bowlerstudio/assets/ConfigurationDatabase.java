@@ -69,7 +69,7 @@ public class ConfigurationDatabase {
 						getDbFile(), writeOut, "Saving database");
 				return;
 			} catch (WrongRepositoryStateException e) {
-				reporter.uncaughtException(Thread.currentThread(), e);
+				//reporter.uncaughtException(Thread.currentThread(), e);
 				try {
 					ScriptingEngine.deleteRepo(getGitSource());
 					Thread.sleep(500);
