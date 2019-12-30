@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CreateBranchCommand;
+import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.PullResult;
@@ -31,6 +32,7 @@ import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -770,27 +772,30 @@ private static boolean ensureExistance(File desired) throws IOException {
       throw ex;
   }
 
-  public static void newBranch(String remoteURI, String newBranch) throws Exception {
-    for (String s : listBranchNames(remoteURI)) {
-      if (s.contains(newBranch)) {
-        throw new RuntimeException(
-            newBranch + " can not be created because " + s + " is too similar");
-      }
-    }
-
-    File gitRepoFile = uriToFile(remoteURI);
-    if (!gitRepoFile.exists()) {
-      gitRepoFile = cloneRepo(remoteURI, null);
-    }
-
-    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-    String source = getFullBranch(remoteURI);
-
+  public static void newBranch(String remoteURI, String newBranch) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
+    File gitRepoFile;
+    try {
+		for (String s : listBranchNames(remoteURI)) {
+		  if (s.contains(newBranch)) {
+		    throw new RuntimeException(
+		        newBranch + " can not be created because " + s + " is too similar");
+		  }
+		}
+	} catch (Exception e) {
+		
+	}
+    try {
+		deleteRepo(remoteURI);
+	}catch(Exception ex) {}
+	gitRepoFile = cloneRepo(remoteURI, null);
+	pull(remoteURI,getBranch(remoteURI));
+    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile()+"/.git");
+    
     Git git;
 
     git = new Git(localRepo);
 
-    newBranchLocal(newBranch, source, git);
+    newBranchLocal(newBranch, remoteURI, git);
 
     git.close();
 
@@ -799,32 +804,27 @@ private static boolean ensureExistance(File desired) throws IOException {
 	private static void newBranchLocal(String newBranch, String remoteURI, Git git)
 			throws GitAPIException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
 			CheckoutConflictException, InvalidRemoteException, TransportException, IOException {
-		 String source = getFullBranch(remoteURI);
+    	RevCommit latestCommit = git.log().setMaxCount(1).call().iterator().next();
 
-	    try {
-	    	CreateBranchCommand setName = git.branchCreate().setName(newBranch);
-			CreateBranchCommand setStartPoint = setName.setStartPoint(source);
-			CreateBranchCommand setForce = setStartPoint.setForce(true);
-			setForce.call();
-	
-	    }catch(org.eclipse.jgit.api.errors.RefNotFoundException ex){
-	    	git.branchCreate().setName(newBranch).call();
+		try {
+			git.branchCreate()
+			.setName(newBranch).setStartPoint(latestCommit)
+			.call();
+		} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
+			System.err.println("ERROR Creating " + newBranch + " in " + remoteURI);
+			ex.printStackTrace();
+		}
+		git.checkout()
+		.setName(newBranch)
+		.call();
 
-	    }
+		git.push()
+		.setRemote(remoteURI)
+		.setRefSpecs(new RefSpec(newBranch + ":" + newBranch))
+		.setCredentialsProvider(PasswordManager.getCredentialProvider())
+		.call();
 
-	    PushCommand pushCommand = git.push();
-	    PushCommand setRemote = pushCommand.setRemote("origin");
-		PushCommand setRefSpecs = setRemote.setRefSpecs(new RefSpec(newBranch + ":" + newBranch));
-		PushCommand setCredentialsProvider = setRefSpecs
-	        .setCredentialsProvider(PasswordManager.getCredentialProvider());
-		setCredentialsProvider.call();
-		
-		CheckoutCommand checkout;
-	    checkout = git.checkout();
-	    checkout.setName(newBranch);
-	    checkout.call();
 	}
-  
   
   private static boolean hasAtLeastOneReference(Git git) throws Exception {
     Repository repo = git.getRepository();
@@ -940,6 +940,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 		// config.setString("branch", "master", "merge", "refs/heads/master");
 
 		try {
+			
 			System.out.print("Pulling " + ref+"  ");
 			if (ref.startsWith("git@")) {
 				git.pull().setTransportConfigCallback(transportConfigCallback).call();
@@ -947,6 +948,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 				git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
 			}
 			System.out.println(" ... Success!" );
+			//new Exception(ref).printStackTrace();
 		} catch (CheckoutConflictException ex) {
 			for(String p: ex.getConflictingPaths()) {
 				File conf = new File(gitRepoFile.getParent()+"/"+p);
@@ -1052,6 +1054,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 			// StoredConfig config = git.getRepository().getConfig();
 			// config.setString("branch", "master", "merge", "refs/heads/master");
 			if (!currentBranch.contains(branch)) {
+				System.err.println("Current branch is "+currentBranch+" need "+branch);
 				pull(remoteURI, branch);
 				Git git = new Git(localRepo);
 				try {
@@ -1060,9 +1063,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 				} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
 
 					try {
-						git.branchCreate().setForce(true).setName(branch)
-								.setStartPoint("origin/" + getBranch(remoteURI)).call();
-						git.checkout().setName(branch).call();
+						newBranch( remoteURI,branch );
 					} catch (RefAlreadyExistsException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -1076,6 +1077,9 @@ private static boolean ensureExistance(File desired) throws IOException {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (GitAPIException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
