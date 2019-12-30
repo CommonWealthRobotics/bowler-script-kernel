@@ -10,6 +10,7 @@ import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 
+import com.neuronrobotics.bowlerstudio.assets.StudioBuildInfo;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.video.OSUtil;
 
@@ -20,14 +21,15 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
 		new Thread(()-> {
+			System.out.println("\r\n\r\nReporting Bug:\\r\\n\\r\\n");
+			e.printStackTrace(System.out);
 			reportIssue( e) ;
 			StackTraceElement[] element = e.getStackTrace();
-			
+			System.out.println("\r\n\r\nBug Reported!\\r\\n\\r\\n");
 			if(element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer" )) {
 				System.exit(-5);
 			}
-			System.err.println("Bug Reported:");
-			e.printStackTrace();
+
 		}).start();
 	}
 	public static void reportIssue(Throwable t) {
@@ -53,9 +55,12 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
 				repo.createIssue(getTitle(element))
 				.body("Auto Reported Issue \r\n"
+						+"BowlerStudio Build "+ StudioBuildInfo.getVersion()
 						+"OS = "+OSUtil.getOsName()+" "+OSUtil.getOsArch()+" "+(OSUtil.is64Bit()?"x64":"x86")+"\r\n"
-						+stacktrace)
+						+"```"+stacktrace+"```")
 				.label("BUG")
+				.label("AUTO_REPORTED")
+				.assignee("madhephaestus")
 				.create();;
 				
 			}
