@@ -60,6 +60,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +74,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javafx.scene.web.WebEngine;
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 public class ScriptingEngine {// this subclasses boarder pane for the widgets
   // sake, because multiple inheritance is TOO
@@ -1029,7 +1032,11 @@ private static boolean ensureExistance(File desired) throws IOException {
     git.close();
 
   }
-
+  public static void checkout(String remoteURI, Ref branch) throws IOException {
+	  String []name = branch.getName().split("/");
+		String myName = name[name.length-1];
+		ScriptingEngine.checkout(remoteURI, myName);
+  }
 	public static void checkout(String remoteURI, String branch) throws IOException {
 		// cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
@@ -1462,13 +1469,34 @@ public static String urlToGist(URL htmlUrl) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    } catch (Exception e1) {
-        // TODO Auto-generated catch block
-        e1.printStackTrace();
-    }
-    
-    
-    return new String[]{targetGit,targetFilename};
-}
+	    } catch (Exception e1) {
+	        // TODO Auto-generated catch block
+	        e1.printStackTrace();
+	    }
+	    
+	    
+	    return new String[]{targetGit,targetFilename};
+	}
+	
+	public static Collection<Ref> getAllBranches(String url) throws IOException, GitAPIException {
+		
+	    Git git = new Git(getRepository(url));
+	
+	    Collection<Ref> call = Git.lsRemoteRepository()
+                .setHeads(true)
+                .setRemote(url)
+                .call();
+	    git.close();
+		return call;
+	}
+	
+	public static Repository getRepository(String url) throws IOException  {
+		File gistDir = cloneRepo(url, getFullBranch(url));
+	
+	    String localPath = gistDir.getAbsolutePath();
+	    File gitRepoFile = new File(localPath + "/.git");
+	
+	    return new FileRepository(gitRepoFile.getAbsoluteFile());
+	}
 
 }
