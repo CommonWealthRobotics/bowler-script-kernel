@@ -118,7 +118,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
       new ArrayList<IGithubLoginListener>();
 
   private static HashMap<String, IScriptingLanguage> langauges = new HashMap<>();
-
+  private static HashMap<String,ArrayList<Runnable>> onCommitEventListeners = new HashMap<>();
 
 
   static {
@@ -145,7 +145,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     addScriptingLanguage(new JsonRunner());
     addScriptingLanguage(new ArduinoLoader());
   }
-
+  
+  public static void addOnCommitEventListeners(String url,Runnable event) {
+	  if(!onCommitEventListeners.containsKey(url)) {
+		  onCommitEventListeners.put(url,new ArrayList<Runnable>()); 
+	  }
+	  if(!onCommitEventListeners.get(url).contains(event)) {
+		  onCommitEventListeners.get(url).add(event); 
+	  }
+  }
+  public static void removeOnCommitEventListeners(String url,Runnable event) {
+	  if(!onCommitEventListeners.containsKey(url)) {
+		  onCommitEventListeners.put(url,new ArrayList<Runnable>()); 
+	  }
+	  if(onCommitEventListeners.get(url).contains(event)) {
+		  onCommitEventListeners.get(url).remove(event); 
+	  }
+  }
   /**
    * This interface is for adding additional language support.
    *
@@ -489,6 +505,17 @@ private static boolean ensureExistance(File desired) throws IOException {
       }
 
       git.commit().setAll(true).setMessage(commitMessage).call();
+      ArrayList<Runnable> arrayList = onCommitEventListeners.get(id);
+	  if(arrayList!=null) {
+    	  for (int i = 0; i < arrayList.size(); i++) {
+			Runnable r = arrayList.get(i);
+			try {
+				r.run();
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+		}
+      }
     } catch (Exception ex) {
       git.close();
 
