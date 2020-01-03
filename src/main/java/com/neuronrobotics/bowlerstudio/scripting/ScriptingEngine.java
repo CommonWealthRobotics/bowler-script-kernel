@@ -1542,10 +1542,10 @@ public static String urlToGist(URL htmlUrl) {
 	}
 
 	private static File getRepositoryCloneDirectory(String remoteURI) {
-//		while(remoteURI.endsWith("/"))
-//			remoteURI=remoteURI.substring(0, remoteURI.length()-2);
+		if(remoteURI.endsWith("/"))
+			throw new RuntimeException("URL needs to end in .git, no trailing slash");
 	    if(!remoteURI.endsWith(".git"))
-	    	remoteURI=remoteURI+".git";
+			throw new RuntimeException("URL needs to end in .git");
 	    String[] colinSplit = remoteURI.split(":");
 
 	    String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
