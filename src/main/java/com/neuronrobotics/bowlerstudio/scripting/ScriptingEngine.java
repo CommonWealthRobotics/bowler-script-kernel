@@ -1317,7 +1317,8 @@ private static boolean ensureExistance(File desired) throws IOException {
 					return true;
 				} catch (Exception ex) {
 					// just return false, the exception is it failing to push
-					ex.printStackTrace();
+					git.close();
+					return false;
 				}
 			}
 		}
