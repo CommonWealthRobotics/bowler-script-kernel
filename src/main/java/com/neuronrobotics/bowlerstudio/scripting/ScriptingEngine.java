@@ -1,18 +1,15 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CreateBranchCommand;
-import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
 import org.eclipse.jgit.api.errors.CanceledException;
@@ -31,20 +28,12 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RefSpec;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
@@ -53,24 +42,17 @@ import org.jsoup.select.Elements;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GitHub;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.Console;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -84,7 +66,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javafx.scene.web.WebEngine;
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 public class ScriptingEngine {// this subclasses boarder pane for the widgets
   // sake, because multiple inheritance is TOO
@@ -129,7 +110,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
   private static HashMap<String, IScriptingLanguage> langauges = new HashMap<>();
   private static HashMap<String,ArrayList<Runnable>> onCommitEventListeners = new HashMap<>();
-
+  private static IssueReportingExceptionHandler exp = new IssueReportingExceptionHandler();
 
   static {
 
@@ -145,8 +126,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     	PasswordManager.loadLoginData(workspace);
       // runLogin();
     } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    	exp.uncaughtException(Thread.currentThread(), e);
     }
     addScriptingLanguage(new ClojureHelper());
     addScriptingLanguage(new GroovyHelper());
@@ -287,7 +267,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
           Log.debug("Gist URL Detected " + id);
           return id;
         } catch (ArrayIndexOutOfBoundsException ex) {
-          Log.error("Parsing " + in + " failed to find gist");
+          exp.uncaughtException(Thread.currentThread(), ex);
           return "d4312a0787456ec27a2a";
         }
       }
@@ -331,11 +311,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         html = sw.getBuffer().toString();
         return returnFirstGist(html);
       } catch (TransformerConfigurationException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+    	  exp.uncaughtException(Thread.currentThread(), e);
       } catch (TransformerException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+    	  exp.uncaughtException(Thread.currentThread(), e);
       }
 
     }
@@ -354,8 +332,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     try {
 		PasswordManager.waitForLogin();
 	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+		exp.uncaughtException(Thread.currentThread(), e);
 	}
 
   }
@@ -698,7 +675,7 @@ private static boolean ensureExistance(File desired) throws IOException {
         // System.out.println("Autoupdating " +id);
         try {
           
-          Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
+          //Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
           // https://gist.github.com/0e6454891a3b3f7c8f28.git
           
           try {
@@ -1001,23 +978,17 @@ private static boolean ensureExistance(File desired) throws IOException {
 			deleteRepo(remoteURI);
 			pull( remoteURI,  branch);
 		} catch (InvalidConfigurationException e) {
-			System.err.println("Error on "+remoteURI);
-			e.printStackTrace();
+			exp.uncaughtException(Thread.currentThread(), e);
 		} catch (DetachedHeadException e) {
-			System.err.println("Error on "+remoteURI);
-			e.printStackTrace();
+			exp.uncaughtException(Thread.currentThread(), e);
 		} catch (InvalidRemoteException e) {
-			System.err.println("Error on "+remoteURI);
-			e.printStackTrace();
+			exp.uncaughtException(Thread.currentThread(), e);
 		} catch (CanceledException e) {
-			System.err.println("Error on "+remoteURI);
-			e.printStackTrace();
+			exp.uncaughtException(Thread.currentThread(), e);
 		} catch (RefNotFoundException e) {
-			System.err.println("Error on "+remoteURI);
-			e.printStackTrace();
+			exp.uncaughtException(Thread.currentThread(), e);
 		} catch (RefNotAdvertisedException e) {
-			System.err.println("Error on "+remoteURI);
-			e.printStackTrace();
+			exp.uncaughtException(Thread.currentThread(), e);
 		} catch (NoHeadException e) {
 			//
 			try {
@@ -1028,8 +999,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 				        .call();
 				checkout(remoteURI, (Ref) refs.toArray()[0]);
 			} catch (GitAPIException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				exp.uncaughtException(Thread.currentThread(), e);
 			}
 			
 		} catch (TransportException e) {
@@ -1039,16 +1009,15 @@ private static boolean ensureExistance(File desired) throws IOException {
 				try {
 					git.pull().setTransportConfigCallback(transportConfigCallback).call();
 				}catch(Exception ex) {
-					ex.printStackTrace();
+					exp.uncaughtException(Thread.currentThread(), ex);
 				}
 			}else {
-				e.printStackTrace();
+				exp.uncaughtException(Thread.currentThread(), e);
 			}
 			
 			
 		} catch (GitAPIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			exp.uncaughtException(Thread.currentThread(), e);
 		}
 
 		git.close();
@@ -1114,26 +1083,20 @@ private static boolean ensureExistance(File desired) throws IOException {
 					try {
 						newBranch( remoteURI,branch );
 					} catch (RefAlreadyExistsException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						exp.uncaughtException(Thread.currentThread(), e);
 					} catch (RefNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						exp.uncaughtException(Thread.currentThread(), e);
 					} catch (InvalidRefNameException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						exp.uncaughtException(Thread.currentThread(), e);
 					} catch (CheckoutConflictException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						exp.uncaughtException(Thread.currentThread(), e);
 					} catch (GitAPIException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						exp.uncaughtException(Thread.currentThread(), e);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						exp.uncaughtException(Thread.currentThread(), e);
 					}
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					exp.uncaughtException(Thread.currentThread(), ex);
 				}
 				git.close();
 			}
@@ -1217,8 +1180,7 @@ private static boolean ensureExistance(File desired) throws IOException {
       try {
         checkout(remoteURI, branch);
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+    	  exp.uncaughtException(Thread.currentThread(), e);
       }
     }
     return gistDir;
@@ -1299,7 +1261,6 @@ private static boolean ensureExistance(File desired) throws IOException {
 
   private static File fileFromGistID(String string, String string2)
       throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-    // TODO Auto-generated method stub
     return fileFromGit("https://gist.github.com/" + string + ".git", string2);
   }
 
@@ -1315,8 +1276,7 @@ private static boolean ensureExistance(File desired) throws IOException {
       git = locateGit(currentFile);
       return findLocalPath(currentFile, git);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+    	exp.uncaughtException(Thread.currentThread(), e);
     }
 
     return currentFile.getName();
@@ -1336,8 +1296,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 		try {
 			git = locateGit(currentFile);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			exp.uncaughtException(Thread.currentThread(), e1);
 			return false;
 		}
 
@@ -1409,13 +1368,11 @@ private static boolean ensureExistance(File desired) throws IOException {
   }
 
   public static String urlToString(URL htmlUrl) {
-		// TODO Auto-generated method stub
 		return htmlUrl.toExternalForm();
 	}
 
 
 public static String urlToGist(URL htmlUrl) {
-	// TODO Auto-generated method stub
 	String externalForm = urlToString( htmlUrl) ;
 	System.out.println(externalForm);
 	return ScriptingEngine.urlToGist(externalForm);
@@ -1483,20 +1440,15 @@ public static String urlToGist(URL htmlUrl) {
                 
             }
         } catch (InvalidRemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	exp.uncaughtException(Thread.currentThread(), e);
         } catch (TransportException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	exp.uncaughtException(Thread.currentThread(), e);
         } catch (GitAPIException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	exp.uncaughtException(Thread.currentThread(), e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	exp.uncaughtException(Thread.currentThread(), e);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	exp.uncaughtException(Thread.currentThread(), e);
         }
         String[] newFileCode;
         try {
@@ -1508,12 +1460,10 @@ public static String urlToGist(URL htmlUrl) {
                 ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename, WalkingEngine[0], "copy file content");
             }
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+	    	exp.uncaughtException(Thread.currentThread(), e);
         }
 	    } catch (Exception e1) {
-	        // TODO Auto-generated catch block
-	        e1.printStackTrace();
+	    	exp.uncaughtException(Thread.currentThread(), e1);
 	    }
 	    
 	    
