@@ -832,7 +832,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 		.setRefSpecs(new RefSpec(newBranch + ":" + newBranch))
 		.setCredentialsProvider(PasswordManager.getCredentialProvider())
 		.call();
-
+		System.out.println("Created new branch "+remoteURI+"\t\t"+newBranch);
 	}
   
   private static boolean hasAtLeastOneReference(Git git) throws Exception {
@@ -871,7 +871,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 
     Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
     // https://gist.github.com/0e6454891a3b3f7c8f28.git
-    List<Ref> Ret = new ArrayList<>();
+    List<Ref> Ret;
     Git git = new Git(localRepo);
     Ret = listBranches(remoteURI, git);
     git.close();
@@ -1470,7 +1470,16 @@ public static String urlToGist(URL htmlUrl) {
 	    
 	    return new String[]{targetGit,targetFilename};
 	}
-	
+    public static Ref getBranch(String url, String branch) throws IOException, GitAPIException {
+    	Collection<Ref> branches =  getAllBranches( url);
+    	for(Ref r:branches){
+    		if(r.getName().endsWith(branch)) {
+    			return r;
+    		}
+    	}
+    	return null;
+	    
+	}
 	public static Collection<Ref> getAllBranches(String url) throws IOException, GitAPIException {
 		
 	    Git git = new Git(getRepository(url));
