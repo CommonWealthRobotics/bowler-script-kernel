@@ -14,21 +14,29 @@ import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
+import org.eclipse.jgit.api.errors.AbortedByHookException;
 import org.eclipse.jgit.api.errors.CanceledException;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
+import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidConfigurationException;
 import org.eclipse.jgit.api.errors.InvalidRefNameException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.NoMessageException;
 import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
 import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -36,6 +44,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
@@ -44,6 +53,7 @@ import org.jsoup.select.Elements;
 import org.kohsuke.github.GHGist;
 import org.kohsuke.github.GitHub;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
@@ -147,21 +157,27 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
   }
   
   public static void addOnCommitEventListeners(String url,Runnable event) {
-	  if(!onCommitEventListeners.containsKey(url)) {
-		  onCommitEventListeners.put(url,new ArrayList<Runnable>()); 
-	  }
-	  if(!onCommitEventListeners.get(url).contains(event)) {
-		  onCommitEventListeners.get(url).add(event); 
-	  }
-  }
-  public static void removeOnCommitEventListeners(String url,Runnable event) {
-	  if(!onCommitEventListeners.containsKey(url)) {
-		  onCommitEventListeners.put(url,new ArrayList<Runnable>()); 
-	  }
-	  if(onCommitEventListeners.get(url).contains(event)) {
-		  onCommitEventListeners.get(url).remove(event); 
+	  synchronized(onCommitEventListeners) {
+		  if(!onCommitEventListeners.containsKey(url)) {
+			  onCommitEventListeners.put(url,new ArrayList<Runnable>()); 
+		  }
+		  if(!onCommitEventListeners.get(url).contains(event)) {
+			  onCommitEventListeners.get(url).add(event); 
+		  }
 	  }
   }
+
+	public static void removeOnCommitEventListeners(String url, Runnable event) {
+		synchronized (onCommitEventListeners) {
+
+			if (!onCommitEventListeners.containsKey(url)) {
+				onCommitEventListeners.put(url, new ArrayList<Runnable>());
+			}
+			if (onCommitEventListeners.get(url).contains(event)) {
+				onCommitEventListeners.get(url).remove(event);
+			}
+		}
+	}
   /**
    * This interface is for adding additional language support.
    *
@@ -504,18 +520,7 @@ private static boolean ensureExistance(File desired) throws IOException {
         }
       }
 
-      git.commit().setAll(true).setMessage(commitMessage).call();
-      ArrayList<Runnable> arrayList = onCommitEventListeners.get(id);
-	  if(arrayList!=null) {
-    	  for (int i = 0; i < arrayList.size(); i++) {
-			Runnable r = arrayList.get(i);
-			try {
-				r.run();
-			}catch(Throwable t) {
-				t.printStackTrace();
-			}
-		}
-      }
+      commit( id,  branch,  commitMessage);
     } catch (Exception ex) {
       git.close();
 
@@ -599,7 +604,7 @@ private static boolean ensureExistance(File desired) throws IOException {
           git.push().setTransportConfigCallback(transportConfigCallback).call();
       else
     	  git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
-      System.out.println("PUSH OK! file: " + desired);
+      System.out.println("PUSH OK! file: " + desired+" on branch "+getBranch(id));
     } catch (Exception ex) {
       String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
       String remoteURI = gitID[0];
@@ -801,9 +806,11 @@ private static boolean ensureExistance(File desired) throws IOException {
     if (ex != null)
       throw ex;
   }
-
   public static void newBranch(String remoteURI, String newBranch) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
-    File gitRepoFile;
+	  newBranch( remoteURI,  newBranch,null );
+  }
+
+  public static void newBranch(String remoteURI, String newBranch,RevCommit source ) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
     try {
 		for (String s : listBranchNames(remoteURI)) {
 		  if (s.contains(newBranch)) {
@@ -814,31 +821,26 @@ private static boolean ensureExistance(File desired) throws IOException {
 	} catch (Exception e) {
 		
 	}
-    try {
-		deleteRepo(remoteURI);
-	}catch(Exception ex) {}
-	gitRepoFile = cloneRepo(remoteURI, null);
-	pull(remoteURI,getBranch(remoteURI));
-    Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile()+"/.git");
+    Repository localRepo = getRepository(remoteURI);
     
     Git git;
 
     git = new Git(localRepo);
 
-    newBranchLocal(newBranch, remoteURI, git);
+    if(source ==null)
+    	source=git.log().setMaxCount(1).call().iterator().next();
+    newBranchLocal(newBranch, remoteURI, git,source);
 
     git.close();
 
   }
 
-	private static void newBranchLocal(String newBranch, String remoteURI, Git git)
+	private static void newBranchLocal(String newBranch, String remoteURI, Git git,RevCommit source )
 			throws GitAPIException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
 			CheckoutConflictException, InvalidRemoteException, TransportException, IOException {
-    	RevCommit latestCommit = git.log().setMaxCount(1).call().iterator().next();
-
 		try {
 			git.branchCreate()
-			.setName(newBranch).setStartPoint(latestCommit)
+			.setName(newBranch).setStartPoint(source)
 			.call();
 		} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
 			System.err.println("ERROR Creating " + newBranch + " in " + remoteURI);
@@ -968,7 +970,14 @@ private static boolean ensureExistance(File desired) throws IOException {
 		Git git = new Git(localRepo);
 		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 		// config.setString("branch", "master", "merge", "refs/heads/master");
+		if(ref == null) {
+			git.close();
+			System.err.println("FAILED to pull "+remoteURI);
+			deleteRepo(remoteURI);
+			pull( remoteURI,  branch);
 
+			return;
+		}
 		try {
 			
 			System.out.print("Pulling " + ref+"  ");
@@ -992,26 +1001,37 @@ private static boolean ensureExistance(File desired) throws IOException {
 			deleteRepo(remoteURI);
 			pull( remoteURI,  branch);
 		} catch (InvalidConfigurationException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Error on "+remoteURI);
 			e.printStackTrace();
 		} catch (DetachedHeadException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Error on "+remoteURI);
 			e.printStackTrace();
 		} catch (InvalidRemoteException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Error on "+remoteURI);
 			e.printStackTrace();
 		} catch (CanceledException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Error on "+remoteURI);
 			e.printStackTrace();
 		} catch (RefNotFoundException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Error on "+remoteURI);
 			e.printStackTrace();
 		} catch (RefNotAdvertisedException e) {
-			// TODO Auto-generated catch block
+			System.err.println("Error on "+remoteURI);
 			e.printStackTrace();
 		} catch (NoHeadException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//
+			try {
+				System.err.println("Error on "+remoteURI);
+				Collection<Ref> refs = Git.lsRemoteRepository()
+				        .setHeads(true)
+				        .setRemote(remoteURI)
+				        .call();
+				checkout(remoteURI, (Ref) refs.toArray()[0]);
+			} catch (GitAPIException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
 		} catch (TransportException e) {
 			PasswordManager.checkInternet();
 			
@@ -1059,6 +1079,9 @@ private static boolean ensureExistance(File desired) throws IOException {
     git.close();
 
   }
+  public static void checkout(String remoteURI, RevCommit commit) throws IOException {
+		ScriptingEngine.checkout(remoteURI, commit.getName());
+  }
   public static void checkout(String remoteURI, Ref branch) throws IOException {
 	  String []name = branch.getName().split("/");
 		String myName = name[name.length-1];
@@ -1076,24 +1099,16 @@ private static boolean ensureExistance(File desired) throws IOException {
 		if (currentBranch != null) {
 			// String currentBranch=getFullBranch(remoteURI);
 			Repository localRepo = new FileRepository(gitRepoFile);
-			// if (!branch.contains("heads")) {
-			// branch = "heads/" + branch;
-			// }
-			// if (!branch.contains("refs")) {
-			// branch = "refs/" + branch;
-			// }
-			// System.out.println("Checking out "+branch+" :
-			// "+gitRepoFile.getAbsolutePath() );
-			// Git git = new Git(localRepo);
-			// StoredConfig config = git.getRepository().getConfig();
-			// config.setString("branch", "master", "merge", "refs/heads/master");
-			if (!currentBranch.contains(branch)) {
+			if (!currentBranch.endsWith(branch)) {
 				System.err.println("Current branch is "+currentBranch+" need "+branch);
-				pull(remoteURI, branch);
 				Git git = new Git(localRepo);
 				try {
 
-					git.checkout().setName(branch).call();
+					git.checkout().
+			        setName(branch).
+			        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
+			        setStartPoint("origin/" + branch).
+			        call();
 				} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
 
 					try {
@@ -1141,20 +1156,20 @@ private static boolean ensureExistance(File desired) throws IOException {
    *
    * @return The local directory containing the .git
    */
-  public static File cloneRepo(String remoteURI, String branch) {
+  public synchronized static File cloneRepo(String remoteURI, String branch) {
 
-	while(remoteURI.endsWith("/"))
-		remoteURI=remoteURI.substring(0, remoteURI.length()-2);
-    if(!remoteURI.endsWith(".git"))
-    	remoteURI=remoteURI+".git";
-    String[] colinSplit = remoteURI.split(":");
+//	while(remoteURI.endsWith("/"))
+//		remoteURI=remoteURI.substring(0, remoteURI.length()-2);
+//    if(!remoteURI.endsWith(".git"))
+//    	remoteURI=remoteURI+".git";
+//    String[] colinSplit = remoteURI.split(":");
+//
+//    String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
 
-    String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
-
-    File gistDir = new File(getWorkspace().getAbsolutePath() + "/gitcache/" + gitSplit);
-    if (!gistDir.exists()) {
-      gistDir.mkdir();
-    }
+    File gistDir = getRepositoryCloneDirectory(remoteURI);
+//    if (!gistDir.exists()) {
+//      gistDir.mkdir();
+//    }
     String localPath = gistDir.getAbsolutePath();
     File gitRepoFile = new File(localPath + "/.git");
     File dir = new File(localPath);
@@ -1517,13 +1532,63 @@ public static String urlToGist(URL htmlUrl) {
 		return call;
 	}
 	
-	public static Repository getRepository(String url) throws IOException  {
-		File gistDir = cloneRepo(url, getFullBranch(url));
-	
-	    String localPath = gistDir.getAbsolutePath();
-	    File gitRepoFile = new File(localPath + "/.git");
-	
+	public static Repository getRepository(String remoteURI) throws IOException  {
+		//File gistDir = cloneRepo(url, getFullBranch(url));
+		
+		File gistDir = getRepositoryCloneDirectory(remoteURI);
+		String localPath = gistDir.getAbsolutePath();
+		File gitRepoFile = new File(localPath + "/.git");
 	    return new FileRepository(gitRepoFile.getAbsoluteFile());
+	}
+
+	private static File getRepositoryCloneDirectory(String remoteURI) {
+		while(remoteURI.endsWith("/"))
+			remoteURI=remoteURI.substring(0, remoteURI.length()-2);
+	    if(!remoteURI.endsWith(".git"))
+	    	remoteURI=remoteURI+".git";
+	    String[] colinSplit = remoteURI.split(":");
+
+	    String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
+		File gistDir = new File(getWorkspace().getAbsolutePath() + "/gitcache/" + gitSplit);
+	    if (!gistDir.exists()) {
+	      gistDir.mkdir();
+	    }
+		return gistDir;
+	}
+
+	public static void setCommitContentsAsCurrent(String url, String branch, RevCommit commit) throws IOException, GitAPIException {
+		checkout(url,commit);	
+		Collection<Ref> branches= getAllBranches( url);
+		String newBranch = branch;
+		for(Ref iterableBranchInstance:branches) {
+			String []name = iterableBranchInstance.getName().split("/");
+			String myName = name[name.length-1];
+			if(myName.contains(newBranch)) {
+				newBranch=newBranch+"-1";
+			}
+		}
+//		
+		newBranch(url, newBranch,commit);
+		commit(url, branch,"New branch "+branch+" created here");
+	}
+
+	private static void commit(String url, String branch, String message)
+			throws IOException, GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
+			ConcurrentRefUpdateException, WrongRepositoryStateException, AbortedByHookException {
+		Git git = new Git(getRepository(url));
+		git.commit().setAll(true).setMessage(message).call();
+		ArrayList<Runnable> arrayList = onCommitEventListeners.get(url);
+		if (arrayList != null) {
+			for (int i = 0; i < arrayList.size(); i++) {
+				Runnable r = arrayList.get(i);
+				try {
+					r.run();
+				} catch (Throwable t) {
+					t.printStackTrace();
+				}
+			}
+		}
+		git.close();
 	}
 
 }
