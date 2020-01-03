@@ -1542,8 +1542,8 @@ public static String urlToGist(URL htmlUrl) {
 	}
 
 	private static File getRepositoryCloneDirectory(String remoteURI) {
-		while(remoteURI.endsWith("/"))
-			remoteURI=remoteURI.substring(0, remoteURI.length()-2);
+//		while(remoteURI.endsWith("/"))
+//			remoteURI=remoteURI.substring(0, remoteURI.length()-2);
 	    if(!remoteURI.endsWith(".git"))
 	    	remoteURI=remoteURI+".git";
 	    String[] colinSplit = remoteURI.split(":");
