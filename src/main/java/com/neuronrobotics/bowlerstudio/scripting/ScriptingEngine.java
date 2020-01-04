@@ -946,19 +946,11 @@ private static boolean ensureExistance(File desired) throws IOException {
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		Git git = new Git(localRepo);
 		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
-		// config.setString("branch", "master", "merge", "refs/heads/master");
-		if(ref == null) {
-			git.close();
-			System.err.println("FAILED to pull "+remoteURI);
-			deleteRepo(remoteURI);
-			pull( remoteURI,  branch);
 
-			return;
-		}
 		try {
 			
 			System.out.print("Pulling " + ref+"  ");
-			if (ref.startsWith("git@")) {
+			if (ref !=null && ref.startsWith("git@")) {
 				git.pull().setTransportConfigCallback(transportConfigCallback).call();
 			}else {
 				git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
@@ -1144,16 +1136,17 @@ private static boolean ensureExistance(File desired) throws IOException {
       if (branch != null)
         System.out.println("            branch: " + branch);
       System.out.println("                to: " + localPath);
-
+      Exception ex=null;
+      String myBranch = branch;
       for (int i = 0; i < 5; i++) {
         // Clone the repo
         try {
-          if (branch == null) {
+          if (myBranch == null) {
             Git git = Git.cloneRepository().setURI(remoteURI).setDirectory(dir)
                 .setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
             hasAtLeastOneReference(git);
-            branch = getFullBranch(remoteURI);
-            checkout(remoteURI, branch);
+            myBranch = getFullBranch(remoteURI);
+            checkout(remoteURI, myBranch);
             hasAtLeastOneReference(git);
             git.close();
 
@@ -1161,19 +1154,25 @@ private static boolean ensureExistance(File desired) throws IOException {
             Git git = Git.cloneRepository().setURI(remoteURI).setBranch(branch).setDirectory(dir)
                 .setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
             hasAtLeastOneReference(git);
-            checkout(remoteURI, branch);
+            checkout(remoteURI, myBranch);
             hasAtLeastOneReference(git);
             git.close();
-
+            
           }
 
           break;
         } catch (Exception e) {
-          Log.error("Failed to clone " + remoteURI + " " + e);
-          e.printStackTrace();
+        	if( i>0)
+        		ex=e;
+          //new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), e);
+        	e.printStackTrace();
+        	myBranch=null;
           deleteFolder(new File(localPath));
         }
-        ThreadUtil.wait(200 * i);
+        ThreadUtil.wait(100 * i);
+      }
+      if(ex!=null) {
+    	  exp.uncaughtException(Thread.currentThread(), ex);
       }
     }
     if (branch != null) {
@@ -1183,6 +1182,7 @@ private static boolean ensureExistance(File desired) throws IOException {
     	  exp.uncaughtException(Thread.currentThread(), e);
       }
     }
+    
     return gistDir;
 
   }
@@ -1483,13 +1483,23 @@ public static String urlToGist(URL htmlUrl) {
 	public static Collection<Ref> getAllBranches(String url) throws IOException, GitAPIException {
 		
 	    Git git = new Git(getRepository(url));
-	
-	    Collection<Ref> call = Git.lsRemoteRepository()
-                .setHeads(true)
-                .setRemote(url)
-                .call();
+	    String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 	    git.close();
-		return call;
+
+		System.out.print("Pulling " + ref+"  ");
+		if (ref !=null && ref.startsWith("git@")) {
+			return Git.lsRemoteRepository()
+	                .setHeads(true)
+	                .setRemote(url)
+	                .setTransportConfigCallback(transportConfigCallback)
+	                .call();
+		}else {
+			return Git.lsRemoteRepository()
+	                .setHeads(true)
+	                .setRemote(url)
+	                .setCredentialsProvider(PasswordManager.getCredentialProvider())
+	                .call();
+		}
 	}
 	
 	public static Repository getRepository(String remoteURI) throws IOException  {
