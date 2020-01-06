@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.vitamins;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,7 +40,9 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHMyself;
+import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
 import com.google.gson.Gson;
@@ -143,6 +146,27 @@ public class Vitamins {
 			}
 		}
 	}
+	
+	public static File getScriptFile(String type) {
+		HashMap<String, Object> script = getMeta(type);
+		
+		try {
+			return ScriptingEngine.fileFromGit(script.get("scriptGit").toString(), script.get("scriptFile").toString());
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	public static HashMap<String, Object> getMeta(String type) {
 		return getConfiguration(type, "meta");
@@ -189,25 +213,54 @@ public class Vitamins {
 	}
 	public static void saveDatabaseForkIfMissing(String type) throws Exception {
 
-		// Save contents and publish them
-		String jsonString = makeJson(type);
+		org.kohsuke.github.GitHub github = PasswordManager.getGithub();
+		GHRepository repo = github.getRepository("madhephaestus/Hardware-Dimensions");
 		try {
-			ScriptingEngine.pushCodeToGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
-					ScriptingEngine.getFullBranch(getGitRepoDatabase()), // branch or tag
-					getRootFolder() + type + ".json", // local path to the file in git
-					jsonString, // content of the file
-					"Pushing changed Database");// commit message
-			
-			System.out.println("Database saved "+ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
-					getRootFolder() + type + ".json"// File from within the Git repo
-			).getAbsolutePath());
+			saveDatabase(type);
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
-			org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-			GHRepository repo = github.getOrganization("madhephaestus").getRepository("Hardware-Dimensions");
+			
+			
 			GHRepository newRepo = repo.fork();
+			
 			Vitamins.gitRpoDatabase = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
 			saveDatabase(type);
+			
 		}
+		if(PasswordManager.getUsername().contentEquals("madhephaestus"))
+			return;
+		try {
+			GHRepository myrepo = github.getRepository(PasswordManager.getUsername()+"/Hardware-Dimensions");
+			if(myrepo.queryPullRequests().state(GHIssueState.OPEN).head("madhephaestus:master")
+			            .list().asList().size()==0) {
+				GHPullRequest request = myrepo.createPullRequest("Update from source", 
+						"madhephaestus:master", 
+						"master", 
+						"## Upstream add vitamins", 
+						false, false);
+				if(request.getMergeable()) {
+					request.merge("Auto Merging Master");
+				}
+				
+			}
+			String head = PasswordManager.getUsername()+":master";
+			List<GHPullRequest> asList = repo.queryPullRequests()
+		            .state(GHIssueState.OPEN)
+		            .head(head)
+		            .list().asList();
+			if(asList.size()==0) {
+				System.err.println("Creating PR for "+head);
+				repo.createPullRequest("User Added vitamins", 
+					head, 
+					"master", 
+					"## User added vitamins", 
+					true, true);
+			}
+		}catch(Exception ex) {
+			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),ex);
+		}
+
+		
+		
 
 	}
 	public static void newVitamin(String type, String id) throws Exception {
@@ -395,13 +448,18 @@ public class Vitamins {
 				if (PasswordManager.getUsername() != null) {
 					ScriptingEngine.setAutoupdate(true);
 					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-					GHRepository repo =github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions" ); 
-					if(repo!=null) {
-						String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
-						// System.out.println("Using my version of Viamins: "+myAssets);
-						setGitRepoDatabase(myAssets);
-					}else
+					try {
+						GHRepository repo =github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions" ); 
+						if(repo!=null) {
+							String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
+							// System.out.println("Using my version of Viamins: "+myAssets);
+							setGitRepoDatabase(myAssets);
+						}else {
+							throw new org.kohsuke.github.GHFileNotFoundException();
+						}
+					}catch(org.kohsuke.github.GHFileNotFoundException ex) {
 						setGitRepoDatabase(defaultgitRpoDatabase);
+					}
 				}
 			} catch (Exception ex) {
 				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
