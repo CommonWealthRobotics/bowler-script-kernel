@@ -16,6 +16,7 @@ import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -108,7 +109,7 @@ public class Vitamins {
 		return get(type, id, 0);
 	}
 
-	public static CSG get(String type, String id, int depthGauge) throws Exception {
+	private static CSG get(String type, String id, int depthGauge) throws Exception {
 		String key = type + id;
 
 		try {
@@ -174,7 +175,10 @@ public class Vitamins {
 					getRootFolder() + type + ".json", // local path to the file in git
 					jsonString, // content of the file
 					"Pushing changed Database");// commit message
-
+			
+			System.out.println("Database saved "+ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
+					getRootFolder() + type + ".json"// File from within the Git repo
+			).getAbsolutePath());
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
 			System.out.println("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
 			System.out.println(
@@ -183,7 +187,29 @@ public class Vitamins {
 		}
 
 	}
+	public static void saveDatabaseForkIfMissing(String type) throws Exception {
 
+		// Save contents and publish them
+		String jsonString = makeJson(type);
+		try {
+			ScriptingEngine.pushCodeToGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
+					ScriptingEngine.getFullBranch(getGitRepoDatabase()), // branch or tag
+					getRootFolder() + type + ".json", // local path to the file in git
+					jsonString, // content of the file
+					"Pushing changed Database");// commit message
+			
+			System.out.println("Database saved "+ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
+					getRootFolder() + type + ".json"// File from within the Git repo
+			).getAbsolutePath());
+		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
+			org.kohsuke.github.GitHub github = PasswordManager.getGithub();
+			GHRepository repo = github.getOrganization("madhephaestus").getRepository("Hardware-Dimensions");
+			GHRepository newRepo = repo.fork();
+			Vitamins.gitRpoDatabase = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
+			saveDatabase(type);
+		}
+
+	}
 	public static void newVitamin(String type, String id) throws Exception {
 		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
 		if (database.keySet().size() > 0) {
@@ -235,12 +261,18 @@ public class Vitamins {
 				f = ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
 						getRootFolder() + type + ".json"// File from within the Git repo
 				);
-				inPut = FileUtils.openInputStream(f);
-
-				jsonString = IOUtils.toString(inPut);
-				// System.out.println("Loading "+jsonString);
-				// perfoem the GSON parse
-				HashMap<String, HashMap<String, Object>> database = gson.fromJson(jsonString, TT_mapStringString);
+				HashMap<String, HashMap<String, Object>> database;
+				if(f.exists()) {
+				
+					inPut = FileUtils.openInputStream(f);
+	
+					jsonString = IOUtils.toString(inPut);
+					// System.out.println("Loading "+jsonString);
+					// perfoem the GSON parse
+					database = gson.fromJson(jsonString, TT_mapStringString);
+				}else {
+					database=new HashMap<String, HashMap<String,Object>>();
+				}
 				if (database == null) {
 					throw new RuntimeException("create a new one");
 				}
@@ -272,15 +304,43 @@ public class Vitamins {
 	private static String getRootFolder() {
 		return getJsonRootDir();
 	}
+	public static ArrayList<String> listVitaminActuators() {
+		ArrayList<String> actuators = new  ArrayList<String>();
+		
+		for (String vitaminsType : Vitamins.listVitaminTypes()) {
+			HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
+			if (meta != null && meta.containsKey("actuator"))
+				actuators.add(vitaminsType);
+		}
+		return actuators;
+	}
+	public static ArrayList<String> listVitaminShafts() {
+		ArrayList<String> actuators = new  ArrayList<String>();
+		for (String vitaminsType : Vitamins.listVitaminTypes()) {
+			HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
+			if (meta != null && meta.containsKey("shaft"))
+				actuators.add(vitaminsType);
+		}
+		return actuators;
+	}
 
+	public static void setIsShaft(String type) {
+		Vitamins.getMeta(type).remove("motor");
+		Vitamins.getMeta(type).put("shaft", "true");
+	}
+
+	public static void setIsActuator(String type) {
+		Vitamins.getMeta(type).remove("shaft");
+		Vitamins.getMeta(type).put("actuator", "true");
+	}
 	public static ArrayList<String> listVitaminTypes() {
 
 		ArrayList<String> types = new ArrayList<String>();
 		File folder;
 		try {
-			folder = ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
-					getRootFolder() + "hobbyServo.json");
-			File[] listOfFiles = folder.getParentFile().listFiles();
+			
+			folder = new File(ScriptingEngine.getRepositoryCloneDirectory(getGitRepoDatabase()).getAbsoluteFile()+"/"+getRootFolder());
+			File[] listOfFiles = folder.listFiles();
 
 			for (File f : listOfFiles) {
 				if (!f.isDirectory() && f.getName().endsWith(".json")) {
@@ -326,22 +386,18 @@ public class Vitamins {
 				if (PasswordManager.getUsername() != null) {
 					ScriptingEngine.setAutoupdate(true);
 					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-					GHMyself self = github.getMyself();
-					Map<String, GHRepository> myPublic = self.getAllRepositories();
-					for (String myRepo : myPublic.keySet()) {
-						GHRepository ghrepo = myPublic.get(myRepo);
-						if (myRepo.contentEquals("Hardware-Dimensions")
-								&& ghrepo.getOwnerName().contentEquals(self.getLogin())) {
-
-							String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "https://");
-							// System.out.println("Using my version of Viamins: "+myAssets);
-							setGitRepoDatabase(myAssets);
-						}
-					}
+					GHRepository repo =github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions" ); 
+					if(repo!=null) {
+						String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
+						// System.out.println("Using my version of Viamins: "+myAssets);
+						setGitRepoDatabase(myAssets);
+					}else
+						setGitRepoDatabase(defaultgitRpoDatabase);
 				}
 			} catch (Exception ex) {
-				// ex.printStackTrace();
+				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 			}
+			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
 		}
 		return gitRpoDatabase;
 	}

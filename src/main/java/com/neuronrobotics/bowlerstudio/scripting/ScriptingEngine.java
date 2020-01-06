@@ -558,9 +558,7 @@ private static boolean ensureExistance(File desired) throws IOException {
     Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
     Git git = new Git(localRepo);
     try {
-    	
       pull(id,branch);
-    	
       // latest version
       if (flagNewFile) {
         git.add().addFilepattern(FileName).call();
@@ -667,6 +665,7 @@ private static boolean ensureExistance(File desired) throws IOException {
     // the
     // file
     {
+
       // System.out.println("Updating git repo, its been
       // "+(System.currentTimeMillis()-lastTime)+
       // " need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
@@ -980,16 +979,12 @@ private static boolean ensureExistance(File desired) throws IOException {
 		} catch (RefNotFoundException e) {
 			exp.uncaughtException(Thread.currentThread(), e);
 		} catch (RefNotAdvertisedException e) {
-			exp.uncaughtException(Thread.currentThread(), e);
+			git.close();
+			return;
 		} catch (NoHeadException e) {
 			//
 			try {
-				System.err.println("Error on "+remoteURI);
-				Collection<Ref> refs = Git.lsRemoteRepository()
-				        .setHeads(true)
-				        .setRemote(remoteURI)
-				        .call();
-				checkout(remoteURI, (Ref) refs.toArray()[0]);
+				newBranch( remoteURI,  branch);
 			} catch (GitAPIException e1) {
 				exp.uncaughtException(Thread.currentThread(), e);
 			}
@@ -1048,7 +1043,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 		String myName = name[name.length-1];
 		ScriptingEngine.checkout(remoteURI, myName);
   }
-	public static void checkout(String remoteURI, String branch) throws IOException {
+  public static void checkout(String remoteURI, String branch) throws IOException {
 		// cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
@@ -1511,7 +1506,7 @@ public static String urlToGist(URL htmlUrl) {
 	    return new FileRepository(gitRepoFile.getAbsoluteFile());
 	}
 
-	private static File getRepositoryCloneDirectory(String remoteURI) {
+	public static File getRepositoryCloneDirectory(String remoteURI) {
 		if(remoteURI.endsWith("/"))
 			throw new RuntimeException("URL needs to end in .git, no trailing slash "+remoteURI);
 	    if(!remoteURI.endsWith(".git"))
