@@ -308,8 +308,7 @@ public class Vitamins {
 		ArrayList<String> actuators = new  ArrayList<String>();
 		
 		for (String vitaminsType : Vitamins.listVitaminTypes()) {
-			HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
-			if (meta != null && meta.containsKey("actuator"))
+			if (isActuator( vitaminsType))
 				actuators.add(vitaminsType);
 		}
 		return actuators;
@@ -317,13 +316,24 @@ public class Vitamins {
 	public static ArrayList<String> listVitaminShafts() {
 		ArrayList<String> actuators = new  ArrayList<String>();
 		for (String vitaminsType : Vitamins.listVitaminTypes()) {
-			HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
-			if (meta != null && meta.containsKey("shaft"))
+			if (isShaft( vitaminsType))
 				actuators.add(vitaminsType);
 		}
 		return actuators;
 	}
-
+	
+	public static boolean isShaft(String vitaminsType) {
+		HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
+		if (meta != null && meta.containsKey("shaft"))
+			return true;
+		return false;
+	}
+	public static boolean isActuator(String vitaminsType) {
+		HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
+		if (meta != null && meta.containsKey("actuator"))
+			return true;
+		return false;
+	}
 	public static void setIsShaft(String type) {
 		Vitamins.getMeta(type).remove("motor");
 		Vitamins.getMeta(type).put("shaft", "true");
