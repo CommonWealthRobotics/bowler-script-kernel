@@ -47,6 +47,22 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		GitHub github = PasswordManager.getGithub();
 		if(github==null || github.isAnonymous())
 			return;
+		String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
+		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(new Exception());
+		String javaVersion = System.getProperty("java.version");
+		String javafxVersion = System.getProperty("javafx.version");
+		String body = "Auto Reported Issue \r\n"
+				+"BowlerStudio Build "+ StudioBuildInfo.getVersion()+"\n"
+				+"BowlerKernel "+ BowlerKernelBuildInfo.getVersion()+"\n"
+				+"JavaCad Version: " + JavaCadBuildInfo.getVersion()+"\n"
+				+"Java-Bowler Version: " + SDKBuildInfo.getVersion()+"\n"
+				+"Java Version: " + javaVersion+"\n"
+				+"JavaFX Version: " + javafxVersion+"\n"
+				+"\nOS = "+OSUtil.getOsName()+" "+OSUtil.getOsArch()+" "+(OSUtil.is64Bit()?"x64":"x86")+"\r\n"
+				+"```\n"+stacktrace+"\n```"
+				+"\n\nCaught and reported at: \n"
+				+"```\n"+stacktraceFromCatch+"\n```"
+				;
 		try {
 			GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
 			List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
@@ -56,32 +72,24 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				System.err.println("Issues are :"+i.getTitle());
 				if(i.getTitle().contains(source)) {
 					stackTraceReported=true;
-					BowlerKernel.upenURL("https://github.com/CommonWealthRobotics/BowlerStudio/issues/"+i.getNumber());
+					
+					BowlerKernel.upenURL(i.getHtmlUrl().toURI());
 				}
 				
 				if(stackTraceReported)
 					break;
 			}
 			if(!stackTraceReported) {
-				String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
-				String javaVersion = System.getProperty("java.version");
-				String javafxVersion = System.getProperty("javafx.version");
+
+				
 				
 				GHIssue i = repo.createIssue(source)
-				.body("Auto Reported Issue \r\n"
-						+"BowlerStudio Build "+ StudioBuildInfo.getVersion()+"\n"
-						+"BowlerKernel "+ BowlerKernelBuildInfo.getVersion()+"\n"
-						+"JavaCad Version: " + JavaCadBuildInfo.getVersion()+"\n"
-						+"Java-Bowler Version: " + SDKBuildInfo.getVersion()+"\n"
-						+"Java Version: " + javaVersion+"\n"
-						+"JavaFX Version: " + javafxVersion+"\n"
-						+"\nOS = "+OSUtil.getOsName()+" "+OSUtil.getOsArch()+" "+(OSUtil.is64Bit()?"x64":"x86")+"\r\n"
-						+"```\n"+stacktrace+"\n```")
+				.body(body)
 				.label("BUG")
 				.label("AUTO_REPORTED")
 				.assignee("madhephaestus")
 				.create();
-				BowlerKernel.upenURL("https://github.com/CommonWealthRobotics/BowlerStudio/issues/"+i.getId());
+				BowlerKernel.upenURL(i.getHtmlUrl().toURI());
 				
 			}
 		} catch (Throwable e) {

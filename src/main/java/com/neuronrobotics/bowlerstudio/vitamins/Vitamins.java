@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -264,7 +265,12 @@ public class Vitamins {
 					"master", 
 					"## User added vitamins", 
 					true, true);
-				BowlerKernel.upenURL("https://github.com/madhephaestus/Hardware-Dimensions/pull/"+request.getNumber());
+				try {
+					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}else {
 				
 			}
@@ -284,8 +290,12 @@ public class Vitamins {
 				reLoadDatabaseFromFiles();
 				System.out.println("Merged Hardware-Dimensions madhephaestus:master into "+PasswordManager.getUsername()+":master");
 			} else {
-				BowlerKernel.upenURL("https://github.com/" + PasswordManager.getUsername()
-						+ "/Hardware-Dimensions/pull/" + request.getNumber());
+				try {
+					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}catch(java.lang.NullPointerException ex) {
 			ex.printStackTrace();
