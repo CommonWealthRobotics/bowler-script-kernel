@@ -36,52 +36,54 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				System.exit(-5);
 			}
 		}
-		new Thread(() -> {
-			System.out.println("\r\n\r\nReporting Bug:\r\n\r\n");
-			e.printStackTrace(System.out);
-			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
-			reportIssue(e);
-		}).start();
+		except(e);
+		
 	}
 
-	public static void reportIssue(Throwable t) {
-		StackTraceElement[] element = t.getStackTrace();
-		GitHub github = PasswordManager.getGithub();
-		if (github == null || github.isAnonymous())
-			return;
-		String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
-		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(new Exception());
-		String javaVersion = System.getProperty("java.version");
-		String javafxVersion = System.getProperty("javafx.version");
-		String body = "Auto Reported Issue \r\n" + "BowlerStudio Build " + StudioBuildInfo.getVersion() + "\n"
-				+ "BowlerKernel " + BowlerKernelBuildInfo.getVersion() + "\n" + "JavaCad Version: "
-				+ JavaCadBuildInfo.getVersion() + "\n" + "Java-Bowler Version: " + SDKBuildInfo.getVersion() + "\n"
-				+ "Java Version: " + javaVersion + "\n" + "JavaFX Version: " + javafxVersion + "\n" + "\nOS = "
-				+ OSUtil.getOsName() + " " + OSUtil.getOsArch() + " " + (OSUtil.is64Bit() ? "x64" : "x86") + "\r\n"
-				+ "```\n" + stacktrace + "\n```" + "\n\nCaught and reported at: \n" + "```\n" + stacktraceFromCatch
-				+ "\n```";
-		try {
-			GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
-			List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
-			String source = getTitle(element);
-			for (GHIssue i : issues) {
-				System.err.println("Issues are :" + i.getTitle());
-				if (i.getTitle().contains(source)) {
-					BowlerKernel.upenURL(i.getHtmlUrl().toURI());
-					return;
+	public static void except(Throwable t) {
+		new Thread(() -> {
+			System.out.println("\r\n\r\nReporting Bug:\r\n\r\n");
+			t.printStackTrace(System.out);
+			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
+
+			StackTraceElement[] element = t.getStackTrace();
+			GitHub github = PasswordManager.getGithub();
+			if (github == null || github.isAnonymous())
+				return;
+			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
+			String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils
+					.getStackTrace(new Exception());
+			String javaVersion = System.getProperty("java.version");
+			String javafxVersion = System.getProperty("javafx.version");
+			String body = "Auto Reported Issue \r\n" + "BowlerStudio Build " + StudioBuildInfo.getVersion() + "\n"
+					+ "BowlerKernel " + BowlerKernelBuildInfo.getVersion() + "\n" + "JavaCad Version: "
+					+ JavaCadBuildInfo.getVersion() + "\n" + "Java-Bowler Version: " + SDKBuildInfo.getVersion() + "\n"
+					+ "Java Version: " + javaVersion + "\n" + "JavaFX Version: " + javafxVersion + "\n" + "\nOS = "
+					+ OSUtil.getOsName() + " " + OSUtil.getOsArch() + " " + (OSUtil.is64Bit() ? "x64" : "x86") + "\r\n"
+					+ "```\n" + stacktrace + "\n```" + "\n\nCaught and reported at: \n" + "```\n" + stacktraceFromCatch
+					+ "\n```";
+			try {
+				GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
+				List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
+				String source = getTitle(element);
+				for (GHIssue i : issues) {
+					System.err.println("Issues are :" + i.getTitle());
+					if (i.getTitle().contains(source)) {
+						BowlerKernel.upenURL(i.getHtmlUrl().toURI());
+						return;
+					}
+
 				}
 
+				GHIssue i = repo.createIssue(source).body(body).label("BUG").label("AUTO_REPORTED")
+						.assignee("madhephaestus").create();
+				BowlerKernel.upenURL(i.getHtmlUrl().toURI());
+
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-
-			GHIssue i = repo.createIssue(source).body(body).label("BUG").label("AUTO_REPORTED")
-					.assignee("madhephaestus").create();
-			BowlerKernel.upenURL(i.getHtmlUrl().toURI());
-
-		} catch (Throwable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		}).start();
 	}
 
 	private static String getTitle(StackTraceElement[] element) {
