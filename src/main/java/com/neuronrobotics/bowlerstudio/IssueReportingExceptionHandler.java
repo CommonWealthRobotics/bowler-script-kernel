@@ -20,85 +20,71 @@ import com.neuronrobotics.video.OSUtil;
 import javafx.application.Platform;
 
 public class IssueReportingExceptionHandler implements UncaughtExceptionHandler {
-	private static int timerErrorCount =0;
+	private static int timerErrorCount = 0;
+
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
 		StackTraceElement[] element = e.getStackTrace();
-		if(element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer" )) {
-			if(timerErrorCount++>5) {
+		if (element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer")) {
+			if (timerErrorCount++ > 5) {
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}// wait for the Issue to be reported
+				} // wait for the Issue to be reported
 				System.exit(-5);
 			}
 		}
-		new Thread(()-> {
+		new Thread(() -> {
 			System.out.println("\r\n\r\nReporting Bug:\r\n\r\n");
 			e.printStackTrace(System.out);
 			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
-			reportIssue( e) ;
+			reportIssue(e);
 		}).start();
 	}
+
 	public static void reportIssue(Throwable t) {
 		StackTraceElement[] element = t.getStackTrace();
 		GitHub github = PasswordManager.getGithub();
-		if(github==null || github.isAnonymous())
+		if (github == null || github.isAnonymous())
 			return;
 		String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
 		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(new Exception());
 		String javaVersion = System.getProperty("java.version");
 		String javafxVersion = System.getProperty("javafx.version");
-		String body = "Auto Reported Issue \r\n"
-				+"BowlerStudio Build "+ StudioBuildInfo.getVersion()+"\n"
-				+"BowlerKernel "+ BowlerKernelBuildInfo.getVersion()+"\n"
-				+"JavaCad Version: " + JavaCadBuildInfo.getVersion()+"\n"
-				+"Java-Bowler Version: " + SDKBuildInfo.getVersion()+"\n"
-				+"Java Version: " + javaVersion+"\n"
-				+"JavaFX Version: " + javafxVersion+"\n"
-				+"\nOS = "+OSUtil.getOsName()+" "+OSUtil.getOsArch()+" "+(OSUtil.is64Bit()?"x64":"x86")+"\r\n"
-				+"```\n"+stacktrace+"\n```"
-				+"\n\nCaught and reported at: \n"
-				+"```\n"+stacktraceFromCatch+"\n```"
-				;
+		String body = "Auto Reported Issue \r\n" + "BowlerStudio Build " + StudioBuildInfo.getVersion() + "\n"
+				+ "BowlerKernel " + BowlerKernelBuildInfo.getVersion() + "\n" + "JavaCad Version: "
+				+ JavaCadBuildInfo.getVersion() + "\n" + "Java-Bowler Version: " + SDKBuildInfo.getVersion() + "\n"
+				+ "Java Version: " + javaVersion + "\n" + "JavaFX Version: " + javafxVersion + "\n" + "\nOS = "
+				+ OSUtil.getOsName() + " " + OSUtil.getOsArch() + " " + (OSUtil.is64Bit() ? "x64" : "x86") + "\r\n"
+				+ "```\n" + stacktrace + "\n```" + "\n\nCaught and reported at: \n" + "```\n" + stacktraceFromCatch
+				+ "\n```";
 		try {
 			GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
 			List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
-			boolean stackTraceReported =false;
 			String source = getTitle(element);
-			for(GHIssue i:issues) {
-				System.err.println("Issues are :"+i.getTitle());
-				if(i.getTitle().contains(source)) {
-					stackTraceReported=true;
-					
+			for (GHIssue i : issues) {
+				System.err.println("Issues are :" + i.getTitle());
+				if (i.getTitle().contains(source)) {
 					BowlerKernel.upenURL(i.getHtmlUrl().toURI());
+					return;
 				}
-				
-				if(stackTraceReported)
-					break;
-			}
-			if(!stackTraceReported) {
 
-				
-				
-				GHIssue i = repo.createIssue(source)
-				.body(body)
-				.label("BUG")
-				.label("AUTO_REPORTED")
-				.assignee("madhephaestus")
-				.create();
-				BowlerKernel.upenURL(i.getHtmlUrl().toURI());
-				
 			}
+
+			GHIssue i = repo.createIssue(source).body(body).label("BUG").label("AUTO_REPORTED")
+					.assignee("madhephaestus").create();
+			BowlerKernel.upenURL(i.getHtmlUrl().toURI());
+
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
+
 	private static String getTitle(StackTraceElement[] element) {
-		return element[0].getClassName()+" at line "+element[0].getLineNumber();
+		return element[0].getClassName() + " at line " + element[0].getLineNumber();
 	}
 }
