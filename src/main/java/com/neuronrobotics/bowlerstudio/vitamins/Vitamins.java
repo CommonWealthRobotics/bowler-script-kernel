@@ -17,6 +17,7 @@ import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
@@ -194,12 +195,13 @@ public class Vitamins {
 		// Save contents and publish them
 		String jsonString = makeJson(type);
 		try {
+			//new Exception().printStackTrace();
 			ScriptingEngine.pushCodeToGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
 					ScriptingEngine.getFullBranch(getGitRepoDatabase()), // branch or tag
 					getRootFolder() + type + ".json", // local path to the file in git
 					jsonString, // content of the file
-					"Pushing changed Database");// commit message
-			
+					"Making changes to "+type+" by "+PasswordManager.getUsername()+"\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit message
+			//System.err.println(jsonString);
 			System.out.println("Database saved "+ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
 					getRootFolder() + type + ".json"// File from within the Git repo
 			).getAbsolutePath());
@@ -230,17 +232,25 @@ public class Vitamins {
 			return;
 		try {
 			GHRepository myrepo = github.getRepository(PasswordManager.getUsername()+"/Hardware-Dimensions");
-			if(myrepo.queryPullRequests().state(GHIssueState.OPEN).head("madhephaestus:master")
-			            .list().asList().size()==0) {
-				GHPullRequest request = myrepo.createPullRequest("Update from source", 
-						"madhephaestus:master", 
-						"master", 
-						"## Upstream add vitamins", 
-						false, false);
-				if(request.getMergeable()) {
-					request.merge("Auto Merging Master");
+			List<GHPullRequest> asList1 = myrepo.queryPullRequests().state(GHIssueState.OPEN).head("madhephaestus:master")
+			            .list().asList();
+			Thread.sleep(200);// Some asynchronus delay here, not sure why...
+			if(asList1.size()==0) {
+				try {
+					GHPullRequest request = myrepo.createPullRequest("Update from source", 
+							"madhephaestus:master", 
+							"master", 
+							"## Upstream add vitamins", 
+							false, false);
+					if(request!=null) {
+						processSelfPR(request);
+					}
+				}catch(org.kohsuke.github.HttpException ex) {
+					// no commits have been made to master
 				}
 				
+			}else {
+				processSelfPR(asList1.get(0));
 			}
 			String head = PasswordManager.getUsername()+":master";
 			List<GHPullRequest> asList = repo.queryPullRequests()
@@ -249,19 +259,37 @@ public class Vitamins {
 		            .list().asList();
 			if(asList.size()==0) {
 				System.err.println("Creating PR for "+head);
-				repo.createPullRequest("User Added vitamins", 
+				GHPullRequest request = repo.createPullRequest("User Added vitamins to "+type, 
 					head, 
 					"master", 
 					"## User added vitamins", 
 					true, true);
+				BowlerKernel.upenURL("https://github.com/madhephaestus/Hardware-Dimensions/pull/"+request.getNumber());
+			}else {
+				
 			}
 		}catch(Exception ex) {
 			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),ex);
 		}
+	
 
-		
-		
+	}
 
+	private static void processSelfPR(GHPullRequest request) throws IOException {
+		if(request== null)
+			return;
+		try {
+			if (request.getMergeable()) {
+				request.merge("Auto Merging Master");
+				reLoadDatabaseFromFiles();
+				System.out.println("Merged Hardware-Dimensions madhephaestus:master into "+PasswordManager.getUsername()+":master");
+			} else {
+				BowlerKernel.upenURL("https://github.com/" + PasswordManager.getUsername()
+						+ "/Hardware-Dimensions/pull/" + request.getNumber());
+			}
+		}catch(java.lang.NullPointerException ex) {
+			ex.printStackTrace();
+		}
 	}
 	public static void newVitamin(String type, String id) throws Exception {
 		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
@@ -441,7 +469,7 @@ public class Vitamins {
 	// setGitRepoDatabase(gitRpoDatabase);
 	// }
 	//
-	public static String getGitRepoDatabase() throws IOException {
+	public static String getGitRepoDatabase()  {
 		if (!checked) {
 			checked = true;
 			try {
@@ -469,6 +497,18 @@ public class Vitamins {
 		return gitRpoDatabase;
 	}
 
+	public static void reLoadDatabaseFromFiles() {
+		
+		setGitRepoDatabase(getGitRepoDatabase());
+		try {
+			ScriptingEngine.pull(getGitRepoDatabase());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		listVitaminTypes();
+		
+	}
 	public static void setGitRepoDatabase(String gitRpoDatabase) {
 		Vitamins.gitRpoDatabase = gitRpoDatabase;
 		databaseSet.clear();

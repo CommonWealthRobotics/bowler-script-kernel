@@ -25,8 +25,15 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	public void uncaughtException(Thread t, Throwable e) {
 		StackTraceElement[] element = e.getStackTrace();
 		if(element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer" )) {
-			if(timerErrorCount++>5)
+			if(timerErrorCount++>5) {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}// wait for the Issue to be reported
 				System.exit(-5);
+			}
 		}
 		new Thread(()-> {
 			System.out.println("\r\n\r\nReporting Bug:\r\n\r\n");
@@ -49,6 +56,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				System.err.println("Issues are :"+i.getTitle());
 				if(i.getTitle().contains(source)) {
 					stackTraceReported=true;
+					BowlerKernel.upenURL("https://github.com/CommonWealthRobotics/BowlerStudio/issues/"+i.getNumber());
 				}
 				
 				if(stackTraceReported)
@@ -59,7 +67,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				String javaVersion = System.getProperty("java.version");
 				String javafxVersion = System.getProperty("javafx.version");
 				
-				repo.createIssue(source)
+				GHIssue i = repo.createIssue(source)
 				.body("Auto Reported Issue \r\n"
 						+"BowlerStudio Build "+ StudioBuildInfo.getVersion()+"\n"
 						+"BowlerKernel "+ BowlerKernelBuildInfo.getVersion()+"\n"
@@ -72,10 +80,11 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				.label("BUG")
 				.label("AUTO_REPORTED")
 				.assignee("madhephaestus")
-				.create();;
+				.create();
+				BowlerKernel.upenURL("https://github.com/CommonWealthRobotics/BowlerStudio/issues/"+i.getId());
 				
 			}
-		} catch (IOException e) {
+		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
