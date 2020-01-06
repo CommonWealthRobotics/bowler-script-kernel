@@ -337,8 +337,7 @@ public class Vitamins {
 
 		ArrayList<String> types = new ArrayList<String>();
 		File folder;
-		try {
-			
+		try {		
 			folder = new File(ScriptingEngine.getRepositoryCloneDirectory(getGitRepoDatabase()).getAbsoluteFile()+"/"+getRootFolder());
 			File[] listOfFiles = folder.listFiles();
 
