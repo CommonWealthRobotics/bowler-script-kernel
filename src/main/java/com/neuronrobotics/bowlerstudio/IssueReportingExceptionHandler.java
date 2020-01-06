@@ -20,20 +20,19 @@ import com.neuronrobotics.video.OSUtil;
 import javafx.application.Platform;
 
 public class IssueReportingExceptionHandler implements UncaughtExceptionHandler {
-
+	private static int timerErrorCount =0;
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
+		StackTraceElement[] element = e.getStackTrace();
+		if(element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer" )) {
+			if(timerErrorCount++>5)
+				System.exit(-5);
+		}
 		new Thread(()-> {
 			System.out.println("\r\n\r\nReporting Bug:\r\n\r\n");
 			e.printStackTrace(System.out);
 			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
 			reportIssue( e) ;
-			StackTraceElement[] element = e.getStackTrace();
-			if(element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer" )) {
-				
-				System.exit(-5);
-			}
-
 		}).start();
 	}
 	public static void reportIssue(Throwable t) {
