@@ -184,7 +184,11 @@ public class Vitamins {
 		if (database.get(id) == null) {
 			database.put(id, new HashMap<String, Object>());
 		}
-		return database.get(id);
+		HashMap<String, Object> hashMap = database.get(id);
+		for(String key:hashMap.keySet()) {
+			sanatize(key,  hashMap);
+		}
+		return hashMap;
 	}
 
 	public static String makeJson(String type) {
@@ -328,13 +332,19 @@ public class Vitamins {
 	public static void setParameter(String type, String id, String parameterName, Object parameter) throws Exception {
 
 		HashMap<String, Object> config = getConfiguration(type, id);
+		config.put(parameterName, parameter);
+		sanatize(parameterName,  config);
+
+		// saveDatabase(type);
+	}
+
+	private static void sanatize(String parameterName,  HashMap<String, Object> config) {
+		Object parameter=config.get(parameterName);
 		try {
 			config.put(parameterName, Double.parseDouble(parameter.toString()));
 		} catch (NumberFormatException ex) {
 			config.put(parameterName, parameter);
 		}
-
-		// saveDatabase(type);
 	}
 
 	public static HashMap<String, HashMap<String, Object>> getDatabase(String type) {
