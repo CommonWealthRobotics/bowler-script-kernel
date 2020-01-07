@@ -41,6 +41,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	}
 
 	public static void except(Throwable t) {
+		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils
+				.getStackTrace(new Exception());
 		new Thread(() -> {
 			System.out.println("\r\n\r\nReporting Bug:\r\n\r\n");
 			t.printStackTrace(System.out);
@@ -51,8 +53,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			if (github == null || github.isAnonymous())
 				return;
 			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
-			String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils
-					.getStackTrace(new Exception());
+			
 			String javaVersion = System.getProperty("java.version");
 			String javafxVersion = System.getProperty("javafx.version");
 			String body = "Auto Reported Issue \r\n" + "BowlerStudio Build " + StudioBuildInfo.getVersion() + "\n"
