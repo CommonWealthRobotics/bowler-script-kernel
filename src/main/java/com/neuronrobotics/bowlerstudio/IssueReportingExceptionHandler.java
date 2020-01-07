@@ -21,6 +21,11 @@ import javafx.application.Platform;
 
 public class IssueReportingExceptionHandler implements UncaughtExceptionHandler {
 	private static int timerErrorCount = 0;
+	String stacktraceFromHandlerInstantiation;
+	public IssueReportingExceptionHandler(){
+		stacktraceFromHandlerInstantiation=org.apache.commons.lang.exception.ExceptionUtils
+				.getStackTrace(new Exception());
+	}
 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
@@ -40,7 +45,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		
 	}
 
-	public static void except(Throwable t) {
+	public void except(Throwable t) {
 		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils
 				.getStackTrace(new Exception());
 		new Thread(() -> {
@@ -62,7 +67,12 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 					+ "Java Version: " + javaVersion + "\n" + "JavaFX Version: " + javafxVersion + "\n" + "\nOS = "
 					+ OSUtil.getOsName() + " " + OSUtil.getOsArch() + " " + (OSUtil.is64Bit() ? "x64" : "x86") + "\r\n"
 					+ "```\n" + stacktrace + "\n```" + "\n\nCaught and reported at: \n" + "```\n" + stacktraceFromCatch
-					+ "\n```";
+					+ "\n```\n"
+					+"\nIssueReportingExceptionHandler Created at:\n"
+					+"\n```\n"
+					+stacktraceFromHandlerInstantiation
+					+"\n```\n"
+					;
 			try {
 				GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
 				List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
