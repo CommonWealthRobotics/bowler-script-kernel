@@ -2,6 +2,8 @@ package com.neuronrobotics.bowlerstudio;
 
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.kohsuke.github.GHIssue;
@@ -22,6 +24,8 @@ import javafx.application.Platform;
 public class IssueReportingExceptionHandler implements UncaughtExceptionHandler {
 	private static int timerErrorCount = 0;
 	String stacktraceFromHandlerInstantiation;
+	private static boolean processing=false;
+	private static HashMap<Throwable,String> exceptionQueue =new HashMap<Throwable, String>();
 	public IssueReportingExceptionHandler(){
 		stacktraceFromHandlerInstantiation=org.apache.commons.lang.exception.ExceptionUtils
 				.getStackTrace(new Exception());
@@ -44,11 +48,9 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		except(e);
 		
 	}
-
-	public void except(Throwable t) {
-		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils
-				.getStackTrace(new Exception());
+	public void except(Throwable t, String stacktraceFromCatch) {
 		new Thread(() -> {
+			processing=true;
 			System.out.println("\r\n\r\nReporting Bug:\r\n\r\n");
 			t.printStackTrace(System.out);
 			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
@@ -94,7 +96,24 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			processing=false;
+			if(!exceptionQueue.isEmpty()) {
+				Throwable exception = (Throwable) exceptionQueue.keySet().toArray()[0];
+				String source = exceptionQueue.remove(exception);
+				except(exception,  source) ;
+			}
+				
 		}).start();
+	}
+	public void except(Throwable t) {
+		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils
+				.getStackTrace(new Exception());
+		if(processing) {
+			exceptionQueue.put(t, stacktraceFromCatch);
+			return;
+		}
+		
+		except( t, stacktraceFromCatch);
 	}
 
 	private static String getTitle(StackTraceElement[] element) {
