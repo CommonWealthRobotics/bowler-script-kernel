@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
+import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -82,6 +83,18 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				for (GHIssue i : issues) {
 					System.err.println("Issues are :" + i.getTitle());
 					if (i.getTitle().contains(source)) {
+						List<GHIssueComment> comments = i.getComments();
+						// Check to see if i created this issue
+						boolean metoo=i.getUser().getName().contentEquals(PasswordManager.getUsername());
+						for(GHIssueComment comment:comments) {
+							// check to see if i commented on this issue
+							if(comment.getUser().getName().contentEquals(PasswordManager.getUsername())) {
+								metoo=true;
+							}
+						}
+						// If i havent commented yet, comment that i had this issue too. 
+						if(!metoo)
+							i.comment(body);
 						BowlerKernel.upenURL(i.getHtmlUrl().toURI());
 						return;
 					}
