@@ -1286,6 +1286,18 @@ private static boolean ensureExistance(File desired) throws IOException {
         findLocalPath(currentFile, git)};
   }
 
+	public static boolean checkOwner(String url) {
+		Git git;
+		try {
+			git = new Git(getRepository(url));
+		} catch (IOException e1) {
+			exp.uncaughtException(Thread.currentThread(), e1);
+			return false;
+		}
+		boolean owned = checkOwner( git);
+		git.close();
+		return owned;
+	}
 	public static boolean checkOwner(File currentFile) {
 		Git git;
 		try {
@@ -1294,7 +1306,12 @@ private static boolean ensureExistance(File desired) throws IOException {
 			exp.uncaughtException(Thread.currentThread(), e1);
 			return false;
 		}
-
+		boolean owned = checkOwner( git);
+		git.close();
+		return owned;
+  }
+	
+	private static boolean checkOwner(Git git) {
 		try {
 			waitForLogin();
 			git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
@@ -1317,9 +1334,8 @@ private static boolean ensureExistance(File desired) throws IOException {
 				}
 			}
 		}
-		git.close();
 		return false;
-  }
+	}
 
   public static GHGist fork(String currentGist) throws Exception {
 
@@ -1555,5 +1571,6 @@ public static String urlToGist(URL htmlUrl) {
 		}
 		git.close();
 	}
+
 
 }
