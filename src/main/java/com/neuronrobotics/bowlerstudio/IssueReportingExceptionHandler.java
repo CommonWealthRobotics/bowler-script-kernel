@@ -52,10 +52,6 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	public void except(Throwable t, String stacktraceFromCatch) {
 		new Thread(() -> {
 			processing=true;
-			System.out.println("\r\n\r\nReporting Bug:\r\n\r\n");
-			t.printStackTrace(System.out);
-			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
-
 			StackTraceElement[] element = t.getStackTrace();
 			GitHub github = PasswordManager.getGithub();
 			if (github == null || github.isAnonymous())
@@ -76,6 +72,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 					+stacktraceFromHandlerInstantiation
 					+"\n```\n"
 					;
+			System.out.println(body);
+			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
 			try {
 				GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
 				List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
@@ -101,7 +99,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 
 				}
 
-				GHIssue i = repo.createIssue(source).body(body).label("BUG").label("AUTO_REPORTED")
+				GHIssue i = repo.createIssue("Build " + StudioBuildInfo.getVersion()+" "+source).body(body).label("BUG").label("AUTO_REPORTED")
 						.assignee("madhephaestus").create();
 				BowlerKernel.upenURL(i.getHtmlUrl().toURI());
 
