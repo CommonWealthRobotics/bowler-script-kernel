@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.vitamins;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -185,7 +186,9 @@ public class Vitamins {
 			database.put(id, new HashMap<String, Object>());
 		}
 		HashMap<String, Object> hashMap = database.get(id);
-		for(String key:hashMap.keySet()) {
+		Object[] array = hashMap.keySet().toArray();
+		for (int i=0;i<array.length;i++) {
+			String key = (String)array[i];
 			sanatize(key,  hashMap);
 		}
 		return hashMap;
