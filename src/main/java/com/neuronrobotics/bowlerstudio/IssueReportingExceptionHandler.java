@@ -131,8 +131,10 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		
 		except( t, stacktraceFromCatch);
 	}
-
-	private static String getTitle(StackTraceElement[] element) {
+	public static String getTitle(Throwable element) {
+		return getTitle(element.getStackTrace());
+	}
+	public static String getTitle(StackTraceElement[] element) {
 		return element[0].getClassName() + " at line " + element[0].getLineNumber();
 	}
 }
