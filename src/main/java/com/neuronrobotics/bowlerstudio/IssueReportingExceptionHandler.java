@@ -51,11 +51,9 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	}
 	public void except(Throwable t, String stacktraceFromCatch) {
 		new Thread(() -> {
-			processing=true;
+			
 			StackTraceElement[] element = t.getStackTrace();
-			GitHub github = PasswordManager.getGithub();
-			if (github == null || github.isAnonymous())
-				return;
+
 			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
 			
 			String javaVersion = System.getProperty("java.version");
@@ -72,8 +70,15 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 					+stacktraceFromHandlerInstantiation
 					+"\n```\n"
 					;
+			System.err.println(body);
+			System.err.println("\r\n\r\nBug Reported!\r\n\r\n");			
 			System.out.println(body);
 			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
+			GitHub github = PasswordManager.getGithub();
+
+			if (github == null || github.isAnonymous())
+				return;
+			processing=true;
 			try {
 				GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
 				List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
