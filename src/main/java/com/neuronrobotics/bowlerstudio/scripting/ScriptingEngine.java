@@ -8,6 +8,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.CreateBranchCommand;
+import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.TransportConfigCallback;
@@ -1056,17 +1057,38 @@ private static boolean ensureExistance(File desired) throws IOException {
 			// String currentBranch=getFullBranch(remoteURI);
 			Repository localRepo = new FileRepository(gitRepoFile);
 			if (!currentBranch.endsWith(branch)) {
+				
 				System.err.println("Current branch is "+currentBranch+" need "+branch);
 				Git git = new Git(localRepo);
 				try {
-
-					git.checkout().
-			        setName(branch).
-			        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
-			        setStartPoint("origin/" + branch).
-			        call();
-				} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
-
+					Collection<Ref> branches = getAllBranches(remoteURI);
+					for(Ref R:branches) {
+						if(R.getName().endsWith(branch))	{
+							System.err.println("\nFound upstream "+R.getName());
+							try {
+								git.checkout().
+						        setName(branch).
+						        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
+						        setStartPoint("origin/"+branch).
+						        call();
+								return;
+							}catch(RefNotFoundException e) {
+								git.branchCreate() 
+				                   .setName(branch)
+				                   .setUpstreamMode(SetupUpstreamMode.SET_UPSTREAM)
+				                   .setStartPoint("origin/"+branch)
+				                   .setForce(true)
+				                   .call(); 
+								git.checkout().
+						        setName(branch).
+						        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
+						        setStartPoint("origin/"+branch).
+						        call();
+								return;
+							}
+						}
+					}
+					// The ref does not exist upstream, create
 					try {
 						newBranch( remoteURI,branch );
 					} catch (RefAlreadyExistsException e) {

@@ -116,8 +116,7 @@ public class ConfigurationDatabase {
           .inlineFileScriptRun(loadFile(), null);
       //new Exception().printStackTrace();
     } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      // oignore and use new one
     }
     if (database == null) {
       database = new HashMap<String, HashMap<String, Object>>();
