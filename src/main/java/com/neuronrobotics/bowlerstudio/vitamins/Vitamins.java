@@ -185,13 +185,18 @@ public class Vitamins {
 		if (database.get(id) == null) {
 			database.put(id, new HashMap<String, Object>());
 		}
-		HashMap<String, Object> hashMap = database.get(id);
-		Object[] array = hashMap.keySet().toArray();
-		for (int i=0;i<array.length;i++) {
-			String key = (String)array[i];
-			sanatize(key,  hashMap);
+		for(int j=0;j<5;j++) {
+			try {
+				HashMap<String, Object> hashMap = database.get(id);
+				Object[] array = hashMap.keySet().toArray();
+				for (int i=0;i<array.length;i++) {
+					String key = (String)array[i];
+					sanatize(key,  hashMap);
+				}
+				return hashMap;
+			}catch (java.util.ConcurrentModificationException ex) {}
 		}
-		return hashMap;
+		return new HashMap<String, Object>();
 	}
 
 	public static String makeJson(String type) {
