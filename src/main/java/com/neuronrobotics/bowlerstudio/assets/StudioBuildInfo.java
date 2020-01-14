@@ -15,7 +15,7 @@ public class StudioBuildInfo {
     String s = getTag("app.version");
 
     if (s == null) {
-      throw new RuntimeException("Failed to load version number");
+      s="0.0.0";
     }
     return s;
   }

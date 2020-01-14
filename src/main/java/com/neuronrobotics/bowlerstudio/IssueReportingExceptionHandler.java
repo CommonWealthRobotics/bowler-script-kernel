@@ -5,6 +5,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueBuilder;
@@ -21,12 +22,16 @@ import com.neuronrobotics.sdk.config.SDKBuildInfo;
 import com.neuronrobotics.video.OSUtil;
 
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 
 public class IssueReportingExceptionHandler implements UncaughtExceptionHandler {
 	private static int timerErrorCount = 0;
 	String stacktraceFromHandlerInstantiation;
 	private static boolean processing=false;
 	private static HashMap<Throwable,String> exceptionQueue =new HashMap<Throwable, String>();
+	private static boolean reportIssues =false;
 	public IssueReportingExceptionHandler(){
 		stacktraceFromHandlerInstantiation=org.apache.commons.lang.exception.ExceptionUtils
 				.getStackTrace(new Exception());
@@ -79,6 +84,32 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			if (github == null || github.isAnonymous())
 				return;
 			processing=true;
+			if(reportIssues) {
+				runReport(element, body, github);
+				return;
+			}
+			Platform.runLater(() -> {
+				Alert alert = new Alert(AlertType.CONFIRMATION);
+				alert.setTitle("An Error occoured");
+				alert.setHeaderText("Would it be ok if I report this issue back to Kevin so he can fix it?");
+				alert.setContentText("Are you ok with this?");
+				Optional<ButtonType> result = alert.showAndWait();
+				if (result.get() == ButtonType.OK){
+					reportIssues=true;
+					runReport(element, body, github);
+				} else {
+					processing=false;
+				}
+			});
+			
+			
+			
+				
+		}).start();
+	}
+
+	private void runReport(StackTraceElement[] element, String body, GitHub github) {
+		new Thread(() -> {
 			try {
 				GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
 				List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
@@ -118,8 +149,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				String source = exceptionQueue.remove(exception);
 				except(exception,  source) ;
 			}
-				
 		}).start();
+		
 	}
 	public void except(Throwable t) {
 		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils
