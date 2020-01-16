@@ -135,6 +135,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
     addScriptingLanguage(new RobotHelper());
     addScriptingLanguage(new JsonRunner());
     addScriptingLanguage(new ArduinoLoader());
+    addScriptingLanguage(new KotlinHelper());
   }
   
   public static void addOnCommitEventListeners(String url,Runnable event) {

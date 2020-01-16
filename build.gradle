@@ -116,6 +116,7 @@ repositories {
 	maven { url 'https://jenkinsci.artifactoryonline.com/jenkinsci/public/' }
 	//com.neuronrobotics hosting point
 	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
+    maven { url "https://dl.bintray.com/s1m0nw1/KtsRunner" }
 }
 
 dependencies {
@@ -261,6 +262,8 @@ dependencies {
 	// https://mvnrepository.com/artifact/de.dfki.mary/marytts-lang-en
 	compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.2'
 
+    compile group: "de.swirtz", name: "ktsRunner", version: "0.0.7"
+
 }
 
 
@@ -277,7 +280,7 @@ jar {
 		    			"Created-By": "CommonWealth Cooperative",
 		    			"Specification-Title": props."app.name",
 		    			"Specification-Version": props."app.version",
-		    			"Specification-Vendor": "CommonWealth Robotics Cooperative",,
+		    			"Specification-Vendor": "CommonWealth Robotics Cooperative",
 		    			"Implementation-Title": props."app.name",
 		    			"Implementation-Version" : props."app.version",
 		    			"Implementation-Vendor": "CommonWealth Robotics Cooperative"
