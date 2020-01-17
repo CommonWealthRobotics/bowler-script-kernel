@@ -13,8 +13,11 @@ import java.util.stream.Stream;
  * Provides kotlin support. If you want to pass arguments to the script. return a class which
  * implements KotlinScriptSkeleton (it will be instantiated and runScript will be called).
  */
-public class KotlinHelper implements IScriptingLanguage {
 
+public class KotlinHelper implements IScriptingLanguage {
+	static {
+		System.setProperty("idea.io.use.fallback", "true");
+	}
     private Object inline(String content, ArrayList<Object> args) throws Exception {
         KtsObjectLoader loader = new KtsObjectLoader();
         Object result = loader.getEngine().eval(content);
