@@ -3,6 +3,8 @@ package com.neuronrobotics.bowlerstudio.vitamins;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,6 +18,8 @@ import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -28,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,7 +43,9 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHMyself;
+import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
 import com.google.gson.Gson;
@@ -108,7 +115,7 @@ public class Vitamins {
 		return get(type, id, 0);
 	}
 
-	public static CSG get(String type, String id, int depthGauge) throws Exception {
+	private static CSG get(String type, String id, int depthGauge) throws Exception {
 		String key = type + id;
 
 		try {
@@ -142,6 +149,27 @@ public class Vitamins {
 			}
 		}
 	}
+	
+	public static File getScriptFile(String type) {
+		HashMap<String, Object> script = getMeta(type);
+		
+		try {
+			return ScriptingEngine.fileFromGit(script.get("scriptGit").toString(), script.get("scriptFile").toString());
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	public static HashMap<String, Object> getMeta(String type) {
 		return getConfiguration(type, "meta");
@@ -157,7 +185,29 @@ public class Vitamins {
 		if (database.get(id) == null) {
 			database.put(id, new HashMap<String, Object>());
 		}
-		return database.get(id);
+		for(int j=0;j<5;j++) {
+			try {
+				HashMap<String, Object> hashMap = database.get(id);
+				Object[] array = hashMap.keySet().toArray();
+				for (int i=0;i<array.length;i++) {
+					String key = (String)array[i];
+					sanatize(key,  hashMap);
+				}
+				return hashMap;
+			}catch (java.util.ConcurrentModificationException ex) {
+				if(j==4) {
+					new IssueReportingExceptionHandler().except(ex);
+				}else {
+					try {
+						Thread.sleep(5);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return new HashMap<String, Object>();
 	}
 
 	public static String makeJson(String type) {
@@ -169,12 +219,16 @@ public class Vitamins {
 		// Save contents and publish them
 		String jsonString = makeJson(type);
 		try {
+			//new Exception().printStackTrace();
 			ScriptingEngine.pushCodeToGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
 					ScriptingEngine.getFullBranch(getGitRepoDatabase()), // branch or tag
 					getRootFolder() + type + ".json", // local path to the file in git
 					jsonString, // content of the file
-					"Pushing changed Database");// commit message
-
+					"Making changes to "+type+" by "+PasswordManager.getUsername()+"\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit message
+			//System.err.println(jsonString);
+			System.out.println("Database saved "+ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
+					getRootFolder() + type + ".json"// File from within the Git repo
+			).getAbsolutePath());
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
 			System.out.println("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
 			System.out.println(
@@ -183,7 +237,93 @@ public class Vitamins {
 		}
 
 	}
+	public static void saveDatabaseForkIfMissing(String type) throws Exception {
 
+		org.kohsuke.github.GitHub github = PasswordManager.getGithub();
+		GHRepository repo = github.getRepository("madhephaestus/Hardware-Dimensions");
+		try {
+			saveDatabase(type);
+		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
+			
+			
+			GHRepository newRepo = repo.fork();
+			
+			Vitamins.gitRpoDatabase = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
+			saveDatabase(type);
+			
+		}
+		if(PasswordManager.getUsername().contentEquals("madhephaestus"))
+			return;
+		try {
+			GHRepository myrepo = github.getRepository(PasswordManager.getUsername()+"/Hardware-Dimensions");
+			List<GHPullRequest> asList1 = myrepo.queryPullRequests().state(GHIssueState.OPEN).head("madhephaestus:master")
+			            .list().asList();
+			Thread.sleep(200);// Some asynchronus delay here, not sure why...
+			if(asList1.size()==0) {
+				try {
+					GHPullRequest request = myrepo.createPullRequest("Update from source", 
+							"madhephaestus:master", 
+							"master", 
+							"## Upstream add vitamins", 
+							false, false);
+					if(request!=null) {
+						processSelfPR(request);
+					}
+				}catch(org.kohsuke.github.HttpException ex) {
+					// no commits have been made to master
+				}
+				
+			}else {
+				processSelfPR(asList1.get(0));
+			}
+			String head = PasswordManager.getUsername()+":master";
+			List<GHPullRequest> asList = repo.queryPullRequests()
+		            .state(GHIssueState.OPEN)
+		            .head(head)
+		            .list().asList();
+			if(asList.size()==0) {
+				System.err.println("Creating PR for "+head);
+				GHPullRequest request = repo.createPullRequest("User Added vitamins to "+type, 
+					head, 
+					"master", 
+					"## User added vitamins", 
+					true, true);
+				try {
+					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else {
+				
+			}
+		}catch(Exception ex) {
+			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),ex);
+		}
+	
+
+	}
+
+	private static void processSelfPR(GHPullRequest request) throws IOException {
+		if(request== null)
+			return;
+		try {
+			if (request.getMergeable()) {
+				request.merge("Auto Merging Master");
+				reLoadDatabaseFromFiles();
+				System.out.println("Merged Hardware-Dimensions madhephaestus:master into "+PasswordManager.getUsername()+":master");
+			} else {
+				try {
+					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}catch(java.lang.NullPointerException ex) {
+			ex.printStackTrace();
+		}
+	}
 	public static void newVitamin(String type, String id) throws Exception {
 		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
 		if (database.keySet().size() > 0) {
@@ -211,13 +351,19 @@ public class Vitamins {
 	public static void setParameter(String type, String id, String parameterName, Object parameter) throws Exception {
 
 		HashMap<String, Object> config = getConfiguration(type, id);
+		config.put(parameterName, parameter);
+		sanatize(parameterName,  config);
+
+		// saveDatabase(type);
+	}
+
+	private static void sanatize(String parameterName,  HashMap<String, Object> config) {
+		Object parameter=config.get(parameterName);
 		try {
 			config.put(parameterName, Double.parseDouble(parameter.toString()));
 		} catch (NumberFormatException ex) {
 			config.put(parameterName, parameter);
 		}
-
-		// saveDatabase(type);
 	}
 
 	public static HashMap<String, HashMap<String, Object>> getDatabase(String type) {
@@ -235,12 +381,18 @@ public class Vitamins {
 				f = ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
 						getRootFolder() + type + ".json"// File from within the Git repo
 				);
-				inPut = FileUtils.openInputStream(f);
-
-				jsonString = IOUtils.toString(inPut);
-				// System.out.println("Loading "+jsonString);
-				// perfoem the GSON parse
-				HashMap<String, HashMap<String, Object>> database = gson.fromJson(jsonString, TT_mapStringString);
+				HashMap<String, HashMap<String, Object>> database;
+				if(f.exists()) {
+				
+					inPut = FileUtils.openInputStream(f);
+	
+					jsonString = IOUtils.toString(inPut);
+					// System.out.println("Loading "+jsonString);
+					// perfoem the GSON parse
+					database = gson.fromJson(jsonString, TT_mapStringString);
+				}else {
+					database=new HashMap<String, HashMap<String,Object>>();
+				}
 				if (database == null) {
 					throw new RuntimeException("create a new one");
 				}
@@ -272,15 +424,52 @@ public class Vitamins {
 	private static String getRootFolder() {
 		return getJsonRootDir();
 	}
+	public static ArrayList<String> listVitaminActuators() {
+		ArrayList<String> actuators = new  ArrayList<String>();
+		
+		for (String vitaminsType : Vitamins.listVitaminTypes()) {
+			if (isActuator( vitaminsType))
+				actuators.add(vitaminsType);
+		}
+		return actuators;
+	}
+	public static ArrayList<String> listVitaminShafts() {
+		ArrayList<String> actuators = new  ArrayList<String>();
+		for (String vitaminsType : Vitamins.listVitaminTypes()) {
+			if (isShaft( vitaminsType))
+				actuators.add(vitaminsType);
+		}
+		return actuators;
+	}
+	
+	public static boolean isShaft(String vitaminsType) {
+		HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
+		if (meta != null && meta.containsKey("shaft"))
+			return true;
+		return false;
+	}
+	public static boolean isActuator(String vitaminsType) {
+		HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
+		if (meta != null && meta.containsKey("actuator"))
+			return true;
+		return false;
+	}
+	public static void setIsShaft(String type) {
+		Vitamins.getMeta(type).remove("motor");
+		Vitamins.getMeta(type).put("shaft", "true");
+	}
 
+	public static void setIsActuator(String type) {
+		Vitamins.getMeta(type).remove("shaft");
+		Vitamins.getMeta(type).put("actuator", "true");
+	}
 	public static ArrayList<String> listVitaminTypes() {
 
 		ArrayList<String> types = new ArrayList<String>();
 		File folder;
-		try {
-			folder = ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
-					getRootFolder() + "hobbyServo.json");
-			File[] listOfFiles = folder.getParentFile().listFiles();
+		try {		
+			folder = new File(ScriptingEngine.getRepositoryCloneDirectory(getGitRepoDatabase()).getAbsoluteFile()+"/"+getRootFolder());
+			File[] listOfFiles = folder.listFiles();
 
 			for (File f : listOfFiles) {
 				if (!f.isDirectory() && f.getName().endsWith(".json")) {
@@ -319,33 +508,46 @@ public class Vitamins {
 	// setGitRepoDatabase(gitRpoDatabase);
 	// }
 	//
-	public static String getGitRepoDatabase() throws IOException {
+	public static String getGitRepoDatabase()  {
 		if (!checked) {
 			checked = true;
 			try {
 				if (PasswordManager.getUsername() != null) {
 					ScriptingEngine.setAutoupdate(true);
 					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-					GHMyself self = github.getMyself();
-					Map<String, GHRepository> myPublic = self.getAllRepositories();
-					for (String myRepo : myPublic.keySet()) {
-						GHRepository ghrepo = myPublic.get(myRepo);
-						if (myRepo.contentEquals("Hardware-Dimensions")
-								&& ghrepo.getOwnerName().contentEquals(self.getLogin())) {
-
-							String myAssets = ghrepo.getGitTransportUrl().replaceAll("git://", "https://");
+					try {
+						GHRepository repo =github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions" ); 
+						if(repo!=null) {
+							String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
 							// System.out.println("Using my version of Viamins: "+myAssets);
 							setGitRepoDatabase(myAssets);
+						}else {
+							throw new org.kohsuke.github.GHFileNotFoundException();
 						}
+					}catch(org.kohsuke.github.GHFileNotFoundException ex) {
+						setGitRepoDatabase(defaultgitRpoDatabase);
 					}
 				}
 			} catch (Exception ex) {
-				// ex.printStackTrace();
+				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 			}
+			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
 		}
 		return gitRpoDatabase;
 	}
 
+	public static void reLoadDatabaseFromFiles() {
+		
+		setGitRepoDatabase(getGitRepoDatabase());
+		try {
+			ScriptingEngine.pull(getGitRepoDatabase());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		listVitaminTypes();
+		
+	}
 	public static void setGitRepoDatabase(String gitRpoDatabase) {
 		Vitamins.gitRpoDatabase = gitRpoDatabase;
 		databaseSet.clear();

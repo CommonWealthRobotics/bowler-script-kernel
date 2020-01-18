@@ -13,6 +13,8 @@ import java.util.Set;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
@@ -101,6 +103,8 @@ public class MobileBaseCadManager {
 			try {
 				new Thread() {
 					public void run() {
+						Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
+
 						ThreadUtil.wait((int) ((50 * Math.random()) + 50));
 						try {
 
@@ -269,6 +273,8 @@ public class MobileBaseCadManager {
 					arrayList.add(c);
 				}
 				new Thread(() -> {
+					Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
+
 					localGetBaseCad(device);// load the cad union in a thread to
 											// make it ready for physics
 				}).start();
@@ -591,6 +597,8 @@ public class MobileBaseCadManager {
 		new Thread() {
 			@Override
 			public void run() {
+				//Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
+
 				System.out.print("\r\nGenerating CAD...\r\n");
 				setName("MobileBaseCadManager Generating cad Thread ");
 				// new Exception().printStackTrace();

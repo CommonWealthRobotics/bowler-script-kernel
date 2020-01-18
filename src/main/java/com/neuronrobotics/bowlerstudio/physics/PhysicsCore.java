@@ -18,6 +18,7 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -158,6 +159,8 @@ public class PhysicsCore {
     if (physicsThread == null) {
       runEngine = true;
       physicsThread = new Thread(() -> {
+			Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
+
         while (runEngine) {
           try {
             long start = System.currentTimeMillis();

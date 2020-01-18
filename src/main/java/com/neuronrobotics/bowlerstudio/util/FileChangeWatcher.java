@@ -39,6 +39,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 import java.nio.file.attribute.*;
 import java.util.*;
 
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.sdk.util.IFileChangeListener;
 
 // TODO: Auto-generated Javadoc
@@ -131,7 +132,8 @@ public class FileChangeWatcher {
 			public void run() {
 				setName("File Watcher Thread");
 				//new Exception("Starting File Watcher Thread").printStackTrace();
-				
+				Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
+
 				while (run) {
 					try {
 						System.err.println("Checking File: " + getFileToWatch().getAbsolutePath());

@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -10,6 +11,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -233,6 +237,7 @@ public class BowlerKernel {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
+				Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
 
 				writeHistory(reader.getHistory().getHistoryList());
 			}
@@ -388,6 +393,32 @@ public class BowlerKernel {
 		tts.speak(msg, 2.0f, false, true);
 
 		return 0;
+	}
+
+	public static void upenURL(String string) {
+		
+
+		System.err.println("Opening "+string);
+	    try {
+	    	upenURL(new URI(string));
+	    	
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void upenURL(URI htmlUrl) {
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
+			try {
+				Desktop.getDesktop().browse(htmlUrl);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 
 }
