@@ -166,6 +166,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		return getTitle(element.getStackTrace());
 	}
 	public static String getTitle(StackTraceElement[] element) {
+		if(element.length==0)
+			return "No exception trace found";
 		return element[0].getClassName() + " at line " + element[0].getLineNumber();
 	}
 }
