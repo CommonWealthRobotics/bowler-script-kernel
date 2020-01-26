@@ -68,38 +68,14 @@ public class ConfigurationDatabase {
 				ScriptingEngine.pushCodeToGit(getGitSource(), ScriptingEngine.getFullBranch(getGitSource()),
 						getDbFile(), writeOut, "Saving database");
 				return;
-			} catch (WrongRepositoryStateException e) {
-				//reporter.uncaughtException(Thread.currentThread(), e);
-				try {
-					ScriptingEngine.deleteRepo(getGitSource());
-					Thread.sleep(500);
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}	catch (org.eclipse.jgit.api.errors.JGitInternalException e) {
-				reporter.uncaughtException(Thread.currentThread(), e);
-
-				try {
-					ScriptingEngine.deleteRepo(getGitSource());
-					Thread.sleep(500);
-					
-				} catch (Exception ex) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
 			} catch (Exception e) {
-				
-				reporter.uncaughtException(Thread.currentThread(), e);
-
 				try {
 					ScriptingEngine.deleteRepo(getGitSource());
+					Thread.sleep(500);
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			}
+			}	
 
 		}
 
