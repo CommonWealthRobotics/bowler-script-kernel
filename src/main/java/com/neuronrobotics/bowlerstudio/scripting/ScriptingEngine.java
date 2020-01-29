@@ -814,15 +814,18 @@ private static boolean ensureExistance(File desired) throws IOException {
   }
 
 	private static void newBranchLocal(String newBranch, String remoteURI, Git git,RevCommit source )
-			throws GitAPIException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
+			throws GitAPIException, RefNotFoundException, InvalidRefNameException,
 			CheckoutConflictException, InvalidRemoteException, TransportException, IOException {
 		try {
 			git.branchCreate()
 			.setName(newBranch).setStartPoint(source)
 			.call();
+			System.out.println("Created new branch "+remoteURI+"\t\t"+newBranch);
 		} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
 			System.err.println("ERROR Creating " + newBranch + " in " + remoteURI);
 			ex.printStackTrace();
+		}catch (org.eclipse.jgit.api.errors.RefAlreadyExistsException ex) {
+			// just checkout the existing branch then
 		}
 		git.checkout()
 		.setName(newBranch)
@@ -833,7 +836,6 @@ private static boolean ensureExistance(File desired) throws IOException {
 		.setRefSpecs(new RefSpec(newBranch + ":" + newBranch))
 		.setCredentialsProvider(PasswordManager.getCredentialProvider())
 		.call();
-		System.out.println("Created new branch "+remoteURI+"\t\t"+newBranch);
 	}
   
   private static boolean hasAtLeastOneReference(Git git) throws Exception {
