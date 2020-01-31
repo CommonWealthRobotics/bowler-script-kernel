@@ -87,6 +87,8 @@ public class BowlerKernel {
 		if (args.length == 0) {
 			fail();
 		}
+		ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DeviceProviders.git",
+				"loadAll.groovy",null);
 		boolean gitRun = false;
 		String gitRepo = null;
 		String gitFile = null;

@@ -633,7 +633,9 @@ private static boolean ensureExistance(File desired) throws IOException {
     String[] gistData = codeFromGistID(gistID, Filename);
     return inlineScriptRun(new File(gistData[2]), args, getShellType(gistData[1]));
   }
-
+  public static Object gitScriptRun(String gitURL, String Filename)  throws Exception {
+	  return gitScriptRun( gitURL,  Filename, null);
+  }
   public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args)
       throws Exception {
     String[] gistData = codeFromGit(gitURL, Filename);
