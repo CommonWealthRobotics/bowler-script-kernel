@@ -1002,10 +1002,12 @@ private static boolean ensureExistance(File desired) throws IOException {
 				try {
 					git.pull().setTransportConfigCallback(transportConfigCallback).call();
 				}catch(Exception ex) {
-					exp.uncaughtException(Thread.currentThread(), ex);
+					git.close();
+					throw new RuntimeException(e);
 				}
 			}else {
-				exp.uncaughtException(Thread.currentThread(), e);
+				git.close();
+				throw new RuntimeException(e);
 			}
 			
 			
