@@ -227,9 +227,7 @@ public class Vitamins {
 					jsonString, // content of the file
 					"Making changes to "+type+" by "+PasswordManager.getUsername()+"\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit message
 			//System.err.println(jsonString);
-			System.out.println("Database saved "+ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
-					getRootFolder() + type + ".json"// File from within the Git repo
-			).getAbsolutePath());
+			System.out.println("Database saved "+getVitaminFile(type,null,false).getAbsolutePath());
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
 			System.out.println("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
 			System.out.println(
@@ -379,17 +377,12 @@ public class Vitamins {
 			// attempt to load the JSON file from the GIt Repo and pars the JSON string
 			File f;
 			try {
-				f = ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
-						getRootFolder() + type + ".json"// File from within the Git repo
-				);
-				
-				FileChangeWatcher watcher = FileChangeWatcher.watch(f);
-				watcher.addIFileChangeListener((fileThatChanged, event) -> {
+				f = getVitaminFile(type,() -> {
 					// If the file changes, clear the database and load the new data
 					databaseSet.put(type,null);
 					System.out.println("Re-loading "+getRootFolder() + type + ".json");
-					watcher.close();
-				});
+				},true);
+
 				HashMap<String, HashMap<String, Object>> database;
 				if(f.exists()) {
 				
@@ -428,6 +421,24 @@ public class Vitamins {
 		}
 		return databaseSet.get(type);
 
+	}
+
+	public static File getVitaminFile(String type, Runnable onChange, boolean oneShot)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		
+		
+		File f= ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
+				getRootFolder() + type + ".json"// File from within the Git repo
+		);
+		if(onChange!=null) {
+			FileChangeWatcher watcher = FileChangeWatcher.watch(f);
+			watcher.addIFileChangeListener((fileThatChanged, event) -> {
+				onChange.run();
+				if(oneShot)
+					watcher.close();
+			});
+		}
+		return f;
 	}
 
 	private static String getRootFolder() {
