@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.neuronrobotics.imageprovider.NativeResource;
 import com.neuronrobotics.sdk.common.Log;
+import com.neuronrobotics.sdk.util.FileChangeWatcher;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.STL;
@@ -381,6 +382,14 @@ public class Vitamins {
 				f = ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
 						getRootFolder() + type + ".json"// File from within the Git repo
 				);
+				
+				FileChangeWatcher watcher = FileChangeWatcher.watch(f);
+				watcher.addIFileChangeListener((fileThatChanged, event) -> {
+					// If the file changes, clear the database and load the new data
+					databaseSet.put(type,null);
+					System.out.println("Re-loading "+getRootFolder() + type + ".json");
+					watcher.close();
+				});
 				HashMap<String, HashMap<String, Object>> database;
 				if(f.exists()) {
 				
