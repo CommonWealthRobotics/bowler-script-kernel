@@ -12,6 +12,7 @@ import javax.vecmath.Vector3f;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.HingeConstraint;
 import com.bulletphysics.linearmath.Transform;
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
@@ -100,7 +101,7 @@ public class MobileBasePhysicsManager {
 			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad, PhysicsCore core) {
 		this.simplecad = simplecad;
 		double minz = 0;
-		double Maxz =0;
+		double Maxz = 0;
 		for (DHParameterKinematics dh : base.getAllDHChains()) {
 			if (dh.getCurrentTaskSpaceTransform().getZ() < minz) {
 				minz = dh.getCurrentTaskSpaceTransform().getZ();
@@ -127,23 +128,24 @@ public class MobileBasePhysicsManager {
 				TransformFactory.bulletToAffine(baseCad.get(0).getManipulator(), start);
 			}
 		});
-		 ArrayList<Vector3d> points = new ArrayList<eu.mihosoft.vrl.v3d.Vector3d>();
-		for(DHParameterKinematics leg:base.getAllDHChains()){
-			TransformNR limbRoot = leg.getRobotToFiducialTransform();
-			points.add(new  eu.mihosoft.vrl.v3d.Vector3d(
-				limbRoot.getX(),
-				limbRoot.getY(),
-				limbRoot.getZ()));
-			points.add(new  eu.mihosoft.vrl.v3d.Vector3d(
-					limbRoot.getX(),
-					limbRoot.getY(),
-					Maxz));
-		}
-		CSG collisionBod = HullUtil.hull(points);
+		CSG collisionBod;
+		ArrayList<Vector3d> points = new ArrayList<eu.mihosoft.vrl.v3d.Vector3d>();
+		try {
+			for (DHParameterKinematics leg : base.getAllDHChains()) {
+				TransformNR limbRoot = leg.getRobotToFiducialTransform();
+				points.add(new eu.mihosoft.vrl.v3d.Vector3d(limbRoot.getX(), limbRoot.getY(), limbRoot.getZ()));
+				points.add(new eu.mihosoft.vrl.v3d.Vector3d(limbRoot.getX(), limbRoot.getY(), Maxz));
+			}
 
-		CSGPhysicsManager baseManager = new CSGPhysicsManager((List<CSG>) Arrays.asList(collisionBod), start, base.getMassKg(), false, core);
-		baseManager.setBaseCSG(baseCad)	;
-		
+			collisionBod = HullUtil.hull(points);
+		} catch (Exception ex) {
+			collisionBod = CSG.hullAll(MobileBaseCadManager.getBaseCad(base));
+		}
+
+		CSGPhysicsManager baseManager = new CSGPhysicsManager((List<CSG>) Arrays.asList(collisionBod), start,
+				base.getMassKg(), false, core);
+		baseManager.setBaseCSG(baseCad);
+
 		RigidBody body = baseManager.getFallRigidBody();
 		baseManager.setUpdateManager(getUpdater(body, base.getImu()));
 		body.setWorldTransform(start);
@@ -187,10 +189,10 @@ public class MobileBasePhysicsManager {
 					// The DH chain calculated the starting location of the link
 					// in its current configuration
 					TransformNR localLink;
-					if(i>0)
-						localLink= cached.get(i-1);
+					if (i > 0)
+						localLink = cached.get(i - 1);
 					else
-						localLink=limbRoot.copy();
+						localLink = limbRoot.copy();
 					// Lift it in the air so nothing is below the ground to
 					// start.
 					localLink.translateZ(lift);
@@ -214,24 +216,19 @@ public class MobileBasePhysicsManager {
 					ArrayList<CSG> collisions = new ArrayList<>();
 					for (int x = 0; x < thisLinkCad.size(); x++) {
 						Color color = thisLinkCad.get(x).getColor();
-						 CSG cad = thisLinkCad.get(x);
-						 CSG tmp = CSGPhysicsManager.getBoundingBox(cad);
-						//tmp=tmp.difference(tmp.toXMax())
-						outCad.add(cad
-								.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse())));
+						CSG cad = thisLinkCad.get(x);
+						CSG tmp = CSGPhysicsManager.getBoundingBox(cad);
+						// tmp=tmp.difference(tmp.toXMax())
+						outCad.add(cad.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse())));
 						outCad.get(x).setManipulator(manipulator);
 						outCad.get(x).setColor(color);
 
-						collisions.add(tmp
-								.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse())));
+						collisions.add(tmp.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse())));
 						collisions.get(x).setManipulator(manipulator);
 						collisions.get(x).setColor(color);
 
 					}
-					
-					
-					
-					
+
 					// Build a hinge based on the link and mass
 					// was outCad
 					HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(collisions, linkLoc, mass,
@@ -243,12 +240,13 @@ public class MobileBasePhysicsManager {
 
 					hingePhysicsManager.setUpdateManager(getUpdater(linkSection, abstractLink.getImu()));
 					// // Setup some damping on the m_bodies
-					//linkSection.setDamping(0.5f, 08.5f);
-					//linkSection.setDeactivationTime(0.8f);
-					//linkSection.setSleepingThresholds(1.6f, 2.5f);
-                	linkSection.setActivationState(com.bulletphysics.collision.dispatch.CollisionObject.DISABLE_DEACTIVATION);
-					
-					//linkSection.set
+					// linkSection.setDamping(0.5f, 08.5f);
+					// linkSection.setDeactivationTime(0.8f);
+					// linkSection.setSleepingThresholds(1.6f, 2.5f);
+					linkSection.setActivationState(
+							com.bulletphysics.collision.dispatch.CollisionObject.DISABLE_DEACTIVATION);
+
+					// linkSection.set
 
 					HingeConstraint joint6DOF;
 					Transform localA = new Transform();
