@@ -67,7 +67,8 @@ public class Vitamins {
 	// chreat the gson object, this is the parsing factory
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	private static boolean checked;
-
+	private static HashMap<String,Runnable> changeListeners = new HashMap<String, Runnable>();
+	
 	public static CSG get(File resource) {
 
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null) {
@@ -377,11 +378,19 @@ public class Vitamins {
 			// attempt to load the JSON file from the GIt Repo and pars the JSON string
 			File f;
 			try {
-				f = getVitaminFile(type,() -> {
-					// If the file changes, clear the database and load the new data
-					databaseSet.put(type,null);
-					System.out.println("Re-loading "+getRootFolder() + type + ".json");
-				},true);
+				
+				Runnable onChange=null;
+				if(changeListeners.get(type)==null) {
+					changeListeners.put(type,() -> {
+						// If the file changes, clear the database and load the new data
+						databaseSet.put(type,null);
+						System.out.println("Re-loading "+type);
+					});
+					onChange=changeListeners.get(type);
+				}
+				
+				
+				f = getVitaminFile(type,onChange,true);
 
 				HashMap<String, HashMap<String, Object>> database;
 				if(f.exists()) {
@@ -434,8 +443,6 @@ public class Vitamins {
 			FileChangeWatcher watcher = FileChangeWatcher.watch(f);
 			watcher.addIFileChangeListener((fileThatChanged, event) -> {
 				onChange.run();
-				if(oneShot)
-					watcher.close();
 			});
 		}
 		return f;
