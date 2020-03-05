@@ -1350,19 +1350,21 @@ private static boolean ensureExistance(File desired) throws IOException {
 			git.close();
 			return true;
 		} catch (Exception e) {
-			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
-				try {
+			try {
+				if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
+
 					git.pull().setTransportConfigCallback(transportConfigCallback).call();// updates to the
 					// latest version
 					git.push().setTransportConfigCallback(transportConfigCallback).call();
 					git.close();
 					return true;
-				} catch (Exception ex) {
-					// just return false, the exception is it failing to push
-					git.close();
-					return false;
 				}
+			} catch (Exception ex) {
+				// just return false, the exception is it failing to push
+				git.close();
+				return false;
 			}
+
 		}
 		return false;
 	}
