@@ -313,4 +313,11 @@ public class MobileBasePhysicsManager {
 			}
 		}
 	}
+
+	public void clear() {
+		if(simplecad!=null) {
+			simplecad.clear();
+		}
+		linkListeners.clear();
+	}
 }

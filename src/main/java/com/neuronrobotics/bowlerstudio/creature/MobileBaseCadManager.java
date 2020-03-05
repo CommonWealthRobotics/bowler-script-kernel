@@ -103,8 +103,7 @@ public class MobileBaseCadManager {
 			try {
 				new Thread() {
 					public void run() {
-						Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
-
+						clear();
 						ThreadUtil.wait((int) ((50 * Math.random()) + 50));
 						try {
 
@@ -125,21 +124,27 @@ public class MobileBaseCadManager {
 	};
 	private boolean autoRegen = true;
 	private DoubleProperty pi = new SimpleDoubleProperty(0);
-
+	protected void clear() {
+		
+		dhCadGen.clear();
+		DHtoCadMap.clear();
+		LinktoCadMap.clear();
+		BasetoCadMap.clear();
+		cadmap.remove(base);
+		if(allCad!=null)
+			allCad.clear();
+	}
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
 		this.setUi(myUI);
 		base.addConnectionEventListener(new IDeviceConnectionEventListener() {
 
 			@Override
 			public void onDisconnect(BowlerAbstractDevice arg0) {
+				
 				if (arg0 !=base)
 					return;
 				bail = true;
-				dhCadGen.clear();
-				DHtoCadMap.clear();
-				LinktoCadMap.clear();
-				BasetoCadMap.clear();
-				cadmap.remove(base);
+				clear();
 			}
 
 			@Override
@@ -603,6 +608,7 @@ public class MobileBaseCadManager {
 				setName("MobileBaseCadManager Generating cad Thread ");
 				// new Exception().printStackTrace();
 				MobileBase device = base;
+				MobileBaseCadManager.get(base).clear();
 				try {
 					setAllCad(generateBody(device));
 				} catch (Exception e) {
@@ -613,9 +619,12 @@ public class MobileBaseCadManager {
 				cadGenerating = false;
 				System.out.print("\r\nDone Generating CAD!\r\n");
 				getProcesIndictor().set(1);
+				System.gc();
 			}
 		}.start();
 	}
+
+
 
 	private void setDefaultLinkLevelCadEngine() throws Exception {
 		String[] cad;
@@ -702,6 +711,7 @@ public class MobileBaseCadManager {
 				public void onDisconnect(BowlerAbstractDevice source) {
 					// TODO Auto-generated method stub
 					ui2.list.clear();
+					
 				}
 				
 				@Override
