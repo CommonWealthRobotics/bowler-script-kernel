@@ -361,7 +361,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				} else {
 					try {
 						FileChangeWatcher.close(f);
-						f.delete();
+
+						if(!f.delete()) {
+							System.err.println("File failed to delete! "+f);
+
+						}
 					} catch (Throwable t) {
 						t.printStackTrace();
 					}
@@ -374,6 +378,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
+		if(folder.exists()) {
+			System.err.println("Folder failed to delete! "+folder);
+			throw new RuntimeException();
+		}
+			
   }
 
   private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {
@@ -468,7 +477,8 @@ private static boolean ensureExistance(File desired) throws IOException {
 	return createdFlag;
 }
 
-  public static void commit(String id, String branch, String FileName, String content,
+  @SuppressWarnings("deprecation")
+public static void commit(String id, String branch, String FileName, String content,
       String commitMessage, boolean flagNewFile) throws Exception {
 
 	    if (PasswordManager.getUsername()  == null)
@@ -531,7 +541,8 @@ private static boolean ensureExistance(File desired) throws IOException {
     }
   }
 
-  public static void pushCodeToGit(String id, String branch, String FileName, String content,
+  @SuppressWarnings("deprecation")
+public static void pushCodeToGit(String id, String branch, String FileName, String content,
       String commitMessage, boolean flagNewFile) throws Exception {
     commit(id, branch, FileName, content, commitMessage, flagNewFile);
     if (PasswordManager.getUsername()  == null)
@@ -841,7 +852,8 @@ private static boolean ensureExistance(File desired) throws IOException {
 		.call();
 	}
   
-  private static boolean hasAtLeastOneReference(Git git) throws Exception {
+  @SuppressWarnings("deprecation")
+private static boolean hasAtLeastOneReference(Git git) throws Exception {
     Repository repo = git.getRepository();
     Config storedConfig = repo.getConfig();
     Set<String> uriList = repo.getConfig().getSubsections("remote");
@@ -1079,6 +1091,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 						        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
 						        setStartPoint("origin/"+branch).
 						        call();
+								git.close();
 								return;
 							}catch(RefNotFoundException e) {
 								git.branchCreate() 
@@ -1092,6 +1105,7 @@ private static boolean ensureExistance(File desired) throws IOException {
 						        setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK).
 						        setStartPoint("origin/"+branch).
 						        call();
+								git.close();
 								return;
 							}
 						}
@@ -1350,19 +1364,21 @@ private static boolean ensureExistance(File desired) throws IOException {
 			git.close();
 			return true;
 		} catch (Exception e) {
-			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
-				try {
+			try {
+				if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
+
 					git.pull().setTransportConfigCallback(transportConfigCallback).call();// updates to the
 					// latest version
 					git.push().setTransportConfigCallback(transportConfigCallback).call();
 					git.close();
 					return true;
-				} catch (Exception ex) {
-					// just return false, the exception is it failing to push
-					git.close();
-					return false;
 				}
+			} catch (Exception ex) {
+				// just return false, the exception is it failing to push
+				git.close();
+				return false;
 			}
+
 		}
 		return false;
 	}
