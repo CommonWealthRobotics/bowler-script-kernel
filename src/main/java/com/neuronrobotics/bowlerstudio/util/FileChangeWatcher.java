@@ -130,13 +130,13 @@ public class FileChangeWatcher {
 		}
 		watcherThread = new Thread() {
 			public void run() {
-				setName("File Watcher Thread");
+				setName("File Watcher Thread "+fileToWatch.getName());
 				//new Exception("Starting File Watcher Thread").printStackTrace();
 				Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
 
 				while (run) {
 					try {
-						System.err.println("Checking File: " + getFileToWatch().getAbsolutePath());
+						//System.err.println("Checking File: " + getFileToWatch().getAbsolutePath());
 						watch();
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -148,6 +148,12 @@ public class FileChangeWatcher {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				}
+				try {
+					watcher.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				//new Exception("File Watcher Thread Died").printStackTrace();
 			}
