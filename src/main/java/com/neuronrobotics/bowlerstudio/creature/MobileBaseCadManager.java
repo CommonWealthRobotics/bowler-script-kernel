@@ -125,12 +125,25 @@ public class MobileBaseCadManager {
 	private boolean autoRegen = true;
 	private DoubleProperty pi = new SimpleDoubleProperty(0);
 	protected void clear() {
-		
+		// Cad generator
 		dhCadGen.clear();
+		//clear the csgs from the list
+		for(DHParameterKinematics key: DHtoCadMap.keySet()) {
+			ArrayList<CSG> arrayList = DHtoCadMap.get(key);
+			if(arrayList!=null)arrayList.clear();
+		}
 		DHtoCadMap.clear();
+		//celat csg from link conf list
+		for(LinkConfiguration key: LinktoCadMap.keySet()) {
+			ArrayList<CSG> arrayList = LinktoCadMap.get(key);
+			if(arrayList!=null)arrayList.clear();
+		}
 		LinktoCadMap.clear();
+		for(MobileBase key: BasetoCadMap.keySet()) {
+			ArrayList<CSG> arrayList = BasetoCadMap.get(key);
+			if(arrayList!=null)arrayList.clear();
+		}
 		BasetoCadMap.clear();
-		cadmap.remove(base);
 		if(allCad!=null)
 			allCad.clear();
 	}
@@ -145,6 +158,7 @@ public class MobileBaseCadManager {
 					return;
 				bail = true;
 				clear();
+				cadmap.remove(base);
 			}
 
 			@Override
@@ -609,6 +623,7 @@ public class MobileBaseCadManager {
 				// new Exception().printStackTrace();
 				MobileBase device = base;
 				MobileBaseCadManager.get(base).clear();
+				
 				try {
 					setAllCad(generateBody(device));
 				} catch (Exception e) {
@@ -686,6 +701,9 @@ public class MobileBaseCadManager {
 					// generateCad(); //TODO Undo this after debugging
 				});
 			}
+
+		if(this.allCad!=null && this.allCad!=allCad)
+			this.allCad.clear();
 		this.allCad = allCad;
 	}
 	public static MobileBaseCadManager get(MobileBase device,IMobileBaseUI ui) {
