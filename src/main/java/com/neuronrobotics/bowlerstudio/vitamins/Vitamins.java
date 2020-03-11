@@ -68,7 +68,19 @@ public class Vitamins {
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	private static boolean checked;
 	private static HashMap<String,Runnable> changeListeners = new HashMap<String, Runnable>();
-	
+	public static void clear() {
+		// TODO Auto-generated method stub
+		for(String keys:databaseSet.keySet()) {
+			HashMap<String, HashMap<String, Object>> data = databaseSet.get(keys);
+			for(String key2:data.keySet()) {
+				HashMap<String, Object> data2 = data.get(key2);
+				data2.clear();
+			}
+			data.clear();
+		}
+		databaseSet.clear();
+		fileLastLoaded.clear();
+	}
 	public static CSG get(File resource) {
 
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null) {
@@ -101,8 +113,7 @@ public class Vitamins {
 				e.printStackTrace();
 
 				gitRpoDatabase = defaultgitRpoDatabase;
-				databaseSet.clear();
-				fileLastLoaded.clear();
+				clear();
 				return get(type, id);
 			}
 
@@ -142,8 +153,7 @@ public class Vitamins {
 		} catch (Exception e) {
 			e.printStackTrace();
 			gitRpoDatabase = defaultgitRpoDatabase;
-			databaseSet.clear();
-			fileLastLoaded.clear();
+			clear();
 			if (depthGauge < 2) {
 				return get(type, id, depthGauge + 1);
 			} else {
@@ -590,5 +600,7 @@ public class Vitamins {
 		Vitamins.jsonRootDir = jsonRootDir;
 		setGitRepoDatabase(getGitRepoDatabase());
 	}
+
+
 
 }

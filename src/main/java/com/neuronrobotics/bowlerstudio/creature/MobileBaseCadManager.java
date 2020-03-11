@@ -18,6 +18,7 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
+import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
@@ -146,6 +147,8 @@ public class MobileBaseCadManager {
 		BasetoCadMap.clear();
 		if(allCad!=null)
 			allCad.clear();
+		Vitamins.clear();
+		
 	}
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
 		this.setUi(myUI);
