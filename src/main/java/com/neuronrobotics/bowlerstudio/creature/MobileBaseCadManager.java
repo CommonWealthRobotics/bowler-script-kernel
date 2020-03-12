@@ -56,6 +56,31 @@ public class MobileBaseCadManager {
 	private IMobileBaseUI ui = null;
 	private static ICadGenerator cadEngineConfiguration=null;
 	private boolean configMode=false;
+	protected void clear() {
+		// Cad generator
+		dhCadGen.clear();
+		//clear the csgs from the list
+		for(DHParameterKinematics key: DHtoCadMap.keySet()) {
+			ArrayList<CSG> arrayList = DHtoCadMap.get(key);
+			if(arrayList!=null)arrayList.clear();
+		}
+		DHtoCadMap.clear();
+		//celat csg from link conf list
+		for(LinkConfiguration key: LinktoCadMap.keySet()) {
+			ArrayList<CSG> arrayList = LinktoCadMap.get(key);
+			if(arrayList!=null)arrayList.clear();
+		}
+		LinktoCadMap.clear();
+		for(MobileBase key: BasetoCadMap.keySet()) {
+			ArrayList<CSG> arrayList = BasetoCadMap.get(key);
+			if(arrayList!=null)arrayList.clear();
+		}
+		BasetoCadMap.clear();
+		if(allCad!=null)
+			allCad.clear();
+		Vitamins.clear();
+		
+	}
 	private static class  IMobileBaseUIlocal implements IMobileBaseUI{
 
 		public ArrayList<CSG> list = new ArrayList<>();
@@ -125,31 +150,7 @@ public class MobileBaseCadManager {
 	};
 	private boolean autoRegen = true;
 	private DoubleProperty pi = new SimpleDoubleProperty(0);
-	protected void clear() {
-		// Cad generator
-		dhCadGen.clear();
-		//clear the csgs from the list
-		for(DHParameterKinematics key: DHtoCadMap.keySet()) {
-			ArrayList<CSG> arrayList = DHtoCadMap.get(key);
-			if(arrayList!=null)arrayList.clear();
-		}
-		DHtoCadMap.clear();
-		//celat csg from link conf list
-		for(LinkConfiguration key: LinktoCadMap.keySet()) {
-			ArrayList<CSG> arrayList = LinktoCadMap.get(key);
-			if(arrayList!=null)arrayList.clear();
-		}
-		LinktoCadMap.clear();
-		for(MobileBase key: BasetoCadMap.keySet()) {
-			ArrayList<CSG> arrayList = BasetoCadMap.get(key);
-			if(arrayList!=null)arrayList.clear();
-		}
-		BasetoCadMap.clear();
-		if(allCad!=null)
-			allCad.clear();
-		Vitamins.clear();
-		
-	}
+
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
 		this.setUi(myUI);
 		base.addConnectionEventListener(new IDeviceConnectionEventListener() {
@@ -215,8 +216,7 @@ public class MobileBaseCadManager {
 	private static ICadGenerator getConfigurationDisplay() {
 		if(cadEngineConfiguration==null) {
 			try {
-				File confFile = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy");
-				cadEngineConfiguration=(ICadGenerator) ScriptingEngine.inlineFileScriptRun(confFile, null);
+				File confFile = resetConfigurationScript();
 				FileChangeWatcher watcher = FileChangeWatcher.watch(confFile);
 				watcher.addIFileChangeListener(new IFileChangeListener() {
 					
@@ -224,7 +224,7 @@ public class MobileBaseCadManager {
 					public void onFileChange(File fileThatChanged, WatchEvent event) {
 						// TODO Auto-generated method stub
 						try {
-							cadEngineConfiguration=(ICadGenerator) ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy", null);
+							resetConfigurationScript();
 							for(MobileBase manager : cadmap.keySet()) {
 								MobileBaseCadManager mobileBaseCadManager = cadmap.get(manager);
 								if(mobileBaseCadManager.autoRegen)
@@ -243,6 +243,13 @@ public class MobileBaseCadManager {
 			}
 		}
 		return cadEngineConfiguration;
+	}
+
+	private static File resetConfigurationScript()
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, Exception {
+		File confFile = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy");
+		cadEngineConfiguration=(ICadGenerator) ScriptingEngine.inlineFileScriptRun(confFile, null);
+		return confFile;
 	}
 
 	public ArrayList<CSG> generateBody(MobileBase base) {
