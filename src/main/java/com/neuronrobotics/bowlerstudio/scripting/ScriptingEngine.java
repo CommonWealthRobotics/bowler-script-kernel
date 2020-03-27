@@ -1005,7 +1005,8 @@ private static boolean hasAtLeastOneReference(Git git) throws Exception {
 			try {
 				newBranch( remoteURI,  branch);
 			} catch (GitAPIException e1) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				git.close();
+				throw new RuntimeException(e1);
 			}
 			
 		} catch (TransportException e) {
