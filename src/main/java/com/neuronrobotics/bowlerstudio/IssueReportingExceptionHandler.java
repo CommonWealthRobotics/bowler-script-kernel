@@ -40,6 +40,9 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
+		if(e==null) {
+			except(new Exception("A null exception was thrown"));
+		}
 		StackTraceElement[] element = e.getStackTrace();
 		if (element != null)
 			if (element.length > 0)
