@@ -561,7 +561,7 @@ public class Vitamins {
 						}else {
 							throw new org.kohsuke.github.GHFileNotFoundException();
 						}
-					}catch(org.kohsuke.github.GHFileNotFoundException ex) {
+					}catch(Exception ex) {
 						setGitRepoDatabase(defaultgitRpoDatabase);
 					}
 				}
