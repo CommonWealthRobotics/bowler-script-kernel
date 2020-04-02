@@ -118,7 +118,6 @@ public class ConfigurationDatabase {
   public static String getGitSource() throws Exception {
 		if (!checked) {
 			if (ScriptingEngine.hasNetwork() && ScriptingEngine.isLoginSuccess()) {
-				ScriptingEngine.setAutoupdate(true);
 				org.kohsuke.github.GitHub github = PasswordManager.getGithub();
 				try {
 					GHRepository myConfigRepo = github.getRepository(PasswordManager.getLoginID() + "/" + repo);
@@ -129,6 +128,7 @@ public class ConfigurationDatabase {
 						GHRepository defaultRep = github.getRepository("CommonWealthRobotics/" + repo);
 						GHRepository forkedRep = defaultRep.fork();
 						setRepo(forkedRep);
+						checked = true;
 					}
 					if (PasswordManager.getUsername() != null) {
 						ConfigurationDatabase.setGitSource(
@@ -141,6 +141,10 @@ public class ConfigurationDatabase {
 				}
 
 				// ScriptingEngine.pull(gitSource);
+			}else if(ScriptingEngine.isLoginSuccess()) {
+				// no network but has logged in before
+				setGitSource(
+						"https://github.com/" + PasswordManager.getUsername() + "/" + repo + ".git");
 			}
 
 		}
