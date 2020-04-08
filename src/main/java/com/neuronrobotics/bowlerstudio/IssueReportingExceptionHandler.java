@@ -113,7 +113,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		new Thread(() -> {
 			try {
 				GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
-				List<GHIssue> issues = repo.getIssues(GHIssueState.OPEN);
+				List<GHIssue> issues = repo.getIssues(GHIssueState.ALL);
 				String source = getTitle(element);
 				for (GHIssue i : issues) {
 					System.err.println("Issues are :" + i.getTitle());
@@ -130,6 +130,11 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 						// If i havent commented yet, comment that i had this issue too.
 						if (!metoo)
 							i.comment(body);
+						if(i.getState()==GHIssueState.CLOSED) {
+							try {
+								i.reopen();
+							}catch(Throwable t) {}
+						}
 						BowlerKernel.upenURL(i.getHtmlUrl().toURI());
 						return;
 					}
