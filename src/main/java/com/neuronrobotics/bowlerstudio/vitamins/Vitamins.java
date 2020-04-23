@@ -10,7 +10,6 @@ import java.util.Set;
 
 import com.neuronrobotics.imageprovider.NativeResource;
 import com.neuronrobotics.sdk.common.Log;
-import com.neuronrobotics.sdk.util.FileChangeWatcher;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.STL;
@@ -24,6 +23,7 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 import javafx.scene.paint.Color;

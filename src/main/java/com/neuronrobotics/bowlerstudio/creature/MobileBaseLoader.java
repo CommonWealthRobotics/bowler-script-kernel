@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.creature;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -11,7 +12,7 @@ import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.DhInverseSolver;
 import com.neuronrobotics.sdk.addons.kinematics.IDriveEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
-import com.neuronrobotics.sdk.common.DeviceManager;
+import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 
 public class MobileBaseLoader {
   private static HashMap<MobileBase, MobileBaseLoader> map = new HashMap<>();
@@ -80,17 +81,18 @@ public class MobileBaseLoader {
     }
 
     File c = code;
-    FileWatchDeviceWrapper.watch(device, code, (fileThatChanged, event) -> {
+    FileWatchDeviceWrapper.watch(device, code, new IFileChangeListener() {
+		@Override
+		public void onFileChange(File fileThatChanged, WatchEvent event) {
 
-      try {
+		      try {
 
-        defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
-        device.setWalkingDriveEngine(defaultDriveEngine);
-      } catch (Exception ex) {
-        MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
-      }
-
-    });
+		        defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
+		        device.setWalkingDriveEngine(defaultDriveEngine);
+		      } catch (Exception ex) {
+		        MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
+		      }
+		}});
     
     try {
       defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);

@@ -40,7 +40,6 @@ import java.nio.file.attribute.*;
 import java.util.*;
 
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
-import com.neuronrobotics.sdk.util.IFileChangeListener;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -76,8 +75,10 @@ public class FileChangeWatcher {
 	/**
 	 * clear the listeners
 	 */
-	public static void clearAll() {
-		for(String key:activeListener.keySet()){
+	public static void clearAll() {	
+		Object[] array = activeListener.keySet().toArray();
+		for (int i = 0; i < array.length; i++) {
+			Object key = array[i];
 			activeListener.get(key).close();
 		}
 		activeListener.clear();
@@ -117,7 +118,7 @@ public class FileChangeWatcher {
 	private FileChangeWatcher(File fileToWatch) throws IOException {
 
 		this.setFileToWatch(fileToWatch);
-		System.err.println("\n\n\n\tWatching "+fileToWatch.getAbsolutePath()+"\n\n\n");
+		//System.err.println("\n\n\n\tWatching "+fileToWatch.getAbsolutePath()+"\n\n\n");
 		this.watcher = FileSystems.getDefault().newWatchService();
 		this.keys = new HashMap<WatchKey, Path>();
 		Path dir = Paths.get(fileToWatch.getParent());
@@ -149,12 +150,7 @@ public class FileChangeWatcher {
 						e.printStackTrace();
 					}
 				}
-				try {
-					watcher.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
 				//new Exception("File Watcher Thread Died").printStackTrace();
 			}
 		};
@@ -345,6 +341,13 @@ public class FileChangeWatcher {
 	public void close() {
 		//new Exception("File watcher closed " + fileToWatch.getAbsolutePath()).printStackTrace();
 		this.run = false;
+		try {
+			System.err.println("Closing watcher for "+fileToWatch.getAbsolutePath());
+			watcher.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		activeListener.remove(fileToWatch.getAbsolutePath());
 	}
 
