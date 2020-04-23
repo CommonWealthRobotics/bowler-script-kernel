@@ -117,7 +117,7 @@ public class FileChangeWatcher {
 	private FileChangeWatcher(File fileToWatch) throws IOException {
 
 		this.setFileToWatch(fileToWatch);
-
+		System.err.println("\n\n\n\tWatching "+fileToWatch.getAbsolutePath()+"\n\n\n");
 		this.watcher = FileSystems.getDefault().newWatchService();
 		this.keys = new HashMap<WatchKey, Path>();
 		Path dir = Paths.get(fileToWatch.getParent());
@@ -345,12 +345,6 @@ public class FileChangeWatcher {
 	public void close() {
 		//new Exception("File watcher closed " + fileToWatch.getAbsolutePath()).printStackTrace();
 		this.run = false;
-		try {
-			watcher.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		activeListener.remove(fileToWatch.getAbsolutePath());
 	}
 
