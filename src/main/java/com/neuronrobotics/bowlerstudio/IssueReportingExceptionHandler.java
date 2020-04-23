@@ -12,6 +12,7 @@ import org.kohsuke.github.GHIssueBuilder;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 
 import com.neuronrobotics.bowlerkernel.BowlerKernelBuildInfo;
@@ -40,7 +41,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 
 	@Override
 	public void uncaughtException(Thread t, Throwable e) {
-		if(e==null) {
+		if (e == null) {
 			except(new Exception("A null exception was thrown"));
 		}
 		StackTraceElement[] element = e.getStackTrace();
@@ -120,20 +121,36 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 					if (i.getTitle().contains(source)) {
 						List<GHIssueComment> comments = i.getComments();
 						// Check to see if i created this issue
-						boolean metoo = i.getUser().getName().contentEquals(PasswordManager.getUsername());
-						for (GHIssueComment comment : comments) {
-							// check to see if i commented on this issue
-							if (comment.getUser().getName().contentEquals(PasswordManager.getUsername())) {
-								metoo = true;
+						boolean metoo = false;
+						try {
+
+							GHUser user = i.getUser();
+							if (user != null) {
+								String name = user.getName();
+								if (name != null) {
+									String username = PasswordManager.getUsername();
+									if (username != null) {
+										metoo = name.contentEquals(username);
+										for (GHIssueComment comment : comments) {
+											// check to see if i commented on this issue
+											if (comment.getUser().getName().contentEquals(username)) {
+												metoo = true;
+											}
+										}
+									}
+								}
 							}
+						} catch (Throwable t) {
+
 						}
 						// If i havent commented yet, comment that i had this issue too.
 						if (!metoo)
 							i.comment(body);
-						if(i.getState()==GHIssueState.CLOSED) {
+						if (i.getState() == GHIssueState.CLOSED) {
 							try {
 								i.reopen();
-							}catch(Throwable t) {}
+							} catch (Throwable t) {
+							}
 						}
 						BowlerKernel.upenURL(i.getHtmlUrl().toURI());
 						return;
