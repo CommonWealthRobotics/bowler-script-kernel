@@ -985,19 +985,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			pull(remoteURI, branch);
 		} catch (InvalidConfigurationException e) {
 			PasswordManager.checkInternet();
-			exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
 		} catch (DetachedHeadException e) {
 			PasswordManager.checkInternet();
-			exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
 		} catch (InvalidRemoteException e) {
 			PasswordManager.checkInternet();
-			exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
 		} catch (CanceledException e) {
 			PasswordManager.checkInternet();
-			exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
 		} catch (RefNotFoundException e) {
 			PasswordManager.checkInternet();
-			exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
 		} catch (RefNotAdvertisedException e) {
 			PasswordManager.checkInternet();
 			git.close();
@@ -1028,7 +1028,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		} catch (GitAPIException e) {
 			PasswordManager.checkInternet();
-			exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
 		}
 
 		git.close();
