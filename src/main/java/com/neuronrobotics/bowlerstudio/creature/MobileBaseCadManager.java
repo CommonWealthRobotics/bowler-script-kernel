@@ -33,6 +33,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import javafx.beans.property.*;
+import javafx.scene.transform.Affine;
 
 public class MobileBaseCadManager {
 
@@ -115,6 +116,12 @@ public class MobileBaseCadManager {
 		public void setSelectedCsg(Collection<CSG> selectedCsg) {
 			// TODO Auto-generated method stub
 
+		}
+
+		@Override
+		public void setSelected(Affine rootListener) {
+			// TODO Auto-generated method stub
+			
 		}
 	};
 	private IFileChangeListener cadWatcher = new IFileChangeListener() {
@@ -570,7 +577,7 @@ public class MobileBaseCadManager {
 						@Override
 						public void onLinkLimit(AbstractLink arg0, PIDLimitEvent arg1) {
 							if (getAutoRegen())
-								selectCsgByLink(base, configuration);
+								selectCsgByLimb(base, dh);
 
 						}
 					});
@@ -599,9 +606,9 @@ public class MobileBaseCadManager {
 	public void selectCsgByLimb(MobileBase base, DHParameterKinematics limb) {
 		try {
 
-			ArrayList<CSG> limCad = MobileBaseCadManager.get(base).getDHtoCadMap().get(limb);
-
-			getUi().setSelectedCsg(limCad);
+//			ArrayList<CSG> limCad = MobileBaseCadManager.get(base).getDHtoCadMap().get(limb);
+//			getUi().setSelectedCsg(limCad);
+			getUi().setSelected(limb.getRootListener());
 		} catch (Exception ex) {
 			System.err.println("Limb not loaded yet");
 		}

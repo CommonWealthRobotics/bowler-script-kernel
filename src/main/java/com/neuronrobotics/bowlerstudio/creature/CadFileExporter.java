@@ -13,6 +13,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
+import javafx.scene.transform.Affine;
 
 public class CadFileExporter {
   
@@ -52,6 +53,12 @@ public class CadFileExporter {
         // TODO Auto-generated method stub
         
       }
+
+	@Override
+	public void setSelected(Affine rootListener) {
+		// TODO Auto-generated method stub
+		
+	}
     };
   }
 	public ArrayList<File> generateManufacturingParts(List<CSG> totalAssembly , File baseDirForFiles) throws IOException {

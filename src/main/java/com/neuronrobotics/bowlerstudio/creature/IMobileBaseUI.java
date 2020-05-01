@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import eu.mihosoft.vrl.v3d.CSG;
+import javafx.scene.transform.Affine;
 
 public interface IMobileBaseUI {
 
@@ -51,6 +52,8 @@ public interface IMobileBaseUI {
    */
   void setSelectedCsg(Collection<CSG> selectedCsg);
   
+  void setSelected(Affine rootListener);
+  
   default void selectCsgByFile(File script, int lineNumber){
     List<CSG> objsFromScriptLine = new ArrayList<>();
 
@@ -93,5 +96,9 @@ public interface IMobileBaseUI {
   default void addCsg(CSG toAdd, File source){
     addCSG(Collections.singletonList(toAdd),  source);
   }
+
+
+  
+  
 
 }
