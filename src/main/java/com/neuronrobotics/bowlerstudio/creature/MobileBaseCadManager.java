@@ -526,7 +526,7 @@ public class MobileBaseCadManager {
 	public ArrayList<CSG> generateCad(DHParameterKinematics dh) {
 		ArrayList<CSG> dhLinks = new ArrayList<>();
 
-		if (cadEngine == null) {
+		if (dhCadGen.get(dh) == null) {
 			try {
 				setDefaultLinkLevelCadEngine();
 			} catch (Exception e) {
@@ -535,9 +535,9 @@ public class MobileBaseCadManager {
 		}
 
 		try {
-			IgenerateCad generatorToUse = getIgenerateCad();
-			if (dhCadGen.get(dh) != null) {
-				Object object = dhCadGen.get(dh);
+			IgenerateCad generatorToUse = getConfigurationDisplay();
+			Object object = dhCadGen.get(dh);
+			if (object != null && !configMode) {
 				if (IgenerateCad.class.isInstance(object))
 					generatorToUse = (IgenerateCad) object;
 			}
@@ -669,6 +669,8 @@ public class MobileBaseCadManager {
 			String[] kinEng = kin.getGitCadEngine();
 			if (!cad[0].contentEquals(kinEng[0]) || !cad[1].contentEquals(kinEng[1])) {
 				setGitCadEngine(kinEng[0], kinEng[1], kin);
+			}else {
+				dhCadGen.put(kin, cadEngine);
 			}
 		}
 	}
