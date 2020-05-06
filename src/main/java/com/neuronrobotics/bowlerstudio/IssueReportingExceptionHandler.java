@@ -33,6 +33,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	private static boolean processing = false;
 	private static HashMap<Throwable, String> exceptionQueue = new HashMap<Throwable, String>();
 	private static boolean reportIssues = false;
+	
+	private static HashMap<String,Integer> exceptionCounter = new HashMap<String, Integer>(); 
 
 	public IssueReportingExceptionHandler() {
 		stacktraceFromHandlerInstantiation = org.apache.commons.lang.exception.ExceptionUtils
@@ -45,6 +47,21 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			except(new Exception("A null exception was thrown"));
 		}
 		StackTraceElement[] element = e.getStackTrace();
+		String source = getTitle(element);
+		
+		if(exceptionCounter.get(source) == null) {
+			exceptionCounter.put(source, 0);
+		}
+		exceptionCounter.put(source, exceptionCounter.get(source)+1);
+		if(exceptionCounter.get(source)>1) {
+//			Alert alert = new Alert(AlertType.CONFIRMATION);
+//			alert.setTitle("IRRECOVERABLE FAULT");
+//			alert.setHeaderText("Its just gunna crash, sorry...");
+//			alert.setContentText("I can wait till you hit yes, buts its basically done...");
+//			Optional<ButtonType> result = alert.showAndWait();
+//			System.exit(-1);
+			return;// maybe just swallowing after 5 reports is good enough??
+		}
 		if (element != null)
 			if (element.length > 0)
 				if (element[0].getClassName() != null)
@@ -116,6 +133,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
 				List<GHIssue> issues = repo.getIssues(GHIssueState.ALL);
 				String source = getTitle(element);
+				
 				for (GHIssue i : issues) {
 					System.err.println("Issues are :" + i.getTitle());
 					if (i.getTitle().contains(source)) {
