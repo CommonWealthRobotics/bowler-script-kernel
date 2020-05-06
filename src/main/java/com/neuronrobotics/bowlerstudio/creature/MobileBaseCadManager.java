@@ -40,7 +40,7 @@ public class MobileBaseCadManager {
 	// static
 	private static HashMap<MobileBase, MobileBaseCadManager> cadmap = new HashMap<>();
 	// static
-	private Object cadEngine;
+	private Object cadForBodyEngine;
 	private MobileBase base;
 	private File cadScript;
 
@@ -141,7 +141,7 @@ public class MobileBaseCadManager {
 						try {
 
 							System.out.println("Re-loading Cad Base Engine");
-							cadEngine = ScriptingEngine.inlineFileScriptRun(fileThatChanged, null);
+							cadForBodyEngine = ScriptingEngine.inlineFileScriptRun(fileThatChanged, null);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -198,8 +198,8 @@ public class MobileBaseCadManager {
 	private IgenerateBody getIgenerateBody() {
 		if(configMode)
 			return getConfigurationDisplay();
-		if (IgenerateBody.class.isInstance(cadEngine)) {
-			return (IgenerateBody) cadEngine;
+		if (IgenerateBody.class.isInstance(cadForBodyEngine)) {
+			return (IgenerateBody) cadForBodyEngine;
 		}
 		return null;
 	}
@@ -207,15 +207,15 @@ public class MobileBaseCadManager {
 	private IgenerateCad getIgenerateCad() {
 		if(configMode)
 			return getConfigurationDisplay();
-		if (IgenerateCad.class.isInstance(cadEngine)) {
-			return (IgenerateCad) cadEngine;
+		if (IgenerateCad.class.isInstance(cadForBodyEngine)) {
+			return (IgenerateCad) cadForBodyEngine;
 		}
 		return null;
 	}
 
 	private IgenerateBed getIgenerateBed() {
-		if (IgenerateBed.class.isInstance(cadEngine)) {
-			return (IgenerateBed) cadEngine;
+		if (IgenerateBed.class.isInstance(cadForBodyEngine)) {
+			return (IgenerateBed) cadForBodyEngine;
 		}
 		return null;
 	}
@@ -272,7 +272,7 @@ public class MobileBaseCadManager {
 			getBasetoCadMap().put(device, new ArrayList<CSG>());
 		}
 
-		if (cadEngine == null) {
+		if (cadForBodyEngine == null) {
 			try {
 				setDefaultLinkLevelCadEngine();
 			} catch (Exception e) {
@@ -280,7 +280,7 @@ public class MobileBaseCadManager {
 			}
 			if (getCadScript() != null) {
 				try {
-					cadEngine = ScriptingEngine.inlineFileScriptRun(getCadScript(), null);
+					cadForBodyEngine = ScriptingEngine.inlineFileScriptRun(getCadScript(), null);
 				} catch (Exception e) {
 					getUi().highlightException(getCadScript(), e);
 				}
@@ -662,7 +662,7 @@ public class MobileBaseCadManager {
 		String[] cad;
 		cad = base.getGitCadEngine();
 
-		if (cadEngine == null) {
+		if (cadForBodyEngine == null) {
 			setGitCadEngine(cad[0], cad[1], base);
 		}
 		for (DHParameterKinematics kin : base.getAllDHChains()) {
@@ -670,7 +670,7 @@ public class MobileBaseCadManager {
 			if (!cad[0].contentEquals(kinEng[0]) || !cad[1].contentEquals(kinEng[1])) {
 				setGitCadEngine(kinEng[0], kinEng[1], kin);
 			}else {
-				dhCadGen.put(kin, cadEngine);
+				dhCadGen.put(kin, cadForBodyEngine);
 			}
 		}
 	}
