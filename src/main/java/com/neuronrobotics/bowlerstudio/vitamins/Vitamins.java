@@ -36,6 +36,7 @@ import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.apache.batik.parser.LengthPairListParser;
@@ -518,6 +519,7 @@ public class Vitamins {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		Collections.sort(types);
 		return types;
 	}
 
@@ -533,6 +535,7 @@ public class Vitamins {
 				}
 			}
 		}
+		Collections.sort(types);
 		return types;
 	}
 
