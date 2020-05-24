@@ -42,6 +42,7 @@ public class MobileBaseCadManager {
 	// static
 	private Object cadForBodyEngine;
 	private MobileBase base;
+	private ArrayList<MobileBaseCadManager> slaves = new ArrayList<MobileBaseCadManager>();
 	private File cadScript;
 
 	private HashMap<DHParameterKinematics, Object> dhCadGen = new HashMap<>();
@@ -80,6 +81,7 @@ public class MobileBaseCadManager {
 		if(allCad!=null)
 			allCad.clear();
 		Vitamins.clear();
+		slaves.clear();
 		
 	}
 	private static class  IMobileBaseUIlocal implements IMobileBaseUI{
@@ -179,8 +181,15 @@ public class MobileBaseCadManager {
 			}
 		});
 		setMobileBase(base);
-
-		// new Exception().printStackTrace();
+		for(DHParameterKinematics kin:base.getAllDHChains()) {
+	    	for(int i=0;i<kin.getNumberOfLinks();i++) {
+	    		MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+	    		if(m!=null) {
+	    			m.setGitSelfSource(base.getGitSelfSource());
+	    			slaves.add(new MobileBaseCadManager(m, myUI));
+	    		}
+	    	}
+	    }
 	}
 
 	public File getCadScript() {
@@ -359,7 +368,9 @@ public class MobileBaseCadManager {
 			i += 1;
 
 		}
-
+		for(MobileBaseCadManager m:slaves) {
+			getAllCad().addAll(m.generateBody(m.base));
+		}
 		showingStl = false;
 		getProcesIndictor().set(1);
 		// PhysicsEngine.clear();
@@ -515,6 +526,7 @@ public class MobileBaseCadManager {
 		cadmap.put(base, this);
 		MobileBaseLoader.get(base);// load the dependant scripts
 		base.updatePositions();
+
 	}
 
 	/**

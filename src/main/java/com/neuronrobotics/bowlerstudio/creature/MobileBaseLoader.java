@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
+import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.DhInverseSolver;
 import com.neuronrobotics.sdk.addons.kinematics.IDriveEngine;
@@ -101,7 +102,15 @@ public class MobileBaseLoader {
   public static MobileBase initializeScripts(MobileBase base) {
     if (map.get(base) == null)
       map.put(base, new MobileBaseLoader(base));
-
+    for(DHParameterKinematics kin:base.getAllDHChains()) {
+    	for(int i=0;i<kin.getNumberOfLinks();i++) {
+    		MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+    		if(m!=null) {
+    			m.setGitSelfSource(base.getGitSelfSource());
+    			initializeScripts(m);
+    		}
+    	}
+    }
     return base;
   }
 
