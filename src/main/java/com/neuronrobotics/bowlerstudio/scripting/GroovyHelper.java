@@ -30,21 +30,21 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
     );
 
     Binding binding = new Binding();
-    for (String pm : DeviceManager.listConnectedDevice()) {
-      BowlerAbstractDevice bad = DeviceManager.getSpecificDevice(null, pm);
-      try {
-        // groovy needs the objects cas to thier actual type befor
-        // passing into the scipt
-
-        binding.setVariable(bad.getScriptingName(),
-            Class.forName(bad.getClass().getName())
-                .cast(bad));
-      } catch (Throwable e) {
-        //throw e;
-      }
-//			System.err.println("Device " + bad.getScriptingName() + " is "
-//					+ bad);
-    }
+//    for (String pm : DeviceManager.listConnectedDevice()) {
+//      BowlerAbstractDevice bad =  DeviceManager.getSpecificDevice(null, pm);
+//      try {
+//        // groovy needs the objects cas to thier actual type befor
+//        // passing into the scipt
+//
+//        binding.setVariable(bad.getScriptingName(),
+//            Class.forName(bad.getClass().getName())
+//                .cast(bad));
+//      } catch (Throwable e) {
+//        //throw e;
+//      }
+////			System.err.println("Device " + bad.getScriptingName() + " is "
+////					+ bad);
+//    }
     binding.setVariable("args", args);
 
     GroovyShell shell = new GroovyShell(GroovyHelper.class

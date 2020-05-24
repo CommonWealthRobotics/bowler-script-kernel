@@ -34,20 +34,20 @@ public class JythonHelper implements IScriptingLanguage {
       interp.exec("import sys");
     }
 
-    for (String pm : DeviceManager.listConnectedDevice(null)) {
-      BowlerAbstractDevice bad = DeviceManager.getSpecificDevice(null, pm);
-      // passing into the scipt
-      try {
-        interp.set(bad.getScriptingName(),
-            Class.forName(bad.getClass().getName())
-                .cast(bad));
-      } catch (ClassNotFoundException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      System.err.println("Device " + bad.getScriptingName() + " is "
-          + bad);
-    }
+//    for (String pm : DeviceManager.listConnectedDevice(null)) {
+//      BowlerAbstractDevice bad =  DeviceManager.getSpecificDevice(null, pm);
+//      // passing into the scipt
+//      try {
+//        interp.set(bad.getScriptingName(),
+//            Class.forName(bad.getClass().getName())
+//                .cast(bad));
+//      } catch (ClassNotFoundException e) {
+//        // TODO Auto-generated catch block
+//        e.printStackTrace();
+//      }
+//      System.err.println("Device " + bad.getScriptingName() + " is "
+//          + bad);
+//    }
     interp.set("args", args);
     interp.exec(code);
     ArrayList<Object> results = new ArrayList<>();
