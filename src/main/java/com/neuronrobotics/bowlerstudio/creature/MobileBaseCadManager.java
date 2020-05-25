@@ -85,6 +85,7 @@ public class MobileBaseCadManager {
 			m.clear();
 		}
 		
+		
 	}
 	private static class  IMobileBaseUIlocal implements IMobileBaseUI{
 
@@ -129,19 +130,20 @@ public class MobileBaseCadManager {
 		}
 	};
 	private IFileChangeListener cadWatcher = new IFileChangeListener() {
-
+		boolean fileHandeling = false;
 		@Override
 		public void onFileChange(File fileThatChanged, WatchEvent event) {
-
+			if(fileHandeling)
+				return;
+			
 			if (cadGenerating || !getAutoRegen()) {
 				System.out.println("No Base reload, building currently");
 				return;
 			}
+			fileHandeling=true;
 			try {
 				new Thread() {
 					public void run() {
-						clear();
-						ThreadUtil.wait((int) ((50 * Math.random()) + 50));
 						try {
 
 							System.out.println("Re-loading Cad Base Engine");
@@ -151,6 +153,7 @@ public class MobileBaseCadManager {
 							e.printStackTrace();
 						}
 						generateCad();
+						fileHandeling=false;
 					}
 				}.start();
 			} catch (Exception e) {
@@ -161,6 +164,7 @@ public class MobileBaseCadManager {
 	};
 	private boolean autoRegen = true;
 	private DoubleProperty pi = new SimpleDoubleProperty(0);
+	private MobileBaseCadManager master;
 
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
 		this.setUi(myUI);
@@ -175,6 +179,7 @@ public class MobileBaseCadManager {
 				clear();
 				cadmap.remove(base);
 				slaves.clear();
+				master=null;
 			}
 
 			@Override
@@ -648,6 +653,10 @@ public class MobileBaseCadManager {
 				System.out.print("\r\nGenerating CAD...\r\n");
 				setName("MobileBaseCadManager Generating cad Thread ");
 				// new Exception().printStackTrace();
+				if(master!=null) {
+					for(int i=0;i<allCad.size();i++)
+						master.allCad.remove(allCad.get(i));
+				}
 				MobileBase device = base;
 				MobileBaseCadManager.get(base).clear();
 				
@@ -657,11 +666,16 @@ public class MobileBaseCadManager {
 					getUi().highlightException(getCadScript(), e);
 				}
 				// System.out.print("\r\nDone Generating CAD!\r\n");
-				getUi().setCsg(MobileBaseCadManager.get(base), getCadScript());
+				if(master!=null) {
+					for(int i=0;i<allCad.size();i++)
+						master.allCad.add(allCad.get(i));
+					getUi().setCsg(master, getCadScript());
+				}else
+					getUi().setCsg(MobileBaseCadManager.get(base), getCadScript());
 				cadGenerating = false;
 				System.out.print("\r\nDone Generating CAD!\r\n");
 				getProcesIndictor().set(1);
-				System.gc();
+				//System.gc();
 			}
 		}.start();
 	}
@@ -748,6 +762,7 @@ public class MobileBaseCadManager {
 		    		if(m!=null) {
 		    			m.setGitSelfSource(device.getGitSelfSource());
 		    			MobileBaseCadManager e = new MobileBaseCadManager(m, ui);
+		    			e.setMaster(mbcm);
 						mbcm.slaves.add(e);
 		    		}
 		    	}
@@ -760,6 +775,10 @@ public class MobileBaseCadManager {
 
 		return mobileBaseCadManager;
 	}
+	private void setMaster(MobileBaseCadManager master) {
+		this.master = master;
+	}
+
 	public static MobileBaseCadManager get(MobileBase device) {
 		if (cadmap.get(device) == null) {
 			IMobileBaseUIlocal ui2 = new IMobileBaseUIlocal();
