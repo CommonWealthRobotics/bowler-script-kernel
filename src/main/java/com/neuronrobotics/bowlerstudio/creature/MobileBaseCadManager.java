@@ -81,7 +81,9 @@ public class MobileBaseCadManager {
 		if(allCad!=null)
 			allCad.clear();
 		Vitamins.clear();
-		slaves.clear();
+		for(MobileBaseCadManager m:slaves) {
+			m.clear();
+		}
 		
 	}
 	private static class  IMobileBaseUIlocal implements IMobileBaseUI{
@@ -172,6 +174,7 @@ public class MobileBaseCadManager {
 				bail = true;
 				clear();
 				cadmap.remove(base);
+				slaves.clear();
 			}
 
 			@Override
@@ -181,15 +184,7 @@ public class MobileBaseCadManager {
 			}
 		});
 		setMobileBase(base);
-		for(DHParameterKinematics kin:base.getAllDHChains()) {
-	    	for(int i=0;i<kin.getNumberOfLinks();i++) {
-	    		MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
-	    		if(m!=null) {
-	    			m.setGitSelfSource(base.getGitSelfSource());
-	    			slaves.add(new MobileBaseCadManager(m, myUI));
-	    		}
-	    	}
-	    }
+		cadmap.put(base, this);
 	}
 
 	public File getCadScript() {
@@ -306,10 +301,12 @@ public class MobileBaseCadManager {
 			} else {
 				if (!bail) {
 					ArrayList<CSG> newcad = getIgenerateBody().generateBody(device);
-					for (CSG c : newcad) {
-						getAllCad().add(c);
+					if(device.isAvailable()) {
+						for (CSG c : newcad) {
+							getAllCad().add(c);
+						}
+						ui.addCSG(newcad, getCadScript());
 					}
-					ui.addCSG(newcad, getCadScript());
 				} else
 					new Exception().printStackTrace();
 				ArrayList<CSG> arrayList = getBasetoCadMap().get(device);
@@ -342,7 +339,8 @@ public class MobileBaseCadManager {
 			}
 			ArrayList<CSG> arrayList = getDHtoCadMap().get(l);
 			int j = 0;
-			if (showingStl || !device.isAvailable()) {
+			boolean isAvailible = device.isAvailable();
+			if (showingStl || !isAvailible) {
 				for (CSG csg : arrayList) {
 					getAllCad().add(csg);
 					getUi().addCsg(csg, getCadScript());
@@ -676,6 +674,7 @@ public class MobileBaseCadManager {
 
 		if (cadForBodyEngine == null) {
 			setGitCadEngine(cad[0], cad[1], base);
+			cadForBodyEngine = ScriptingEngine.inlineFileScriptRun(getCadScript(), null);
 		}
 		for (DHParameterKinematics kin : base.getAllDHChains()) {
 			String[] kinEng = kin.getGitCadEngine();
@@ -742,7 +741,17 @@ public class MobileBaseCadManager {
 			// new RuntimeException("No Mobile Base Cad Manager UI
 			// specified").printStackTrace();
 			MobileBaseCadManager mbcm = new MobileBaseCadManager(device,ui );
-			cadmap.put(device, mbcm);
+			
+			for(DHParameterKinematics kin:device.getAllDHChains()) {
+		    	for(int i=0;i<kin.getNumberOfLinks();i++) {
+		    		MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+		    		if(m!=null) {
+		    			m.setGitSelfSource(device.getGitSelfSource());
+		    			MobileBaseCadManager e = new MobileBaseCadManager(m, ui);
+						mbcm.slaves.add(e);
+		    		}
+		    	}
+		    }
 		}
 		MobileBaseCadManager mobileBaseCadManager = cadmap.get(device);
 		if(!IMobileBaseUIlocal.class.isInstance(ui)&&
@@ -825,6 +834,9 @@ public class MobileBaseCadManager {
 
 	public void setAutoRegen(boolean autoRegen) {
 		this.autoRegen = autoRegen;
+		for(MobileBaseCadManager m:slaves) {
+			m.setAutoRegen(autoRegen);
+		}
 	}
 
 	public IMobileBaseUI getUi() {
@@ -838,6 +850,9 @@ public class MobileBaseCadManager {
 	public void setConfigurationViewerMode(boolean b) {
 		System.out.println("Setting config mode "+b);
 		configMode=b;
+		for(MobileBaseCadManager m:slaves) {
+			m.setConfigurationViewerMode(b);
+		}
 	}
 
 }
