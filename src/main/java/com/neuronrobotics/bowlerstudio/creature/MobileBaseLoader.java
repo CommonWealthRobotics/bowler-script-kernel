@@ -14,126 +14,127 @@ import com.neuronrobotics.sdk.addons.kinematics.IDriveEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
 public class MobileBaseLoader {
-  private static HashMap<MobileBase, MobileBaseLoader> map = new HashMap<>();
-  private MobileBase base;
-  private IDriveEngine defaultDriveEngine;
+	private static HashMap<MobileBase, MobileBaseLoader> map = new HashMap<>();
+	private MobileBase base;
+	private IDriveEngine defaultDriveEngine;
 
-  private MobileBaseLoader(MobileBase base) {
-    this.setBase(base);
+	private MobileBaseLoader(MobileBase base) {
+		this.setBase(base);
 
-    setDefaultWalkingEngine(base);
-  }
+		setDefaultWalkingEngine(base);
+	}
 
-  public void setGitDhEngine(String gitsId, String file, DHParameterKinematics dh) {
-    dh.setGitDhEngine(new String[] {gitsId, file});
+	public void setGitDhEngine(String gitsId, String file, DHParameterKinematics dh) {
+		dh.setGitDhEngine(new String[] { gitsId, file });
 
-    setDefaultDhParameterKinematics(dh);
+		setDefaultDhParameterKinematics(dh);
 
-  }
+	}
 
+	public File setDefaultDhParameterKinematics(DHParameterKinematics device) {
+		File code = null;
+		try {
+			code = ScriptingEngine.fileFromGit(device.getGitDhEngine()[0], device.getGitDhEngine()[1]);
+			DhInverseSolver defaultDHSolver = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(code, null);
 
-  public File setDefaultDhParameterKinematics(DHParameterKinematics device) {
-    File code = null;
-    try {
-      code = ScriptingEngine.fileFromGit(device.getGitDhEngine()[0], device.getGitDhEngine()[1]);
-      DhInverseSolver defaultDHSolver =
-          (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(code, null);
+			File c = code;
+			FileWatchDeviceWrapper.watch(device, code, (fileThatChanged, event) -> {
 
-      File c = code;
-      FileWatchDeviceWrapper.watch(device, code, (fileThatChanged, event) -> {
+				try {
+					System.out.println("D-H Solver changed, updating " + device.getScriptingName());
+					DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(c, null);
+					device.setInverseSolver(d);
+				} catch (Exception ex) {
+					MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
+				}
+			});
 
-        try {
-          System.out.println("D-H Solver changed, updating " + device.getScriptingName());
-          DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(c, null);
-          device.setInverseSolver(d);
-        } catch (Exception ex) {
-          MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
-        }
-      });
+			device.setInverseSolver(defaultDHSolver);
+			return code;
+		} catch (Exception e1) {
+			MobileBaseCadManager.get(base).getUi().highlightException(code, e1);
+		}
+		return null;
 
-      device.setInverseSolver(defaultDHSolver);
-      return code;
-    } catch (Exception e1) {
-      MobileBaseCadManager.get(base).getUi().highlightException(code, e1);
-    }
-    return null;
+	}
 
-  }
+	public void setDefaultWalkingEngine(MobileBase device) {
+		if (defaultDriveEngine == null) {
+			setGitWalkingEngine(device.getGitWalkingEngine()[0], device.getGitWalkingEngine()[1], device);
+		}
+		for (DHParameterKinematics dh : device.getAllDHChains()) {
+			setDefaultDhParameterKinematics(dh);
+		}
+	}
 
-  public void setDefaultWalkingEngine(MobileBase device) {
-    if (defaultDriveEngine == null) {
-      setGitWalkingEngine(device.getGitWalkingEngine()[0], device.getGitWalkingEngine()[1], device);
-    }
-    for (DHParameterKinematics dh : device.getAllDHChains()) {
-      setDefaultDhParameterKinematics(dh);
-    }
-  }
+	public void setGitWalkingEngine(String git, String file, MobileBase device) {
 
-  public void setGitWalkingEngine(String git, String file, MobileBase device) {
+		device.setGitWalkingEngine(new String[] { git, file });
+		File code = null;
+		try {
+			code = ScriptingEngine.fileFromGit(git, file);
+		} catch (GitAPIException | IOException e) {
+			MobileBaseCadManager.get(base).getUi().highlightException(code, e);
+		}
 
-    device.setGitWalkingEngine(new String[] {git, file});
-    File code = null;
-    try {
-      code = ScriptingEngine.fileFromGit(git, file);
-    } catch (GitAPIException | IOException e) {
-      MobileBaseCadManager.get(base).getUi().highlightException(code, e);
-    }
+		File c = code;
+		FileWatchDeviceWrapper.watch(device, code, (fileThatChanged, event) -> {
 
-    File c = code;
-    FileWatchDeviceWrapper.watch(device, code, (fileThatChanged, event) -> {
+			try {
+				System.out.println("Walking Gait Script changed, updating " + device.getScriptingName());
+				defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
+				device.setWalkingDriveEngine(defaultDriveEngine);
+			} catch (Exception ex) {
+				MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
+			}
+		});
 
-	      try {
-	    	  System.out.println("Walking Gait Script changed, updating " + device.getScriptingName());
-	        defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
-	        device.setWalkingDriveEngine(defaultDriveEngine);
-	      } catch (Exception ex) {
-	        MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
-	      }
-	});
-    
-    try {
-      defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
-      device.setWalkingDriveEngine(defaultDriveEngine);
-    } catch (Exception ex) {
-      MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
-    }
-  }
+		try {
+			defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
+			device.setWalkingDriveEngine(defaultDriveEngine);
+		} catch (Exception ex) {
+			MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
+		}
+	}
 
-  public static MobileBase initializeScripts(MobileBase base) {
-    if (map.get(base) == null)
-      map.put(base, new MobileBaseLoader(base));
-    for(DHParameterKinematics kin:base.getAllDHChains()) {
-    	for(int i=0;i<kin.getNumberOfLinks();i++) {
-    		MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
-    		if(m!=null) {
-    			m.setGitSelfSource(base.getGitSelfSource());
-    			initializeScripts(m);
-    		}
-    	}
-    }
-    return base;
-  }
+	public static MobileBase initializeScripts(MobileBase base) {
+		if (map.get(base) == null)
+			synchronized (map) {
+				if (map.get(base) == null)map.put(base, new MobileBaseLoader(base));
+				for (DHParameterKinematics kin : base.getAllDHChains()) {
+					for (int i = 0; i < kin.getNumberOfLinks(); i++) {
+						MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+						if (m != null) {
+							m.setGitSelfSource(base.getGitSelfSource());
+							if (map.get(m) == null)
+								map.put(m, new MobileBaseLoader(m));
+						}
+					}
+				}
+			}
+		return base;
+	}
 
-  public static MobileBase fromGit(String id, String file) throws Exception {
-    String xmlContent = ScriptingEngine.codeFromGit(id, file)[0];
-    MobileBase mb = new MobileBase(IOUtils.toInputStream(xmlContent, "UTF-8"));
+	public static MobileBase fromGit(String id, String file) throws Exception {
+		String xmlContent = ScriptingEngine.codeFromGit(id, file)[0];
+		MobileBase mb = new MobileBase(IOUtils.toInputStream(xmlContent, "UTF-8"));
 
-    mb.setGitSelfSource(new String[] {id, file});
-    // ConnectionManager.addConnection(mb, mb.getScriptingName());
-    return initializeScripts(mb);
-  }
+		mb.setGitSelfSource(new String[] { id, file });
+		return initializeScripts(mb);
+	}
 
-  public static MobileBaseLoader get(MobileBase base) {
+	public static MobileBaseLoader get(MobileBase base) {
+		initializeScripts(base);
 
-    return map.get(initializeScripts(base));
-  }
+		return map.get(base);
+	}
 
-  public MobileBase getBase() {
-    return base;
-  }
+	public MobileBase getBase() {
+		return base;
+	}
 
-  public void setBase(MobileBase base) {
-    this.base = base;
-  }
+	public void setBase(MobileBase base) {
+		this.base = base;
+	}
 
 }
