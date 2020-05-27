@@ -23,7 +23,7 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
+//import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 import javafx.scene.paint.Color;
@@ -451,10 +451,10 @@ public class Vitamins {
 				getRootFolder() + type + ".json"// File from within the Git repo
 		);
 		if(onChange!=null) {
-			FileChangeWatcher watcher = FileChangeWatcher.watch(f);
-			watcher.addIFileChangeListener((fileThatChanged, event) -> {
-				onChange.run();
-			});
+//			FileChangeWatcher watcher = FileChangeWatcher.watch(f);
+//			watcher.addIFileChangeListener((fileThatChanged, event) -> {
+//				onChange.run();
+//			});
 		}
 		return f;
 	}
