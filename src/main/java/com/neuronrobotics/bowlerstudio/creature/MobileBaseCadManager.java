@@ -305,7 +305,19 @@ public class MobileBaseCadManager {
 				}
 			} else {
 				if (!bail) {
-					ArrayList<CSG> newcad = getIgenerateBody().generateBody(device);
+					
+					ArrayList<CSG> newcad =null;
+					try {
+						newcad = getIgenerateBody().generateBody(device);
+					}catch(Throwable t) {
+						t.printStackTrace();
+					}
+					if(newcad==null) {
+						newcad=new ArrayList<CSG>();
+					}
+					if(newcad.size()==0) {
+						newcad =getConfigurationDisplay().generateBody(device);
+					}
 					if(device.isAvailable()) {
 						for (CSG c : newcad) {
 							getAllCad().add(c);
@@ -566,14 +578,25 @@ public class MobileBaseCadManager {
 				set(base, (int) j, (int) i);
 
 				if (!bail) {
-					ArrayList<CSG> tmp = generatorToUse.generateCad(dh, i);
-					getUi().addCSG(tmp, getCadScript());
+					ArrayList<CSG> newcad =null;
+					try {
+						newcad  = generatorToUse.generateCad(dh, i);
+					}catch(Throwable t) {
+						t.printStackTrace();
+					}
+					if(newcad==null) {
+						newcad=new ArrayList<CSG>();
+					}
+					if(newcad.size()==0) {
+						newcad =getConfigurationDisplay().generateCad(dh, i);
+					}
+					getUi().addCSG(newcad, getCadScript());
 					LinkConfiguration configuration = dh.getLinkConfiguration(i);
 					if (getLinktoCadMap().get(configuration) == null) {
 						getLinktoCadMap().put(configuration, new ArrayList<>());
 					} else
 						getLinktoCadMap().get(configuration).clear();
-					for (CSG c : tmp) {
+					for (CSG c : newcad) {
 						dhLinks.add(c);
 						getLinktoCadMap().get(configuration).add(c);// add to
 																	// the
