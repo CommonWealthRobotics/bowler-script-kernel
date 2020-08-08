@@ -1167,7 +1167,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 *
 	 * @return The local directory containing the .git
 	 */
-	public synchronized static File cloneRepo(String remoteURI, String branch) {
+	public static File cloneRepo(String remoteURI, String branch) {
 
 //	while(remoteURI.endsWith("/"))
 //		remoteURI=remoteURI.substring(0, remoteURI.length()-2);

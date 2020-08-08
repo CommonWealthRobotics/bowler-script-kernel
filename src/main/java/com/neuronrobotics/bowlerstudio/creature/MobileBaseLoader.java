@@ -99,7 +99,7 @@ public class MobileBaseLoader {
 
 	public static MobileBase initializeScripts(MobileBase base) {
 		if (map.get(base) == null)
-			synchronized (map) {
+			//synchronized (map) {
 				if (map.get(base) == null)map.put(base, new MobileBaseLoader(base));
 				for (DHParameterKinematics kin : base.getAllDHChains()) {
 					for (int i = 0; i < kin.getNumberOfLinks(); i++) {
@@ -111,7 +111,7 @@ public class MobileBaseLoader {
 						}
 					}
 				}
-			}
+			//}
 		return base;
 	}
 
