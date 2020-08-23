@@ -2,6 +2,7 @@ package junit.bowler;
 
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
@@ -9,6 +10,7 @@ import com.neuronrobotics.bowlerstudio.BowlerKernel;
 public class VoiceTest {
 
   @Test
+  @Ignore
   public void test() {
 	  BowlerKernel.speak(
 				"This is the default voice");
