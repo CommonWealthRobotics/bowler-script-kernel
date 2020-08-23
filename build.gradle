@@ -120,6 +120,12 @@ repositories {
 
     mavenCentral()
     jcenter()
+    maven {
+        url "https://dl.bintray.com/s1m0nw1/KtsRunner"
+        content {
+            includeGroup("de.swirtz")
+        }
+    }
 }
 
 dependencies {
