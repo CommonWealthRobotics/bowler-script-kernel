@@ -105,19 +105,6 @@ String getOsArch() {
 
 
 repositories {
-	
-//	maven { url 'https://oss.sonatype.org/service/local/repositories/releases/content/' }
-//	mavenCentral()
-//	jcenter()
-//	maven { url 'https://repository-bubblecloud.forge.cloudbees.com/release/'}
-//	maven { url 'https://clojars.org/repo' }
-//	maven { url 'https://jline.sourceforge.net/m2repo' }
-//	maven { url 'https://repo.spring.io/milestone'}
-//	maven { url 'https://jenkinsci.artifactoryonline.com/jenkinsci/public/' }
-//	//com.neuronrobotics hosting point
-//	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
-//    maven { url "https://dl.bintray.com/s1m0nw1/KtsRunner" }
-
     mavenCentral()
     jcenter()
     maven {
