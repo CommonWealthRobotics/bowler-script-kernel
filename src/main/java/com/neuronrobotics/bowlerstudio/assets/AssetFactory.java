@@ -101,6 +101,7 @@ public class AssetFactory {
         System.out.println("No image at " + file);
 
         try {
+        	new RuntimeException().printStackTrace();
           File imageFile = ScriptingEngine.createFile(getGitSource(), file, "create file");
           try {
             String fileName = imageFile.getName();
