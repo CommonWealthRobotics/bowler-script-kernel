@@ -25,7 +25,7 @@ apply plugin: 'maven'
 //apply plugin: 'io.spring.dependency-management'
 
 
-sourceCompatibility = '1.8'
+sourceCompatibility = '1.11'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 sourceSets {
 	
