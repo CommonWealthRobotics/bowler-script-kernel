@@ -14,13 +14,25 @@ buildscript {
 //	}
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
+plugins {
+ 	id 'java'
+ 	id 'signing'
+ 	id 'eclipse'
+ 	id 'maven'
+	id 'application'
+	id 'org.openjfx.javafxplugin' 
+	id 'com.github.johnrengelman.shadow' 
+}
 
-apply plugin: 'java'
-apply plugin: 'signing'
-apply plugin: 'maven'
-
-
+javafx {
+    version = "11"
+    modules = [ 'javafx.controls',
+    'javafx.fxml',
+    'javafx.media',
+    'javafx.swing',
+    'javafx.web'
+     ]
+}
 //apply plugin: 'spring-boot'
 //apply plugin: 'io.spring.dependency-management'
 
