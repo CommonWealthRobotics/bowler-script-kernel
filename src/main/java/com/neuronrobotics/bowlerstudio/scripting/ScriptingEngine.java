@@ -1479,7 +1479,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static HashMap<String, IScriptingLanguage> getLangaugesMap() {
 		return langauges;
 	}
-
+	public static IScriptingLanguage getLangaugeByExtention(String extention) {
+		for (String L : getLangaugesMap().keySet()) {
+			if(langauges.get(L).isSupportedFileExtenetion(extention)) {
+				return langauges.get(L);
+			}
+		}
+		return null;
+	}
 	public static boolean hasNetwork() {
 
 		return PasswordManager.hasNetwork();
