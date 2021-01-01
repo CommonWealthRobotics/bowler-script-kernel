@@ -1421,13 +1421,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return null;
 	}
 	
-	public static GHRepository makeNewRepo(String newName, String description) throws IOException {
+	public static GHRepository makeNewRepoNoFailOver(String newName, String description) throws IOException,org.kohsuke.github.HttpException  {
 		GitHub github = PasswordManager.getGithub();
 		GHCreateRepositoryBuilder builder = github.createRepository(newName );
 		builder.description(description );
+		return builder.create();		
+	}
+	
+	
+	public static GHRepository makeNewRepo(String newName, String description) throws IOException {
+		GitHub github = PasswordManager.getGithub();
 		GHRepository gist=null;
 		try {
-			gist = builder.create();
+			gist = makeNewRepoNoFailOver(newName,description);
 		}catch(org.kohsuke.github.HttpException ex) {
 			if(ex.getMessage().contains("name already exists on this account")) {
 				gist = github.getRepository(PasswordManager.getLoginID()+"/"+newName);
