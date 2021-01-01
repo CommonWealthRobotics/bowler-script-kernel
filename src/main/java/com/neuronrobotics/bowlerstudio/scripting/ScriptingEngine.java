@@ -1319,6 +1319,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return ScriptingEngine.autoupdate;
 	}
 
+	@SuppressWarnings("unused")
 	private static File fileFromGistID(String string, String string2)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		return fileFromGit("https://gist.github.com/" + string + ".git", string2);
@@ -1405,7 +1406,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return false;
 	}
 
-	public static GHGist fork(String currentGist) throws Exception {
+	public static GHGist forkGist(String currentGist) throws Exception {
 
 		if (PasswordManager.getGithub() != null) {
 
@@ -1421,6 +1422,34 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return null;
 	}
 	
+	/**
+	 * Fork a git repo
+	 * @param sourceURL the URL of the source repo
+	 * @return the URL of the target repo
+	 * @throws Exception 
+	 */
+	
+	public static String fork(String sourceURL,String newRepoName, String newRepoDescription) throws Exception {
+		ArrayList<String> files = filesInGit(sourceURL);
+		Git git = locateGit(fileFromGit(sourceURL,files.get(0)));
+		Repository sourceRepoObject = git.getRepository();
+		
+		GHRepository repository =makeNewRepoNoFailOver(newRepoName,newRepoDescription);
+		String gitRepo= repository.getHttpTransportUrl();
+		
+		sourceRepoObject.getConfig().setString("remote", "origin", "url", gitRepo);
+		
+		if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
+			git.push().setTransportConfigCallback(transportConfigCallback).call();
+		else
+			git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+		git.close();
+		
+		ArrayList<String> filesNew = filesInGit(gitRepo);
+		
+		return gitRepo;
+	}
+
 	public static GHRepository makeNewRepoNoFailOver(String newName, String description) throws IOException,org.kohsuke.github.HttpException  {
 		GitHub github = PasswordManager.getGithub();
 		GHCreateRepositoryBuilder builder = github.createRepository(newName );
@@ -1456,30 +1485,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return null;
 	}
 
-	public static String[] forkGitFile(String[] incoming) throws Exception {
-		GitHub github = PasswordManager.getGithub();
 
-		String id = null;
-		if (incoming[0].endsWith(".git"))
-			id = urlToGist(incoming[0]);
-		else {
-			id = incoming[0];
-			incoming[0] = "https://gist.github.com/" + id + ".git";
-		}
-		GHGist incomingGist = github.getGist(id);
-		File incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
-		if (!ScriptingEngine.checkOwner(incomingFile)) {
-			incomingGist = incomingGist.fork();
-			incoming[0] = "https://gist.github.com/" + ScriptingEngine.urlToGist(incomingGist.getHtmlUrl()) + ".git";
-			// sync the new file to the disk
-			incomingFile = ScriptingEngine.fileFromGistID(id, incoming[1]);
-		}
-		for (IGithubLoginListener l : loginListeners) {
-			l.onLogin(PasswordManager.getUsername());
-		}
-
-		return incoming;
-	}
 
 	public static String urlToString(URL htmlUrl) {
 		return htmlUrl.toExternalForm();
@@ -1491,11 +1497,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return ScriptingEngine.urlToGist(externalForm);
 	}
 
-//  public static void setGithub(GitHub github) {
-//    ScriptingEngine.github = github;
-//    if (github == null)
-//      setLoginSuccess(false);
-//  }
 
 	public static List<String> getAllLangauges() {
 		ArrayList<String> langs = new ArrayList<>();
@@ -1505,13 +1506,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return langs;
 	}
 
-	// private static ArrayList<IScriptingLanguage> getLangauges() {
-	// ArrayList<IScriptingLanguage> langs = new ArrayList<>();
-	// for (String L : getLangaugesMap().keySet()) {
-	// langs.add(getLangaugesMap().get(L));
-	// }
-	// return langs;
-	// }
+
 
 	public static HashMap<String, IScriptingLanguage> getLangaugesMap() {
 		return langauges;
