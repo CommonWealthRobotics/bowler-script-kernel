@@ -40,7 +40,9 @@ import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GHGist;
+import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import java.io.BufferedReader;
 import java.io.File;
@@ -1416,6 +1418,35 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		}
 
+		return null;
+	}
+	
+	public static GHRepository makeNewRepo(String newName, String description) throws IOException {
+		GitHub github = PasswordManager.getGithub();
+		GHCreateRepositoryBuilder builder = github.createRepository(newName );
+		builder.description(description );
+		GHRepository gist=null;
+		try {
+			gist = builder.create();
+		}catch(org.kohsuke.github.HttpException ex) {
+			if(ex.getMessage().contains("name already exists on this account")) {
+				gist = github.getRepository(PasswordManager.getLoginID()+"/"+newName);
+			}
+		}
+		return gist;
+	}
+	
+	public static String locateGitUrlString(File f)  {
+		
+		
+		try {
+			Repository repository = ScriptingEngine.locateGit(f).getRepository();
+			return repository.getConfig().getString("remote", "origin", "url");
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 
