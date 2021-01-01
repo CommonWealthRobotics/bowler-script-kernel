@@ -692,11 +692,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					} catch (Exception ex) {
 						setAutoupdate(false);
 						try {
-							if(hasNetwork()){
+							if (hasNetwork()) {
 								ex.printStackTrace();
 								System.err.println("Error in gist, hosing: " + gitRepoFile);
 								deleteFolder(gitRepoFile);
-								return fileFromGit ( remoteURI,  branch,  fileInRepo);
+								return fileFromGit(remoteURI, branch, fileInRepo);
 							}
 						} catch (Exception x) {
 							x.printStackTrace();
@@ -987,19 +987,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			pull(remoteURI, branch);
 		} catch (InvalidConfigurationException e) {
 			PasswordManager.checkInternet();
-			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
+			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (DetachedHeadException e) {
 			PasswordManager.checkInternet();
-			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
+			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (InvalidRemoteException e) {
 			PasswordManager.checkInternet();
-			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
+			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (CanceledException e) {
 			PasswordManager.checkInternet();
-			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
+			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (RefNotFoundException e) {
 			PasswordManager.checkInternet();
-			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
+			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (RefNotAdvertisedException e) {
 			PasswordManager.checkInternet();
 			git.close();
@@ -1030,7 +1030,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		} catch (GitAPIException e) {
 			PasswordManager.checkInternet();
-			throw new RuntimeException("remoteURI "+remoteURI+" branch "+branch+" "+e.getMessage());
+			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		}
 
 		git.close();
@@ -1074,7 +1074,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void checkout(String remoteURI, String branch) throws IOException {
-		if(!hasNetwork())
+		if (!hasNetwork())
 			return;
 		// cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
@@ -1421,59 +1421,66 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		return null;
 	}
-	
+
 	/**
 	 * Fork a git repo
+	 * 
 	 * @param sourceURL the URL of the source repo
 	 * @return the URL of the target repo
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	
-	public static String fork(String sourceURL,String newRepoName, String newRepoDescription) throws Exception {
+
+	public static String fork(String sourceURL, String newRepoName, String newRepoDescription) throws Exception {
 		ArrayList<String> files = filesInGit(sourceURL);
-		Git git = locateGit(fileFromGit(sourceURL,files.get(0)));
+		Git git = locateGit(fileFromGit(sourceURL, files.get(0)));
 		Repository sourceRepoObject = git.getRepository();
-		
-		GHRepository repository =makeNewRepoNoFailOver(newRepoName,newRepoDescription);
-		String gitRepo= repository.getHttpTransportUrl();
-		
-		sourceRepoObject.getConfig().setString("remote", "origin", "url", gitRepo);
-		
-		if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
-			git.push().setTransportConfigCallback(transportConfigCallback).call();
-		else
-			git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
-		git.close();
-		
-		ArrayList<String> filesNew = filesInGit(gitRepo);
-		
-		return gitRepo;
+		try {
+			GHRepository repository = makeNewRepoNoFailOver(newRepoName, newRepoDescription);
+			String gitRepo = repository.getHttpTransportUrl();
+
+			sourceRepoObject.getConfig().setString("remote", "origin", "url", gitRepo);
+
+			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
+				git.push().setTransportConfigCallback(transportConfigCallback).call();
+			else
+				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+			git.close();
+
+			ArrayList<String> filesNew = filesInGit(gitRepo);
+
+			return gitRepo;
+		} catch (org.kohsuke.github.HttpException ex) {
+			if (ex.getMessage().contains("name already exists on this account")) {
+				return PasswordManager.getGithub().getRepository(PasswordManager.getLoginID() + "/" + newRepoName)
+						.getHttpTransportUrl();
+			}
+		}
+		throw new RuntimeException("Repo could not be forked and does not exist");
 	}
 
-	public static GHRepository makeNewRepoNoFailOver(String newName, String description) throws IOException,org.kohsuke.github.HttpException  {
+	public static GHRepository makeNewRepoNoFailOver(String newName, String description)
+			throws IOException, org.kohsuke.github.HttpException {
 		GitHub github = PasswordManager.getGithub();
-		GHCreateRepositoryBuilder builder = github.createRepository(newName );
-		builder.description(description );
-		return builder.create();		
+		GHCreateRepositoryBuilder builder = github.createRepository(newName);
+		builder.description(description);
+		return builder.create();
 	}
-	
-	
+
 	public static GHRepository makeNewRepo(String newName, String description) throws IOException {
 		GitHub github = PasswordManager.getGithub();
-		GHRepository gist=null;
+		GHRepository gist = null;
 		try {
-			gist = makeNewRepoNoFailOver(newName,description);
-		}catch(org.kohsuke.github.HttpException ex) {
-			if(ex.getMessage().contains("name already exists on this account")) {
-				gist = github.getRepository(PasswordManager.getLoginID()+"/"+newName);
+			gist = makeNewRepoNoFailOver(newName, description);
+		} catch (org.kohsuke.github.HttpException ex) {
+			if (ex.getMessage().contains("name already exists on this account")) {
+				gist = github.getRepository(PasswordManager.getLoginID() + "/" + newName);
 			}
 		}
 		return gist;
 	}
-	
-	public static String locateGitUrlString(File f)  {
-		
-		
+
+	public static String locateGitUrlString(File f) {
+
 		try {
 			Repository repository = ScriptingEngine.locateGit(f).getRepository();
 			return repository.getConfig().getString("remote", "origin", "url");
@@ -1485,8 +1492,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return null;
 	}
 
-
-
 	public static String urlToString(URL htmlUrl) {
 		return htmlUrl.toExternalForm();
 	}
@@ -1497,7 +1502,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return ScriptingEngine.urlToGist(externalForm);
 	}
 
-
 	public static List<String> getAllLangauges() {
 		ArrayList<String> langs = new ArrayList<>();
 		for (String L : getLangaugesMap().keySet()) {
@@ -1506,19 +1510,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return langs;
 	}
 
-
-
 	public static HashMap<String, IScriptingLanguage> getLangaugesMap() {
 		return langauges;
 	}
+
 	public static IScriptingLanguage getLangaugeByExtention(String extention) {
 		for (String L : getLangaugesMap().keySet()) {
-			if(langauges.get(L).isSupportedFileExtenetion(extention)) {
+			if (langauges.get(L).isSupportedFileExtenetion(extention)) {
 				return langauges.get(L);
 			}
 		}
 		return null;
 	}
+
 	public static boolean hasNetwork() {
 
 		return PasswordManager.hasNetwork();
