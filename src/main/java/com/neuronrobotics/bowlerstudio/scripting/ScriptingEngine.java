@@ -348,7 +348,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void deleteFolder(File folder) {
 		if (!folder.exists() || !folder.isDirectory())
-			throw new RuntimeException("Folder doesnt exist " + folder);
+			return;
 		File[] files = folder.listFiles();
 		if (files != null) { // some JVMs return null for empty dirs
 			for (File f : files) {
@@ -1454,6 +1454,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				return PasswordManager.getGithub().getRepository(PasswordManager.getLoginID() + "/" + newRepoName)
 						.getHttpTransportUrl();
 			}
+			ex.printStackTrace();
 		}
 		throw new RuntimeException("Repo could not be forked and does not exist");
 	}
