@@ -90,7 +90,7 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
   @Override
   public ArrayList<String> getFileExtenetion() {
     // TODO Auto-generated method stub
-    return new ArrayList<>(Arrays.asList("java", "groovy"));
+    return new ArrayList<>(Arrays.asList( "groovy","java"));
   }
 
   @Override
