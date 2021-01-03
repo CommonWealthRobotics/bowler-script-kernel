@@ -35,14 +35,15 @@ public class SvgLoader implements IScriptingLanguage {
 				polys.add(P);
 			}
 		}
-		double depth =5;
+		
 		List<String> layers = s.getLayers();
+		double depth =5+(layers.size()*5);
 		for(int i=0;i<layers.size();i++) {
 			String layerName=layers.get(i);
 			CSG extrudeLayerToCSG = s.extrudeLayerToCSG(depth,layerName);
-			extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
+			//extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
 			polys.add(extrudeLayerToCSG);
-			depth+=5;
+			depth-=5;
 		}
 		
 		return polys;
