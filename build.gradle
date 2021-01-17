@@ -129,7 +129,6 @@ repositories {
 
 dependencies {
 	implementation group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '201204'
-
 	implementation group: 'us.ihmc', name: 'ihmc-native-library-loader', version: '1.3.1'
 	
 	
