@@ -113,13 +113,25 @@ repositories {
             includeGroup("de.swirtz")
         }
     }
+	maven {
+		url "https://dl.bintray.com/ihmcrobotics/maven-release/"
+		content {
+			includeGroup("us.ihmc")
+		}
+	}
+	maven {
+		url "https://dl.bintray.com/ihmcrobotics/maven-vendor/"
+		content {
+			includeGroup("us.ihmc.thirdparty.jinput")
+		}
+	}
 }
 
 dependencies {
-	implementation 'net.java.jinput:coreapi:2.0.9'
-	implementation 'net.java.jinput:windows-plugin:2.0.9'
-	implementation 'net.java.jinput:linux-plugin:2.0.9'
-	implementation 'net.java.jinput:osx-plugin:2.0.9'
+	implementation group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '201204'
+
+	implementation group: 'us.ihmc', name: 'ihmc-native-library-loader', version: '1.3.1'
+	
 	
 	compile 'com.google.crypto.tink:tink:1.3.0-rc1'
 	
