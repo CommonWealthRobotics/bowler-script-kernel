@@ -9,6 +9,8 @@ import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
+
+import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.NonBowlerDevice;
 import com.neuronrobotics.sdk.util.ThreadUtil;
@@ -38,13 +40,26 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	static {
 		net.java.games.input.ControllerEnvironment.getDefaultEnvironment();
 	}
-
-	public static String[] getControllers() {
+	
+	private static ArrayList<Controller> controllers(){
+		ArrayList<Controller> back = new ArrayList<Controller>();
+		
 		ControllerEnvironment defaultEnvironment = ControllerEnvironment.getDefaultEnvironment();
 		Controller[] getDefaultEnvironmentGetControllers = defaultEnvironment.getControllers();
-		ArrayList<String> cons = new ArrayList<>();
 		for (int i = 0; i < getDefaultEnvironmentGetControllers.length; i++) {
-			Controller controller = getDefaultEnvironmentGetControllers[i];
+			if (!getDefaultEnvironmentGetControllers[i].getName().contains("Wacom")) {
+				back.add(getDefaultEnvironmentGetControllers[i]);
+			}
+
+		}
+		return back;
+	}
+
+	public static String[] getControllers() {
+		ArrayList<Controller> getDefaultEnvironmentGetControllers = controllers();
+		ArrayList<String> cons = new ArrayList<>();
+		for (int i = 0; i < getDefaultEnvironmentGetControllers.size(); i++) {
+			Controller controller = getDefaultEnvironmentGetControllers.get(i);
 			String name = controller.getName();
 			if(! name.contains("Wacom")){
 				cons.add( name);
@@ -67,24 +82,15 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 
 	private void setControllerByName(List<String> names) {
 		searches =names;
-		ControllerEnvironment defaultEnvironment = ControllerEnvironment.getDefaultEnvironment();
-
-		Controller[] getDefaultEnvironmentGetControllers = defaultEnvironment.getControllers();
+		ArrayList<Controller> getDefaultEnvironmentGetControllers = controllers();
 		int index = 0;
-		for (int i = 0; i < getDefaultEnvironmentGetControllers.length; i++) {
-			if (!getDefaultEnvironmentGetControllers[i].getName().contains("Wacom")) {
-				index = i;
-				break;
-			}
 
-		}
-
-		if (names == null && getDefaultEnvironmentGetControllers.length > 0) {
-			controller = getDefaultEnvironmentGetControllers[index];
+		if (names == null && getDefaultEnvironmentGetControllers.size() > 0) {
+			controller = getDefaultEnvironmentGetControllers.get(index);
 		} else {		
 			for (String n : searches) {
-				for (int i = 0; i < getDefaultEnvironmentGetControllers.length; i++) {
-					Controller c = getDefaultEnvironmentGetControllers[i];
+				for (int i = 0; i < getDefaultEnvironmentGetControllers.size(); i++) {
+					Controller c = getDefaultEnvironmentGetControllers.get(i);
 					if (c.getName().toLowerCase().contains(n.toLowerCase())) {
 						controller = c;
 						break;
@@ -133,7 +139,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 					setName("Game Controller Poll thread");
 					Log.warning("Starting game Pad Poller");
 					try {
-						PersistantControllerMap.getGitSource();
+						ConfigurationDatabase.getGitSource();
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -283,7 +289,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 				values += "\n\t" + key + " = " + recentValue.get(key);
 		}
 		values += "\nMaped:";
-		for (String key : PersistantControllerMap.getParamMap(name).keySet()) {
+		for (String key : PersistantControllerMap.getMappedAxis(name)) {
 			String mappedAxisName = PersistantControllerMap.getMappedAxisName(name, key);
 			values += "\n\t" + mappedAxisName + " (from \"" + key + "\") " + getValue(mappedAxisName);
 		}
@@ -296,15 +302,14 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 			values += "\n\t" + key + " = " + recentValue.get(key);
 		}
 		values += "\nMaps:";
-		for (String key : PersistantControllerMap.getParamMap(name).keySet()) {
+		for (String key : PersistantControllerMap.getMappedAxis(name)) {
 			values += "\n\t" + key + "<-" + PersistantControllerMap.getMappedAxisName(name, key);
 		}
 		return name + " = " + values;
 	}
 
 	public void map(String controllerVal, String persistantVal) {
-		PersistantControllerMap.setObject(name, controllerVal, persistantVal);
-		PersistantControllerMap.save();
+		PersistantControllerMap.map(name,controllerVal, persistantVal);
 	}
 
 	public static List<String> getDefaultMaps() {
