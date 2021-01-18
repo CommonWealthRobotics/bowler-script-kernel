@@ -87,7 +87,7 @@ public class ConfigurationDatabase {
       return database;
     }
     try {
-    	
+    	ScriptingEngine.pull(getGitSource());
       database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
           .inlineFileScriptRun(loadFile(), null);
       //new Exception().printStackTrace();

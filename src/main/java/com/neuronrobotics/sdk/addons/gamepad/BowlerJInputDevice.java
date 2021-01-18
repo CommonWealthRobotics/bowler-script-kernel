@@ -34,6 +34,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	private Thread poller;
 
 	private String name;
+	private List<String> searches;
 	static {
 		net.java.games.input.ControllerEnvironment.getDefaultEnvironment();
 	}
@@ -41,49 +42,63 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	public static String[] getControllers() {
 		ControllerEnvironment defaultEnvironment = ControllerEnvironment.getDefaultEnvironment();
 		Controller[] getDefaultEnvironmentGetControllers = defaultEnvironment.getControllers();
-		String[] cons = new String[getDefaultEnvironmentGetControllers.length];
-		for (int i = 0; i < cons.length; i++) {
-			cons[i] = getDefaultEnvironmentGetControllers[i].getName();
+		ArrayList<String> cons = new ArrayList<>();
+		for (int i = 0; i < getDefaultEnvironmentGetControllers.length; i++) {
+			Controller controller = getDefaultEnvironmentGetControllers[i];
+			String name = controller.getName();
+			if(! name.contains("Wacom")){
+				cons.add( name);
+			}
 		}
-		return cons;
+		String[] finalvals = new String[cons.size()];
+		for (int i=0;i<finalvals.length;i++) {
+			finalvals[i]=cons.get(i);
+		}
+		return finalvals;
 	}
 
 	/**
 	 * Instantiates a new bowler j input device.
 	 */
-	public BowlerJInputDevice(String name) {
-		this.setName(name);
-		setControllerByName(name);
-
+	public BowlerJInputDevice(String... names) {
+		
+		setControllerByName(names!=null?Arrays.asList(names):null);
 	}
 
-	private void setControllerByName(String name) {
+	private void setControllerByName(List<String> names) {
+		searches =names;
 		ControllerEnvironment defaultEnvironment = ControllerEnvironment.getDefaultEnvironment();
 
 		Controller[] getDefaultEnvironmentGetControllers = defaultEnvironment.getControllers();
-		if (name == null && getDefaultEnvironmentGetControllers.length > 0) {
-			controller = getDefaultEnvironmentGetControllers[0];
-		} else
-			for (int i = 0; i < getDefaultEnvironmentGetControllers.length; i++) {
-				Controller c = getDefaultEnvironmentGetControllers[i];
-				if (c.getName().toLowerCase().contains(name.toLowerCase())) {
-					System.out.println("Found! " + c.getName());
-					controller = c;
-					this.name=c.getName();
-					controller.poll();
-					EventQueue queue = controller.getEventQueue();
-					Event event = new Event();
-					while (queue.getNextEvent(event)) {
-						// drain startup events
-					}
-					break;
-				} else
-					System.out.println("Non match: " + c.getName() + " " + name);
+		int index = 0;
+		for (int i = 0; i < getDefaultEnvironmentGetControllers.length; i++) {
+			if (!getDefaultEnvironmentGetControllers[i].getName().contains("Wacom")) {
+				index = i;
+				break;
 			}
-		if (controller != null)
+
+		}
+
+		if (names == null && getDefaultEnvironmentGetControllers.length > 0) {
+			controller = getDefaultEnvironmentGetControllers[index];
+		} else {		
+			for (String n : searches) {
+				for (int i = 0; i < getDefaultEnvironmentGetControllers.length; i++) {
+					Controller c = getDefaultEnvironmentGetControllers[i];
+					if (c.getName().toLowerCase().contains(n.toLowerCase())) {
+						controller = c;
+						break;
+					} else
+						System.out.println("Non match: " + c.getName() + " " + n);
+				}
+			}
+		}
+		if (controller != null) {
 			this.setController(controller);
-		else
-			throw new RuntimeException("Contoller must not be null");
+			return;
+		}
+
+		throw new RuntimeException("Contoller must not be null");
 	}
 
 	/*
@@ -111,27 +126,28 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	 */
 	@Override
 	public boolean connectDeviceImp() {
-		try {
-			PersistantControllerMap.getGitSource();
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+
 		if (poller == null) {
 			poller = new Thread() {
 				public void run() {
 					setName("Game Controller Poll thread");
 					Log.warning("Starting game Pad Poller");
 					try {
+						PersistantControllerMap.getGitSource();
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					try {
 						while (run) {
-							if(controller==null) {
+							if (controller == null) {
 								while (run) {
 									try {
-										setControllerByName(name);
+										setControllerByName(searches);
 										break;
 									} catch (Throwable t) {
 										System.out.println("BowlerJInputDevice Waiting for device to be availible");
-										//t.printStackTrace();
+										// t.printStackTrace();
 										try {
 											Thread.sleep(1000);
 										} catch (InterruptedException e) {
@@ -143,7 +159,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 							}
 							boolean pollStat = controller.poll();
 							if (!pollStat) {
-								controller=null;
+								controller = null;
 								continue;
 							}
 							EventQueue queue = controller.getEventQueue();
@@ -152,15 +168,15 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 								Component comp = event.getComponent();
 								float value = event.getValue();
 								String n = comp.getName();
-								if(n.contentEquals("pov")) {
-									double angle= Math.PI*2*value;
-									if(angle>0) {
+								if (n.contentEquals("pov")) {
+									double angle = Math.PI * 2 * value;
+									if (angle > 0) {
 										sendValue((float) Math.sin(angle), "pov-up-down");
 										sendValue((float) Math.cos(angle), "pov-left-right");
-									}else {
+									} else {
 										sendValue((float) 0, "pov-up-down");
 										sendValue((float) 0, "pov-left-right");
-									}	
+									}
 								}
 								sendValue(value, n);
 							}
@@ -173,9 +189,9 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 				}
 
 				private void sendValue(float value, String n) {
-					n=PersistantControllerMap.getMappedAxisName(name, n);
-					if(Math.abs(value)<0.0001 && value!=0)
-						return;
+					n = PersistantControllerMap.getMappedAxisName(name, n);
+					if (Math.abs(value) < 0.0001 && value != 0)
+						value = 0;
 					recentValue.put(n, (double) value);
 					for (int i = 0; i < listeners.size(); i++) {
 						IGameControlEvent l = listeners.get(i);
@@ -207,7 +223,17 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	 * @param controller the new controller
 	 */
 	public void setController(Controller controller) {
+		System.out.println("Found! " + controller.getName());
+		this.name = controller.getName();
+		controller.poll();
+		EventQueue queue = controller.getEventQueue();
+		Event event = new Event();
+		while (queue.getNextEvent(event)) {
+			// drain startup events
+		}
 		this.controller = controller;
+		recentValue.clear();
+		
 	}
 
 	/**
@@ -248,51 +274,42 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		// TODO Auto-generated method stub
 		return new ArrayList<String>();
 	}
-	
+
 	@Override
 	public String toString() {
-		String values = "";
-		for(String key:recentValue.keySet()) {
-			values+="\n\t"+key+" = "+recentValue.get(key);
+		String values = " unmaped:";
+		for (String key : recentValue.keySet()) {
+			if (!PersistantControllerMap.isMapedAxis(name, key))
+				values += "\n\t" + key + " = " + recentValue.get(key);
 		}
-//		values+="\nMaps:";
-//		for(String key:PersistantControllerMap.getParamMap(name).keySet()) {
-//			values+="\n\t"+key+"<-"+PersistantControllerMap.getMappedAxisName(name, key);
-//		}
-		return name+" = "+values;
+		values += "\nMaped:";
+		for (String key : PersistantControllerMap.getParamMap(name).keySet()) {
+			String mappedAxisName = PersistantControllerMap.getMappedAxisName(name, key);
+			values += "\n\t" + mappedAxisName + " (from \"" + key + "\") " + getValue(mappedAxisName);
+		}
+		return name + " " + values;
 	}
+
 	public String getMaps() {
 		String values = "";
-		for(String key:recentValue.keySet()) {
-			values+="\n\t"+key+" = "+recentValue.get(key);
+		for (String key : recentValue.keySet()) {
+			values += "\n\t" + key + " = " + recentValue.get(key);
 		}
-		values+="\nMaps:";
-		for(String key:PersistantControllerMap.getParamMap(name).keySet()) {
-			values+="\n\t"+key+"<-"+PersistantControllerMap.getMappedAxisName(name, key);
+		values += "\nMaps:";
+		for (String key : PersistantControllerMap.getParamMap(name).keySet()) {
+			values += "\n\t" + key + "<-" + PersistantControllerMap.getMappedAxisName(name, key);
 		}
-		return name+" = "+values;
+		return name + " = " + values;
 	}
-	public void map(String controllerVal,String persistantVal) {
+
+	public void map(String controllerVal, String persistantVal) {
 		PersistantControllerMap.setObject(name, controllerVal, persistantVal);
 		PersistantControllerMap.save();
 	}
-	
-	public static List<String> getDefaultMaps(){
-		return Arrays.asList(
-				"l-joy-up-down",
-				"l-joy-left-right",
-				"r-joy-up-down",
-				"r-joy-left-right",
-				"l-trig-button",
-				"r-trig-button",
-				"x-mode",
-				"y-mode",
-				"a-mode",
-				"b-mode",
-				"start",
-				"select",
-				"analog-trig"
-				);
+
+	public static List<String> getDefaultMaps() {
+		return Arrays.asList("l-joy-up-down", "l-joy-left-right", "r-joy-up-down", "r-joy-left-right", "l-trig-button",
+				"r-trig-button", "x-mode", "y-mode", "a-mode", "b-mode", "start", "select", "analog-trig");
 	}
 
 	public static void main(String[] args) throws InterruptedException {
@@ -313,7 +330,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 
 		while (true) {
 			try {
-				BowlerJInputDevice g = new BowlerJInputDevice("Gamesir"); // This is the DyIO to talk to.
+				BowlerJInputDevice g = new BowlerJInputDevice("X-Box","Gamesir"); // 
 				g.connect(); // Connect to it.
 				g.addListeners((name, value) -> {
 					System.out.println(g);
