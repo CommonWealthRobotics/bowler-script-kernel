@@ -131,11 +131,10 @@ public class ConfigurationDatabase {
 						checked = true;
 					}
 					if (PasswordManager.getUsername() != null) {
-						ConfigurationDatabase.setGitSource(
+						setGitSource(
 								"https://github.com/" + PasswordManager.getUsername() + "/" + repo + ".git");
 					} else {
-						ConfigurationDatabase
-								.setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
+						setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
 					}
 
 				}

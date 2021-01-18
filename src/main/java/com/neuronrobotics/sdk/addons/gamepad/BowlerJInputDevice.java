@@ -1,7 +1,9 @@
 package com.neuronrobotics.sdk.addons.gamepad;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
@@ -109,6 +111,12 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	 */
 	@Override
 	public boolean connectDeviceImp() {
+		try {
+			PersistantControllerMap.getGitSource();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		if (poller == null) {
 			poller = new Thread() {
 				public void run() {
@@ -143,15 +151,18 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 							while (queue.getNextEvent(event) && run) {
 								Component comp = event.getComponent();
 								float value = event.getValue();
-								recentValue.put(comp.getName(), (double) value);
-								for (int i = 0; i < listeners.size(); i++) {
-									IGameControlEvent l = listeners.get(i);
-									try {
-										l.onEvent(comp.getName(), value);
-									} catch (Throwable ex) {
-										ex.printStackTrace();
-									}
+								String n = comp.getName();
+								if(n.contentEquals("pov")) {
+									double angle= Math.PI*2*value;
+									if(angle>0) {
+										sendValue((float) Math.sin(angle), "pov-up-down");
+										sendValue((float) Math.cos(angle), "pov-left-right");
+									}else {
+										sendValue((float) 0, "pov-up-down");
+										sendValue((float) 0, "pov-left-right");
+									}	
 								}
+								sendValue(value, n);
 							}
 							ThreadUtil.wait(16);
 						}
@@ -159,6 +170,21 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 						t.printStackTrace();
 					}
 					disconnect();
+				}
+
+				private void sendValue(float value, String n) {
+					n=PersistantControllerMap.getMappedAxisName(name, n);
+					if(Math.abs(value)<0.0001 && value!=0)
+						return;
+					recentValue.put(n, (double) value);
+					for (int i = 0; i < listeners.size(); i++) {
+						IGameControlEvent l = listeners.get(i);
+						try {
+							l.onEvent(n, value);
+						} catch (Throwable ex) {
+							ex.printStackTrace();
+						}
+					}
 				}
 			};
 			poller.start();
@@ -229,10 +255,61 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		for(String key:recentValue.keySet()) {
 			values+="\n\t"+key+" = "+recentValue.get(key);
 		}
+//		values+="\nMaps:";
+//		for(String key:PersistantControllerMap.getParamMap(name).keySet()) {
+//			values+="\n\t"+key+"<-"+PersistantControllerMap.getMappedAxisName(name, key);
+//		}
 		return name+" = "+values;
+	}
+	public String getMaps() {
+		String values = "";
+		for(String key:recentValue.keySet()) {
+			values+="\n\t"+key+" = "+recentValue.get(key);
+		}
+		values+="\nMaps:";
+		for(String key:PersistantControllerMap.getParamMap(name).keySet()) {
+			values+="\n\t"+key+"<-"+PersistantControllerMap.getMappedAxisName(name, key);
+		}
+		return name+" = "+values;
+	}
+	public void map(String controllerVal,String persistantVal) {
+		PersistantControllerMap.setObject(name, controllerVal, persistantVal);
+		PersistantControllerMap.save();
+	}
+	
+	public static List<String> getDefaultMaps(){
+		return Arrays.asList(
+				"l-joy-up-down",
+				"l-joy-left-right",
+				"r-joy-up-down",
+				"r-joy-left-right",
+				"l-trig-button",
+				"r-trig-button",
+				"x-mode",
+				"y-mode",
+				"a-mode",
+				"b-mode",
+				"start",
+				"select",
+				"analog-trig"
+				);
 	}
 
 	public static void main(String[] args) throws InterruptedException {
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "y", "l-joy-up-down");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "rz", "r-joy-up-down");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "x", "l-joy-left-right");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "z", "r-joy-left-right");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Left Thumb", "l-trig-button");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Right Thumb", "r-trig-button");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "X", "x-mode");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Y", "y-mode");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "A", "a-mode");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "B", "b-mode");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Start", "start");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Select", "select");
+//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "slider", "analog-trig");
+//		PersistantControllerMap.save();
 
 		while (true) {
 			try {
