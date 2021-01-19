@@ -1,12 +1,31 @@
 package com.neuronrobotics.sdk.addons.gamepad;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 
 public class PersistantControllerMap {
-
+	
+	public static List<String> getDefaultMaps() {
+		return Arrays.asList("l-joy-up-down", "l-joy-left-right", "r-joy-up-down", "r-joy-left-right", "l-trig-button",
+				"r-trig-button", "x-mode", "y-mode", "a-mode", "b-mode", "start", "select", "analog-trig");
+	}
+	
+	public static boolean areAllAxisMapped(String controllerName) {
+		for(String axis:getDefaultMaps()) {
+			if(!isMapedAxis(controllerName,axis)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	public static void clearMapping(String controllerName) {
+		ConfigurationDatabase.getParamMap(controllerName).clear();
+		
+	}
 	public static String getMappedAxisName(String controllerName, String incomingName) {
 		Object object = ConfigurationDatabase.getParamMap(controllerName).get(incomingName);
 		if (object == null)
@@ -15,10 +34,11 @@ public class PersistantControllerMap {
 	}
 
 	public static boolean isMapedAxis(String controllerName, String mappedValue) {
-		return getMapedAxis(controllerName, mappedValue) != null;
+		return getHardwareAxisFromMappedValue(controllerName, mappedValue) != null;
 	}
+	
 
-	public static String getMapedAxis(String controllerName, String mappedValue) {
+	public static String getHardwareAxisFromMappedValue(String controllerName, String mappedValue) {
 		HashMap<String, Object> paramMap = ConfigurationDatabase.getParamMap(controllerName);
 		for (String key : paramMap.keySet()) {
 			String string = (String) paramMap.get(key);

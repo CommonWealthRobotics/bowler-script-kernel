@@ -1,0 +1,235 @@
+package com.neuronrobotics.sdk.addons.gamepad;
+
+/**
+ * Sample Skeleton for "jogTrainerWidget.fxml" Controller Class
+ * You can copy and paste this code into your favorite IDE
+ **/
+
+import com.neuronrobotics.bowlerstudio.assets.AssetFactory;
+import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.net.URL;
+import java.util.ResourceBundle;
+import javafx.fxml.FXML;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+
+public class JogTrainerWidget extends Application implements IGameControlEvent {
+
+	@FXML // ResourceBundle that was given to the FXMLLoader
+	private ResourceBundle resources;
+	
+    @FXML // fx:id="controllername"
+    private Label controllername; // Value injected by FXMLLoader
+
+	@FXML // URL location of the FXML file that was given to the FXMLLoader
+	private URL location;
+
+	@FXML // fx:id="grid"
+	private GridPane grid; // Value injected by FXMLLoader
+	private int mappingIndex = 0;
+	private HashMap<Integer, TextField> fields = new HashMap<>();
+	private String axisWaiting=null;
+	private long timeOfLastAxisSet=0;
+	private ArrayList<String> listOfMappedAxis =new ArrayList<>();
+	private Button save;
+	@FXML // This method is called by the FXMLLoader when initialization is complete
+	void initialize() {
+		assert grid != null : "fx:id=\"grid\" was not injected: check your FXML file 'jogTrainerWidget.fxml'.";
+		assert gameController != null : "Game controller missing!";
+		assert primaryStage != null : "Stage missing!";
+		assert controllername!= null: "fx:id=\"grid\" was not injected: check your FXML file 'jogTrainerWidget.fxml'.";
+		
+		controllername.setText(gameController.getName());
+		save = new Button("Save Mapping");
+		Button reset = new Button("Reset");
+		reset.setOnAction(event -> {
+			reset();
+		});
+		save.setOnAction(new EventHandler<ActionEvent>() {
+ 
+            @Override
+            public void handle(ActionEvent event) {	
+            	new Thread(()->{
+            		List<String> maps = PersistantControllerMap.getDefaultMaps();
+            		for (int i = 0; i < maps.size(); i++) 
+            			ConfigurationDatabase.setObject(gameController.getName(), fields.get(i).getText(), maps.get(i));
+            		ConfigurationDatabase.save();
+            	}).start();
+            	primaryStage.hide();
+            }
+        });
+
+		List<String> maps = PersistantControllerMap.getDefaultMaps();
+		int i = 0;
+		System.out.println("There are "+maps.size()+" rows");
+		for (i = 0; i < maps.size(); i++) {
+			String map = maps.get(i);
+
+			Label name = new Label(map);
+			Label setto = new Label("set to");
+			TextField toBeMapped = new TextField();
+			if(PersistantControllerMap.isMapedAxis(gameController.getName(), map)) {
+				toBeMapped.setText(PersistantControllerMap.getHardwareAxisFromMappedValue(gameController.getName(), map));
+			}
+			if(i!=0)
+				toBeMapped.setDisable(true);
+			grid.add(name, 0, i);
+			grid.add(setto, 1, i);
+			grid.add(toBeMapped, 2, i);
+			fields.put(i, toBeMapped);
+		}
+		grid.add(reset, 1, i);
+		grid.add(save, 2, i);
+		gameController.addListeners(this);
+		reset();
+	}
+
+	private Stage primaryStage;
+
+	private BowlerJInputDevice gameController;
+
+	public JogTrainerWidget(BowlerJInputDevice gameController) {
+		this.gameController = gameController;
+		
+	}
+
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		this.primaryStage = primaryStage;
+		File fxmlFIle = AssetFactory.loadFile("layout/jogTrainerWidget.fxml");
+	    URL fileURL = fxmlFIle.toURI().toURL();
+		FXMLLoader loader = new FXMLLoader(fileURL);
+		loader.setLocation(fileURL);
+		Parent root;
+		loader.setController(this);
+		// This is needed when loading on MAC
+		loader.setClassLoader(getClass().getClassLoader());
+		root = loader.load();
+		Platform.runLater(() -> {
+			primaryStage.setTitle("Configure the controller");
+
+			Scene scene = new Scene(root);
+			primaryStage.setScene(scene);
+			primaryStage.initModality(Modality.WINDOW_MODAL);
+			primaryStage.setResizable(true);
+			primaryStage.show();
+
+		});
+		
+	}
+
+	private void reset() {
+		listOfMappedAxis.clear();
+		mappingIndex=0;
+		Platform.runLater(() ->fields.get(mappingIndex).setDisable(false));
+		gameController.addListeners(this);
+		Platform.runLater(() ->controllername.setText(gameController.getName()));
+		PersistantControllerMap.clearMapping(gameController.getName());
+		save.setDisable(true);
+
+	}
+
+
+
+	@Override
+	public void onEvent(String name, float value) {
+		//System.out.println(controller);
+		if(axisWaiting!=null) {
+			// waiting for that axis to go back to 0
+			if(axisWaiting.contentEquals(name)) {
+				if(Math.abs(value)>0.0001) {
+					System.out.println("Waiting for value to settle for "+axisWaiting);
+					return;
+				}else {
+					// the axis returned, moving on
+					timeOfLastAxisSet=System.currentTimeMillis();
+					System.out.println("Map done "+axisWaiting);
+					axisWaiting=null;
+					return;
+				}
+			}else {
+				System.out.println("Waiting for value to settle for "+axisWaiting+" got value from "+name);
+				return;
+			}
+		}
+		for(String s:listOfMappedAxis) {
+			if(s.contentEquals(name)) {
+				System.out.println("mapping skipped for "+name);
+				System.out.println(gameController);
+				return;// This axis name is already mapped and will not be mapped again
+			}
+		}
+		for(String s:PersistantControllerMap.getDefaultMaps()) {
+			if(name.contentEquals(s))
+				return;// Do not use maped axis for re-mapping
+		}
+		if(System.currentTimeMillis()-timeOfLastAxisSet<1000) {
+			return;
+		}
+		axisWaiting=name;
+		System.out.println("Adding Axis "+name);
+		listOfMappedAxis.add(name);
+		timeOfLastAxisSet=System.currentTimeMillis();
+		Platform.runLater(() -> {
+			TextField textField = fields.get(mappingIndex);
+			textField.setText(name);
+			
+			textField.setDisable(true);
+			mappingIndex++;
+			if(mappingIndex==PersistantControllerMap.getDefaultMaps().size()) {
+				save.setDisable(false);
+				gameController.removeListeners(this);
+			}else
+				fields.get(mappingIndex).setDisable(false);
+		});
+
+	}
+
+	public static void run(BowlerJInputDevice c) {
+		//System.out.println("Launching Controller mapping");
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				//System.out.println("Creating stage");
+				Stage s = new Stage();
+				new Thread() {
+					public void run() {
+						JogTrainerWidget controller = new JogTrainerWidget(c);
+						try {
+							//System.out.println("Loading FXML");
+							controller.start(s);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}.start();
+			}
+		});
+
+	}
+
+}

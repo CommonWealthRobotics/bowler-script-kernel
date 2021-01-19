@@ -11,6 +11,7 @@ import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
+import com.neuronrobotics.sdk.addons.kinematics.JavaFXInitializer;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.NonBowlerDevice;
 import com.neuronrobotics.sdk.util.ThreadUtil;
@@ -144,6 +145,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
+					
 					try {
 						while (run) {
 							if (controller == null) {
@@ -153,7 +155,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 										break;
 									} catch (Throwable t) {
 										System.out.println("BowlerJInputDevice Waiting for device to be availible");
-										// t.printStackTrace();
+										t.printStackTrace();
 										try {
 											Thread.sleep(1000);
 										} catch (InterruptedException e) {
@@ -163,6 +165,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 									}
 								}
 							}
+							
 							boolean pollStat = controller.poll();
 							if (!pollStat) {
 								controller = null;
@@ -183,7 +186,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 										sendValue((float) 0, "pov-up-down");
 										sendValue((float) 0, "pov-left-right");
 									}
-								}
+								}else
 								sendValue(value, n);
 							}
 							ThreadUtil.wait(16);
@@ -239,7 +242,9 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		}
 		this.controller = controller;
 		recentValue.clear();
-		
+		//if(!PersistantControllerMap.areAllAxisMapped(name)) {
+			JogTrainerWidget.run(this);
+		//}
 	}
 
 	/**
@@ -312,30 +317,14 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		PersistantControllerMap.map(name,controllerVal, persistantVal);
 	}
 
-	public static List<String> getDefaultMaps() {
-		return Arrays.asList("l-joy-up-down", "l-joy-left-right", "r-joy-up-down", "r-joy-left-right", "l-trig-button",
-				"r-trig-button", "x-mode", "y-mode", "a-mode", "b-mode", "start", "select", "analog-trig");
-	}
+	
 
 	public static void main(String[] args) throws InterruptedException {
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "y", "l-joy-up-down");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "rz", "r-joy-up-down");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "x", "l-joy-left-right");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "z", "r-joy-left-right");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Left Thumb", "l-trig-button");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Right Thumb", "r-trig-button");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "X", "x-mode");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Y", "y-mode");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "A", "a-mode");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "B", "b-mode");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Start", "start");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "Select", "select");
-//		PersistantControllerMap.setObject("Gamesir-T4pro_21FD", "slider", "analog-trig");
-//		PersistantControllerMap.save();
 
+		JavaFXInitializer.go();
 		while (true) {
 			try {
-				BowlerJInputDevice g = new BowlerJInputDevice("X-Box","Gamesir"); // 
+				BowlerJInputDevice g = new BowlerJInputDevice("X-Box","Gamesir","Dragon"); // 
 				g.connect(); // Connect to it.
 				g.addListeners((name, value) -> {
 					System.out.println(g);
