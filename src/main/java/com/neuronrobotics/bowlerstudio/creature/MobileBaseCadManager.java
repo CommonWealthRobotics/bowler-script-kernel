@@ -195,6 +195,9 @@ public class MobileBaseCadManager implements Runnable {
 					ArrayList<TransformNR> linkPos = ll;
 					int index = i;
 					Affine a;
+					if(k.getChain().getLinks().get(index).getListener()==null) {
+						k.getChain().getLinks().get(index).setListener(new Affine());
+					}
 					try {
 						a = (Affine) k.getChain().getLinks().get(index).getListener();
 					} catch (java.lang.ClassCastException ex) {
