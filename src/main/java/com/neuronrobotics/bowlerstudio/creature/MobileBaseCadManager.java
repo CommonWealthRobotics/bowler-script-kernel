@@ -176,59 +176,65 @@ public class MobileBaseCadManager implements Runnable {
 	private DoubleProperty pi = new SimpleDoubleProperty(0);
 	private MobileBaseCadManager master;
 	private long timeOfLastRender = System.currentTimeMillis();
-
+	private boolean rendering = false;
 	// This is the rendering event
 	public void run() {
-		if (System.currentTimeMillis() - timeOfLastRender < 16 * 3)
+		if (System.currentTimeMillis() - timeOfLastRender < 16 )
 			return;
-		timeOfLastRender = System.currentTimeMillis();
+		if(rendering)
+			return;
+		rendering = true;
 		// System.out.println("Render");
+		Platform.runLater(() -> {
+			updateBase(base);
+			for (DHParameterKinematics k : base.getAllDHChains()) {
+				updateBase(k);
+				ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
 
-		updateBase(base);
-		for (DHParameterKinematics k : base.getAllDHChains()) {
-			updateBase(k);
-			ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
-			for (int i = 0; i < ll.size(); i++) {
-				ArrayList<TransformNR> linkPos = ll;
-				int index = i;
-				Affine a;
-				try {
-					a = (Affine) k.getChain().getLinks().get(index).getListener();
-				} catch (java.lang.ClassCastException ex) {
-					a = new Affine();
-					k.getChain().getLinks().get(index).setListener(a);
-				}
-				
-				Affine af=a;
-				TransformNR nr = linkPos.get(index);
-				if (nr != null && af != null)
-					Platform.runLater(() -> {
+				for (int i = 0; i < ll.size(); i++) {
+					ArrayList<TransformNR> linkPos = ll;
+					int index = i;
+					Affine a;
+					try {
+						a = (Affine) k.getChain().getLinks().get(index).getListener();
+					} catch (java.lang.ClassCastException ex) {
+						a = new Affine();
+						k.getChain().getLinks().get(index).setListener(a);
+					}
+
+					Affine af = a;
+					TransformNR nr = linkPos.get(index);
+					if (nr != null && af != null)
+
 						try {
 							TransformFactory.nrToAffine(nr, af);
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
-					});
-			}
-		}
 
+				}
+
+			}
+			rendering = false;
+			timeOfLastRender = System.currentTimeMillis();
+		});
 	}
 
 	private void updateBase(AbstractKinematicsNR kin) {
 		if (kin == null)
 			return;
 		TransformNR forwardOffset = kin.forwardOffset(new TransformNR());
-		if(kin.getRootListener()==null) {
+		if (kin.getRootListener() == null) {
 			kin.setRootListener(new Affine());
 		}
 		if (forwardOffset != null && kin.getRootListener() != null)
-			Platform.runLater(() -> {
-				try {
-					TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			});
+			// Platform.runLater(() -> {
+			try {
+				TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		// });
 	}
 
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
