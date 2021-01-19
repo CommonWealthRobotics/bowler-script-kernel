@@ -177,12 +177,13 @@ public class MobileBaseCadManager implements Runnable {
 	private MobileBaseCadManager master;
 	private long timeOfLastRender = System.currentTimeMillis();
 	private boolean rendering = false;
+	private boolean rerenderFlag=false;
 	// This is the rendering event
 	public void run() {
-		if (System.currentTimeMillis() - timeOfLastRender < 16 )
+		if(rendering) {
+			rerenderFlag=true;
 			return;
-		if(rendering)
-			return;
+		}
 		rendering = true;
 		// System.out.println("Render");
 		Platform.runLater(() -> {
@@ -219,7 +220,10 @@ public class MobileBaseCadManager implements Runnable {
 
 			}
 			rendering = false;
-			timeOfLastRender = System.currentTimeMillis();
+			if(rerenderFlag) {
+				rerenderFlag=false;
+				run();
+			}
 		});
 	}
 
