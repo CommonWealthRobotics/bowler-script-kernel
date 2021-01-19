@@ -56,17 +56,25 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 	private long timeOfLastAxisSet=0;
 	private ArrayList<String> listOfMappedAxis =new ArrayList<>();
 	private Button save;
+	private Stage primaryStage;
+
+	private BowlerJInputDevice gameController;
+
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
 		assert grid != null : "fx:id=\"grid\" was not injected: check your FXML file 'jogTrainerWidget.fxml'.";
 		assert gameController != null : "Game controller missing!";
-		assert primaryStage != null : "Stage missing!";
+		//assert primaryStage != null : "Stage missing!";
 		assert controllername!= null: "fx:id=\"grid\" was not injected: check your FXML file 'jogTrainerWidget.fxml'.";
 		
 		controllername.setText(gameController.getName());
 		save = new Button("Save Mapping");
 		Button reset = new Button("Reset");
 		reset.setOnAction(event -> {
+			PersistantControllerMap.clearMapping(gameController.getName());
+			for(Integer key:fields.keySet()) {
+				fields.get(key).setText("");
+			}
 			reset();
 		});
 		save.setOnAction(new EventHandler<ActionEvent>() {
@@ -79,7 +87,8 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
             			ConfigurationDatabase.setObject(gameController.getName(), fields.get(i).getText(), maps.get(i));
             		ConfigurationDatabase.save();
             	}).start();
-            	primaryStage.hide();
+            	if(primaryStage!=null)
+            		primaryStage.hide();
             }
         });
 
@@ -102,15 +111,17 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 			grid.add(toBeMapped, 2, i);
 			fields.put(i, toBeMapped);
 		}
-		grid.add(reset, 1, i);
 		grid.add(save, 2, i);
-		gameController.addListeners(this);
+		grid.add(reset, 1, i);
 		reset();
+		if(PersistantControllerMap.areAllAxisMapped(gameController.getName())) {
+			Platform.runLater(() ->fields.get(0).setDisable(true));
+			gameController.removeListeners(this);
+		}else {
+			gameController.addListeners(this);
+		}
 	}
 
-	private Stage primaryStage;
-
-	private BowlerJInputDevice gameController;
 
 	public JogTrainerWidget(BowlerJInputDevice gameController) {
 		this.gameController = gameController;
@@ -142,15 +153,13 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		
 	}
 
-	private void reset() {
+	public void reset() {
 		listOfMappedAxis.clear();
 		mappingIndex=0;
 		Platform.runLater(() ->fields.get(mappingIndex).setDisable(false));
 		gameController.addListeners(this);
-		Platform.runLater(() ->controllername.setText(gameController.getName()));
-		PersistantControllerMap.clearMapping(gameController.getName());
+		Platform.runLater(() ->controllername.setText(gameController.getName()));	
 		save.setDisable(true);
-
 	}
 
 
