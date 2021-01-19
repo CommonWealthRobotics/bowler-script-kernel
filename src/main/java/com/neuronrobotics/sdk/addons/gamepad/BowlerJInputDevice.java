@@ -242,9 +242,9 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		}
 		this.controller = controller;
 		recentValue.clear();
-		//if(!PersistantControllerMap.areAllAxisMapped(name)) {
+		if(!PersistantControllerMap.areAllAxisMapped(name)) {
 			JogTrainerWidget.run(this);
-		//}
+		}
 	}
 
 	/**
