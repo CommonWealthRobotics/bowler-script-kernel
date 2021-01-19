@@ -11,10 +11,11 @@ import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
-import com.neuronrobotics.sdk.addons.kinematics.JavaFXInitializer;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.NonBowlerDevice;
 import com.neuronrobotics.sdk.util.ThreadUtil;
+
+import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -242,9 +243,9 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		}
 		this.controller = controller;
 		recentValue.clear();
-		//if(!PersistantControllerMap.areAllAxisMapped(name)) {
+		if(!PersistantControllerMap.areAllAxisMapped(name)) {
 			JogTrainerWidget.run(this);
-		//}
+		}
 	}
 
 	/**

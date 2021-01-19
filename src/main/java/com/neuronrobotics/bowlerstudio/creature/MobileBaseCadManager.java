@@ -15,16 +15,19 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
 import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+import com.neuronrobotics.sdk.addons.kinematics.AbstractKinematicsNR;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.IDeviceConnectionEventListener;
 import com.neuronrobotics.sdk.pid.PIDLimitEvent;
@@ -34,8 +37,9 @@ import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import javafx.beans.property.*;
 import javafx.scene.transform.Affine;
+import javafx.application.Platform;
 
-public class MobileBaseCadManager {
+public class MobileBaseCadManager implements Runnable {
 
 	// static
 	private static HashMap<MobileBase, MobileBaseCadManager> cadmap = new HashMap<>();
@@ -56,38 +60,42 @@ public class MobileBaseCadManager {
 
 	private boolean bail = false;
 	private IMobileBaseUI ui = null;
-	private static ICadGenerator cadEngineConfiguration=null;
-	private boolean configMode=false;
+	private static ICadGenerator cadEngineConfiguration = null;
+	private boolean configMode = false;
+
 	protected void clear() {
 		// Cad generator
 		dhCadGen.clear();
-		//clear the csgs from the list
-		for(DHParameterKinematics key: DHtoCadMap.keySet()) {
+		// clear the csgs from the list
+		for (DHParameterKinematics key : DHtoCadMap.keySet()) {
 			ArrayList<CSG> arrayList = DHtoCadMap.get(key);
-			if(arrayList!=null)arrayList.clear();
+			if (arrayList != null)
+				arrayList.clear();
 		}
 		DHtoCadMap.clear();
-		//celat csg from link conf list
-		for(LinkConfiguration key: LinktoCadMap.keySet()) {
+		// celat csg from link conf list
+		for (LinkConfiguration key : LinktoCadMap.keySet()) {
 			ArrayList<CSG> arrayList = LinktoCadMap.get(key);
-			if(arrayList!=null)arrayList.clear();
+			if (arrayList != null)
+				arrayList.clear();
 		}
 		LinktoCadMap.clear();
-		for(MobileBase key: BasetoCadMap.keySet()) {
+		for (MobileBase key : BasetoCadMap.keySet()) {
 			ArrayList<CSG> arrayList = BasetoCadMap.get(key);
-			if(arrayList!=null)arrayList.clear();
+			if (arrayList != null)
+				arrayList.clear();
 		}
 		BasetoCadMap.clear();
-		if(allCad!=null)
+		if (allCad != null)
 			allCad.clear();
 		Vitamins.clear();
-		for(MobileBaseCadManager m:slaves) {
+		for (MobileBaseCadManager m : slaves) {
 			m.clear();
 		}
-		
-		
+
 	}
-	private static class  IMobileBaseUIlocal implements IMobileBaseUI{
+
+	private static class IMobileBaseUIlocal implements IMobileBaseUI {
 
 		public ArrayList<CSG> list = new ArrayList<>();
 
@@ -126,21 +134,23 @@ public class MobileBaseCadManager {
 		@Override
 		public void setSelected(Affine rootListener) {
 			// TODO Auto-generated method stub
-			
+
 		}
 	};
+
 	private IFileChangeListener cadWatcher = new IFileChangeListener() {
 		boolean fileHandeling = false;
+
 		@Override
 		public void onFileChange(File fileThatChanged, WatchEvent event) {
-			if(fileHandeling)
+			if (fileHandeling)
 				return;
-			
+
 			if (cadGenerating || !getAutoRegen()) {
 				System.out.println("No Base reload, building currently");
 				return;
 			}
-			fileHandeling=true;
+			fileHandeling = true;
 			try {
 				new Thread() {
 					public void run() {
@@ -153,7 +163,7 @@ public class MobileBaseCadManager {
 							e.printStackTrace();
 						}
 						generateCad();
-						fileHandeling=false;
+						fileHandeling = false;
 					}
 				}.start();
 			} catch (Exception e) {
@@ -165,21 +175,85 @@ public class MobileBaseCadManager {
 	private boolean autoRegen = true;
 	private DoubleProperty pi = new SimpleDoubleProperty(0);
 	private MobileBaseCadManager master;
+	private long timeOfLastRender = System.currentTimeMillis();
+
+	// This is the rendering event
+	public void run() {
+		if (System.currentTimeMillis() - timeOfLastRender < 16 * 3)
+			return;
+		timeOfLastRender = System.currentTimeMillis();
+		// System.out.println("Render");
+
+		updateBase(base);
+		for (DHParameterKinematics k : base.getAllDHChains()) {
+			updateBase(k);
+			ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
+			for (int i = 0; i < ll.size(); i++) {
+				ArrayList<TransformNR> linkPos = ll;
+				int index = i;
+				Affine a;
+				try {
+					a = (Affine) k.getChain().getLinks().get(index).getListener();
+				} catch (java.lang.ClassCastException ex) {
+					a = new Affine();
+					k.getChain().getLinks().get(index).setListener(a);
+				}
+				
+				Affine af=a;
+				TransformNR nr = linkPos.get(index);
+				if (nr != null && af != null)
+					Platform.runLater(() -> {
+						try {
+							TransformFactory.nrToAffine(nr, af);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					});
+			}
+		}
+
+	}
+
+	private void updateBase(AbstractKinematicsNR kin) {
+		if (kin == null)
+			return;
+		TransformNR forwardOffset = kin.forwardOffset(new TransformNR());
+		if(kin.getRootListener()==null) {
+			kin.setRootListener(new Affine());
+		}
+		if (forwardOffset != null && kin.getRootListener() != null)
+			Platform.runLater(() -> {
+				try {
+					TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			});
+	}
 
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
 		this.setUi(myUI);
+
+		base.setRenderWrangler(this);
+		for (DHParameterKinematics k : base.getAllDHChains()) {
+			k.setRenderWrangler(this);
+		}
+		run();
 		base.addConnectionEventListener(new IDeviceConnectionEventListener() {
 
 			@Override
 			public void onDisconnect(BowlerAbstractDevice arg0) {
-				
-				if (arg0 !=base)
+				base.setRenderWrangler(null);
+				for (DHParameterKinematics k : base.getAllDHChains()) {
+					k.setRenderWrangler(null);
+				}
+				if (arg0 != base)
 					return;
 				bail = true;
 				clear();
 				cadmap.remove(base);
 				slaves.clear();
-				master=null;
+				master = null;
 			}
 
 			@Override
@@ -190,6 +264,7 @@ public class MobileBaseCadManager {
 		});
 		setMobileBase(base);
 		cadmap.put(base, this);
+
 	}
 
 	public File getCadScript() {
@@ -205,7 +280,7 @@ public class MobileBaseCadManager {
 	}
 
 	private IgenerateBody getIgenerateBody() {
-		if(configMode)
+		if (configMode)
 			return getConfigurationDisplay();
 		if (IgenerateBody.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateBody) cadForBodyEngine;
@@ -214,7 +289,7 @@ public class MobileBaseCadManager {
 	}
 
 	private IgenerateCad getIgenerateCad() {
-		if(configMode)
+		if (configMode)
 			return getConfigurationDisplay();
 		if (IgenerateCad.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateCad) cadForBodyEngine;
@@ -228,24 +303,24 @@ public class MobileBaseCadManager {
 		}
 		return null;
 	}
-	
+
 	private static ICadGenerator getConfigurationDisplay() {
-		if(cadEngineConfiguration==null) {
+		if (cadEngineConfiguration == null) {
 			try {
 				File confFile = resetConfigurationScript();
 				FileChangeWatcher watcher = FileChangeWatcher.watch(confFile);
 				watcher.addIFileChangeListener(new IFileChangeListener() {
-					
+
 					@Override
 					public void onFileChange(File fileThatChanged, WatchEvent event) {
 						// TODO Auto-generated method stub
 						try {
 							resetConfigurationScript();
-							for(MobileBase manager : cadmap.keySet()) {
+							for (MobileBase manager : cadmap.keySet()) {
 								MobileBaseCadManager mobileBaseCadManager = cadmap.get(manager);
-								if(mobileBaseCadManager.autoRegen)
-									if(mobileBaseCadManager.configMode)
-										mobileBaseCadManager.generateCad() ;
+								if (mobileBaseCadManager.autoRegen)
+									if (mobileBaseCadManager.configMode)
+										mobileBaseCadManager.generateCad();
 							}
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
@@ -263,8 +338,9 @@ public class MobileBaseCadManager {
 
 	private static File resetConfigurationScript()
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, Exception {
-		File confFile = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy");
-		cadEngineConfiguration=(ICadGenerator) ScriptingEngine.inlineFileScriptRun(confFile, null);
+		File confFile = ScriptingEngine
+				.fileFromGit("https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy");
+		cadEngineConfiguration = (ICadGenerator) ScriptingEngine.inlineFileScriptRun(confFile, null);
 		return confFile;
 	}
 
@@ -305,20 +381,20 @@ public class MobileBaseCadManager {
 				}
 			} else {
 				if (!bail) {
-					
-					ArrayList<CSG> newcad =null;
+
+					ArrayList<CSG> newcad = null;
 					try {
 						newcad = getIgenerateBody().generateBody(device);
-					}catch(Throwable t) {
+					} catch (Throwable t) {
 						t.printStackTrace();
 					}
-					if(newcad==null) {
-						newcad=new ArrayList<CSG>();
+					if (newcad == null) {
+						newcad = new ArrayList<CSG>();
 					}
-					if(newcad.size()==0) {
-						newcad =getConfigurationDisplay().generateBody(device);
+					if (newcad.size() == 0) {
+						newcad = getConfigurationDisplay().generateBody(device);
 					}
-					if(device.isAvailable()) {
+					if (device.isAvailable()) {
 						for (CSG c : newcad) {
 							getAllCad().add(c);
 						}
@@ -383,7 +459,7 @@ public class MobileBaseCadManager {
 			i += 1;
 
 		}
-		for(MobileBaseCadManager m:slaves) {
+		for (MobileBaseCadManager m : slaves) {
 			getAllCad().addAll(m.generateBody(m.base));
 		}
 		showingStl = false;
@@ -402,7 +478,8 @@ public class MobileBaseCadManager {
 		DHParameterKinematics dh = limbs.get(limb);
 		double partsTotal = numLimbs * dh.getNumberOfLinks();
 		double progress = ((double) ((limb * dh.getNumberOfLinks()) + link)) / partsTotal;
-		//System.out.println("Cad progress " + progress + " limb " + limb + " link " + link + " total parts " + partsTotal);
+		// System.out.println("Cad progress " + progress + " limb " + limb + " link " +
+		// link + " total parts " + partsTotal);
 		getProcesIndictor().set(0.333 + (2 * (progress / 3)));
 	}
 
@@ -578,17 +655,17 @@ public class MobileBaseCadManager {
 				set(base, (int) j, (int) i);
 
 				if (!bail) {
-					ArrayList<CSG> newcad =null;
+					ArrayList<CSG> newcad = null;
 					try {
-						newcad  = generatorToUse.generateCad(dh, i);
-					}catch(Throwable t) {
+						newcad = generatorToUse.generateCad(dh, i);
+					} catch (Throwable t) {
 						t.printStackTrace();
 					}
-					if(newcad==null) {
-						newcad=new ArrayList<CSG>();
+					if (newcad == null) {
+						newcad = new ArrayList<CSG>();
 					}
-					if(newcad.size()==0) {
-						newcad =getConfigurationDisplay().generateCad(dh, i);
+					if (newcad.size() == 0) {
+						newcad = getConfigurationDisplay().generateCad(dh, i);
 					}
 					getUi().addCSG(newcad, getCadScript());
 					LinkConfiguration configuration = dh.getLinkConfiguration(i);
@@ -646,7 +723,7 @@ public class MobileBaseCadManager {
 
 //			ArrayList<CSG> limCad = MobileBaseCadManager.get(base).getDHtoCadMap().get(limb);
 //			getUi().setSelectedCsg(limCad);
-			getUi().setSelected(limb.getRootListener());
+			getUi().setSelected((Affine) limb.getRootListener());
 		} catch (Exception ex) {
 			System.err.println("Limb not loaded yet");
 		}
@@ -671,39 +748,38 @@ public class MobileBaseCadManager {
 		new Thread() {
 			@Override
 			public void run() {
-				//Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
+				// Thread.currentThread().setUncaughtExceptionHandler(new
+				// IssueReportingExceptionHandler());
 
 				System.out.print("\r\nGenerating CAD...\r\n");
 				setName("MobileBaseCadManager Generating cad Thread ");
 				// new Exception().printStackTrace();
-				if(master!=null) {
-					for(int i=0;i<allCad.size();i++)
+				if (master != null) {
+					for (int i = 0; i < allCad.size(); i++)
 						master.allCad.remove(allCad.get(i));
 				}
 				MobileBase device = base;
 				MobileBaseCadManager.get(base).clear();
-				
+
 				try {
 					setAllCad(generateBody(device));
 				} catch (Exception e) {
 					getUi().highlightException(getCadScript(), e);
 				}
 				// System.out.print("\r\nDone Generating CAD!\r\n");
-				if(master!=null) {
-					for(int i=0;i<allCad.size();i++)
+				if (master != null) {
+					for (int i = 0; i < allCad.size(); i++)
 						master.allCad.add(allCad.get(i));
 					getUi().setCsg(master, getCadScript());
-				}else
+				} else
 					getUi().setCsg(MobileBaseCadManager.get(base), getCadScript());
 				cadGenerating = false;
 				System.out.print("\r\nDone Generating CAD!\r\n");
 				getProcesIndictor().set(1);
-				//System.gc();
+				// System.gc();
 			}
 		}.start();
 	}
-
-
 
 	private void setDefaultLinkLevelCadEngine() throws Exception {
 		String[] cad;
@@ -717,7 +793,7 @@ public class MobileBaseCadManager {
 			String[] kinEng = kin.getGitCadEngine();
 			if (!cad[0].contentEquals(kinEng[0]) || !cad[1].contentEquals(kinEng[1])) {
 				setGitCadEngine(kinEng[0], kinEng[1], kin);
-			}else {
+			} else {
 				dhCadGen.put(kin, cadForBodyEngine);
 			}
 		}
@@ -769,35 +845,37 @@ public class MobileBaseCadManager {
 				});
 			}
 
-		if(this.allCad!=null && this.allCad!=allCad)
+		if (this.allCad != null && this.allCad != allCad)
 			this.allCad.clear();
 		this.allCad = allCad;
 	}
-	public static MobileBaseCadManager get(MobileBase device,IMobileBaseUI ui) {
+
+	public static MobileBaseCadManager get(MobileBase device, IMobileBaseUI ui) {
 		if (cadmap.get(device) == null) {
 			// new RuntimeException("No Mobile Base Cad Manager UI
 			// specified").printStackTrace();
-			MobileBaseCadManager mbcm = new MobileBaseCadManager(device,ui );
-			
-			for(DHParameterKinematics kin:device.getAllDHChains()) {
-		    	for(int i=0;i<kin.getNumberOfLinks();i++) {
-		    		MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
-		    		if(m!=null) {
-		    			m.setGitSelfSource(device.getGitSelfSource());
-		    			MobileBaseCadManager e = new MobileBaseCadManager(m, ui);
-		    			e.setMaster(mbcm);
+			MobileBaseCadManager mbcm = new MobileBaseCadManager(device, ui);
+
+			for (DHParameterKinematics kin : device.getAllDHChains()) {
+				for (int i = 0; i < kin.getNumberOfLinks(); i++) {
+					MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+					if (m != null) {
+						m.setGitSelfSource(device.getGitSelfSource());
+						MobileBaseCadManager e = new MobileBaseCadManager(m, ui);
+						e.setMaster(mbcm);
 						mbcm.slaves.add(e);
-		    		}
-		    	}
-		    }
+					}
+				}
+			}
 		}
 		MobileBaseCadManager mobileBaseCadManager = cadmap.get(device);
-		if(!IMobileBaseUIlocal.class.isInstance(ui)&&
-			IMobileBaseUIlocal.class.isInstance(mobileBaseCadManager.getUi())	) 
+		if (!IMobileBaseUIlocal.class.isInstance(ui)
+				&& IMobileBaseUIlocal.class.isInstance(mobileBaseCadManager.getUi()))
 			mobileBaseCadManager.setUi(ui);
 
 		return mobileBaseCadManager;
 	}
+
 	private void setMaster(MobileBaseCadManager master) {
 		this.master = master;
 	}
@@ -806,21 +884,21 @@ public class MobileBaseCadManager {
 		if (cadmap.get(device) == null) {
 			IMobileBaseUIlocal ui2 = new IMobileBaseUIlocal();
 			device.addConnectionEventListener(new IDeviceConnectionEventListener() {
-				
+
 				@Override
 				public void onDisconnect(BowlerAbstractDevice source) {
 					// TODO Auto-generated method stub
 					ui2.list.clear();
-					
+
 				}
-				
+
 				@Override
 				public void onConnect(BowlerAbstractDevice source) {
 					// TODO Auto-generated method stub
-					
+
 				}
 			});
-			return get(device,ui2);
+			return get(device, ui2);
 		}
 		return cadmap.get(device);
 	}
@@ -876,7 +954,7 @@ public class MobileBaseCadManager {
 
 	public void setAutoRegen(boolean autoRegen) {
 		this.autoRegen = autoRegen;
-		for(MobileBaseCadManager m:slaves) {
+		for (MobileBaseCadManager m : slaves) {
 			m.setAutoRegen(autoRegen);
 		}
 	}
@@ -890,9 +968,9 @@ public class MobileBaseCadManager {
 	}
 
 	public void setConfigurationViewerMode(boolean b) {
-		System.out.println("Setting config mode "+b);
-		configMode=b;
-		for(MobileBaseCadManager m:slaves) {
+		System.out.println("Setting config mode " + b);
+		configMode = b;
+		for (MobileBaseCadManager m : slaves) {
 			m.setConfigurationViewerMode(b);
 		}
 	}

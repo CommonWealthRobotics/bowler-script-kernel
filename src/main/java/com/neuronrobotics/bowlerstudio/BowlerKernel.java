@@ -27,6 +27,7 @@ import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
+import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
 import marytts.signalproc.effects.ChorusEffectBase;
@@ -82,7 +83,7 @@ public class BowlerKernel {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-		com.neuronrobotics.sdk.addons.kinematics.JavaFXInitializer.go();
+		JavaFXInitializer.go();
 		ScriptingEngine.waitForLogin();
 		if (args.length == 0) {
 			fail();
