@@ -81,7 +81,10 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		
 		setControllerByName(names!=null?Arrays.asList(names):null);
 	}
-
+	public BowlerJInputDevice( List<String> searches) {
+		setControllerByName(searches);
+	}
+	
 	private void setControllerByName(List<String> names) {
 		searches =names;
 		ArrayList<Controller> getDefaultEnvironmentGetControllers = controllers();
