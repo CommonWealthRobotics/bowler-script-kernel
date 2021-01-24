@@ -205,6 +205,9 @@ public class MobileBaseCadManager implements Runnable {
 						a = new Affine();
 						k.getChain().getLinks().get(index).setListener(a);
 					}
+					if(k.getAbstractLink(i).getGlobalPositionListener()==null) {
+						k.getAbstractLink(i).setGlobalPositionListener(a);
+					}
 
 					Affine af = a;
 					TransformNR nr = linkPos.get(index);

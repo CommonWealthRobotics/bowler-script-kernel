@@ -57,7 +57,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		return back;
 	}
 
-	public static String[] getControllers() {
+	public static ArrayList<String> getControllers() {
 		ArrayList<Controller> getDefaultEnvironmentGetControllers = controllers();
 		ArrayList<String> cons = new ArrayList<>();
 		for (int i = 0; i < getDefaultEnvironmentGetControllers.size(); i++) {
@@ -67,11 +67,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 				cons.add( name);
 			}
 		}
-		String[] finalvals = new String[cons.size()];
-		for (int i=0;i<finalvals.length;i++) {
-			finalvals[i]=cons.get(i);
-		}
-		return finalvals;
+		return cons;
 	}
 
 	/**
