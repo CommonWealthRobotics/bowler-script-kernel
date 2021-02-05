@@ -177,57 +177,74 @@ public class MobileBaseCadManager implements Runnable {
 	private MobileBaseCadManager master;
 	private long timeOfLastRender = System.currentTimeMillis();
 	private boolean rendering = false;
-	private boolean rerenderFlag=false;
+	private boolean rerenderFlag = false;
+	private Thread renderWrangler = null;
+
 	// This is the rendering event
 	public void run() {
-		if(rendering) {
-			rerenderFlag=true;
-			return;
-		}
 		rendering = true;
-		// System.out.println("Render");
-		Platform.runLater(() -> {
-			updateBase(base);
-			for (DHParameterKinematics k : base.getAllDHChains()) {
-				updateBase(k);
-				ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
-
-				for (int i = 0; i < ll.size(); i++) {
-					ArrayList<TransformNR> linkPos = ll;
-					int index = i;
-					Affine a;
-					if(k.getChain().getLinks().get(index).getListener()==null) {
-						k.getChain().getLinks().get(index).setListener(new Affine());
-					}
-					try {
-						a = (Affine) k.getChain().getLinks().get(index).getListener();
-					} catch (java.lang.ClassCastException ex) {
-						a = new Affine();
-						k.getChain().getLinks().get(index).setListener(a);
-					}
-					if(k.getAbstractLink(i).getGlobalPositionListener()==null) {
-						k.getAbstractLink(i).setGlobalPositionListener(a);
-					}
-
-					Affine af = a;
-					TransformNR nr = linkPos.get(index);
-					if (nr != null && af != null)
-
+		if (renderWrangler == null) {
+			renderWrangler = new Thread() {
+				@Override
+				public void run() {
+					setName("MobileBaseCadManager Render Thread for "+base.getScriptingName());
+					while (base.isAvailable()) {
 						try {
-							TransformFactory.nrToAffine(nr, af);
-						} catch (Exception ex) {
-							ex.printStackTrace();
+							Thread.sleep(32);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
+						if (rendering) {
+							rendering = false;
+							long timeSince =  System.currentTimeMillis()-timeOfLastRender;
+							timeOfLastRender = System.currentTimeMillis();
+							System.err.println("Render "+timeSince);
+							Platform.runLater(() -> {
+								updateBase(base);
+								for (DHParameterKinematics k : base.getAllDHChains()) {
+									updateBase(k);
+									ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
 
+									for (int i = 0; i < ll.size(); i++) {
+										ArrayList<TransformNR> linkPos = ll;
+										int index = i;
+										Affine a;
+										if (k.getChain().getLinks().get(index).getListener() == null) {
+											k.getChain().getLinks().get(index).setListener(new Affine());
+										}
+										try {
+											a = (Affine) k.getChain().getLinks().get(index).getListener();
+										} catch (java.lang.ClassCastException ex) {
+											a = new Affine();
+											k.getChain().getLinks().get(index).setListener(a);
+										}
+										if (k.getAbstractLink(i).getGlobalPositionListener() == null) {
+											k.getAbstractLink(i).setGlobalPositionListener(a);
+										}
+
+										Affine af = a;
+										TransformNR nr = linkPos.get(index);
+										if (nr != null && af != null)
+											// Platform.runLater(() -> {
+											try {
+												TransformFactory.nrToAffine(nr, af);
+											} catch (Exception ex) {
+												ex.printStackTrace();
+											}
+										// });
+									}
+
+								}
+							});
+						}
+					}
+					renderWrangler=null;
 				}
+			};
+			renderWrangler.start();
+		}
 
-			}
-			rendering = false;
-			if(rerenderFlag) {
-				rerenderFlag=false;
-				run();
-			}
-		});
 	}
 
 	private void updateBase(AbstractKinematicsNR kin) {
@@ -250,34 +267,6 @@ public class MobileBaseCadManager implements Runnable {
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
 		this.setUi(myUI);
 
-		base.setRenderWrangler(this);
-		for (DHParameterKinematics k : base.getAllDHChains()) {
-			k.setRenderWrangler(this);
-		}
-		run();
-		base.addConnectionEventListener(new IDeviceConnectionEventListener() {
-
-			@Override
-			public void onDisconnect(BowlerAbstractDevice arg0) {
-				base.setRenderWrangler(null);
-				for (DHParameterKinematics k : base.getAllDHChains()) {
-					k.setRenderWrangler(null);
-				}
-				if (arg0 != base)
-					return;
-				bail = true;
-				clear();
-				cadmap.remove(base);
-				slaves.clear();
-				master = null;
-			}
-
-			@Override
-			public void onConnect(BowlerAbstractDevice arg0) {
-				// TODO Auto-generated method stub
-
-			}
-		});
 		setMobileBase(base);
 		cadmap.put(base, this);
 
@@ -629,12 +618,43 @@ public class MobileBaseCadManager implements Runnable {
 		return base;
 	}
 
-	public void setMobileBase(MobileBase base) {
-		this.base = base;
+	public void setMobileBase(MobileBase b) {
+		this.base = b;
 		cadmap.put(base, this);
 		MobileBaseLoader.get(base);// load the dependant scripts
 		base.updatePositions();
+		base.setRenderWrangler(this);
+		for (DHParameterKinematics k : base.getAllDHChains()) {
+			k.setRenderWrangler(this);
+		}
+		run();
+		//new Exception("Adding the mysteryListener "+b.getScriptingName()).printStackTrace();
 
+		base.addConnectionEventListener(new IDeviceConnectionEventListener() {
+
+			@Override
+			public void onDisconnect(BowlerAbstractDevice arg0) {
+				if (arg0 != base) {
+					new Exception("This listener called from the wrong device!! "+arg0.getScriptingName()).printStackTrace();
+					return;
+				}
+				base.setRenderWrangler(null);
+				for (DHParameterKinematics k : base.getAllDHChains()) {
+					k.setRenderWrangler(null);
+				}
+				bail = true;
+				clear();
+				cadmap.remove(base);
+				slaves.clear();
+				master = null;
+			}
+
+			@Override
+			public void onConnect(BowlerAbstractDevice arg0) {
+				// TODO Auto-generated method stub
+
+			}
+		});
 	}
 
 	/**
