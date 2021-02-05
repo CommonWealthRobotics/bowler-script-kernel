@@ -62,7 +62,13 @@ public class MobileBaseCadManager implements Runnable {
 	private IMobileBaseUI ui = null;
 	private static ICadGenerator cadEngineConfiguration = null;
 	private boolean configMode = false;
-
+	private boolean autoRegen = true;
+	private DoubleProperty pi = new SimpleDoubleProperty(0);
+	private MobileBaseCadManager master;
+	private boolean rendering = false;
+	private Thread renderWrangler = null;
+	
+	
 	protected void clear() {
 		// Cad generator
 		dhCadGen.clear();
@@ -172,13 +178,7 @@ public class MobileBaseCadManager implements Runnable {
 			}
 		}
 	};
-	private boolean autoRegen = true;
-	private DoubleProperty pi = new SimpleDoubleProperty(0);
-	private MobileBaseCadManager master;
-	private long timeOfLastRender = System.currentTimeMillis();
-	private boolean rendering = false;
-	private boolean rerenderFlag = false;
-	private Thread renderWrangler = null;
+
 
 	// This is the rendering event
 	public void run() {
@@ -197,9 +197,7 @@ public class MobileBaseCadManager implements Runnable {
 						}
 						if (rendering) {
 							rendering = false;
-							long timeSince =  System.currentTimeMillis()-timeOfLastRender;
-							timeOfLastRender = System.currentTimeMillis();
-							System.err.println("Render "+timeSince);
+							//System.err.println("Render "+timeSince);
 							Platform.runLater(() -> {
 								updateBase(base);
 								for (DHParameterKinematics k : base.getAllDHChains()) {
