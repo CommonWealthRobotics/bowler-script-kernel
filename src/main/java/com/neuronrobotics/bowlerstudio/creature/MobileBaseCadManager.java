@@ -199,45 +199,59 @@ public class MobileBaseCadManager implements Runnable {
 							rendering = false;
 							//System.err.println("Render "+timeSince);
 							Platform.runLater(() -> {
-								updateBase(base);
-								for (DHParameterKinematics k : base.getAllDHChains()) {
-									updateBase(k);
-									ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
-
-									for (int i = 0; i < ll.size(); i++) {
-										ArrayList<TransformNR> linkPos = ll;
-										int index = i;
-										Affine a;
-										if (k.getChain().getLinks().get(index).getListener() == null) {
-											k.getChain().getLinks().get(index).setListener(new Affine());
-										}
-										try {
-											a = (Affine) k.getChain().getLinks().get(index).getListener();
-										} catch (java.lang.ClassCastException ex) {
-											a = new Affine();
-											k.getChain().getLinks().get(index).setListener(a);
-										}
-										if (k.getAbstractLink(i).getGlobalPositionListener() == null) {
-											k.getAbstractLink(i).setGlobalPositionListener(a);
-										}
-
-										Affine af = a;
-										TransformNR nr = linkPos.get(index);
-										if (nr != null && af != null)
-											// Platform.runLater(() -> {
-											try {
-												TransformFactory.nrToAffine(nr, af);
-											} catch (Exception ex) {
-												ex.printStackTrace();
-											}
-										// });
-									}
-
-								}
+								updateMobileBase(base);
 							});
 						}
 					}
 					renderWrangler=null;
+				}
+
+				private void updateMobileBase(MobileBase b) {
+					updateBase(b);
+					for (DHParameterKinematics k : b.getAllDHChains()) {
+						updateLimb(k);
+					}
+					for (DHParameterKinematics k : b.getAllParallelGroups()) {
+						updateBase(k);
+					}
+					
+				}
+
+				private void updateLimb(DHParameterKinematics k) {
+					updateBase(k);
+					ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
+
+					for (int i = 0; i < ll.size(); i++) {
+						ArrayList<TransformNR> linkPos = ll;
+						int index = i;
+						Affine a;
+						if (k.getChain().getLinks().get(index).getListener() == null) {
+							k.getChain().getLinks().get(index).setListener(new Affine());
+						}
+						try {
+							a = (Affine) k.getChain().getLinks().get(index).getListener();
+						} catch (java.lang.ClassCastException ex) {
+							a = new Affine();
+							k.getChain().getLinks().get(index).setListener(a);
+						}
+						if (k.getAbstractLink(i).getGlobalPositionListener() == null) {
+							k.getAbstractLink(i).setGlobalPositionListener(a);
+						}
+
+						Affine af = a;
+						TransformNR nr = linkPos.get(index);
+						if (nr != null && af != null)
+							// Platform.runLater(() -> {
+							try {
+								TransformFactory.nrToAffine(nr, af);
+							} catch (Exception ex) {
+								ex.printStackTrace();
+							}
+						// });
+						if(k.getSlaveMobileBase(i)!=null) {
+							updateMobileBase(k.getSlaveMobileBase(i));
+						}
+					}
 				}
 			};
 			renderWrangler.start();
