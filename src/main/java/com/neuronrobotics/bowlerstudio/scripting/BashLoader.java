@@ -37,8 +37,12 @@ public class BashLoader implements IScriptingLanguage {
 		Thread.sleep(100);
 		ArrayList<String> back = new ArrayList<>();
 		while ((s = stdInput.readLine()) != null || (e = errInput.readLine()) != null) {
-			if (s != null)
+			if (s != null) {
 				back.add(s);
+				System.out.println(s);
+			}
+			if(e!=null)
+				System.out.println(e);
 			//
 		}
 		process.waitFor();
