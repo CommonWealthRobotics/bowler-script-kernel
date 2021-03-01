@@ -57,7 +57,7 @@ public class BashLoader implements IScriptingLanguage {
 
 	@Override
 	public String getShellType() {
-		return "Bash Script";
+		return "Bash";
 	}
 
 	@Override
