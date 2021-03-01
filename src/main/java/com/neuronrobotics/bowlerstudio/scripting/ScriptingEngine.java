@@ -136,6 +136,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new ArduinoLoader());
 		addScriptingLanguage(new KotlinHelper());
 		addScriptingLanguage(new SvgLoader());
+		addScriptingLanguage(new BashLoader());
 	}
 
 	public static void addOnCommitEventListeners(String url, Runnable event) {
@@ -1367,20 +1368,24 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static boolean checkOwner(File currentFile) {
-		Git git;
 		try {
-			git = locateGit(currentFile);
-		} catch (Exception e1) {
+			Git git;
+			try {
+				git = locateGit(currentFile);
+			} catch (Exception e1) {
+				return false;
+			}
+			boolean owned ;
+			try {
+				owned = checkOwner(git);
+			}catch(Throwable t) {
+				owned=false;
+			}
+			git.close();
+			return owned;
+		}catch(Throwable t) {
 			return false;
 		}
-		boolean owned ;
-		try {
-			owned = checkOwner(git);
-		}catch(Throwable t) {
-			owned=false;
-		}
-		git.close();
-		return owned;
 	}
 
 	private static boolean checkOwner(Git git) {

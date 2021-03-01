@@ -159,7 +159,7 @@ public class ArduinoLoader implements IScriptingLanguage {
   @Override
   public ArrayList<String> getFileExtenetion() {
     // TODO Auto-generated method stub
-    return new ArrayList<>(Arrays.asList("c", "ino", "h", "cpp", "hpp"));
+    return new ArrayList<>(Arrays.asList(".c", ".ino", ".h", ".cpp", ".hpp"));
   }
 
 }
