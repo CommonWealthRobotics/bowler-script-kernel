@@ -1253,12 +1253,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		File gitRepoFile = f;
 		while (gitRepoFile != null) {
 			gitRepoFile = gitRepoFile.getParentFile();
-			if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
-				// System.err.println("Fount git repo for file: "+gitRepoFile);
-				Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
-				return new Git(localRepo);
-
-			}
+			if(gitRepoFile!=null)
+				if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+					// System.err.println("Fount git repo for file: "+gitRepoFile);
+					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
+					return new Git(localRepo);
+	
+				}
 		}
 
 		return null;
@@ -1369,11 +1370,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Git git;
 		try {
 			git = locateGit(currentFile);
-		} catch (IOException e1) {
-			exp.uncaughtException(Thread.currentThread(), e1);
+		} catch (Exception e1) {
 			return false;
 		}
-		boolean owned = checkOwner(git);
+		boolean owned ;
+		try {
+			owned = checkOwner(git);
+		}catch(Throwable t) {
+			owned=false;
+		}
 		git.close();
 		return owned;
 	}
