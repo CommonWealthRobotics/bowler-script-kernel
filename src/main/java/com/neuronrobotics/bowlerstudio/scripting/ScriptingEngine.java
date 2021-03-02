@@ -57,6 +57,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1478,6 +1479,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static GHRepository makeNewRepo(String newName, String description) throws IOException {
+		if (description.length()<2) {
+			description= new Date().toString();
+		}
 		GitHub github = PasswordManager.getGithub();
 		GHRepository gist = null;
 		try {
