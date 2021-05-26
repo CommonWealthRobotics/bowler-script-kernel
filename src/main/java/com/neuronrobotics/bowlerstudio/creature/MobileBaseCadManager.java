@@ -190,7 +190,7 @@ public class MobileBaseCadManager implements Runnable {
 					setName("MobileBaseCadManager Render Thread for "+base.getScriptingName());
 					while (base.isAvailable()) {
 						try {
-							Thread.sleep(32);
+							Thread.sleep(16*3);
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
