@@ -11,6 +11,8 @@ import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
 import org.eclipse.jgit.api.errors.CanceledException;
@@ -29,6 +31,7 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
@@ -1112,6 +1115,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 										.setStartPoint("origin/" + branch).call();
 								git.close();
 								return;
+							} catch (CheckoutConflictException con) {
+
+								resolveConflict(remoteURI, con, git);
 							}
 						}
 					}
@@ -1155,6 +1161,49 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		}
 
+	}
+
+	private static boolean resolveConflict(String remoteURI, CheckoutConflictException con, Git git) {
+		try {
+			Status stat = git.status().call();
+			Set<String> changed = stat.getModified();
+			if (changed.size() > 0) {
+				System.out.println("Modified ");
+				for (String p : changed) {
+					System.out.println("Modified Conflict with: " + p);
+					byte[] bytes;
+					String content = "";
+				    try {
+				      bytes = Files.readAllBytes(fileFromGit(remoteURI, p).toPath());
+				       content = new String(bytes, "UTF-8");
+				    } catch (IOException e1) {
+				      // TODO Auto-generated catch block
+				      e1.printStackTrace();
+				    }
+					try {
+						commit(remoteURI, getBranch(remoteURI), p, content, "auto-save in ScriptingEngine.resolveConflict", false);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				return     resolveConflict(remoteURI,con,git);
+			}
+			Set<String> untracked = stat.getUntracked();
+			if (untracked.size() > 0) {
+				System.out.println("Untracked ");
+				for (String p : untracked) {
+					System.out.println("Untracked Conflict with: " + p);
+					File f=fileFromGit(remoteURI, p);
+					f.delete();
+				}
+				return     resolveConflict(remoteURI,con,git);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
 	}
 
 	// public static void checkout(String branch, File gitRepoFile) throws
@@ -1255,12 +1304,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		File gitRepoFile = f;
 		while (gitRepoFile != null) {
 			gitRepoFile = gitRepoFile.getParentFile();
-			if(gitRepoFile!=null)
+			if (gitRepoFile != null)
 				if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
 					// System.err.println("Fount git repo for file: "+gitRepoFile);
 					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
 					return new Git(localRepo);
-	
+
 				}
 		}
 
@@ -1376,15 +1425,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			} catch (Exception e1) {
 				return false;
 			}
-			boolean owned ;
+			boolean owned;
 			try {
 				owned = checkOwner(git);
-			}catch(Throwable t) {
-				owned=false;
+			} catch (Throwable t) {
+				owned = false;
 			}
 			git.close();
 			return owned;
-		}catch(Throwable t) {
+		} catch (Throwable t) {
 			return false;
 		}
 	}
@@ -1479,8 +1528,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static GHRepository makeNewRepo(String newName, String description) throws IOException {
-		if (description.length()<2) {
-			description= new Date().toString();
+		if (description.length() < 2) {
+			description = new Date().toString();
 		}
 		GitHub github = PasswordManager.getGithub();
 		GHRepository gist = null;
