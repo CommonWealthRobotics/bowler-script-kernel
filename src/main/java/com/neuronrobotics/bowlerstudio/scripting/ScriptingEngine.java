@@ -12,7 +12,6 @@ import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.Status;
-import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
 import org.eclipse.jgit.api.errors.CanceledException;
@@ -31,7 +30,6 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
@@ -977,14 +975,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			System.out.println(" ... Success!");
 			// new Exception(ref).printStackTrace();
 		} catch (CheckoutConflictException ex) {
-			PasswordManager.checkInternet();
-			for (String p : ex.getConflictingPaths()) {
-				File conf = new File(gitRepoFile.getParent() + "/" + p);
-				System.out.println("\r\n\r\n\tConflict: " + conf + "\r\n\r\n");
-				System.out.println("Using upstream and deleting local changes");
-			}
-			git.close();
-			deleteFolder(new File(gitRepoFile.getParent()));
+
+			resolveConflict(remoteURI, ex, git);
 			pull(remoteURI, branch);
 		} catch (WrongRepositoryStateException e) {
 			PasswordManager.checkInternet();
@@ -992,18 +984,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			pull(remoteURI, branch);
 		} catch (InvalidConfigurationException e) {
 			PasswordManager.checkInternet();
+			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (DetachedHeadException e) {
 			PasswordManager.checkInternet();
+			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (InvalidRemoteException e) {
 			PasswordManager.checkInternet();
+			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (CanceledException e) {
 			PasswordManager.checkInternet();
+			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (RefNotFoundException e) {
 			PasswordManager.checkInternet();
+			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (RefNotAdvertisedException e) {
 			PasswordManager.checkInternet();
@@ -1034,7 +1031,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 
 		} catch (GitAPIException e) {
-			PasswordManager.checkInternet();
+			PasswordManager.checkInternet();git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		}
 
@@ -1139,9 +1136,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 						exp.uncaughtException(Thread.currentThread(), e);
 					} catch (CheckoutConflictException e) {
-						PasswordManager.checkInternet();
-
-						exp.uncaughtException(Thread.currentThread(), e);
+						resolveConflict(remoteURI, e, git);
 					} catch (GitAPIException e) {
 						PasswordManager.checkInternet();
 
@@ -1164,6 +1159,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	private static boolean resolveConflict(String remoteURI, CheckoutConflictException con, Git git) {
+		PasswordManager.checkInternet();
+
 		try {
 			Status stat = git.status().call();
 			Set<String> changed = stat.getModified();
@@ -1173,31 +1170,32 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					System.out.println("Modified Conflict with: " + p);
 					byte[] bytes;
 					String content = "";
-				    try {
-				      bytes = Files.readAllBytes(fileFromGit(remoteURI, p).toPath());
-				       content = new String(bytes, "UTF-8");
-				    } catch (IOException e1) {
-				      // TODO Auto-generated catch block
-				      e1.printStackTrace();
-				    }
 					try {
-						commit(remoteURI, getBranch(remoteURI), p, content, "auto-save in ScriptingEngine.resolveConflict", false);
+						bytes = Files.readAllBytes(fileFromGit(remoteURI, p).toPath());
+						content = new String(bytes, "UTF-8");
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					try {
+						commit(remoteURI, getBranch(remoteURI), p, content,
+								"auto-save in ScriptingEngine.resolveConflict", false);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
-				return     resolveConflict(remoteURI,con,git);
+				return resolveConflict(remoteURI, con, git);
 			}
 			Set<String> untracked = stat.getUntracked();
 			if (untracked.size() > 0) {
 				System.out.println("Untracked ");
 				for (String p : untracked) {
 					System.out.println("Untracked Conflict with: " + p);
-					File f=fileFromGit(remoteURI, p);
+					File f = fileFromGit(remoteURI, p);
 					f.delete();
 				}
-				return     resolveConflict(remoteURI,con,git);
+				return resolveConflict(remoteURI, con, git);
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -1506,7 +1504,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
 			git.close();
 
-			ArrayList<String> filesNew = filesInGit(gitRepo);
+			filesInGit(gitRepo);
 
 			return gitRepo;
 		} catch (org.kohsuke.github.HttpException ex) {
