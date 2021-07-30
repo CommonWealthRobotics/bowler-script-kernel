@@ -107,28 +107,28 @@ String getOsArch() {
 repositories {
     mavenCentral()
     jcenter()
-    maven {
-        url "https://dl.bintray.com/s1m0nw1/KtsRunner"
-        content {
-            includeGroup("de.swirtz")
-        }
-    }
-	maven {
-		url "https://dl.bintray.com/ihmcrobotics/maven-release/"
-		content {
-			includeGroup("us.ihmc")
-		}
-	}
-	maven {
-		url "https://dl.bintray.com/ihmcrobotics/maven-vendor/"
-		content {
-			includeGroup("us.ihmc.thirdparty.jinput")
-		}
-	}
+//    maven {
+//        url "https://dl.bintray.com/s1m0nw1/KtsRunner"
+//        content {
+//            includeGroup("de.swirtz")
+//        }
+//    }
+//	maven {
+//		url "https://dl.bintray.com/ihmcrobotics/maven-release/"
+//		content {
+//			includeGroup("us.ihmc")
+//		}
+//	}
+//	maven {
+//		url "https://dl.bintray.com/ihmcrobotics/maven-vendor/"
+//		content {
+//			includeGroup("us.ihmc.thirdparty.jinput")
+//		}
+//	}
 }
 
 dependencies {
-	compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '201204'
+	compile 'us.ihmc:jinput:2.0.6-ihmc2'
 	compile group: 'us.ihmc', name: 'ihmc-native-library-loader', version: '1.3.1'
 	
 	
