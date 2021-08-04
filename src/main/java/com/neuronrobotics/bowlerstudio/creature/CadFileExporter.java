@@ -37,7 +37,7 @@ public class CadFileExporter {
       }
       
       @Override
-      public void highlightException(File fileEngineRunByName, Exception ex) {
+      public void highlightException(File fileEngineRunByName, Throwable ex) {
         // TODO Auto-generated method stub
         
       }

@@ -106,7 +106,8 @@ public class MobileBaseCadManager implements Runnable {
 		public ArrayList<CSG> list = new ArrayList<>();
 
 		@Override
-		public void highlightException(File fileEngineRunByName, Exception ex) {
+		public void highlightException(File fileEngineRunByName, Throwable ex) {
+			new Exception("Caught here:").printStackTrace();
 			ex.printStackTrace();
 		}
 
@@ -165,16 +166,14 @@ public class MobileBaseCadManager implements Runnable {
 							System.out.println("Re-loading Cad Base Engine");
 							cadForBodyEngine = ScriptingEngine.inlineFileScriptRun(fileThatChanged, null);
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							getUi().highlightException(null, e);
 						}
 						generateCad();
 						fileHandeling = false;
 					}
 				}.start();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				getUi().highlightException(null, e);
 			}
 		}
 	};
@@ -192,8 +191,7 @@ public class MobileBaseCadManager implements Runnable {
 						try {
 							Thread.sleep(16*3);
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							getUi().highlightException(null, e);
 						}
 						if (rendering) {
 							rendering = false;
@@ -245,7 +243,7 @@ public class MobileBaseCadManager implements Runnable {
 							try {
 								TransformFactory.nrToAffine(nr, af);
 							} catch (Exception ex) {
-								ex.printStackTrace();
+								getUi().highlightException(null, ex);
 							}
 						// });
 						if(k.getSlaveMobileBase(i)!=null) {
@@ -271,7 +269,7 @@ public class MobileBaseCadManager implements Runnable {
 			try {
 				TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				getUi().highlightException(null, ex);
 			}
 		// });
 	}
@@ -330,23 +328,23 @@ public class MobileBaseCadManager implements Runnable {
 
 					@Override
 					public void onFileChange(File fileThatChanged, WatchEvent event) {
-						// TODO Auto-generated method stub
+						MobileBaseCadManager mobileBaseCadManager=null;
 						try {
 							resetConfigurationScript();
+							
 							for (MobileBase manager : cadmap.keySet()) {
-								MobileBaseCadManager mobileBaseCadManager = cadmap.get(manager);
+								mobileBaseCadManager = cadmap.get(manager);
 								if (mobileBaseCadManager.autoRegen)
 									if (mobileBaseCadManager.configMode)
 										mobileBaseCadManager.generateCad();
 							}
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							if(mobileBaseCadManager!=null)
+								mobileBaseCadManager.getUi().highlightException(null, e);
 						}
 					}
 				});
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -377,7 +375,7 @@ public class MobileBaseCadManager implements Runnable {
 		if (cadForBodyEngine == null) {
 			try {
 				setDefaultLinkLevelCadEngine();
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				getUi().highlightException(null, e);
 			}
 			if (getCadScript() != null) {
@@ -403,7 +401,7 @@ public class MobileBaseCadManager implements Runnable {
 					try {
 						newcad = getIgenerateBody().generateBody(device);
 					} catch (Throwable t) {
-						t.printStackTrace();
+						getUi().highlightException(null, t);
 					}
 					if (newcad == null) {
 						newcad = new ArrayList<CSG>();
@@ -418,7 +416,7 @@ public class MobileBaseCadManager implements Runnable {
 						ui.addCSG(newcad, getCadScript());
 					}
 				} else
-					new Exception().printStackTrace();
+					getUi().highlightException(null, new Exception());
 				ArrayList<CSG> arrayList = getBasetoCadMap().get(device);
 				arrayList.clear();
 				for (CSG c : getAllCad()) {
@@ -707,7 +705,7 @@ public class MobileBaseCadManager implements Runnable {
 					try {
 						newcad = generatorToUse.generateCad(dh, i);
 					} catch (Throwable t) {
-						t.printStackTrace();
+						getUi().highlightException(null, t);
 					}
 					if (newcad == null) {
 						newcad = new ArrayList<CSG>();
@@ -761,6 +759,7 @@ public class MobileBaseCadManager implements Runnable {
 			ArrayList<CSG> csg = MobileBaseCadManager.get(base).getBasetoCadMap().get(base);
 			getUi().setSelectedCsg(csg);
 		} catch (Exception ex) {
+			//getUi().highlightException(null, ex);
 			System.err.println("Base not loaded yet");
 		}
 
@@ -773,6 +772,7 @@ public class MobileBaseCadManager implements Runnable {
 //			getUi().setSelectedCsg(limCad);
 			getUi().setSelected((Affine) limb.getRootListener());
 		} catch (Exception ex) {
+			//getUi().highlightException(null, ex);
 			System.err.println("Limb not loaded yet");
 		}
 	}

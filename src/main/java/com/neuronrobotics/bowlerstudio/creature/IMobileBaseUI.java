@@ -34,7 +34,7 @@ public interface IMobileBaseUI {
    * @param fileEngineRunByName The file that was running when the exception occurred
    * @param ex the stack trace for file names of open files, or for open or executed file names
    */
-  void highlightException(File fileEngineRunByName, Exception ex);
+  void highlightException(File fileEngineRunByName, Throwable ex);
 
   /**
    * Return the CSGs currently visible in the UI.
