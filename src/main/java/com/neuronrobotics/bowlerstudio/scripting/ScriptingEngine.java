@@ -951,7 +951,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return branchNames;
 	}
 
-	public static void pull(String remoteURI, String branch) throws IOException {
+	public static void pull(String remoteURI, String branch) throws IOException,CheckoutConflictException {
 		// new Exception().printStackTrace();
 
 		if (!hasNetwork())
@@ -977,9 +977,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			git.close();
 			// new Exception(ref).printStackTrace();
 		} catch (CheckoutConflictException ex) {
+//			git.close();
+//			resolveConflict(remoteURI, ex, git);
+//			pull(remoteURI, branch);
 			git.close();
-			resolveConflict(remoteURI, ex, git);
-			pull(remoteURI, branch);
+			PasswordManager.checkInternet();
+			throw ex;
 		} catch (WrongRepositoryStateException e) {
 			git.close();
 			PasswordManager.checkInternet();
@@ -1047,7 +1050,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		
 	}
 
-	public static void pull(String remoteURI) throws IOException {
+	public static void pull(String remoteURI) throws IOException,CheckoutConflictException {
 		if (!hasNetwork())
 			return;// No login info means there is no way to publish
 		pull(remoteURI, getBranch(remoteURI));
@@ -1182,17 +1185,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					try {
 						bytes = Files.readAllBytes(fileFromGit(remoteURI, p).toPath());
 						content = new String(bytes, "UTF-8");
+						try {
+							commit(remoteURI, getBranch(remoteURI), p, content,
+									"auto-save in ScriptingEngine.resolveConflict", false);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-					try {
-						commit(remoteURI, getBranch(remoteURI), p, content,
-								"auto-save in ScriptingEngine.resolveConflict", false);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					
 				}
 				return resolveConflict(remoteURI, con, git);
 			}

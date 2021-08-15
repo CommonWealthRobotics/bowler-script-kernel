@@ -42,6 +42,7 @@ import java.util.HashMap;
 import org.apache.batik.parser.LengthPairListParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -584,6 +585,14 @@ public class Vitamins {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (CheckoutConflictException e) {
+			ScriptingEngine.deleteRepo(getGitRepoDatabase());
+			try {
+				ScriptingEngine.pull(getGitRepoDatabase());
+			} catch (CheckoutConflictException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		listVitaminTypes();
 		
