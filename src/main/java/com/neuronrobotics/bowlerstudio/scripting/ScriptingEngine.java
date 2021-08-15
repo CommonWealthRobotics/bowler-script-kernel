@@ -985,11 +985,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			PasswordManager.checkInternet();
 			throw ex;
 		} catch (WrongRepositoryStateException e) {
+			e.printStackTrace();
 			git.close();
 			PasswordManager.checkInternet();
 			deleteRepo(remoteURI);
 			pull(remoteURI, branch);
 		} catch (InvalidConfigurationException e) {
+			
 			PasswordManager.checkInternet();
 			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
@@ -1014,6 +1016,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (NoHeadException e) {
+			e.printStackTrace();
 			PasswordManager.checkInternet();
 			try {
 				git.close();
@@ -1024,6 +1027,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 
 		} catch (TransportException e) {
+			e.printStackTrace();
 			PasswordManager.checkInternet();
 
 			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
@@ -1040,6 +1044,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 
 		} catch (GitAPIException e) {
+			e.printStackTrace();
 			PasswordManager.checkInternet();
 			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
@@ -1104,10 +1109,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			Repository localRepo = new FileRepository(gitRepoFile);
 			if(branch==null)
 				branch=currentBranch;
-			System.err.println("Current branch is " + currentBranch + " need " + branch);			
 			
-			if (currentBranch.length()<=branch.length() || !currentBranch.endsWith(branch)) {
-
+			if (currentBranch.length()<branch.length() || !currentBranch.endsWith(branch)) {
+				System.err.println("Current branch is " + currentBranch + " need " + branch);			
 				
 				Git git = new Git(localRepo);
 				try {
@@ -1688,7 +1692,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 		git.close();
 
-		System.out.print("Pulling " + ref + "  ");
+		System.out.print("Getting branches " + ref + "  ");
 		if (ref != null && ref.startsWith("git@")) {
 			return Git.lsRemoteRepository().setHeads(true).setRemote(url)
 					.setTransportConfigCallback(transportConfigCallback).call();
