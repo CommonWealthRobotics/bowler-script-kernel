@@ -2,11 +2,13 @@ package com.neuronrobotics.bowlerstudio.creature;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
+import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.DhInverseSolver;
@@ -38,14 +40,24 @@ public class MobileBaseLoader {
 			DhInverseSolver defaultDHSolver = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(code, null);
 
 			File c = code;
-			FileWatchDeviceWrapper.watch(device, code, (fileThatChanged, event) -> {
+			FileWatchDeviceWrapper.watch(device, code,new IFileChangeListener() {
+				
+				@Override
+				public void onFileDelete(File fileThatIsDeleted) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void onFileChange(File fileThatChanged, WatchEvent event)  {
 
-				try {
-					System.out.println("D-H Solver changed, updating " + device.getScriptingName());
-					DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(c, null);
-					device.setInverseSolver(d);
-				} catch (Exception ex) {
-					MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
+					try {
+						System.out.println("D-H Solver changed, updating " + device.getScriptingName());
+						DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(c, null);
+						device.setInverseSolver(d);
+					} catch (Exception ex) {
+						MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
+					}
 				}
 			});
 
@@ -78,14 +90,24 @@ public class MobileBaseLoader {
 		}
 
 		File c = code;
-		FileWatchDeviceWrapper.watch(device, code, (fileThatChanged, event) -> {
+		FileWatchDeviceWrapper.watch(device, code, new IFileChangeListener() {
+			
+			@Override
+			public void onFileDelete(File fileThatIsDeleted) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onFileChange(File fileThatChanged, WatchEvent event){
 
-			try {
-				System.out.println("Walking Gait Script changed, updating " + device.getScriptingName());
-				defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
-				device.setWalkingDriveEngine(defaultDriveEngine);
-			} catch (Exception ex) {
-				MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
+				try {
+					System.out.println("Walking Gait Script changed, updating " + device.getScriptingName());
+					defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
+					device.setWalkingDriveEngine(defaultDriveEngine);
+				} catch (Exception ex) {
+					MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
+				}
 			}
 		});
 
