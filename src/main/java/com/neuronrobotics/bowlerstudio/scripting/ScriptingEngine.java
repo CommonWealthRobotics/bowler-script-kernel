@@ -340,8 +340,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void deleteRepo(String remoteURI) {
-
 		File gitRepoFile = uriToFile(remoteURI);
+		new RuntimeException("Repository deleting "+gitRepoFile.getAbsolutePath()).printStackTrace();
+
 		deleteFolder(gitRepoFile.getParentFile());
 	}
 
@@ -952,7 +953,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return branchNames;
 	}
 
-	public static void pull(String remoteURI, String branch) throws IOException,CheckoutConflictException {
+	public static void pull(String remoteURI, String branch) throws IOException,CheckoutConflictException,NoHeadException {
 		// new Exception().printStackTrace();
 
 		if (!hasNetwork())
@@ -1016,15 +1017,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			git.close();
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (NoHeadException e) {
-			e.printStackTrace();
+			
 			PasswordManager.checkInternet();
-			try {
-				git.close();
-				newBranch(remoteURI, branch);
-			} catch (GitAPIException e1) {
-				git.close();
-				throw new RuntimeException(e1);
-			}
+			git.close();
+			throw e;
+//			try {
+//				git.close();
+//				newBranch(remoteURI, branch);
+//			} catch (GitAPIException e1) {
+//				git.close();
+//				throw new RuntimeException(e1);
+//			}
 
 		} catch (TransportException e) {
 			e.printStackTrace();
@@ -1056,7 +1059,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		
 	}
 
-	public static void pull(String remoteURI) throws IOException,CheckoutConflictException {
+	public static void pull(String remoteURI) throws IOException,CheckoutConflictException,NoHeadException  {
 		if (!hasNetwork())
 			return;// No login info means there is no way to publish
 		pull(remoteURI, getBranch(remoteURI));

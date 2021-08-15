@@ -45,6 +45,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHMyself;
@@ -585,11 +586,11 @@ public class Vitamins {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (CheckoutConflictException e) {
+		} catch (CheckoutConflictException|NoHeadException e) {
 			ScriptingEngine.deleteRepo(getGitRepoDatabase());
 			try {
 				ScriptingEngine.pull(getGitRepoDatabase());
-			} catch (CheckoutConflictException | IOException e1) {
+			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
