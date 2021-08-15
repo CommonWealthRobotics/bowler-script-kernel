@@ -380,7 +380,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		if (folder.exists()) {
 			System.err.println("Folder failed to delete! " + folder);
-			throw new RuntimeException();
+			deleteFolder( folder);
 		}
 
 	}
@@ -1102,9 +1102,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (currentBranch != null) {
 			// String currentBranch=getFullBranch(remoteURI);
 			Repository localRepo = new FileRepository(gitRepoFile);
-			if (!currentBranch.endsWith(branch)) {
+			if(branch==null)
+				branch=currentBranch;
+			System.err.println("Current branch is " + currentBranch + " need " + branch);			
+			
+			if (currentBranch.length()<=branch.length() || !currentBranch.endsWith(branch)) {
 
-				System.err.println("Current branch is " + currentBranch + " need " + branch);
+				
 				Git git = new Git(localRepo);
 				try {
 					Collection<Ref> branches = getAllBranches(remoteURI);
