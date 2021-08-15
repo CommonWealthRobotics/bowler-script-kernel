@@ -359,6 +359,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					deleteFolder(f);
 				} else {
 					try {
+						FileChangeWatcher.notifyOfDelete(f);
 						FileChangeWatcher.close(f);
 
 						if (!f.delete()) {

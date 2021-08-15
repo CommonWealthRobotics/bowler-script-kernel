@@ -176,6 +176,11 @@ public class MobileBaseCadManager implements Runnable {
 				getUi().highlightException(null, e);
 			}
 		}
+
+		@Override
+		public void onFileDelete(File fileThatIsDeleted) {
+			
+		}
 	};
 
 
@@ -342,6 +347,12 @@ public class MobileBaseCadManager implements Runnable {
 							if(mobileBaseCadManager!=null)
 								mobileBaseCadManager.getUi().highlightException(null, e);
 						}
+					}
+
+					@Override
+					public void onFileDelete(File fileThatIsDeleted) {
+						// TODO Auto-generated method stub
+						
 					}
 				});
 			} catch (Exception e) {
@@ -862,15 +873,25 @@ public class MobileBaseCadManager implements Runnable {
 			getUi().highlightException(code, e);
 		}
 
-		FileWatchDeviceWrapper.watch(dh, code, (fileThatChanged, event) -> {
-			System.out.println("Re-loading Cad Limb Engine");
+		FileWatchDeviceWrapper.watch(dh, code, new IFileChangeListener() {
+			
+			@Override
+			public void onFileDelete(File fileThatIsDeleted) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onFileChange(File fileThatChanged, WatchEvent event) {
+				System.out.println("Re-loading Cad Limb Engine");
 
-			try {
-				Object d = ScriptingEngine.inlineFileScriptRun(code, null);
-				dhCadGen.put(dh, d);
-				generateCad();
-			} catch (Exception ex) {
-				getUi().highlightException(code, ex);
+				try {
+					Object d = ScriptingEngine.inlineFileScriptRun(code, null);
+					dhCadGen.put(dh, d);
+					generateCad();
+				} catch (Exception ex) {
+					getUi().highlightException(code, ex);
+				}
 			}
 		});
 	}

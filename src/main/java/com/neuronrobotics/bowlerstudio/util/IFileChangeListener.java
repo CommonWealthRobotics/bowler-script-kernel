@@ -24,5 +24,10 @@ public interface IFileChangeListener {
 	 * @param event the event
 	 */
 	public void onFileChange(File fileThatChanged,WatchEvent event);
+	
+	/** On file delete
+	 * When the file is deleted, notify all of the listeners to the file
+	 */
+	public void onFileDelete(File fileThatIsDeleted);
 
 }
