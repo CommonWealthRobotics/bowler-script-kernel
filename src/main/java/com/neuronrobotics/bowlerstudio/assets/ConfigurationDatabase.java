@@ -69,6 +69,7 @@ public class ConfigurationDatabase {
 						getDbFile(), writeOut, "Saving database");
 				return;
 			} catch (Exception e) {
+				e.printStackTrace();
 				try {
 					ScriptingEngine.deleteRepo(getGitSource());
 					Thread.sleep(500);

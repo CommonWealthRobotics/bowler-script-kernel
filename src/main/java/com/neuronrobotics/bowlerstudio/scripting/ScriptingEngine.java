@@ -7,6 +7,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
@@ -569,9 +570,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		File gitRepoFile = new File(localPath + "/.git");
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-		Git git = openGit(localRepo);
+		Git git = null;
 		try {
 			pull(id, branch);
+			git = openGit(localRepo);
 			// latest version
 			if (flagNewFile) {
 				git.add().addFilepattern(FileName).call();
@@ -592,6 +594,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				git.push().setTransportConfigCallback(transportConfigCallback).call();
 			else
 				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+			closeGit(git);
 			System.out.println("PUSH OK! file: " + desired + " on branch " + getBranch(id));
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -602,35 +605,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			
 			throw ex;
 		}
-		closeGit(git);
 
-	}
-	private static HashMap<Git,Thread> gitOpenTimeout = new HashMap<>();
-	
-	private static Git openGit(Repository localRepo) {
-		Git git = new Git(localRepo);
-		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!");
-		Thread t= new Thread(()->{
-			try {
-				Thread.sleep(1000);
-				ex.printStackTrace();
-			} catch (InterruptedException e) {
-				// exited clean
-			}
-		});
-		t.start();
-		gitOpenTimeout.put(git, t);
-		return git;
-	}
-	public static void closeGit(Git git) {
-		if(git==null)
-			return;
-		Thread thread = gitOpenTimeout.get(git);
-		if(thread!=null)
-			thread.interrupt();
-		gitOpenTimeout.remove(git);
-		git.getRepository().close();
-		git.close();
 	}
 
 	public static String[] codeFromGit(String id, String FileName) throws Exception {
@@ -1269,6 +1244,49 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// "/.git");
 	//
 	// }
+	private static HashMap<Git,Thread> gitOpenTimeout = new HashMap<>();
+	
+	private static Git cloneRepo(String remoteURI, String branch, File dir) throws InvalidRemoteException, TransportException, GitAPIException {
+		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
+		if(branch!=null)
+		 setURI = setURI.setBranch(branch);
+		Git git = setURI.setDirectory(dir).setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+		gitOpenTimeout.put(git, makeTimeoutThread());
+		return git;
+	}
+	private static Git openGit(Repository localRepo) {
+		Git git = new Git(localRepo);
+		
+		gitOpenTimeout.put(git, makeTimeoutThread());
+		return git;
+	}
+
+	private static Thread makeTimeoutThread() {
+		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);");
+		Thread thread = new Thread(()->{
+			try {
+				Thread.sleep(1000);
+				ex.printStackTrace();
+			} catch (InterruptedException e) {
+				// exited clean
+			}
+		});
+		thread.start();
+		return thread;
+	}
+	public static void closeGit(Git git) {
+		if(git==null)
+			return;
+		Thread thread = gitOpenTimeout.get(git);
+		if(thread!=null)
+			thread.interrupt();
+		else {
+			throw new RuntimeException("Closing a git object that was not opened with a timeout!");
+		}
+		gitOpenTimeout.remove(git);
+		git.getRepository().close();
+		git.close();
+	}
 
 	/**
 	 * This function retrieves the local cached version of a given git repository.
@@ -1308,22 +1326,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				Git git = null;
 				try {
 					if (myBranch == null) {
-						git = Git.cloneRepository().setURI(remoteURI).setDirectory(dir)
-								.setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+						git = cloneRepo(remoteURI, branch, dir);
 						hasAtLeastOneReference(git);
+						closeGit(git);
 						myBranch = getFullBranch(remoteURI);
 						checkout(remoteURI, myBranch);
-						hasAtLeastOneReference(git);
-						closeGit(git);
+						
 
 					} else {
-						git = Git.cloneRepository().setURI(remoteURI).setBranch(branch).setDirectory(dir)
-								.setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
-						hasAtLeastOneReference(git);
-						checkout(remoteURI, myBranch);
+						git = cloneRepo(remoteURI, branch, dir);
 						hasAtLeastOneReference(git);
 						closeGit(git);
-
+						checkout(remoteURI, myBranch);
 					}
 
 					break;
@@ -1358,6 +1372,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return gistDir;
 
 	}
+
+
 
 	public static Git locateGit(File f) throws IOException {
 		File gitRepoFile = f;
@@ -1511,7 +1527,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();// updates to the
 			// latest version
 			git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
-			closeGit(git);
 			return true;
 		} catch (Exception e) {
 			try {
@@ -1520,12 +1535,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					git.pull().setTransportConfigCallback(transportConfigCallback).call();// updates to the
 					// latest version
 					git.push().setTransportConfigCallback(transportConfigCallback).call();
-					closeGit(git);
+
 					return true;
 				}
 			} catch (Exception ex) {
 				// just return false, the exception is it failing to push
-				closeGit(git);
 				return false;
 			}
 
