@@ -598,9 +598,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			System.out.println("PUSH OK! file: " + desired + " on branch " + getBranch(id));
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			closeGit(git);
 			String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
 			String remoteURI = gitID[0];
-			closeGit(git);
 			deleteRepo(remoteURI);
 			
 			throw ex;
@@ -1266,7 +1266,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Thread thread = new Thread(()->{
 			try {
 				Thread.sleep(1000);
-				ex.printStackTrace();
+				exp.uncaughtException(Thread.currentThread(), ex);
 			} catch (InterruptedException e) {
 				// exited clean
 			}
