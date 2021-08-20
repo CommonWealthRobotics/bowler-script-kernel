@@ -1506,6 +1506,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				git = locateGit(currentFile);
 			} catch (Exception e1) {
+				
 				return false;
 			}
 			boolean owned;
@@ -1627,8 +1628,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static String locateGitUrlString(File f) {
 
 		try {
-			Repository repository = ScriptingEngine.locateGit(f).getRepository();
-			return repository.getConfig().getString("remote", "origin", "url");
+			Git locateGit = ScriptingEngine.locateGit(f);
+			Repository repository = locateGit.getRepository();
+			String string = repository.getConfig().getString("remote", "origin", "url");
+			ScriptingEngine.closeGit(locateGit);
+			return string;
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
