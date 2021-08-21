@@ -114,7 +114,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static HashMap<String, IScriptingLanguage> langauges = new HashMap<>();
 	private static HashMap<String, ArrayList<Runnable>> onCommitEventListeners = new HashMap<>();
 	private static IssueReportingExceptionHandler exp = new IssueReportingExceptionHandler();
-
+	private static HashMap<Git,Thread> gitOpenTimeout = new HashMap<>();
 	static {
 
 		PasswordManager.hasNetwork();
@@ -142,6 +142,70 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new BashLoader());
 	}
 
+	/**
+	 * CLoe git and start a timeout timer
+	 * @param remoteURI
+	 * @param branch
+	 * @param dir
+	 * @return
+	 * @throws InvalidRemoteException
+	 * @throws TransportException
+	 * @throws GitAPIException
+	 */
+	private static Git cloneRepo(String remoteURI, String branch, File dir) throws InvalidRemoteException, TransportException, GitAPIException {
+		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
+		if(branch!=null)
+		 setURI = setURI.setBranch(branch);
+		Git git = setURI.setDirectory(dir).setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+		gitOpenTimeout.put(git, makeTimeoutThread());
+		return git;
+	}
+	/**
+	 * Open a git object and start a timeout timer for closing it
+	 * @param url
+	 * @return
+	 */
+	public static Git openGit(String url) {
+		Repository localRepo;
+		try {
+			localRepo = getRepository(url);
+			return openGit(localRepo);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		throw new RuntimeException("IOException making repo");
+	}	
+	/**
+	 * Open a git object and start a timeout timer for closing it
+	 * @param localRepo
+	 * @return
+	 */
+	
+	public static Git openGit(Repository localRepo) {
+		Git git = new Git(localRepo);
+		
+		gitOpenTimeout.put(git, makeTimeoutThread());
+		return git;
+	}
+	/**
+	 * Make a timeout thread for printing an exception whenever a git object is opened and not closed within 5 seconds
+	 * @return
+	 */
+	private static Thread makeTimeoutThread() {
+		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);");
+		Thread thread = new Thread(()->{
+			try {
+				Thread.sleep(5000);
+				exp.uncaughtException(Thread.currentThread(), ex);
+			} catch (InterruptedException e) {
+				// exited clean
+			}
+		});
+		thread.start();
+		return thread;
+	}
+	
 	public static void addOnCommitEventListeners(String url, Runnable event) {
 		synchronized (onCommitEventListeners) {
 			if (!onCommitEventListeners.containsKey(url)) {
@@ -1237,43 +1301,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return true;
 	}
 
-	// public static void checkout(String branch, File gitRepoFile) throws
-	// Exception {
-	// String currentBranch=getFullBranch(gitRepoFile);
-	// Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() +
-	// "/.git");
-	//
-	// }
-	private static HashMap<Git,Thread> gitOpenTimeout = new HashMap<>();
-	
-	private static Git cloneRepo(String remoteURI, String branch, File dir) throws InvalidRemoteException, TransportException, GitAPIException {
-		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
-		if(branch!=null)
-		 setURI = setURI.setBranch(branch);
-		Git git = setURI.setDirectory(dir).setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
-		gitOpenTimeout.put(git, makeTimeoutThread());
-		return git;
-	}
-	private static Git openGit(Repository localRepo) {
-		Git git = new Git(localRepo);
-		
-		gitOpenTimeout.put(git, makeTimeoutThread());
-		return git;
-	}
 
-	private static Thread makeTimeoutThread() {
-		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);");
-		Thread thread = new Thread(()->{
-			try {
-				Thread.sleep(1000);
-				exp.uncaughtException(Thread.currentThread(), ex);
-			} catch (InterruptedException e) {
-				// exited clean
-			}
-		});
-		thread.start();
-		return thread;
-	}
+
+
 	public static void closeGit(Git git) {
 		if(git==null)
 			return;
