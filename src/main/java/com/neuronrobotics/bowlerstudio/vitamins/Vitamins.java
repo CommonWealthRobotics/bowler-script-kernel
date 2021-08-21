@@ -411,6 +411,7 @@ public class Vitamins {
 					inPut = FileUtils.openInputStream(f);
 	
 					jsonString = IOUtils.toString(inPut);
+					inPut.close();
 					// System.out.println("Loading "+jsonString);
 					// perfoem the GSON parse
 					database = gson.fromJson(jsonString, TT_mapStringString);
