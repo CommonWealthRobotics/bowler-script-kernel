@@ -189,6 +189,24 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return git;
 	}
 	/**
+	 * Close GIt and disable the timeout timer for this object
+	 * @param git
+	 */
+	public static void closeGit(Git git) {
+		if(git==null)
+			return;
+		Thread thread = gitOpenTimeout.get(git);
+		if(thread!=null)
+			thread.interrupt();
+		else {
+			throw new RuntimeException("Closing a git object that was not opened with a timeout!");
+		}
+		gitOpenTimeout.remove(git);
+		git.getRepository().close();
+		git.close();
+	}
+	
+	/**
 	 * Make a timeout thread for printing an exception whenever a git object is opened and not closed within 5 seconds
 	 * @return
 	 */
@@ -416,6 +434,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void deleteFolder(File folder) {
+		System.out.println("Deleting Folder "+folder.getAbsolutePath());
 		if (!folder.exists() || !folder.isDirectory())
 			return;
 		File[] files = folder.listFiles();
@@ -430,7 +449,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 						if (!f.delete()) {
 							System.err.println("File failed to delete! " + f);
-
 						}
 					} catch (Throwable t) {
 						t.printStackTrace();
@@ -1304,19 +1322,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 
 
-	public static void closeGit(Git git) {
-		if(git==null)
-			return;
-		Thread thread = gitOpenTimeout.get(git);
-		if(thread!=null)
-			thread.interrupt();
-		else {
-			throw new RuntimeException("Closing a git object that was not opened with a timeout!");
-		}
-		gitOpenTimeout.remove(git);
-		git.getRepository().close();
-		git.close();
-	}
+
 
 	/**
 	 * This function retrieves the local cached version of a given git repository.
