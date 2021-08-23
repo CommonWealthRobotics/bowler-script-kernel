@@ -33,6 +33,7 @@ import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -824,7 +825,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		String branch = localRepo.getBranch();
 		localRepo.close();
-
+//		if(branch==null)
+//			branch="main";
 		return branch;
 	}
 
@@ -838,6 +840,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		String branch = localRepo.getFullBranch();
 		localRepo.close();
+//		if(branch==null)
+//			branch="main";
 
 		return branch;
 	}
@@ -888,10 +892,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throw ex;
 	}
 
-	public static void newBranch(String remoteURI, String newBranch)
+	public static String newBranch(String remoteURI, String newBranch)
 			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
 			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		newBranch(remoteURI, newBranch, null);
+		return getFullBranch(remoteURI);
 	}
 
 	public static void newBranch(String remoteURI, String newBranch, RevCommit source)
@@ -900,11 +905,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		try {
 			for (String s : listBranchNames(remoteURI)) {
 				if (s.contains(newBranch)) {
-					throw new RuntimeException(newBranch + " can not be created because " + s + " is too similar");
+					//throw new RuntimeException(newBranch + " can not be created because " + s + " is too similar");
+					checkout(remoteURI, newBranch);
+					return;
+					
 				}
 			}
 		} catch (Exception e) {
-
+			e.printStackTrace();
 		}
 		Repository localRepo = getRepository(remoteURI);
 
@@ -912,9 +920,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		git = openGit(localRepo);
 
-		if (source == null)
-			source = git.log().setMaxCount(1).call().iterator().next();
-		newBranchLocal(newBranch, remoteURI, git, source);
+		try {
+			if (source == null)
+				source = git.log().setMaxCount(1).call().iterator().next();
+			newBranchLocal(newBranch, remoteURI, git, source);
+		}catch(NoHeadException ex) {
+			newBranchLocal(newBranch, remoteURI, git, null);
+		}
 
 		closeGit(git);
 
@@ -924,7 +936,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throws GitAPIException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException,
 			InvalidRemoteException, TransportException, IOException {
 		try {
-			git.branchCreate().setName(newBranch).setStartPoint(source).call();
+			CreateBranchCommand setName = git.branchCreate().setName(newBranch);
+			if(source!=null)
+				setName=setName.setStartPoint(source);
+			else {
+				Ref ref = git.getRepository().findRef( Constants.HEAD  );
+				setName=setName.setStartPoint(ref.getName());
+				setName.setForce(true);
+			}
+			setName.call();
 			System.out.println("Created new branch " + remoteURI + "\t\t" + newBranch);
 		} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
 			System.err.println("ERROR Creating " + newBranch + " in " + remoteURI);
@@ -1357,45 +1377,32 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			System.out.println("                to: " + localPath);
 			Throwable ex = null;
 			String myBranch = branch;
-			for (int i = 0; i < 5 && hasNetwork(); i++) {
-				// Clone the repo
-				Git git = null;
-				try {
-					if (myBranch == null) {
-						git = cloneRepo(remoteURI, branch, dir);
-						hasAtLeastOneReference(git);
-						closeGit(git);
-						myBranch = getFullBranch(remoteURI);
-						checkout(remoteURI, myBranch);
-						
+			// Clone the repo
+			Git git = null;
+			try {
+				if (myBranch == null) {
+					git = cloneRepo(remoteURI, branch, dir);
+					hasAtLeastOneReference(git);
+					closeGit(git);
+					myBranch = getFullBranch(remoteURI);
+					checkout(remoteURI, myBranch);
+					
 
-					} else {
-						git = cloneRepo(remoteURI, branch, dir);
-						hasAtLeastOneReference(git);
-						closeGit(git);
-						checkout(remoteURI, myBranch);
-					}
-
-					break;
-				} catch (Throwable e) {
-					if (i > 0)
-						ex = e;
-					// new
-					// IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),
-					// e);
-					e.printStackTrace();
-					myBranch = null;
-					if(git!=null)
-						closeGit(git);
-					deleteFolder(new File(localPath));
-					PasswordManager.checkInternet();
+				} else {
+					git = cloneRepo(remoteURI, branch, dir);
+					hasAtLeastOneReference(git);
+					closeGit(git);
+					checkout(remoteURI, myBranch);
 				}
-				ThreadUtil.wait(100 * i);
-			}
-			if (ex != null) {
+
+			} catch (Throwable e) {
+				
+				if(git!=null)
+					closeGit(git);
 				PasswordManager.checkInternet();
-				exp.uncaughtException(Thread.currentThread(), ex);
+				throw new RuntimeException(e);
 			}
+			
 		}
 		if (branch != null) {
 			try {
@@ -1658,6 +1665,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				gist = github.getRepository(PasswordManager.getLoginID() + "/" + newName);
 			}
 		}
+		String url=gist.getHttpTransportUrl();
+		cloneRepo(url, null);
+		try {
+
+			commit(url,"main","firstCommit");
+			newBranch(url, "main");
+		} catch (IOException | GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 		return gist;
 	}
 
@@ -1845,17 +1862,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throws IOException, GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
 			ConcurrentRefUpdateException, WrongRepositoryStateException, AbortedByHookException {
 		Git git = openGit(getRepository(url));
-		git.commit().setAll(true).setMessage(message).call();
-		ArrayList<Runnable> arrayList = onCommitEventListeners.get(url);
-		if (arrayList != null) {
-			for (int i = 0; i < arrayList.size(); i++) {
-				Runnable r = arrayList.get(i);
-				try {
-					r.run();
-				} catch (Throwable t) {
-					t.printStackTrace();
+		try {
+			git.commit().setAll(true).setMessage(message).call();
+			ArrayList<Runnable> arrayList = onCommitEventListeners.get(url);
+			if (arrayList != null) {
+				for (int i = 0; i < arrayList.size(); i++) {
+					Runnable r = arrayList.get(i);
+					try {
+						r.run();
+					} catch (Throwable t) {
+						t.printStackTrace();
+					}
 				}
 			}
+		}catch(Throwable t) {
+			closeGit(git);
+			throw t;
 		}
 		closeGit(git);
 	}
