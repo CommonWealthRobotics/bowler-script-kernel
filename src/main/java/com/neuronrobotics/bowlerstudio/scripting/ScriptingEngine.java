@@ -105,6 +105,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// private static GHGist gist;
 
 	private static File workspace;
+	private static File appdata;
 	private static File lastFile;
 	private static TransportConfigCallback transportConfigCallback = new SshTransportConfigCallback();
 
@@ -122,6 +123,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		workspace = new File(System.getProperty("user.home") + "/bowler-workspace/");
 		if (!workspace.exists()) {
 			workspace.mkdir();
+		}
+		appdata=new File(System.getProperty("user.home") + "/bowler-workspace/appdata");
+		if (!appdata.exists()) {
+			appdata.mkdir();
 		}
 		File oldpass = new File(System.getProperty("user.home") + "/.github");
 		if (oldpass.exists())
@@ -1880,6 +1885,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throw t;
 		}
 		closeGit(git);
+	}
+	public static File getAppData() {
+		return appdata;
 	}
 
 }
