@@ -1536,11 +1536,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static boolean checkOwner(String url) {
-		Git git;
+		Git git=null;
 		try {
 			git = openGit(getRepository(url));
 		} catch (IOException e1) {
 			exp.uncaughtException(Thread.currentThread(), e1);
+			closeGit(git);
 			return false;
 		}
 		boolean owned = checkOwner(git);
