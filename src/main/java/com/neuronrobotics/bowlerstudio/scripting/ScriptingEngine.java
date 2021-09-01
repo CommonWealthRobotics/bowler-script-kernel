@@ -1263,6 +1263,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						PasswordManager.checkInternet();
 
 						newBranch(remoteURI, branch);
+					}catch(org.eclipse.jgit.api.errors.TransportException ex) {
+						// Not logged in yet, just return
+						PasswordManager.checkInternet();
+						closeGit(git);
+						return;
 					} catch (RefAlreadyExistsException e) {
 						PasswordManager.checkInternet();
 
