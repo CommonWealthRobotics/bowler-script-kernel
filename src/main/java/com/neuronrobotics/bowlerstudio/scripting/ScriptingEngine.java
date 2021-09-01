@@ -430,8 +430,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void deleteRepo(String remoteURI) {
 		File gitRepoFile = uriToFile(remoteURI);
-		new RuntimeException("Repository deleting "+gitRepoFile.getAbsolutePath()).printStackTrace();
-
 		deleteFolder(gitRepoFile.getParentFile());
 	}
 
@@ -830,8 +828,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		String branch = localRepo.getBranch();
 		localRepo.close();
-//		if(branch==null)
-//			branch="main";
+		if(branch==null)
+			branch="main";
 		return branch;
 	}
 
@@ -931,6 +929,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			newBranchLocal(newBranch, remoteURI, git, source);
 		}catch(NoHeadException ex) {
 			newBranchLocal(newBranch, remoteURI, git, null);
+		}catch(Throwable ex) {
+			closeGit(git);
+			throw ex;
 		}
 
 		closeGit(git);
