@@ -438,7 +438,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void deleteFolder(File folder) {
-		System.out.println("Deleting Folder "+folder.getAbsolutePath());
+		
 		if (!folder.exists() || !folder.isDirectory())
 			return;
 		File[] files = folder.listFiles();
@@ -450,7 +450,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					try {
 						FileChangeWatcher.notifyOfDelete(f);
 						FileChangeWatcher.close(f);
-
+						System.out.println("Deleting File "+f.getAbsolutePath());
 						if (!f.delete()) {
 							System.err.println("File failed to delete! " + f);
 						}
@@ -658,7 +658,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		Git git = null;
 		try {
-			pull(id, branch);
+			try {
+				pull(id, branch);
+			}catch(java.lang.RuntimeException exp) {}
 			git = openGit(localRepo);
 			// latest version
 			if (flagNewFile) {
@@ -1661,7 +1663,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		GitHub github = PasswordManager.getGithub();
 		GHCreateRepositoryBuilder builder = github.createRepository(newName);
 		builder.description(description);
-		return builder.create();
+		GHRepository repo = builder.create();
+		for(int i=0;i<5;i++) {
+			try {
+				repo=github.getRepositoryById(""+repo.getId());
+				return repo;
+			}catch(Exception ex) {
+				ex.printStackTrace();
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return repo;
 	}
 
 	public static GHRepository makeNewRepo(String newName, String description) throws IOException {
