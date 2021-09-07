@@ -87,7 +87,8 @@ public class FileChangeWatcher {
 	public static void notifyOfDelete(File fileToWatch) {
 		String path = fileToWatch.getAbsolutePath();
 		if (activeListener.get(path) != null) {
-			ArrayList<IFileChangeListener> listeners2 = activeListener.get(path).listeners;
+			ArrayList<IFileChangeListener> listeners2 = new ArrayList<>();
+			listeners2.addAll(	activeListener.get(path).listeners);
 			for (int i = 0; i < listeners2.size(); i++) {
 				IFileChangeListener l = listeners2.get(i);
 				l.onFileDelete(fileToWatch);
