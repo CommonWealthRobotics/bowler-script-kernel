@@ -163,7 +163,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if(branch!=null)
 		 setURI = setURI.setBranch(branch);
 		Git git = setURI.setDirectory(dir).setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
-		gitOpenTimeout.put(git, makeTimeoutThread());
+		gitOpenTimeout.put(git, makeTimeoutThread(git));
 		return git;
 	}
 	/**
@@ -191,7 +191,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static Git openGit(Repository localRepo) {
 		Git git = new Git(localRepo);
 		
-		gitOpenTimeout.put(git, makeTimeoutThread());
+		gitOpenTimeout.put(git, makeTimeoutThread(git));
 		return git;
 	}
 	/**
@@ -216,12 +216,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * Make a timeout thread for printing an exception whenever a git object is opened and not closed within 5 seconds
 	 * @return
 	 */
-	private static Thread makeTimeoutThread() {
-		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);");
+	private static Thread makeTimeoutThread(Git git) {
+		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
+		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);|n"+ref);
 		Thread thread = new Thread(()->{
 			try {
 				Thread.sleep(5000);
 				exp.uncaughtException(Thread.currentThread(), ex);
+				git.close();
 			} catch (InterruptedException e) {
 				// exited clean
 			}
@@ -1078,67 +1080,68 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		Git git = openGit(localRepo);
-		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
-
 		try {
 
-			System.out.print("Pulling " + ref + "  ");
-			if (ref != null && ref.startsWith("git@")) {
-				git.pull().setTransportConfigCallback(transportConfigCallback).call();
-			} else {
-				git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
-			}
-			System.out.println(" ... Success!");
-			closeGit(git);
-			// new Exception(ref).printStackTrace();
-		} catch (CheckoutConflictException ex) {
+			String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
+			try {
+
+				System.out.print("Pulling " + ref + "  ");
+				if (ref != null && ref.startsWith("git@")) {
+					git.pull().setTransportConfigCallback(transportConfigCallback).call();
+				} else {
+					git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+				}
+				System.out.println(" ... Success!");
+				closeGit(git);
+				// new Exception(ref).printStackTrace();
+			} catch (CheckoutConflictException ex) {
 //			closeGit(git);
 //			resolveConflict(remoteURI, ex, git);
 //			pull(remoteURI, branch);
-			closeGit(git);
-			PasswordManager.checkInternet();
-			throw ex;
-		} catch (WrongRepositoryStateException e) {
-			e.printStackTrace();
-			closeGit(git);
-			PasswordManager.checkInternet();
-			deleteRepo(remoteURI);
-			pull(remoteURI, branch);
-		} catch (InvalidConfigurationException e) {
-			
-			PasswordManager.checkInternet();
-			closeGit(git);
-			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
-		} catch (DetachedHeadException e) {
-			PasswordManager.checkInternet();
-			closeGit(git);
-			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
-		} catch (InvalidRemoteException e) {
-			PasswordManager.checkInternet();
-			closeGit(git);
-			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
-		} catch (CanceledException e) {
-			PasswordManager.checkInternet();
-			closeGit(git);
-			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
-		} catch (RefNotFoundException e) {
-			PasswordManager.checkInternet();
-			closeGit(git);
-			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
-		} catch (RefNotAdvertisedException e) {
-			PasswordManager.checkInternet();
-			closeGit(git);
-			try {
-				newBranch(remoteURI, branch);
-			}catch(Exception ex) {
-				ex.printStackTrace();
-				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + ex.getMessage());
-			}
-		} catch (NoHeadException e) {
-			
-			PasswordManager.checkInternet();
-			closeGit(git);
-			throw e;
+				closeGit(git);
+				PasswordManager.checkInternet();
+				throw ex;
+			} catch (WrongRepositoryStateException e) {
+				e.printStackTrace();
+				closeGit(git);
+				PasswordManager.checkInternet();
+				deleteRepo(remoteURI);
+				pull(remoteURI, branch);
+			} catch (InvalidConfigurationException e) {
+
+				PasswordManager.checkInternet();
+				closeGit(git);
+				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
+			} catch (DetachedHeadException e) {
+				PasswordManager.checkInternet();
+				closeGit(git);
+				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
+			} catch (InvalidRemoteException e) {
+				PasswordManager.checkInternet();
+				closeGit(git);
+				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
+			} catch (CanceledException e) {
+				PasswordManager.checkInternet();
+				closeGit(git);
+				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
+			} catch (RefNotFoundException e) {
+				PasswordManager.checkInternet();
+				closeGit(git);
+				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
+			} catch (RefNotAdvertisedException e) {
+				PasswordManager.checkInternet();
+				closeGit(git);
+				try {
+					newBranch(remoteURI, branch);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + ex.getMessage());
+				}
+			} catch (NoHeadException e) {
+
+				PasswordManager.checkInternet();
+				closeGit(git);
+				throw e;
 //			try {
 //				closeGit(git);
 //				newBranch(remoteURI, branch);
@@ -1147,29 +1150,31 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 //				throw new RuntimeException(e1);
 //			}
 
-		} catch (TransportException e) {
-			e.printStackTrace();
-			PasswordManager.checkInternet();
+			} catch (TransportException e) {
+				e.printStackTrace();
+				PasswordManager.checkInternet();
 
-			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
-				try {
-					git.pull().setTransportConfigCallback(transportConfigCallback).call();
-					closeGit(git);
-				} catch (Exception ex) {
+				if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
+					try {
+						git.pull().setTransportConfigCallback(transportConfigCallback).call();
+						closeGit(git);
+					} catch (Exception ex) {
+						closeGit(git);
+						throw new RuntimeException(
+								"remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
+					}
+				} else {
 					closeGit(git);
 					throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 				}
-			} else {
+
+			} catch (GitAPIException e) {
+				e.printStackTrace();
+				PasswordManager.checkInternet();
 				closeGit(git);
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			}
-
-		} catch (GitAPIException e) {
-			e.printStackTrace();
-			PasswordManager.checkInternet();
-			closeGit(git);
-			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
-		}catch (Throwable t) {
+		} catch (Throwable t) {
 			PasswordManager.checkInternet();
 			closeGit(git);
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + t.getMessage());
