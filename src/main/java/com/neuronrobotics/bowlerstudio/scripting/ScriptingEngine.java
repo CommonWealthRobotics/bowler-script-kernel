@@ -201,13 +201,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void closeGit(Git git) {
 		if(git==null)
 			return;
-		Thread thread = gitOpenTimeout.get(git);
-		if(thread!=null)
+		Thread thread = gitOpenTimeout.remove(git);
+		if(thread!=null) {
 			thread.interrupt();
-		else {
-			throw new RuntimeException("Closing a git object that was not opened with a timeout!");
 		}
-		gitOpenTimeout.remove(git);
+		else {
+			exp.uncaughtException(Thread.currentThread(), new RuntimeException("Closing a git object that was not opened with a timeout!"));
+		}
 		git.getRepository().close();
 		git.close();
 	}
@@ -221,9 +221,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);\n"+ref+"\n");
 		Thread thread = new Thread(()->{
 			try {
-				Thread.sleep(120000);
+				Thread.sleep(600000);
 				exp.uncaughtException(Thread.currentThread(), ex);
 				git.close();
+				gitOpenTimeout.remove(git);
 			} catch (InterruptedException e) {
 				// exited clean
 			}
