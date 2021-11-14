@@ -221,7 +221,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);\n"+ref+"\n");
 		Thread thread = new Thread(()->{
 			try {
-				Thread.sleep(600000);
+				Thread.sleep(600000*20);
 				exp.uncaughtException(Thread.currentThread(), ex);
 				git.close();
 				gitOpenTimeout.remove(git);
@@ -1655,12 +1655,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			return gitRepo;
 		} catch (org.kohsuke.github.HttpException ex) {
+			closeGit(git);
 			if (ex.getMessage().contains("name already exists on this account")) {
 				return PasswordManager.getGithub().getRepository(PasswordManager.getLoginID() + "/" + newRepoName)
 						.getHttpTransportUrl();
 			}
 			ex.printStackTrace();
 		}
+		closeGit(git);
 		throw new RuntimeException("Repo could not be forked and does not exist");
 	}
 
