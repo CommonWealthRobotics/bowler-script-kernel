@@ -221,7 +221,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		RuntimeException ex =new RuntimeException("Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);\n"+ref+"\n");
 		Thread thread = new Thread(()->{
 			try {
-				Thread.sleep(600000*20);
+				Thread.sleep(60*1000*20);
 				exp.uncaughtException(Thread.currentThread(), ex);
 				git.close();
 				gitOpenTimeout.remove(git);
