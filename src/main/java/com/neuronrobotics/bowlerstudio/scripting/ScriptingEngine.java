@@ -1177,7 +1177,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		} catch (Throwable t) {
 			PasswordManager.checkInternet();
-			closeGit(git);
+			if(gitOpenTimeout.containsKey(git))
+				closeGit(git);
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + t.getMessage());
 		}
 		
