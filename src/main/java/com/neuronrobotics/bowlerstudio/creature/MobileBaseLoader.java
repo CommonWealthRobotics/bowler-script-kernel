@@ -14,6 +14,7 @@ import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.DhInverseSolver;
 import com.neuronrobotics.sdk.addons.kinematics.IDriveEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 
 public class MobileBaseLoader {
 	private static HashMap<MobileBase, MobileBaseLoader> map = new HashMap<>();
@@ -24,6 +25,7 @@ public class MobileBaseLoader {
 		this.setBase(base);
 
 		setDefaultWalkingEngine(base);
+		base.initializeParalellGroups();
 	}
 
 	public void setGitDhEngine(String gitsId, String file, DHParameterKinematics dh) {
@@ -120,20 +122,22 @@ public class MobileBaseLoader {
 	}
 
 	public static MobileBase initializeScripts(MobileBase base) {
-		if (map.get(base) == null)
-			//synchronized (map) {
-				if (map.get(base) == null)map.put(base, new MobileBaseLoader(base));
-				for (DHParameterKinematics kin : base.getAllDHChains()) {
-					for (int i = 0; i < kin.getNumberOfLinks(); i++) {
-						MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
-						if (m != null) {
-							m.setGitSelfSource(base.getGitSelfSource());
-							if (map.get(m) == null)
-								map.put(m, new MobileBaseLoader(m));
-						}
+		if (map.get(base) == null) {
+
+			if (map.get(base) == null)
+				map.put(base, new MobileBaseLoader(base));
+			for (DHParameterKinematics kin : base.getAllDHChains()) {
+				for (int i = 0; i < kin.getNumberOfLinks(); i++) {
+					MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+					if (m != null) {
+						m.setGitSelfSource(base.getGitSelfSource());
+						if (map.get(m) == null)
+							map.put(m, new MobileBaseLoader(m));
 					}
 				}
-			//}
+			}
+			
+		}
 		return base;
 	}
 
