@@ -313,7 +313,6 @@ shadowJar {
 
 group = "com.neuronrobotics"
 archivesBaseName = "bowler-script-kernel"
-version = props."app.version"
 
 task javadocJar(type: Jar) {
 	classifier = 'javadoc'
