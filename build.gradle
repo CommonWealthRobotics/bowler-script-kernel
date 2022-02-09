@@ -284,7 +284,7 @@ dependencies {
 // excludes VRL.jar (plugin jar files must not start with 'vrl-\\d+')
 jar {
 	jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	jar.baseName= "BowlerScriptingKernel";
+	jar.baseName= "bowler-kernel";
 
 	manifest {  
 	    attributes(	
@@ -307,8 +307,7 @@ shadowJar {
 	zip64 true
    //mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
    baseName = 'BowlerScriptingKernel'
-   classifier = "fat"
-   version = props."app.version"
+   classifier = ""
     mergeServiceFiles()
 }
 
