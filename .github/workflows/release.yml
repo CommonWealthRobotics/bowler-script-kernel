@@ -46,10 +46,11 @@ jobs:
           
     - name: Set Release Number
       run: |
+         git fetch
          git checkout origin development
          echo $'app.name=BowlerStudio\n' > src/main/resources/com/neuronrobotics/bowlerkernel/build.properties 
          echo "app.version=${{ steps.get_version.outputs.VERSION  }}" >> src/main/resources/com/neuronrobotics/bowlerkernel/build.properties
-         git commit  src/main/resources/com/neuronrobotics/bowlerkernel/build.properties -m"Updating version number in git ${{ steps.get_version.outputs.VERSION  }}"
+         git commit  src/main/resources/com/neuronrobotics/bowlerkernel/build.properties -m"Updating version number in CI to ${{ steps.get_version.outputs.VERSION  }}"
          git push
                 
     - name: Build with Gradle 
