@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -115,8 +116,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static HashMap<String, IScriptingLanguage> langauges = new HashMap<>();
 	private static HashMap<String, ArrayList<Runnable>> onCommitEventListeners = new HashMap<>();
-	private static IssueReportingExceptionHandler exp = new IssueReportingExceptionHandler();
-	private static HashMap<Git, Thread> gitOpenTimeout = new HashMap<>();
+	static IssueReportingExceptionHandler exp = new IssueReportingExceptionHandler();
+	static HashMap<Git, GitTimeouThread> gitOpenTimeout = new HashMap<>();
 	static {
 
 		PasswordManager.hasNetwork();
@@ -195,6 +196,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 
 	public static Git openGit(Repository localRepo) {
+		
+		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
+			Git g = iterator.next();
+			if(	g.getRepository().getDirectory().getAbsolutePath().contentEquals(
+					    localRepo.getDirectory().getAbsolutePath()	)) {
+				GitTimeouThread t= gitOpenTimeout.get(g);
+				System.out.println("Git locked "+t.ref);
+				System.out.println("By process "+t.getException().getStackTrace()[1]);
+				t.getException().printStackTrace(System.out);
+				while(gitOpenTimeout.containsKey(g)) {
+					System.out.println("Git is locked by other process, blocking "+localRepo.getDirectory().getAbsolutePath());
+					ThreadUtil.wait(100);
+				}
+				break;
+			}
+		}
+		
 		Git git = new Git(localRepo);
 
 		gitOpenTimeout.put(git, makeTimeoutThread(git));
@@ -228,21 +246,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * 
 	 * @return
 	 */
-	private static Thread makeTimeoutThread(Git git) {
-		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
-		RuntimeException ex = new RuntimeException(
-				"Git opened here, timeout on close!!\nWhen Done with the git object, Call:\n 	ScriptingEngine.closeGit(git);\n"
-						+ ref + "\n");
-		Thread thread = new Thread(() -> {
-			try {
-				Thread.sleep(60 * 1000 * 20);
-				exp.uncaughtException(Thread.currentThread(), ex);
-				git.close();
-				gitOpenTimeout.remove(git);
-			} catch (InterruptedException e) {
-				// exited clean
-			}
-		});
+	private static GitTimeouThread makeTimeoutThread(Git git) {
+
+		GitTimeouThread thread = new  GitTimeouThread(git);
 		thread.start();
 		return thread;
 	}
