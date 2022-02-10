@@ -15,10 +15,10 @@ public class GitTimeouThread extends Thread {
 	}
 	public void run() {
 		try {
-			Thread.sleep(1000*20);
-			ScriptingEngine.exp.uncaughtException(Thread.currentThread(), getException());
+			Thread.sleep(1000*60*20);
 			git.close();
 			ScriptingEngine.gitOpenTimeout.remove(git);
+			ScriptingEngine.exp.uncaughtException(Thread.currentThread(), getException());
 		} catch (InterruptedException e) {
 			// exited clean
 		}

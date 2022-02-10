@@ -187,6 +187,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		throw new RuntimeException("IOException making repo");
 	}
+	
+	public static boolean isUrlAlreadyOpen(String URL) {
+		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
+			Git g = iterator.next();
+			GitTimeouThread t = gitOpenTimeout.get(g);
+			if (t.ref.toLowerCase().contentEquals(URL.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Open a git object and start a timeout timer for closing it
@@ -210,6 +221,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					System.out.println("Git locked " + t.ref);
 					if (i > 3) {
 						t.getException().printStackTrace(System.out);
+						System.out.println("Blocking process: ");
+
 						new Exception().printStackTrace(System.out);
 					}
 					i++;
@@ -458,6 +471,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void deleteRepo(String remoteURI) {
+		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to delete repo "+remoteURI);
+		}
 		File gitRepoFile = uriToFile(remoteURI);
 		deleteFolder(gitRepoFile.getParentFile());
 	}
@@ -466,8 +483,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		deleteFolder(new File(getWorkspace().getAbsolutePath() + "/gitcache/"));
 	}
 
-	public static void deleteFolder(File folder) {
-
+	private static void deleteFolder(File folder) {
+		new Exception().printStackTrace(System.out);
 		if (!folder.exists() || !folder.isDirectory())
 			return;
 		File[] files = folder.listFiles();
@@ -544,10 +561,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return filesInGit(remote, ScriptingEngine.getFullBranch(remote), null);
 	}
 
-	// private static ArrayList<String> filesInGist(String id) throws Exception{
-	// return filesInGist(id, null);
-	// }
-	//
+
 	public static String getUserIdOfGist(String id) throws Exception {
 
 		waitForLogin();
@@ -600,6 +614,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			login();
 		if (!hasNetwork())
 			return;// No login info means there is no way to publish
+		while(ScriptingEngine.isUrlAlreadyOpen(id)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to newBranch "+id);
+		}
 		File gistDir = cloneRepo(id, branch);
 		File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -660,6 +678,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	@SuppressWarnings("deprecation")
 	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile) throws Exception {
+		while(ScriptingEngine.isUrlAlreadyOpen(id)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to push "+id);
+		}
 		commit(id, branch, FileName, content, commitMessage, flagNewFile);
 		if (PasswordManager.getUsername() == null)
 			login();
@@ -883,6 +905,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void deleteBranch(String remoteURI, String toDelete) throws Exception {
+		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to delete branch "+remoteURI);
+		}
 		boolean found = false;
 		for (String s : listBranchNames(remoteURI)) {
 			if (s.contains(toDelete)) {
@@ -938,6 +964,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void newBranch(String remoteURI, String newBranch, RevCommit source)
 			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
 			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
+		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to newBranch "+remoteURI);
+		}
 		try {
 			for (String s : listBranchNames(remoteURI)) {
 				if (s.contains(newBranch)) {
@@ -1100,6 +1130,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void pull(String remoteURI, String branch)
 			throws IOException, CheckoutConflictException, NoHeadException {
+		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to pull "+remoteURI);
+		}
 		// new Exception().printStackTrace();
 
 		if (!hasNetwork())
@@ -1221,6 +1255,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void checkoutCommit(String remoteURI, String branch, String commitHash) throws IOException {
+		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to checkout "+remoteURI);
+		}
 		File gitRepoFile = ScriptingEngine.uriToFile(remoteURI);
 		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
 			System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
@@ -1270,9 +1308,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if (currentBranch.length() < branch.length() || !currentBranch.endsWith(branch)) {
 				System.err.println("Current branch is " + currentBranch + " need " + branch);
 
-				Git git = openGit(localRepo);
+				Git git = null;
 				try {
 					Collection<Ref> branches = getAllBranches(remoteURI);
+					git = openGit(localRepo);
 					for (Ref R : branches) {
 						if (R.getName().endsWith(branch)) {
 							System.err.println("\nFound upstream " + R.getName());
@@ -1343,7 +1382,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static boolean resolveConflict(String remoteURI, CheckoutConflictException con, Git git) {
 		PasswordManager.checkInternet();
-
+		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to pull "+remoteURI);
+		}
 		try {
 			Status stat = git.status().call();
 			Set<String> changed = stat.getModified();
@@ -1395,19 +1437,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @return The local directory containing the .git
 	 */
 	public static File cloneRepo(String remoteURI, String branch) {
-
-//	while(remoteURI.endsWith("/"))
-//		remoteURI=remoteURI.substring(0, remoteURI.length()-2);
-//    if(!remoteURI.endsWith(".git"))
-//    	remoteURI=remoteURI+".git";
-//    String[] colinSplit = remoteURI.split(":");
-//
-//    String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
+		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+			ThreadUtil.wait(1000);
+			System.out.println("Waiting to clone "+remoteURI);
+		}
 
 		File gistDir = getRepositoryCloneDirectory(remoteURI);
-//    if (!gistDir.exists()) {
-//      gistDir.mkdir();
-//    }
 		String localPath = gistDir.getAbsolutePath();
 		File gitRepoFile = new File(localPath + "/.git");
 		File dir = new File(localPath);
