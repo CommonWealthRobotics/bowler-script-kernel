@@ -196,23 +196,29 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 
 	public static Git openGit(Repository localRepo) {
-		
+
 		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
 			Git g = iterator.next();
-			if(	g.getRepository().getDirectory().getAbsolutePath().contentEquals(
-					    localRepo.getDirectory().getAbsolutePath()	)) {
-				GitTimeouThread t= gitOpenTimeout.get(g);
-				System.out.println("Git locked "+t.ref);
-				System.out.println("By process "+t.getException().getStackTrace()[1]);
-				t.getException().printStackTrace(System.out);
-				while(gitOpenTimeout.containsKey(g)) {
-					System.out.println("Git is locked by other process, blocking "+localRepo.getDirectory().getAbsolutePath());
-					ThreadUtil.wait(100);
+			if (g.getRepository().getDirectory().getAbsolutePath()
+					.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
+				GitTimeouThread t = gitOpenTimeout.get(g);
+				int i = 0;
+				while (gitOpenTimeout.containsKey(g)) {
+
+					System.out.println(
+							"Git is locked by other process, blocking " + localRepo.getDirectory().getAbsolutePath());
+					System.out.println("Git locked " + t.ref);
+					if (i > 3) {
+						t.getException().printStackTrace(System.out);
+						new Exception().printStackTrace(System.out);
+					}
+					i++;
+					ThreadUtil.wait(1000);
 				}
 				break;
 			}
 		}
-		
+
 		Git git = new Git(localRepo);
 
 		gitOpenTimeout.put(git, makeTimeoutThread(git));
@@ -606,6 +612,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if (flagNewFile) {
 				git.add().addFilepattern(FileName).call();
 			}
+			closeGit(git);
 			if (content != null) {
 				OutputStream out = null;
 				try {
