@@ -527,6 +527,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			ThreadUtil.wait(1000);
 			System.out.println("\n\n\nPaused "+reason+" by another thread, waiting for repo "+remoteURI);
 			new Exception().printStackTrace(System.err);
+			for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
+				Git g = iterator.next();
+				GitTimeoutThread t = gitOpenTimeout.get(g);
+				if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
+					t.getException().printStackTrace(System.err);
+				}
+			}
 		}
 	}
 	public static void deleteRepo(String remoteURI) {
@@ -1390,7 +1397,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					// The ref does not exist upstream, create
 					try {
 						PasswordManager.checkInternet();
-
+						closeGit(git);
 						newBranch(remoteURI, branch);
 					} catch (org.eclipse.jgit.api.errors.TransportException ex) {
 						// Not logged in yet, just return
