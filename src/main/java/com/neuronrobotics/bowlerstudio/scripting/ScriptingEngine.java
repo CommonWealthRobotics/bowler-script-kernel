@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
@@ -34,6 +35,7 @@ import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -58,6 +60,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -165,9 +168,56 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
 		if (branch != null)
 			setURI = setURI.setBranch(branch);
-		Git git = setURI.setDirectory(dir).setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+		setURI.setProgressMonitor(getProgressMoniter("Cloning " +remoteURI));
+		setURI.setDirectory(dir);
+		
+		if (remoteURI != null && remoteURI.startsWith("git@")) {
+			setURI.setTransportConfigCallback(transportConfigCallback);
+		} else {
+			setURI.setCredentialsProvider(PasswordManager.getCredentialProvider());
+		}
+		Git git = setURI.call();
 		gitOpenTimeout.put(git, makeTimeoutThread(git));
 		return git;
+	}
+
+	private static ProgressMonitor getProgressMoniter(String remoteURI) {
+		return new ProgressMonitor() {
+			double total=1;
+			double sum;
+			double tasks=1;
+			String stage;
+			@Override
+			public void update(int completed) {
+				sum+=completed;
+				DecimalFormat df = new DecimalFormat("###.##");
+				System.out.println( remoteURI + "  "+stage+" "+df.format((sum)/total*100)+"% complete");
+			}
+			
+			@Override
+			public void start(int totalTasks) {
+				System.out.println("Setting tasks to "+totalTasks);
+				tasks=totalTasks;
+			}
+			
+			@Override
+			public boolean isCancelled() {
+				return false;
+			}
+			
+			@Override
+			public void endTask() {
+				
+			}
+			
+			@Override
+			public void beginTask(String title, int totalWork) {
+				stage=title;
+				System.out.println("Setting totalWork to "+totalWork+" for stage "+stage);
+				total=totalWork;
+				sum=0;
+			}
+		};
 	}
 
 	/**
@@ -193,6 +243,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			Git g = iterator.next();
 			GitTimeouThread t = gitOpenTimeout.get(g);
 			if (t.ref.toLowerCase().contentEquals(URL.toLowerCase())) {
+				t.getException().printStackTrace(System.err);
 				return true;
 			}
 		}
@@ -469,12 +520,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 
 	}
-
-	public static void deleteRepo(String remoteURI) {
+	public static void waitForRepo(String remoteURI,String reason) {
 		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
 			ThreadUtil.wait(1000);
-			System.out.println("Waiting to delete repo "+remoteURI);
+			System.out.println("\n\n\nPaused "+reason+" by another thread, waiting for repo "+remoteURI);
+			new Exception().printStackTrace(System.err);
 		}
+	}
+	public static void deleteRepo(String remoteURI) {
+		if(remoteURI==null)
+			return;
+		if(remoteURI.length()<4)
+			return;
+		waitForRepo(remoteURI,"delete");
+		
+		new Exception("\n\nDelete called Here\n").printStackTrace(System.out);
 		File gitRepoFile = uriToFile(remoteURI);
 		deleteFolder(gitRepoFile.getParentFile());
 	}
@@ -484,7 +544,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	private static void deleteFolder(File folder) {
-		new Exception().printStackTrace(System.out);
+
 		if (!folder.exists() || !folder.isDirectory())
 			return;
 		File[] files = folder.listFiles();
@@ -614,10 +674,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			login();
 		if (!hasNetwork())
 			return;// No login info means there is no way to publish
-		while(ScriptingEngine.isUrlAlreadyOpen(id)) {
-			ThreadUtil.wait(1000);
-			System.out.println("Waiting to newBranch "+id);
-		}
+		waitForRepo(id,"commit");
 		File gistDir = cloneRepo(id, branch);
 		File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -678,10 +735,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	@SuppressWarnings("deprecation")
 	public static void pushCodeToGit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile) throws Exception {
-		while(ScriptingEngine.isUrlAlreadyOpen(id)) {
-			ThreadUtil.wait(1000);
-			System.out.println("Waiting to push "+id);
-		}
+		waitForRepo(id,"push");
 		commit(id, branch, FileName, content, commitMessage, flagNewFile);
 		if (PasswordManager.getUsername() == null)
 			login();
@@ -866,11 +920,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static File uriToFile(String remoteURI) {
 		// new Exception().printStackTrace();
 		String[] colinSplit = remoteURI.split(":");
+		try {
+			String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
+			File gistDir = new File(getWorkspace().getAbsolutePath() + "/gitcache/" + gitSplit + "/.git");
+			return gistDir;
+		}catch(ArrayIndexOutOfBoundsException ex) {
+			System.err.println("Failed to parse "+remoteURI);
+			throw ex;
+		}
 
-		String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
-
-		File gistDir = new File(getWorkspace().getAbsolutePath() + "/gitcache/" + gitSplit + "/.git");
-		return gistDir;
+		
 	}
 
 	public static String getBranch(String remoteURI) throws IOException {
@@ -905,10 +964,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void deleteBranch(String remoteURI, String toDelete) throws Exception {
-		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(1000);
-			System.out.println("Waiting to delete branch "+remoteURI);
-		}
+		waitForRepo(remoteURI,"deleteBranch");
 		boolean found = false;
 		for (String s : listBranchNames(remoteURI)) {
 			if (s.contains(toDelete)) {
@@ -964,10 +1020,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void newBranch(String remoteURI, String newBranch, RevCommit source)
 			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
 			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
-		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(1000);
-			System.out.println("Waiting to newBranch "+remoteURI);
-		}
+		waitForRepo(remoteURI,"newBranch");
 		try {
 			for (String s : listBranchNames(remoteURI)) {
 				if (s.contains(newBranch)) {
@@ -1130,10 +1183,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void pull(String remoteURI, String branch)
 			throws IOException, CheckoutConflictException, NoHeadException {
-		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(1000);
-			System.out.println("Waiting to pull "+remoteURI);
-		}
+		waitForRepo(remoteURI,"pull");
 		// new Exception().printStackTrace();
 
 		if (!hasNetwork())
@@ -1150,12 +1200,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 			try {
 
-				System.out.print("Pulling " + ref + "  ");
+				
+				PullCommand command;
 				if (ref != null && ref.startsWith("git@")) {
-					git.pull().setTransportConfigCallback(transportConfigCallback).call();
+					command = git.pull().setTransportConfigCallback(transportConfigCallback);
 				} else {
-					git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
+					command = git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider());
 				}
+				command.setProgressMonitor(getProgressMoniter("Pulling " +remoteURI));
+				command.call();
 				System.out.println(" ... Success!");
 				closeGit(git);
 				// new Exception(ref).printStackTrace();
@@ -1255,10 +1308,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void checkoutCommit(String remoteURI, String branch, String commitHash) throws IOException {
-		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(1000);
-			System.out.println("Waiting to checkout "+remoteURI);
-		}
+		waitForRepo(remoteURI,"checkoutCommit");
 		File gitRepoFile = ScriptingEngine.uriToFile(remoteURI);
 		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
 			System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
@@ -1382,10 +1432,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static boolean resolveConflict(String remoteURI, CheckoutConflictException con, Git git) {
 		PasswordManager.checkInternet();
-		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(1000);
-			System.out.println("Waiting to pull "+remoteURI);
-		}
+		waitForRepo(remoteURI,"resolveConflict");
 		try {
 			Status stat = git.status().call();
 			Set<String> changed = stat.getModified();
@@ -1437,10 +1484,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @return The local directory containing the .git
 	 */
 	public static File cloneRepo(String remoteURI, String branch) {
-		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(1000);
-			System.out.println("Waiting to clone "+remoteURI);
-		}
+		waitForRepo(remoteURI,"cloneRepo");
 
 		File gistDir = getRepositoryCloneDirectory(remoteURI);
 		String localPath = gistDir.getAbsolutePath();
