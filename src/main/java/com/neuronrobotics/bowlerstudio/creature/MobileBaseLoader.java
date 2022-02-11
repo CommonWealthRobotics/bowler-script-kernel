@@ -6,6 +6,8 @@ import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
+
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
 import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
@@ -87,8 +89,15 @@ public class MobileBaseLoader {
 		File code = null;
 		try {
 			code = ScriptingEngine.fileFromGit(git, file);
-		} catch (GitAPIException | IOException e) {
-			MobileBaseCadManager.get(base).getUi().highlightException(code, e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			ScriptingEngine.deleteRepo(git);
+			try {
+				code = ScriptingEngine.fileFromGit(git, file);
+			} catch (GitAPIException | IOException e) {
+				MobileBaseCadManager.get(base).getUi().highlightException(code, e);
+				throw new RuntimeException(e);
+			}
 		}
 
 		File c = code;

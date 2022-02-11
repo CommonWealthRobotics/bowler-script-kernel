@@ -2,11 +2,11 @@ package com.neuronrobotics.bowlerstudio.scripting;
 
 import org.eclipse.jgit.api.Git;
 
-public class GitTimeouThread extends Thread {
+public class GitTimeoutThread extends Thread {
 	Git git;
 	String ref;
 	private RuntimeException ex;
-	public GitTimeouThread(Git g) {
+	public GitTimeoutThread(Git g) {
 		git=g;
 		ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 		setException(new RuntimeException(
