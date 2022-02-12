@@ -1279,7 +1279,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 				command.setProgressMonitor(getProgressMoniter("Pulling " ,remoteURI));
 				command.call();
-				System.out.println(" ... Success!");
 				closeGit(git);
 				// new Exception(ref).printStackTrace();
 			} catch (CheckoutConflictException ex) {
