@@ -513,10 +513,30 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * The GistID we are waiting to see
 	 */
 	public static void waitForLogin() throws IOException, InvalidRemoteException, TransportException, GitAPIException {
-		if (!PasswordManager.hasNetwork())
+		if (!PasswordManager.hasNetwork()) {
+			System.out.println("No network, cant log in");
 			return;
+		}
 		try {
 			PasswordManager.waitForLogin();
+			if (PasswordManager.loggedIn())
+				return;
+			if(PasswordManager.getLoginID()==null) {
+				System.out.println("No login ID found!");
+				return;
+			}
+			if(PasswordManager.getPassword()==null) {
+				System.out.println("No login api key found!");
+				return;
+			}
+			System.out.println("Performing Login");
+			PasswordManager.waitForLogin();
+
+			if (!PasswordManager.loggedIn()) {
+				System.out.println("\nERROR: Wrong Password!\n");
+				login();
+			}
+			
 		} catch (Exception e) {
 			exp.uncaughtException(Thread.currentThread(), e);
 		}
