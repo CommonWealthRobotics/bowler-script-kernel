@@ -232,6 +232,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				for (GitLogProgressMonitor l : logListeners) {
 					l.onUpdate(str,e);
 				}
+				if(reponame.contentEquals("BowlerStudioConfiguration")) {
+					System.err.println(stage+" "+remoteURI);
+					//e.printStackTrace(System.err);
+				}
 			}
 
 			@Override
