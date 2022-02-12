@@ -1093,25 +1093,29 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
 			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		waitForRepo(remoteURI,"newBranch");
+		Repository localRepo = getRepository(remoteURI);
+
+		Git git=null;
 		try {
 			for (String s : listBranchNames(remoteURI)) {
 				if (s.contains(newBranch)) {
 					// throw new RuntimeException(newBranch + " can not be created because " + s + "
 					// is too similar");
-					checkout(remoteURI, newBranch);
+					
+					git = openGit(localRepo);
+					shallowCheckout(remoteURI, newBranch, git);
+					closeGit(git);
 					return;
 
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			closeGit(git);
 		}
-		Repository localRepo = getRepository(remoteURI);
-
-		Git git;
+		
 
 		git = openGit(localRepo);
-
 		try {
 			if (source == null)
 				source = git.log().setMaxCount(1).call().iterator().next();
@@ -1436,24 +1440,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					for (Ref R : branches) {
 						if (R.getName().endsWith(branch)) {
 							System.err.println("\nFound upstream " + R.getName());
-							try {
-								git.checkout().setName(branch)
-										.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
-										.setStartPoint("origin/" + branch).call();
-								closeGit(git);
-								return;
-							} catch (RefNotFoundException e) {
-								git.branchCreate().setName(branch).setUpstreamMode(SetupUpstreamMode.SET_UPSTREAM)
-										.setStartPoint("origin/" + branch).setForce(true).call();
-								git.checkout().setName(branch)
-										.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
-										.setStartPoint("origin/" + branch).call();
-								closeGit(git);
-								return;
-							} catch (CheckoutConflictException con) {
-
-								resolveConflict(remoteURI, con, git);
-							}
+							shallowCheckout(remoteURI, branch, git);
+							closeGit(git);
 						}
 					}
 					// The ref does not exist upstream, create
@@ -1499,6 +1487,26 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		}
 
+	}
+
+	private static void shallowCheckout(String remoteURI, String branch, Git git) throws GitAPIException,
+			RefAlreadyExistsException, InvalidRefNameException, RefNotFoundException, CheckoutConflictException {
+		try {
+			git.checkout().setName(branch)
+					.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+					.setStartPoint("origin/" + branch).call();
+			return;
+		} catch (RefNotFoundException e) {
+			git.branchCreate().setName(branch).setUpstreamMode(SetupUpstreamMode.SET_UPSTREAM)
+					.setStartPoint("origin/" + branch).setForce(true).call();
+			git.checkout().setName(branch)
+					.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+					.setStartPoint("origin/" + branch).call();
+			return;
+		} catch (CheckoutConflictException con) {
+
+			resolveConflict(remoteURI, con, git);
+		}
 	}
 
 	private static boolean resolveConflict(String remoteURI, CheckoutConflictException con, Git git) {
