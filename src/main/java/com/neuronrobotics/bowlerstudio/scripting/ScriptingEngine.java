@@ -200,56 +200,65 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return git;
 	}
 
-	private static ProgressMonitor getProgressMoniter(String type,String remoteURI) {
-		String reponame= getRepositoryCloneDirectory(remoteURI).getName();
+	private static ProgressMonitor getProgressMoniter(String type, String remoteURI) {
+		String reponame = getRepositoryCloneDirectory(remoteURI).getName();
 		return new ProgressMonitor() {
-			double total=1;
+			double total = 1;
 			double sum;
-			double tasks=0;
-			String stage="done";
-			long timeofLastUpdate=0;
+			double tasks = 0;
+			String stage = "done";
+			long timeofLastUpdate = 0;
+
 			@Override
 			public void update(int completed) {
-				
-				sum+=completed;
+
+				sum += completed;
 				DecimalFormat df = new DecimalFormat("###.#");
-				String str= df.format(total>0?((sum)/total*100):0)+"% "+type+" "+ reponame+ "  "+stage+" of task "+tasks;
-				if(timeofLastUpdate+500<System.currentTimeMillis()) {
+				String format = df.format(total > 0 ? ((sum) / total * 100) : 0);
+				if(!format.contains("."))
+					format=format+".0";// keep spacing consistant
+				while(format.length()<5) {
+					format=" "+format;//pad out the string for formatting
+				}
+				String str = format + "% " + stage + " " + reponame + "  "
+						+ tasks + " of task " + type;
+				if (timeofLastUpdate + 500 < System.currentTimeMillis()) {
 					System.out.println(str);
-					timeofLastUpdate=System.currentTimeMillis();
+					timeofLastUpdate = System.currentTimeMillis();
 				}
 				System.err.println(str);
-				for(GitLogProgressMonitor l:logListeners) {
+				for (GitLogProgressMonitor l : logListeners) {
 					l.onUpdate(str);
 				}
 			}
-			
+
 			@Override
 			public void start(int totalTasks) {
 
 			}
-			
+
 			@Override
 			public boolean isCancelled() {
 				return false;
 			}
-			
+
 			@Override
 			public void endTask() {
-				 String string ="Completed "+  type+" "+ reponame+ "  "+stage;
-				 System.out.println(string);
-				 for(GitLogProgressMonitor l:logListeners) {
-						l.onUpdate(string);
-					}
+				String string = "Completed " + type + " " + reponame + "  " + stage;
+				System.out.println(string);
+				for (GitLogProgressMonitor l : logListeners) {
+					l.onUpdate(string);
+				}
 			}
-			
+
 			@Override
 			public void beginTask(String title, int totalWork) {
-				stage=title;
-				//System.out.println("Setting totalWork to "+totalWork+" for stage "+stage);
-				total=totalWork;
-				sum=0;
-				tasks+=1;
+				stage = title;
+				// System.out.println("Setting totalWork to "+totalWork+" for stage "+stage);
+				total = totalWork;
+				sum = 0;
+				tasks += 1;
+				timeofLastUpdate = 0;
 			}
 		};
 	}
