@@ -212,8 +212,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			public void update(int completed) {
 				
 				sum+=completed;
-				DecimalFormat df = new DecimalFormat("###.##");
-				String str= type+" "+ reponame+ "  "+stage+" "+df.format(total>0?((sum)/total*100):0)+"% complete of task "+tasks;
+				DecimalFormat df = new DecimalFormat("###.#");
+				String str= df.format(total>0?((sum)/total*100):0)+"% "+type+" "+ reponame+ "  "+stage+" of task "+tasks;
 				if(timeofLastUpdate+500<System.currentTimeMillis()) {
 					System.out.println(str);
 					timeofLastUpdate=System.currentTimeMillis();
