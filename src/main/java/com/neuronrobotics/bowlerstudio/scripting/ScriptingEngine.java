@@ -86,6 +86,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 *
 	 */
 	private static final Map<String, Long> fileLastLoaded = new HashMap<String, Long>();
+	
+	private static final ArrayList<GitLogProgressMonitor> logListeners= new ArrayList<>();
 
 	private static boolean autoupdate = false;
 
@@ -152,6 +154,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new BashLoader());
 	}
 
+	public static void addLogListener(GitLogProgressMonitor l) {
+		if(logListeners.contains(l))
+			return;
+		logListeners.add(l);
+	}
+	
+	public static void removeLogListener(GitLogProgressMonitor l) {
+		if(!logListeners.contains(l))
+			return;
+		logListeners.remove(l);
+	}
+	
+	public static void clearLogListener() {
+
+		logListeners.clear();
+	}
+	
 	/**
 	 * CLoe git and start a timeout timer
 	 * 
@@ -200,6 +219,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					timeofLastUpdate=System.currentTimeMillis();
 				}
 				System.err.println(str);
+				for(GitLogProgressMonitor l:logListeners) {
+					l.onUpdate(str);
+				}
 			}
 			
 			@Override
@@ -214,7 +236,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			
 			@Override
 			public void endTask() {
-				 System.out.println(type+" "+ reponame+ "  "+stage+" Completed");	
+				 String string = type+" "+ reponame+ "  "+stage+" Completed";
+				 System.out.println(string);
+				 for(GitLogProgressMonitor l:logListeners) {
+						l.onUpdate(string);
+					}
 			}
 			
 			@Override
