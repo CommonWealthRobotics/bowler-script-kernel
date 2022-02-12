@@ -187,13 +187,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			double total=1;
 			double sum;
 			double tasks=0;
-			String stage;
-			
+			String stage="done";
+			long timeofLastUpdate=0;
 			@Override
 			public void update(int completed) {
+				
 				sum+=completed;
 				DecimalFormat df = new DecimalFormat("###.##");
-				System.out.println( type+" "+ reponame+ "  "+stage+" "+df.format(total>0?((sum)/total*100):0)+"% complete of task "+tasks);
+				String str= type+" "+ reponame+ "  "+stage+" "+df.format(total>0?((sum)/total*100):0)+"% complete of task "+tasks;
+				if(timeofLastUpdate+500<System.currentTimeMillis()) {
+					System.out.println(str);
+					timeofLastUpdate=System.currentTimeMillis();
+				}
+				System.err.println(str);
 			}
 			
 			@Override
@@ -208,7 +214,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			
 			@Override
 			public void endTask() {
-				
+				 System.out.println(type+" "+ reponame+ "  "+stage+" Completed");	
 			}
 			
 			@Override
@@ -514,7 +520,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 	public static void waitForLogin() throws IOException, InvalidRemoteException, TransportException, GitAPIException {
 		if (!PasswordManager.hasNetwork()) {
-			System.out.println("No network, cant log in");
+			System.err.println("No network, cant log in");
 			return;
 		}
 		try {
@@ -522,18 +528,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if (PasswordManager.loggedIn())
 				return;
 			if(PasswordManager.getLoginID()==null) {
-				System.out.println("No login ID found!");
+				System.err.println("No login ID found!");
 				return;
 			}
 			if(PasswordManager.getPassword()==null) {
-				System.out.println("No login api key found!");
+				System.err.println("No login api key found!");
 				return;
 			}
-			System.out.println("Performing Login");
+			System.err.println("Performing Login");
 			PasswordManager.waitForLogin();
 
 			if (!PasswordManager.loggedIn()) {
-				System.out.println("\nERROR: Wrong Password!\n");
+				System.err.println("\nERROR: Wrong Password!\n");
 				login();
 			}
 			
