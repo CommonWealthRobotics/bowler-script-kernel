@@ -202,6 +202,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static ProgressMonitor getProgressMoniter(String type, String remoteURI) {
 		String reponame = getRepositoryCloneDirectory(remoteURI).getName();
+		Exception e = new Exception();
 		return new ProgressMonitor() {
 			double total = 1;
 			double sum;
@@ -227,8 +228,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					timeofLastUpdate = System.currentTimeMillis();
 				}
 				System.err.println(str);
+				
 				for (GitLogProgressMonitor l : logListeners) {
-					l.onUpdate(str);
+					l.onUpdate(str,e);
 				}
 			}
 
@@ -247,7 +249,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				String string = "DONE!  " + type + " " + reponame + "  " + stage;
 				System.out.println(string);
 				for (GitLogProgressMonitor l : logListeners) {
-					l.onUpdate(string);
+					l.onUpdate(string,e);
 				}
 			}
 
