@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
+import com.neuronrobotics.bowlerstudio.scripting.IGithubLoginListener;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
@@ -32,6 +33,24 @@ public class ConfigurationDatabase {
   //chreat the gson object, this is the parsing factory
   private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
   private static IssueReportingExceptionHandler reporter =new IssueReportingExceptionHandler();
+  
+  static {
+	  ScriptingEngine.addIGithubLoginListener(new IGithubLoginListener() {
+		
+		@Override
+		public void onLogout(String oldUsername) {
+			checked=false;
+			gitSource=null;
+			database=null;
+			setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
+		}
+		
+		@Override
+		public void onLogin(String newUsername) {
+			loginEvent(newUsername);
+		}
+	});
+  }
 
   public static Object getObject(String paramsKey, String objectKey, Object defaultValue) {
     if (getParamMap(paramsKey).get(objectKey) == null) {
@@ -63,8 +82,13 @@ public class ConfigurationDatabase {
     //synchronized(database){
     writeOut = gson.toJson(database, TT_mapStringString);
     //}
+    
 		for (int i = 0; i < 5; i++) {
 			try {
+				if(getGitSource().contentEquals(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT)) {
+			    	System.out.println("Not pushing changes the default branch");
+					return;
+			    }
 				ScriptingEngine.pushCodeToGit(getGitSource(), ScriptingEngine.getFullBranch(getGitSource()),
 						getDbFile(), writeOut, "Saving database");
 				return;
@@ -108,12 +132,25 @@ public class ConfigurationDatabase {
     );
   }
   public static void loginEvent(String username) {
-		checked = false;
+		checked=false;
+		gitSource=null;
+		HashMap<String, HashMap<String, Object>> existing = database;
+		database=null;
 		try {
-			getGitSource();
+			System.out.println("Setting Configurations repo to "+getGitSource());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		//Copy over the existing database values into the newly logged in user
+		for(String pkey:existing.keySet()) {
+			HashMap<String, Object> val=existing.get(pkey);
+			
+			for(String objectKey: val.keySet()) {
+				Object defaultValue = val.get(objectKey);
+				getObject(pkey, objectKey, defaultValue);
+			}
+				
 		}
   }
   public static String getGitSource() throws Exception {
