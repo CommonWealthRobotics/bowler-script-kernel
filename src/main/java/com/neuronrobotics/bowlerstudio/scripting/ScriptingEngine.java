@@ -202,7 +202,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static ProgressMonitor getProgressMoniter(String type, String remoteURI) {
 		String reponame = getRepositoryCloneDirectory(remoteURI).getName();
-		Exception e = new Exception();
+
+		RuntimeException e = new RuntimeException();
 		return new ProgressMonitor() {
 			double total = 1;
 			double sum;
@@ -212,7 +213,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			@Override
 			public void update(int completed) {
-
+				for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
+					Git g = iterator.next();
+					GitTimeoutThread t = gitOpenTimeout.get(g);
+					if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
+						t.resetTimer();
+						break;
+					}
+				}
+				
 				sum += completed;
 				DecimalFormat df = new DecimalFormat("###.#");
 				String format = df.format(total > 0 ? ((sum) / total * 100) : 0);

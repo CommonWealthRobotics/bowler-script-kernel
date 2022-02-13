@@ -6,6 +6,7 @@ public class GitTimeoutThread extends Thread {
 	Git git;
 	String ref;
 	private RuntimeException ex;
+	long startTime=0;
 	public GitTimeoutThread(Git g) {
 		git=g;
 		ref = git.getRepository().getConfig().getString("remote", "origin", "url");
@@ -14,14 +15,19 @@ public class GitTimeoutThread extends Thread {
 						+ ref + "\n"));
 	}
 	public void run() {
+		resetTimer();
 		try {
-			Thread.sleep(1000*60*20);
+			while((startTime+(1000*30))>System.currentTimeMillis())
+				Thread.sleep(1000);
 			git.close();
 			ScriptingEngine.gitOpenTimeout.remove(git);
 			ScriptingEngine.exp.uncaughtException(Thread.currentThread(), getException());
 		} catch (InterruptedException e) {
 			// exited clean
 		}
+	}
+	public void resetTimer() {
+		startTime=System.currentTimeMillis();
 	}
 	public RuntimeException getException() {
 		return ex;
