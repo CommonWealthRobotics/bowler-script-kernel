@@ -39,9 +39,6 @@ public class ConfigurationDatabase {
 		
 		@Override
 		public void onLogout(String oldUsername) {
-			checked=false;
-			gitSource=null;
-			database=null;
 			setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
 		}
 		
@@ -143,6 +140,7 @@ public class ConfigurationDatabase {
 			e.printStackTrace();
 		}
 		//Copy over the existing database values into the newly logged in user
+		if(existing!=null)
 		for(String pkey:existing.keySet()) {
 			HashMap<String, Object> val=existing.get(pkey);
 			
