@@ -297,6 +297,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 	
 	public static boolean isUrlAlreadyOpen(String URL) {
+		if(URL==null)
+			return false;
 		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
 			Git g = iterator.next();
 			GitTimeoutThread t = gitOpenTimeout.get(g);
@@ -1576,7 +1578,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @return The local directory containing the .git
 	 */
 	public static File cloneRepo(String remoteURI, String branch) {
-		waitForRepo(remoteURI,"cloneRepo");
 
 		File gistDir = getRepositoryCloneDirectory(remoteURI);
 		String localPath = gistDir.getAbsolutePath();
@@ -1586,6 +1587,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (!gitRepoFile.exists()) {
 			if (!hasNetwork())
 				return null;// No login info means there is no way to publish
+			waitForRepo(remoteURI,"cloneRepo");
 			System.out.println("Cloning files from: " + remoteURI);
 			if (branch != null)
 				System.out.println("            branch: " + branch);
