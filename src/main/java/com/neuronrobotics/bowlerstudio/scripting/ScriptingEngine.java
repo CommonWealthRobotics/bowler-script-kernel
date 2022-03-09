@@ -1019,7 +1019,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		
 	}
 
-	public static String getBranch(String remoteURI) throws IOException {
+	public static String getBranch(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
@@ -1029,12 +1029,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		String branch = localRepo.getBranch();
 		localRepo.close();
-		if (branch == null)
-			branch = "main";
+		if(branch==null)
+			newBranch(remoteURI, "main", null);
 		return branch;
 	}
 
-	public static String getFullBranch(String remoteURI) throws IOException {
+	public static String getFullBranch(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
@@ -1044,8 +1044,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		String branch = localRepo.getFullBranch();
 		localRepo.close();
-//		if(branch==null)
-//			branch="main";
+		if(branch==null)
+			newBranch(remoteURI, "main", null);
 
 		return branch;
 	}
@@ -1390,7 +1390,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	}
 
-	public static void pull(String remoteURI) throws IOException, CheckoutConflictException, NoHeadException {
+	public static void pull(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, InvalidRemoteException, TransportException, GitAPIException {
 		if (!hasNetwork())
 			return;// No login info means there is no way to publish
 		pull(remoteURI, getBranch(remoteURI));
@@ -1418,17 +1418,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	}
 
-	public static void checkout(String remoteURI, RevCommit commit) throws IOException {
+	public static void checkout(String remoteURI, RevCommit commit) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		ScriptingEngine.checkout(remoteURI, commit.getName());
 	}
 
-	public static void checkout(String remoteURI, Ref branch) throws IOException {
+	public static void checkout(String remoteURI, Ref branch) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		String[] name = branch.getName().split("/");
 		String myName = name[name.length - 1];
 		ScriptingEngine.checkout(remoteURI, myName);
 	}
 
-	public static void checkout(String remoteURI, String branch) throws IOException {
+	public static void checkout(String remoteURI, String branch) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		if (!hasNetwork())
 			return;
 		// cloneRepo(remoteURI, branch);
@@ -1623,7 +1623,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (branch != null) {
 			try {
 				checkout(remoteURI, branch);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				exp.uncaughtException(Thread.currentThread(), e);
 			}
 		}

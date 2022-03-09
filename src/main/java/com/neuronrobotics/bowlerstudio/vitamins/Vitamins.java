@@ -584,10 +584,7 @@ public class Vitamins {
 		setGitRepoDatabase(getGitRepoDatabase());
 		try {
 			ScriptingEngine.pull(getGitRepoDatabase());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (CheckoutConflictException|NoHeadException e) {
+		}catch (CheckoutConflictException|NoHeadException e) {
 			ScriptingEngine.deleteRepo(getGitRepoDatabase());
 			try {
 				ScriptingEngine.pull(getGitRepoDatabase());
@@ -595,6 +592,8 @@ public class Vitamins {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+		}catch (Exception e) {
+			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), e);
 		}
 		listVitaminTypes();
 		
