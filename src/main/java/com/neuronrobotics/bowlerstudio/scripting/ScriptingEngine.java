@@ -1611,10 +1611,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					checkout(remoteURI, myBranch);
 				}
 
-			} catch (Throwable e) {
+			} catch (org.eclipse.jgit.api.errors.JGitInternalException exe) {
+				closeGit(git);
+				deleteRepo(remoteURI);
+				return cloneRepo(remoteURI,branch);
+			}catch (Throwable e) {
 
-				if (git != null)
-					closeGit(git);
+				closeGit(git);
 				PasswordManager.checkInternet();
 				throw new RuntimeException(e);
 			}
