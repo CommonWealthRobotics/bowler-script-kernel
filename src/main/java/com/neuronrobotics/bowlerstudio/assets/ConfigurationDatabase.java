@@ -33,20 +33,9 @@ public class ConfigurationDatabase {
   //chreat the gson object, this is the parsing factory
   private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
   private static IssueReportingExceptionHandler reporter =new IssueReportingExceptionHandler();
-  
+  private static String loggedInAs=null;
   static {
-	  ScriptingEngine.addIGithubLoginListener(new IGithubLoginListener() {
-		
-		@Override
-		public void onLogout(String oldUsername) {
-			setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
-		}
-		
-		@Override
-		public void onLogin(String newUsername) {
-			loginEvent(newUsername);
-		}
-	});
+
   }
 
   public static Object getObject(String paramsKey, String objectKey, Object defaultValue) {
@@ -103,25 +92,29 @@ public class ConfigurationDatabase {
 
   }
 
-  @SuppressWarnings("unchecked")
-  public static HashMap<String, HashMap<String, Object>> getDatabase() {
-    if (database != null) {
-      return database;
-    }
-    try {
-    	ScriptingEngine.pull(getGitSource());
-      database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
-          .inlineFileScriptRun(loadFile(), null);
-      //new Exception().printStackTrace();
-    } catch (Exception e) {
-      // oignore and use new one
-    }
-    if (database == null) {
-      database = new HashMap<String, HashMap<String, Object>>();
-      //new Exception().printStackTrace();
-    }
-    return database;
-  }
+	@SuppressWarnings("unchecked")
+	public static HashMap<String, HashMap<String, Object>> getDatabase() {
+		if (database != null) {
+			return database;
+		}
+		HashMap<String, HashMap<String, Object>> existing = null;
+		try {
+			existing = (HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile(), null);
+			
+			ScriptingEngine.pull(getGitSource());
+			database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile(), null);
+			// new Exception().printStackTrace();
+		} catch (Exception e) {
+			// oignore and use new one
+		}
+		if (database == null) {
+			database = new HashMap<String, HashMap<String, Object>>();
+			// new Exception().printStackTrace();
+		}
+		// Copy over the existing database values into the newly logged in user
+		syncOldDBToNew(existing);
+		return database;
+	}
 
   public static File loadFile() throws Exception {
     return ScriptingEngine.fileFromGit(getGitSource(), // git repo, change
@@ -129,6 +122,11 @@ public class ConfigurationDatabase {
     );
   }
   public static void loginEvent(String username) {
+	  if(username==null)
+		  return;
+	  if(loggedInAs!=null)
+		  if(username.contentEquals(loggedInAs))
+			  return;
 		checked=false;
 		gitSource=null;
 		HashMap<String, HashMap<String, Object>> existing = database;
@@ -140,18 +138,24 @@ public class ConfigurationDatabase {
 			e.printStackTrace();
 		}
 		//Copy over the existing database values into the newly logged in user
-		if(existing!=null)
-		for(String pkey:existing.keySet()) {
-			HashMap<String, Object> val=existing.get(pkey);
-			
-			for(String objectKey: val.keySet()) {
-				Object defaultValue = val.get(objectKey);
-				Object value=getObject(pkey, objectKey, defaultValue);
-				System.out.println("Setting "+pkey+":"+objectKey+" to "+value+" with previous being "+defaultValue);
-			}
-				
-		}
+		syncOldDBToNew(existing);
+		loggedInAs=username;
+		
   }
+
+private static void syncOldDBToNew(HashMap<String, HashMap<String, Object>> existing) {
+	if(existing!=null)
+	for(String pkey:existing.keySet()) {
+		HashMap<String, Object> val=existing.get(pkey);
+		
+		for(String objectKey: val.keySet()) {
+			Object defaultValue = val.get(objectKey);
+			Object value=getObject(pkey, objectKey, defaultValue);
+			System.out.println("Setting "+pkey+":"+objectKey+" to "+value+" with previous being "+defaultValue);
+		}
+			
+	}
+}
   public static String getGitSource() throws Exception {
 		if (!checked) {
 			if (ScriptingEngine.hasNetwork() && ScriptingEngine.isLoginSuccess()) {
@@ -175,8 +179,6 @@ public class ConfigurationDatabase {
 					}
 
 				}
-
-				// ScriptingEngine.pull(gitSource);
 			}else if(ScriptingEngine.isLoginSuccess()) {
 				// no network but has logged in before
 				setGitSource(

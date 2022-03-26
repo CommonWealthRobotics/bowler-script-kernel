@@ -236,14 +236,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					System.out.println(str);
 					timeofLastUpdate = System.currentTimeMillis();
 				}
-				System.err.println(str);
+				//System.err.println(str);
 				
 				for (GitLogProgressMonitor l : logListeners) {
 					l.onUpdate(str,e);
-				}
-				if(reponame.contentEquals("BowlerStudioConfiguration")) {
-					System.err.println(stage+" "+remoteURI);
-					//e.printStackTrace(System.err);
 				}
 			}
 
@@ -705,7 +701,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static ArrayList<String> filesInGit(String remote) throws Exception {
-		return filesInGit(remote, ScriptingEngine.getFullBranch(remote), null);
+		return filesInGit(remote, null, null);
 	}
 
 
@@ -941,7 +937,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static File fileFromGit(String remoteURI, String fileInRepo)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-		return fileFromGit(remoteURI, ScriptingEngine.getFullBranch(remoteURI), fileInRepo);
+		return fileFromGit(remoteURI, null, fileInRepo);
 	}
 
 	// git@github.com:CommonWealthRobotics/BowlerStudioVitamins.git
@@ -1167,7 +1163,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			// just checkout the existing branch then
 		}
 		git.checkout().setName(newBranch).call();
-
+		if(PasswordManager.loggedIn())
 		git.push().setRemote(remoteURI).setRefSpecs(new RefSpec(newBranch + ":" + newBranch))
 				.setCredentialsProvider(PasswordManager.getCredentialProvider()).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
 	}
@@ -1340,8 +1336,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				PasswordManager.checkInternet();
 				closeGit(git);
 				try {
-					newBranch(remoteURI, branch);
+					if(branch!=null)
+						newBranch(remoteURI, branch);
+					else {
+						git = openGit(remoteURI);
+						RevCommit source = git.log().setMaxCount(1).call().iterator().next();
+						
+						newBranchLocal("main", remoteURI, git, source);
+						closeGit(git);
+					}
 				} catch (Exception ex) {
+					closeGit(git);
 					ex.printStackTrace();
 					throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + ex.getMessage());
 				}
