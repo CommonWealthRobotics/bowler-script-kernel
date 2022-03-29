@@ -83,7 +83,7 @@ public class BowlerKernel {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-		JavaFXInitializer.go();
+		//JavaFXInitializer.go();
 		ScriptingEngine.waitForLogin();
 		if (args.length == 0) {
 			fail();
@@ -157,7 +157,7 @@ public class BowlerKernel {
 					fail();
 				}
 			}
-			if (s.contains("script") || s.contains("-s")) {
+			if (s.contains("script") || s.contains("-f")|| s.contains("-s")) {
 				startLoadingScripts = true;
 			}
 		}
