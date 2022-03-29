@@ -48,4 +48,6 @@ jobs:
       run: java -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
       
     - name: Test Cad 
-      run: java -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
+      run: |
+      		rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
+      		java -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
