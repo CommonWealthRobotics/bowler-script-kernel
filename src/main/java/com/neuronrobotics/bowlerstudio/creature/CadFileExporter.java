@@ -88,7 +88,9 @@ public class CadFileExporter {
 			  continue;
 			}
 			manufactured.setName(part.getName());
-			nameBase = dir.getAbsolutePath()+"/"+index+"-"+name;
+			if(name.length()==0)
+				name="Part-Num-"+index;
+			nameBase = dir.getAbsolutePath()+"/"+name;
 			index++;
 			if(part.getExportFormats()==null){
 				allCadStl.add(makeStl(nameBase,manufactured));// default to stl

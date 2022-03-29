@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 //import org.springframework.boot.SpringApplication;
@@ -25,8 +26,10 @@ import java.util.List;
 import jline.ConsoleReader;
 import jline.Terminal;
 
+import com.neuronrobotics.bowlerstudio.creature.CadFileExporter;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
+import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
@@ -106,6 +109,8 @@ public class BowlerKernel {
 				gitRun = true;
 			}
 		}
+		Object ret = null;
+
 		if (gitRun && gitRepo != null ) {
 			
 				ScriptingEngine.pull(gitRepo);
@@ -127,7 +132,9 @@ public class BowlerKernel {
 				}
 				if( gitFile != null)
 					try {
-						ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
+						ret=ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
+
+						exportCad(ret);
 					} catch (Throwable e) {
 						e.printStackTrace();
 						fail();
@@ -146,7 +153,6 @@ public class BowlerKernel {
 //		System.out.println(servo.exists()+" exists: "+servo);
 
 		boolean startLoadingScripts = false;
-		Object ret = null;
 		for (String s : args) {
 			if (startLoadingScripts) {
 				try {
@@ -161,6 +167,7 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
+		exportCad(ret);
 		startLoadingScripts = false;
 
 		for (String s : args) {
@@ -177,6 +184,8 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
+		exportCad(ret);
+
 		boolean runShell = false;
 		String groovy = "Groovy";
 		String shellTypeStorage = groovy;
@@ -274,6 +283,7 @@ public class BowlerKernel {
 					if (ret != null) {
 						System.out.println(ret);
 					}
+					exportCad(ret);
 				} catch (Error e) {
 					e.printStackTrace();
 				} catch (Exception e) {
@@ -284,6 +294,20 @@ public class BowlerKernel {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static void exportCad(Object ret) {
+		List<CSG> totalAssembly=null;
+		try {
+			if(List.class.isInstance(ret)) {
+				totalAssembly=(List<CSG> )ret;
+			}else
+				totalAssembly=Arrays.asList((CSG)ret);
+			
+			new CadFileExporter().generateManufacturingParts(totalAssembly, new File("."));
+		}catch(Throwable t) {
+			t.printStackTrace();
+		}
 	}
 
 	public static ArrayList<String> loadHistory() throws IOException {
