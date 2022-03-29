@@ -330,9 +330,9 @@ public class BowlerKernel {
 		if(MobileBase.class.isInstance(ret)) {
 			
 			MobileBase ret2 = (MobileBase)ret;
-			ret2.connect();
 			MobileBaseCadManager m=MobileBaseCadManager.get(ret2);
 			m.setConfigurationViewerMode(false);
+			ret2.connect();
 			ArrayList<CSG> generateBody = m.generateBody();
 			processReturnedObjects(generateBody,csgBits);
 		}

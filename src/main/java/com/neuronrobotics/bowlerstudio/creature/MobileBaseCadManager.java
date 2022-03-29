@@ -378,7 +378,7 @@ public class MobileBaseCadManager implements Runnable {
 		return generateBody(getMobileBase());
 	}
 	public ArrayList<CSG> generateBody(MobileBase base) {
-		if(base.isAvailable())
+		if(!base.isAvailable())
 			throw new RuntimeException("Device "+base.getScriptingName()+" is not connected, can not generate cad");
 
 		getProcesIndictor().set(0);
