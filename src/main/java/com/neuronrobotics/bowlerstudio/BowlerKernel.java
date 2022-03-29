@@ -32,6 +32,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ICSGProgress;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
@@ -41,7 +42,7 @@ import marytts.signalproc.effects.VolumeEffect;
 
 public class BowlerKernel {
 
-	private static final String CSG = null;
+	//private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 
 	static {
@@ -298,6 +299,15 @@ public class BowlerKernel {
 
 	}
 	private static void processReturnedObjects(Object ret) {
+		CSG.setProgressMoniter(new ICSGProgress() {
+			@Override
+			public void progressUpdate(int currentIndex, int finalIndex, String type,
+					eu.mihosoft.vrl.v3d.CSG intermediateShape) {
+	
+			}
+			
+		});
+		
 		ArrayList<CSG> csgBits = new ArrayList<>();
 		processReturnedObjects(ret,csgBits);
 		try {
@@ -318,20 +328,13 @@ public class BowlerKernel {
 			csgBits.add((CSG)ret);
 		}
 		if(MobileBase.class.isInstance(ret)) {
-			MobileBaseCadManager m=MobileBaseCadManager.get((MobileBase)ret);
+			
+			MobileBase ret2 = (MobileBase)ret;
+			ret2.connect();
+			MobileBaseCadManager m=MobileBaseCadManager.get(ret2);
 			m.setConfigurationViewerMode(false);
-			m.generateCad();
-			while(m.getProcesIndictor().get()<1) {
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				System.out.println("Building cad "+(m.getProcesIndictor().get()*100)+"%");
-				
-			}
-			processReturnedObjects(m.getAllCad(),csgBits);
+			ArrayList<CSG> generateBody = m.generateBody();
+			processReturnedObjects(generateBody,csgBits);
 		}
 		
 				

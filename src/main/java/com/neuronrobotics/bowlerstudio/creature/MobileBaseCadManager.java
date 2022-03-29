@@ -374,8 +374,12 @@ public class MobileBaseCadManager implements Runnable {
 		cadEngineConfiguration = (ICadGenerator) ScriptingEngine.inlineFileScriptRun(confFile, null);
 		return confFile;
 	}
-
+	public ArrayList<CSG> generateBody() {
+		return generateBody(getMobileBase());
+	}
 	public ArrayList<CSG> generateBody(MobileBase base) {
+		if(base.isAvailable())
+			throw new RuntimeException("Device "+base.getScriptingName()+" is not connected, can not generate cad");
 
 		getProcesIndictor().set(0);
 		setAllCad(new ArrayList<>());
@@ -830,7 +834,7 @@ public class MobileBaseCadManager implements Runnable {
 				} catch (Exception e) {
 					getUi().highlightException(getCadScript(), e);
 				}
-				// System.out.print("\r\nDone Generating CAD!\r\n");
+				
 				if (master != null) {
 					for (int i = 0; i < allCad.size(); i++)
 						master.allCad.add(allCad.get(i));
@@ -838,7 +842,13 @@ public class MobileBaseCadManager implements Runnable {
 				} else
 					getUi().setCsg(MobileBaseCadManager.get(base), getCadScript());
 				cadGenerating = false;
-				System.out.print("\r\nDone Generating CAD!\r\n");
+				System.out.print("\r\nDone Generating CAD! num parts: "+allCad.size()+"\r\n");
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				getProcesIndictor().set(1);
 				// System.gc();
 			}
