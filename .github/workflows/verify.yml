@@ -43,3 +43,6 @@ jobs:
      
     - name: Build with Gradle 
       run: ./gradlew shadowJar
+      
+    - name: Test  
+      run: java -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy

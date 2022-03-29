@@ -27,3 +27,4 @@ gradle.properties
 /CSGdatabase.json
 .idea
 out
+manufacturing

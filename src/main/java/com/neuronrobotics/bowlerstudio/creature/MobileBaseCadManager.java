@@ -201,9 +201,14 @@ public class MobileBaseCadManager implements Runnable {
 						if (rendering) {
 							rendering = false;
 							//System.err.println("Render "+timeSince);
-							Platform.runLater(() -> {
-								updateMobileBase(base);
-							});
+							try {
+								Platform.runLater(() -> {
+									updateMobileBase(base);
+								});
+							}catch(Throwable t) {
+								// rendering not availible
+								break;
+							}
 						}
 					}
 					renderWrangler=null;

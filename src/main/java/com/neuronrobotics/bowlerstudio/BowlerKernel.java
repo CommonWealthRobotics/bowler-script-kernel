@@ -107,7 +107,7 @@ public class BowlerKernel {
 					gitFile = s;
 				}
 			}
-			if (s.contains("git") || s.contains("-g")) {
+			if (s.startsWith("-g")) {
 				gitRun = true;
 			}
 		}
@@ -165,7 +165,7 @@ public class BowlerKernel {
 					fail();
 				}
 			}
-			if (s.contains("script") || s.contains("-f")|| s.contains("-s")) {
+			if ( s.startsWith("-f")|| s.startsWith("-s")) {
 				startLoadingScripts = true;
 			}
 		}
@@ -182,7 +182,7 @@ public class BowlerKernel {
 					fail();
 				}
 			}
-			if (s.contains("pipe") || s.contains("-p")) {
+			if (s.startsWith("-p")) {
 				startLoadingScripts = true;
 			}
 		}
@@ -201,7 +201,7 @@ public class BowlerKernel {
 				}
 				break;
 			}
-			if (s.contains("repl") || s.contains("-r")) {
+			if ( s.startsWith("-r")) {
 				runShell = true;
 			}
 		}
@@ -300,8 +300,9 @@ public class BowlerKernel {
 
 	private static void processReturnedObjects(Object ret) {
 		if(List.class.isInstance(ret)) {
-			for(Object o:(List)ret)
-				processReturnedObjects(o);
+			List lst=(List)ret;
+			for(int i=0;i<lst.size();i++)
+				processReturnedObjects(lst.get(i));
 			return;
 		}
 		if(CSG.class.isInstance(ret)) {
