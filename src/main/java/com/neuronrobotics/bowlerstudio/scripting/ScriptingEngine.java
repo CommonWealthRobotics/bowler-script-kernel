@@ -538,6 +538,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static List<String> getCurrentGist(String addr,  Object engine) {
+		if(!javafx.scene.web.WebEngine.class.isInstance(engine))
+			throw new RuntimeException("Engine must be of type javafx.scene.web.WebEngine");
 		String gist = urlToGist(addr);
 
 		if (gist == null) {

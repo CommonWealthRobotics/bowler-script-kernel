@@ -136,35 +136,37 @@ public class CadFileExporter {
 		System.out.println("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
-	private File makeSvg(String nameBase,List<CSG> currentCsg ) throws IOException{
-		File stl = new File(nameBase + ".svg");		
-		
 
-		for(CSG csg:currentCsg){
-			if(csg.getSlicePlanes()==null){
-				csg.addSlicePlane(new Transform());
-			}
-		}
-		try {
-			try {
-				SVGExporter.export(currentCsg, stl);
-			} catch (Exception e) {
-				ArrayList<CSG> movedDown = new ArrayList<>();
-				for (CSG csg : currentCsg) {
-					CSG movez = csg.toZMin().movez(-0.01);
-					if (movez.getSlicePlanes() == null)
-						movez.addSlicePlane(new Transform());
-					movez.setName(csg.getName());
-					movedDown.add(movez);
+	private File makeSvg(String nameBase, List<CSG> currentCsg) throws IOException {
+		File stl = new File(nameBase + ".svg");
+
+		if (!eu.mihosoft.vrl.v3d.JavaFXInitializer.errored) {
+			for (CSG csg : currentCsg) {
+				if (csg.getSlicePlanes() == null) {
+					csg.addSlicePlane(new Transform());
 				}
-				SVGExporter.export(movedDown, stl);
-
 			}
+			try {
+				try {
+					SVGExporter.export(currentCsg, stl);
+				} catch (Exception e) {
+					ArrayList<CSG> movedDown = new ArrayList<>();
+					for (CSG csg : currentCsg) {
+						CSG movez = csg.toZMin().movez(-0.01);
+						if (movez.getSlicePlanes() == null)
+							movez.addSlicePlane(new Transform());
+						movez.setName(csg.getName());
+						movedDown.add(movez);
+					}
+					SVGExporter.export(movedDown, stl);
 
-			System.out.println("Writing " + stl.getAbsolutePath());
-		} catch (Throwable t) {
-			System.err.println("ERROR, NO pixelization engine availible for slicing");
-			t.printStackTrace();
+				}
+
+				System.out.println("Writing " + stl.getAbsolutePath());
+			} catch (Throwable t) {
+				System.err.println("ERROR, NO pixelization engine availible for slicing");
+				t.printStackTrace();
+			}
 		}
 		return stl;
 	}
