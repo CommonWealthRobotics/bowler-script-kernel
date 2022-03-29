@@ -11,6 +11,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
+import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
 import javafx.scene.transform.Affine;
@@ -139,7 +140,12 @@ public class CadFileExporter {
 
 	private File makeSvg(String nameBase, List<CSG> currentCsg) throws IOException {
 		File stl = new File(nameBase + ".svg");
-
+		try {
+			eu.mihosoft.vrl.v3d.JavaFXInitializer.go();
+		}catch(Throwable t) {
+			t.printStackTrace();
+			System.err.println("ERROR No UI engine availible");
+		}
 		if (!eu.mihosoft.vrl.v3d.JavaFXInitializer.errored) {
 			for (CSG csg : currentCsg) {
 				if (csg.getSlicePlanes() == null) {
