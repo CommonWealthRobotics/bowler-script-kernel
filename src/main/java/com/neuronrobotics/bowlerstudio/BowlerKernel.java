@@ -92,6 +92,7 @@ public class BowlerKernel {
 		try {
 			JavaFXInitializer.go();
 		}catch(Throwable t) {
+			t.printStackTrace();
 			System.err.println("ERROR No UI engine availible");
 		}
 		ScriptingEngine.waitForLogin();

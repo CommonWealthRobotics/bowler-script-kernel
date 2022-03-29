@@ -76,7 +76,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javafx.scene.web.WebEngine;
 
 public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// sake, because multiple inheritance is TOO
@@ -538,7 +537,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return ret;
 	}
 
-	public static List<String> getCurrentGist(String addr, WebEngine engine) {
+	public static List<String> getCurrentGist(String addr,  Object engine) {
 		String gist = urlToGist(addr);
 
 		if (gist == null) {
@@ -548,7 +547,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				TransformerFactory tf = TransformerFactory.newInstance();
 				Transformer t = tf.newTransformer();
 				StringWriter sw = new StringWriter();
-				t.transform(new DOMSource(engine.getDocument()), new StreamResult(sw));
+				t.transform(new DOMSource(((javafx.scene.web.WebEngine)engine).getDocument()), new StreamResult(sw));
 				html = sw.getBuffer().toString();
 				return returnFirstGist(html);
 			} catch (TransformerConfigurationException e) {
