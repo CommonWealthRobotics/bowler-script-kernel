@@ -297,21 +297,25 @@ public class BowlerKernel {
 		}
 
 	}
-
 	private static void processReturnedObjects(Object ret) {
+		ArrayList<CSG> csgBits = new ArrayList<>();
+		processReturnedObjects(ret,csgBits);
+		try {
+			new CadFileExporter()
+			.generateManufacturingParts(csgBits, new File("."));
+		}catch(Throwable t) {
+			t.printStackTrace();
+		}
+	}
+	private static void processReturnedObjects(Object ret, ArrayList<CSG> csgBits) {
 		if(List.class.isInstance(ret)) {
 			List lst=(List)ret;
 			for(int i=0;i<lst.size();i++)
-				processReturnedObjects(lst.get(i));
+				processReturnedObjects(lst.get(i),csgBits);
 			return;
 		}
 		if(CSG.class.isInstance(ret)) {
-			try {
-				new CadFileExporter()
-				.generateManufacturingParts(Arrays.asList((CSG)ret), new File("."));
-			}catch(Throwable t) {
-				t.printStackTrace();
-			}
+			csgBits.add((CSG)ret);
 		}
 		if(MobileBase.class.isInstance(ret)) {
 			MobileBaseCadManager m=MobileBaseCadManager.get((MobileBase)ret);
@@ -327,7 +331,7 @@ public class BowlerKernel {
 				System.out.println("Building cad "+(m.getProcesIndictor().get()*100)+"%");
 				
 			}
-			processReturnedObjects(m.getAllCad());
+			processReturnedObjects(m.getAllCad(),csgBits);
 		}
 		
 				
