@@ -27,7 +27,9 @@ import jline.ConsoleReader;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.creature.CadFileExporter;
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
@@ -134,7 +136,7 @@ public class BowlerKernel {
 					try {
 						ret=ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
 
-						exportCad(ret);
+						processReturnedObjects(ret);
 					} catch (Throwable e) {
 						e.printStackTrace();
 						fail();
@@ -167,7 +169,7 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		exportCad(ret);
+		processReturnedObjects(ret);
 		startLoadingScripts = false;
 
 		for (String s : args) {
@@ -184,7 +186,7 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		exportCad(ret);
+		processReturnedObjects(ret);
 
 		boolean runShell = false;
 		String groovy = "Groovy";
@@ -283,7 +285,7 @@ public class BowlerKernel {
 					if (ret != null) {
 						System.out.println(ret);
 					}
-					exportCad(ret);
+					processReturnedObjects(ret);
 				} catch (Error e) {
 					e.printStackTrace();
 				} catch (Exception e) {
@@ -296,18 +298,39 @@ public class BowlerKernel {
 
 	}
 
-	private static void exportCad(Object ret) {
-		List<CSG> totalAssembly=null;
-		try {
-			if(List.class.isInstance(ret)) {
-				totalAssembly=(List<CSG> )ret;
-			}else
-				totalAssembly=Arrays.asList((CSG)ret);
-			
-			new CadFileExporter().generateManufacturingParts(totalAssembly, new File("."));
-		}catch(Throwable t) {
-			t.printStackTrace();
+	private static void processReturnedObjects(Object ret) {
+		if(List.class.isInstance(ret)) {
+			for(Object o:(List)ret)
+				processReturnedObjects(o);
+			return;
 		}
+		if(CSG.class.isInstance(ret)) {
+			try {
+				new CadFileExporter()
+				.generateManufacturingParts(Arrays.asList((CSG)ret), new File("."));
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+		}
+		if(MobileBase.class.isInstance(ret)) {
+			MobileBaseCadManager m=MobileBaseCadManager.get((MobileBase)ret);
+			m.setConfigurationViewerMode(false);
+			m.generateCad();
+			while(m.getProcesIndictor().get()<1) {
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Building cad "+(m.getProcesIndictor().get()*100)+"%");
+				
+			}
+			processReturnedObjects(m.getAllCad());
+		}
+		
+				
+
 	}
 
 	public static ArrayList<String> loadHistory() throws IOException {
