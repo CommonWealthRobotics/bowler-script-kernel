@@ -144,22 +144,28 @@ public class CadFileExporter {
 			if(csg.getSlicePlanes()==null){
 				csg.addSlicePlane(new Transform());
 			}
-		}try{
-			SVGExporter.export(currentCsg, stl);
-		}catch(Exception e){
-			ArrayList<CSG> movedDown = new ArrayList<>();
-			for(CSG csg:currentCsg){
-				CSG movez = csg.toZMin().movez(-0.01);
-				if(movez.getSlicePlanes()==null)
-					movez.addSlicePlane(new Transform());
-				movez.setName(csg.getName());
-				movedDown.add(movez);
-			}
-			SVGExporter.export(movedDown, stl);
-	
 		}
-		
-		System.out.println("Writing "+stl.getAbsolutePath());
+		try {
+			try {
+				SVGExporter.export(currentCsg, stl);
+			} catch (Exception e) {
+				ArrayList<CSG> movedDown = new ArrayList<>();
+				for (CSG csg : currentCsg) {
+					CSG movez = csg.toZMin().movez(-0.01);
+					if (movez.getSlicePlanes() == null)
+						movez.addSlicePlane(new Transform());
+					movez.setName(csg.getName());
+					movedDown.add(movez);
+				}
+				SVGExporter.export(movedDown, stl);
+
+			}
+
+			System.out.println("Writing " + stl.getAbsolutePath());
+		} catch (Throwable t) {
+			System.err.println("ERROR, NO pixelization engine availible for slicing");
+			t.printStackTrace();
+		}
 		return stl;
 	}
 	

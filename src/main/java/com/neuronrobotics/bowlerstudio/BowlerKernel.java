@@ -89,7 +89,11 @@ public class BowlerKernel {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-		//JavaFXInitializer.go();
+		try {
+			JavaFXInitializer.go();
+		}catch(Throwable t) {
+			System.err.println("ERROR No UI engine availible");
+		}
 		ScriptingEngine.waitForLogin();
 		if (args.length == 0) {
 			fail();
