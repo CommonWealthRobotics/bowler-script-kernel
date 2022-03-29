@@ -47,7 +47,7 @@ jobs:
     - name: Test Local 
       run: java -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
       
-    - name: Test Cad 
-      run: |
-      	   rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
-      	   java -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
+    - name: Clean Cad 
+      run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
+    - name: build Cad 
+      run: java -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
