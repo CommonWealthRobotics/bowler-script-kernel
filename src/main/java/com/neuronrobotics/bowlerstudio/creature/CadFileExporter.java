@@ -140,13 +140,8 @@ public class CadFileExporter {
 
 	private File makeSvg(String nameBase, List<CSG> currentCsg) throws IOException {
 		File stl = new File(nameBase + ".svg");
-		try {
-			eu.mihosoft.vrl.v3d.JavaFXInitializer.go();
-		}catch(Throwable t) {
-			t.printStackTrace();
-			System.err.println("ERROR No UI engine availible");
-		}
-		if (!eu.mihosoft.vrl.v3d.JavaFXInitializer.errored) {
+
+		
 			for (CSG csg : currentCsg) {
 				if (csg.getSlicePlanes() == null) {
 					csg.addSlicePlane(new Transform());
@@ -173,7 +168,7 @@ public class CadFileExporter {
 				System.err.println("ERROR, NO pixelization engine availible for slicing");
 				t.printStackTrace();
 			}
-		}
+		
 		return stl;
 	}
 	
