@@ -63,6 +63,8 @@ import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -2125,6 +2127,93 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static File getAppData() {
 		return appdata;
+	}
+
+	// Method to compare two versions.
+	// Returns 1 if v2 is
+	// smaller, -1 if v1 is smaller, 0 if equal
+	public static int versionCompare(String v1, String v2) {
+		// vnum stores each numeric part of version
+		int vnum1 = 0, vnum2 = 0;
+
+		// loop until both String are processed
+		for (int i = 0, j = 0; (i < v1.length() || j < v2.length());) {
+			// Storing numeric part of
+			// version 1 in vnum1
+			while (i < v1.length() && v1.charAt(i) != '.') {
+				vnum1 = vnum1 * 10 + (v1.charAt(i) - '0');
+				i++;
+			}
+
+			// storing numeric part
+			// of version 2 in vnum2
+			while (j < v2.length() && v2.charAt(j) != '.') {
+				vnum2 = vnum2 * 10 + (v2.charAt(j) - '0');
+				j++;
+			}
+
+			if (vnum1 > vnum2)
+				return -1;
+			if (vnum2 > vnum1)
+				return 1;
+
+			// if equal, reset variables and
+			// go for next numeric part
+			vnum1 = vnum2 = 0;
+			i++;
+			j++;
+		}
+		return 0;
+	}
+	public static List<String> getAllTags(String gitRepo) {
+		ArrayList<String> tags = new ArrayList<>();
+		Git jGit =openGit(gitRepo);
+		List<Ref> call;
+		try {
+			call = jGit.tagList().call();
+			for (Ref ref : call) {
+			    String string = ref.getName().split("/")[2];
+			    tags.add(string);
+			}
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
+		Collections.sort(tags, new Comparator<String>() {
+			public int compare(String object1, String object2) {
+		        return versionCompare(object1,object2);
+		    }
+		});
+		closeGit(jGit);
+		return tags;
+	}
+	public static void tagRepo(String remoteURI, String newTag) {
+		System.out.println("Tagging "+remoteURI+" at "+newTag);
+		List<String> tags =getAllTags( remoteURI);
+		for(String s: tags) {
+			if(s.contains(newTag)) {
+				System.out.println("error: tag exists ");	
+				return;
+			}
+		}
+		Git git =openGit(remoteURI);
+		// Creating tag
+		try {
+			try {
+				git.tag().setName(newTag).setForceUpdate(true).call();
+			}catch(Throwable t) {
+				t.printStackTrace();
+			}
+			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
+				git.push().setPushTags().setTransportConfigCallback(transportConfigCallback).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
+			else
+				git.push().setPushTags().setCredentialsProvider(PasswordManager.getCredentialProvider()).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		closeGit(git);
 	}
 
 }
