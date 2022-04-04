@@ -19,11 +19,11 @@ jobs:
       
     - name: start xvfb
       run:
-        Xvfb :99 &
+        Xvfb :0 &
 
     - name: initialize the X11 DISPLAY variable
       run:
-        export DISPLAY=:99
+        export DISPLAY=:0
 
     - name: After checkout, list directory contnts
       run: pwd; ls -la        
@@ -45,9 +45,9 @@ jobs:
       run: ./gradlew shadowJar
       
     - name: Test Local 
-      run: java -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
+      run:  xvfb-run -s '-screen 0 1024x768x24' java -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
       
     - name: Clean Cad 
       run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
     - name: build Cad 
-      run: java -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
+      run:  xvfb-run -s '-screen 0 1024x768x24' java -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml

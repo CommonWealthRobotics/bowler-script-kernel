@@ -1,8 +1,10 @@
+import eu.mihosoft.vrl.v3d.CSG
 
-
+CSG wedge = new Wedge(60,25,40).toCSG()
+wedge.addExportFormat("svg")
 [
 [
-new Wedge(60,25,40).toCSG().movey(75),
+wedge,
 new Isosceles(60,25,40).toCSG()
 ],
 DeviceManager.getSpecificDevice( "MediumKat",{
@@ -14,5 +16,5 @@ DeviceManager.getSpecificDevice( "MediumKat",{
 			  )
 		})
 		, null,
-		[null,new Wedge(60,25,40).toCSG().movey(-75)]
+		[null,wedge.movey(-75)]
 		]
