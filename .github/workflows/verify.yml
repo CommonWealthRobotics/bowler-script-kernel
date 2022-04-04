@@ -45,9 +45,9 @@ jobs:
       run: ./gradlew shadowJar
       
     - name: Test Local 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
+      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.verbose=true -Dprism.forceGPU=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
       
     - name: Clean Cad 
       run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
     - name: build Cad 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
+      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.verbose=true -Dprism.forceGPU=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
