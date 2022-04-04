@@ -27,7 +27,11 @@ jobs:
 
     - name: After checkout, list directory contnts
       run: pwd; ls -la        
-
+    - name: Install libraries
+      run: |
+          sudo apt update
+          sudo apt install libgtk2.0-0
+          
     - name: Pull a JavaFX JDK
       run: wget http://static.azul.com/zulu/bin/zulu8.33.0.1-ca-fx-jdk8.0.192-linux_x64.tar.gz
 
