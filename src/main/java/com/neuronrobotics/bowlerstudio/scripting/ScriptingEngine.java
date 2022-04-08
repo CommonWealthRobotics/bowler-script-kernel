@@ -2192,11 +2192,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static boolean tagExists(String remoteURI, String newTag) {
 		List<String> tags =getAllTags( remoteURI);
 		for(String s: tags) {
-			if(s.contains(newTag)) {
-				return false;
+			System.out.println("Checking "+newTag+" against "+s);
+			if(s.contentEquals(newTag)) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 	public static void tagRepo(String remoteURI, String newTag) {
 		System.out.println("Tagging "+remoteURI+" at "+newTag);
