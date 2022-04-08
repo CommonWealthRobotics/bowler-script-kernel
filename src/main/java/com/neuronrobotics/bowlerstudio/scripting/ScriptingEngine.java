@@ -2188,14 +2188,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		closeGit(jGit);
 		return tags;
 	}
-	public static void tagRepo(String remoteURI, String newTag) {
-		System.out.println("Tagging "+remoteURI+" at "+newTag);
+
+	public static boolean tagExists(String remoteURI, String newTag) {
 		List<String> tags =getAllTags( remoteURI);
 		for(String s: tags) {
 			if(s.contains(newTag)) {
-				System.out.println("error: tag exists ");	
-				return;
+				return false;
 			}
+		}
+		return true;
+	}
+	public static void tagRepo(String remoteURI, String newTag) {
+		System.out.println("Tagging "+remoteURI+" at "+newTag);
+		if(tagExists(remoteURI,newTag)) {
+			System.out.println("ERROR! Tag exists "+remoteURI+"@"+newTag);
+			return;
 		}
 		Git git =openGit(remoteURI);
 		// Creating tag
