@@ -1029,7 +1029,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		String branch = localRepo.getBranch();
 		localRepo.close();
 		if(branch==null)
-			newBranch(remoteURI, "main", null);
+			throw new RuntimeException("FAULT! "+remoteURI+" has no branch!");
 		return branch;
 	}
 
@@ -1044,7 +1044,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		String branch = localRepo.getFullBranch();
 		localRepo.close();
 		if(branch==null)
-			newBranch(remoteURI, "main", null);
+			throw new RuntimeException("FAULT! "+remoteURI+" has no branch!");
 
 		return branch;
 	}
