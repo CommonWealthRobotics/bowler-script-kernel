@@ -31,9 +31,10 @@ public class TestCheckout {
 				String s = ScriptingEngine.getBranch(url);
 				assertTrue("Changing from "+was+" to "+myName+" got "+s,myName.contains(s));
 				
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				fail();
 			}
 		}
 	}

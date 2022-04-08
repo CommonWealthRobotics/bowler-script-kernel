@@ -21,8 +21,6 @@ hs_err_pid*
 .classpath
 /.settings*
 /writer.debug
-/gradle.properties
-gradle.properties
 /jbullet-20101010/
 /CSGdatabase.json
 .idea

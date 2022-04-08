@@ -1019,7 +1019,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static String getBranch(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
-
+		cloneRepo(remoteURI, null);
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
 			gitRepoFile = cloneRepo(remoteURI, null);
@@ -1034,7 +1034,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static String getFullBranch(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
-
+		cloneRepo(remoteURI, null);
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
 			gitRepoFile = cloneRepo(remoteURI, null);
@@ -1391,6 +1391,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			}
 		} catch (Throwable t) {
+			t.printStackTrace();
 			PasswordManager.checkInternet();
 			closeGit(git);
 			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + t.getMessage());
@@ -2033,8 +2034,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return new String[] { targetGit, targetFilename };
 	}
 
-	public static Ref getBranch(String url, String branch) throws IOException, GitAPIException {
-		Collection<Ref> branches = getAllBranches(url);
+	public static Ref getBranch(String remoteURI, String branch) throws IOException, GitAPIException {
+		cloneRepo(remoteURI, null);
+		Collection<Ref> branches = getAllBranches(remoteURI);
 		for (Ref r : branches) {
 			if (r.getName().endsWith(branch)) {
 				return r;
@@ -2044,18 +2046,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	}
 
-	public static Collection<Ref> getAllBranches(String url) throws IOException, GitAPIException {
-
-		Git git = openGit(getRepository(url));
+	public static Collection<Ref> getAllBranches(String remoteURI) throws IOException, GitAPIException {
+		cloneRepo(remoteURI, null);
+		Git git = openGit(getRepository(remoteURI));
 		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 		closeGit(git);
 
 		System.out.print("Getting branches " + ref + "  ");
 		if (ref != null && ref.startsWith("git@")) {
-			return Git.lsRemoteRepository().setHeads(true).setRemote(url)
+			return Git.lsRemoteRepository().setHeads(true).setRemote(remoteURI)
 					.setTransportConfigCallback(transportConfigCallback).call();
 		} else {
-			return Git.lsRemoteRepository().setHeads(true).setRemote(url)
+			return Git.lsRemoteRepository().setHeads(true).setRemote(remoteURI)
 					.setCredentialsProvider(PasswordManager.getCredentialProvider()).call();
 		}
 	}

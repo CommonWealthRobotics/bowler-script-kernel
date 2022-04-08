@@ -48,6 +48,9 @@ jobs:
     - name: Build with Gradle 
       run: ./gradlew shadowJar
       
+     - name: Test with Gradle 
+      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test     
+      
     - name: Test Local 
       run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.verbose=true -Dprism.forceGPU=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
       
