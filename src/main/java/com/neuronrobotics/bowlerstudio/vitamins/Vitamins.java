@@ -23,6 +23,8 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
+import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
@@ -34,6 +36,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.nio.file.WatchEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -95,6 +98,25 @@ public class Vitamins {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+		try {
+			FileChangeWatcher f = FileChangeWatcher.watch(resource);
+			f.addIFileChangeListener(new IFileChangeListener() {
+				@Override
+				public void onFileDelete(File fileThatIsDeleted) {
+					fileLastLoaded.remove(resource.getAbsolutePath());
+					f.close();
+				}
+				
+				@Override
+				public void onFileChange(File fileThatChanged, WatchEvent event) {
+					fileLastLoaded.remove(resource.getAbsolutePath());	
+					f.close();
+				}
+			});
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return fileLastLoaded.get(resource.getAbsolutePath()).clone();
 	}
