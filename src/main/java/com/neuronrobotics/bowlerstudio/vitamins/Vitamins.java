@@ -94,30 +94,31 @@ public class Vitamins {
 			// update
 			try {
 				fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
+				try {
+					FileChangeWatcher f = FileChangeWatcher.watch(resource);
+					f.addIFileChangeListener(new IFileChangeListener() {
+						@Override
+						public void onFileDelete(File fileThatIsDeleted) {
+							fileLastLoaded.remove(resource.getAbsolutePath());
+							f.close();
+						}
+						
+						@Override
+						public void onFileChange(File fileThatChanged, WatchEvent event) {
+							fileLastLoaded.remove(resource.getAbsolutePath());	
+							f.close();
+						}
+					});
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		try {
-			FileChangeWatcher f = FileChangeWatcher.watch(resource);
-			f.addIFileChangeListener(new IFileChangeListener() {
-				@Override
-				public void onFileDelete(File fileThatIsDeleted) {
-					fileLastLoaded.remove(resource.getAbsolutePath());
-					f.close();
-				}
-				
-				@Override
-				public void onFileChange(File fileThatChanged, WatchEvent event) {
-					fileLastLoaded.remove(resource.getAbsolutePath());	
-					f.close();
-				}
-			});
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		return fileLastLoaded.get(resource.getAbsolutePath()).clone();
 	}
 
