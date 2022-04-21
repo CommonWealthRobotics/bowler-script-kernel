@@ -21,11 +21,13 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
+import com.bulletphysics.util.ObjectArrayList;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
-
+import eu.mihosoft.vrl.v3d.Polygon;
+import eu.mihosoft.vrl.v3d.Vertex;
 import javafx.application.Platform;
 
 public class PhysicsCore implements IPhysicsCore {
@@ -74,15 +76,20 @@ public class PhysicsCore implements IPhysicsCore {
 	Transform localTransform = new Transform();
 	localTransform.setIdentity();
 	((CompoundShape)cs).addChildShape(localTransform, new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
+	
 	for(int i=0;i<ground.size();i++) {
-		CSGPhysicsManager m=	new CSGPhysicsManager(
-				Arrays.asList(ground.get(i)), 
-				new Vector3f(0, 0, 0),// starting point
-				0.02,// mass
-				this
-				);
+		ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
+		List<Polygon> polygons = ground.get(i).getPolygons();
+		//if(polygons.size()>1000)
+		//	 polygons = getBoundingBox(finalCSG).getPolygons();
+		for (Polygon p : polygons) {
+			for (Vertex v : p.vertices) {
+				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
+			}
+		}
+		CollisionShape fallShape = new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
 		
-		((CompoundShape)cs).addChildShape(localTransform, m.getFallRigidBody().getCollisionShape());
+		((CompoundShape)cs).addChildShape(localTransform, fallShape);
 	}
 	setGroundShape(cs);
   }
