@@ -1,6 +1,8 @@
 package com.neuronrobotics.bowlerstudio.physics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
@@ -11,6 +13,7 @@ import com.bulletphysics.collision.broadphase.DbvtBroadphase;
 import com.bulletphysics.collision.dispatch.CollisionDispatcher;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.collision.shapes.CollisionShape;
+import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.collision.shapes.StaticPlaneShape;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
@@ -52,6 +55,7 @@ public class PhysicsCore implements IPhysicsCore {
   private float linearSleepThreshhold;
   private float angularSleepThreshhold;
   private float deactivationTime;
+  private List<CSG> ground=null;
 
   public PhysicsCore() throws Exception {
     // set the gravity of our world
@@ -60,7 +64,28 @@ public class PhysicsCore implements IPhysicsCore {
 
     setGroundShape(new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
   }
+  
+  public PhysicsCore(List<CSG> ground) throws Exception {
+	this.ground = ground;
+	// set the gravity of our world
+	getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98 * MobileBasePhysicsManager.PhysicsGravityScalar));
 
+	CollisionShape cs = new CompoundShape();
+	Transform localTransform = new Transform();
+	localTransform.setIdentity();
+	((CompoundShape)cs).addChildShape(localTransform, new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
+	for(int i=0;i<ground.size();i++) {
+		CSGPhysicsManager m=	new CSGPhysicsManager(
+				Arrays.asList(ground.get(i)), 
+				new Vector3f(0, 0, 0),// starting point
+				0.02,// mass
+				this
+				);
+		
+		((CompoundShape)cs).addChildShape(localTransform, m.getFallRigidBody().getCollisionShape());
+	}
+	setGroundShape(cs);
+  }
   public BroadphaseInterface getBroadphase() {
     return broadphase;
   }
@@ -187,6 +212,8 @@ public class PhysicsCore implements IPhysicsCore {
         csg.add(c);
       }
     }
+    if(ground!=null)
+    	csg.addAll(ground);
     return csg;
   }
 
@@ -280,7 +307,10 @@ public class PhysicsCore implements IPhysicsCore {
 
     }
     getPhysicsObjects().clear();
-
+    if(ground!=null)
+    	ground.clear();
+    ground=null;
+    
   }
 
   public int getSimulationSubSteps() {

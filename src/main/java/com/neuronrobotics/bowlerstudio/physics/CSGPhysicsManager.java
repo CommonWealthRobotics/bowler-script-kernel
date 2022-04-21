@@ -51,7 +51,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		setup(fallShape, pose, mass, core);
 	}
 
-	public CSGPhysicsManager(ArrayList<CSG> baseCSG, Vector3f start, double mass, IPhysicsCore core) {
+	public CSGPhysicsManager(List<CSG> baseCSG, Vector3f start, double mass, IPhysicsCore core) {
 		this(baseCSG, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)), mass, true, core);
 	}
 
