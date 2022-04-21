@@ -25,7 +25,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 
 import javafx.application.Platform;
 
-public class PhysicsCore {
+public class PhysicsCore implements IPhysicsCore {
 
   private BroadphaseInterface broadphase = new DbvtBroadphase();
   private DefaultCollisionConfiguration collisionConfiguration = new DefaultCollisionConfiguration();

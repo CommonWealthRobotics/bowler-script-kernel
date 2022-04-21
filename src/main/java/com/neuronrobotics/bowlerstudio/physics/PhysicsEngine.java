@@ -36,7 +36,7 @@ import javafx.application.Platform;
 
 public class PhysicsEngine {
 
-  private static PhysicsCore mainEngine;
+  private static IPhysicsCore mainEngine;
 
   public static void startPhysicsThread(int ms) {
     get().startPhysicsThread(ms);
@@ -67,11 +67,13 @@ public class PhysicsEngine {
     mainEngine = null;
 
   }
+  
+  
 
-  public static PhysicsCore get() {
+  public static IPhysicsCore get() {
     if (mainEngine == null) {
       try {
-        mainEngine = new PhysicsCore();
+        setCore(new PhysicsCore());
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -80,6 +82,10 @@ public class PhysicsEngine {
     return mainEngine;
 
   }
+
+private static void setCore(IPhysicsCore c) throws Exception {
+	mainEngine = c;
+}
 
   public static ArrayList<CSG> getCsgFromEngine() {
 

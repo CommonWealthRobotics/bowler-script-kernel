@@ -34,10 +34,10 @@ public class CSGPhysicsManager implements IPhysicsManager {
 	protected List<CSG> baseCSG = null;
 	private Transform updateTransform = new Transform();
 	private IPhysicsUpdate updateManager = null;
-	private PhysicsCore core;
+	private IPhysicsCore core;
 	
 	public CSGPhysicsManager(List<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
-			PhysicsCore core) {
+			IPhysicsCore core) {
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 
 		ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
@@ -51,7 +51,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		setup(fallShape, pose, mass, core);
 	}
 
-	public CSGPhysicsManager(ArrayList<CSG> baseCSG, Vector3f start, double mass, PhysicsCore core) {
+	public CSGPhysicsManager(ArrayList<CSG> baseCSG, Vector3f start, double mass, IPhysicsCore core) {
 		this(baseCSG, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)), mass, true, core);
 	}
 
@@ -102,7 +102,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 	}
 
 
-	public void setup(CollisionShape fallShape, Transform pose, double mass, PhysicsCore core) {
+	public void setup(CollisionShape fallShape, Transform pose, double mass, IPhysicsCore core) {
 		this.setCore(core);
 
 		// setup the motion state for the ball
@@ -167,11 +167,11 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		this.updateManager = updateManager;
 	}
 
-	public PhysicsCore getCore() {
+	public IPhysicsCore getCore() {
 		return core;
 	}
 
-	public void setCore(PhysicsCore core) {
+	public void setCore(IPhysicsCore core) {
 		this.core = core;
 	}
 

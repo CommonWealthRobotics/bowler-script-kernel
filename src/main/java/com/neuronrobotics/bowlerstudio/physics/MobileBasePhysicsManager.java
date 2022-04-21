@@ -98,7 +98,7 @@ public class MobileBasePhysicsManager {
 	}
 
 	public MobileBasePhysicsManager(MobileBase base, ArrayList<CSG> baseCad,
-			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad, PhysicsCore core) {
+			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad, IPhysicsCore core) {
 		this.simplecad = simplecad;
 		double minz = 0;
 		double Maxz = 0;

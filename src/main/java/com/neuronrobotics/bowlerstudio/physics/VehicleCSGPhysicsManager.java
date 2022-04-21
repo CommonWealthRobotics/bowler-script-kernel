@@ -22,7 +22,7 @@ public class VehicleCSGPhysicsManager extends CSGPhysicsManager {
 
   public VehicleCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass,
       boolean adjustCenter,
-      PhysicsCore core) {
+      IPhysicsCore core) {
     super(baseCSG, pose, mass, adjustCenter, core);
 
     vehicleRayCaster = new DefaultVehicleRaycaster(core.getDynamicsWorld());

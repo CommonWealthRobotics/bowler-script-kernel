@@ -22,7 +22,7 @@ public class WheelCSGPhysicsManager extends CSGPhysicsManager {
   private RaycastVehicle vehicle;
   private final int wheelIndex;
 
-  public WheelCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, PhysicsCore c,
+  public WheelCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, IPhysicsCore c,
       RaycastVehicle v, int wheelIndex) {
     super(baseCSG, pose, mass, false, c);
     this.vehicle = v;

@@ -22,7 +22,7 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager {
   private double velocity;
 
   public HingeCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass,
-      PhysicsCore c) {
+      IPhysicsCore c) {
     super(baseCSG, pose, mass, false, c);
 
   }
