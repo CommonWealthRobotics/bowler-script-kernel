@@ -183,11 +183,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @throws TransportException
 	 * @throws GitAPIException
 	 */
-	private static Git cloneRepo(String remoteURI, String branch, File dir)
+	private static Git cloneRepoLocal(String remoteURI, File dir)
 			throws InvalidRemoteException, TransportException, GitAPIException {
 		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
-		if (branch != null)
-			setURI = setURI.setBranch(branch);
+
 		setURI.setProgressMonitor(getProgressMoniter("Cloning " ,remoteURI));
 		setURI.setDirectory(dir);
 		
@@ -1602,27 +1601,26 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				System.out.println("            branch: " + branch);
 			System.out.println("                to: " + localPath);
 			Throwable ex = null;
-			String myBranch = branch;
 			// Clone the repo
 			Git git = null;
 			try {
-				if (myBranch == null) {
-					git = cloneRepo(remoteURI, branch, dir);
+				if (branch == null) {
+					git = cloneRepoLocal(remoteURI, dir);
 					hasAtLeastOneReference(git);
 					closeGit(git);
-					myBranch = getFullBranch(remoteURI);
-					checkout(remoteURI, myBranch);
+					branch = getFullBranch(remoteURI);
 
 				} else {
-					git = cloneRepo(remoteURI, branch, dir);
+					git = cloneRepoLocal(remoteURI, dir);
 					hasAtLeastOneReference(git);
 					closeGit(git);
-					checkout(remoteURI, myBranch);
+					checkout(remoteURI, branch);
 				}
 
 			} catch (org.eclipse.jgit.api.errors.JGitInternalException exe) {
 				closeGit(git);
 				deleteRepo(remoteURI);
+				exe.printStackTrace(System.out);
 				return cloneRepo(remoteURI,branch);
 			}catch (Throwable e) {
 
@@ -1636,7 +1634,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				checkout(remoteURI, branch);
 			} catch (Exception e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				e.printStackTrace(System.out);	
 			}
 		}
 
