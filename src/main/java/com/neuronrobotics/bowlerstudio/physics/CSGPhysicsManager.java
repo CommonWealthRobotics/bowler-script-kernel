@@ -87,6 +87,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
 			}
 		}
+		finalCSG.setName(baseCSG.getName());
 		return finalCSG;
 	}
 
