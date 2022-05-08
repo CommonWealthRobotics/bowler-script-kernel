@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio.assets;
 
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 //import javafx.embed.swing.SwingFXUtils;
@@ -126,7 +127,13 @@ public class AssetFactory {
     try {
       return new ImageView(loadAsset(file));
     } catch (Exception e) {
-      return new ImageView();
+    	e.printStackTrace();
+      try {
+		return new ImageView(loadAsset("BowlerStudio.png"));
+	} catch (Exception e1) {
+		new IssueReportingExceptionHandler().except(e1);
+		throw new RuntimeException(e1);
+	}
     }
   }
 
