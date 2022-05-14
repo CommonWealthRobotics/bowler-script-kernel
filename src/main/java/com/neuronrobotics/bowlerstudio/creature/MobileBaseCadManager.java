@@ -485,7 +485,7 @@ public class MobileBaseCadManager implements Runnable {
 						for (CSG c : newcad) {
 							getAllCad().add(c);
 						}
-						ui.addCSG(newcad, getFileOfBodyScript(device));
+						ui.addCSG(newcad, getCadScriptFromMobileBase(device));
 					}
 				} else
 					getUi().highlightException(null, new Exception());
@@ -502,12 +502,12 @@ public class MobileBaseCadManager implements Runnable {
 				}).start();
 			}
 		} catch (Exception e) {
-			getUi().highlightException(getFileOfBodyScript(device), e);
+			getUi().highlightException(getCadScriptFromMobileBase(device), e);
 		}
 		System.out.println("Displaying Body");
 		getProcesIndictor().set(0.35);
 		// clears old robot and places base
-		getUi().setAllCSG(getBasetoCadMap().get(device), getFileOfBodyScript(device));
+		getUi().setAllCSG(getBasetoCadMap().get(device), getCadScriptFromMobileBase(device));
 		System.out.println("Rendering limbs");
 		getProcesIndictor().set(0.4);
 		ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
@@ -559,7 +559,7 @@ public class MobileBaseCadManager implements Runnable {
 		return getAllCad();
 	}
 
-	private File getCadScriptFromLimnb(DHParameterKinematics l) {
+	public File getCadScriptFromLimnb(DHParameterKinematics l) {
 		try {
 			return ScriptingEngine.fileFromGit(l.getGitCadEngine()[0], l.getGitCadEngine()[1]);
 		} catch (Exception e) {
@@ -569,7 +569,7 @@ public class MobileBaseCadManager implements Runnable {
 		return null;
 	}
 
-	private File getFileOfBodyScript(MobileBase device){
+	public File getCadScriptFromMobileBase(MobileBase device){
 		try {
 			return ScriptingEngine.fileFromGit(device.getGitCadEngine()[0], device.getGitCadEngine()[1]);
 		} catch (Exception e) {
@@ -609,7 +609,7 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		System.out.println("Found arrangeBed API in CAD engine");
 		List<CSG> totalAssembly = bed.arrangeBed(base);
-		getUi().setAllCSG(totalAssembly, getFileOfBodyScript(base));
+		getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
 		File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
 		if (!dir.exists())
 			dir.mkdirs();
@@ -664,11 +664,11 @@ public class MobileBaseCadManager implements Runnable {
 						FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
 						allCadStl.add(stl);
 						// totalAssembly.add(tmp);
-						getUi().setAllCSG(totalAssembly, getFileOfBodyScript(base));
+						getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
 						set(base, i, j);
 					}
 				} catch (Exception ex) {
-					getUi().highlightException(getFileOfBodyScript(base), ex);
+					getUi().highlightException(getCadScriptFromMobileBase(base), ex);
 				}
 				// legAssembly.setManufactuing(new PrepForManufacturing() {
 				// public CSG prep(CSG arg0) {
@@ -700,11 +700,11 @@ public class MobileBaseCadManager implements Runnable {
 					FileUtil.write(Paths.get(stl.getAbsolutePath()), csg.toStlString());
 					allCadStl.add(stl);
 					totalAssembly.add(csg);
-					getUi().setAllCSG(totalAssembly, getFileOfBodyScript(base));
+					getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
 					link++;
 				}
 			} catch (Exception ex) {
-				getUi().highlightException(getFileOfBodyScript(base), ex);
+				getUi().highlightException(getCadScriptFromMobileBase(base), ex);
 			}
 		}
 		// ui.setCsg(BasetoCadMap.get(base),getCadScript());
@@ -898,15 +898,15 @@ public class MobileBaseCadManager implements Runnable {
 				try {
 					setAllCad(generateBody(device));
 				} catch (Exception e) {
-					getUi().highlightException(getFileOfBodyScript(device), e);
+					getUi().highlightException(getCadScriptFromMobileBase(device), e);
 				}
 				
 				if (master != null) {
 					for (int i = 0; i < allCad.size(); i++)
 						master.allCad.add(allCad.get(i));
-					getUi().setCsg(master, getFileOfBodyScript(device));
+					getUi().setCsg(master, getCadScriptFromMobileBase(device));
 				} else
-					getUi().setCsg(MobileBaseCadManager.get(base), getFileOfBodyScript(device));
+					getUi().setCsg(MobileBaseCadManager.get(base), getCadScriptFromMobileBase(device));
 				cadGenerating = false;
 				System.out.print("\r\nDone Generating CAD! num parts: "+allCad.size()+"\r\n");
 				try {
