@@ -310,6 +310,7 @@ public class MobileBaseCadManager implements Runnable {
 			File f = ScriptingEngine.fileFromGit(args[0], args[1]);
 			if(cadScriptCache.get(key)==null) {
 				try {
+					System.err.println("Building the compiled CAD script for "+key+" "+base+" "+base.getScriptingName());
 					cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
 				} catch (Exception e) {
 					getUi().highlightException(f, e);
@@ -320,8 +321,10 @@ public class MobileBaseCadManager implements Runnable {
 					@Override
 					public void onFileChange(File fileThatChanged, WatchEvent event) {
 						try {
-							cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
-							r.run();
+							System.err.println("Clearing the compiled CAD script for "+key);
+							cadScriptCache.remove(key);
+							if(!rendering)
+								r.run();
 						} catch (Exception e) {
 							getUi().highlightException(f, e);
 						}
@@ -368,7 +371,7 @@ public class MobileBaseCadManager implements Runnable {
 		if (configMode)
 			return getConfigurationDisplay();
 		Object cadForBodyEngine = scriptFromFileInfo(base.getGitCadEngine(),()->{
-			generateBody();
+			run();
 		});
 		if (IgenerateBody.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateBody) cadForBodyEngine;
@@ -390,7 +393,7 @@ public class MobileBaseCadManager implements Runnable {
 
 	private IgenerateBed getIgenerateBed() {
 		Object cadForBodyEngine=scriptFromFileInfo(base.getGitCadEngine(),()->{
-			master.run();
+			run();
 		});
 		if (IgenerateBed.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateBed) cadForBodyEngine;
