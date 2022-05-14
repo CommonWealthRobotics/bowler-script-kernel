@@ -44,12 +44,12 @@ public class MobileBaseCadManager implements Runnable {
 	// static
 	private static HashMap<MobileBase, MobileBaseCadManager> cadmap = new HashMap<>();
 	// static
-	private Object cadForBodyEngine;
+	//private Object cadForBodyEngine;
 	private MobileBase base;
 	private ArrayList<MobileBaseCadManager> slaves = new ArrayList<MobileBaseCadManager>();
-	private File cadScript;
+	//private File cadScript;
 
-	private HashMap<DHParameterKinematics, Object> dhCadGen = new HashMap<>();
+	//private HashMap<DHParameterKinematics, Object> dhCadGen = new HashMap<>();
 	private HashMap<DHParameterKinematics, ArrayList<CSG>> DHtoCadMap = new HashMap<>();
 	private HashMap<LinkConfiguration, ArrayList<CSG>> LinktoCadMap = new HashMap<>();
 	private HashMap<MobileBase, ArrayList<CSG>> BasetoCadMap = new HashMap<>();
@@ -67,11 +67,11 @@ public class MobileBaseCadManager implements Runnable {
 	private MobileBaseCadManager master;
 	private boolean rendering = false;
 	private Thread renderWrangler = null;
-	
+	private HashMap<String,Object> cadScriptCache = new HashMap<>();
 	
 	protected void clear() {
 		// Cad generator
-		dhCadGen.clear();
+		cadScriptCache.clear();
 		// clear the csgs from the list
 		for (DHParameterKinematics key : DHtoCadMap.keySet()) {
 			ArrayList<CSG> arrayList = DHtoCadMap.get(key);
@@ -145,43 +145,44 @@ public class MobileBaseCadManager implements Runnable {
 		}
 	};
 
-	private IFileChangeListener cadWatcher = new IFileChangeListener() {
-		boolean fileHandeling = false;
-
-		@Override
-		public void onFileChange(File fileThatChanged, WatchEvent event) {
-			if (fileHandeling)
-				return;
-
-			if (cadGenerating || !getAutoRegen()) {
-				System.out.println("No Base reload, building currently");
-				return;
-			}
-			fileHandeling = true;
-			try {
-				new Thread() {
-					public void run() {
-						try {
-
-							System.out.println("Re-loading Cad Base Engine");
-							cadForBodyEngine = ScriptingEngine.inlineFileScriptRun(fileThatChanged, null);
-						} catch (Exception e) {
-							getUi().highlightException(null, e);
-						}
-						generateCad();
-						fileHandeling = false;
-					}
-				}.start();
-			} catch (Exception e) {
-				getUi().highlightException(null, e);
-			}
-		}
-
-		@Override
-		public void onFileDelete(File fileThatIsDeleted) {
-			
-		}
-	};
+//	private IFileChangeListener cadWatcher = new IFileChangeListener() {
+//		boolean fileHandeling = false;
+//
+//		@Override
+//		public void onFileChange(File fileThatChanged, WatchEvent event) {
+//			if (fileHandeling)
+//				return;
+//
+//			if (cadGenerating || !getAutoRegen()) {
+//				System.out.println("No Base reload, building currently");
+//				return;
+//			}
+//			fileHandeling = true;
+//			try {
+//				new Thread() {
+//					public void run() {
+//						try {
+//
+//							System.out.println("Re-loading Cad Base Engine");
+//							cadForBodyEngine = ScriptingEngine.inlineFileScriptRun(fileThatChanged, null);
+//							
+//						} catch (Exception e) {
+//							getUi().highlightException(null, e);
+//						}
+//						generateCad();
+//						fileHandeling = false;
+//					}
+//				}.start();
+//			} catch (Exception e) {
+//				getUi().highlightException(null, e);
+//			}
+//		}
+//
+//		@Override
+//		public void onFileDelete(File fileThatIsDeleted) {
+//			
+//		}
+//	};
 
 
 	// This is the rendering event
@@ -292,30 +293,95 @@ public class MobileBaseCadManager implements Runnable {
 
 	}
 
-	public File getCadScript() {
-		return cadScript;
+//	public File getCadScript() {
+//		return cadScript;
+//	}
+
+//	public void setCadScript(File cadScript) {
+//		if (cadScript == null)
+//			return;
+//		FileWatchDeviceWrapper.watch(base, cadScript, cadWatcher);
+//
+//		this.cadScript = cadScript;
+//	}
+	private Object scriptFromFileInfo(String[] args,Runnable r ) {
+		String key = args[0]+":"+args[1];
+		try {
+			File f = ScriptingEngine.fileFromGit(args[0], args[1]);
+			if(cadScriptCache.get(key)==null) {
+				try {
+					cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
+				} catch (Exception e) {
+					getUi().highlightException(f, e);
+				}
+				FileChangeWatcher watcher = FileChangeWatcher.watch(f);
+				watcher.addIFileChangeListener(new IFileChangeListener() {
+
+					@Override
+					public void onFileChange(File fileThatChanged, WatchEvent event) {
+						try {
+							cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
+							r.run();
+						} catch (Exception e) {
+							getUi().highlightException(f, e);
+						}
+					}
+					@Override
+					public void onFileDelete(File fileThatIsDeleted) {
+						cadScriptCache.remove(key);
+					}
+				});
+			}
+			return cadScriptCache.get(key);
+		} catch (GitAPIException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		throw new RuntimeException("File Missing!");
+		
 	}
-
-	public void setCadScript(File cadScript) {
-		if (cadScript == null)
-			return;
-		FileWatchDeviceWrapper.watch(base, cadScript, cadWatcher);
-
-		this.cadScript = cadScript;
+	
+	private void closeScriptFromFileInfo(String[] args ) {
+		String key = args[0]+":"+args[1];
+		cadScriptCache.remove(key);
+		try {
+			File f = ScriptingEngine.fileFromGit(args[0], args[1]);
+			FileChangeWatcher.close(f);
+			
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
-
+	
 	private IgenerateBody getIgenerateBody() {
 		if (configMode)
 			return getConfigurationDisplay();
+		Object cadForBodyEngine = scriptFromFileInfo(base.getGitCadEngine(),()->{
+			generateBody();
+		});
 		if (IgenerateBody.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateBody) cadForBodyEngine;
 		}
 		return null;
 	}
 
-	private IgenerateCad getIgenerateCad() {
+	private IgenerateCad getIgenerateCad(DHParameterKinematics dh) {
 		if (configMode)
 			return getConfigurationDisplay();
+		Object cadForBodyEngine=scriptFromFileInfo(dh.getGitCadEngine(),()->{
+			generateCad(dh);
+		});
 		if (IgenerateCad.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateCad) cadForBodyEngine;
 		}
@@ -323,6 +389,9 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	private IgenerateBed getIgenerateBed() {
+		Object cadForBodyEngine=scriptFromFileInfo(base.getGitCadEngine(),()->{
+			master.run();
+		});
 		if (IgenerateBed.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateBed) cadForBodyEngine;
 		}
@@ -383,29 +452,12 @@ public class MobileBaseCadManager implements Runnable {
 
 		getProcesIndictor().set(0);
 		setAllCad(new ArrayList<>());
-		// DHtoCadMap = new HashMap<>();
-		// private HashMap<MobileBase, ArrayList<CSG>> BasetoCadMap = new
-		// HashMap<>();
 
 		MobileBase device = base;
 		if (getBasetoCadMap().get(device) == null) {
 			getBasetoCadMap().put(device, new ArrayList<CSG>());
 		}
 
-		if (cadForBodyEngine == null) {
-			try {
-				setDefaultLinkLevelCadEngine();
-			} catch (Throwable e) {
-				getUi().highlightException(null, e);
-			}
-			if (getCadScript() != null) {
-				try {
-					cadForBodyEngine = ScriptingEngine.inlineFileScriptRun(getCadScript(), null);
-				} catch (Exception e) {
-					getUi().highlightException(getCadScript(), e);
-				}
-			}
-		}
 		getProcesIndictor().set(0.1);
 		try {
 			getAllCad().clear();
@@ -433,7 +485,7 @@ public class MobileBaseCadManager implements Runnable {
 						for (CSG c : newcad) {
 							getAllCad().add(c);
 						}
-						ui.addCSG(newcad, getCadScript());
+						ui.addCSG(newcad, getFileOfBodyScript(device));
 					}
 				} else
 					getUi().highlightException(null, new Exception());
@@ -450,12 +502,12 @@ public class MobileBaseCadManager implements Runnable {
 				}).start();
 			}
 		} catch (Exception e) {
-			getUi().highlightException(getCadScript(), e);
+			getUi().highlightException(getFileOfBodyScript(device), e);
 		}
 		System.out.println("Displaying Body");
 		getProcesIndictor().set(0.35);
 		// clears old robot and places base
-		getUi().setAllCSG(getBasetoCadMap().get(device), getCadScript());
+		getUi().setAllCSG(getBasetoCadMap().get(device), getFileOfBodyScript(device));
 		System.out.println("Rendering limbs");
 		getProcesIndictor().set(0.4);
 		ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
@@ -471,7 +523,7 @@ public class MobileBaseCadManager implements Runnable {
 			if (showingStl || !isAvailible) {
 				for (CSG csg : arrayList) {
 					getAllCad().add(csg);
-					getUi().addCsg(csg, getCadScript());
+					getUi().addCsg(csg, getCadScriptFromLimnb(l));
 					set(base, (int) i, (int) j);
 					j += 1;
 				}
@@ -484,7 +536,7 @@ public class MobileBaseCadManager implements Runnable {
 
 					getAllCad().add(csg);
 					arrayList.add(csg);
-					getUi().addCsg(csg, getCadScript());
+					getUi().addCsg(csg, getCadScriptFromLimnb(l));
 					j += 1;
 
 				}
@@ -505,6 +557,26 @@ public class MobileBaseCadManager implements Runnable {
 		// PhysicsEngine.startPhysicsThread(50);
 		// return PhysicsEngine.getCsgFromEngine();
 		return getAllCad();
+	}
+
+	private File getCadScriptFromLimnb(DHParameterKinematics l) {
+		try {
+			return ScriptingEngine.fileFromGit(l.getGitCadEngine()[0], l.getGitCadEngine()[1]);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private File getFileOfBodyScript(MobileBase device){
+		try {
+			return ScriptingEngine.fileFromGit(device.getGitCadEngine()[0], device.getGitCadEngine()[1]);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	private void set(MobileBase base, int limb, int link) {
@@ -537,7 +609,7 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		System.out.println("Found arrangeBed API in CAD engine");
 		List<CSG> totalAssembly = bed.arrangeBed(base);
-		getUi().setAllCSG(totalAssembly, getCadScript());
+		getUi().setAllCSG(totalAssembly, getFileOfBodyScript(base));
 		File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
 		if (!dir.exists())
 			dir.mkdirs();
@@ -592,11 +664,11 @@ public class MobileBaseCadManager implements Runnable {
 						FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
 						allCadStl.add(stl);
 						// totalAssembly.add(tmp);
-						getUi().setAllCSG(totalAssembly, getCadScript());
+						getUi().setAllCSG(totalAssembly, getFileOfBodyScript(base));
 						set(base, i, j);
 					}
 				} catch (Exception ex) {
-					getUi().highlightException(getCadScript(), ex);
+					getUi().highlightException(getFileOfBodyScript(base), ex);
 				}
 				// legAssembly.setManufactuing(new PrepForManufacturing() {
 				// public CSG prep(CSG arg0) {
@@ -628,11 +700,11 @@ public class MobileBaseCadManager implements Runnable {
 					FileUtil.write(Paths.get(stl.getAbsolutePath()), csg.toStlString());
 					allCadStl.add(stl);
 					totalAssembly.add(csg);
-					getUi().setAllCSG(totalAssembly, getCadScript());
+					getUi().setAllCSG(totalAssembly, getFileOfBodyScript(base));
 					link++;
 				}
 			} catch (Exception ex) {
-				getUi().highlightException(getCadScript(), ex);
+				getUi().highlightException(getFileOfBodyScript(base), ex);
 			}
 		}
 		// ui.setCsg(BasetoCadMap.get(base),getCadScript());
@@ -696,17 +768,11 @@ public class MobileBaseCadManager implements Runnable {
 	public ArrayList<CSG> generateCad(DHParameterKinematics dh) {
 		ArrayList<CSG> dhLinks = new ArrayList<>();
 
-		if (dhCadGen.get(dh) == null) {
-			try {
-				setDefaultLinkLevelCadEngine();
-			} catch (Exception e) {
-				getUi().highlightException(getCadScript(), e);
-			}
-		}
+
 
 		try {
 			IgenerateCad generatorToUse = getConfigurationDisplay();
-			Object object = dhCadGen.get(dh);
+			Object object = getIgenerateCad(dh);
 			if (object != null && !configMode) {
 				if (IgenerateCad.class.isInstance(object))
 					generatorToUse = (IgenerateCad) object;
@@ -733,7 +799,7 @@ public class MobileBaseCadManager implements Runnable {
 					if (newcad.size() == 0) {
 						newcad = getConfigurationDisplay().generateCad(dh, i);
 					}
-					getUi().addCSG(newcad, getCadScript());
+					getUi().addCSG(newcad, getCadScriptFromLimnb(dh));
 					LinkConfiguration configuration = dh.getLinkConfiguration(i);
 					if (getLinktoCadMap().get(configuration) == null) {
 						getLinktoCadMap().put(configuration, new ArrayList<>());
@@ -767,7 +833,7 @@ public class MobileBaseCadManager implements Runnable {
 			}
 			return dhLinks;
 		} catch (Exception e) {
-			getUi().highlightException(getCadScript(), e);
+			getUi().highlightException(getCadScriptFromLimnb(dh), e);
 		}
 		return null;
 
@@ -832,15 +898,15 @@ public class MobileBaseCadManager implements Runnable {
 				try {
 					setAllCad(generateBody(device));
 				} catch (Exception e) {
-					getUi().highlightException(getCadScript(), e);
+					getUi().highlightException(getFileOfBodyScript(device), e);
 				}
 				
 				if (master != null) {
 					for (int i = 0; i < allCad.size(); i++)
 						master.allCad.add(allCad.get(i));
-					getUi().setCsg(master, getCadScript());
+					getUi().setCsg(master, getFileOfBodyScript(device));
 				} else
-					getUi().setCsg(MobileBaseCadManager.get(base), getCadScript());
+					getUi().setCsg(MobileBaseCadManager.get(base), getFileOfBodyScript(device));
 				cadGenerating = false;
 				System.out.print("\r\nDone Generating CAD! num parts: "+allCad.size()+"\r\n");
 				try {
@@ -855,23 +921,7 @@ public class MobileBaseCadManager implements Runnable {
 		}.start();
 	}
 
-	private void setDefaultLinkLevelCadEngine() throws Exception {
-		String[] cad;
-		cad = base.getGitCadEngine();
 
-		if (cadForBodyEngine == null) {
-			setGitCadEngine(cad[0], cad[1], base);
-			cadForBodyEngine = ScriptingEngine.inlineFileScriptRun(getCadScript(), null);
-		}
-		for (DHParameterKinematics kin : base.getAllDHChains()) {
-			String[] kinEng = kin.getGitCadEngine();
-			if (!cad[0].contentEquals(kinEng[0]) || !cad[1].contentEquals(kinEng[1])) {
-				setGitCadEngine(kinEng[0], kinEng[1], kin);
-			} else {
-				dhCadGen.put(kin, cadForBodyEngine);
-			}
-		}
-	}
 
 	public void onTabClosing() {
 
@@ -879,41 +929,13 @@ public class MobileBaseCadManager implements Runnable {
 
 	public void setGitCadEngine(String gitsId, String file, DHParameterKinematics dh)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		closeScriptFromFileInfo(dh.getGitCadEngine());
 		dh.setGitCadEngine(new String[] { gitsId, file });
-		File code = ScriptingEngine.fileFromGit(gitsId, file);
-		try {
-			Object defaultDHSolver = ScriptingEngine.inlineFileScriptRun(code, null);
-			dhCadGen.put(dh, defaultDHSolver);
-		} catch (Exception e) {
-			getUi().highlightException(code, e);
-		}
-
-		FileWatchDeviceWrapper.watch(dh, code, new IFileChangeListener() {
-			
-			@Override
-			public void onFileDelete(File fileThatIsDeleted) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onFileChange(File fileThatChanged, WatchEvent event) {
-				System.out.println("Re-loading Cad Limb Engine");
-
-				try {
-					Object d = ScriptingEngine.inlineFileScriptRun(code, null);
-					dhCadGen.put(dh, d);
-					generateCad();
-				} catch (Exception ex) {
-					getUi().highlightException(code, ex);
-				}
-			}
-		});
 	}
 
 	public void setGitCadEngine(String gitsId, String file, MobileBase device)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-		setCadScript(ScriptingEngine.fileFromGit(gitsId, file));
+		closeScriptFromFileInfo(device.getGitCadEngine());
 		device.setGitCadEngine(new String[] { gitsId, file });
 	}
 
