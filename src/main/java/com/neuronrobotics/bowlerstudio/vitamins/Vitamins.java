@@ -163,13 +163,14 @@ public class Vitamins {
 			StringParameter size = new StringParameter(type + " Default", id, Vitamins.listVitaminSizes(type));
 			size.setStrValue(id);
 			Object file = script.get("scriptGit");
-			Object repo = script.get("scriptFile");
+			Object repostring = script.get("scriptFile");
+			Object repo = repostring;
 			if (file != null && repo != null) {
 				ArrayList<Object> servoMeasurments = new ArrayList<Object>();
 				servoMeasurments.add(id);
 				newVitamin = (CSG) ScriptingEngine.gitScriptRun(script.get("scriptGit").toString(), // git location of
 																									// the library
-						script.get("scriptFile").toString(), // file to load
+						repostring.toString(), // file to load
 						servoMeasurments);
 				return newVitamin;
 			} else {
