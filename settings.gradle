@@ -1,2 +1,3 @@
 include 'java-bowler'
 include 'JCSG'
+include 'mujoco-java'
