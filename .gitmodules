@@ -4,6 +4,4 @@
 [submodule "JCSG"]
 	path = JCSG
 	url = https://github.com/NeuronRobotics/JCSG.git
-[submodule "mujoco-java"]
-	path = mujoco-java
-	url = https://github.com/CommonWealthRobotics/mujoco-java.git
+
