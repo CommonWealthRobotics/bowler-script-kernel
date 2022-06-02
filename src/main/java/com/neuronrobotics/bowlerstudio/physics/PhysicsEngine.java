@@ -75,7 +75,7 @@ public class PhysicsEngine {
     if (mainEngine == null) {
       try {
     	  if(OSUtil.isWindows())
-    		  setCore(new PhysicsCore());
+    		  setCore(new JBulletCore());
     	  else
     		  setCore(new MuJoCoCore(new ArrayList<>()));
       } catch (Exception e) {

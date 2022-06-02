@@ -27,7 +27,7 @@ import eu.mihosoft.vrl.v3d.Vertex;
 import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
-public class CSGPhysicsManager implements IPhysicsManager {
+public class JBulletCSGPhysicsManager implements IPhysicsManager {
 
 	private RigidBody fallRigidBody;
 	private final Affine ballLocation = new Affine();
@@ -36,7 +36,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 	private IPhysicsUpdate updateManager = null;
 	private IPhysicsCore core;
 	
-	public CSGPhysicsManager(List<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
+	public JBulletCSGPhysicsManager(List<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
 			IPhysicsCore core) {
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 
@@ -51,7 +51,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		setup(fallShape, pose, mass, core);
 	}
 
-	public CSGPhysicsManager(List<CSG> baseCSG, Vector3f start, double mass, IPhysicsCore core) {
+	public JBulletCSGPhysicsManager(List<CSG> baseCSG, Vector3f start, double mass, IPhysicsCore core) {
 		this(baseCSG, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)), mass, true, core);
 	}
 

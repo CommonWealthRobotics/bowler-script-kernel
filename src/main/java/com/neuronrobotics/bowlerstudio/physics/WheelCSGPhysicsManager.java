@@ -12,7 +12,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class WheelCSGPhysicsManager extends CSGPhysicsManager {
+public class WheelCSGPhysicsManager extends JBulletCSGPhysicsManager {
 
   private IClosedLoopController controller = null;
   private double target = 0;

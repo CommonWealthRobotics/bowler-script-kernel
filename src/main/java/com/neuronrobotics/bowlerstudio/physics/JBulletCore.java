@@ -30,7 +30,7 @@ import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Vertex;
 import javafx.application.Platform;
 
-public class PhysicsCore implements IPhysicsCore {
+public class JBulletCore implements IPhysicsCore {
 
   private BroadphaseInterface broadphase = new DbvtBroadphase();
   private DefaultCollisionConfiguration collisionConfiguration = new DefaultCollisionConfiguration();
@@ -58,8 +58,8 @@ public class PhysicsCore implements IPhysicsCore {
   private float angularSleepThreshhold;
   private float deactivationTime;
   private List<CSG> ground=null;
-
-  public PhysicsCore() throws Exception {
+  public static final float PhysicsGravityScalar = 6;
+  public JBulletCore() throws Exception {
     // set the gravity of our world
     getDynamicsWorld().setGravity(
         new Vector3f(0, 0, (float) -98 * MobileBasePhysicsManager.PhysicsGravityScalar));
@@ -67,7 +67,7 @@ public class PhysicsCore implements IPhysicsCore {
     setGroundShape(new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
   }
   
-  public PhysicsCore(List<CSG> ground) throws Exception {
+  public JBulletCore(List<CSG> ground) throws Exception {
 	this.ground = ground;
 	// set the gravity of our world
 	getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98 * MobileBasePhysicsManager.PhysicsGravityScalar));
@@ -153,6 +153,7 @@ public class PhysicsCore implements IPhysicsCore {
         new Vector3f(0, 0, 0));
     groundRigidBody = new RigidBody(groundRigidBodyCI);
     dynamicsWorld.addRigidBody(groundRigidBody); // add our ground to the
+    dynamicsWorld.setGravity(new Vector3f(0, 0, (float) -98 * PhysicsGravityScalar));
   }
 
   public ArrayList<IPhysicsManager> getPhysicsObjects() {
@@ -262,10 +263,10 @@ public class PhysicsCore implements IPhysicsCore {
           && !VehicleCSGPhysicsManager.class.isInstance(manager)) {
         getDynamicsWorld().addRigidBody(manager.getFallRigidBody());
       }
-      if (HingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
+      if (JBulletHingeCSGPhysicsManager.class.isInstance(manager)) {
+        if (((JBulletHingeCSGPhysicsManager) manager).getConstraint() != null) {
           getDynamicsWorld()
-              .addConstraint(((HingeCSGPhysicsManager) manager).getConstraint(), true);
+              .addConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint(), true);
         }
       }
       if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
@@ -283,9 +284,9 @@ public class PhysicsCore implements IPhysicsCore {
 
         getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
       }
-      if (HingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
-          getDynamicsWorld().removeConstraint(((HingeCSGPhysicsManager) manager).getConstraint());
+      if (JBulletHingeCSGPhysicsManager.class.isInstance(manager)) {
+        if (((JBulletHingeCSGPhysicsManager) manager).getConstraint() != null) {
+          getDynamicsWorld().removeConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint());
         }
       }
       if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
@@ -303,9 +304,9 @@ public class PhysicsCore implements IPhysicsCore {
           && !VehicleCSGPhysicsManager.class.isInstance(manager)) {
         getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
       }
-      if (HingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
-          getDynamicsWorld().removeConstraint(((HingeCSGPhysicsManager) manager).getConstraint());
+      if (JBulletHingeCSGPhysicsManager.class.isInstance(manager)) {
+        if (((JBulletHingeCSGPhysicsManager) manager).getConstraint() != null) {
+          getDynamicsWorld().removeConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint());
         }
       }
       if (VehicleCSGPhysicsManager.class.isInstance(manager)) {

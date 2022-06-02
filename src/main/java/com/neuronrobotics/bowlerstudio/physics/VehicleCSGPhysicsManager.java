@@ -11,7 +11,7 @@ import com.bulletphysics.linearmath.Transform;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class VehicleCSGPhysicsManager extends CSGPhysicsManager {
+public class VehicleCSGPhysicsManager extends JBulletCSGPhysicsManager {
 
   ////////////////////////////////////////////////////////////////////////////
 
