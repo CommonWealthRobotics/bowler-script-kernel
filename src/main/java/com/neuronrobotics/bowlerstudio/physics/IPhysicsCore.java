@@ -2,8 +2,6 @@ package com.neuronrobotics.bowlerstudio.physics;
 
 import java.util.ArrayList;
 
-import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
-import com.bulletphysics.dynamics.RigidBody;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
@@ -25,6 +23,5 @@ public interface IPhysicsCore {
 
 	void startPhysicsThread(int ms);
 
-	DiscreteDynamicsWorld getDynamicsWorld();
 
 }

@@ -1,8 +1,7 @@
 package com.neuronrobotics.bowlerstudio.physics;
 
 import java.util.ArrayList;
-
-import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
+import java.util.List;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
@@ -10,6 +9,10 @@ import org.mujoco.MuJoCoLib;
 
 public class MuJoCoCore implements IPhysicsCore {
 
+	
+	public MuJoCoCore(List<CSG> ground) {
+		
+	}
 	@Override
 	public ArrayList<CSG> getCsgFromEngine() {
 		// TODO Auto-generated method stub
@@ -56,12 +59,6 @@ public class MuJoCoCore implements IPhysicsCore {
 	public void startPhysicsThread(int ms) {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public DiscreteDynamicsWorld getDynamicsWorld() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

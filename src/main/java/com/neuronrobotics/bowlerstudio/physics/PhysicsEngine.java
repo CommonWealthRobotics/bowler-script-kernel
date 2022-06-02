@@ -28,6 +28,7 @@ import com.bulletphysics.linearmath.Transform;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.util.ThreadUtil;
+import com.neuronrobotics.video.OSUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Sphere;
@@ -73,7 +74,10 @@ public class PhysicsEngine {
   public static IPhysicsCore get() {
     if (mainEngine == null) {
       try {
-        setCore(new PhysicsCore());
+    	  if(OSUtil.isWindows())
+    		  setCore(new PhysicsCore());
+    	  else
+    		  setCore(new MuJoCoCore(new ArrayList<>()));
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
