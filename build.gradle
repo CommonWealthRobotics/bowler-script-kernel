@@ -274,7 +274,7 @@ dependencies {
 	compile group: 'de.dfki.mary', name: 'voice-dfki-spike-hsmm', version: '5.2'
 	// https://mvnrepository.com/artifact/de.dfki.mary/marytts-lang-en
 	compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.2'
-	implementation group: 'org.bytedeco', name: 'javacpp', version: '1.5.7'
+	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'0.4.3'
 
 }
 
