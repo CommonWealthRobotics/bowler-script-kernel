@@ -260,7 +260,8 @@ public class JBulletCore implements IPhysicsCore {
     if (!getPhysicsObjects().contains(manager)) {
       getPhysicsObjects().add(manager);
       if (!WheelCSGPhysicsManager.class.isInstance(manager)
-          && !VehicleCSGPhysicsManager.class.isInstance(manager)) {
+          //&& !VehicleCSGPhysicsManager.class.isInstance(manager)
+          ) {
         getDynamicsWorld().addRigidBody(manager.getFallRigidBody());
       }
       if (JBulletHingeCSGPhysicsManager.class.isInstance(manager)) {
@@ -269,9 +270,9 @@ public class JBulletCore implements IPhysicsCore {
               .addConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint(), true);
         }
       }
-      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
-        getDynamicsWorld().addVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
-      }
+//      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
+//        getDynamicsWorld().addVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
+//      }
 
     }
   }
@@ -280,7 +281,8 @@ public class JBulletCore implements IPhysicsCore {
     if (getPhysicsObjects().contains(manager)) {
       getPhysicsObjects().remove(manager);
       if (!WheelCSGPhysicsManager.class.isInstance(manager)
-          && !VehicleCSGPhysicsManager.class.isInstance(manager)) {
+          //&& !VehicleCSGPhysicsManager.class.isInstance(manager)
+          ) {
 
         getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
       }
@@ -289,9 +291,9 @@ public class JBulletCore implements IPhysicsCore {
           getDynamicsWorld().removeConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint());
         }
       }
-      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
-        getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
-      }
+//      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
+//        getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
+//      }
 
     }
   }
@@ -301,7 +303,8 @@ public class JBulletCore implements IPhysicsCore {
     ThreadUtil.wait((int) (msTime * 2));
     for (IPhysicsManager manager : getPhysicsObjects()) {
       if (!WheelCSGPhysicsManager.class.isInstance(manager)
-          && !VehicleCSGPhysicsManager.class.isInstance(manager)) {
+          //&& !VehicleCSGPhysicsManager.class.isInstance(manager)
+          ) {
         getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
       }
       if (JBulletHingeCSGPhysicsManager.class.isInstance(manager)) {
@@ -309,9 +312,9 @@ public class JBulletCore implements IPhysicsCore {
           getDynamicsWorld().removeConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint());
         }
       }
-      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
-        getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
-      }
+//      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
+//        getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
+//      }
 
     }
     getPhysicsObjects().clear();
