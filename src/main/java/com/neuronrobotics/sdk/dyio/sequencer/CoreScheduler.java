@@ -38,7 +38,7 @@ public class CoreScheduler {
 	private SchedulerThread st=null;
 	
 	/** The mp3. */
-	private SequencerMP3 mp3;
+	private SequencerWAV mp3;
 	
 	/** The loop. */
 	private boolean loop = false;
@@ -207,7 +207,7 @@ public class CoreScheduler {
 			return;
 		audioFile=f;
 		filename=f.getAbsolutePath();
-    	mp3 = new SequencerMP3(f.getAbsolutePath());
+    	mp3 = new SequencerWAV(f.getAbsolutePath());
     	msDuration = mp3.getTrackLength();
     	System.out.println("Setting track length: "+msDuration);
     	setSequenceParams( msDuration, 0);
