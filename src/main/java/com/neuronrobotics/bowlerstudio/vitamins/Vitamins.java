@@ -555,7 +555,8 @@ public class Vitamins {
 		ArrayList<String> types = new ArrayList<String>();
 		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
 		Set<String> keys = database.keySet();
-		for (String s : keys) {
+		for (Iterator<String> iterator = keys.iterator(); iterator.hasNext();) {
+			String s = iterator.next();
 			if (s != null) {
 				if (!s.contains("meta")) {
 					types.add(s);
