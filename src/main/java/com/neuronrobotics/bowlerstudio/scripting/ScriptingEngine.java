@@ -255,7 +255,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			@Override
 			public void endTask() {
-				String string = "DONE!  " + type + " " + reponame + "  " + stage;
+				String string = "100%  " + stage + " " + reponame + "  " + type;
 				System.out.println(string);
 				for (GitLogProgressMonitor l : logListeners) {
 					l.onUpdate(string,e);
