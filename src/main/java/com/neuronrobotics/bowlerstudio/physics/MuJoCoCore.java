@@ -5,7 +5,7 @@ import java.util.List;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-import org.mujoco.MuJoCoLib;
+//import org.mujoco.MuJoCoLib;
 
 public class MuJoCoCore implements IPhysicsCore {
 
