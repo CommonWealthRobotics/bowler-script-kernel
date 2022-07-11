@@ -63,7 +63,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			return;// maybe just swallowing after 5 reports is good enough??
 		}
 		if (element != null)
-			if (element.length > 0)
+			if (element.length > 0) {
 				if (element[0].getClassName() != null)
 					if (element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer")) {
 						if (timerErrorCount++ > 5) {
@@ -75,7 +75,18 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 							} // wait for the Issue to be reported
 							System.exit(-5);
 						}
+					} else if (element[0].getClassName().contains("javafx.embed.swing.SwingNode")) {
+						if (timerErrorCount++ > 5) {
+							try {
+								Thread.sleep(5000);
+							} catch (InterruptedException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							} // wait for the Issue to be reported
+							System.exit(-5);
+						}
 					}
+			}
 		except(e);
 
 	}
