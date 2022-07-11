@@ -46,57 +46,57 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		if (e == null) {
 			except(new Exception("A null exception was thrown"));
 		}
-		StackTraceElement[] element = e.getStackTrace();
-		String source = getTitle(element);
-		
-		if(exceptionCounter.get(source) == null) {
-			exceptionCounter.put(source, 0);
-		}
-		exceptionCounter.put(source, exceptionCounter.get(source)+1);
-		if(exceptionCounter.get(source)>1) {
-//			Alert alert = new Alert(AlertType.CONFIRMATION);
-//			alert.setTitle("IRRECOVERABLE FAULT");
-//			alert.setHeaderText("Its just gunna crash, sorry...");
-//			alert.setContentText("I can wait till you hit yes, buts its basically done...");
-//			Optional<ButtonType> result = alert.showAndWait();
-//			System.exit(-1);
-			return;// maybe just swallowing after 5 reports is good enough??
-		}
-		if (element != null)
-			if (element.length > 0) {
-				if (element[0].getClassName() != null)
-					if (element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer")) {
-						if (timerErrorCount++ > 5) {
-							try {
-								Thread.sleep(5000);
-							} catch (InterruptedException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							} // wait for the Issue to be reported
-							System.exit(-5);
-						}
-					} else if (element[0].getClassName().contains("javafx.embed.swing.SwingNode")) {
-						if (timerErrorCount++ > 5) {
-							try {
-								Thread.sleep(5000);
-							} catch (InterruptedException e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
-							} // wait for the Issue to be reported
-							System.exit(-5);
-						}
-					}
-			}
+
 		except(e);
 
 	}
 
-	public void except(Throwable t, String stacktraceFromCatch) {
+	public void except(Throwable e, String stacktraceFromCatch) {
 		new Thread(() -> {
-
-			StackTraceElement[] element = t.getStackTrace();
-
-			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t);
+			StackTraceElement[] element = e.getStackTrace();
+			String source = getTitle(element);
+			
+			if(exceptionCounter.get(source) == null) {
+				exceptionCounter.put(source, 0);
+			}
+			exceptionCounter.put(source, exceptionCounter.get(source)+1);
+			if(exceptionCounter.get(source)>1) {
+//				Alert alert = new Alert(AlertType.CONFIRMATION);
+//				alert.setTitle("IRRECOVERABLE FAULT");
+//				alert.setHeaderText("Its just gunna crash, sorry...");
+//				alert.setContentText("I can wait till you hit yes, buts its basically done...");
+//				Optional<ButtonType> result = alert.showAndWait();
+//				System.exit(-1);
+				return;// maybe just swallowing after 5 reports is good enough??
+			}
+			if (element != null)
+				if (element.length > 0) {
+					if (element[0].getClassName() != null)
+						if (element[0].getClassName().contains("com.sun.scenario.animation.AbstractMasterTimer")) {
+							if (timerErrorCount++ > 5) {
+								try {
+									Thread.sleep(5000);
+								} catch (InterruptedException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} // wait for the Issue to be reported
+								System.exit(-5);
+							}
+							return;
+						} else if (element[0].getClassName().contains("javafx.embed.swing.SwingNode")) {
+							if (timerErrorCount++ > 5) {
+								try {
+									Thread.sleep(5000);
+								} catch (InterruptedException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								} // wait for the Issue to be reported
+								System.exit(-5);
+							}
+							return;
+						}
+				}
+			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e);
 
 			String javaVersion = System.getProperty("java.version");
 			String javafxVersion = System.getProperty("javafx.version");
