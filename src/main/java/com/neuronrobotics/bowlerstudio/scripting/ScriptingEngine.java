@@ -127,11 +127,24 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	static {
 
 		PasswordManager.hasNetwork();
-		workspace = new File(System.getProperty("user.home") + "/bowler-workspace/");
+		setWorkspace(new File(System.getProperty("user.home") + "/bowler-workspace/"));
+		addScriptingLanguage(new ClojureHelper());
+		addScriptingLanguage(new GroovyHelper());
+		addScriptingLanguage(new JythonHelper());
+		addScriptingLanguage(new RobotHelper());
+		addScriptingLanguage(new JsonRunner());
+		addScriptingLanguage(new ArduinoLoader());
+		// addScriptingLanguage(new KotlinHelper());
+		addScriptingLanguage(new SvgLoader());
+		addScriptingLanguage(new BashLoader());
+	}
+
+	public static void setWorkspace(File file) {
+		workspace = file;
 		if (!workspace.exists()) {
 			workspace.mkdir();
 		}
-		appdata = new File(System.getProperty("user.home") + "/bowler-workspace/appdata");
+		appdata = new File(file.getAbsolutePath() + "/appdata");
 		if (!appdata.exists()) {
 			appdata.mkdir();
 		}
@@ -144,15 +157,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		} catch (Exception e) {
 			exp.uncaughtException(Thread.currentThread(), e);
 		}
-		addScriptingLanguage(new ClojureHelper());
-		addScriptingLanguage(new GroovyHelper());
-		addScriptingLanguage(new JythonHelper());
-		addScriptingLanguage(new RobotHelper());
-		addScriptingLanguage(new JsonRunner());
-		addScriptingLanguage(new ArduinoLoader());
-		// addScriptingLanguage(new KotlinHelper());
-		addScriptingLanguage(new SvgLoader());
-		addScriptingLanguage(new BashLoader());
 	}
 
 	public static void addLogListener(GitLogProgressMonitor l) {
