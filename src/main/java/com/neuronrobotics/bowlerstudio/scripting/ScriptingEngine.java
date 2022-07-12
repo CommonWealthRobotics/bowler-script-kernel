@@ -127,7 +127,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	static {
 
 		PasswordManager.hasNetwork();
-		setWorkspace(new File(System.getProperty("user.home") + "/bowler-workspace/"));
+		
 		addScriptingLanguage(new ClojureHelper());
 		addScriptingLanguage(new GroovyHelper());
 		addScriptingLanguage(new JythonHelper());
@@ -141,6 +141,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void setWorkspace(File file) {
 		workspace = file;
+		System.err.println("Workspace: "+workspace.getAbsolutePath());
 		if (!workspace.exists()) {
 			workspace.mkdir();
 		}
@@ -153,7 +154,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			oldpass.delete();
 		try {
 			PasswordManager.loadLoginData(workspace);
-			// runLogin();
 		} catch (Exception e) {
 			exp.uncaughtException(Thread.currentThread(), e);
 		}
@@ -458,7 +458,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static File getWorkspace() {
-		// System.err.println("Workspace: "+workspace.getAbsolutePath());
+		if(workspace==null) {
+			setWorkspace(new File(System.getProperty("user.home") + "/bowler-workspace/"));
+		}
 		return workspace;
 	}
 
