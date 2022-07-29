@@ -23,6 +23,7 @@ import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractKinematicsNR;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
+import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
@@ -187,22 +188,35 @@ public class MobileBaseCadManager implements Runnable {
 	// This is the rendering event
 	public void run() {
 		// rendering = true;
+		String name = base.getScriptingName();
 		if (renderWrangler == null) {
 			renderWrangler = new Thread() {
+				HashMap<Affine,TransformNR> m=new HashMap<Affine, TransformNR>();
+				boolean rendering = false;
 				@Override
 				public void run() {
+					
 					setName("MobileBaseCadManager Render Thread for " + base.getScriptingName());
 					while (base.isAvailable()) {
 						try {
-							Thread.sleep(16 * 2);
+							do {
+								Thread.sleep(16 );
+							}while(rendering);
 						} catch (InterruptedException e) {
 							getUi().highlightException(null, e);
 						}
 
 						// System.err.println("Render "+timeSince);
 						try {
+							
+							updateMobileBase(base,base.getFiducialToGlobalTransform(),m);
+							rendering=true;
 							Platform.runLater(() -> {
-							updateMobileBase(base);
+								for(Affine af:m.keySet()) {
+									TransformFactory.nrToAffine(m.get(af),af);
+								}
+								m.clear();
+								rendering = false;
 							});
 						} catch (Throwable t) {
 							// rendering not availible
@@ -213,19 +227,21 @@ public class MobileBaseCadManager implements Runnable {
 					renderWrangler = null;
 				}
 
-				private void updateMobileBase(MobileBase b) {
-					updateBase(b);
+				private void updateMobileBase(MobileBase b, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
+					updateBase(b,baseLoc,map2);
 					for (DHParameterKinematics k : b.getAllDHChains()) {
-						updateLimb(k);
+						updateLimb(k,baseLoc,map2);
 					}
 					for (DHParameterKinematics k : b.getAllParallelGroups()) {
-						updateBase(k);
+						updateBase(k,baseLoc,map2);
 					}
 
 				}
 
-				private void updateLimb(DHParameterKinematics k) {
-					updateBase(k);
+				private void updateLimb(DHParameterKinematics k, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
+					updateBase(k,baseLoc,map2);
+					TransformNR previous = k.getFiducialToGlobalTransform();
+					k.setGlobalToFiducialTransform(baseLoc);
 					ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
 
 					for (int i = 0; i < ll.size(); i++) {
@@ -248,17 +264,19 @@ public class MobileBaseCadManager implements Runnable {
 						Affine af = a;
 						TransformNR nr = linkPos.get(index);
 						if (nr != null && af != null)
+							map2.put(af, nr);
 							//Platform.runLater(() -> {
-								try {
-									TransformFactory.nrToAffine(nr, af);
-								} catch (Exception ex) {
-									getUi().highlightException(null, ex);
-								}
+//								try {
+//									TransformFactory.nrToAffine(nr, af);
+//								} catch (Exception ex) {
+//									getUi().highlightException(null, ex);
+//								}
 							//});
 						if (k.getSlaveMobileBase(i) != null) {
-							updateMobileBase(k.getSlaveMobileBase(i));
+							updateMobileBase(k.getSlaveMobileBase(i),nr,map2);
 						}
 					}
+					k.setGlobalToFiducialTransform(previous);
 				}
 			};
 			renderWrangler.start();
@@ -266,21 +284,25 @@ public class MobileBaseCadManager implements Runnable {
 
 	}
 
-	private void updateBase(AbstractKinematicsNR kin) {
+	private void updateBase(AbstractKinematicsNR kin, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
 		if (kin == null)
 			return;
+		TransformNR previous = kin.getFiducialToGlobalTransform();
+		kin.setGlobalToFiducialTransform(baseLoc);
 		TransformNR forwardOffset = kin.forwardOffset(new TransformNR());
 		if (kin.getRootListener() == null) {
 			kin.setRootListener(new Affine());
 		}
 		if (forwardOffset != null && kin.getRootListener() != null)
+			map2.put((Affine) kin.getRootListener(), forwardOffset);
 			//Platform.runLater(() -> {
-				try {
-					TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
-				} catch (Exception ex) {
-					getUi().highlightException(null, ex);
-				}
+//				try {
+//					TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
+//				} catch (Exception ex) {
+//					getUi().highlightException(null, ex);
+//				}
 			//});
+		kin.setGlobalToFiducialTransform(previous);
 	}
 
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
@@ -366,10 +388,10 @@ public class MobileBaseCadManager implements Runnable {
 
 	}
 
-	private IgenerateBody getIgenerateBody() {
+	private IgenerateBody getIgenerateBody(MobileBase b) {
 		if (configMode)
 			return getConfigurationDisplay();
-		Object cadForBodyEngine = scriptFromFileInfo(base.getGitCadEngine(), () -> {
+		Object cadForBodyEngine = scriptFromFileInfo(b.getGitCadEngine(), () -> {
 			run();
 		});
 		if (IgenerateBody.class.isInstance(cadForBodyEngine)) {
@@ -475,7 +497,7 @@ public class MobileBaseCadManager implements Runnable {
 
 					ArrayList<CSG> newcad = null;
 					try {
-						newcad = getIgenerateBody().generateBody(device);
+						newcad = getIgenerateBody(device).generateBody(device);
 					} catch (Throwable t) {
 						getUi().highlightException(null, t);
 					}
@@ -585,7 +607,10 @@ public class MobileBaseCadManager implements Runnable {
 
 	private void set(MobileBase base, int limb, int link) {
 		ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
-		double numLimbs = limbs.size();
+		int numLimbs = limbs.size();
+		if(limb>=numLimbs) {
+			limb=numLimbs-1;
+		}
 		DHParameterKinematics dh = limbs.get(limb);
 		double partsTotal = numLimbs * dh.getNumberOfLinks();
 		double progress = ((double) ((limb * dh.getNumberOfLinks()) + link)) / partsTotal;
@@ -832,15 +857,20 @@ public class MobileBaseCadManager implements Runnable {
 
 						}
 					});
-
+					DHLink dhl = dh.getDhLink(i);
+					if(dhl.getSlaveMobileBase()!=null) {
+						ArrayList<CSG> slParts =generateBody(dhl.getSlaveMobileBase());
+						dhLinks.addAll(slParts);
+					}
+					//ArrayList<CSG> generateBody(MobileBase base)
 				}
 			}
-			return dhLinks;
+			
 		} catch (Exception e) {
+			e.printStackTrace();
 			getUi().highlightException(getCadScriptFromLimnb(dh), e);
 		}
-		return null;
-
+		return dhLinks;
 	}
 
 	public void selectCsgByMobileBase(MobileBase base) {
@@ -964,17 +994,17 @@ public class MobileBaseCadManager implements Runnable {
 			// specified").printStackTrace();
 			MobileBaseCadManager mbcm = new MobileBaseCadManager(device, ui);
 
-			for (DHParameterKinematics kin : device.getAllDHChains()) {
-				for (int i = 0; i < kin.getNumberOfLinks(); i++) {
-					MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
-					if (m != null) {
-						m.setGitSelfSource(device.getGitSelfSource());
-						MobileBaseCadManager e = new MobileBaseCadManager(m, ui);
-						e.setMaster(mbcm);
-						mbcm.slaves.add(e);
-					}
-				}
-			}
+//			for (DHParameterKinematics kin : device.getAllDHChains()) {
+//				for (int i = 0; i < kin.getNumberOfLinks(); i++) {
+//					MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+//					if (m != null) {
+//						m.setGitSelfSource(device.getGitSelfSource());
+//						MobileBaseCadManager e = new MobileBaseCadManager(m, ui);
+//						e.setMaster(mbcm);
+//						mbcm.slaves.add(e);
+//					}
+//				}
+//			}
 		}
 		MobileBaseCadManager mobileBaseCadManager = cadmap.get(device);
 		if (!IMobileBaseUIlocal.class.isInstance(ui)
@@ -990,6 +1020,16 @@ public class MobileBaseCadManager implements Runnable {
 
 	public static MobileBaseCadManager get(MobileBase device) {
 		if (cadmap.get(device) == null) {
+			for(MobileBase mb:cadmap.keySet()) {
+				for(DHParameterKinematics kin:mb.getAllDHChains()) {
+					for (int i = 0; i < kin.getNumberOfLinks(); i++) {
+						MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+						if (m == device) {
+							return get(mb);
+						}
+					}
+				}
+			}
 			IMobileBaseUIlocal ui2 = new IMobileBaseUIlocal();
 			device.addConnectionEventListener(new IDeviceConnectionEventListener() {
 
@@ -1006,6 +1046,7 @@ public class MobileBaseCadManager implements Runnable {
 
 				}
 			});
+			
 			return get(device, ui2);
 		}
 		return cadmap.get(device);
