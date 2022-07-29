@@ -259,7 +259,7 @@ dependencies {
 	// JScience:
     //compile 'org.jscience:jscience:4.3.1'
     
-	compile 'javax.media:jmf:2.1.1e'
+	//compile 'javax.media:jmf:2.1.1e'
 	
 	//Weka 
 	//compile 'nz.ac.waikato.cms.weka:weka-stable:3.6.13'
