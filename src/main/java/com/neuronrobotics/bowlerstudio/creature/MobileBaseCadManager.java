@@ -201,9 +201,9 @@ public class MobileBaseCadManager implements Runnable {
 
 						// System.err.println("Render "+timeSince);
 						try {
-							// Platform.runLater(() -> {
+							Platform.runLater(() -> {
 							updateMobileBase(base);
-							// });
+							});
 						} catch (Throwable t) {
 							// rendering not availible
 							break;
@@ -248,13 +248,13 @@ public class MobileBaseCadManager implements Runnable {
 						Affine af = a;
 						TransformNR nr = linkPos.get(index);
 						if (nr != null && af != null)
-							Platform.runLater(() -> {
+							//Platform.runLater(() -> {
 								try {
 									TransformFactory.nrToAffine(nr, af);
 								} catch (Exception ex) {
 									getUi().highlightException(null, ex);
 								}
-							});
+							//});
 						if (k.getSlaveMobileBase(i) != null) {
 							updateMobileBase(k.getSlaveMobileBase(i));
 						}
@@ -274,13 +274,13 @@ public class MobileBaseCadManager implements Runnable {
 			kin.setRootListener(new Affine());
 		}
 		if (forwardOffset != null && kin.getRootListener() != null)
-			Platform.runLater(() -> {
+			//Platform.runLater(() -> {
 				try {
 					TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
 				} catch (Exception ex) {
 					getUi().highlightException(null, ex);
 				}
-			});
+			//});
 	}
 
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
