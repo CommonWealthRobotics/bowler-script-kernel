@@ -469,15 +469,16 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public ArrayList<CSG> generateBody() {
-		return generateBody(getMobileBase());
+		return generateBody(getMobileBase(),true);
 	}
 
-	public ArrayList<CSG> generateBody(MobileBase base) {
+	public ArrayList<CSG> generateBody(MobileBase base, boolean clear) {
 		if (!base.isAvailable())
 			throw new RuntimeException("Device " + base.getScriptingName() + " is not connected, can not generate cad");
 
 		getProcesIndictor().set(0);
-		setAllCad(new ArrayList<>());
+		if(clear)
+			setAllCad(new ArrayList<>());
 
 		MobileBase device = base;
 		if (getBasetoCadMap().get(device) == null) {
@@ -486,7 +487,8 @@ public class MobileBaseCadManager implements Runnable {
 
 		getProcesIndictor().set(0.1);
 		try {
-			getAllCad().clear();
+			if(clear)
+				getAllCad().clear();
 			if (showingStl) {
 				// skip the regen
 				for (CSG c : getBasetoCadMap().get(device)) {
@@ -516,7 +518,8 @@ public class MobileBaseCadManager implements Runnable {
 				} else
 					getUi().highlightException(null, new Exception());
 				ArrayList<CSG> arrayList = getBasetoCadMap().get(device);
-				arrayList.clear();
+				if(clear)
+					arrayList.clear();
 				for (CSG c : getAllCad()) {
 					arrayList.add(c);
 				}
@@ -554,8 +557,8 @@ public class MobileBaseCadManager implements Runnable {
 					j += 1;
 				}
 			} else {
-
-				arrayList.clear();
+				if(clear)
+					arrayList.clear();
 				ArrayList<CSG> linksCad = generateCad(l);
 
 				for (CSG csg : linksCad) {
@@ -573,7 +576,7 @@ public class MobileBaseCadManager implements Runnable {
 
 		}
 		for (MobileBaseCadManager m : slaves) {
-			getAllCad().addAll(m.generateBody(m.base));
+			getAllCad().addAll(m.generateBody(m.base,false));
 		}
 		showingStl = false;
 		getProcesIndictor().set(1);
@@ -859,7 +862,7 @@ public class MobileBaseCadManager implements Runnable {
 					});
 					DHLink dhl = dh.getDhLink(i);
 					if(dhl.getSlaveMobileBase()!=null) {
-						ArrayList<CSG> slParts =generateBody(dhl.getSlaveMobileBase());
+						ArrayList<CSG> slParts =generateBody(dhl.getSlaveMobileBase(),false);
 						dhLinks.addAll(slParts);
 					}
 					//ArrayList<CSG> generateBody(MobileBase base)
@@ -930,7 +933,7 @@ public class MobileBaseCadManager implements Runnable {
 				MobileBaseCadManager.get(base).clear();
 
 				try {
-					setAllCad(generateBody(device));
+					setAllCad(generateBody(device,true));
 				} catch (Exception e) {
 					getUi().highlightException(getCadScriptFromMobileBase(device), e);
 				}
