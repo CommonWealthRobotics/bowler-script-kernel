@@ -207,6 +207,10 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 
 	public void except(Throwable t) {
 		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(new Exception());
+		if (Platform.isFxApplicationThread()) {
+	    	System.err.println("Exception in Javafx thread! "+stacktraceFromCatch);
+	    	return;
+	    }
 		if (processing) {
 			exceptionQueue.put(t, stacktraceFromCatch);
 			return;
