@@ -220,7 +220,13 @@ public class MobileBaseCadManager implements Runnable {
 							});
 						} catch (Throwable t) {
 							// rendering not availible
-							break;
+							System.err.println("Exception for render engine "+base.getScriptingName());
+							t.printStackTrace();
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								break;
+							}
 						}
 
 					}
@@ -232,9 +238,9 @@ public class MobileBaseCadManager implements Runnable {
 					for (DHParameterKinematics k : b.getAllDHChains()) {
 						updateLimb(k,baseLoc,map2);
 					}
-					for (DHParameterKinematics k : b.getAllParallelGroups()) {
-						updateBase(k,baseLoc,map2);
-					}
+//					for (DHParameterKinematics k : b.getAllParallelGroups()) {
+//						updateBase(k,baseLoc,map2);
+//					}
 
 				}
 
@@ -288,7 +294,12 @@ public class MobileBaseCadManager implements Runnable {
 		if (kin == null)
 			return;
 		TransformNR previous = kin.getFiducialToGlobalTransform();
-		kin.setGlobalToFiducialTransform(baseLoc);
+		try {
+			kin.setGlobalToFiducialTransform(baseLoc);
+		}catch(Exception e) {
+			throw new RuntimeException("MB "+base.getScriptingName()+", "+e.getMessage());
+		}
+		
 		TransformNR forwardOffset = kin.forwardOffset(new TransformNR());
 		if (kin.getRootListener() == null) {
 			kin.setRootListener(new Affine());
