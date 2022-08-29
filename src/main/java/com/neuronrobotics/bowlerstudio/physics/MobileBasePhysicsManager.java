@@ -125,7 +125,9 @@ public class MobileBasePhysicsManager {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				TransformFactory.bulletToAffine(baseCad.get(0).getManipulator(), start);
+				CSG csg = baseCad.get(0);
+				if(csg!=null)
+					TransformFactory.bulletToAffine(csg.getManipulator(), start);
 			}
 		});
 		CSG collisionBod;
