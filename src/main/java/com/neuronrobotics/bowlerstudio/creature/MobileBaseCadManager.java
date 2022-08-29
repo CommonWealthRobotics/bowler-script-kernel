@@ -297,6 +297,7 @@ public class MobileBaseCadManager implements Runnable {
 		try {
 			kin.setGlobalToFiducialTransform(baseLoc);
 		}catch(Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException("MB "+base.getScriptingName()+", "+e.getMessage());
 		}
 		
