@@ -23,8 +23,8 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
-import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
+//import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
+//import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
@@ -94,25 +94,25 @@ public class Vitamins {
 			// update
 			try {
 				fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
-				try {
-					FileChangeWatcher f = FileChangeWatcher.watch(resource);
-					f.addIFileChangeListener(new IFileChangeListener() {
-						@Override
-						public void onFileDelete(File fileThatIsDeleted) {
-							fileLastLoaded.remove(resource.getAbsolutePath());
-							f.close();
-						}
-						
-						@Override
-						public void onFileChange(File fileThatChanged, WatchEvent event) {
-							fileLastLoaded.remove(resource.getAbsolutePath());	
-							f.close();
-						}
-					});
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try {
+//					FileChangeWatcher f = FileChangeWatcher.watch(resource);
+//					f.addIFileChangeListener(new IFileChangeListener() {
+//						@Override
+//						public void onFileDelete(File fileThatIsDeleted) {
+//							fileLastLoaded.remove(resource.getAbsolutePath());
+//							f.close();
+//						}
+//						
+//						@Override
+//						public void onFileChange(File fileThatChanged, WatchEvent event) {
+//							fileLastLoaded.remove(resource.getAbsolutePath());	
+//							f.close();
+//						}
+//					});
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

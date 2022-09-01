@@ -152,7 +152,7 @@ public class MobileBaseCadManager implements Runnable {
 	// This is the rendering event
 	public void run() {
 		// rendering = true;
-		String name = base.getScriptingName();
+		//String name = base.getScriptingName();
 		if (renderWrangler == null) {
 			renderWrangler = new Thread() {
 				HashMap<Affine,TransformNR> m=new HashMap<Affine, TransformNR>();
@@ -167,10 +167,11 @@ public class MobileBaseCadManager implements Runnable {
 					while (base.isAvailable()) {
 						try {
 							do {
-								Thread.sleep(32 );
+								Thread.sleep(16 );
 							}while(rendering || changed ==false);
 						} catch (InterruptedException e) {
 							getUi().highlightException(null, e);
+							break;
 						}
 
 						// System.err.println("Render "+timeSince);
@@ -179,14 +180,15 @@ public class MobileBaseCadManager implements Runnable {
 							updateMobileBase(base,base.getFiducialToGlobalTransform(),m);
 							rendering=true;
 							changed=false;
-							Platform.runLater(() -> {
-								if(m.size()>0)
+							if(m.size()>0) {
+								Platform.runLater(() -> {
 									for(Affine af:m.keySet()) {
 										TransformFactory.nrToAffine(m.get(af),af);
 									}
-								m.clear();
-								rendering = false;
-							});
+									m.clear();
+									rendering = false;
+								});
+							}
 						} catch (Throwable t) {
 							// rendering not availible
 							System.err.println("Exception for render engine "+base.getScriptingName());
