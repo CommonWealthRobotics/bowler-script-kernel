@@ -148,7 +148,9 @@ public class MobileBaseCadManager implements Runnable {
 		}
 	};
 
-
+	private void runThread() {
+		run();
+	}
 
 	// This is the rendering event
 	public void run() {
@@ -165,19 +167,19 @@ public class MobileBaseCadManager implements Runnable {
 						@Override
 						public void event() {
 							changed=true;
+							runThread();
 						}
 					};
 					base.addIOnMobileBaseRenderChange(l);
 					base.addIHardwareSyncPulseReciver(()->{
 						base.removeIOnMobileBaseRenderChange(l);
-						changed=true;
-						run();
+						l.event();
 					});
 					setName("MobileBaseCadManager Render Thread for " + base.getScriptingName());
 					while (base.isAvailable()) {
 						try {
 							do {
-								Thread.sleep(0,10 );
+								Thread.sleep(1);
 							}while(rendering || changed ==false);
 						} catch (InterruptedException e) {
 							getUi().highlightException(null, e);
@@ -198,6 +200,7 @@ public class MobileBaseCadManager implements Runnable {
 									m.clear();
 									rendering = false;
 								});
+								Thread.sleep( 32 );
 							}
 						} catch (Throwable t) {
 							// rendering not availible
