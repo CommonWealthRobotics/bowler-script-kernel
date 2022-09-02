@@ -26,6 +26,7 @@ import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
+import com.neuronrobotics.sdk.addons.kinematics.IOnMobileBaseRenderChange;
 import com.neuronrobotics.sdk.addons.kinematics.ITaskSpaceUpdateListenerNR;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -160,14 +161,23 @@ public class MobileBaseCadManager implements Runnable {
 				boolean changed=true;
 				@Override
 				public void run() {
-					base.addIOnMobileBaseRenderChange(()->{
+					IOnMobileBaseRenderChange l = new IOnMobileBaseRenderChange() {
+						@Override
+						public void event() {
+							changed=true;
+						}
+					};
+					base.addIOnMobileBaseRenderChange(l);
+					base.addIHardwareSyncPulseReciver(()->{
+						base.removeIOnMobileBaseRenderChange(l);
 						changed=true;
+						run();
 					});
 					setName("MobileBaseCadManager Render Thread for " + base.getScriptingName());
 					while (base.isAvailable()) {
 						try {
 							do {
-								Thread.sleep(16 );
+								Thread.sleep(0,10 );
 							}while(rendering || changed ==false);
 						} catch (InterruptedException e) {
 							getUi().highlightException(null, e);
