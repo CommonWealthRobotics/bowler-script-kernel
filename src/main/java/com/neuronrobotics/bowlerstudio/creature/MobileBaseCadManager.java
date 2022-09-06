@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -71,6 +72,7 @@ public class MobileBaseCadManager implements Runnable {
 	// private boolean rendering = false;
 	private Thread renderWrangler = null;
 	private HashMap<String, Object> cadScriptCache = new HashMap<>();
+	private HashMap<String, Runnable> toRun = new HashMap<String, Runnable>();
 
 	protected void clear() {
 		// Cad generator
@@ -152,26 +154,32 @@ public class MobileBaseCadManager implements Runnable {
 		run();
 	}
 
+	public void runLater(Runnable r) {
+		String loc = Thread.currentThread().getStackTrace()[1].toString();
+		toRun.put(loc, r);
+	}
+
 	// This is the rendering event
 	public void run() {
 		// rendering = true;
-		//String name = base.getScriptingName();
+		// String name = base.getScriptingName();
 		if (renderWrangler == null) {
 			renderWrangler = new Thread() {
-				HashMap<Affine,TransformNR> m=new HashMap<Affine, TransformNR>();
+				HashMap<Affine, TransformNR> m = new HashMap<Affine, TransformNR>();
 				boolean rendering = false;
-				boolean changed=true;
+				boolean changed = true;
+
 				@Override
 				public void run() {
 					IOnMobileBaseRenderChange l = new IOnMobileBaseRenderChange() {
 						@Override
 						public void event() {
-							changed=true;
+							changed = true;
 							runThread();
 						}
 					};
 					base.addIOnMobileBaseRenderChange(l);
-					base.addIHardwareSyncPulseReciver(()->{
+					base.addIHardwareSyncPulseReciver(() -> {
 						base.removeIOnMobileBaseRenderChange(l);
 						l.event();
 					});
@@ -180,7 +188,7 @@ public class MobileBaseCadManager implements Runnable {
 						try {
 							do {
 								Thread.sleep(1);
-							}while(rendering || changed ==false);
+							} while (rendering || changed == false);
 						} catch (InterruptedException e) {
 							getUi().highlightException(null, e);
 							break;
@@ -188,23 +196,37 @@ public class MobileBaseCadManager implements Runnable {
 
 						// System.err.println("Render "+timeSince);
 						try {
-							
-							updateMobileBase(base,base.getFiducialToGlobalTransform(),m);
-							rendering=true;
-							changed=false;
-							if(m.size()>0) {
+
+							updateMobileBase(base, base.getFiducialToGlobalTransform(), m);
+							rendering = true;
+							changed = false;
+							if (m.size() > 0) {
+								Iterator<Affine> iterator = m.keySet().iterator();
 								Platform.runLater(() -> {
-									for(Affine af:m.keySet()) {
-										TransformFactory.nrToAffine(m.get(af),af);
+									for (; iterator.hasNext();) {
+										Affine af = iterator.next();
+										TransformFactory.nrToAffine(m.get(af), af);
 									}
 									m.clear();
 									rendering = false;
 								});
-								Thread.sleep( 32 );
+								Thread.sleep(16);
+							}
+							if (toRun.size() > 0) {
+								HashMap<String, Runnable> tmp = toRun;
+								toRun = new HashMap<String, Runnable>();
+								Iterator<String> iterator = tmp.keySet().iterator();
+								Platform.runLater(() -> {
+									for (; iterator.hasNext();) {
+										String af = iterator.next();
+										tmp.get(af).run();
+									}
+								});
+								Thread.sleep(16);
 							}
 						} catch (Throwable t) {
 							// rendering not availible
-							System.err.println("Exception for render engine "+base.getScriptingName());
+							System.err.println("Exception for render engine " + base.getScriptingName());
 							t.printStackTrace();
 							try {
 								Thread.sleep(100);
@@ -217,16 +239,16 @@ public class MobileBaseCadManager implements Runnable {
 					renderWrangler = null;
 				}
 
-
 			};
 			renderWrangler.start();
 		}
 
 	}
+
 	private void updateMobileBase(MobileBase b, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
-		updateBase(b,baseLoc,map2);
+		updateBase(b, baseLoc, map2);
 		for (DHParameterKinematics k : b.getAllDHChains()) {
-			updateLimb(k,baseLoc,map2);
+			updateLimb(k, baseLoc, map2);
 		}
 //		for (DHParameterKinematics k : b.getAllParallelGroups()) {
 //			updateBase(k,baseLoc,map2);
@@ -235,7 +257,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	private void updateLimb(DHParameterKinematics k, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
-		updateBase(k,baseLoc,map2);
+		updateBase(k, baseLoc, map2);
 		TransformNR previous = k.getFiducialToGlobalTransform();
 		k.setGlobalToFiducialTransform(baseLoc);
 		ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
@@ -261,44 +283,44 @@ public class MobileBaseCadManager implements Runnable {
 			TransformNR nr = linkPos.get(index);
 			if (nr != null && af != null)
 				map2.put(af, nr);
-				//Platform.runLater(() -> {
+			// Platform.runLater(() -> {
 //					try {
 //						TransformFactory.nrToAffine(nr, af);
 //					} catch (Exception ex) {
 //						getUi().highlightException(null, ex);
 //					}
-				//});
+			// });
 			if (k.getSlaveMobileBase(i) != null) {
-				updateMobileBase(k.getSlaveMobileBase(i),nr,map2);
+				updateMobileBase(k.getSlaveMobileBase(i), nr, map2);
 			}
 		}
 		k.setGlobalToFiducialTransform(previous);
 	}
-	
+
 	private void updateBase(AbstractKinematicsNR kin, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
 		if (kin == null)
 			return;
 		TransformNR previous = kin.getFiducialToGlobalTransform();
 		try {
 			kin.setGlobalToFiducialTransform(baseLoc);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException("MB "+base.getScriptingName()+", "+e.getMessage());
+			throw new RuntimeException("MB " + base.getScriptingName() + ", " + e.getMessage());
 		}
-		
+
 		TransformNR forwardOffset = kin.forwardOffset(new TransformNR());
 		if (kin.getRootListener() == null) {
 			kin.setRootListener(new Affine());
 		}
 		if (forwardOffset != null && kin.getRootListener() != null)
 			map2.put((Affine) kin.getRootListener(), forwardOffset);
-			//Platform.runLater(() -> {
+		// Platform.runLater(() -> {
 //				try {
 //					TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
 //				} catch (Exception ex) {
 //					getUi().highlightException(null, ex);
 //				}
-			//});
+		// });
 		kin.setGlobalToFiducialTransform(previous);
 	}
 
@@ -466,7 +488,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public ArrayList<CSG> generateBody() {
-		return generateBody(getMobileBase(),true);
+		return generateBody(getMobileBase(), true);
 	}
 
 	public ArrayList<CSG> generateBody(MobileBase base, boolean clear) {
@@ -474,7 +496,7 @@ public class MobileBaseCadManager implements Runnable {
 			throw new RuntimeException("Device " + base.getScriptingName() + " is not connected, can not generate cad");
 
 		getProcesIndictor().set(0);
-		if(clear)
+		if (clear)
 			setAllCad(new ArrayList<>());
 
 		MobileBase device = base;
@@ -484,7 +506,7 @@ public class MobileBaseCadManager implements Runnable {
 
 		getProcesIndictor().set(0.1);
 		try {
-			if(clear)
+			if (clear)
 				getAllCad().clear();
 			if (showingStl) {
 				// skip the regen
@@ -515,7 +537,7 @@ public class MobileBaseCadManager implements Runnable {
 				} else
 					getUi().highlightException(null, new Exception());
 				ArrayList<CSG> arrayList = getBasetoCadMap().get(device);
-				if(clear)
+				if (clear)
 					arrayList.clear();
 				for (CSG c : getAllCad()) {
 					arrayList.add(c);
@@ -554,7 +576,7 @@ public class MobileBaseCadManager implements Runnable {
 					j += 1;
 				}
 			} else {
-				if(clear)
+				if (clear)
 					arrayList.clear();
 				ArrayList<CSG> linksCad = generateCad(l);
 
@@ -573,7 +595,7 @@ public class MobileBaseCadManager implements Runnable {
 
 		}
 		for (MobileBaseCadManager m : slaves) {
-			getAllCad().addAll(m.generateBody(m.base,false));
+			getAllCad().addAll(m.generateBody(m.base, false));
 		}
 		showingStl = false;
 		getProcesIndictor().set(1);
@@ -608,8 +630,8 @@ public class MobileBaseCadManager implements Runnable {
 	private void set(MobileBase base, int limb, int link) {
 		ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
 		int numLimbs = limbs.size();
-		if(limb>=numLimbs) {
-			limb=numLimbs-1;
+		if (limb >= numLimbs) {
+			limb = numLimbs - 1;
 		}
 		DHParameterKinematics dh = limbs.get(limb);
 		double partsTotal = numLimbs * dh.getNumberOfLinks();
@@ -858,14 +880,14 @@ public class MobileBaseCadManager implements Runnable {
 						}
 					});
 					DHLink dhl = dh.getDhLink(i);
-					if(dhl.getSlaveMobileBase()!=null) {
-						ArrayList<CSG> slParts =generateBody(dhl.getSlaveMobileBase(),false);
+					if (dhl.getSlaveMobileBase() != null) {
+						ArrayList<CSG> slParts = generateBody(dhl.getSlaveMobileBase(), false);
 						dhLinks.addAll(slParts);
 					}
-					//ArrayList<CSG> generateBody(MobileBase base)
+					// ArrayList<CSG> generateBody(MobileBase base)
 				}
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			getUi().highlightException(getCadScriptFromLimnb(dh), e);
@@ -930,7 +952,7 @@ public class MobileBaseCadManager implements Runnable {
 				MobileBaseCadManager.get(base).clear();
 
 				try {
-					setAllCad(generateBody(device,true));
+					setAllCad(generateBody(device, true));
 				} catch (Exception e) {
 					getUi().highlightException(getCadScriptFromMobileBase(device), e);
 				}
@@ -1020,8 +1042,8 @@ public class MobileBaseCadManager implements Runnable {
 
 	public static MobileBaseCadManager get(MobileBase device) {
 		if (cadmap.get(device) == null) {
-			for(MobileBase mb:cadmap.keySet()) {
-				for(DHParameterKinematics kin:mb.getAllDHChains()) {
+			for (MobileBase mb : cadmap.keySet()) {
+				for (DHParameterKinematics kin : mb.getAllDHChains()) {
 					for (int i = 0; i < kin.getNumberOfLinks(); i++) {
 						MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
 						if (m == device) {
@@ -1046,7 +1068,7 @@ public class MobileBaseCadManager implements Runnable {
 
 				}
 			});
-			
+
 			return get(device, ui2);
 		}
 		return cadmap.get(device);
