@@ -135,16 +135,16 @@ public class MobileBaseLoader {
 
 			if (map.get(base) == null)
 				map.put(base, new MobileBaseLoader(base));
-			for (DHParameterKinematics kin : base.getAllDHChains()) {
-				for (int i = 0; i < kin.getNumberOfLinks(); i++) {
-					MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
-					if (m != null) {
-						m.setGitSelfSource(base.getGitSelfSource());
-						if (map.get(m) == null)
-							map.put(m, new MobileBaseLoader(m));
-					}
-				}
-			}
+//			for (DHParameterKinematics kin : base.getAllDHChains()) {
+//				for (int i = 0; i < kin.getNumberOfLinks(); i++) {
+//					MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
+//					if (m != null) {
+//						m.setGitSelfSource(base.getGitSelfSource());
+//						if (map.get(m) == null)
+//							map.put(m, new MobileBaseLoader(m));
+//					}
+//				}
+//			}
 			
 		}
 		return base;
