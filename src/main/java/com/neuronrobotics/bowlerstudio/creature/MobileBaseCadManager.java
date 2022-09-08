@@ -4,17 +4,20 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
-
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -32,6 +35,7 @@ import com.neuronrobotics.sdk.addons.kinematics.ITaskSpaceUpdateListenerNR;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.IDeviceConnectionEventListener;
 import com.neuronrobotics.sdk.pid.PIDLimitEvent;
@@ -150,10 +154,6 @@ public class MobileBaseCadManager implements Runnable {
 		}
 	};
 
-	private void runThread() {
-		run();
-	}
-
 	public static void runLater(Runnable r) {
 		if(r==null)
 			throw new NullPointerException();
@@ -167,15 +167,22 @@ public class MobileBaseCadManager implements Runnable {
 		if (renderWrangler == null) {
 			renderWrangler = new Thread() {
 				HashMap<Affine, TransformNR> m = new HashMap<Affine, TransformNR>();
+				HashMap<Affine, TransformNR> cached = new HashMap<Affine, TransformNR>();
 				boolean rendering = false;
-				boolean changed = true;
-				
+				boolean changed = false;
+				HashMap<DHParameterKinematics,double[]> jointPoses = new HashMap<>();
 				IOnMobileBaseRenderChange l = new IOnMobileBaseRenderChange() {
 					@Override
-					public void event() {
+					public void  event() {
+						if(changed)
+							return;
+						loadJointPose(base,jointPoses);
+						updateMobileBase(base, base.getFiducialToGlobalTransform(), cached,jointPoses);
+						HashMap<Affine, TransformNR> cachedOld = cached;
+						cached=m;
+						m=cachedOld;
 						changed = true;
-						runThread();
-						new RuntimeException().printStackTrace();
+						
 					}
 				};
 				@Override
@@ -183,7 +190,7 @@ public class MobileBaseCadManager implements Runnable {
 					base.addIOnMobileBaseRenderChange(l);
 					base.addIHardwareSyncPulseReciver(() -> {
 						base.removeIOnMobileBaseRenderChange(l);
-						changed = true;
+						l.event();
 					});
 					setName("MobileBaseCadManager Render Thread for " + base.getScriptingName());
 					while (base.isAvailable()) {
@@ -195,41 +202,61 @@ public class MobileBaseCadManager implements Runnable {
 							getUi().highlightException(null, e);
 							break;
 						}
-
-						// System.err.println("Render "+timeSince);
 						try {
-
-							updateMobileBase(base, base.getFiducialToGlobalTransform(), m);
+//							DecimalFormat df = new DecimalFormat("000.00");
+//							for(DHParameterKinematics kin:jointPoses.keySet().stream()
+//									.sorted((o1, o2) -> {
+//							               return o1.getScriptingName().compareTo(o2.getScriptingName());
+//							        })
+//							        .collect(Collectors.toList())) {
+//								double[] joints = jointPoses.get(kin);
+//								System.err.print("\n"+kin.getScriptingName()+" \t[ ");
+//								for(int i=0;i<kin.getNumberOfLinks();i++) {
+//									System.err.print(" "+df.format(joints[i])+"\t");
+//									
+//								}
+//								System.err.print("]");
+//							}
+//							System.err.print("\n\n");
 							rendering = true;
-							changed = false;
-							if (m.size() > 0) {
-								Iterator<Affine> iterator = m.keySet().iterator();
-								Platform.runLater(() -> {
-									for (; iterator.hasNext();) {
-										Affine af = iterator.next();
-										TransformFactory.nrToAffine(m.get(af), af);
-									}
-									m.clear();
-									rendering = false;
-								});
-								Thread.sleep(16);
-							}
-							if (toRun.size() > 0) {
-								ArrayList< Runnable>tmp = toRun;
-								toRun = new ArrayList< Runnable>();
+							HashMap<Affine, TransformNR> tmp=m;
+							Object[] iterator = tmp.keySet().stream().toArray();
+							if (iterator.length > 0) {
 								Platform.runLater(() -> {
 									try {
-										for (int i=0;i<tmp.size();i++) {
-											Runnable runnable = tmp.get(i);
-											if(runnable!=null)
-												runnable.run();
+										for (int i=0;i<iterator.length;i++) {
+											Affine af = (Affine)iterator[i];
+											TransformFactory.nrToAffine(tmp.get(af), af);
 										}
-										tmp.clear();
 									}catch(Throwable t) {
 										t.printStackTrace();
 									}
+									tmp.clear();
+									rendering = false;
+									changed = false;
 								});
-								Thread.sleep(16);
+								//Thread.sleep(16);
+							}else {
+								rendering = false;
+								changed = false;
+							}
+							
+							if (toRun.size() > 0) {
+								ArrayList< Runnable>t = toRun;
+								toRun = new ArrayList< Runnable>();
+								Platform.runLater(() -> {
+									try {
+										for (int i=0;i<t.size();i++) {
+											Runnable runnable = t.get(i);
+											if(runnable!=null)
+												runnable.run();
+										}
+										t.clear();
+									}catch(Throwable tr) {
+										tr.printStackTrace();
+									}
+								});
+								//Thread.sleep(16);
 							}
 						} catch (Throwable t) {
 							// rendering not availible
@@ -251,54 +278,59 @@ public class MobileBaseCadManager implements Runnable {
 		}
 
 	}
-
-	private void updateMobileBase(MobileBase b, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
+	private void loadJointPose(MobileBase base, HashMap<DHParameterKinematics,double[]> jointPoses) {
+		for(DHParameterKinematics k: base.getAllDHChains()) {
+//			ParallelGroup p = base.getParallelGroup(k);
+//			if(p==null) {
+			jointPoses.put(k, k.getCurrentJointSpaceVector());
+//			}else
+//				jointPoses.put(k, p.getCurrentJointSpaceVector(k));
+			for(int i=0;i<k.getNumberOfLinks();i++) {
+				MobileBase mb = k.getSlaveMobileBase(i);
+				if(mb!=null){
+					loadJointPose(mb, jointPoses);
+				}
+			}
+		}
+	}
+	private void updateMobileBase(MobileBase b, TransformNR baseLoc, HashMap<Affine, TransformNR> map2, HashMap<DHParameterKinematics, double[]> jointPoses) {
 		updateBase(b, baseLoc, map2);
 		for (DHParameterKinematics k : b.getAllDHChains()) {
-			updateLimb(k, baseLoc, map2);
+			updateLimb(k, baseLoc, map2,jointPoses);
 		}
-//		for (DHParameterKinematics k : b.getAllParallelGroups()) {
-//			updateBase(k,baseLoc,map2);
-//		}
 
 	}
 
-	private void updateLimb(DHParameterKinematics k, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
+	private void updateLimb(DHParameterKinematics k, TransformNR baseLoc, HashMap<Affine, TransformNR> map2, HashMap<DHParameterKinematics, double[]> jointPoses) {
 		updateBase(k, baseLoc, map2);
 		TransformNR previous = k.getFiducialToGlobalTransform();
 		k.setGlobalToFiducialTransform(baseLoc,false);
-		ArrayList<TransformNR> ll = k.getChain().getChain(k.getCurrentJointSpaceVector());
+		ArrayList<TransformNR> ll = k.getChain().getChain(jointPoses.get(k));
 
 		for (int i = 0; i < ll.size(); i++) {
-			ArrayList<TransformNR> linkPos = ll;
 			int index = i;
 			Affine a;
-			if (k.getChain().getLinks().get(index).getListener() == null) {
-				k.getChain().getLinks().get(index).setListener(new Affine());
+			DHLink dhLink = k.getChain().getLinks().get(index);
+			if (dhLink.getListener() == null) {
+				dhLink.setListener(new Affine());
 			}
 			try {
-				a = (Affine) k.getChain().getLinks().get(index).getListener();
+				a = (Affine) dhLink.getListener();
 			} catch (java.lang.ClassCastException ex) {
 				a = new Affine();
-				k.getChain().getLinks().get(index).setListener(a);
+				dhLink.setListener(a);
 			}
-			if (k.getAbstractLink(i).getGlobalPositionListener() == null) {
-				k.getAbstractLink(i).setGlobalPositionListener(a);
+			AbstractLink abstractLink = k.getAbstractLink(i);
+			if (abstractLink.getGlobalPositionListener() == null) {
+				abstractLink.setGlobalPositionListener(a);
 			}
 
 			Affine af = a;
-			TransformNR nr = linkPos.get(index);
+			TransformNR nr = ll.get(index);
 			if (nr != null && af != null)
 				map2.put(af, nr);
-			// Platform.runLater(() -> {
-//					try {
-//						TransformFactory.nrToAffine(nr, af);
-//					} catch (Exception ex) {
-//						getUi().highlightException(null, ex);
-//					}
-			// });
 			if (k.getSlaveMobileBase(i) != null) {
-				updateMobileBase(k.getSlaveMobileBase(i), nr, map2);
+				updateMobileBase(k.getSlaveMobileBase(i), nr, map2,jointPoses);
 			}
 		}
 		k.setGlobalToFiducialTransform(previous,false);
@@ -321,13 +353,7 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		if (forwardOffset != null && kin.getRootListener() != null)
 			map2.put((Affine) kin.getRootListener(), forwardOffset);
-		// Platform.runLater(() -> {
-//				try {
-//					TransformFactory.nrToAffine(forwardOffset, (Affine) kin.getRootListener());
-//				} catch (Exception ex) {
-//					getUi().highlightException(null, ex);
-//				}
-		// });
+
 		kin.setGlobalToFiducialTransform(previous,false);
 	}
 
