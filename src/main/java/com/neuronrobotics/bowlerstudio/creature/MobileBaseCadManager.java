@@ -166,17 +166,15 @@ public class MobileBaseCadManager implements Runnable {
 		// String name = base.getScriptingName();
 		if (renderWrangler == null) {
 			renderWrangler = new Thread() {
-				HashMap<Affine, TransformNR> cached = new HashMap<Affine, TransformNR>();
+				HashMap<DHParameterKinematics,double[]> jointPoses = new HashMap<>();
 				boolean rendering = false;
 				boolean changed = false;
 				
 				IOnMobileBaseRenderChange l = new IOnMobileBaseRenderChange() {
 					@Override
-					public void  event() {
-						HashMap<DHParameterKinematics,double[]> jointPoses = new HashMap<>();
-						loadJointPose(base,jointPoses);
-						synchronized(cached) {
-							updateMobileBase(base, base.getFiducialToGlobalTransform(), cached,jointPoses);
+					public void  onIOnMobileBaseRenderChange() {
+						synchronized(jointPoses) {
+							loadJointPose(base,jointPoses);
 							changed = true;
 						}
 						
@@ -187,7 +185,7 @@ public class MobileBaseCadManager implements Runnable {
 					base.addIOnMobileBaseRenderChange(l);
 					base.addIHardwareSyncPulseReciver(() -> {
 						base.removeIOnMobileBaseRenderChange(l);
-						l.event();
+						l.onIOnMobileBaseRenderChange();
 					});
 					setName("MobileBaseCadManager Render Thread for " + base.getScriptingName());
 					while (base.isAvailable()) {
@@ -216,11 +214,15 @@ public class MobileBaseCadManager implements Runnable {
 //							}
 //							System.err.print("\n\n");
 							rendering = true;
-							HashMap<Affine, TransformNR> tmp;
-							synchronized(cached) {
-								tmp=cached;
-								cached = new HashMap<>(); 
+							HashMap<Affine, TransformNR> tmp= new HashMap<>();
+							HashMap<DHParameterKinematics,double[]> jointPosesTmp;
+							synchronized(jointPoses) {
+								jointPosesTmp=jointPoses;
+								jointPoses = new HashMap<>(); 
 							}
+							updateMobileBase(base, base.getFiducialToGlobalTransform(), tmp,jointPosesTmp);
+							changed = false;
+							
 							Object[] iterator = tmp.keySet().stream().toArray();
 							if (iterator.length > 0) {
 								Platform.runLater(() -> {
@@ -234,12 +236,11 @@ public class MobileBaseCadManager implements Runnable {
 									}
 									tmp.clear();
 									rendering = false;
-									changed = false;
+									
 								});
 								Thread.sleep(16);
 							}else {
 								rendering = false;
-								changed = false;
 							}
 							
 							if (toRun.size() > 0) {
