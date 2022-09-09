@@ -166,22 +166,19 @@ public class MobileBaseCadManager implements Runnable {
 		// String name = base.getScriptingName();
 		if (renderWrangler == null) {
 			renderWrangler = new Thread() {
-				HashMap<Affine, TransformNR> m = new HashMap<Affine, TransformNR>();
 				HashMap<Affine, TransformNR> cached = new HashMap<Affine, TransformNR>();
 				boolean rendering = false;
 				boolean changed = false;
-				HashMap<DHParameterKinematics,double[]> jointPoses = new HashMap<>();
+				
 				IOnMobileBaseRenderChange l = new IOnMobileBaseRenderChange() {
 					@Override
 					public void  event() {
-						if(changed)
-							return;
+						HashMap<DHParameterKinematics,double[]> jointPoses = new HashMap<>();
 						loadJointPose(base,jointPoses);
-						updateMobileBase(base, base.getFiducialToGlobalTransform(), cached,jointPoses);
-						HashMap<Affine, TransformNR> cachedOld = cached;
-						cached=m;
-						m=cachedOld;
-						changed = true;
+						synchronized(cached) {
+							updateMobileBase(base, base.getFiducialToGlobalTransform(), cached,jointPoses);
+							changed = true;
+						}
 						
 					}
 				};
@@ -219,7 +216,11 @@ public class MobileBaseCadManager implements Runnable {
 //							}
 //							System.err.print("\n\n");
 							rendering = true;
-							HashMap<Affine, TransformNR> tmp=m;
+							HashMap<Affine, TransformNR> tmp;
+							synchronized(cached) {
+								tmp=cached;
+								cached = new HashMap<>(); 
+							}
 							Object[] iterator = tmp.keySet().stream().toArray();
 							if (iterator.length > 0) {
 								Platform.runLater(() -> {
@@ -235,7 +236,7 @@ public class MobileBaseCadManager implements Runnable {
 									rendering = false;
 									changed = false;
 								});
-								//Thread.sleep(16);
+								Thread.sleep(16);
 							}else {
 								rendering = false;
 								changed = false;
@@ -256,7 +257,7 @@ public class MobileBaseCadManager implements Runnable {
 										tr.printStackTrace();
 									}
 								});
-								//Thread.sleep(16);
+								Thread.sleep(16);
 							}
 						} catch (Throwable t) {
 							// rendering not availible
