@@ -31,6 +31,7 @@ import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
 import com.neuronrobotics.sdk.addons.kinematics.IOnMobileBaseRenderChange;
+import com.neuronrobotics.sdk.addons.kinematics.IRegistrationListenerNR;
 import com.neuronrobotics.sdk.addons.kinematics.ITaskSpaceUpdateListenerNR;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -167,6 +168,7 @@ public class MobileBaseCadManager implements Runnable {
 		if (renderWrangler == null) {
 			renderWrangler = new Thread() {
 				HashMap<DHParameterKinematics,double[]> jointPoses = new HashMap<>();
+				HashMap<Affine, TransformNR> tmp= new HashMap<>();
 				boolean rendering = false;
 				boolean changed = false;
 				
@@ -180,6 +182,17 @@ public class MobileBaseCadManager implements Runnable {
 						
 					}
 				};
+				IRegistrationListenerNR r=new IRegistrationListenerNR() {
+					@Override
+					public void onFiducialToGlobalUpdate(AbstractKinematicsNR source, TransformNR regestration) {
+						l. onIOnMobileBaseRenderChange();
+					}
+
+					@Override
+					public void onBaseToFiducialUpdate(AbstractKinematicsNR source, TransformNR regestration) {
+						l. onIOnMobileBaseRenderChange();
+					}
+				};
 				@Override
 				public void run() {
 					base.addIOnMobileBaseRenderChange(l);
@@ -187,6 +200,10 @@ public class MobileBaseCadManager implements Runnable {
 						base.removeIOnMobileBaseRenderChange(l);
 						l.onIOnMobileBaseRenderChange();
 					});
+					base.addRegistrationListener(r);
+					for (DHParameterKinematics kin : base.getAllDHChains()) {
+						kin.addRegistrationListener(r);
+					}
 					setName("MobileBaseCadManager Render Thread for " + base.getScriptingName());
 					while (base.isAvailable()) {
 						try {
@@ -214,14 +231,16 @@ public class MobileBaseCadManager implements Runnable {
 //							}
 //							System.err.print("\n\n");
 							rendering = true;
-							HashMap<Affine, TransformNR> tmp= new HashMap<>();
+							
 							HashMap<DHParameterKinematics,double[]> jointPosesTmp;
 							synchronized(jointPoses) {
 								jointPosesTmp=jointPoses;
 								jointPoses = new HashMap<>(); 
 							}
 							updateMobileBase(base, base.getFiducialToGlobalTransform(), tmp,jointPosesTmp);
-							changed = false;
+							jointPosesTmp.clear();
+							jointPosesTmp=null;
+							
 							
 							Object[] iterator = tmp.keySet().stream().toArray();
 							if (iterator.length > 0) {
@@ -239,7 +258,9 @@ public class MobileBaseCadManager implements Runnable {
 									
 								});
 								Thread.sleep(16);
+								changed = false;
 							}else {
+								changed = false;
 								rendering = false;
 							}
 							
