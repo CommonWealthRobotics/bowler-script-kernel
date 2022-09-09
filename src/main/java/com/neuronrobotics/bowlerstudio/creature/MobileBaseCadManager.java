@@ -237,6 +237,7 @@ public class MobileBaseCadManager implements Runnable {
 								jointPosesTmp=jointPoses;
 								jointPoses = new HashMap<>(); 
 							}
+							changed = false;
 							updateMobileBase(base, base.getFiducialToGlobalTransform(), tmp,jointPosesTmp);
 							jointPosesTmp.clear();
 							jointPosesTmp=null;
@@ -258,9 +259,8 @@ public class MobileBaseCadManager implements Runnable {
 									
 								});
 								Thread.sleep(16);
-								changed = false;
+								
 							}else {
-								changed = false;
 								rendering = false;
 							}
 							
