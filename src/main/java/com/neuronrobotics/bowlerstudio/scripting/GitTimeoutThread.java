@@ -17,7 +17,7 @@ public class GitTimeoutThread extends Thread {
 	public void run() {
 		resetTimer();
 		try {
-			while((startTime+(1000*30))>System.currentTimeMillis())
+			while((startTime+(1000*120))>System.currentTimeMillis())
 				Thread.sleep(1000);
 			git.close();
 			ScriptingEngine.gitOpenTimeout.remove(git);
