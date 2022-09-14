@@ -413,7 +413,7 @@ public class MobileBaseCadManager implements Runnable {
 					getUi().highlightException(f, e);
 				}
 				FileChangeWatcher watcher = FileChangeWatcher.watch(f);
-				watcher.addIFileChangeListener(new IFileChangeListener() {
+				IFileChangeListener l = new IFileChangeListener() {
 
 					@Override
 					public void onFileChange(File fileThatChanged, WatchEvent event) {
@@ -429,6 +429,20 @@ public class MobileBaseCadManager implements Runnable {
 					@Override
 					public void onFileDelete(File fileThatIsDeleted) {
 						cadScriptCache.remove(key);
+					}
+				};
+				watcher.addIFileChangeListener(l);
+				base.addConnectionEventListener(new IDeviceConnectionEventListener() {
+					
+					@Override
+					public void onDisconnect(BowlerAbstractDevice source) {
+						watcher.removeIFileChangeListener(l);
+					}
+					
+					@Override
+					public void onConnect(BowlerAbstractDevice source) {
+						// TODO Auto-generated method stub
+						
 					}
 				});
 			}
@@ -1000,6 +1014,7 @@ public class MobileBaseCadManager implements Runnable {
 				try {
 					setAllCad(generateBody(device, true));
 				} catch (Exception e) {
+					
 					getUi().highlightException(getCadScriptFromMobileBase(device), e);
 				}
 
