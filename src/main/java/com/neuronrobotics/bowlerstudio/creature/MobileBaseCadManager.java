@@ -197,10 +197,10 @@ public class MobileBaseCadManager implements Runnable {
 				@Override
 				public void run() {
 					base.addIOnMobileBaseRenderChange(l);
-					base.addIHardwareSyncPulseReciver(() -> {
-						base.removeIOnMobileBaseRenderChange(l);
-						l.onIOnMobileBaseRenderChange();
-					});
+//					base.addIHardwareSyncPulseReciver(() -> {
+//						base.removeIOnMobileBaseRenderChange(l);
+//						l.onIOnMobileBaseRenderChange();
+//					});
 					base.addRegistrationListener(r);
 					for (DHParameterKinematics kin : base.getAllDHChains()) {
 						kin.addRegistrationListener(r);
@@ -320,9 +320,9 @@ public class MobileBaseCadManager implements Runnable {
 
 	private void updateMobileBase(MobileBase b, TransformNR baseLoc, HashMap<Affine, TransformNR> map2,
 			HashMap<DHParameterKinematics, double[]> jointPoses) {
-		updateBase(b, baseLoc, map2);
+		TransformNR back =updateBase(b, baseLoc, map2);
 		for (DHParameterKinematics k : b.getAllDHChains()) {
-			updateLimb(k, baseLoc, map2, jointPoses);
+			updateLimb(k, back, map2, jointPoses);
 		}
 
 	}
@@ -363,10 +363,11 @@ public class MobileBaseCadManager implements Runnable {
 		k.setGlobalToFiducialTransform(previous, false);
 	}
 
-	private void updateBase(AbstractKinematicsNR kin, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
+	private TransformNR updateBase(AbstractKinematicsNR kin, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
 		if (kin == null)
-			return;
+			return null;
 		TransformNR previous = kin.getFiducialToGlobalTransform();
+		
 		try {
 			kin.setGlobalToFiducialTransform(baseLoc, false);
 		} catch (Exception e) {
@@ -382,6 +383,7 @@ public class MobileBaseCadManager implements Runnable {
 			map2.put((Affine) kin.getRootListener(), forwardOffset);
 
 		kin.setGlobalToFiducialTransform(previous, false);
+		return forwardOffset;
 	}
 
 	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
