@@ -29,6 +29,7 @@ import com.neuronrobotics.sdk.addons.kinematics.AbstractKinematicsNR;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
+import com.neuronrobotics.sdk.addons.kinematics.ILinkConfigurationChangeListener;
 import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
 import com.neuronrobotics.sdk.addons.kinematics.IOnMobileBaseRenderChange;
 import com.neuronrobotics.sdk.addons.kinematics.IRegistrationListenerNR;
@@ -193,7 +194,13 @@ public class MobileBaseCadManager implements Runnable {
 						l.onIOnMobileBaseRenderChange();
 					}
 				};
-
+				ILinkConfigurationChangeListener confL= new ILinkConfigurationChangeListener() {
+					@Override
+					public void event(LinkConfiguration newConf) {
+						l.onIOnMobileBaseRenderChange();
+					}
+					
+				};
 				@Override
 				public void run() {
 					base.addIOnMobileBaseRenderChange(l);
@@ -205,6 +212,8 @@ public class MobileBaseCadManager implements Runnable {
 					for (DHParameterKinematics kin : base.getAllDHChains()) {
 						kin.addRegistrationListener(r);
 					}
+					// render on any configuration change
+					addConfL(base,confL);
 					setName("MobileBaseCadManager Render Thread for " + base.getScriptingName());
 					while (base.isAvailable()) {
 						try {
@@ -294,6 +303,16 @@ public class MobileBaseCadManager implements Runnable {
 
 					}
 					renderWrangler = null;
+				}
+				private void addConfL(MobileBase base, ILinkConfigurationChangeListener confL2) {
+					if(base==null)
+						return;
+					for(DHParameterKinematics k:base.getAllDHChains()) {
+						for(int i=0;i<k.getNumberOfLinks();i++) {
+							k.getAbstractLink(i).addChangeListener(confL2);
+							addConfL(k.getSlaveMobileBase(i),confL2);
+						}
+					}
 				}
 
 			};
