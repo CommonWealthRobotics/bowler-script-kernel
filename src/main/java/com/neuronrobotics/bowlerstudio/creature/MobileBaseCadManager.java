@@ -79,7 +79,25 @@ public class MobileBaseCadManager implements Runnable {
 	private Thread renderWrangler = null;
 	private HashMap<String, Object> cadScriptCache = new HashMap<>();
 	private static ArrayList<Runnable> toRun = new ArrayList<Runnable>();
-
+	private ArrayList<IRenderSynchronizationEvent> rendersync=new ArrayList<>();
+	
+	public void addIRenderSynchronizationEvent(IRenderSynchronizationEvent ev) {
+		if(rendersync.contains(ev))
+			return;
+		rendersync.add(ev);
+	}
+	public void removeIRenderSynchronizationEvent(IRenderSynchronizationEvent ev) {
+		if(rendersync.contains(ev))
+			rendersync.remove(ev);
+	}
+	private void fireIRenderSynchronizationEvent() {
+		for(int i=0;i<rendersync.size();i++)
+			try {
+				rendersync.get(i).event(this);
+			}catch(Exception e) {
+				
+			}
+	}
 	protected void clear() {
 		// Cad generator
 		cadScriptCache.clear();
@@ -300,7 +318,7 @@ public class MobileBaseCadManager implements Runnable {
 								break;
 							}
 						}
-
+						fireIRenderSynchronizationEvent();
 					}
 					renderWrangler = null;
 				}
