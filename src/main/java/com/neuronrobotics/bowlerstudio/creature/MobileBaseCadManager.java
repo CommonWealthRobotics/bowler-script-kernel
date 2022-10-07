@@ -283,7 +283,7 @@ public class MobileBaseCadManager implements Runnable {
 									}
 									tmp.clear();
 									rendering = false;
-
+									fireIRenderSynchronizationEvent();
 								});
 								Thread.sleep(16);
 
@@ -318,7 +318,7 @@ public class MobileBaseCadManager implements Runnable {
 								break;
 							}
 						}
-						fireIRenderSynchronizationEvent();
+						
 					}
 					renderWrangler = null;
 				}
