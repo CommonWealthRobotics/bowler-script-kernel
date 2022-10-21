@@ -64,7 +64,13 @@ public class RobotHelper implements IScriptingLanguage {
     // TODO Auto-generated method stub
     return true;
   }
-
+  /**
+   * Get the contents of an empty file
+   * @return
+   */
+  public String getDefaultContents() {
+	  return new MobileBase().getXml();
+  }
   @Override
   public ArrayList<String> getFileExtenetion() {
     // TODO Auto-generated method stub
