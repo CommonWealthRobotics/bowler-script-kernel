@@ -137,6 +137,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		// addScriptingLanguage(new KotlinHelper());
 		addScriptingLanguage(new SvgLoader());
 		addScriptingLanguage(new BashLoader());
+		addScriptingLanguage(new SequenceRunner());
 	}
 
 	public static void setWorkspace(File file) {
