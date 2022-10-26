@@ -4,7 +4,6 @@ import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.IOnInterpolationDone;
 import com.neuronrobotics.sdk.addons.kinematics.InterpolationMoveState;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
-import com.neuronrobotics.sdk.pid.InterpolationEngine;
 import com.neuronrobotics.sdk.pid.InterpolationType;
 
 public class SequenceEvent implements IOnInterpolationDone{

@@ -20,20 +20,34 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 
 public class TimeSequence {
 	// Create the type, this tells GSON what datatypes to instantiate when parsing
 	// and saving the json
-	private static Type TT_mapStringString = new TypeToken<HashMap<String, HashMap<String, Object>>>() {
+	private static Type TT_mapStringString = new TypeToken<HashMap<String, Object>>() {
 	}.getType();
 	private static Type TT_listString = new TypeToken<ArrayList<String>>() {
 	}.getType();
 	private static Type TT_SequenceEvent = new TypeToken<SequenceEvent>() {
 	}.getType();
+	private static Type TT_mapSequence = new TypeToken<HashMap<String,SequenceEvent>>() {
+	}.getType();
 	// chreat the gson object, this is the parsing factory
-	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+	private  Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+	private  HashMap<String, Object> database;
+	private  HashMap<String, Object> initialize;
+	private  String url;
+	private  String file;
+	private  String wavurl;
+	private  String wavfile;
+	private  long duration;
+	private  ArrayList<String> devicesInSequence;
 
 	public static HashMap<String, AbstractKinematicsNR> getDevices() {
 		HashMap<String, AbstractKinematicsNR> map = new HashMap<>();
@@ -67,68 +81,32 @@ public class TimeSequence {
 		}
 	}
 
-	public static void execute(String content) throws Exception {
+	public void execute(String content) throws Exception {
 
-		HashMap<String, HashMap<String, Object>> database = gson.fromJson(content, TT_mapStringString);
-		HashMap<String, Object> initialize = database.get("initialize");
-		if (initialize == null)
-			throw new RuntimeException("Cant initialize!");
-		String url = initialize.get("url").toString();
-		String file = initialize.get("file").toString();
-		String wavurl = initialize.get("wavURL").toString();
-		String wavfile = initialize.get("wavFile").toString();
-		long duration = Long.parseLong(initialize.get("msDuration").toString());
-		ArrayList<String> devicesInSequence = gson.fromJson(gson.toJson(initialize.get("devices")), TT_listString);
+		load(content);
 
+		runSequence();
+	}
+
+	public void runSequence() throws Exception {
 		System.out.println("Initialize Sequence");
-		ScriptingEngine.gitScriptRun(url, file);
+		ScriptingEngine.gitScriptRun(getUrl(), getFile());
 
 		HashMap<String, AbstractKinematicsNR> devices = getDevices();
 		long start = System.currentTimeMillis();
 		ArrayList<Thread> threads = new ArrayList<Thread>();
-		if (wavurl != null && wavfile != null) {
-			File path = ScriptingEngine.fileFromGit(wavurl, null, // branch
-					wavfile);
-			AudioInputStream audioStream = AudioSystem.getAudioInputStream(path);
-			Clip audioClip = AudioSystem.getClip();
-			audioClip.open(audioStream);
-			double len = (double) audioClip.getMicrosecondLength() / 1000.0;
-			if(duration < len)
-				duration =(long) len;
-			threads.add(new Thread(() -> {
-				try {
-
-					audioClip.start();
-					ThreadUtil.wait(1);
-					try {
-						while (audioClip.isRunning() && !Thread.interrupted()) {
-							double pos = (double) audioClip.getMicrosecondPosition() / 1000.0;
-							double percent = pos / len * 100.0;
-							// System.out.println("Current " + pos + " Percent = " + percent);
-							ThreadUtil.wait(10);
-						}
-					} catch (Throwable t) {
-
-					}
-					audioClip.stop();
-					audioClip.close();
-					((AudioInputStream) audioStream).close();
-
-				} catch (Exception e) {
-
-				}
-
-			}));
+		if (getWavurl() != null && getWavfile() != null) {
+			addWavFileRun(threads);
 		}
-		long finalDur = duration;
-		for (String key : devices.keySet()) {
-			for (String mine : devicesInSequence)
+		long finalDur = getDuration();
+		for (String mine : devices.keySet()) {
+			for (String key : getDevicesInSequence())
 				if (mine.contentEquals(key)) {
 					System.out.println("Found Device " + key);
-					HashMap<String, Object> devSeq = database.get(key);
+					HashMap<String,SequenceEvent> devSeq = gson.fromJson(gson.toJson(getDatabase().get(key)),TT_mapSequence );
 					Thread t = new Thread(() -> {
 						for (int i = 0; i < finalDur && !Thread.interrupted(); i++) {
-							SequenceEvent event = gson.fromJson(gson.toJson(devSeq.get("" + i)), TT_SequenceEvent);
+							SequenceEvent event = devSeq.get("" + i);
 							if (event != null) {
 								System.out.println(key + " Execute @ " + i);
 								event.execute((DHParameterKinematics) devices.get(key));
@@ -156,7 +134,152 @@ public class TimeSequence {
 				t.interrupt();
 			}
 		}
-		System.out.println("Running complete, took " + (System.currentTimeMillis() - start) + " expcted " + duration);
+		System.out.println("Running complete, took " + (System.currentTimeMillis() - start) + " expcted " + getDuration());
+	}
+
+	private void addWavFileRun(ArrayList<Thread> threads) throws InvalidRemoteException, TransportException,
+			GitAPIException, IOException, UnsupportedAudioFileException, LineUnavailableException {
+		File path = ScriptingEngine.fileFromGit(getWavurl(), null, // branch
+				getWavfile());
+		AudioInputStream audioStream = AudioSystem.getAudioInputStream(path);
+		Clip audioClip = AudioSystem.getClip();
+		audioClip.open(audioStream);
+		double len = (double) audioClip.getMicrosecondLength() / 1000.0;
+		if(getDuration() < len)
+			setDuration((long) len);
+		threads.add(new Thread(() -> {
+			try {
+
+				audioClip.start();
+				ThreadUtil.wait(1);
+				try {
+					while (audioClip.isRunning() && !Thread.interrupted()) {
+						double pos = (double) audioClip.getMicrosecondPosition() / 1000.0;
+						double percent = pos / len * 100.0;
+						// System.out.println("Current " + pos + " Percent = " + percent);
+						ThreadUtil.wait(10);
+					}
+				} catch (Throwable t) {
+
+				}
+				audioClip.stop();
+				audioClip.close();
+				((AudioInputStream) audioStream).close();
+
+			} catch (Exception e) {
+
+			}
+
+		}));
+	}
+
+	public void load(String content) {
+		setDatabase(gson.fromJson(content, TT_mapStringString));
+		setInitialize(gson.fromJson(gson.toJson(getDatabase().get("initialize")),TT_mapStringString));
+		if (getInitialize() == null)
+			throw new RuntimeException("Cant initialize!");
+		setUrl(getInitialize().get("url").toString());
+		setFile(getInitialize().get("file").toString());
+		setWavurl(getInitialize().get("wavURL").toString());
+		setWavfile(getInitialize().get("wavFile").toString());
+		setDuration(Long.parseLong(getInitialize().get("msDuration").toString()));
+		setDevicesInSequence(gson.fromJson(gson.toJson(getInitialize().get("devices")), TT_listString));
+//		for (String key : devicesInSequence) {
+//			HashMap<String,SequenceEvent> devSeq = gson.fromJson(gson.toJson(database.get(key)),TT_mapSequence );
+//
+//		}
+	}
+	
+	public HashMap<String,SequenceEvent> getSequence(String d){
+		String device = getDevice(d);
+		HashMap<String,SequenceEvent> devSeq = gson.fromJson(gson.toJson(getDatabase().get(device)),TT_mapSequence );
+		if(devSeq==null) {
+			devSeq=new HashMap<>();
+		}
+		getDatabase().put(device,devSeq);
+		
+		return devSeq;
+	}
+	
+	
+	
+	private String getDevice(String d) {
+		for(String s:devicesInSequence) {
+			if(s.contentEquals(d))
+				return d;
+		}
+		devicesInSequence.add(d);
+		return d;
+	}
+
+	public String save() {
+		return gson.toJson(getDatabase());
+	}
+
+	public ArrayList<String> getDevicesInSequence() {
+		return devicesInSequence;
+	}
+
+	public void setDevicesInSequence(ArrayList<String> devicesInSequence) {
+		this.devicesInSequence = devicesInSequence;
+		initialize.put("devices", devicesInSequence);
+	}
+
+	public long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(long duration) {
+		this.duration = duration;
+	}
+
+	public String getWavfile() {
+		return wavfile;
+	}
+
+	public void setWavfile(String wavfile) {
+		this.wavfile = wavfile;
+	}
+
+	public String getWavurl() {
+		return wavurl;
+	}
+
+	public void setWavurl(String wavurl) {
+		this.wavurl = wavurl;
+	}
+
+	public String getFile() {
+		return file;
+	}
+
+	public void setFile(String file) {
+		this.file = file;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public HashMap<String, Object> getInitialize() {
+		return initialize;
+	}
+
+	public void setInitialize(HashMap<String, Object> initialize) {
+		this.initialize = initialize;
+		database.put("initialize", initialize);
+	}
+
+	public HashMap<String, Object> getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(HashMap<String,Object> database) {
+		this.database = database;
 	}
 
 }

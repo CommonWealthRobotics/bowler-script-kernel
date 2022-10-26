@@ -30,7 +30,7 @@ public class SequenceRunner implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
 
-		TimeSequence.execute(code);
+		new TimeSequence().execute(code);
 		return null;
 	}
 
