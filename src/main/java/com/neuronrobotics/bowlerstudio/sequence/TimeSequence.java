@@ -103,7 +103,7 @@ public class TimeSequence {
 			for (String key : getDevicesInSequence())
 				if (mine.contentEquals(key)) {
 					System.out.println("Found Device " + key);
-					HashMap<String,SequenceEvent> devSeq = gson.fromJson(gson.toJson(getDatabase().get(key)),TT_mapSequence );
+					HashMap<String,SequenceEvent> devSeq = getSequence(key);
 					Thread t = new Thread(() -> {
 						for (int i = 0; i < finalDur && !Thread.interrupted(); i++) {
 							SequenceEvent event = devSeq.get("" + i);
@@ -184,10 +184,9 @@ public class TimeSequence {
 		setWavfile(getInitialize().get("wavFile").toString());
 		setDuration(Long.parseLong(getInitialize().get("msDuration").toString()));
 		setDevicesInSequence(gson.fromJson(gson.toJson(getInitialize().get("devices")), TT_listString));
-//		for (String key : devicesInSequence) {
-//			HashMap<String,SequenceEvent> devSeq = gson.fromJson(gson.toJson(database.get(key)),TT_mapSequence );
-//
-//		}
+		for(String key:devicesInSequence) {
+			getSequence(key);
+		}
 	}
 	
 	public HashMap<String,SequenceEvent> getSequence(String d){
