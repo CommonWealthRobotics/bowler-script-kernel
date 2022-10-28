@@ -18,7 +18,7 @@ public class SequenceTest {
 		}catch(Throwable t) {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
-			t.printStackTrace(System.out);
+			t.printStackTrace(pw);
 			fail(sw.toString());
 		}
 	}
