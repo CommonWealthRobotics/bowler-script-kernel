@@ -331,6 +331,11 @@ task sourcesJar(type: Jar) {
 artifacts {
 	archives javadocJar, sourcesJar, jar
 }
+test {
+	testLogging {
+		exceptionFormat = 'full'
+	}
+}
 /*
 signing {
 	sign configurations.archives
