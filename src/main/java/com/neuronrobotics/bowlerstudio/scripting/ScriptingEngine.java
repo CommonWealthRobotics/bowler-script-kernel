@@ -1848,16 +1848,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 
 	public static String fork(String sourceURL, String newRepoName, String newRepoDescription) throws Exception {
+		GHRepository repository = makeNewRepoNoFailOver(newRepoName, newRepoDescription);
+		String gitRepo = repository.getHttpTransportUrl();
+		
 		ArrayList<String> files = filesInGit(sourceURL);
 		Git git = locateGit(fileFromGit(sourceURL, files.get(0)));
 		Repository sourceRepoObject = git.getRepository();
 		try {
-			closeGit(git);
-			GHRepository repository = makeNewRepoNoFailOver(newRepoName, newRepoDescription);
-			String gitRepo = repository.getHttpTransportUrl();
-
 			sourceRepoObject.getConfig().setString("remote", "origin", "url", gitRepo);
-			git = locateGit(fileFromGit(sourceURL, files.get(0)));
 			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
 				git.push().setTransportConfigCallback(transportConfigCallback).setProgressMonitor(getProgressMoniter("Pushing " ,gitRepo)).call();
 			else
