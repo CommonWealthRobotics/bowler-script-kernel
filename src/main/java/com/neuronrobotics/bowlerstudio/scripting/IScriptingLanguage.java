@@ -63,9 +63,7 @@ public interface IScriptingLanguage {
    * Get the contents of an empty file
    * @return
    */
-  default String getDefaultContents() {
-	  return "//Your code here";
-  }
+  String getDefaultContents();
 
   /**
    * This function returns if this is a binary file or a text file

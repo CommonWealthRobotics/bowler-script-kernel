@@ -147,6 +147,50 @@ public class ArduinoLoader implements IScriptingLanguage {
   public static void setDefaultBoard(String defaultBoard) {
     ArduinoLoader.defaultBoard = defaultBoard;
   }
+  /**
+   * Get the contents of an empty file
+   * @return
+   */
+  public String getDefaultContents() {
+	  return "/*\n"
+	  		+ "  Blink\n"
+	  		+ "\n"
+	  		+ "  Turns an LED on for one second, then off for one second, repeatedly.\n"
+	  		+ "\n"
+	  		+ "  Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO\n"
+	  		+ "  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to\n"
+	  		+ "  the correct LED pin independent of which board is used.\n"
+	  		+ "  If you want to know what pin the on-board LED is connected to on your Arduino\n"
+	  		+ "  model, check the Technical Specs of your board at:\n"
+	  		+ "  https://www.arduino.cc/en/Main/Products\n"
+	  		+ "\n"
+	  		+ "  modified 8 May 2014\n"
+	  		+ "  by Scott Fitzgerald\n"
+	  		+ "  modified 2 Sep 2016\n"
+	  		+ "  by Arturo Guadalupi\n"
+	  		+ "  modified 8 Sep 2016\n"
+	  		+ "  by Colby Newman\n"
+	  		+ "\n"
+	  		+ "  This example code is in the public domain.\n"
+	  		+ "\n"
+	  		+ "  https://www.arduino.cc/en/Tutorial/BuiltInExamples/Blink\n"
+	  		+ "*/\n"
+	  		+ "\n"
+	  		+ "// the setup function runs once when you press reset or power the board\n"
+	  		+ "void setup() {\n"
+	  		+ "  // initialize digital pin LED_BUILTIN as an output.\n"
+	  		+ "  pinMode(LED_BUILTIN, OUTPUT);\n"
+	  		+ "}\n"
+	  		+ "\n"
+	  		+ "// the loop function runs over and over again forever\n"
+	  		+ "void loop() {\n"
+	  		+ "  digitalWrite(LED_BUILTIN, HIGH);  // turn the LED on (HIGH is the voltage level)\n"
+	  		+ "  delay(1000);                      // wait for a second\n"
+	  		+ "  digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW\n"
+	  		+ "  delay(1000);                      // wait for a second\n"
+	  		+ "}\n"
+	  		+ "";
+  }
 
   public static String getARDUINOExec() {
     return ARDUINO;

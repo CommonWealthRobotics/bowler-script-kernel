@@ -13,12 +13,12 @@ public class BashLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-		//List<String> asList = Arrays.asList("bash",code.getAbsolutePath());
+		// List<String> asList = Arrays.asList("bash",code.getAbsolutePath());
 		ArrayList<String> commands = new ArrayList<>();
 		commands.add("bash");
 		commands.add(code.getAbsolutePath());
-		if(args!=null) {
-			for(Object o:args) {
+		if (args != null) {
+			for (Object o : args) {
 				commands.add(o.toString());
 			}
 		}
@@ -27,7 +27,7 @@ public class BashLoader implements IScriptingLanguage {
 		pb.directory(code.getParentFile());
 		// startinf the process
 		Process process = pb.start();
-		
+
 		// for reading the ouput from stream
 		BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		BufferedReader errInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -41,7 +41,7 @@ public class BashLoader implements IScriptingLanguage {
 				back.add(s);
 				System.out.println(s);
 			}
-			if(e!=null)
+			if (e != null)
 				System.out.println(e);
 			//
 		}
@@ -66,9 +66,18 @@ public class BashLoader implements IScriptingLanguage {
 
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		if(OSUtil.isWindows())
-			 return new ArrayList<>();
-		return new ArrayList<>(Arrays.asList(".sh",".bash"));
+		if (OSUtil.isWindows())
+			return new ArrayList<>();
+		return new ArrayList<>(Arrays.asList(".sh", ".bash"));
+	}
+
+	/**
+	 * Get the contents of an empty file
+	 * 
+	 * @return
+	 */
+	public String getDefaultContents() {
+		return "echo Hello World";
 	}
 
 	@Override

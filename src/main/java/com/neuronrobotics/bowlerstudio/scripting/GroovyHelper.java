@@ -67,7 +67,14 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
   public String getShellType() {
     return "Groovy";
   }
-
+	/**
+	 * Get the contents of an empty file
+	 * 
+	 * @return
+	 */
+	public String getDefaultContents() {
+		return "// code here";
+	}
 
   @Override
   public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
