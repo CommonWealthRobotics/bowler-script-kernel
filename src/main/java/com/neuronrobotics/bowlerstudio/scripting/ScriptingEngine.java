@@ -1332,7 +1332,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			} catch (InvalidRemoteException e) {
 				PasswordManager.checkInternet();
 				closeGit(git);
-				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
+				throw new InvalidRemoteException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			} catch (CanceledException e) {
 				PasswordManager.checkInternet();
 				closeGit(git);
