@@ -1278,7 +1278,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void pull(String remoteURI, String branch)
-			throws IOException, CheckoutConflictException, NoHeadException {
+			throws IOException, CheckoutConflictException, NoHeadException,InvalidRemoteException {
 		waitForRepo(remoteURI,"pull");
 		// new Exception().printStackTrace();
 
@@ -1396,6 +1396,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				closeGit(git);
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			}
+		} catch (InvalidRemoteException e) {
+			PasswordManager.checkInternet();
+			closeGit(git);
+			throw new InvalidRemoteException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (Throwable t) {
 			t.printStackTrace();
 			PasswordManager.checkInternet();
