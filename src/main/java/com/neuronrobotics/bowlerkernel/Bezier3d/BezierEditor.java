@@ -112,10 +112,20 @@ public class BezierEditor{
 		}
 
 
-		setEndManip(new CartesianManipulator(end,()->{save();},()->{update();}));
-		cp1Manip=new CartesianManipulator(cp1,()->{save();},()->{update();});
-		cp2Manip=new CartesianManipulator(cp2,()->{save();},()->{update();});
-		setStartManip(new CartesianManipulator(strt,()->{save();},()->{update();}));
+		endManip =new CartesianManipulator(end);
+		cp1Manip=new CartesianManipulator(cp1);
+		cp2Manip=new CartesianManipulator(cp2);
+		setStartManip(new CartesianManipulator(strt));
+		
+		endManip.addSaveListener(()->{save();});
+		endManip.addEventListener(()->{update();});
+		
+		cp1Manip.addSaveListener(()->{save();});
+		cp1Manip.addEventListener(()->{update();});
+		
+		cp2Manip.addSaveListener(()->{save();});
+		cp2Manip.addEventListener(()->{update();});
+		
 
 		for(int i=0;i<numPoints;i++){
 			CSG part=displayPart.clone();
@@ -243,13 +253,16 @@ public class BezierEditor{
 	public CartesianManipulator getEndManip() {
 		return endManip;
 	}
-	public void setEndManip(CartesianManipulator endManip) {
-		this.endManip = endManip;
-	}
+//	private void setEndManip(CartesianManipulator endManip) {
+//		this.endManip = endManip;
+//	}
 	public CartesianManipulator getStartManip() {
 		return start;
 	}
 	public void setStartManip(CartesianManipulator start) {
+		this.start.clearListeners();
 		this.start = start;
+		start.addSaveListener(()->{save();});
+		start.addEventListener(()->{update();});
 	}
 }
