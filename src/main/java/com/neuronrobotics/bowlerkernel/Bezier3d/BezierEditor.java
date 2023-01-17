@@ -50,10 +50,10 @@ public class BezierEditor{
 	.toZMax()
 	.roty(-90);
 
-	CartesianManipulator endManip;
+	private CartesianManipulator endManip;
 	CartesianManipulator cp1Manip;
 	CartesianManipulator cp2Manip;
-	CartesianManipulator start;
+	private CartesianManipulator start;
 	HashMap<String, HashMap<String,List<Double>>> database;
 	boolean updating = false;
 	private String url;
@@ -112,26 +112,30 @@ public class BezierEditor{
 		}
 
 
-		endManip=new CartesianManipulator(end,()->{save();},()->{update();});
+		setEndManip(new CartesianManipulator(end,()->{save();},()->{update();}));
 		cp1Manip=new CartesianManipulator(cp1,()->{save();},()->{update();});
 		cp2Manip=new CartesianManipulator(cp2,()->{save();},()->{update();});
-		start=new CartesianManipulator(strt,()->{save();},()->{update();});
+		setStartManip(new CartesianManipulator(strt,()->{save();},()->{update();}));
 
 		for(int i=0;i<numPoints;i++){
 			CSG part=displayPart.clone();
 			part.setManipulator(new Affine());
+			part.setMfg(incoming -> null);
 			parts.add(part);
 		}
 		update();
 		save();
 	}
+	
+	
+	
 	public ArrayList<CSG> get(){
 
 		ArrayList<CSG> back= new ArrayList<CSG>();
-		back.addAll(endManip.get());
+		back.addAll(getEndManip().get());
 		back.addAll(cp1Manip.get());
 		back.addAll(cp2Manip.get());
-		back.addAll(start.get());
+		back.addAll(getStartManip().get());
 		back.addAll(parts);
 		return back;
 	}
@@ -153,24 +157,24 @@ public class BezierEditor{
 	}
 	public ArrayList<Transform> transforms (){
 		ArrayList<Transform> tf=Extrude.bezierToTransforms(
-		new Vector3d(	cp1Manip.manipulationMatrix.getTx()-start.manipulationMatrix.getTx(),
-						cp1Manip.manipulationMatrix.getTy()-start.manipulationMatrix.getTy(),
-						cp1Manip.manipulationMatrix.getTz()-start.manipulationMatrix.getTz()), // Control point one
-		new Vector3d(	cp2Manip.manipulationMatrix.getTx()-start.manipulationMatrix.getTx(),
-						cp2Manip.manipulationMatrix.getTy()-start.manipulationMatrix.getTy(),
-						cp2Manip.manipulationMatrix.getTz()-start.manipulationMatrix.getTz()), // Control point two
-		new Vector3d(	endManip.manipulationMatrix.getTx()-start.manipulationMatrix.getTx(),
-						endManip.manipulationMatrix.getTy()-start.manipulationMatrix.getTy(),
-						endManip.manipulationMatrix.getTz()-start.manipulationMatrix.getTz()), // Endpoint
+		new Vector3d(	cp1Manip.manipulationMatrix.getTx()-getStartManip().manipulationMatrix.getTx(),
+						cp1Manip.manipulationMatrix.getTy()-getStartManip().manipulationMatrix.getTy(),
+						cp1Manip.manipulationMatrix.getTz()-getStartManip().manipulationMatrix.getTz()), // Control point one
+		new Vector3d(	cp2Manip.manipulationMatrix.getTx()-getStartManip().manipulationMatrix.getTx(),
+						cp2Manip.manipulationMatrix.getTy()-getStartManip().manipulationMatrix.getTy(),
+						cp2Manip.manipulationMatrix.getTz()-getStartManip().manipulationMatrix.getTz()), // Control point two
+		new Vector3d(	getEndManip().manipulationMatrix.getTx()-getStartManip().manipulationMatrix.getTx(),
+						getEndManip().manipulationMatrix.getTy()-getStartManip().manipulationMatrix.getTy(),
+						getEndManip().manipulationMatrix.getTz()-getStartManip().manipulationMatrix.getTz()), // Endpoint
 		parts.size()// Iterations
 		);
 		
 		for(int i=0;i<tf.size();i++) {
 			tf.set(i, tf
 					.get(i)
-					.movex(start.manipulationMatrix.getTx())
-					.movey(start.manipulationMatrix.getTy())
-					.movez(start.manipulationMatrix.getTz())
+					.movex(getStartManip().manipulationMatrix.getTx())
+					.movey(getStartManip().manipulationMatrix.getTy())
+					.movez(getStartManip().manipulationMatrix.getTz())
 					);
 		}
 		return tf;
@@ -190,14 +194,14 @@ public class BezierEditor{
 				cp2Manip.manipulationMatrix.getTz()
 				));
 		bezData.put("end point",Arrays.asList(
-				endManip.manipulationMatrix.getTx(),
-				endManip.manipulationMatrix.getTy(),
-				endManip.manipulationMatrix.getTz()
+				getEndManip().manipulationMatrix.getTx(),
+				getEndManip().manipulationMatrix.getTy(),
+				getEndManip().manipulationMatrix.getTz()
 				));
 		bezData.put("start point",Arrays.asList(
-				start.manipulationMatrix.getTx(),
-				start.manipulationMatrix.getTy(),
-				start.manipulationMatrix.getTz()
+				getStartManip().manipulationMatrix.getTx(),
+				getStartManip().manipulationMatrix.getTy(),
+				getStartManip().manipulationMatrix.getTz()
 				));
 		bezData.put("number of points",Arrays.asList((double)parts.size()));
 		database.put("bezier",bezData);
@@ -235,5 +239,17 @@ public class BezierEditor{
 				}
 			}
 		}).start();
+	}
+	public CartesianManipulator getEndManip() {
+		return endManip;
+	}
+	public void setEndManip(CartesianManipulator endManip) {
+		this.endManip = endManip;
+	}
+	public CartesianManipulator getStartManip() {
+		return start;
+	}
+	public void setStartManip(CartesianManipulator start) {
+		this.start = start;
 	}
 }

@@ -22,7 +22,11 @@ public class CartesianManipulator{
 	CSG manip3 = new Cylinder(0,5,40,10).toCSG()
 	.rotx(90)
 	.setColor(Color.GREEN);
+	
 	public CartesianManipulator(TransformNR globalPose,Runnable ev,Runnable moving) {
+		manip1.setMfg(incoming -> null);
+		manip2.setMfg(incoming -> null);
+		manip3.setMfg(incoming -> null);
 		new manipulation( manipulationMatrix, new Vector3d(0,0,1), manip1, globalPose,ev,moving);
 		new manipulation( manipulationMatrix, new Vector3d(0,1,0), manip3, globalPose,ev,moving);
 		new manipulation( manipulationMatrix, new Vector3d(1,0,0), manip2, globalPose,ev,moving);
