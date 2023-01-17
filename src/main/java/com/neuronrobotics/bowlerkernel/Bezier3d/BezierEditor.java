@@ -260,7 +260,8 @@ public class BezierEditor{
 		return start;
 	}
 	public void setStartManip(CartesianManipulator start) {
-		this.start.clearListeners();
+		if(this.start!=null)
+			this.start.clearListeners();
 		this.start = start;
 		start.addSaveListener(()->{save();});
 		start.addEventListener(()->{update();});
