@@ -23,7 +23,7 @@ public class GitHub {
 
   @Test
   public void test() throws Exception {
-		ScriptingEngine.login();
+		//ScriptingEngine.login();
 //		String remoteURI = "https://github.com/madhephaestusdemo/WalkTest_madhephaestusdemo.git";
 //		System.out.println(ScriptingEngine.getRepositoryCloneDirectory(remoteURI));
 //		ScriptingEngine.pull(remoteURI);
