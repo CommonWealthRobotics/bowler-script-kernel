@@ -114,6 +114,7 @@ public class BezierEditor{
 
 		endManip =new CartesianManipulator(end);
 		cp1Manip=new CartesianManipulator(cp1);
+		endManip.addDependant(cp1Manip);
 		cp2Manip=new CartesianManipulator(cp2);
 		setStartManip(new CartesianManipulator(strt));
 		
@@ -265,5 +266,6 @@ public class BezierEditor{
 		this.start = start;
 		start.addSaveListener(()->{save();});
 		start.addEventListener(()->{update();});
+		start.addDependant(cp2Manip);
 	}
 }
