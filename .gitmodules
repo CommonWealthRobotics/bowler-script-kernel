@@ -5,3 +5,6 @@
 	path = JCSG
 	url = https://github.com/NeuronRobotics/JCSG.git
 
+[submodule "GithubPasswordManager"]
+	path = GithubPasswordManager
+	url = https://github.com/CommonWealthRobotics/GithubPasswordManager.git
