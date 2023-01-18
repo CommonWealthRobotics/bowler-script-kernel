@@ -270,15 +270,28 @@ dependencies {
 	
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
-	compile group: 'de.dfki.mary', name: 'voice-cmu-slt-hsmm', version: '5.2'
-	// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
-	compile group: 'de.dfki.mary', name: 'voice-dfki-poppy-hsmm', version: '5.2'
-	// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
-	compile group: 'de.dfki.mary', name: 'voice-dfki-prudence-hsmm', version: '5.2'
-		// https://mvnrepository.com/artifact/de.dfki.mary/voice-dfki-poppy-hsmm
-	compile group: 'de.dfki.mary', name: 'voice-dfki-spike-hsmm', version: '5.2'
-	// https://mvnrepository.com/artifact/de.dfki.mary/marytts-lang-en
-	compile group: 'de.dfki.mary', name: 'marytts-lang-en', version: '5.2'
+	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+	implementation('de.dfki.mary:marytts-lang-en:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+
+	
 	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'2.2.0-pre.5'
 
 }
