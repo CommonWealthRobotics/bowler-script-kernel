@@ -241,7 +241,7 @@ public class BezierEditor{
 				OutputStream out = null;
 				try {
 					out = FileUtils.openOutputStream(cachejson, false);
-					IOUtils.write(writeOut, out, Charset.defaultCharset());
+					IOUtils.write(writeOut, out);
 					out.close(); // don't swallow close Exception if copy
 					// completes
 					// normally
@@ -249,7 +249,7 @@ public class BezierEditor{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} finally {
-					IOUtils.closeQuietly(out,null);
+					IOUtils.closeQuietly(out);
 				}
 			}
 		}).start();
