@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ public class BezierEditor{
 	TransformNR cp1 = new TransformNR();
 	TransformNR cp2 = new TransformNR();
 	TransformNR strt = new TransformNR();
-	ArrayList<CSG> parts = new ArrayList<CSG>();
+	private ArrayList<CSG> partsInternal = null;
 	CSG displayPart=new Cylinder(5,0,20,10).toCSG()
 	.toZMax()
 	.roty(-90);
@@ -126,14 +127,13 @@ public class BezierEditor{
 		
 		cp2Manip.addSaveListener(()->{save();});
 		cp2Manip.addEventListener(()->{update();});
-		
-
+		ArrayList<CSG> parts = new ArrayList<>();
 		for(int i=0;i<numPoints;i++){
 			CSG part=displayPart.clone();
-			part.setManipulator(new Affine());
-			part.setMfg(incoming -> null);
 			parts.add(part);
 		}
+		setPartsInternal(parts);
+		
 		update();
 		save();
 	}
@@ -147,7 +147,7 @@ public class BezierEditor{
 		back.addAll(cp1Manip.get());
 		back.addAll(cp2Manip.get());
 		back.addAll(getStartManip().get());
-		back.addAll(parts);
+		back.addAll(getPartsInternal());
 		return back;
 	}
 
@@ -157,9 +157,9 @@ public class BezierEditor{
 		}
 		updating=true;
 		ArrayList<Transform> transforms = transforms ();
-		for(int i=0;i<parts.size();i++) {
+		for(int i=0;i<getNumParts();i++) {
 			TransformNR nr=TransformFactory.csgToNR(transforms.get(i));
-			Affine partsGetGetManipulator = parts.get(i).getManipulator();
+			Affine partsGetGetManipulator = getPartsInternal().get(i).getManipulator();
 			Platform.runLater(()->{
 				TransformFactory.nrToAffine(nr, partsGetGetManipulator);
 			});
@@ -177,7 +177,7 @@ public class BezierEditor{
 		new Vector3d(	getEndManip().manipulationMatrix.getTx()-getStartManip().manipulationMatrix.getTx(),
 						getEndManip().manipulationMatrix.getTy()-getStartManip().manipulationMatrix.getTy(),
 						getEndManip().manipulationMatrix.getTz()-getStartManip().manipulationMatrix.getTz()), // Endpoint
-		parts.size()// Iterations
+		getNumParts()// Iterations
 		);
 		
 		for(int i=0;i<tf.size();i++) {
@@ -189,6 +189,9 @@ public class BezierEditor{
 					);
 		}
 		return tf;
+	}
+	private int getNumParts() {
+		return getPartsInternal().size();
 	}
 	public void save() {
 		database.clear();
@@ -214,7 +217,7 @@ public class BezierEditor{
 				getStartManip().manipulationMatrix.getTy(),
 				getStartManip().manipulationMatrix.getTz()
 				));
-		bezData.put("number of points",Arrays.asList((double)parts.size()));
+		bezData.put("number of points",Arrays.asList((double)getNumParts()));
 		database.put("bezier",bezData);
 
 		new Thread(()->{
@@ -238,7 +241,7 @@ public class BezierEditor{
 				OutputStream out = null;
 				try {
 					out = FileUtils.openOutputStream(cachejson, false);
-					IOUtils.write(writeOut, out);
+					IOUtils.write(writeOut, out, Charset.defaultCharset());
 					out.close(); // don't swallow close Exception if copy
 					// completes
 					// normally
@@ -246,7 +249,7 @@ public class BezierEditor{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} finally {
-					IOUtils.closeQuietly(out);
+					IOUtils.closeQuietly(out,null);
 				}
 			}
 		}).start();
@@ -267,5 +270,15 @@ public class BezierEditor{
 		start.addSaveListener(()->{save();});
 		start.addEventListener(()->{update();});
 		start.addDependant(cp2Manip);
+	}
+	public ArrayList<CSG> getPartsInternal() {
+		return partsInternal;
+	}
+	public void setPartsInternal(ArrayList<CSG> partsInternal) {
+		this.partsInternal = partsInternal;
+		for(int i=0;i<partsInternal.size();i++){
+			partsInternal.get(i).setManipulator(new Affine());
+			partsInternal.get(i).setMfg(incoming -> null);
+		}
 	}
 }
