@@ -125,7 +125,12 @@ public class ConfigurationDatabase {
 
 	public static void loginEvent(String username) {
 		if (username == null) {
+			String loggedInAs2 = loggedInAs;
 			loggedInAs = null;
+			checked = false;
+			gitSource = null;
+			database = null;
+			System.out.println("\n\nLogout from "+loggedInAs2+"\n\n");
 			return;
 		}
 		if (loggedInAs != null)
