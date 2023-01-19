@@ -279,6 +279,9 @@ public class BezierEditor{
 		for(int i=0;i<partsInternal.size();i++){
 			partsInternal.get(i).setManipulator(new Affine());
 			partsInternal.get(i).setMfg(incoming -> null);
+			partsInternal.get(i).getMesh().setDrawMode(javafx.scene.shape.DrawMode.LINE);
+			
 		}
+		update();
 	}
 }
