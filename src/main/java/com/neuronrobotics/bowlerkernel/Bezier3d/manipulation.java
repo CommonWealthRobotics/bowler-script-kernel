@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerkernel.Bezier3d;
 
 import java.util.ArrayList;
+import javafx.scene.paint.Color;
 import java.util.HashMap;
 
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
@@ -11,8 +12,9 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
-
+import javafx.scene.paint.PhongMaterial;
 public class manipulation {
 	HashMap<EventType<MouseEvent>, EventHandler<MouseEvent>> map = new HashMap<>();
 	double startx = 0;
@@ -33,7 +35,13 @@ public class manipulation {
 	private Vector3d orintation;
 	private CSG manip;
 	private TransformNR globalPose;
-
+	private PhongMaterial color;// = new PhongMaterial(getColor());
+	private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
+	private enum DragState{
+		IDLE,
+		Dragging
+	}
+	private DragState state = DragState.IDLE;
 	public void addEventListener(Runnable r) {
 		if (eventListeners.contains(r))
 			return;
@@ -76,59 +84,77 @@ public class manipulation {
 		this.manipulationMatrix = mm;
 		this.orintation = o;
 		this.manip = m;
+		color=new PhongMaterial(m.getColor());
 		this.globalPose = p;
 		getUi().runLater(() -> {
 			TransformFactory.nrToAffine(globalPose, manipulationMatrix);
 		});
-		map.put(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				new Thread(() -> {
-					camFrame = getUi().getCamerFrame();
-					depth = -1600 / getUi().getCamerDepth();
-					event.consume();
-					dragging = false;
-					for (manipulation R : dependants) {
-						R.camFrame = getUi().getCamerFrame();
-						R.depth = -1600 / getUi().getCamerDepth();
-						R.dragging = false;
-					}
-				}).start();
+		
+		map.put(MouseEvent.ANY, event -> {
+			String name = event.getEventType().getName();
+			switch(name) {
+			case "MOUSE_PRESSED":
+				pressed(event);
+				break;
+			case "MOUSE_DRAGGED":
+				dragged(event);
+				break;
+			case "MOUSE_RELEASED":
+				release(event);
+				break;
+			case "MOUSE_MOVED":
+				// ignore
+				break;	
+			case "MOUSE_ENTERED":
+				m.getMesh().setMaterial(highlight);
+				break;	
+			case "MOUSE_EXITED":
+				if(state==DragState.IDLE)
+					m.getMesh().setMaterial(color);
+				break;	
+			default:
+				System.out.println("UNKNOWN! Mouse event "+name);
+				break;
 			}
-		});
-
-		map.put(MouseEvent.MOUSE_DRAGGED, new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				getUi().runLater(() -> {
-					setDragging(event);
-					double deltx = (startx - event.getScreenX());
-					double delty = (starty - event.getScreenY());
-					TransformNR trans = new TransformNR(deltx / depth, delty / depth, 0, new RotationNR());
-
-					performMove( trans,camFrame);
-				});
-				event.consume();
-			}
-
-
-
-
-		});
-
-		map.put(MouseEvent.MOUSE_RELEASED, new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				mouseRelease(event);
-				for (manipulation R : dependants) 
-					R.mouseRelease(event);
-			}
-
-
+			
 		});
 		manip.getStorage().set("manipulator", map);
 		manip.setManipulator(manipulationMatrix);
 	}
+	
+	private void pressed(MouseEvent event) {
+		state = DragState.Dragging;
+		new Thread(() -> {
+			camFrame = getUi().getCamerFrame();
+			depth = -1600 / getUi().getCamerDepth();
+			event.consume();
+			dragging = false;
+			for (manipulation R : dependants) {
+				R.camFrame = getUi().getCamerFrame();
+				R.depth = -1600 / getUi().getCamerDepth();
+				R.dragging = false;
+			}
+		}).start();
+	}
+	private void release(MouseEvent event) {
+		mouseRelease(event);
+		for (manipulation R : dependants) 
+			R.mouseRelease(event);
+		state = DragState.IDLE;
+		manip.getMesh().setMaterial(color);
+	}
+	private void dragged(MouseEvent event) {
+		getUi().runLater(() -> {
+			setDragging(event);
+			double deltx = (startx - event.getScreenX());
+			double delty = (starty - event.getScreenY());
+			TransformNR trans = new TransformNR(deltx / depth, delty / depth, 0, new RotationNR());
+
+			performMove( trans,camFrame);
+		});
+		event.consume();
+	}
+
 	private void mouseRelease(MouseEvent event) {
 		if (dragging) {
 			dragging = false;
@@ -150,7 +176,11 @@ public class manipulation {
 		}
 	}
 	private void performMove( TransformNR trans, TransformNR camFrame2) {
-		TransformNR global = camFrame2.times(trans);
+		TransformNR globalTMP = camFrame2.copy();
+		globalTMP.setX(0);
+		globalTMP.setY(0);
+		globalTMP.setZ(0);		
+		TransformNR global = globalTMP.times(trans);
 		newx = (global.getX() * orintation.x + globalPose.getX());
 		newy = (global.getY() * orintation.y + globalPose.getY());
 		newz = (global.getZ() * orintation.z + globalPose.getZ());
