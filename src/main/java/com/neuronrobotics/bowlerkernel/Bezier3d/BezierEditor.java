@@ -60,6 +60,7 @@ public class BezierEditor{
 	private String url;
 	private String gitfile;
 	private boolean saving;
+	private BezierEditor nextBez=null;
 	public BezierEditor(String URL, String file, int numPoints) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		this(ScriptingEngine.fileFromGit(URL, file),numPoints);
 		url=URL;
@@ -276,6 +277,13 @@ public class BezierEditor{
 		start.addEventListener(()->{update();});
 		start.addDependant(cp2Manip);
 	}
+	
+	public void addBezierToTheEnd(BezierEditor nextBez) {
+		this.nextBez=nextBez;
+		nextBez.setStartManip(endManip);
+		
+	}
+	
 	public ArrayList<CSG> getPartsInternal() {
 		return partsInternal;
 	}
