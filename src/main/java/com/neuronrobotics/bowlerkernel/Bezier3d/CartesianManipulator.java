@@ -18,8 +18,10 @@ public class CartesianManipulator {
 	CSG manip2 = new Cylinder(0, 5, 40, 10).toCSG().roty(-90).setColor(Color.RED);
 	CSG manip3 = new Cylinder(0, 5, 40, 10).toCSG().rotx(90).setColor(Color.GREEN);
 	private manipulation[] manipulationList = new manipulation[3];
+	TransformNR globalPose;
 
 	public CartesianManipulator(TransformNR globalPose) {
+		this.globalPose = globalPose;
 		manip1.setMfg(incoming -> null);
 		manip2.setMfg(incoming -> null);
 		manip3.setMfg(incoming -> null);
@@ -29,7 +31,7 @@ public class CartesianManipulator {
 	}
 
 	public void addEventListener(Runnable r) {
-		for (int i = 0; i< 3; i++)
+		for (int i = 0; i < 3; i++)
 			manipulationList[i].addEventListener(r);
 	}
 
@@ -40,6 +42,18 @@ public class CartesianManipulator {
 
 	public List<CSG> get() {
 		return Arrays.asList(manip1, manip2, manip3);
+	}
+
+	public double getX() {
+		return manipulationList[2].currentPose.getX();
+	}
+
+	public double getY() {
+		return manipulationList[1].currentPose.getY();
+	}
+
+	public double getZ() {
+		return manipulationList[0].currentPose.getZ();
 	}
 
 	public void addDependant(CartesianManipulator r) {

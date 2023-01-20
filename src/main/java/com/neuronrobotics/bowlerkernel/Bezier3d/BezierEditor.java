@@ -169,24 +169,24 @@ public class BezierEditor{
 	}
 	public ArrayList<Transform> transforms (){
 		ArrayList<Transform> tf=Extrude.bezierToTransforms(
-		new Vector3d(	cp1Manip.manipulationMatrix.getTx()-getStartManip().manipulationMatrix.getTx(),
-						cp1Manip.manipulationMatrix.getTy()-getStartManip().manipulationMatrix.getTy(),
-						cp1Manip.manipulationMatrix.getTz()-getStartManip().manipulationMatrix.getTz()), // Control point one
-		new Vector3d(	cp2Manip.manipulationMatrix.getTx()-getStartManip().manipulationMatrix.getTx(),
-						cp2Manip.manipulationMatrix.getTy()-getStartManip().manipulationMatrix.getTy(),
-						cp2Manip.manipulationMatrix.getTz()-getStartManip().manipulationMatrix.getTz()), // Control point two
-		new Vector3d(	getEndManip().manipulationMatrix.getTx()-getStartManip().manipulationMatrix.getTx(),
-						getEndManip().manipulationMatrix.getTy()-getStartManip().manipulationMatrix.getTy(),
-						getEndManip().manipulationMatrix.getTz()-getStartManip().manipulationMatrix.getTz()), // Endpoint
+		new Vector3d(	cp1Manip.getX()-getStartManip().getX(),
+						cp1Manip.getY()-getStartManip().getY(),
+						cp1Manip.getZ()-getStartManip().getZ()), // Control point one
+		new Vector3d(	cp2Manip.getX()-getStartManip().getX(),
+						cp2Manip.getY()-getStartManip().getY(),
+						cp2Manip.getZ()-getStartManip().getZ()), // Control point two
+		new Vector3d(	getEndManip().getX()-getStartManip().getX(),
+						getEndManip().getY()-getStartManip().getY(),
+						getEndManip().getZ()-getStartManip().getZ()), // Endpoint
 		getNumParts()// Iterations
 		);
 		
 		for(int i=0;i<tf.size();i++) {
 			tf.set(i, tf
 					.get(i)
-					.movex(getStartManip().manipulationMatrix.getTx())
-					.movey(getStartManip().manipulationMatrix.getTy())
-					.movez(getStartManip().manipulationMatrix.getTz())
+					.movex(getStartManip().getX())
+					.movey(getStartManip().getY())
+					.movez(getStartManip().getZ())
 					);
 		}
 		return tf;
@@ -202,24 +202,24 @@ public class BezierEditor{
 		HashMap<String,List<Double>> bezData=new HashMap<>();
 
 		bezData.put("control one",Arrays.asList(
-				cp1Manip.manipulationMatrix.getTx(),
-				cp1Manip.manipulationMatrix.getTy(),
-				cp1Manip.manipulationMatrix.getTz()
+				cp1Manip.getX(),
+				cp1Manip.getY(),
+				cp1Manip.getZ()
 				));
 		bezData.put("control two",Arrays.asList(
-				cp2Manip.manipulationMatrix.getTx(),
-				cp2Manip.manipulationMatrix.getTy(),
-				cp2Manip.manipulationMatrix.getTz()
+				cp2Manip.getX(),
+				cp2Manip.getY(),
+				cp2Manip.getZ()
 				));
 		bezData.put("end point",Arrays.asList(
-				getEndManip().manipulationMatrix.getTx(),
-				getEndManip().manipulationMatrix.getTy(),
-				getEndManip().manipulationMatrix.getTz()
+				getEndManip().getX(),
+				getEndManip().getY(),
+				getEndManip().getZ()
 				));
 		bezData.put("start point",Arrays.asList(
-				getStartManip().manipulationMatrix.getTx(),
-				getStartManip().manipulationMatrix.getTy(),
-				getStartManip().manipulationMatrix.getTz()
+				getStartManip().getX(),
+				getStartManip().getY(),
+				getStartManip().getZ()
 				));
 		bezData.put("number of points",Arrays.asList((double)getNumParts()));
 		database.put("bezier",bezData);

@@ -35,6 +35,7 @@ public class manipulation {
 	private Vector3d orintation;
 	private CSG manip;
 	private TransformNR globalPose;
+	TransformNR currentPose;
 	private PhongMaterial color;// = new PhongMaterial(getColor());
 	private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
 	private enum DragState{
@@ -86,6 +87,7 @@ public class manipulation {
 		this.manip = m;
 		color=new PhongMaterial(m.getColor());
 		this.globalPose = p;
+		currentPose=p.copy();
 		getUi().runLater(() -> {
 			TransformFactory.nrToAffine(globalPose, manipulationMatrix);
 		});
@@ -189,12 +191,18 @@ public class manipulation {
 		global.setZ(newz);
 
 		global.setRotation(new RotationNR());
-		getUi().runLater(() -> {
-			TransformFactory.nrToAffine(global, manipulationMatrix);
-		});
+		setGlobal(global);
 		// System.out.println(" drag "+global.getX()+" , "+global.getY()+" ,
 		// "+global.getZ()+" "+deltx+" "+delty);
 		fireMove(trans,camFrame2);
+	}
+	private void setGlobal(TransformNR global) {
+		currentPose.setX(newx);
+		currentPose.setY(newy);
+		currentPose.setZ(newz);
+		getUi().runLater(() -> {
+			TransformFactory.nrToAffine(global, manipulationMatrix);
+		});
 	}
 	public static IInteractiveUIElementProvider getUi() {
 		return ui;
