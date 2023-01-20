@@ -113,7 +113,7 @@ public class manipulation {
 					m.getMesh().setMaterial(color);
 				break;	
 			default:
-				System.out.println("UNKNOWN! Mouse event "+name);
+				//System.out.println("UNKNOWN! Mouse event "+name);
 				break;
 			}
 			

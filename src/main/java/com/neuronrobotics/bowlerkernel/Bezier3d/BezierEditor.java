@@ -59,6 +59,7 @@ public class BezierEditor{
 	boolean updating = false;
 	private String url;
 	private String gitfile;
+	private boolean saving;
 	public BezierEditor(String URL, String file, int numPoints) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		this(ScriptingEngine.fileFromGit(URL, file),numPoints);
 		url=URL;
@@ -194,6 +195,9 @@ public class BezierEditor{
 		return getPartsInternal().size();
 	}
 	public void save() {
+		if(saving)
+			return;
+		saving = true;
 		database.clear();
 		HashMap<String,List<Double>> bezData=new HashMap<>();
 
@@ -252,6 +256,7 @@ public class BezierEditor{
 					IOUtils.closeQuietly(out);
 				}
 			}
+			saving = false;
 		}).start();
 	}
 	public CartesianManipulator getEndManip() {
