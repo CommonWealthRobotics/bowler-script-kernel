@@ -1,12 +1,11 @@
 package com.neuronrobotics.bowlerkernel.Bezier3d;
 
-
 //import com.neuronrobotics.bowlerstudio.BowlerStudio
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
-
+import javafx.geometry.Point3D;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
@@ -14,6 +13,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.Rotate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -37,50 +37,57 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import eu.mihosoft.vrl.v3d.*;
+import javafx.scene.shape.Line;
 
-public class BezierEditor{
-	Type TT_mapStringString = new TypeToken<HashMap<String, HashMap<String,List<Double>>>>() {}.getType();
+public class BezierEditor {
+	Type TT_mapStringString = new TypeToken<HashMap<String, HashMap<String, List<Double>>>>() {
+	}.getType();
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-	File	cachejson;
+	File cachejson;
 	TransformNR end = new TransformNR();
 	TransformNR cp1 = new TransformNR();
 	TransformNR cp2 = new TransformNR();
 	TransformNR strt = new TransformNR();
 	private ArrayList<CSG> partsInternal = null;
-	CSG displayPart=new Cylinder(5,0,20,10).toCSG()
-	.toZMax()
-	.roty(-90);
+	CSG displayPart = new Cylinder(5, 0, 20, 10).toCSG().toZMax().roty(-90);
 
 	private CartesianManipulator endManip;
 	CartesianManipulator cp1Manip;
 	CartesianManipulator cp2Manip;
 	private CartesianManipulator start;
-	HashMap<String, HashMap<String,List<Double>>> database;
+	HashMap<String, HashMap<String, List<Double>>> database;
 	boolean updating = false;
 	private String url;
 	private String gitfile;
 	private boolean saving;
-	private BezierEditor nextBez=null;
-	public BezierEditor(String URL, String file, int numPoints) throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-		this(ScriptingEngine.fileFromGit(URL, file),numPoints);
-		url=URL;
-		gitfile=file;
+	private BezierEditor nextBez = null;
+	private Line cp1Line = new Line();
+	private Line cp2Line = new Line();
+	private Affine cp1LinePose = new Affine();
+	private Affine cp2LinePose = new Affine();
+
+	public BezierEditor(String URL, String file, int numPoints)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		this(ScriptingEngine.fileFromGit(URL, file), numPoints);
+		url = URL;
+		gitfile = file;
 	}
+
 	public BezierEditor(File data, int numPoints) {
 		cachejson = data;
 		String jsonString = null;
-		boolean loaded=false;
+		boolean loaded = false;
 		try {
-			if(cachejson.exists()) {
+			if (cachejson.exists()) {
 				InputStream inPut = null;
 				inPut = FileUtils.openInputStream(cachejson);
 				jsonString = IOUtils.toString(inPut);
 				database = gson.fromJson(jsonString, TT_mapStringString);
 
-				List<Double> cp1in = (List<Double>)database.get("bezier").get("control one");
-				List<Double> cp2in = (List<Double>)database.get("bezier").get("control two");
-				List<Double> ep = (List<Double>)database.get("bezier").get("end point");
-				List<Double> st = (List<Double>)database.get("bezier").get("start point");
+				List<Double> cp1in = (List<Double>) database.get("bezier").get("control one");
+				List<Double> cp2in = (List<Double>) database.get("bezier").get("control two");
+				List<Double> ep = (List<Double>) database.get("bezier").get("end point");
+				List<Double> st = (List<Double>) database.get("bezier").get("start point");
 				end.setX(ep.get(0));
 				end.setY(ep.get(1));
 				end.setZ(ep.get(2));
@@ -94,15 +101,16 @@ public class BezierEditor{
 				strt.setX(st.get(0));
 				strt.setY(st.get(1));
 				strt.setZ(st.get(2));
-				loaded=true;
+				loaded = true;
 			}
-		}catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 
-		if(!loaded) {
+		if (!loaded) {
 			end.setX(100);
-			end.setY(100);;
+			end.setY(100);
+			;
 			end.setZ(100);
 			cp1.setX(50);
 			cp1.setY(-50);
@@ -111,132 +119,164 @@ public class BezierEditor{
 			cp2.setY(50);
 			cp2.setZ(-50);
 
-			database= new HashMap<>();
+			database = new HashMap<>();
 		}
 
-
-		endManip =new CartesianManipulator(end);
-		cp1Manip=new CartesianManipulator(cp1);
-		endManip.addDependant(cp1Manip);
-		cp2Manip=new CartesianManipulator(cp2);
+		endManip = new CartesianManipulator(end);
+		cp1Manip = new CartesianManipulator(cp1);
+		
+		cp2Manip = new CartesianManipulator(cp2);
+		endManip.addDependant(cp2Manip);
 		setStartManip(new CartesianManipulator(strt));
-		
-		endManip.addSaveListener(()->{save();});
-		endManip.addEventListener(()->{update();});
-		
-		cp1Manip.addSaveListener(()->{save();});
-		cp1Manip.addEventListener(()->{update();});
-		
-		cp2Manip.addSaveListener(()->{save();});
-		cp2Manip.addEventListener(()->{update();});
+
+		endManip.addSaveListener(() -> {
+			save();
+		});
+		endManip.addEventListener(() -> {
+			update();
+		});
+
+		cp1Manip.addSaveListener(() -> {
+			save();
+		});
+		cp1Manip.addEventListener(() -> {
+			update();
+		});
+
+		cp2Manip.addSaveListener(() -> {
+			save();
+		});
+		cp2Manip.addEventListener(() -> {
+			update();
+		});
 		ArrayList<CSG> parts = new ArrayList<>();
-		for(int i=0;i<numPoints;i++){
-			CSG part=displayPart.clone();
+		for (int i = 0; i < numPoints; i++) {
+			CSG part = displayPart.clone();
 			parts.add(part);
 		}
 		setPartsInternal(parts);
-		
+		cp1Line.setStrokeWidth(5);
+		cp2Line.setStrokeWidth(5);
+
+		cp2Line.getTransforms().addAll(endManip.manipulationMatrix, cp2LinePose);
 		update();
 		save();
 	}
-	
-	
-	
-	public ArrayList<CSG> get(){
 
-		ArrayList<CSG> back= new ArrayList<CSG>();
+	public ArrayList<Object> get() {
+
+		ArrayList<Object> back = new ArrayList<>();
 		back.addAll(getEndManip().get());
 		back.addAll(cp1Manip.get());
 		back.addAll(cp2Manip.get());
 		back.addAll(getStartManip().get());
 		back.addAll(getPartsInternal());
+		back.add(cp2Line);
+		back.add(cp1Line);
+
 		return back;
 	}
 
 	public void update() {
-		if(updating) {
+		if (updating) {
 			return;
 		}
-		updating=true;
-		ArrayList<Transform> transforms = transforms ();
-		for(int i=0;i<getNumParts();i++) {
-			TransformNR nr=TransformFactory.csgToNR(transforms.get(i));
+		updating = true;
+		ArrayList<Transform> transforms = transforms();
+		for (int i = 0; i < getNumParts(); i++) {
+			TransformNR nr = TransformFactory.csgToNR(transforms.get(i));
 			Affine partsGetGetManipulator = getPartsInternal().get(i).getManipulator();
-			Platform.runLater(()->{
+			Platform.runLater(() -> {
 				TransformFactory.nrToAffine(nr, partsGetGetManipulator);
 			});
 		}
-		updating=false;
-	}
-	public ArrayList<Transform> transforms (){
-		ArrayList<Transform> tf=Extrude.bezierToTransforms(
-		new Vector3d(	cp1Manip.getX()-getStartManip().getX(),
-						cp1Manip.getY()-getStartManip().getY(),
-						cp1Manip.getZ()-getStartManip().getZ()), // Control point one
-		new Vector3d(	cp2Manip.getX()-getStartManip().getX(),
-						cp2Manip.getY()-getStartManip().getY(),
-						cp2Manip.getZ()-getStartManip().getZ()), // Control point two
-		new Vector3d(	getEndManip().getX()-getStartManip().getX(),
-						getEndManip().getY()-getStartManip().getY(),
-						getEndManip().getZ()-getStartManip().getZ()), // Endpoint
-		getNumParts()// Iterations
-		);
 		
-		for(int i=0;i<tf.size();i++) {
-			tf.set(i, tf
-					.get(i)
-					.movex(getStartManip().getX())
-					.movey(getStartManip().getY())
-					.movez(getStartManip().getZ())
-					);
+		updateLines(start,cp1Manip,cp1Line,cp1LinePose);
+		
+		updateLines(endManip,cp2Manip,cp2Line,cp2LinePose);
+
+		updating = false;
+	}
+
+	private void updateLines(CartesianManipulator m, CartesianManipulator p, Line l,Affine poseAF) {
+		double cp1XDiff = m.getX() - p.getX();
+		double cp1Ydiff = m.getY() - p.getY();
+		double cp1ZDiff = m.getZ() - p.getZ();
+		TransformNR vect = new TransformNR(cp1XDiff,cp1Ydiff,cp1ZDiff,new RotationNR());
+		
+		double distCP1 = Math.sqrt(Math.pow(cp1XDiff, 2) +
+				Math.pow(cp1Ydiff, 2)
+				+ Math.pow(cp1ZDiff, 2));
+		double xyRot = Math.toDegrees(Math.atan2(cp1Ydiff, cp1XDiff))-90;
+		
+
+		TransformNR az = new TransformNR(0,0,0,new RotationNR(0,-xyRot,0));
+		TransformNR reorented = az.times(vect);
+		//System.out.println("CP1 "+reorented.getX()+" "+reorented.getY()+" "+reorented.getZ());
+		double xzRot = Math.toDegrees(Math.atan2(reorented.getZ(), reorented.getY()));
+
+		TransformNR pose = new TransformNR(0,0,0,new RotationNR(xzRot,xyRot,0));
+
+		Platform.runLater(() -> {
+			TransformFactory.nrToAffine( pose,poseAF);			
+
+			l.setStartX(0);
+			l.setStartY(0);
+			l.setEndY(-distCP1);
+			l.setEndX(0);
+		});
+	}
+
+	public ArrayList<Transform> transforms() {
+		ArrayList<Transform> tf = Extrude.bezierToTransforms(
+				new Vector3d(cp1Manip.getX() - getStartManip().getX(), cp1Manip.getY() - getStartManip().getY(),
+						cp1Manip.getZ() - getStartManip().getZ()), // Control point one
+				new Vector3d(cp2Manip.getX() - getStartManip().getX(), cp2Manip.getY() - getStartManip().getY(),
+						cp2Manip.getZ() - getStartManip().getZ()), // Control point two
+				new Vector3d(getEndManip().getX() - getStartManip().getX(),
+						getEndManip().getY() - getStartManip().getY(), getEndManip().getZ() - getStartManip().getZ()), // Endpoint
+				getNumParts()// Iterations
+		);
+
+		for (int i = 0; i < tf.size(); i++) {
+			tf.set(i, tf.get(i).movex(getStartManip().getX()).movey(getStartManip().getY())
+					.movez(getStartManip().getZ()));
 		}
 		return tf;
 	}
+
 	private int getNumParts() {
 		return getPartsInternal().size();
 	}
+
 	public void save() {
-		if(saving)
+		if (saving)
 			return;
 		saving = true;
 		database.clear();
-		HashMap<String,List<Double>> bezData=new HashMap<>();
+		HashMap<String, List<Double>> bezData = new HashMap<>();
 
-		bezData.put("control one",Arrays.asList(
-				cp1Manip.getX(),
-				cp1Manip.getY(),
-				cp1Manip.getZ()
-				));
-		bezData.put("control two",Arrays.asList(
-				cp2Manip.getX(),
-				cp2Manip.getY(),
-				cp2Manip.getZ()
-				));
-		bezData.put("end point",Arrays.asList(
-				getEndManip().getX(),
-				getEndManip().getY(),
-				getEndManip().getZ()
-				));
-		bezData.put("start point",Arrays.asList(
-				getStartManip().getX(),
-				getStartManip().getY(),
-				getStartManip().getZ()
-				));
-		bezData.put("number of points",Arrays.asList((double)getNumParts()));
-		database.put("bezier",bezData);
+		bezData.put("control one", Arrays.asList(cp1Manip.getX(), cp1Manip.getY(), cp1Manip.getZ()));
+		bezData.put("control two", Arrays.asList(cp2Manip.getX(), cp2Manip.getY(), cp2Manip.getZ()));
+		bezData.put("end point", Arrays.asList(getEndManip().getX(), getEndManip().getY(), getEndManip().getZ()));
+		bezData.put("start point",
+				Arrays.asList(getStartManip().getX(), getStartManip().getY(), getStartManip().getZ()));
+		bezData.put("number of points", Arrays.asList((double) getNumParts()));
+		database.put("bezier", bezData);
 
-		new Thread(()->{
-			System.out.println("Saving to file "+cachejson.getAbsolutePath());
+		new Thread(() -> {
+			System.out.println("Saving to file " + cachejson.getAbsolutePath());
 			String writeOut = gson.toJson(database, TT_mapStringString);
-			if(url!=null) {
+			if (url != null) {
 				try {
-					ScriptingEngine.pushCodeToGit(url, ScriptingEngine.getFullBranch(url), gitfile, writeOut, "Saving Bezier");
+					ScriptingEngine.pushCodeToGit(url, ScriptingEngine.getFullBranch(url), gitfile, writeOut,
+							"Saving Bezier");
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}else {
-				if(!cachejson.exists())
+			} else {
+				if (!cachejson.exists())
 					try {
 						cachejson.createNewFile();
 					} catch (IOException e) {
@@ -260,36 +300,47 @@ public class BezierEditor{
 			saving = false;
 		}).start();
 	}
+
 	public CartesianManipulator getEndManip() {
 		return endManip;
 	}
+
 //	private void setEndManip(CartesianManipulator endManip) {
 //		this.endManip = endManip;
 //	}
 	public CartesianManipulator getStartManip() {
 		return start;
 	}
+
 	public void setStartManip(CartesianManipulator start) {
-		if(this.start!=null)
+		if (this.start != null)
 			this.start.clearListeners();
 		this.start = start;
-		start.addSaveListener(()->{save();});
-		start.addEventListener(()->{update();});
-		start.addDependant(cp2Manip);
+		start.addSaveListener(() -> {
+			save();
+		});
+		start.addEventListener(() -> {
+			update();
+		});
+		start.addDependant(cp1Manip);
+		cp1Line.getTransforms().clear();
+		cp1Line.getTransforms().addAll(start.manipulationMatrix, cp1LinePose);
+
 	}
-	
+
 	public void addBezierToTheEnd(BezierEditor nextBez) {
-		this.nextBez=nextBez;
+		this.nextBez = nextBez;
 		nextBez.setStartManip(endManip);
-		
+
 	}
-	
+
 	public ArrayList<CSG> getPartsInternal() {
 		return partsInternal;
 	}
+
 	public void setPartsInternal(ArrayList<CSG> partsInternal) {
 		this.partsInternal = partsInternal;
-		for(int i=0;i<partsInternal.size();i++){
+		for (int i = 0; i < partsInternal.size(); i++) {
 			partsInternal.get(i).setManipulator(new Affine());
 			partsInternal.get(i).setMfg(incoming -> null);
 			partsInternal.get(i).getStorage().set("skeleton", true);
