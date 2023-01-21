@@ -60,6 +60,12 @@ public class CartesianManipulator {
 		for (int i = 0; i < 3; i++)
 			manipulationList[i].addDependant(r.manipulationList[i]);
 	}
+	public boolean isMoving() {
+		for (int i = 0; i < 3; i++)
+			if(manipulationList[i].isMoving())
+				return true;
+		return false;
+	}
 
 	public void clearListeners() {
 		// TODO Auto-generated method stub

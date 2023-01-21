@@ -156,7 +156,9 @@ public class manipulation {
 		});
 		event.consume();
 	}
-
+	public boolean isMoving() {
+		return state==DragState.Dragging;
+	}
 	private void mouseRelease(MouseEvent event) {
 		if (dragging) {
 			dragging = false;

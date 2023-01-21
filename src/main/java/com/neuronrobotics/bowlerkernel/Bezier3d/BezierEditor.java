@@ -124,7 +124,7 @@ public class BezierEditor {
 
 		endManip = new CartesianManipulator(end);
 		cp1Manip = new CartesianManipulator(cp1);
-		
+
 		cp2Manip = new CartesianManipulator(cp2);
 		endManip.addDependant(cp2Manip);
 		setStartManip(new CartesianManipulator(strt));
@@ -190,52 +190,49 @@ public class BezierEditor {
 				TransformFactory.nrToAffine(nr, partsGetGetManipulator);
 			});
 		}
-		
-		updateLines(start,cp1Manip,cp1Line,cp1LinePose);
-		
-		TransformNR endVector = updateLines(endManip,cp2Manip,cp2Line,cp2LinePose);
-		
-		for(BezierEditor b:nextBez) {
-			CartesianManipulator m = b.cp1Manip;
-			CartesianManipulator p=endManip;
-			double cp1XDiff = m.getX() - p.getX();
-			double cp1Ydiff = m.getY() - p.getY();
-			double cp1ZDiff = m.getZ() - p.getZ();
-			double distCP1 = Math.sqrt(Math.pow(cp1XDiff, 2) +
-					Math.pow(cp1Ydiff, 2)
-					+ Math.pow(cp1ZDiff, 2));
-			TransformNR vect = endVector.times(new TransformNR(0,distCP1,0,new RotationNR()));
-			double newX = vect.getX()+p.getX();
-			double newY = vect.getY()+p.getY();
-			double newZ = vect.getZ()+p.getZ();
-			m.set(newX,newY,newZ);
-			
-		}
+
+		updateLines(start, cp1Manip, cp1Line, cp1LinePose);
+
+		TransformNR endVector = updateLines(endManip, cp2Manip, cp2Line, cp2LinePose);
+		if (!endManip.isMoving())
+			for (BezierEditor b : nextBez) {
+				CartesianManipulator m = b.cp1Manip;
+				CartesianManipulator p = endManip;
+
+				double cp1XDiff = m.getX() - p.getX();
+				double cp1Ydiff = m.getY() - p.getY();
+				double cp1ZDiff = m.getZ() - p.getZ();
+				double distCP1 = Math.sqrt(Math.pow(cp1XDiff, 2) + Math.pow(cp1Ydiff, 2) + Math.pow(cp1ZDiff, 2));
+				TransformNR vect = endVector.times(new TransformNR(0, distCP1, 0, new RotationNR()));
+				double newX = vect.getX() + p.getX();
+				double newY = vect.getY() + p.getY();
+				double newZ = vect.getZ() + p.getZ();
+				m.set(newX, newY, newZ);
+
+			}
 
 		updating = false;
 	}
 
-	private TransformNR updateLines(CartesianManipulator m, CartesianManipulator p, Line l,Affine poseAF) {
+	private TransformNR updateLines(CartesianManipulator m, CartesianManipulator p, Line l, Affine poseAF) {
 		double cp1XDiff = m.getX() - p.getX();
 		double cp1Ydiff = m.getY() - p.getY();
 		double cp1ZDiff = m.getZ() - p.getZ();
-		TransformNR vect = new TransformNR(cp1XDiff,cp1Ydiff,cp1ZDiff,new RotationNR());
-		
-		double distCP1 = Math.sqrt(Math.pow(cp1XDiff, 2) +
-				Math.pow(cp1Ydiff, 2)
-				+ Math.pow(cp1ZDiff, 2));
-		double xyRot = Math.toDegrees(Math.atan2(cp1Ydiff, cp1XDiff))-90;
-		
+		TransformNR vect = new TransformNR(cp1XDiff, cp1Ydiff, cp1ZDiff, new RotationNR());
 
-		TransformNR az = new TransformNR(0,0,0,new RotationNR(0,-xyRot,0));
+		double distCP1 = Math.sqrt(Math.pow(cp1XDiff, 2) + Math.pow(cp1Ydiff, 2) + Math.pow(cp1ZDiff, 2));
+		double xyRot = Math.toDegrees(Math.atan2(cp1Ydiff, cp1XDiff)) - 90;
+
+		TransformNR az = new TransformNR(0, 0, 0, new RotationNR(0, -xyRot, 0));
 		TransformNR reorented = az.times(vect);
-		//System.out.println("CP1 "+reorented.getX()+" "+reorented.getY()+" "+reorented.getZ());
+		// System.out.println("CP1 "+reorented.getX()+" "+reorented.getY()+"
+		// "+reorented.getZ());
 		double xzRot = Math.toDegrees(Math.atan2(reorented.getZ(), reorented.getY()));
 
-		TransformNR pose = new TransformNR(0,0,0,new RotationNR(xzRot,xyRot,0));
+		TransformNR pose = new TransformNR(0, 0, 0, new RotationNR(xzRot, xyRot, 0));
 
 		Platform.runLater(() -> {
-			TransformFactory.nrToAffine( pose,poseAF);			
+			TransformFactory.nrToAffine(pose, poseAF);
 
 			l.setStartX(0);
 			l.setStartY(0);
@@ -317,7 +314,7 @@ public class BezierEditor {
 			}
 			saving = false;
 		}).start();
-		for(BezierEditor b:nextBez) 
+		for (BezierEditor b : nextBez)
 			b.save();
 	}
 
