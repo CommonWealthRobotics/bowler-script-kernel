@@ -60,7 +60,7 @@ public class BezierEditor {
 	private String url;
 	private String gitfile;
 	private boolean saving;
-	private BezierEditor nextBez = null;
+	private ArrayList<BezierEditor> nextBez = new ArrayList<>();
 	private Line cp1Line = new Line();
 	private Line cp2Line = new Line();
 	private Affine cp1LinePose = new Affine();
@@ -193,12 +193,29 @@ public class BezierEditor {
 		
 		updateLines(start,cp1Manip,cp1Line,cp1LinePose);
 		
-		updateLines(endManip,cp2Manip,cp2Line,cp2LinePose);
+		TransformNR endVector = updateLines(endManip,cp2Manip,cp2Line,cp2LinePose);
+		
+		for(BezierEditor b:nextBez) {
+			CartesianManipulator m = b.cp1Manip;
+			CartesianManipulator p=endManip;
+			double cp1XDiff = m.getX() - p.getX();
+			double cp1Ydiff = m.getY() - p.getY();
+			double cp1ZDiff = m.getZ() - p.getZ();
+			double distCP1 = Math.sqrt(Math.pow(cp1XDiff, 2) +
+					Math.pow(cp1Ydiff, 2)
+					+ Math.pow(cp1ZDiff, 2));
+			TransformNR vect = endVector.times(new TransformNR(0,distCP1,0,new RotationNR()));
+			double newX = vect.getX()+p.getX();
+			double newY = vect.getY()+p.getY();
+			double newZ = vect.getZ()+p.getZ();
+			m.set(newX,newY,newZ);
+			
+		}
 
 		updating = false;
 	}
 
-	private void updateLines(CartesianManipulator m, CartesianManipulator p, Line l,Affine poseAF) {
+	private TransformNR updateLines(CartesianManipulator m, CartesianManipulator p, Line l,Affine poseAF) {
 		double cp1XDiff = m.getX() - p.getX();
 		double cp1Ydiff = m.getY() - p.getY();
 		double cp1ZDiff = m.getZ() - p.getZ();
@@ -225,6 +242,7 @@ public class BezierEditor {
 			l.setEndY(-distCP1);
 			l.setEndX(0);
 		});
+		return pose;
 	}
 
 	public ArrayList<Transform> transforms() {
@@ -299,6 +317,8 @@ public class BezierEditor {
 			}
 			saving = false;
 		}).start();
+		for(BezierEditor b:nextBez) 
+			b.save();
 	}
 
 	public CartesianManipulator getEndManip() {
@@ -328,10 +348,9 @@ public class BezierEditor {
 
 	}
 
-	public void addBezierToTheEnd(BezierEditor nextBez) {
-		this.nextBez = nextBez;
-		nextBez.setStartManip(endManip);
-
+	public void addBezierToTheEnd(BezierEditor b) {
+		nextBez.add(b);
+		b.setStartManip(endManip);
 	}
 
 	public ArrayList<CSG> getPartsInternal() {

@@ -66,4 +66,9 @@ public class CartesianManipulator {
 		for (int i = 0; i < 3; i++)
 			manipulationList[i].clearListeners();
 	}
+
+	public void set(double newX, double newY, double newZ) {
+		for (int i = 0; i < 3; i++)
+			manipulationList[i].set(newX,newY,newZ);
+	}
 }

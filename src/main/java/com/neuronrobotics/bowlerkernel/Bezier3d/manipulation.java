@@ -211,6 +211,19 @@ public class manipulation {
 	public static void setUi(IInteractiveUIElementProvider ui) {
 		manipulation.ui = ui;
 	}
+	public void set(double newX, double newY, double newZ) {
+		newx=newX;
+		newy=newY;
+		newz=newZ;
+		globalPose.setX(newX);
+		globalPose.setY(newY);
+		globalPose.setZ(newZ);
+		setGlobal(new TransformNR(newX,newY,newZ,new RotationNR()));
+		for (Runnable R : eventListeners) {
+			R.run();
+		}
+		
+	}
 
 
 
