@@ -66,6 +66,14 @@ public interface IScriptingLanguage {
   String getDefaultContents();
 
   /**
+   * Get the contents of an empty file
+ * @param fileSlug 
+   * @return
+   */
+  default String getDefaultContents(String gitURL, String fileSlug) {
+	  return getDefaultContents();
+  }
+  /**
    * This function returns if this is a binary file or a text file
    *
    * @return true if the file is a text file.

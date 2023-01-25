@@ -69,8 +69,31 @@ public class RobotHelper implements IScriptingLanguage {
    * @return
    */
   public String getDefaultContents() {
+	  
 	  return new MobileBase().getXml();
   }
+  
+  /**
+   * Get the contents of an empty file
+   * @return
+   */
+  public String getDefaultContents(String gitURL,String slug) {
+	  MobileBase back =new MobileBase();
+	  back.setScriptingName(slug);
+	  back.setGitSelfSource(Arrays.asList(gitURL,slug+".xml").toArray(new String[0]));
+	  String[] cad = ScriptingEngine.copyGitFile("https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git",
+			  gitURL, "exampleCad.groovy");
+	  String[] kin = ScriptingEngine.copyGitFile("https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git",
+			  gitURL, "exampleKinematics.groovy");
+	  String[] walk = ScriptingEngine.copyGitFile("https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git",
+			  gitURL, "exampleWalking.groovy");
+	  back.setGitCadEngine(cad);
+	  back.setGitDhEngine(kin);
+	  back.setGitWalkingEngine(walk);
+	  
+	  return back.getXml();
+  }
+  
   @Override
   public ArrayList<String> getFileExtenetion() {
     // TODO Auto-generated method stub
