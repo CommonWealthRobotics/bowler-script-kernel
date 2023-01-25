@@ -1987,8 +1987,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static boolean isLoginSuccess() {
 		return PasswordManager.loggedIn();
 	}
-
 	public static String[] copyGitFile(String sourceGit, String targetGit, String filename) {
+		return copyGitFile( sourceGit,  targetGit,  filename, false);
+	}
+	public static String[] copyGitFile(String sourceGit, String targetGit, String filename,boolean bailIfExisting) {
 		String targetFilename = filename;
 		String[] WalkingEngine;
 		if (targetGit.contains("gist.github.com") && filename.contains("/")) {
@@ -2011,7 +2013,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						ThreadUtil.wait(500);
 						// Log.warn(targetGit +"/"+filename+ " not built yet");
 					}
-
+			
+				}else {
+					if(bailIfExisting)
+						return new String[] { targetGit, targetFilename };
 				}
 			} catch (InvalidRemoteException e) {
 				exp.uncaughtException(Thread.currentThread(), e);
