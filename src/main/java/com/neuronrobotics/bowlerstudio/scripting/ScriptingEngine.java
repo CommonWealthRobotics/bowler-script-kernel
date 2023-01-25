@@ -2001,7 +2001,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			WalkingEngine = ScriptingEngine.codeFromGit(sourceGit, filename);
 			try {
 				if (null == ScriptingEngine.fileFromGit(targetGit, targetFilename)) {
-
 					ScriptingEngine.createFile(targetGit, targetFilename, "copy file");
 					while (true) {
 						try {
@@ -2014,9 +2013,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						// Log.warn(targetGit +"/"+filename+ " not built yet");
 					}
 			
-				}else {
-					if(bailIfExisting)
-						return new String[] { targetGit, targetFilename };
 				}
 			} catch (InvalidRemoteException e) {
 				exp.uncaughtException(Thread.currentThread(), e);
@@ -2034,7 +2030,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				newFileCode = ScriptingEngine.codeFromGit(targetGit, targetFilename);
 				if (newFileCode == null)
 					newFileCode = new String[] { "" };
-				if (!WalkingEngine[0].contentEquals(newFileCode[0])) {
+				if (newFileCode[0].length()<10) {
 					System.out.println("Copy Content to " + targetGit + "/" + targetFilename);
 					ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename,
 							WalkingEngine[0], "copy file content");
