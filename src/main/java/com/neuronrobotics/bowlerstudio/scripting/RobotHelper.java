@@ -86,13 +86,13 @@ public class RobotHelper implements IScriptingLanguage {
 		back.setScriptingName(slug);
 		back.setGitSelfSource(Arrays.asList(gitURL, slug + ".xml").toArray(new String[0]));
 		String[] cad = ScriptingEngine.copyGitFile(
-				"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", gitURL, "exampleCad.groovy",true);
+				"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", gitURL, "exampleCad.groovy",slug+"Cad.groovy",true);
 		String[] kin = ScriptingEngine.copyGitFile(
 				"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", gitURL,
-				"exampleKinematics.groovy",true);
+				"exampleKinematics.groovy",slug+"Kinematics.groovy",true);
 		String[] walk = ScriptingEngine.copyGitFile(
 				"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", gitURL,
-				"exampleWalking.groovy",true);
+				"exampleWalking.groovy",slug+"Walk.groovy",true);
 		back.setGitCadEngine(cad);
 		back.setGitDhEngine(kin);
 		back.setGitWalkingEngine(walk);

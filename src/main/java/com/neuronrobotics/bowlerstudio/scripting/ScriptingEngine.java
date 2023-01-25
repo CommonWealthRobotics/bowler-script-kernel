@@ -1988,10 +1988,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return PasswordManager.loggedIn();
 	}
 	public static String[] copyGitFile(String sourceGit, String targetGit, String filename) {
-		return copyGitFile( sourceGit,  targetGit,  filename, false);
+		return copyGitFile( sourceGit,  targetGit,  filename,filename, false);
 	}
-	public static String[] copyGitFile(String sourceGit, String targetGit, String filename,boolean bailIfExisting) {
-		String targetFilename = filename;
+	public static String[] copyGitFile(String sourceGit, String targetGit, String filename,String outFile,boolean bailIfExisting) {
+		String targetFilename = outFile;
 		String[] WalkingEngine;
 		if (targetGit.contains("gist.github.com") && filename.contains("/")) {
 			String[] parts = filename.split("/");
