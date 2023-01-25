@@ -97,7 +97,7 @@ public class RobotHelper implements IScriptingLanguage {
 		back.setGitDhEngine(kin);
 		back.setGitWalkingEngine(walk);
 		DHParameterKinematics limb = new DHParameterKinematics();
-		limb.setScriptingName(slug+"-LimbName");
+		limb.setScriptingName(slug+"-Limb-1");
 		limb.setGitCadEngine(cad);
 		limb.setGitDhEngine(kin);
 		LinkConfiguration newLink = new LinkConfiguration();
