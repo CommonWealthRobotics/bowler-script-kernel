@@ -270,18 +270,19 @@ public class MobileBaseCadManager implements Runnable {
 							jointPosesTmp.clear();
 							jointPosesTmp = null;
 
-							Object[] iterator = tmp.keySet().stream().toArray();
+							Affine[] iterator = tmp.keySet().stream().toArray(size->new Affine[size]);
+							TransformNR[] vals = tmp.values().stream().toArray(size->new TransformNR[size]);
+							tmp.clear();
 							if (iterator.length > 0) {
 								Platform.runLater(() -> {
 									try {
 										for (int i = 0; i < iterator.length; i++) {
-											Affine af = (Affine) iterator[i];
-											TransformFactory.nrToAffine(tmp.get(af), af);
+											Affine af = iterator[i];
+											TransformFactory.nrToAffine(vals[i], af);
 										}
 									} catch (Throwable t) {
 										t.printStackTrace();
 									}
-									tmp.clear();
 									rendering = false;
 									fireIRenderSynchronizationEvent();
 								});
@@ -1233,6 +1234,10 @@ public class MobileBaseCadManager implements Runnable {
 		for (MobileBaseCadManager m : slaves) {
 			m.setConfigurationViewerMode(b);
 		}
+	}
+	public void invalidateModelCache() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
