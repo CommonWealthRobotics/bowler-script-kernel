@@ -101,6 +101,8 @@ public class RobotHelper implements IScriptingLanguage {
 		limb.setGitCadEngine(cad);
 		limb.setGitDhEngine(kin);
 		LinkConfiguration newLink = new LinkConfiguration();
+		newLink.setName("link1");
+		newLink.setDeviceScriptingName(newLink.getName());
 		newLink.setDeviceScriptingName("exampleDevice");
 		limb.addNewLink(newLink, new DHLink(0, 0, 100, 0));
 		back.getAppendages().add(limb);
