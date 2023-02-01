@@ -888,7 +888,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			closeGit(git);
 			String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
 			String id = gitID[0];
-			deleteRepo(id);
 
 			throw ex;
 		}
@@ -1318,7 +1317,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				e.printStackTrace();
 				closeGit(git);
 				PasswordManager.checkInternet();
-				deleteRepo(remoteURI);
+				//deleteRepo(remoteURI);
 				pull(remoteURI, branch);
 			} catch (InvalidConfigurationException e) {
 
@@ -1630,7 +1629,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			} catch (org.eclipse.jgit.api.errors.JGitInternalException exe) {
 				closeGit(git);
-				deleteRepo(remoteURI);
+				//deleteRepo(remoteURI);
 				exe.printStackTrace(System.out);
 				return cloneRepo(remoteURI,branch);
 			}catch (Throwable e) {
