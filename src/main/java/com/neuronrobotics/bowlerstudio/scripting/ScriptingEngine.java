@@ -86,7 +86,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 *
 	 */
-	private static final Map<String, Long> fileLastLoaded = new HashMap<String, Long>();
 
 	private static final ArrayList<GitLogProgressMonitor> logListeners = new ArrayList<>();
 
@@ -956,57 +955,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static File fileFromGit(String remoteURI, String branch, String fileInRepo)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		File gitRepoFile = cloneRepo(remoteURI, branch);
-		String id = gitRepoFile.getAbsolutePath();
-		if (fileLastLoaded.get(id) == null) {
-			// forces the first time the files is accessed by the application
-			// tou pull an update
-			fileLastLoaded.put(id, System.currentTimeMillis() - TIME_TO_WAIT_BETWEEN_GIT_PULL * 2);
-		}
-		long lastTime = fileLastLoaded.get(id);
-		if ((System.currentTimeMillis() - lastTime) > TIME_TO_WAIT_BETWEEN_GIT_PULL || !gitRepoFile.exists())// wait
-		// 2
-		// seconds
-		// before
-		// re-downloading
-		// the
-		// file
-		{
-
-			// System.out.println("Updating git repo, its been
-			// "+(System.currentTimeMillis()-lastTime)+
-			// " need to wait "+ TIME_TO_WAIT_BETWEEN_GIT_PULL);
-			fileLastLoaded.put(id, System.currentTimeMillis());
-			if (isAutoupdate()) {
-				// System.out.println("Autoupdating " +id);
-				try {
-
-					// Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() +
-					// "/.git");
-					// https://gist.github.com/0e6454891a3b3f7c8f28.git
-
-					try {
-						pull(remoteURI, branch);
-					} catch (Exception ex) {
-						setAutoupdate(false);
-						try {
-							if (hasNetwork()) {
-								ex.printStackTrace();
-								System.err.println("Error in gist, hosing: " + gitRepoFile);
-								deleteFolder(gitRepoFile);
-								return fileFromGit(remoteURI, branch, fileInRepo);
-							}
-						} catch (Exception x) {
-							x.printStackTrace();
-						}
-					}
-				} catch (NullPointerException ex) {
-					setAutoupdate(false);
-				}
-
-			}
-
-		}
-
 		return new File(gitRepoFile.getAbsolutePath() + "/" + fileInRepo);
 	}
 
