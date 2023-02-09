@@ -87,8 +87,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 *
 	 */
 	private static final Map<String, Long> fileLastLoaded = new HashMap<String, Long>();
-	
-	private static final ArrayList<GitLogProgressMonitor> logListeners= new ArrayList<>();
+
+	private static final ArrayList<GitLogProgressMonitor> logListeners = new ArrayList<>();
 
 	private static boolean autoupdate = false;
 
@@ -127,7 +127,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	static {
 
 		PasswordManager.hasNetwork();
-		
+
 		addScriptingLanguage(new ClojureHelper());
 		addScriptingLanguage(new GroovyHelper());
 		addScriptingLanguage(new JythonHelper());
@@ -142,7 +142,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void setWorkspace(File file) {
 		workspace = file;
-		System.err.println("Workspace: "+workspace.getAbsolutePath());
+		System.err.println("Workspace: " + workspace.getAbsolutePath());
 		if (!workspace.exists()) {
 			workspace.mkdir();
 		}
@@ -161,22 +161,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void addLogListener(GitLogProgressMonitor l) {
-		if(logListeners.contains(l))
+		if (logListeners.contains(l))
 			return;
 		logListeners.add(l);
 	}
-	
+
 	public static void removeLogListener(GitLogProgressMonitor l) {
-		if(!logListeners.contains(l))
+		if (!logListeners.contains(l))
 			return;
 		logListeners.remove(l);
 	}
-	
+
 	public static void clearLogListener() {
 
 		logListeners.clear();
 	}
-	
+
 	/**
 	 * CLoe git and start a timeout timer
 	 * 
@@ -192,9 +192,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throws InvalidRemoteException, TransportException, GitAPIException {
 		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
 
-		setURI.setProgressMonitor(getProgressMoniter("Cloning " ,remoteURI));
+		setURI.setProgressMonitor(getProgressMoniter("Cloning ", remoteURI));
 		setURI.setDirectory(dir);
-		
+
 		if (remoteURI != null && remoteURI.startsWith("git@")) {
 			setURI.setTransportConfigCallback(transportConfigCallback);
 		} else {
@@ -226,25 +226,24 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						break;
 					}
 				}
-				
+
 				sum += completed;
 				DecimalFormat df = new DecimalFormat("###.#");
 				String format = df.format(total > 0 ? ((sum) / total * 100) : 0);
-				if(!format.contains("."))
-					format=format+".0";// keep spacing consistant
-				while(format.length()<5) {
-					format=" "+format;//pad out the string for formatting
+				if (!format.contains("."))
+					format = format + ".0";// keep spacing consistant
+				while (format.length() < 5) {
+					format = " " + format;// pad out the string for formatting
 				}
-				String str = format + "% " + stage + " " + reponame + "  "
-						+ tasks + " of task " + type;
+				String str = format + "% " + stage + " " + reponame + "  " + tasks + " of task " + type;
 				if (timeofLastUpdate + 500 < System.currentTimeMillis()) {
 					System.out.println(str);
 					timeofLastUpdate = System.currentTimeMillis();
 				}
-				//System.err.println(str);
-				
+				// System.err.println(str);
+
 				for (GitLogProgressMonitor l : logListeners) {
-					l.onUpdate(str,e);
+					l.onUpdate(str, e);
 				}
 			}
 
@@ -263,7 +262,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				String string = "100%  " + stage + " " + reponame + "  " + type;
 				System.out.println(string);
 				for (GitLogProgressMonitor l : logListeners) {
-					l.onUpdate(string,e);
+					l.onUpdate(string, e);
 				}
 			}
 
@@ -296,15 +295,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		throw new RuntimeException("IOException making repo");
 	}
-	
+
 	public static boolean isUrlAlreadyOpen(String URL) {
-		if(URL==null)
+		if (URL == null)
 			return false;
 		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
 			Git g = iterator.next();
 			GitTimeoutThread t = gitOpenTimeout.get(g);
 			if (t.ref.toLowerCase().contentEquals(URL.toLowerCase())) {
-				//t.getException().printStackTrace(System.err);
+				// t.getException().printStackTrace(System.err);
 				return true;
 			}
 		}
@@ -379,7 +378,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 	private static GitTimeoutThread makeTimeoutThread(Git git) {
 
-		GitTimeoutThread thread = new  GitTimeoutThread(git);
+		GitTimeoutThread thread = new GitTimeoutThread(git);
 		thread.start();
 		return thread;
 	}
@@ -459,7 +458,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static File getWorkspace() {
-		if(workspace==null) {
+		if (workspace == null) {
 			setWorkspace(new File(System.getProperty("user.home") + "/bowler-workspace/"));
 		}
 		return workspace;
@@ -545,8 +544,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return ret;
 	}
 
-	public static List<String> getCurrentGist(String addr,  Object engine) {
-		if(!javafx.scene.web.WebEngine.class.isInstance(engine))
+	public static List<String> getCurrentGist(String addr, Object engine) {
+		if (!javafx.scene.web.WebEngine.class.isInstance(engine))
 			throw new RuntimeException("Engine must be of type javafx.scene.web.WebEngine");
 		String gist = urlToGist(addr);
 
@@ -557,7 +556,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				TransformerFactory tf = TransformerFactory.newInstance();
 				Transformer t = tf.newTransformer();
 				StringWriter sw = new StringWriter();
-				t.transform(new DOMSource(((javafx.scene.web.WebEngine)engine).getDocument()), new StreamResult(sw));
+				t.transform(new DOMSource(((javafx.scene.web.WebEngine) engine).getDocument()), new StreamResult(sw));
 				html = sw.getBuffer().toString();
 				return returnFirstGist(html);
 			} catch (TransformerConfigurationException e) {
@@ -584,11 +583,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			PasswordManager.waitForLogin();
 			if (PasswordManager.loggedIn())
 				return;
-			if(PasswordManager.getLoginID()==null) {
+			if (PasswordManager.getLoginID() == null) {
 				System.err.println("No login ID found!");
 				return;
 			}
-			if(PasswordManager.getPassword()==null) {
+			if (PasswordManager.getPassword() == null) {
 				System.err.println("No login api key found!");
 				return;
 			}
@@ -599,16 +598,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				System.err.println("\nERROR: Wrong Password!\n");
 				login();
 			}
-			
+
 		} catch (Exception e) {
 			exp.uncaughtException(Thread.currentThread(), e);
 		}
 
 	}
-	public static void waitForRepo(String remoteURI,String reason) {
-		while(ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+
+	public static void waitForRepo(String remoteURI, String reason) {
+		while (ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
 			ThreadUtil.wait(1000);
-			System.out.println("\n\n\nPaused "+reason+" by another thread, waiting for repo "+remoteURI);
+			System.out.println("\n\n\nPaused " + reason + " by another thread, waiting for repo " + remoteURI);
 			new Exception().printStackTrace(System.err);
 			for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
 				Git g = iterator.next();
@@ -619,14 +619,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		}
 	}
+
 	public static void deleteRepo(String remoteURI) {
-		if(remoteURI==null)
+		if (remoteURI == null)
 			return;
-		if(remoteURI.length()<4)
+		if (remoteURI.length() < 4)
 			return;
-		waitForRepo(remoteURI,"delete");
-		
-		new Exception("\n\nDelete "+remoteURI+"called Here\n").printStackTrace(System.out);
+		waitForRepo(remoteURI, "delete");
+
+		new Exception("\n\nDelete " + remoteURI + "called Here\n").printStackTrace(System.out);
 		File gitRepoFile = uriToFile(remoteURI);
 		deleteFolder(gitRepoFile.getParentFile());
 	}
@@ -713,7 +714,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return filesInGit(remote, null, null);
 	}
 
-
 	public static String getUserIdOfGist(String id) throws Exception {
 
 		waitForLogin();
@@ -766,7 +766,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			login();
 		if (!hasNetwork())
 			return;// No login info means there is no way to publish
-		waitForRepo(id,"commit");
+		waitForRepo(id, "commit");
 		File gistDir = cloneRepo(id, branch);
 		File desired = new File(gistDir.getAbsoluteFile() + "/" + FileName);
 
@@ -825,9 +825,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void pushCodeToGit(String remoteURI, String branch, String FileName, String content, String commitMessage,
-			boolean flagNewFile) throws Exception {
-		waitForRepo(remoteURI,"push");
+	public static void pushCodeToGit(String remoteURI, String branch, String FileName, String content,
+			String commitMessage, boolean flagNewFile) throws Exception {
+		waitForRepo(remoteURI, "push");
 		commit(remoteURI, branch, FileName, content, commitMessage, flagNewFile);
 		if (PasswordManager.getUsername() == null)
 			login();
@@ -878,9 +878,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 			}
 			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
-				git.push().setTransportConfigCallback(transportConfigCallback).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
+				git.push().setTransportConfigCallback(transportConfigCallback)
+						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 			else
-				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
+				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider())
+						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 			closeGit(git);
 			System.out.println("PUSH OK! file: " + desired + " on branch " + getBranch(remoteURI));
 		} catch (Exception ex) {
@@ -1015,15 +1017,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			String gitSplit = colinSplit[1].substring(0, colinSplit[1].lastIndexOf('.'));
 			File gistDir = new File(getWorkspace().getAbsolutePath() + "/gitcache/" + gitSplit + "/.git");
 			return gistDir;
-		}catch(ArrayIndexOutOfBoundsException ex) {
-			System.err.println("Failed to parse "+remoteURI);
+		} catch (ArrayIndexOutOfBoundsException ex) {
+			System.err.println("Failed to parse " + remoteURI);
 			throw ex;
 		}
 
-		
 	}
 
-	public static String getBranch(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
+	public static String getBranch(String remoteURI)
+			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
+			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		cloneRepo(remoteURI, null);
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
@@ -1033,12 +1036,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		String branch = localRepo.getBranch();
 		localRepo.close();
-		if(branch==null)
-			throw new RuntimeException("FAULT! "+remoteURI+" has no branch!");
+		if (branch == null)
+			throw new RuntimeException("FAULT! " + remoteURI + " has no branch!");
 		return branch;
 	}
 
-	public static String getFullBranch(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
+	public static String getFullBranch(String remoteURI)
+			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
+			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		cloneRepo(remoteURI, null);
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists()) {
@@ -1048,14 +1053,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		String branch = localRepo.getFullBranch();
 		localRepo.close();
-		if(branch==null)
-			throw new RuntimeException("FAULT! "+remoteURI+" has no branch!");
+		if (branch == null)
+			throw new RuntimeException("FAULT! " + remoteURI + " has no branch!");
 
 		return branch;
 	}
 
 	public static void deleteBranch(String remoteURI, String toDelete) throws Exception {
-		waitForRepo(remoteURI,"deleteBranch");
+		waitForRepo(remoteURI, "deleteBranch");
 		boolean found = false;
 		for (String s : listBranchNames(remoteURI)) {
 			if (s.contains(toDelete)) {
@@ -1092,7 +1097,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			// delete branch 'branchToDelete' on remote 'origin'
 			RefSpec refSpec = new RefSpec().setSource(null).setDestination(toDelete);
 			git.push().setRefSpecs(refSpec).setRemote("origin")
-					.setCredentialsProvider(PasswordManager.getCredentialProvider()).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
+					.setCredentialsProvider(PasswordManager.getCredentialProvider())
+					.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 		} catch (Exception e) {
 			ex = e;
 		}
@@ -1111,16 +1117,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void newBranch(String remoteURI, String newBranch, RevCommit source)
 			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
 			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
-		waitForRepo(remoteURI,"newBranch");
+		waitForRepo(remoteURI, "newBranch");
 		Repository localRepo = getRepository(remoteURI);
 
-		Git git=null;
+		Git git = null;
 		try {
 			for (String s : listBranchNames(remoteURI)) {
 				if (s.contains(newBranch)) {
 					// throw new RuntimeException(newBranch + " can not be created because " + s + "
 					// is too similar");
-					
+
 					git = openGit(localRepo);
 					shallowCheckout(remoteURI, newBranch, git);
 					closeGit(git);
@@ -1132,7 +1138,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			e.printStackTrace();
 			closeGit(git);
 		}
-		
 
 		git = openGit(localRepo);
 		try {
@@ -1171,9 +1176,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			// just checkout the existing branch then
 		}
 		git.checkout().setName(newBranch).call();
-		if(PasswordManager.loggedIn())
-		git.push().setRemote(remoteURI).setRefSpecs(new RefSpec(newBranch + ":" + newBranch))
-				.setCredentialsProvider(PasswordManager.getCredentialProvider()).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
+		if (PasswordManager.loggedIn())
+			git.push().setRemote(remoteURI).setRefSpecs(new RefSpec(newBranch + ":" + newBranch))
+					.setCredentialsProvider(PasswordManager.getCredentialProvider())
+					.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1277,8 +1283,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void pull(String remoteURI, String branch)
-			throws IOException, CheckoutConflictException, NoHeadException,InvalidRemoteException {
-		waitForRepo(remoteURI,"pull");
+			throws IOException, CheckoutConflictException, NoHeadException, InvalidRemoteException {
+		waitForRepo(remoteURI, "pull");
 		// new Exception().printStackTrace();
 
 		if (!hasNetwork())
@@ -1295,14 +1301,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 			try {
 
-				
 				PullCommand command;
 				if (ref != null && ref.startsWith("git@")) {
 					command = git.pull().setTransportConfigCallback(transportConfigCallback);
 				} else {
 					command = git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider());
 				}
-				command.setProgressMonitor(getProgressMoniter("Pulling " ,remoteURI));
+				command.setProgressMonitor(getProgressMoniter("Pulling ", remoteURI));
 				command.call();
 				closeGit(git);
 				// new Exception(ref).printStackTrace();
@@ -1317,7 +1322,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				e.printStackTrace();
 				closeGit(git);
 				PasswordManager.checkInternet();
-				//deleteRepo(remoteURI);
+				// deleteRepo(remoteURI);
 				pull(remoteURI, branch);
 			} catch (InvalidConfigurationException e) {
 
@@ -1344,12 +1349,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				PasswordManager.checkInternet();
 				closeGit(git);
 				try {
-					if(branch!=null)
+					if (branch != null)
 						newBranch(remoteURI, branch);
 					else {
 						git = openGit(remoteURI);
 						RevCommit source = git.log().setMaxCount(1).call().iterator().next();
-						
+
 						newBranchLocal("main", remoteURI, git, source);
 						closeGit(git);
 					}
@@ -1377,7 +1382,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 				if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
 					try {
-						git.pull().setTransportConfigCallback(transportConfigCallback).setProgressMonitor(getProgressMoniter("Pull " ,remoteURI)).call();
+						git.pull().setTransportConfigCallback(transportConfigCallback)
+								.setProgressMonitor(getProgressMoniter("Pull ", remoteURI)).call();
 						closeGit(git);
 					} catch (Exception ex) {
 						closeGit(git);
@@ -1408,7 +1414,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	}
 
-	public static void pull(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, InvalidRemoteException, TransportException, GitAPIException {
+	public static void pull(String remoteURI) throws IOException, RefAlreadyExistsException, RefNotFoundException,
+			InvalidRefNameException, InvalidRemoteException, TransportException, GitAPIException {
 		if (!hasNetwork())
 			return;// No login info means there is no way to publish
 		pull(remoteURI, getBranch(remoteURI));
@@ -1416,7 +1423,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void checkoutCommit(String remoteURI, String branch, String commitHash) throws IOException {
-		waitForRepo(remoteURI,"checkoutCommit");
+		waitForRepo(remoteURI, "checkoutCommit");
 		File gitRepoFile = ScriptingEngine.uriToFile(remoteURI);
 		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
 			System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
@@ -1436,17 +1443,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	}
 
-	public static void checkout(String remoteURI, RevCommit commit) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
+	public static void checkout(String remoteURI, RevCommit commit)
+			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
+			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		ScriptingEngine.checkout(remoteURI, commit.getName());
 	}
 
-	public static void checkout(String remoteURI, Ref branch) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
+	public static void checkout(String remoteURI, Ref branch)
+			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
+			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		String[] name = branch.getName().split("/");
 		String myName = name[name.length - 1];
 		ScriptingEngine.checkout(remoteURI, myName);
 	}
 
-	public static void checkout(String remoteURI, String branch) throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException, CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
+	public static void checkout(String remoteURI, String branch)
+			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
+			CheckoutConflictException, InvalidRemoteException, TransportException, GitAPIException {
 		if (!hasNetwork())
 			return;
 		// cloneRepo(remoteURI, branch);
@@ -1525,15 +1538,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static void shallowCheckout(String remoteURI, String branch, Git git) throws GitAPIException,
 			RefAlreadyExistsException, InvalidRefNameException, RefNotFoundException, CheckoutConflictException {
 		try {
-			git.checkout().setName(branch)
-					.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+			git.checkout().setName(branch).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
 					.setStartPoint("origin/" + branch).call();
 			return;
 		} catch (RefNotFoundException e) {
 			git.branchCreate().setName(branch).setUpstreamMode(SetupUpstreamMode.SET_UPSTREAM)
 					.setStartPoint("origin/" + branch).setForce(true).call();
-			git.checkout().setName(branch)
-					.setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
+			git.checkout().setName(branch).setUpstreamMode(CreateBranchCommand.SetupUpstreamMode.TRACK)
 					.setStartPoint("origin/" + branch).call();
 			return;
 		} catch (CheckoutConflictException con) {
@@ -1544,7 +1555,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static boolean resolveConflict(String remoteURI, CheckoutConflictException con, Git git) {
 		PasswordManager.checkInternet();
-		waitForRepo(remoteURI,"resolveConflict");
+		waitForRepo(remoteURI, "resolveConflict");
 		try {
 			Status stat = git.status().call();
 			Set<String> changed = stat.getModified();
@@ -1605,7 +1616,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (!gitRepoFile.exists()) {
 			if (!hasNetwork())
 				return null;// No login info means there is no way to publish
-			waitForRepo(remoteURI,"cloneRepo");
+			waitForRepo(remoteURI, "cloneRepo");
 			System.out.println("Cloning files from: " + remoteURI);
 			if (branch != null)
 				System.out.println("            branch: " + branch);
@@ -1629,10 +1640,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			} catch (org.eclipse.jgit.api.errors.JGitInternalException exe) {
 				closeGit(git);
-				//deleteRepo(remoteURI);
+				// deleteRepo(remoteURI);
 				exe.printStackTrace(System.out);
-				return cloneRepo(remoteURI,branch);
-			}catch (Throwable e) {
+				return cloneRepo(remoteURI, branch);
+			} catch (Throwable e) {
 
 				closeGit(git);
 				PasswordManager.checkInternet();
@@ -1644,7 +1655,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				checkout(remoteURI, branch);
 			} catch (Exception e) {
-				e.printStackTrace(System.out);	
+				e.printStackTrace(System.out);
 			}
 		}
 
@@ -1757,11 +1768,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static String[] findGitTagFromFile(File currentFile) throws IOException {
 
 		Git git = locateGit(currentFile);
-
-		String[] strings = new String[] { git.getRepository().getConfig().getString("remote", "origin", "url"),
-				findLocalPath(currentFile, git) };
-		closeGit(git);
-		return strings;
+		try {
+			String[] strings = new String[] { git.getRepository().getConfig().getString("remote", "origin", "url"),
+					findLocalPath(currentFile, git) };
+			closeGit(git);
+			return strings;
+		} catch (Throwable t) {
+			t.printStackTrace();
+			closeGit(git);
+			throw t;
+		}
 	}
 
 	public static boolean checkOwner(String url) {
@@ -1853,16 +1869,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static String fork(String sourceURL, String newRepoName, String newRepoDescription) throws Exception {
 		GHRepository repository = makeNewRepoNoFailOver(newRepoName, newRepoDescription);
 		String gitRepo = repository.getHttpTransportUrl();
-		
+
 		ArrayList<String> files = filesInGit(sourceURL);
 		Git git = locateGit(fileFromGit(sourceURL, files.get(0)));
 		Repository sourceRepoObject = git.getRepository();
 		try {
 			sourceRepoObject.getConfig().setString("remote", "origin", "url", gitRepo);
 			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
-				git.push().setTransportConfigCallback(transportConfigCallback).setProgressMonitor(getProgressMoniter("Pushing " ,gitRepo)).call();
+				git.push().setTransportConfigCallback(transportConfigCallback)
+						.setProgressMonitor(getProgressMoniter("Pushing ", gitRepo)).call();
 			else
-				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider()).setProgressMonitor(getProgressMoniter("Pushing " ,gitRepo)).call();
+				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider())
+						.setProgressMonitor(getProgressMoniter("Pushing ", gitRepo)).call();
 			closeGit(git);
 
 			filesInGit(gitRepo);
@@ -1875,7 +1893,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						.getHttpTransportUrl();
 			}
 			ex.printStackTrace();
-		}catch (Throwable ex) {
+		} catch (Throwable ex) {
 			ex.printStackTrace();
 		}
 		closeGit(git);
@@ -1986,10 +2004,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static boolean isLoginSuccess() {
 		return PasswordManager.loggedIn();
 	}
+
 	public static String[] copyGitFile(String sourceGit, String targetGit, String filename) {
-		return copyGitFile( sourceGit,  targetGit,  filename,filename, false);
+		return copyGitFile(sourceGit, targetGit, filename, filename, false);
 	}
-	public static String[] copyGitFile(String sourceGit, String targetGit, String filename,String outFile,boolean bailIfExisting) {
+
+	public static String[] copyGitFile(String sourceGit, String targetGit, String filename, String outFile,
+			boolean bailIfExisting) {
 		String targetFilename = outFile;
 		String[] WalkingEngine;
 		if (targetGit.contains("gist.github.com") && filename.contains("/")) {
@@ -2011,7 +2032,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						ThreadUtil.wait(500);
 						// Log.warn(targetGit +"/"+filename+ " not built yet");
 					}
-			
+
 				}
 			} catch (InvalidRemoteException e) {
 				exp.uncaughtException(Thread.currentThread(), e);
@@ -2029,7 +2050,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				newFileCode = ScriptingEngine.codeFromGit(targetGit, targetFilename);
 				if (newFileCode == null)
 					newFileCode = new String[] { "" };
-				if (newFileCode[0].length()<10) {
+				if (newFileCode[0].length() < 10) {
 					System.out.println("Copy Content to " + targetGit + "/" + targetFilename);
 					ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename,
 							WalkingEngine[0], "copy file content");
@@ -2177,58 +2198,62 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		return 0;
 	}
+
 	public static List<String> getAllTags(String gitRepo) {
 		ArrayList<String> tags = new ArrayList<>();
-		Git jGit =openGit(gitRepo);
+		Git jGit = openGit(gitRepo);
 		List<Ref> call;
 		try {
 			call = jGit.tagList().call();
 			for (Ref ref : call) {
-			    String string = ref.getName().split("/")[2];
-			    tags.add(string);
+				String string = ref.getName().split("/")[2];
+				tags.add(string);
 			}
 		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			
+
 		}
 		Collections.sort(tags, new Comparator<String>() {
 			public int compare(String object1, String object2) {
-		        return versionCompare(object1,object2);
-		    }
+				return versionCompare(object1, object2);
+			}
 		});
 		closeGit(jGit);
 		return tags;
 	}
 
 	public static boolean tagExists(String remoteURI, String newTag) {
-		List<String> tags =getAllTags( remoteURI);
-		for(String s: tags) {
-			System.out.println("Checking "+newTag+" against "+s);
-			if(s.contentEquals(newTag)) {
+		List<String> tags = getAllTags(remoteURI);
+		for (String s : tags) {
+			System.out.println("Checking " + newTag + " against " + s);
+			if (s.contentEquals(newTag)) {
 				return true;
 			}
 		}
 		return false;
 	}
+
 	public static void tagRepo(String remoteURI, String newTag) {
-		System.out.println("Tagging "+remoteURI+" at "+newTag);
-		if(tagExists(remoteURI,newTag)) {
-			System.out.println("ERROR! Tag exists "+remoteURI+"@"+newTag);
+		System.out.println("Tagging " + remoteURI + " at " + newTag);
+		if (tagExists(remoteURI, newTag)) {
+			System.out.println("ERROR! Tag exists " + remoteURI + "@" + newTag);
 			return;
 		}
-		Git git =openGit(remoteURI);
+		Git git = openGit(remoteURI);
 		// Creating tag
 		try {
 			try {
 				git.tag().setName(newTag).setForceUpdate(true).call();
-			}catch(Throwable t) {
+			} catch (Throwable t) {
 				t.printStackTrace();
 			}
 			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
-				git.push().setPushTags().setTransportConfigCallback(transportConfigCallback).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
+				git.push().setPushTags().setTransportConfigCallback(transportConfigCallback)
+						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 			else
-				git.push().setPushTags().setCredentialsProvider(PasswordManager.getCredentialProvider()).setProgressMonitor(getProgressMoniter("Pushing " ,remoteURI)).call();
+				git.push().setPushTags().setCredentialsProvider(PasswordManager.getCredentialProvider())
+						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 		} catch (GitAPIException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
