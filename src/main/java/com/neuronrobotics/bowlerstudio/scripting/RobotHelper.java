@@ -104,7 +104,9 @@ public class RobotHelper implements IScriptingLanguage {
 		newLink.setName("link1");
 		newLink.setDeviceScriptingName(newLink.getName());
 		newLink.setDeviceScriptingName("exampleDevice");
-		limb.addNewLink(newLink, new DHLink(0, 0, 100, 0));
+		DHLink nextLink = new DHLink(0, 0, 100, 0);
+		nextLink = nextLink.setListener(new Affine);
+		limb.addNewLink(newLink, nextLink);
 		back.getAppendages().add(limb);
 
 		return back.getXml();
