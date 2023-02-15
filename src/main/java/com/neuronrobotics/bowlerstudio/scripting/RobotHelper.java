@@ -81,6 +81,7 @@ public class RobotHelper implements IScriptingLanguage {
 	 * 
 	 * @return
 	 */
+	@SuppressWarnings("restriction")
 	public String getDefaultContents(String gitURL, String slug) {
 		MobileBase back = new MobileBase();
 		back.setScriptingName(slug);
@@ -104,7 +105,9 @@ public class RobotHelper implements IScriptingLanguage {
 		newLink.setName("link1");
 		newLink.setDeviceScriptingName(newLink.getName());
 		newLink.setDeviceScriptingName("exampleDevice");
-		limb.addNewLink(newLink, new DHLink(0, 0, 100, 0));
+		DHLink nextLink = new DHLink(0, 0, 100, 0);
+		nextLink.setListener(new javafx.scene.transform.Affine());
+		limb.addNewLink(newLink, nextLink);
 		back.getAppendages().add(limb);
 
 		return back.getXml();
