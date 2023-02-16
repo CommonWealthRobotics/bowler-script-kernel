@@ -162,15 +162,21 @@ public class BezierEditor {
 		update();
 		save();
 	}
+	public ArrayList<CSG> getCSG() {
 
-	public ArrayList<Object> get() {
-
-		ArrayList<Object> back = new ArrayList<>();
+		ArrayList<CSG> back = new ArrayList<>();
 		back.addAll(getEndManip().get());
 		back.addAll(cp1Manip.get());
 		back.addAll(cp2Manip.get());
 		back.addAll(getStartManip().get());
 		back.addAll(getPartsInternal());
+
+		return back;
+	}
+	public ArrayList<Object> get() {
+
+		ArrayList<Object> back = new ArrayList<>();
+		back.addAll(getCSG());
 		back.add(cp2Line);
 		back.add(cp1Line);
 
