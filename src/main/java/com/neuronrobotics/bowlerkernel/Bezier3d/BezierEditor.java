@@ -244,18 +244,25 @@ public class BezierEditor {
 
 	public void setEnd(double newX, double newY, double newZ) {
 		endManip.set(newX, newY, newZ);
+		save();
 	}
 
 	public void setStart(double newX, double newY, double newZ) {
 		getStartManip().set(newX, newY, newZ);
+		save();
+
 	}
 
 	public void setCP1(double newX, double newY, double newZ) {
 		cp1Manip.set(newX, newY, newZ);
+		save();
+
 	}
 
 	public void setCP2(double newX, double newY, double newZ) {
 		cp2Manip.set(newX, newY, newZ);
+		save();
+
 	}
 
 	public ArrayList<Transform> transforms() {
