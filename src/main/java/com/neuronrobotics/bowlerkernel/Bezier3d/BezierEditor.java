@@ -242,6 +242,22 @@ public class BezierEditor {
 		return pose;
 	}
 
+	public void setEnd(double newX, double newY, double newZ) {
+		endManip.set(newX, newY, newZ);
+	}
+
+	public void setStart(double newX, double newY, double newZ) {
+		getStartManip().set(newX, newY, newZ);
+	}
+
+	public void setCP1(double newX, double newY, double newZ) {
+		cp1Manip.set(newX, newY, newZ);
+	}
+
+	public void setCP2(double newX, double newY, double newZ) {
+		cp2Manip.set(newX, newY, newZ);
+	}
+
 	public ArrayList<Transform> transforms() {
 		ArrayList<Transform> tf = Extrude.bezierToTransforms(
 				new Vector3d(cp1Manip.getX() - getStartManip().getX(), cp1Manip.getY() - getStartManip().getY(),
