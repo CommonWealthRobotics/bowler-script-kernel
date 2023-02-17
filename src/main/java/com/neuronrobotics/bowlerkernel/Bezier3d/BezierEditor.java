@@ -162,15 +162,21 @@ public class BezierEditor {
 		update();
 		save();
 	}
+	public ArrayList<CSG> getCSG() {
 
-	public ArrayList<Object> get() {
-
-		ArrayList<Object> back = new ArrayList<>();
+		ArrayList<CSG> back = new ArrayList<>();
 		back.addAll(getEndManip().get());
 		back.addAll(cp1Manip.get());
 		back.addAll(cp2Manip.get());
 		back.addAll(getStartManip().get());
 		back.addAll(getPartsInternal());
+
+		return back;
+	}
+	public ArrayList<Object> get() {
+
+		ArrayList<Object> back = new ArrayList<>();
+		back.addAll(getCSG());
 		back.add(cp2Line);
 		back.add(cp1Line);
 
@@ -240,6 +246,29 @@ public class BezierEditor {
 			l.setEndX(0);
 		});
 		return pose;
+	}
+
+	public void setEnd(double newX, double newY, double newZ) {
+		endManip.set(newX, newY, newZ);
+		save();
+	}
+
+	public void setStart(double newX, double newY, double newZ) {
+		getStartManip().set(newX, newY, newZ);
+		save();
+
+	}
+
+	public void setCP1(double newX, double newY, double newZ) {
+		cp1Manip.set(newX, newY, newZ);
+		save();
+
+	}
+
+	public void setCP2(double newX, double newY, double newZ) {
+		cp2Manip.set(newX, newY, newZ);
+		save();
+
 	}
 
 	public ArrayList<Transform> transforms() {
