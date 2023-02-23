@@ -440,7 +440,7 @@ public class MobileBaseCadManager implements Runnable {
 //
 //		this.cadScript = cadScript;
 //	}
-	private Object scriptFromFileInfo(String name,String[] args, Runnable r) {
+	private Object scriptFromFileInfo(String name,String[] args, Runnable r) throws Throwable{
 		String key = args[0] + ":" + args[1];
 		try {
 			File f = ScriptingEngine.fileFromGit(args[0], args[1]);
@@ -449,17 +449,22 @@ public class MobileBaseCadManager implements Runnable {
 					System.err.println(
 							"Building the compiled CAD script for " + key + " " + base + " " + base.getScriptingName());
 					cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					getUi().highlightException(f, e);
+					throw e;
 				}
 				FileChangeWatcher watcher = FileChangeWatcher.watch(f);
+				Exception ex = new Exception("CAD script declared here and regenerated");
 				IFileChangeListener l = new IFileChangeListener() {
 
 					@Override
 					public void onFileChange(File fileThatChanged, WatchEvent event) {
+						if(cadGenerating)
+							return;
 						try {
 							System.err.println("Clearing the compiled CAD script for " + key);
 							cadScriptCache.remove(key);
+							ex.printStackTrace();
 							r.run();
 						} catch (Exception e) {
 							getUi().highlightException(f, e);
@@ -518,7 +523,7 @@ public class MobileBaseCadManager implements Runnable {
 
 	}
 
-	private IgenerateBody getIgenerateBody(MobileBase b) {
+	private IgenerateBody getIgenerateBody(MobileBase b) throws Throwable{
 		if (configMode)
 			return getConfigurationDisplay();
 		Object cadForBodyEngine = scriptFromFileInfo(b.getScriptingName(),b.getGitCadEngine(), () -> {
@@ -531,7 +536,7 @@ public class MobileBaseCadManager implements Runnable {
 		return null;
 	}
 
-	private IgenerateCad getIgenerateCad(DHParameterKinematics dh) {
+	private IgenerateCad getIgenerateCad(DHParameterKinematics dh) throws Throwable{
 		if (configMode)
 			return getConfigurationDisplay();
 		Object cadForBodyEngine = scriptFromFileInfo(dh.getScriptingName(),dh.getGitCadEngine(), () -> {
@@ -544,7 +549,7 @@ public class MobileBaseCadManager implements Runnable {
 		return null;
 	}
 
-	private IgenerateBed getIgenerateBed() {
+	private IgenerateBed getIgenerateBed() throws Throwable{
 		Object cadForBodyEngine = scriptFromFileInfo(base.getScriptingName(),base.getGitCadEngine(), () -> {
 			run();
 		});
@@ -554,7 +559,7 @@ public class MobileBaseCadManager implements Runnable {
 		return null;
 	}
 
-	private ICadGenerator getConfigurationDisplay() {
+	private ICadGenerator getConfigurationDisplay()throws Throwable {
 		if (cadEngineConfiguration == null) {
 			Object cadForBodyEngine = scriptFromFileInfo("ConfigDisplay",new String[] {
 					"https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy" }, () -> {
@@ -639,7 +644,7 @@ public class MobileBaseCadManager implements Runnable {
 											// make it ready for physics
 				}).start();
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			getUi().highlightException(getCadScriptFromMobileBase(device), e);
 		}
 		System.out.println("Displaying Body");
@@ -743,8 +748,13 @@ public class MobileBaseCadManager implements Runnable {
 		return conf;
 	}
 
-	public ArrayList<File> generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws IOException {
-		IgenerateBed bed = getIgenerateBed();
+	public ArrayList<File> generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws Exception {
+		IgenerateBed bed=null;
+		try{
+		 bed= getIgenerateBed();
+		}catch(Throwable T) {
+			throw new RuntimeException(T.getMessage());
+		}
 		if (bed == null || kinematic) {
 			return _generateStls(base, baseDirForFiles, kinematic);
 		}
@@ -988,7 +998,7 @@ public class MobileBaseCadManager implements Runnable {
 				}
 			}
 
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			e.printStackTrace();
 			getUi().highlightException(getCadScriptFromLimnb(dh), e);
 		}
