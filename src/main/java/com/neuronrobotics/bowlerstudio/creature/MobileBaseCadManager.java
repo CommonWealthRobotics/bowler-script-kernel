@@ -453,7 +453,7 @@ public class MobileBaseCadManager implements Runnable {
 					getUi().highlightException(f, e);
 				}
 				FileChangeWatcher watcher = FileChangeWatcher.watch(f);
-				Exception ex = new Exception("CAD script declaired here and regenerated");
+				Exception ex = new Exception("CAD script declared here and regenerated");
 				IFileChangeListener l = new IFileChangeListener() {
 
 					@Override
