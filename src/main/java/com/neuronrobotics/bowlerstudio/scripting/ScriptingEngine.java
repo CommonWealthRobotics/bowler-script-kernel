@@ -1450,30 +1450,30 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						return;
 					} catch (RefAlreadyExistsException e) {
 						PasswordManager.checkInternet();
-
+						closeGit(git);
 						throw new RuntimeException(e);
 					} catch (RefNotFoundException e) {
 						PasswordManager.checkInternet();
-
+						closeGit(git);
 						throw new RuntimeException(e);
 					} catch (InvalidRefNameException e) {
 						PasswordManager.checkInternet();
-
+						closeGit(git);
 						throw new RuntimeException(e);
 					} catch (CheckoutConflictException e) {
 						resolveConflict(remoteURI, e, git);
 					} catch (GitAPIException e) {
 						PasswordManager.checkInternet();
-
+						closeGit(git);
 						throw new RuntimeException(e);
 					} catch (Exception e) {
 						PasswordManager.checkInternet();
-
+						closeGit(git);
 						throw new RuntimeException(e);
 					}
 				} catch (Exception ex) {
 					PasswordManager.checkInternet();
-
+					closeGit(git);
 					throw new RuntimeException(ex);
 				}
 				closeGit(git);
@@ -1603,7 +1603,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				checkout(remoteURI, branch);
 			} catch (Exception e) {
-				e.printStackTrace(System.out);
+				throw new RuntimeException(e);
 			}
 		}
 
