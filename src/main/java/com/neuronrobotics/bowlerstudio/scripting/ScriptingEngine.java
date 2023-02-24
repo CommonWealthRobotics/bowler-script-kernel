@@ -121,7 +121,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static HashMap<String, IScriptingLanguage> langauges = new HashMap<>();
 	private static HashMap<String, ArrayList<Runnable>> onCommitEventListeners = new HashMap<>();
-	static IssueReportingExceptionHandler exp = new IssueReportingExceptionHandler();
+	//static IssueReportingExceptionHandler exp = new IssueReportingExceptionHandler();
 	static HashMap<Git, GitTimeoutThread> gitOpenTimeout = new HashMap<>();
 	static {
 
@@ -155,7 +155,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		try {
 			PasswordManager.loadLoginData(workspace);
 		} catch (Exception e) {
-			exp.uncaughtException(Thread.currentThread(), e);
+			//exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -361,7 +362,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if (thread != null) {
 				thread.interrupt();
 			} else {
-				exp.uncaughtException(Thread.currentThread(),
+				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),
 						new RuntimeException("Closing a git object that was not opened with a timeout!"));
 			}
 		}
@@ -513,8 +514,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					Log.debug("Gist URL Detected " + id);
 					return id;
 				} catch (ArrayIndexOutOfBoundsException ex) {
-					exp.uncaughtException(Thread.currentThread(), ex);
-					return "d4312a0787456ec27a2a";
+					throw new RuntimeException(e);
 				}
 			}
 		}
@@ -559,9 +559,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				html = sw.getBuffer().toString();
 				return returnFirstGist(html);
 			} catch (TransformerConfigurationException e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				throw new RuntimeException(e);
 			} catch (TransformerException e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				throw new RuntimeException(e);
 			}
 
 		}
@@ -599,7 +599,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 
 		} catch (Exception e) {
-			exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException(e);
 		}
 
 	}
@@ -1451,30 +1451,30 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					} catch (RefAlreadyExistsException e) {
 						PasswordManager.checkInternet();
 
-						exp.uncaughtException(Thread.currentThread(), e);
+						throw new RuntimeException(e);
 					} catch (RefNotFoundException e) {
 						PasswordManager.checkInternet();
 
-						exp.uncaughtException(Thread.currentThread(), e);
+						throw new RuntimeException(e);
 					} catch (InvalidRefNameException e) {
 						PasswordManager.checkInternet();
 
-						exp.uncaughtException(Thread.currentThread(), e);
+						throw new RuntimeException(e);
 					} catch (CheckoutConflictException e) {
 						resolveConflict(remoteURI, e, git);
 					} catch (GitAPIException e) {
 						PasswordManager.checkInternet();
 
-						exp.uncaughtException(Thread.currentThread(), e);
+						throw new RuntimeException(e);
 					} catch (Exception e) {
 						PasswordManager.checkInternet();
 
-						exp.uncaughtException(Thread.currentThread(), e);
+						throw new RuntimeException(e);
 					}
 				} catch (Exception ex) {
 					PasswordManager.checkInternet();
 
-					exp.uncaughtException(Thread.currentThread(), ex);
+					throw new RuntimeException(ex);
 				}
 				closeGit(git);
 			}
@@ -1705,11 +1705,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		} catch (IOException e) {
 			if (git != null)
 				closeGit(git);
-			exp.uncaughtException(Thread.currentThread(), e);
+			throw new RuntimeException(e);
 		}
-		if (git != null)
-			closeGit(git);
-		return currentFile.getName();
 
 	}
 
@@ -1733,9 +1730,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		try {
 			git = openGit(getRepository(url));
 		} catch (IOException e1) {
-			exp.uncaughtException(Thread.currentThread(), e1);
 			closeGit(git);
-			return false;
+			throw new RuntimeException(e1);
 		}
 		boolean owned = checkOwner(git);
 		closeGit(git);
@@ -1983,15 +1979,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 				}
 			} catch (InvalidRemoteException e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				throw new RuntimeException(e);
 			} catch (TransportException e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				throw new RuntimeException(e);
 			} catch (GitAPIException e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				throw new RuntimeException(e);
 			} catch (IOException e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				throw new RuntimeException(e);
 			} catch (Exception e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				throw new RuntimeException(e);
 			}
 			String[] newFileCode;
 			try {
@@ -2004,10 +2000,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 							WalkingEngine[0], "copy file content");
 				}
 			} catch (Exception e) {
-				exp.uncaughtException(Thread.currentThread(), e);
+				throw new RuntimeException(e);
 			}
 		} catch (Exception e1) {
-			exp.uncaughtException(Thread.currentThread(), e1);
+			throw new RuntimeException(e1);
 		}
 
 		return new String[] { targetGit, targetFilename };
