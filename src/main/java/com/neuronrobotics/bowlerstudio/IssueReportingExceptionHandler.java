@@ -52,6 +52,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	}
 
 	public void except(Throwable e, String stacktraceFromCatch) {
+		System.out.println(stacktraceFromCatch);
 		new Thread(() -> {
 			StackTraceElement[] element = e.getStackTrace();
 			String source = getTitle(element);
@@ -215,7 +216,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			exceptionQueue.put(t, stacktraceFromCatch);
 			return;
 		}
-
+		
 		except(t, stacktraceFromCatch);
 	}
 

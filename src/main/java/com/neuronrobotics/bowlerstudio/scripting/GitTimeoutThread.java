@@ -2,6 +2,8 @@ package com.neuronrobotics.bowlerstudio.scripting;
 
 import org.eclipse.jgit.api.Git;
 
+import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
+
 public class GitTimeoutThread extends Thread {
 	Git git;
 	String ref;
@@ -21,7 +23,7 @@ public class GitTimeoutThread extends Thread {
 				Thread.sleep(1000);
 			git.close();
 			ScriptingEngine.gitOpenTimeout.remove(git);
-			ScriptingEngine.exp.uncaughtException(Thread.currentThread(), getException());
+			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), getException());
 		} catch (InterruptedException e) {
 			// exited clean
 		}

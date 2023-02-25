@@ -12,6 +12,8 @@ import javafx.scene.image.WritableImage;
 
 import javax.imageio.ImageIO;
 
+import org.eclipse.jgit.api.errors.RefNotFoundException;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -152,7 +154,12 @@ public class AssetFactory {
 
   public static void loadAllAssets() throws Exception {
 	  System.err.println("Loading assets");
-    List<String> files = ScriptingEngine.filesInGit(gitSource, StudioBuildInfo.getVersion(), null);
+    List<String> files;
+    try {
+    	files = ScriptingEngine.filesInGit(gitSource, StudioBuildInfo.getVersion(), null);
+    }catch(Exception ex) {
+    	files = ScriptingEngine.filesInGit(gitSource);
+    }
     for (String file : files) {
     	System.err.println("Loading asset file: "+file);
       loadAsset(file);
