@@ -66,7 +66,7 @@ public class MobileBaseCadManager implements Runnable {
 
 	private boolean cadGenerating = false;
 	private boolean showingStl = false;
-	private ArrayList<CSG> allCad;
+	private ArrayList<CSG> allCad = new ArrayList<>();
 
 	private boolean bail = false;
 	private IMobileBaseUI ui = null;
