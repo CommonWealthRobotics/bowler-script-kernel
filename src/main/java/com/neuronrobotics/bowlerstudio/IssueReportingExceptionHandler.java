@@ -113,7 +113,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 								Alert alert = new Alert(AlertType.CONFIRMATION);
 								alert.setTitle("Out Of Memory FAULT ");
 								alert.setHeaderText("It's just gunna crash, sorry...");
-								alert.setContentText("I can wait till you hit yes, buts its basically done...\n"+stacktraceFromCatch);
+								alert.setContentText("I can wait till you hit yes, buts its basically done...\n"+org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 								Optional<ButtonType> result = alert.showAndWait();
 								System.exit(-1);
 							});
