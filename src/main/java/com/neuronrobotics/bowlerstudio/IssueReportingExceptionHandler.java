@@ -67,6 +67,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	public void except(Throwable e, String stacktraceFromCatch) {
 		System.out.println(stacktraceFromCatch);
 		new Thread(() -> {
+			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e);
 			StackTraceElement[] element = e.getStackTrace();
 			String source = getTitle(element);
 			
@@ -108,19 +109,19 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 								System.exit(-5);
 							}
 							return;
-						}else if (java.lang.OutOfMemoryError.class.isInstance(e)) {
+						}else if (java.lang.OutOfMemoryError.class.isInstance(e)||stacktrace.contains("java.lang.OutOfMemoryError")) {
 							runLater(()->{
 								Alert alert = new Alert(AlertType.CONFIRMATION);
 								alert.setTitle("Out Of Memory FAULT ");
 								alert.setHeaderText("It's just gunna crash, sorry...");
-								alert.setContentText("I can wait till you hit yes, buts its basically done...\n"+org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
+								alert.setContentText("I can wait till you hit yes, buts its basically done...\n"+stacktrace);
 								Optional<ButtonType> result = alert.showAndWait();
 								System.exit(-1);
 							});
 
 						}
 				}
-			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e);
+
 
 			String javaVersion = System.getProperty("java.version");
 			String javafxVersion = System.getProperty("javafx.version");
