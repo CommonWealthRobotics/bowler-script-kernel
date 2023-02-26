@@ -699,6 +699,7 @@ public class MobileBaseCadManager implements Runnable {
 		// baseCad, getSimplecad());
 		// PhysicsEngine.startPhysicsThread(50);
 		// return PhysicsEngine.getCsgFromEngine();
+		System.gc();
 		return getAllCad();
 	}
 
