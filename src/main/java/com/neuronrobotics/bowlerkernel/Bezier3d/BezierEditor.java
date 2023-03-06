@@ -268,6 +268,10 @@ public class BezierEditor {
 		save();
 	}
 
+	public void setEnd(Vector3d point) {
+		this.setEnd(point.x, point.y, point.z);
+	}
+
 	public ArrayList<Transform> transforms() {
 		ArrayList<Transform> tf = Extrude.bezierToTransforms(
 				new Vector3d(cp1Manip.getX() - getStartManip().getX(), cp1Manip.getY() - getStartManip().getY(),
