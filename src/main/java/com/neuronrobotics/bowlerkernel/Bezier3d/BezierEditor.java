@@ -248,13 +248,13 @@ public class BezierEditor {
 		return pose;
 	}
 
-	public void setEnd(double newX, double newY, double newZ) {
-		endManip.set(newX, newY, newZ);
+	public void setStart(double newX, double newY, double newZ) {
+		getStartManip().set(newX, newY, newZ);
 		save();
 	}
 
-	public void setStart(double newX, double newY, double newZ) {
-		getStartManip().set(newX, newY, newZ);
+	public void setEnd(double newX, double newY, double newZ) {
+		endManip.set(newX, newY, newZ);
 		save();
 	}
 
