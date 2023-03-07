@@ -268,8 +268,20 @@ public class BezierEditor {
 		save();
 	}
 
+	public void setStart(Vector3d point) {
+		this.setStart(point.x, point.y, point.z);
+	}
+
 	public void setEnd(Vector3d point) {
 		this.setEnd(point.x, point.y, point.z);
+	}
+
+	public void setCP1(Vector3d point) {
+		this.setCP1(point.x, point.y, point.z);
+	}
+
+	public void setCP2(Vector3d point) {
+		this.setCP2(point.x, point.y, point.z);
 	}
 
 	public ArrayList<Transform> transforms() {
