@@ -46,16 +46,9 @@ jobs:
           
     - name: Set Release Number
       run: |
-         git fetch
-         git config user.email "mad.hephaestus@gmail.com"
-         git config user.name "Kevin Harrington"
-         git config pull.rebase false
-         git config core.mergeoptions --no-edit
-         git checkout development
          echo $'app.name=BowlerScriptKernel' > src/main/resources/com/neuronrobotics/bowlerkernel/build.properties 
          echo "app.version=${{ steps.get_version.outputs.VERSION  }}" >> src/main/resources/com/neuronrobotics/bowlerkernel/build.properties
-         git commit  src/main/resources/com/neuronrobotics/bowlerkernel/build.properties -m"Updating version number in CI to ${{ steps.get_version.outputs.VERSION  }}"
-         git push
+
                 
     - name: Build with Gradle 
       run: ./gradlew shadowJar

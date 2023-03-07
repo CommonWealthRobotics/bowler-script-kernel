@@ -50,10 +50,24 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		except(e);
 
 	}
-
+	public static void runLater(Runnable r) {
+		runLater(r,new Exception("UI Thread Exception here!"));
+	}
+	public static void runLater(Runnable r,Throwable ex) {
+		Platform.runLater(()->{
+			try {
+				r.run();
+			}catch(Throwable t) {
+				t.printStackTrace();
+				ex.printStackTrace();
+			}
+			
+		});
+	}
 	public void except(Throwable e, String stacktraceFromCatch) {
 		System.out.println(stacktraceFromCatch);
 		new Thread(() -> {
+			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e);
 			StackTraceElement[] element = e.getStackTrace();
 			String source = getTitle(element);
 			
@@ -95,9 +109,19 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 								System.exit(-5);
 							}
 							return;
+						}else if (java.lang.OutOfMemoryError.class.isInstance(e)||stacktrace.contains("java.lang.OutOfMemoryError")) {
+							runLater(()->{
+								Alert alert = new Alert(AlertType.CONFIRMATION);
+								alert.setTitle("Out Of Memory FAULT ");
+								alert.setHeaderText("It's just gunna crash, sorry...");
+								alert.setContentText("I can wait till you hit yes, buts its basically done...\n"+stacktrace);
+								Optional<ButtonType> result = alert.showAndWait();
+								System.exit(-1);
+							});
+
 						}
 				}
-			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e);
+
 
 			String javaVersion = System.getProperty("java.version");
 			String javafxVersion = System.getProperty("javafx.version");
@@ -209,9 +233,10 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	public void except(Throwable t) {
 		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(new Exception());
 		if (Platform.isFxApplicationThread()) {
-	    	System.err.println("Exception in Javafx thread! "+t);
+	    	System.err.println("Exception in Javafx thread! \n"+org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
 	    	return;
 	    }
+		
 		if (processing) {
 			exceptionQueue.put(t, stacktraceFromCatch);
 			return;
