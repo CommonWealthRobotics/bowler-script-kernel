@@ -253,11 +253,6 @@ public class BezierEditor {
 		save();
 	}
 
-	public void setEnd(double newX, double newY, double newZ) {
-		endManip.set(newX, newY, newZ);
-		save();
-	}
-
 	public void setCP1(double newX, double newY, double newZ) {
 		cp1Manip.set(newX, newY, newZ);
 		save();
@@ -268,12 +263,13 @@ public class BezierEditor {
 		save();
 	}
 
-	public void setStart(Vector3d point) {
-		this.setStart(point.x, point.y, point.z);
+	public void setEnd(double newX, double newY, double newZ) {
+		endManip.set(newX, newY, newZ);
+		save();
 	}
 
-	public void setEnd(Vector3d point) {
-		this.setEnd(point.x, point.y, point.z);
+	public void setStart(Vector3d point) {
+		this.setStart(point.x, point.y, point.z);
 	}
 
 	public void setCP1(Vector3d point) {
@@ -282,6 +278,10 @@ public class BezierEditor {
 
 	public void setCP2(Vector3d point) {
 		this.setCP2(point.x, point.y, point.z);
+	}
+
+	public void setEnd(Vector3d point) {
+		this.setEnd(point.x, point.y, point.z);
 	}
 
 	public ArrayList<Transform> transforms() {
