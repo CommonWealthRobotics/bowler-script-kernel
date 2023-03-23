@@ -75,7 +75,7 @@ public class Vitamins {
 	private static boolean checked;
 	private static HashMap<String,Runnable> changeListeners = new HashMap<String, Runnable>();
 	public static void clear() {
-		// TODO Auto-generated method stub
+		System.out.println("Vitamins Database Cleraing, reloading files");
 		for(String keys:databaseSet.keySet()) {
 			HashMap<String, HashMap<String, Object>> data = databaseSet.get(keys);
 			for(String key2:data.keySet()) {
@@ -159,7 +159,7 @@ public class Vitamins {
 
 		try {
 			CSG newVitamin = null;
-			HashMap<String, Object> script = getMeta(type);
+			Map<String, Object> script = getMeta(type);
 			StringParameter size = new StringParameter(type + " Default", id, Vitamins.listVitaminSizes(type));
 			size.setStrValue(id);
 			Object file = script.get("scriptGit");
@@ -190,7 +190,7 @@ public class Vitamins {
 	}
 	
 	public static File getScriptFile(String type) {
-		HashMap<String, Object> script = getMeta(type);
+		Map<String, Object> script = getMeta(type);
 		
 		try {
 			return ScriptingEngine.fileFromGit(script.get("scriptGit").toString(), script.get("scriptFile").toString());
@@ -210,16 +210,25 @@ public class Vitamins {
 		return null;
 	}
 
-	public static HashMap<String, Object> getMeta(String type) {
-		return getConfiguration(type, "meta");
+	public static Map<String, Object> getMeta(String type) {
+		return getConfigurationRW(type, "meta");
 	}
 
 	public static void setScript(String type, String git, String file) throws Exception {
 		setParameter(type, "meta", "scriptGit", git);
 		setParameter(type, "meta", "scriptFile", file);
 	}
-
-	public static HashMap<String, Object> getConfiguration(String type, String id) {
+	
+	public static Map<String, Object> getConfiguration(String type, String id){
+		return Collections.unmodifiableMap(getConfigurationRW( type,  id));
+	}
+	public static void putMeasurment(String type, String size,String measurementName, Object measurmentValue) {
+		getConfigurationRW(type,size).put(measurementName, measurmentValue);
+	}
+	public static Object getMeasurement(String type, String size,String measurementName) {
+		return getConfigurationRW(type,size).get(measurementName);
+	}
+	public static HashMap<String, Object> getConfigurationRW(String type, String id) {
 		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
 		if (database.get(id) == null) {
 			database.put(id, new HashMap<String, Object>());
@@ -372,22 +381,22 @@ public class Vitamins {
 			}
 			if (exampleKey != null) {
 				// this database has examples, load an example
-				HashMap<String, Object> exampleConfiguration = getConfiguration(type, exampleKey);
-				HashMap<String, Object> newConfig = getConfiguration(type, id);
+				Map<String, Object> exampleConfiguration = getConfigurationRW(type, exampleKey);
+				Map<String, Object> newConfig = getConfigurationRW(type, id);
 				for (String key : exampleConfiguration.keySet()) {
 					newConfig.put(key, exampleConfiguration.get(key));
 				}
 			}
 		}
 
-		getConfiguration(type, id);
+		getConfigurationRW(type, id);
 		// saveDatabase(type);
 
 	}
 
 	public static void setParameter(String type, String id, String parameterName, Object parameter) throws Exception {
 
-		HashMap<String, Object> config = getConfiguration(type, id);
+		HashMap<String, Object> config = getConfigurationRW(type, id);
 		config.put(parameterName, parameter);
 		sanatize(parameterName,  config);
 
@@ -420,8 +429,9 @@ public class Vitamins {
 				if(changeListeners.get(type)==null) {
 					changeListeners.put(type,() -> {
 						// If the file changes, clear the database and load the new data
-						databaseSet.put(type,null);
 						System.out.println("Re-loading "+type);
+						databaseSet.put(type,null);
+						new RuntimeException().printStackTrace();
 					});
 					onChange=changeListeners.get(type);
 				}
@@ -436,14 +446,13 @@ public class Vitamins {
 	
 					jsonString = IOUtils.toString(inPut);
 					inPut.close();
-					// System.out.println("Loading "+jsonString);
+					System.out.println("JSON loading Loading "+type+" "+jsonString.length());
 					// perfoem the GSON parse
 					database = gson.fromJson(jsonString, TT_mapStringString);
+					if(database==null)
+						throw new RuntimeException("Database failed to read");
 				}else {
 					database=new HashMap<String, HashMap<String,Object>>();
-				}
-				if (database == null) {
-					throw new RuntimeException("create a new one");
 				}
 				databaseSet.put(type, database);
 
@@ -508,13 +517,13 @@ public class Vitamins {
 	}
 	
 	public static boolean isShaft(String vitaminsType) {
-		HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
+		Map<String, Object> meta = Vitamins.getMeta(vitaminsType);
 		if (meta != null && meta.containsKey("shaft"))
 			return true;
 		return false;
 	}
 	public static boolean isActuator(String vitaminsType) {
-		HashMap<String, Object> meta = Vitamins.getMeta(vitaminsType);
+		Map<String, Object> meta = Vitamins.getMeta(vitaminsType);
 		if (meta != null && meta.containsKey("actuator"))
 			return true;
 		return false;
@@ -567,15 +576,6 @@ public class Vitamins {
 		return types;
 	}
 
-	// @Deprecated
-	// public static String getGitRpoDatabase() throws IOException {
-	// return getGitRepoDatabase();
-	// }
-	// @Deprecated
-	// public static void setGitRpoDatabase(String gitRpoDatabase) {
-	// setGitRepoDatabase(gitRpoDatabase);
-	// }
-	//
 	public static String getGitRepoDatabase()  {
 		if (!checked) {
 			checked = true;
