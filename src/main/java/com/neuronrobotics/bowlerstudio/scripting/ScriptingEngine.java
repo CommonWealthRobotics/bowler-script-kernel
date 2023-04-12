@@ -660,6 +660,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		}
 		try {
+			System.out.println("Deleting Folder " + folder.getAbsolutePath());
 			folder.delete();
 		} catch (Throwable t) {
 			t.printStackTrace();
