@@ -1590,7 +1590,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				closeGit(git);
 				// deleteRepo(remoteURI);
 				exe.printStackTrace(System.out);
-				return cloneRepo(remoteURI, branch);
+				throw exe;
 			} catch (Throwable e) {
 
 				closeGit(git);
