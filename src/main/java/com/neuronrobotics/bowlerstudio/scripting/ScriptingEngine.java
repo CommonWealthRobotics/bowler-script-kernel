@@ -660,6 +660,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		}
 		try {
+			System.out.println("Deleting Folder " + folder.getAbsolutePath());
 			folder.delete();
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -1590,7 +1591,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				closeGit(git);
 				// deleteRepo(remoteURI);
 				exe.printStackTrace(System.out);
-				return cloneRepo(remoteURI, branch);
+				throw exe;
 			} catch (Throwable e) {
 
 				closeGit(git);
