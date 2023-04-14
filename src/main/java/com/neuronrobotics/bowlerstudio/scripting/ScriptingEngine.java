@@ -176,7 +176,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		logListeners.clear();
 	}
+	private static Git cloneRepoLocalSelectAuth(String remoteURI, File dir,boolean useSSH)
+			throws InvalidRemoteException, TransportException, GitAPIException {
+		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
 
+		setURI.setProgressMonitor(getProgressMoniter("Cloning ", remoteURI));
+		setURI.setDirectory(dir);
+
+		if (useSSH) {
+			setURI.setTransportConfigCallback(transportConfigCallback);
+		} else {
+			setURI.setCredentialsProvider(PasswordManager.getCredentialProvider());
+		}
+
+		Git git = setURI.call();
+		gitOpenTimeout.put(git, makeTimeoutThread(git));
+		return git;
+	}
 	/**
 	 * CLoe git and start a timeout timer
 	 * 
@@ -190,19 +206,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 	private static Git cloneRepoLocal(String remoteURI, File dir)
 			throws InvalidRemoteException, TransportException, GitAPIException {
-		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
+		boolean startsWith = remoteURI.startsWith("git@");
 
-		setURI.setProgressMonitor(getProgressMoniter("Cloning ", remoteURI));
-		setURI.setDirectory(dir);
-
-		if (remoteURI != null && remoteURI.startsWith("git@")) {
-			setURI.setTransportConfigCallback(transportConfigCallback);
-		} else {
-			setURI.setCredentialsProvider(PasswordManager.getCredentialProvider());
+		try {
+			return cloneRepoLocalSelectAuth(remoteURI,dir,startsWith);
+		}catch(org.eclipse.jgit.api.errors.JGitInternalException ex) {
+			if( ex.getMessage().contains("already exists and is not an empty directory")) {
+				deleteRepo(remoteURI);
+				return cloneRepoLocal(remoteURI, dir);
+			}
+			throw ex;
+		}catch(org.eclipse.jgit.api.errors.TransportException ex) {
+			if(ex.getMessage().contains("Auth fail")&& !startsWith ) {
+				return cloneRepoLocalSelectAuth(remoteURI,dir,true);
+			}
+			throw ex;
 		}
-		Git git = setURI.call();
-		gitOpenTimeout.put(git, makeTimeoutThread(git));
-		return git;
 	}
 
 	private static ProgressMonitor getProgressMoniter(String type, String remoteURI) {
@@ -1257,7 +1276,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					command = git.pull().setCredentialsProvider(PasswordManager.getCredentialProvider());
 				}
 				command.setProgressMonitor(getProgressMoniter("Pulling ", remoteURI));
-				command.call();
+				try {
+					command.call();
+				}catch(org.eclipse.jgit.api.errors.TransportException ex) {
+					if(ex.getMessage().contains("Auth fail")) {
+						command = git.pull().setTransportConfigCallback(transportConfigCallback);
+						command.call();
+					}else
+						throw ex;
+					
+				}
 				closeGit(git);
 				// new Exception(ref).printStackTrace();
 			} catch (CheckoutConflictException ex) {
@@ -1590,10 +1618,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			} catch (org.eclipse.jgit.api.errors.JGitInternalException exe) {
 				closeGit(git);
 				// deleteRepo(remoteURI);
-				exe.printStackTrace(System.out);
 				throw exe;
 			} catch (Throwable e) {
-
+				e.printStackTrace();
 				closeGit(git);
 				PasswordManager.checkInternet();
 				throw new RuntimeException(e);
