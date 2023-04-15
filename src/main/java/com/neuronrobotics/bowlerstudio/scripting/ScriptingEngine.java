@@ -1839,7 +1839,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 
 	public static String fork(String sourceURL, String newRepoName, String newRepoDescription) throws Exception {
-		GHRepository repository = makeNewRepoNoFailOver(newRepoName, newRepoDescription);
+		GHRepository repository = makeNewRepo(newRepoName, newRepoDescription);
 		String gitRepo = repository.getHttpTransportUrl();
 
 		ArrayList<String> files = filesInGit(sourceURL);
@@ -1875,24 +1875,31 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static GHRepository makeNewRepoNoFailOver(String newName, String description)
 			throws IOException, org.kohsuke.github.HttpException {
 		GitHub github = PasswordManager.getGithub();
-		GHCreateRepositoryBuilder builder = github.createRepository(newName);
-		builder.description(description);
-		GHRepository repo = builder.create();
-		for (int i = 0; i < 5; i++) {
-			try {
-				repo = github.getRepositoryById("" + repo.getId());
-				return repo;
-			} catch (Exception ex) {
-				ex.printStackTrace();
+		try {
+			GHCreateRepositoryBuilder builder = github.createRepository(newName);
+			builder.description(description);
+			GHRepository repo = builder.create();
+			for (int i = 0; i < 5; i++) {
+				try {
+					repo = github.getRepositoryById("" + repo.getId());
+					return repo;
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			return repo;
+		} catch (org.kohsuke.github.HttpException ex) {
+			if (ex.getMessage().contains("name already exists on this account")) {
+				
 			}
+			throw ex;
 		}
-		return repo;
 	}
 
 	public static GHRepository makeNewRepo(String newName, String description) throws IOException {
@@ -1903,21 +1910,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		GHRepository gist = null;
 		try {
 			gist = makeNewRepoNoFailOver(newName, description);
+			String url = gist.getHttpTransportUrl();
+			cloneRepo(url, null);
+			try {
+
+				commit(url, "main", "firstCommit");
+				newBranch(url, "main");
+			} catch (IOException | GitAPIException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (org.kohsuke.github.HttpException ex) {
 			if (ex.getMessage().contains("name already exists on this account")) {
 				gist = github.getRepository(PasswordManager.getLoginID() + "/" + newName);
 			}
 		}
-		String url = gist.getHttpTransportUrl();
-		cloneRepo(url, null);
-		try {
 
-			commit(url, "main", "firstCommit");
-			newBranch(url, "main");
-		} catch (IOException | GitAPIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return gist;
 	}
 
