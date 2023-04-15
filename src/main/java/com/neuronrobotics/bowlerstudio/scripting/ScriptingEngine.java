@@ -1839,7 +1839,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 
 	public static String fork(String sourceURL, String newRepoName, String newRepoDescription) throws Exception {
-		GHRepository repository = makeNewRepo(newRepoName, newRepoDescription);
+		GHRepository repository;
+		GitHub github = PasswordManager.getGithub();
+		try {
+			repository = makeNewRepoNoFailOver(newRepoName, newRepoDescription);
+		} catch (org.kohsuke.github.HttpException ex) {
+			if (ex.getMessage().contains("name already exists on this account")) {
+				repository = github.getRepository(PasswordManager.getLoginID() + "/" + newRepoName);
+				System.out.println("Repo exists!");
+				return repository
+						.getHttpTransportUrl();
+			}
+			throw ex;
+		}
 		String gitRepo = repository.getHttpTransportUrl();
 
 		ArrayList<String> files = filesInGit(sourceURL);
@@ -1895,9 +1907,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 			return repo;
 		} catch (org.kohsuke.github.HttpException ex) {
-			if (ex.getMessage().contains("name already exists on this account")) {
-				
-			}
 			throw ex;
 		}
 	}
