@@ -158,8 +158,16 @@ dependencies {
 
 
 		
-	// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
-	compile group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.6.0.201912101111-r'
+// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
+implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.13.1.202206130422-r'
+// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.ssh.apache
+implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit.ssh.apache', version: '5.13.1.202206130422-r'
+
+
+// https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
+compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1'
+
+
 	
 	compile group: 'com.squareup.okhttp', name: 'okhttp-urlconnection', version: '2.0.0'
 	compile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
