@@ -1,8 +1,6 @@
 package com.neuronrobotics.bowlerstudio.physics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
@@ -13,7 +11,6 @@ import com.bulletphysics.collision.broadphase.DbvtBroadphase;
 import com.bulletphysics.collision.dispatch.CollisionDispatcher;
 import com.bulletphysics.collision.dispatch.DefaultCollisionConfiguration;
 import com.bulletphysics.collision.shapes.CollisionShape;
-import com.bulletphysics.collision.shapes.CompoundShape;
 import com.bulletphysics.collision.shapes.StaticPlaneShape;
 import com.bulletphysics.dynamics.DiscreteDynamicsWorld;
 import com.bulletphysics.dynamics.RigidBody;
@@ -21,16 +18,14 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
-import com.bulletphysics.util.ObjectArrayList;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Polygon;
-import eu.mihosoft.vrl.v3d.Vertex;
+
 import javafx.application.Platform;
 
-public class JBulletCore implements IPhysicsCore {
+public class PhysicsCore {
 
   private BroadphaseInterface broadphase = new DbvtBroadphase();
   private DefaultCollisionConfiguration collisionConfiguration = new DefaultCollisionConfiguration();
@@ -57,42 +52,15 @@ public class JBulletCore implements IPhysicsCore {
   private float linearSleepThreshhold;
   private float angularSleepThreshhold;
   private float deactivationTime;
-  private List<CSG> ground=null;
-  public static final float PhysicsGravityScalar = 6;
-  public JBulletCore() throws Exception {
+
+  public PhysicsCore() throws Exception {
     // set the gravity of our world
     getDynamicsWorld().setGravity(
         new Vector3f(0, 0, (float) -98 * MobileBasePhysicsManager.PhysicsGravityScalar));
 
     setGroundShape(new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
   }
-  
-  public JBulletCore(List<CSG> ground) throws Exception {
-	this.ground = ground;
-	// set the gravity of our world
-	getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98 * MobileBasePhysicsManager.PhysicsGravityScalar));
 
-	CollisionShape cs = new CompoundShape();
-	Transform localTransform = new Transform();
-	localTransform.setIdentity();
-	((CompoundShape)cs).addChildShape(localTransform, new StaticPlaneShape(new Vector3f(0, 0, 10), 1));
-	
-	for(int i=0;i<ground.size();i++) {
-		ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
-		List<Polygon> polygons = ground.get(i).getPolygons();
-		//if(polygons.size()>1000)
-		//	 polygons = getBoundingBox(finalCSG).getPolygons();
-		for (Polygon p : polygons) {
-			for (Vertex v : p.vertices) {
-				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
-			}
-		}
-		CollisionShape fallShape = new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
-		
-		((CompoundShape)cs).addChildShape(localTransform, fallShape);
-	}
-	setGroundShape(cs);
-  }
   public BroadphaseInterface getBroadphase() {
     return broadphase;
   }
@@ -153,7 +121,6 @@ public class JBulletCore implements IPhysicsCore {
         new Vector3f(0, 0, 0));
     groundRigidBody = new RigidBody(groundRigidBodyCI);
     dynamicsWorld.addRigidBody(groundRigidBody); // add our ground to the
-    dynamicsWorld.setGravity(new Vector3f(0, 0, (float) -98 * PhysicsGravityScalar));
   }
 
   public ArrayList<IPhysicsManager> getPhysicsObjects() {
@@ -220,8 +187,6 @@ public class JBulletCore implements IPhysicsCore {
         csg.add(c);
       }
     }
-    if(ground!=null)
-    	csg.addAll(ground);
     return csg;
   }
 
@@ -260,19 +225,18 @@ public class JBulletCore implements IPhysicsCore {
     if (!getPhysicsObjects().contains(manager)) {
       getPhysicsObjects().add(manager);
       if (!WheelCSGPhysicsManager.class.isInstance(manager)
-          //&& !VehicleCSGPhysicsManager.class.isInstance(manager)
-          ) {
+          && !VehicleCSGPhysicsManager.class.isInstance(manager)) {
         getDynamicsWorld().addRigidBody(manager.getFallRigidBody());
       }
-      if (JBulletHingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((JBulletHingeCSGPhysicsManager) manager).getConstraint() != null) {
+      if (HingeCSGPhysicsManager.class.isInstance(manager)) {
+        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
           getDynamicsWorld()
-              .addConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint(), true);
+              .addConstraint(((HingeCSGPhysicsManager) manager).getConstraint(), true);
         }
       }
-//      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
-//        getDynamicsWorld().addVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
-//      }
+      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
+        getDynamicsWorld().addVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
+      }
 
     }
   }
@@ -281,19 +245,18 @@ public class JBulletCore implements IPhysicsCore {
     if (getPhysicsObjects().contains(manager)) {
       getPhysicsObjects().remove(manager);
       if (!WheelCSGPhysicsManager.class.isInstance(manager)
-          //&& !VehicleCSGPhysicsManager.class.isInstance(manager)
-          ) {
+          && !VehicleCSGPhysicsManager.class.isInstance(manager)) {
 
         getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
       }
-      if (JBulletHingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((JBulletHingeCSGPhysicsManager) manager).getConstraint() != null) {
-          getDynamicsWorld().removeConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint());
+      if (HingeCSGPhysicsManager.class.isInstance(manager)) {
+        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
+          getDynamicsWorld().removeConstraint(((HingeCSGPhysicsManager) manager).getConstraint());
         }
       }
-//      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
-//        getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
-//      }
+      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
+        getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
+      }
 
     }
   }
@@ -303,25 +266,21 @@ public class JBulletCore implements IPhysicsCore {
     ThreadUtil.wait((int) (msTime * 2));
     for (IPhysicsManager manager : getPhysicsObjects()) {
       if (!WheelCSGPhysicsManager.class.isInstance(manager)
-          //&& !VehicleCSGPhysicsManager.class.isInstance(manager)
-          ) {
+          && !VehicleCSGPhysicsManager.class.isInstance(manager)) {
         getDynamicsWorld().removeRigidBody(manager.getFallRigidBody());
       }
-      if (JBulletHingeCSGPhysicsManager.class.isInstance(manager)) {
-        if (((JBulletHingeCSGPhysicsManager) manager).getConstraint() != null) {
-          getDynamicsWorld().removeConstraint(((JBulletHingeCSGPhysicsManager) manager).getConstraint());
+      if (HingeCSGPhysicsManager.class.isInstance(manager)) {
+        if (((HingeCSGPhysicsManager) manager).getConstraint() != null) {
+          getDynamicsWorld().removeConstraint(((HingeCSGPhysicsManager) manager).getConstraint());
         }
       }
-//      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
-//        getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
-//      }
+      if (VehicleCSGPhysicsManager.class.isInstance(manager)) {
+        getDynamicsWorld().removeVehicle(((VehicleCSGPhysicsManager) manager).getVehicle());
+      }
 
     }
     getPhysicsObjects().clear();
-    if(ground!=null)
-    	ground.clear();
-    ground=null;
-    
+
   }
 
   public int getSimulationSubSteps() {

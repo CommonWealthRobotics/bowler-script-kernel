@@ -28,7 +28,6 @@ import com.bulletphysics.linearmath.Transform;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.util.ThreadUtil;
-import com.neuronrobotics.video.OSUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Sphere;
@@ -37,7 +36,7 @@ import javafx.application.Platform;
 
 public class PhysicsEngine {
 
-  private static IPhysicsCore mainEngine;
+  private static PhysicsCore mainEngine;
 
   public static void startPhysicsThread(int ms) {
     get().startPhysicsThread(ms);
@@ -68,16 +67,11 @@ public class PhysicsEngine {
     mainEngine = null;
 
   }
-  
-  
 
-  public static IPhysicsCore get() {
+  public static PhysicsCore get() {
     if (mainEngine == null) {
       try {
-    	  if(OSUtil.isWindows())
-    		  setCore(new JBulletCore());
-    	  else
-    		  setCore(new MuJoCoCore(new ArrayList<>()));
+        mainEngine = new PhysicsCore();
       } catch (Exception e) {
         // TODO Auto-generated catch block
         e.printStackTrace();
@@ -86,10 +80,6 @@ public class PhysicsEngine {
     return mainEngine;
 
   }
-
-private static void setCore(IPhysicsCore c) throws Exception {
-	mainEngine = c;
-}
 
   public static ArrayList<CSG> getCsgFromEngine() {
 

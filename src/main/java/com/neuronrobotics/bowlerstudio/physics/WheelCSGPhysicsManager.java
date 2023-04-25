@@ -12,7 +12,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class WheelCSGPhysicsManager extends JBulletCSGPhysicsManager {
+public class WheelCSGPhysicsManager extends CSGPhysicsManager {
 
   private IClosedLoopController controller = null;
   private double target = 0;
@@ -22,7 +22,7 @@ public class WheelCSGPhysicsManager extends JBulletCSGPhysicsManager {
   private RaycastVehicle vehicle;
   private final int wheelIndex;
 
-  public WheelCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, IPhysicsCore c,
+  public WheelCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass, PhysicsCore c,
       RaycastVehicle v, int wheelIndex) {
     super(baseCSG, pose, mass, false, c);
     this.vehicle = v;
