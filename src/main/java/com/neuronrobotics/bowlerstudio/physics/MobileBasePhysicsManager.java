@@ -38,7 +38,7 @@ import javafx.scene.transform.Affine;
 
 public class MobileBasePhysicsManager {
 
-	public static final float PhysicsGravityScalar = JBulletCore.PhysicsGravityScalar;
+	public static final float PhysicsGravityScalar = 6;
 	private HashMap<LinkConfiguration, ArrayList<CSG>> simplecad;
 	private float lift = 0;
 	private ArrayList<ILinkListener> linkListeners = new ArrayList<>();
@@ -98,7 +98,7 @@ public class MobileBasePhysicsManager {
 	}
 
 	public MobileBasePhysicsManager(MobileBase base, ArrayList<CSG> baseCad,
-			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad, IPhysicsCore core) {
+			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad, PhysicsCore core) {
 		this.simplecad = simplecad;
 		double minz = 0;
 		double Maxz = 0;
@@ -125,9 +125,7 @@ public class MobileBasePhysicsManager {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				CSG csg = baseCad.get(0);
-				if(csg!=null)
-					TransformFactory.bulletToAffine(csg.getManipulator(), start);
+				TransformFactory.bulletToAffine(baseCad.get(0).getManipulator(), start);
 			}
 		});
 		CSG collisionBod;
@@ -144,14 +142,14 @@ public class MobileBasePhysicsManager {
 			collisionBod = CSG.hullAll(MobileBaseCadManager.getBaseCad(base));
 		}
 
-		JBulletCSGPhysicsManager baseManager = new JBulletCSGPhysicsManager((List<CSG>) Arrays.asList(collisionBod), start,
+		CSGPhysicsManager baseManager = new CSGPhysicsManager((List<CSG>) Arrays.asList(collisionBod), start,
 				base.getMassKg(), false, core);
 		baseManager.setBaseCSG(baseCad);
 
 		RigidBody body = baseManager.getFallRigidBody();
 		baseManager.setUpdateManager(getUpdater(body, base.getImu()));
 		body.setWorldTransform(start);
-		
+		core.getDynamicsWorld().setGravity(new Vector3f(0, 0, (float) -98 * PhysicsGravityScalar));
 		core.add(baseManager);
 		for (int j = 0; j < base.getAllDHChains().size(); j++) {
 			DHParameterKinematics dh = base.getAllDHChains().get(j);
@@ -219,7 +217,7 @@ public class MobileBasePhysicsManager {
 					for (int x = 0; x < thisLinkCad.size(); x++) {
 						Color color = thisLinkCad.get(x).getColor();
 						CSG cad = thisLinkCad.get(x);
-						CSG tmp = JBulletCSGPhysicsManager.getBoundingBox(cad);
+						CSG tmp = CSGPhysicsManager.getBoundingBox(cad);
 						// tmp=tmp.difference(tmp.toXMax())
 						outCad.add(cad.transformed(TransformFactory.nrToCSG(new TransformNR(step).inverse())));
 						outCad.get(x).setManipulator(manipulator);
@@ -233,10 +231,10 @@ public class MobileBasePhysicsManager {
 
 					// Build a hinge based on the link and mass
 					// was outCad
-					JBulletHingeCSGPhysicsManager hingePhysicsManager = new JBulletHingeCSGPhysicsManager(collisions, linkLoc, mass,
+					HingeCSGPhysicsManager hingePhysicsManager = new HingeCSGPhysicsManager(collisions, linkLoc, mass,
 							core);
 					hingePhysicsManager.setBaseCSG(outCad);
-					JBulletHingeCSGPhysicsManager.setMuscleStrength(1000000);
+					HingeCSGPhysicsManager.setMuscleStrength(1000000);
 
 					RigidBody linkSection = hingePhysicsManager.getFallRigidBody();
 

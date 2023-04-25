@@ -27,17 +27,17 @@ import eu.mihosoft.vrl.v3d.Vertex;
 import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
-public class JBulletCSGPhysicsManager implements IPhysicsManager {
+public class CSGPhysicsManager implements IPhysicsManager {
 
 	private RigidBody fallRigidBody;
 	private final Affine ballLocation = new Affine();
 	protected List<CSG> baseCSG = null;
 	private Transform updateTransform = new Transform();
 	private IPhysicsUpdate updateManager = null;
-	private IPhysicsCore core;
+	private PhysicsCore core;
 	
-	public JBulletCSGPhysicsManager(List<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
-			IPhysicsCore core) {
+	public CSGPhysicsManager(List<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
+			PhysicsCore core) {
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 
 		ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
@@ -51,7 +51,7 @@ public class JBulletCSGPhysicsManager implements IPhysicsManager {
 		setup(fallShape, pose, mass, core);
 	}
 
-	public JBulletCSGPhysicsManager(List<CSG> baseCSG, Vector3f start, double mass, IPhysicsCore core) {
+	public CSGPhysicsManager(ArrayList<CSG> baseCSG, Vector3f start, double mass, PhysicsCore core) {
 		this(baseCSG, new Transform(new Matrix4f(new Quat4f(0, 0, 0, 1), start, 1.0f)), mass, true, core);
 	}
 
@@ -87,7 +87,6 @@ public class JBulletCSGPhysicsManager implements IPhysicsManager {
 				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
 			}
 		}
-		finalCSG.setName(baseCSG.getName());
 		return finalCSG;
 	}
 
@@ -103,7 +102,7 @@ public class JBulletCSGPhysicsManager implements IPhysicsManager {
 	}
 
 
-	public void setup(CollisionShape fallShape, Transform pose, double mass, IPhysicsCore core) {
+	public void setup(CollisionShape fallShape, Transform pose, double mass, PhysicsCore core) {
 		this.setCore(core);
 
 		// setup the motion state for the ball
@@ -168,11 +167,11 @@ public class JBulletCSGPhysicsManager implements IPhysicsManager {
 		this.updateManager = updateManager;
 	}
 
-	public IPhysicsCore getCore() {
+	public PhysicsCore getCore() {
 		return core;
 	}
 
-	public void setCore(IPhysicsCore core) {
+	public void setCore(PhysicsCore core) {
 		this.core = core;
 	}
 

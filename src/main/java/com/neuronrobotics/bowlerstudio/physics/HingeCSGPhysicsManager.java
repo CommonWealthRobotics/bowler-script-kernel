@@ -12,7 +12,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 
-public class JBulletHingeCSGPhysicsManager extends JBulletCSGPhysicsManager {
+public class HingeCSGPhysicsManager extends CSGPhysicsManager {
 
   private HingeConstraint constraint = null;
   private IClosedLoopController controller = null;
@@ -21,8 +21,8 @@ public class JBulletHingeCSGPhysicsManager extends JBulletCSGPhysicsManager {
   boolean flagBroken = false;
   private double velocity;
 
-  public JBulletHingeCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass,
-      IPhysicsCore c) {
+  public HingeCSGPhysicsManager(ArrayList<CSG> baseCSG, Transform pose, double mass,
+      PhysicsCore c) {
     super(baseCSG, pose, mass, false, c);
 
   }
