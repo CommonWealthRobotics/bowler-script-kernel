@@ -31,12 +31,15 @@ public class AudioPlayer extends Thread {
 	public static final int RIGHT_ONLY = 2;
 	private AudioInputStream ais;
 	private LineListener lineListener;
+	private ISpeakingProgress speakProgress;
 	private SourceDataLine line;
 	private int outputMode;
 	
 	private Status status = Status.WAITING;
 	private boolean exitRequested = false;
 	private float gain = 1.0f;
+	private int threshhold = 500;
+	private int lowerThreshhold = 200;
 	
 	/**
 	 * The status of the player
@@ -273,17 +276,92 @@ public class AudioPlayer extends Thread {
 		setGain(getGainValue());
 		
 		int nRead = 0;
-		byte[] abData = new byte[65532];
+		byte[] abData = new byte[6553];
+		int[] intData = new int[abData.length/2];
+		int total = 0;
+		AudioStatus status = AudioStatus.release;
+
 		while ( ( nRead != -1 ) && ( !exitRequested )) {
 			try {
 				nRead = ais.read(abData, 0, abData.length);
 			} catch (IOException ex) {
 				Logger.getLogger(getClass().getName()).log(Level.WARNING, null, ex);
 			}
+			int lastIndex=0;
+			int amountToRead = nRead;
+
 			if (nRead >= 0) {
-				getLine().write(abData, 0, nRead);
+
+				if(speakProgress!=null) {
+
+					for(int i=0;i<nRead-1;i+=2) {
+						int b1=abData[i];
+						if(b1<0)
+							b1+=256;
+						int b2=abData[i+1];
+						if(b2<0)
+							b2+=256;
+						int val=(b1<<8)+(b2);
+						intData[i/2]=val;
+						boolean change=false;
+						switch(status) {
+						case attack:
+							if(val>getThreshhold()) {
+								status=AudioStatus.sustain;
+							}
+							break;
+						case decay:
+							if(val<getLowerThreshhold()) {
+								status=AudioStatus.release;
+							}
+							break;
+						case release:
+							if(val>getThreshhold()) {
+								status=AudioStatus.attack;
+								change=true;
+							}
+							break;
+						case sustain:
+							if(val<getLowerThreshhold()) {
+								status=AudioStatus.decay;
+								change=true;
+							}
+							break;
+						default:
+							break;
+						}
+						if(i==(nRead-2)) {
+							change=true;
+						}
+						if(change) {
+							amountToRead=i-lastIndex;
+							total+=amountToRead;
+							
+							double len = (ais.getFrameLength()*2);
+							if(total>=(len-2)) {
+								status=AudioStatus.decay;
+							}
+							double now = total;
+							double percent = now/len*100.0;
+							speakProgress.update(percent,status);
+							getLine().write(abData, lastIndex, amountToRead);
+							lastIndex=i;
+						}
+					}
+				}else {
+					total+=nRead;
+					double len = (ais.getFrameLength()*2);
+					double now = total;
+					double percent = now/len*100.0;
+					if(speakProgress!=null)
+						speakProgress.update(percent,status);
+					getLine().write(abData, lastIndex, amountToRead);
+				}
+
 			}
 		}
+		if(speakProgress!=null)
+			speakProgress.update(100,AudioStatus.decay);
 		if (!exitRequested) {
 			getLine().drain();
 		}
@@ -292,6 +370,48 @@ public class AudioPlayer extends Thread {
 
 	public void setLine(SourceDataLine line) {
 		this.line = line;
+	}
+
+	/**
+	 * @return the speakProgress
+	 */
+	public ISpeakingProgress getSpeakProgress() {
+		return speakProgress;
+	}
+
+	/**
+	 * @param speakProgress the speakProgress to set
+	 */
+	public void setSpeakProgress(ISpeakingProgress speakProgress) {
+		this.speakProgress = speakProgress;
+	}
+
+	/**
+	 * @return the threshhold
+	 */
+	public int getThreshhold() {
+		return threshhold;
+	}
+
+	/**
+	 * @param threshhold the threshhold to set
+	 */
+	public void setThreshhold(int threshhold) {
+		this.threshhold = threshhold;
+	}
+
+	/**
+	 * @return the lowerThreshhold
+	 */
+	public int getLowerThreshhold() {
+		return lowerThreshhold;
+	}
+
+	/**
+	 * @param lowerThreshhold the lowerThreshhold to set
+	 */
+	public void setLowerThreshhold(int lowerThreshhold) {
+		this.lowerThreshhold = lowerThreshhold;
 	}
 	
 }

@@ -380,14 +380,20 @@ public class BowlerKernel {
 		}
 
 	}
-
+	public static int speak(String msg, ISpeakingProgress progress) {
+		return speak(msg, 200, 0, 100, 1.0, 1.0,progress);
+	}
 	public static int speak(String msg) {
 
-		return speak(msg, 200, 0, 100, 1.0, 1.0);
+		return speak(msg, 200, 0, 100, 1.0, 1.0,null);
 	}
 
 	@SuppressWarnings("unused")
 	public static int speak(String msg, Number rate, Number pitch, Number range, Number shift, Number volume) {
+		return speak(msg,rate,pitch,range,shift,volume,null);
+	}
+	@SuppressWarnings("unused")
+	public static int speak(String msg, Number rate, Number pitch, Number range, Number shift, Number volume, ISpeakingProgress progress) {
 		if (rate.doubleValue() > 300)
 			rate = 300;
 		if (rate.doubleValue() < 10)
@@ -453,7 +459,7 @@ public class BowlerKernel {
 		System.out.println(msg + "-->" + effect);
 		tts.getMarytts().setAudioEffects(effect);
 
-		tts.speak(msg, 2.0f, false, true);
+		tts.speak(msg, 2.0f, false, true,progress);
 
 		return 0;
 	}
