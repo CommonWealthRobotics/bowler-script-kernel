@@ -38,8 +38,8 @@ public class AudioPlayer extends Thread {
 	private Status status = Status.WAITING;
 	private boolean exitRequested = false;
 	private float gain = 1.0f;
-	private int threshhold = 500;
-	private int lowerThreshhold = 200;
+	private static int threshhold = 600;
+	private static int lowerThreshhold = 100;
 	
 	/**
 	 * The status of the player
@@ -389,29 +389,29 @@ public class AudioPlayer extends Thread {
 	/**
 	 * @return the threshhold
 	 */
-	public int getThreshhold() {
+	public static int getThreshhold() {
 		return threshhold;
 	}
 
 	/**
 	 * @param threshhold the threshhold to set
 	 */
-	public void setThreshhold(int threshhold) {
-		this.threshhold = threshhold;
+	public static void setThreshhold(int t) {
+		threshhold = t;
 	}
 
 	/**
 	 * @return the lowerThreshhold
 	 */
-	public int getLowerThreshhold() {
+	public static int getLowerThreshhold() {
 		return lowerThreshhold;
 	}
 
 	/**
 	 * @param lowerThreshhold the lowerThreshhold to set
 	 */
-	public void setLowerThreshhold(int lowerThreshhold) {
-		this.lowerThreshhold = lowerThreshhold;
+	public static void setLowerThreshhold(int lt) {
+		lowerThreshhold = lt;
 	}
 	
 }
