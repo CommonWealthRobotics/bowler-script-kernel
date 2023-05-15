@@ -38,9 +38,11 @@ public class AudioPlayer extends Thread {
 	private Status status = Status.WAITING;
 	private boolean exitRequested = false;
 	private float gain = 1.0f;
-	private static int threshhold = 600;
-	private static int lowerThreshhold = 100;
+	private static double threshhold = 600;
+	private static double lowerThreshhold = 100;
 	private static int integralDepth=30;
+	private static double integralGain = 1.0;
+	private static double derivitiveGain =1.0;
 	
 	
 	/**
@@ -414,28 +416,28 @@ public class AudioPlayer extends Thread {
 	/**
 	 * @return the threshhold
 	 */
-	public static int getThreshhold() {
+	public static double getThreshhold() {
 		return threshhold;
 	}
 
 	/**
 	 * @param threshhold the threshhold to set
 	 */
-	public static void setThreshhold(int t) {
+	public static void setThreshhold(double t) {
 		threshhold = t;
 	}
 
 	/**
 	 * @return the lowerThreshhold
 	 */
-	public static int getLowerThreshhold() {
+	public static double getLowerThreshhold() {
 		return lowerThreshhold;
 	}
 
 	/**
 	 * @param lowerThreshhold the lowerThreshhold to set
 	 */
-	public static void setLowerThreshhold(int lt) {
+	public static void setLowerThreshhold(double lt) {
 		lowerThreshhold = lt;
 	}
 
@@ -459,6 +461,34 @@ public class AudioPlayer extends Thread {
 	public static double[] getIntegralBuffer() {
 		double[] ds = new double[getIntegralDepth()];
 		return ds;
+	}
+
+	/**
+	 * @return the integralGain
+	 */
+	public static double getIntegralGain() {
+		return integralGain;
+	}
+
+	/**
+	 * @param integralGain the integralGain to set
+	 */
+	public static void setIntegralGain(double integralGain) {
+		AudioPlayer.integralGain = integralGain;
+	}
+
+	/**
+	 * @return the derivitiveGain
+	 */
+	public static double getDerivitiveGain() {
+		return derivitiveGain;
+	}
+
+	/**
+	 * @param derivitiveGain the derivitiveGain to set
+	 */
+	public static void setDerivitiveGain(double derivitiveGain) {
+		AudioPlayer.derivitiveGain = derivitiveGain;
 	}
 
 
