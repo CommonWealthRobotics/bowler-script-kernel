@@ -40,6 +40,8 @@ public class AudioPlayer extends Thread {
 	private float gain = 1.0f;
 	private static int threshhold = 600;
 	private static int lowerThreshhold = 100;
+	private static int integralDepth=30;
+	
 	
 	/**
 	 * The status of the player
@@ -277,10 +279,12 @@ public class AudioPlayer extends Thread {
 		
 		int nRead = 0;
 		byte[] abData = new byte[6553];
-		int[] intData = new int[abData.length/2];
 		int total = 0;
 		AudioStatus status = AudioStatus.release;
-
+		int integralIndex=0;
+		double integralTotal=0;
+		double[] buffer =null;
+		Double previousValue=null;
 		while ( ( nRead != -1 ) && ( !exitRequested )) {
 			try {
 				nRead = ais.read(abData, 0, abData.length);
@@ -295,14 +299,35 @@ public class AudioPlayer extends Thread {
 				if(speakProgress!=null) {
 
 					for(int i=0;i<nRead-1;i+=2) {
-						int b1=abData[i];
-						if(b1<0)
-							b1+=256;
-						int b2=abData[i+1];
-						if(b2<0)
-							b2+=256;
-						int amplitude16Bit=(b1<<8)+(b2);
-						intData[i/2]=amplitude16Bit;
+						int upperByteOfAmplitude=abData[i];
+						if(upperByteOfAmplitude<0)
+							upperByteOfAmplitude+=256;
+						int lowerByteOfAmplitude=abData[i+1];
+						if(lowerByteOfAmplitude<0)
+							lowerByteOfAmplitude+=256;
+						double amplitude16Bit=(upperByteOfAmplitude<<8)+(lowerByteOfAmplitude);
+						if(previousValue==null) {
+							// initialize the previous value
+							previousValue=amplitude16Bit;
+						}
+						if(buffer==null) {
+							// initialize the integral term
+							integralTotal=amplitude16Bit*getIntegralDepth();
+							buffer=getIntegralBuffer();
+							for(int j=0;j<getIntegralDepth();j++) {
+								buffer[j]=amplitude16Bit;
+							}
+						}
+						// update the rolling total
+						integralTotal=integralTotal+amplitude16Bit-buffer[integralIndex];
+						// add current value to the buffer, overwriting previous buffer value
+						buffer[integralIndex]=amplitude16Bit;
+						integralIndex++;
+						// wrap the buffer circularly
+						if(integralIndex==getIntegralDepth())
+							integralIndex=0;
+						double currentRollingAverage=  integralTotal/getIntegralDepth();
+						double currentDerivitiveTerm= amplitude16Bit-previousValue;
 						boolean change=false;
 						switch(status) {
 						case attack:
@@ -413,5 +438,29 @@ public class AudioPlayer extends Thread {
 	public static void setLowerThreshhold(int lt) {
 		lowerThreshhold = lt;
 	}
+
+	/**
+	 * @return the integralDepth
+	 */
+	public static int getIntegralDepth() {
+		return integralDepth;
+	}
+
+	/**
+	 * @param integralDepth the integralDepth to set
+	 */
+	public static void setIntegralDepth(int integralDepth) {
+		AudioPlayer.integralDepth = integralDepth;
+	}
+
+	/**
+	 * @return the integralBuffer
+	 */
+	public static double[] getIntegralBuffer() {
+		double[] ds = new double[getIntegralDepth()];
+		return ds;
+	}
+
+
 	
 }
