@@ -301,28 +301,28 @@ public class AudioPlayer extends Thread {
 						int b2=abData[i+1];
 						if(b2<0)
 							b2+=256;
-						int val=(b1<<8)+(b2);
-						intData[i/2]=val;
+						int amplitude16Bit=(b1<<8)+(b2);
+						intData[i/2]=amplitude16Bit;
 						boolean change=false;
 						switch(status) {
 						case attack:
-							if(val>getThreshhold()) {
+							if(amplitude16Bit>getThreshhold()) {
 								status=AudioStatus.sustain;
 							}
 							break;
 						case decay:
-							if(val<getLowerThreshhold()) {
+							if(amplitude16Bit<getLowerThreshhold()) {
 								status=AudioStatus.release;
 							}
 							break;
 						case release:
-							if(val>getThreshhold()) {
+							if(amplitude16Bit>getThreshhold()) {
 								status=AudioStatus.attack;
 								change=true;
 							}
 							break;
 						case sustain:
-							if(val<getLowerThreshhold()) {
+							if(amplitude16Bit<getLowerThreshhold()) {
 								status=AudioStatus.decay;
 								change=true;
 							}
