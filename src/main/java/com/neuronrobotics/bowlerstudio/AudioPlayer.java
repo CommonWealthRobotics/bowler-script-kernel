@@ -308,28 +308,30 @@ public class AudioPlayer extends Thread {
 						if(lowerByteOfAmplitude<0)
 							lowerByteOfAmplitude+=256;
 						double amplitude16Bit=(upperByteOfAmplitude<<8)+(lowerByteOfAmplitude);
+						double amplitudeUnitVector = amplitude16Bit/65535.0;// scale the amplitude to a 0-1.0 scale
 						if(previousValue==null) {
 							// initialize the previous value
-							previousValue=amplitude16Bit;
+							previousValue=amplitudeUnitVector;
 						}
 						if(buffer==null) {
 							// initialize the integral term
-							integralTotal=amplitude16Bit*getIntegralDepth();
+							integralTotal=amplitudeUnitVector*getIntegralDepth();
 							buffer=getIntegralBuffer();
 							for(int j=0;j<getIntegralDepth();j++) {
-								buffer[j]=amplitude16Bit;
+								buffer[j]=amplitudeUnitVector;
 							}
 						}
 						// update the rolling total
-						integralTotal=integralTotal+amplitude16Bit-buffer[integralIndex];
+						integralTotal=integralTotal+amplitudeUnitVector-buffer[integralIndex];
 						// add current value to the buffer, overwriting previous buffer value
-						buffer[integralIndex]=amplitude16Bit;
+						buffer[integralIndex]=amplitudeUnitVector;
 						integralIndex++;
 						// wrap the buffer circularly
 						if(integralIndex==getIntegralDepth())
 							integralIndex=0;
+						// @Finn here are the integral and derivitives of amplitude to work with
 						double currentRollingAverage=  integralTotal/getIntegralDepth()* getIntegralGain();
-						double currentDerivitiveTerm= (amplitude16Bit-previousValue)*getDerivitiveGain();
+						double currentDerivitiveTerm= (amplitudeUnitVector-previousValue)*getDerivitiveGain();
 						boolean change=false;
 						switch(status) {
 						case attack:
