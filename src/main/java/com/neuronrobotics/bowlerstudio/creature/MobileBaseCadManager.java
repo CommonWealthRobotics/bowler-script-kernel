@@ -236,7 +236,7 @@ public class MobileBaseCadManager implements Runnable {
 					while (base.isAvailable()) {
 						try {
 							do {
-								Thread.sleep(1);
+								Thread.sleep(5);
 							} while (rendering || changed == false);
 						} catch (InterruptedException e) {
 							getUi().highlightException(null, e);
@@ -286,7 +286,7 @@ public class MobileBaseCadManager implements Runnable {
 									rendering = false;
 									fireIRenderSynchronizationEvent();
 								});
-								Thread.sleep(16);
+								Thread.sleep(32);
 
 							} else {
 								rendering = false;
@@ -307,7 +307,7 @@ public class MobileBaseCadManager implements Runnable {
 										tr.printStackTrace();
 									}
 								});
-								Thread.sleep(16);
+								Thread.sleep(32);
 							}
 						} catch (Throwable t) {
 							// rendering not availible
@@ -367,7 +367,7 @@ public class MobileBaseCadManager implements Runnable {
 
 	private void updateLimb(DHParameterKinematics k, TransformNR baseLoc, HashMap<Affine, TransformNR> map2,
 			HashMap<DHParameterKinematics, double[]> jointPoses) {
-		updateBase(k, baseLoc, map2);
+		//updateBase(k, baseLoc, map2);
 		TransformNR previous = k.getFiducialToGlobalTransform();
 		k.setGlobalToFiducialTransform(baseLoc, false);
 		ArrayList<TransformNR> ll = k.getChain().getChain(jointPoses.get(k));
@@ -401,26 +401,33 @@ public class MobileBaseCadManager implements Runnable {
 		k.setGlobalToFiducialTransform(previous, false);
 	}
 
-	private TransformNR updateBase(AbstractKinematicsNR kin, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
-		if (kin == null)
+	private TransformNR updateBase(MobileBase base, TransformNR baseLoc, HashMap<Affine, TransformNR> map2) {
+		if (base == null)
 			return null;
-		TransformNR previous = kin.getFiducialToGlobalTransform();
+		TransformNR previous = base.getFiducialToGlobalTransform();
 		
 		try {
-			kin.setGlobalToFiducialTransform(baseLoc, false);
+			base.setGlobalToFiducialTransform(baseLoc, false);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("MB " + base.getScriptingName() + ", " + e.getMessage());
 		}
 
-		TransformNR forwardOffset = kin.forwardOffset(new TransformNR());
-		if (kin.getRootListener() == null) {
-			kin.setRootListener(new Affine());
+		TransformNR forwardOffset = base.forwardOffset(new TransformNR());
+		if (base.getRootListener() == null) {
+			base.setRootListener(new Affine());
 		}
-		if (forwardOffset != null && kin.getRootListener() != null)
-			map2.put((Affine) kin.getRootListener(), forwardOffset);
-
-		kin.setGlobalToFiducialTransform(previous, false);
+		if (forwardOffset != null )
+			map2.put((Affine) base.getRootListener(), forwardOffset);
+		for (DHParameterKinematics k : base.getAllDHChains()) {
+			if (k.getRootListener() == null) {
+				k.setRootListener(new Affine());
+			}
+			TransformNR fo = k.forwardOffset(new TransformNR());
+			if (fo != null )
+				map2.put((Affine) k.getRootListener(), fo);
+		}
+		base.setGlobalToFiducialTransform(previous, false);
 		return forwardOffset;
 	}
 
