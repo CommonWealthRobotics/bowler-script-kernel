@@ -328,8 +328,8 @@ public class AudioPlayer extends Thread {
 						// wrap the buffer circularly
 						if(integralIndex==getIntegralDepth())
 							integralIndex=0;
-						double currentRollingAverage=  integralTotal/getIntegralDepth();
-						double currentDerivitiveTerm= amplitude16Bit-previousValue;
+						double currentRollingAverage=  integralTotal/getIntegralDepth()* getIntegralGain();
+						double currentDerivitiveTerm= (amplitude16Bit-previousValue)*getDerivitiveGain();
 						boolean change=false;
 						switch(status) {
 						case attack:
