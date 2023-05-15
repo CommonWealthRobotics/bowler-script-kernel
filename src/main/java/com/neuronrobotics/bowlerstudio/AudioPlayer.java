@@ -38,12 +38,48 @@ public class AudioPlayer extends Thread {
 	private Status status = Status.WAITING;
 	private boolean exitRequested = false;
 	private float gain = 1.0f;
-	private static double threshhold = 600;
-	private static double lowerThreshhold = 100;
+	private static double threshhold = 600/65535.0;
+	private static double lowerThreshhold = 100/65535.0;;
 	private static int integralDepth=30;
 	private static double integralGain = 1.0;
 	private static double derivitiveGain =1.0;
-	
+	private static IAudioProcessingLambda lambda = new IAudioProcessingLambda() {
+		
+		@Override
+		public AudioStatus update(AudioStatus currentStatus, double amplitudeUnitVector, double currentRollingAverage,
+				double currentDerivitiveTerm) {
+			switch(currentStatus) {
+			case attack:
+				if(amplitudeUnitVector>getThreshhold()) {
+					currentStatus=AudioStatus.sustain;
+				}
+				break;
+			case decay:
+				if(amplitudeUnitVector<getLowerThreshhold()) {
+					currentStatus=AudioStatus.release;
+				}
+				break;
+			case release:
+				if(amplitudeUnitVector>getThreshhold()) {
+					currentStatus=AudioStatus.attack;
+				}
+				break;
+			case sustain:
+				if(amplitudeUnitVector<getLowerThreshhold()) {
+					currentStatus=AudioStatus.decay;
+				}
+				break;
+			default:
+				break;
+			}
+			return currentStatus;
+		}
+		
+		@Override
+		public void startProcessing() {
+
+		}
+	};
 	
 	/**
 	 * The status of the player
@@ -332,33 +368,9 @@ public class AudioPlayer extends Thread {
 						// @Finn here are the integral and derivitives of amplitude to work with
 						double currentRollingAverage=  integralTotal/getIntegralDepth()* getIntegralGain();
 						double currentDerivitiveTerm= (amplitudeUnitVector-previousValue)*getDerivitiveGain();
-						boolean change=false;
-						switch(status) {
-						case attack:
-							if(amplitude16Bit>getThreshhold()) {
-								status=AudioStatus.sustain;
-							}
-							break;
-						case decay:
-							if(amplitude16Bit<getLowerThreshhold()) {
-								status=AudioStatus.release;
-							}
-							break;
-						case release:
-							if(amplitude16Bit>getThreshhold()) {
-								status=AudioStatus.attack;
-								change=true;
-							}
-							break;
-						case sustain:
-							if(amplitude16Bit<getLowerThreshhold()) {
-								status=AudioStatus.decay;
-								change=true;
-							}
-							break;
-						default:
-							break;
-						}
+						AudioStatus newStat = lambda.update(status, amplitudeUnitVector, currentRollingAverage, currentDerivitiveTerm);
+						boolean change=newStat!=status;
+						status=newStat;
 						if(i==(nRead-2)) {
 							change=true;
 						}
@@ -426,6 +438,7 @@ public class AudioPlayer extends Thread {
 	 * @param threshhold the threshhold to set
 	 */
 	public static void setThreshhold(double t) {
+
 		threshhold = t;
 	}
 
@@ -440,6 +453,7 @@ public class AudioPlayer extends Thread {
 	 * @param lowerThreshhold the lowerThreshhold to set
 	 */
 	public static void setLowerThreshhold(double lt) {
+
 		lowerThreshhold = lt;
 	}
 
@@ -460,7 +474,7 @@ public class AudioPlayer extends Thread {
 	/**
 	 * @return the integralBuffer
 	 */
-	public static double[] getIntegralBuffer() {
+	private double[] getIntegralBuffer() {
 		double[] ds = new double[getIntegralDepth()];
 		return ds;
 	}
@@ -491,6 +505,20 @@ public class AudioPlayer extends Thread {
 	 */
 	public static void setDerivitiveGain(double derivitiveGain) {
 		AudioPlayer.derivitiveGain = derivitiveGain;
+	}
+
+	/**
+	 * @return the lambda
+	 */
+	public static IAudioProcessingLambda getLambda() {
+		return lambda;
+	}
+
+	/**
+	 * @param lambda the lambda to set
+	 */
+	public static void setLambda(IAudioProcessingLambda lambda) {
+		AudioPlayer.lambda = lambda;
 	}
 
 
