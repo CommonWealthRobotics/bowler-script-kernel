@@ -323,7 +323,12 @@ public class AudioPlayer extends Thread {
 		double integralTotal=0;
 		double[] buffer =null;
 		Double previousValue=null;
-		while ( ( nRead != -1 ) && ( !exitRequested )) {
+		while ( ( nRead != -1 ) && ( !exitRequested ) && (!Thread.interrupted())) {
+			try {
+				Thread.sleep(0,1);
+			} catch (InterruptedException e) {
+				break;
+			}
 			try {
 				nRead = ais.read(abData, 0, abData.length);
 			} catch (IOException ex) {
@@ -331,12 +336,16 @@ public class AudioPlayer extends Thread {
 			}
 			int lastIndex=0;
 			int amountToRead = nRead;
-
+			
 			if (nRead >= 0) {
 
 				if(speakProgress!=null) {
 
 					for(int i=0;i<nRead-1;i+=2) {
+						if(Thread.interrupted()) {
+							exitRequested=true;
+							break;
+						}
 						int upperByteOfAmplitude=abData[i];
 						if(upperByteOfAmplitude<0)
 							upperByteOfAmplitude+=256;
