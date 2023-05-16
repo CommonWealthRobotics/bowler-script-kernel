@@ -31,12 +31,55 @@ public class AudioPlayer extends Thread {
 	public static final int RIGHT_ONLY = 2;
 	private AudioInputStream ais;
 	private LineListener lineListener;
+	private ISpeakingProgress speakProgress;
 	private SourceDataLine line;
 	private int outputMode;
 	
 	private Status status = Status.WAITING;
 	private boolean exitRequested = false;
 	private float gain = 1.0f;
+	private static double threshhold = 600/65535.0;
+	private static double lowerThreshhold = 100/65535.0;;
+	private static int integralDepth=30;
+	private static double integralGain = 1.0;
+	private static double derivitiveGain =1.0;
+	private static IAudioProcessingLambda lambda = new IAudioProcessingLambda() {
+		
+		@Override
+		public AudioStatus update(AudioStatus currentStatus, double amplitudeUnitVector, double currentRollingAverage,
+				double currentDerivitiveTerm) {
+			switch(currentStatus) {
+			case attack:
+				if(amplitudeUnitVector>getThreshhold()) {
+					currentStatus=AudioStatus.sustain;
+				}
+				break;
+			case decay:
+				if(amplitudeUnitVector<getLowerThreshhold()) {
+					currentStatus=AudioStatus.release;
+				}
+				break;
+			case release:
+				if(amplitudeUnitVector>getThreshhold()) {
+					currentStatus=AudioStatus.attack;
+				}
+				break;
+			case sustain:
+				if(amplitudeUnitVector<getLowerThreshhold()) {
+					currentStatus=AudioStatus.decay;
+				}
+				break;
+			default:
+				break;
+			}
+			return currentStatus;
+		}
+		
+		@Override
+		public void startProcessing() {
+
+		}
+	};
 	
 	/**
 	 * The status of the player
@@ -273,17 +316,102 @@ public class AudioPlayer extends Thread {
 		setGain(getGainValue());
 		
 		int nRead = 0;
-		byte[] abData = new byte[65532];
-		while ( ( nRead != -1 ) && ( !exitRequested )) {
+		byte[] abData = new byte[6553];
+		int total = 0;
+		AudioStatus status = AudioStatus.release;
+		int integralIndex=0;
+		double integralTotal=0;
+		double[] buffer =null;
+		Double previousValue=null;
+		while ( ( nRead != -1 ) && ( !exitRequested ) && (!Thread.interrupted())) {
+			try {
+				Thread.sleep(0,1);
+			} catch (InterruptedException e) {
+				break;
+			}
 			try {
 				nRead = ais.read(abData, 0, abData.length);
 			} catch (IOException ex) {
 				Logger.getLogger(getClass().getName()).log(Level.WARNING, null, ex);
 			}
+			int lastIndex=0;
+			int amountToRead = nRead;
+			
 			if (nRead >= 0) {
-				getLine().write(abData, 0, nRead);
+
+				if(speakProgress!=null) {
+
+					for(int i=0;i<nRead-1;i+=2) {
+						if(Thread.interrupted()) {
+							exitRequested=true;
+							break;
+						}
+						int upperByteOfAmplitude=abData[i];
+						if(upperByteOfAmplitude<0)
+							upperByteOfAmplitude+=256;
+						int lowerByteOfAmplitude=abData[i+1];
+						if(lowerByteOfAmplitude<0)
+							lowerByteOfAmplitude+=256;
+						double amplitude16Bit=(upperByteOfAmplitude<<8)+(lowerByteOfAmplitude);
+						double amplitudeUnitVector = amplitude16Bit/65535.0;// scale the amplitude to a 0-1.0 scale
+						if(previousValue==null) {
+							// initialize the previous value
+							previousValue=amplitudeUnitVector;
+						}
+						if(buffer==null) {
+							// initialize the integral term
+							integralTotal=amplitudeUnitVector*getIntegralDepth();
+							buffer=getIntegralBuffer();
+							for(int j=0;j<getIntegralDepth();j++) {
+								buffer[j]=amplitudeUnitVector;
+							}
+						}
+						// update the rolling total
+						integralTotal=integralTotal+amplitudeUnitVector-buffer[integralIndex];
+						// add current value to the buffer, overwriting previous buffer value
+						buffer[integralIndex]=amplitudeUnitVector;
+						integralIndex++;
+						// wrap the buffer circularly
+						if(integralIndex==getIntegralDepth())
+							integralIndex=0;
+						// @Finn here are the integral and derivitives of amplitude to work with
+						double currentRollingAverage=  integralTotal/getIntegralDepth()* getIntegralGain();
+						double currentDerivitiveTerm= (amplitudeUnitVector-previousValue)*getDerivitiveGain();
+						AudioStatus newStat = lambda.update(status, amplitudeUnitVector, currentRollingAverage, currentDerivitiveTerm);
+						boolean change=newStat!=status;
+						status=newStat;
+						if(i==(nRead-2)) {
+							change=true;
+						}
+						if(change) {
+							amountToRead=i-lastIndex;
+							total+=amountToRead;
+							
+							double len = (ais.getFrameLength()*2);
+							if(total>=(len-2)) {
+								status=AudioStatus.decay;
+							}
+							double now = total;
+							double percent = now/len*100.0;
+							speakProgress.update(percent,status);
+							getLine().write(abData, lastIndex, amountToRead);
+							lastIndex=i;
+						}
+					}
+				}else {
+					total+=nRead;
+					double len = (ais.getFrameLength()*2);
+					double now = total;
+					double percent = now/len*100.0;
+					if(speakProgress!=null)
+						speakProgress.update(percent,status);
+					getLine().write(abData, lastIndex, amountToRead);
+				}
+
 			}
 		}
+		if(speakProgress!=null)
+			speakProgress.update(100,AudioStatus.decay);
 		if (!exitRequested) {
 			getLine().drain();
 		}
@@ -293,5 +421,115 @@ public class AudioPlayer extends Thread {
 	public void setLine(SourceDataLine line) {
 		this.line = line;
 	}
+
+	/**
+	 * @return the speakProgress
+	 */
+	public ISpeakingProgress getSpeakProgress() {
+		return speakProgress;
+	}
+
+	/**
+	 * @param speakProgress the speakProgress to set
+	 */
+	public void setSpeakProgress(ISpeakingProgress speakProgress) {
+		this.speakProgress = speakProgress;
+	}
+
+	/**
+	 * @return the threshhold
+	 */
+	public static double getThreshhold() {
+		return threshhold;
+	}
+
+	/**
+	 * @param threshhold the threshhold to set
+	 */
+	public static void setThreshhold(double t) {
+
+		threshhold = t;
+	}
+
+	/**
+	 * @return the lowerThreshhold
+	 */
+	public static double getLowerThreshhold() {
+		return lowerThreshhold;
+	}
+
+	/**
+	 * @param lowerThreshhold the lowerThreshhold to set
+	 */
+	public static void setLowerThreshhold(double lt) {
+
+		lowerThreshhold = lt;
+	}
+
+	/**
+	 * @return the integralDepth
+	 */
+	public static int getIntegralDepth() {
+		return integralDepth;
+	}
+
+	/**
+	 * @param integralDepth the integralDepth to set
+	 */
+	public static void setIntegralDepth(int integralDepth) {
+		AudioPlayer.integralDepth = integralDepth;
+	}
+
+	/**
+	 * @return the integralBuffer
+	 */
+	private double[] getIntegralBuffer() {
+		double[] ds = new double[getIntegralDepth()];
+		return ds;
+	}
+
+	/**
+	 * @return the integralGain
+	 */
+	public static double getIntegralGain() {
+		return integralGain;
+	}
+
+	/**
+	 * @param integralGain the integralGain to set
+	 */
+	public static void setIntegralGain(double integralGain) {
+		AudioPlayer.integralGain = integralGain;
+	}
+
+	/**
+	 * @return the derivitiveGain
+	 */
+	public static double getDerivitiveGain() {
+		return derivitiveGain;
+	}
+
+	/**
+	 * @param derivitiveGain the derivitiveGain to set
+	 */
+	public static void setDerivitiveGain(double derivitiveGain) {
+		AudioPlayer.derivitiveGain = derivitiveGain;
+	}
+
+	/**
+	 * @return the lambda
+	 */
+	public static IAudioProcessingLambda getLambda() {
+		return lambda;
+	}
+
+	/**
+	 * @param lambda the lambda to set
+	 */
+	public static void setLambda(IAudioProcessingLambda lambda) {
+		AudioPlayer.lambda = lambda;
+	}
+
+
 	
 }
