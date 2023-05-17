@@ -385,7 +385,7 @@ public class BowlerKernel {
 	}
 	public static int speak(String msg) {
 
-		return speak(msg, 200, 0, 100, 1.0, 1.0,null);
+		return speak(msg, 200, 0, 301, 1.0, 1.0,null);
 	}
 
 	@SuppressWarnings("unused")
@@ -402,16 +402,24 @@ public class BowlerKernel {
 		// cd ..
 		tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
 		// Setting the Current Voice
-		// tts.setVoice(tts.getAvailableVoices().toArray()[0].toString());
-
-		if (range.doubleValue() > 200)
-			tts.setVoice("cmu-slt-hsmm");
+		// voice =(tts.getAvailableVoices().toArray()[0].toString());
+		String voice ="dfki-poppy-hsmm";
+		if (range.doubleValue() > 600)
+			voice =("dfki-prudence-hsmm");
+		else if (range.doubleValue() > 500)
+			voice =("cmu-rms-hsmm");
+		else if (range.doubleValue() > 400)
+			voice =("cmu-bdl-hsmm");
+		else if (range.doubleValue() > 300)
+			voice =("dfki-obadiah-hsmm");
+		else if (range.doubleValue() > 200)
+			voice =("cmu-slt-hsmm");
 		else if (range.doubleValue() > 100)
-			tts.setVoice("dfki-spike-hsmm");
-		else if (range.doubleValue() > 50)
-			tts.setVoice("dfki-prudence-hsmm");
-		else
-			tts.setVoice("dfki-poppy-hsmm");
+			voice =("dfki-spike-hsmm");
+		
+		tts.setVoice(voice);
+		
+		System.out.println("Using voice "+voice);
 
 		RobotiserEffect vocalTractLSE = new RobotiserEffect(); // russian drunk effect
 		vocalTractLSE.setParams("amount:" + pitch.intValue());

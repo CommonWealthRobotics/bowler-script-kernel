@@ -324,11 +324,11 @@ public class AudioPlayer extends Thread {
 		double[] buffer =null;
 		Double previousValue=null;
 		while ( ( nRead != -1 ) && ( !exitRequested ) && (!Thread.interrupted())) {
-			try {
-				Thread.sleep(0,1);
-			} catch (InterruptedException e) {
-				break;
-			}
+//			try {
+//				Thread.sleep(0,1);
+//			} catch (InterruptedException e) {
+//				break;
+//			}
 			try {
 				nRead = ais.read(abData, 0, abData.length);
 			} catch (IOException ex) {

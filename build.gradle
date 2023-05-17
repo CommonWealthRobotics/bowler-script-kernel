@@ -286,11 +286,31 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
+//	implementation('de.dfki.mary:voice-cmu-awb-time:5.2')
+//	{
+//		exclude group: 'commons-io', module: 'commons-io'
+//	}
 	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
 	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
+	{
+		exclude group: 'commons-io', module: 'commons-io'
+	}
+	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
