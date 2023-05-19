@@ -318,7 +318,10 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-
+	implementation "ai.djl:api:0.4.0"
+	implementation "ai.djl:repository:0.4.0"
+	runtimeOnly "ai.djl.pytorch:pytorch-model-zoo:0.4.0"
+	runtimeOnly "ai.djl.pytorch:pytorch-native-auto:1.4.0"
 	
 	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'2.2.0-pre.5'
 
