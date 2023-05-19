@@ -24,7 +24,7 @@ public class PyTorchYoloTest {
 	@Test
 	public void test() throws ModelNotFoundException, MalformedModelException, IOException, TranslateException {
 
-		String url = "https://github.com/awslabs/djl/raw/master/examples/src/test/resources/dog_bike_car.jpg";
+		String url = "https://github.com/CommonWealthRobotics/CommonWealthRobotics.github.io/blob/source/content/img/AndrewHarrington/kickstarterVideoImage-clean.jpeg?raw=true";
 		BufferedImage img = BufferedImageUtils.fromUrl(url);
 
 		Criteria<BufferedImage, DetectedObjects> criteria = Criteria.builder()
