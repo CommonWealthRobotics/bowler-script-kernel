@@ -318,43 +318,12 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	implementation "ai.djl:api:0.4.0"
-	implementation "ai.djl:repository:0.4.0"
-	runtimeOnly "ai.djl.pytorch:pytorch-model-zoo:0.4.0"
-	runtimeOnly "ai.djl.pytorch:pytorch-native-auto:1.4.0"
+
+	implementation 'ai.djl:api:'
+	implementation 'ai.djl.pytorch:pytorch-engine:0.22.1'
+	implementation 'ai.djl.pytorch:pytorch-jni:2.0.0-0.22.1'
+	implementation("ai.djl.onnxruntime:onnxruntime-engine:0.22.1") 
 	
-	implementation 'ai.djl:api:0.18.0'
-	implementation 'ai.djl.tensorflow:tensorflow-engine:0.18.0'
-	implementation 'ai.djl.tensorflow:tensorflow-native-auto:2.6.0'
-	implementation 'ai.djl.tensorflow:tensorflow-model-zoo:0.18.0'
-	implementation 'ai.djl.tensorflow:tensorflow-yolo:0.18.0'
-	implementation 'ai.djl.tensorflow:tensorflow-tensor:2.6.0'
-
-	// Other dependencies required by DJL
-	implementation 'ai.djl.tensorflow:tensorflow-engine:0.18.0'
-	implementation 'ai.djl.tensorflow:tensorflow-native-auto:2.6.0'
-	implementation 'ai.djl.tensorflow:tensorflow-model-zoo:0.18.0'
-	implementation 'ai.djl.tensorflow:tensorflow-yolo:0.18.0'
-	implementation 'ai.djl.tensorflow:tensorflow-tensor:2.6.0'
-
-	// Additional dependencies for image processing
-	implementation 'org.slf4j:slf4j-api:1.7.32'
-	implementation 'ai.djl.modality:cv:0.18.0'
-	implementation 'ai.djl.modality:cv-image:0.18.0'
-	implementation 'ai.djl.modality:cv-buffered-image:0.18.0'
-	implementation 'ai.djl.modality:cv-zoo:0.18.0'
-
-	// Other dependencies required by DJL
-	implementation 'org.slf4j:slf4j-api:1.7.32'
-	implementation 'ai.djl.modality:cv:0.18.0'
-	implementation 'ai.djl.modality:cv-image:0.18.0'
-	implementation 'ai.djl.modality:cv-buffered-image:0.18.0'
-	implementation 'ai.djl.modality:cv-zoo:0.18.0'
-
-	// Dependencies for DJL scripting
-	implementation 'org.bytedeco:javacpp:1.5.6'
-	implementation 'org.bytedeco:javacpp-presets:1.5.6'
-	implementation 'org.bytedeco.opencv:opencv:4.5.3-1.5.6'
 	
 	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'2.2.0-pre.5'
 
