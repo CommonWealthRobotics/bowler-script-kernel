@@ -82,6 +82,7 @@ public class TextToSpeech {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Interrupted ", ex);
 			System.out.println("Speaking clean exit");
 			tts.cancel();
+			tts.interrupt();
 		}
 	}
 	

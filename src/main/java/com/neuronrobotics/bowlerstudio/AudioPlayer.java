@@ -24,7 +24,7 @@ import marytts.util.data.audio.StereoAudioInputStream;
  *
  */
 public class AudioPlayer extends Thread {
-	
+
 	public static final int MONO = 0;
 	public static final int STEREO = 3;
 	public static final int LEFT_ONLY = 1;
@@ -34,39 +34,39 @@ public class AudioPlayer extends Thread {
 	private ISpeakingProgress speakProgress;
 	private SourceDataLine line;
 	private int outputMode;
-	
+
 	private Status status = Status.WAITING;
 	private boolean exitRequested = false;
 	private float gain = 1.0f;
-	private static double threshhold = 600/65535.0;
-	private static double lowerThreshhold = 100/65535.0;;
-	private static int integralDepth=30;
+	private static double threshhold = 600 / 65535.0;
+	private static double lowerThreshhold = 100 / 65535.0;;
+	private static int integralDepth = 30;
 	private static double integralGain = 1.0;
-	private static double derivitiveGain =1.0;
+	private static double derivitiveGain = 1.0;
 	private static IAudioProcessingLambda lambda = new IAudioProcessingLambda() {
-		
+
 		@Override
 		public AudioStatus update(AudioStatus currentStatus, double amplitudeUnitVector, double currentRollingAverage,
 				double currentDerivitiveTerm) {
-			switch(currentStatus) {
+			switch (currentStatus) {
 			case attack:
-				if(amplitudeUnitVector>getThreshhold()) {
-					currentStatus=AudioStatus.sustain;
+				if (amplitudeUnitVector > getThreshhold()) {
+					currentStatus = AudioStatus.sustain;
 				}
 				break;
 			case decay:
-				if(amplitudeUnitVector<getLowerThreshhold()) {
-					currentStatus=AudioStatus.release;
+				if (amplitudeUnitVector < getLowerThreshhold()) {
+					currentStatus = AudioStatus.release;
 				}
 				break;
 			case release:
-				if(amplitudeUnitVector>getThreshhold()) {
-					currentStatus=AudioStatus.attack;
+				if (amplitudeUnitVector > getThreshhold()) {
+					currentStatus = AudioStatus.attack;
 				}
 				break;
 			case sustain:
-				if(amplitudeUnitVector<getLowerThreshhold()) {
-					currentStatus=AudioStatus.decay;
+				if (amplitudeUnitVector < getLowerThreshhold()) {
+					currentStatus = AudioStatus.decay;
 				}
 				break;
 			default:
@@ -74,13 +74,13 @@ public class AudioPlayer extends Thread {
 			}
 			return currentStatus;
 		}
-		
+
 		@Override
 		public void startProcessing() {
 
 		}
 	};
-	
+
 	/**
 	 * The status of the player
 	 * 
@@ -97,14 +97,15 @@ public class AudioPlayer extends Thread {
 		*/
 		PLAYING;
 	}
-	
+
 	/**
-	 * AudioPlayer which can be used if audio stream is to be set separately, using setAudio().
+	 * AudioPlayer which can be used if audio stream is to be set separately, using
+	 * setAudio().
 	 *
 	 */
 	public AudioPlayer() {
 	}
-	
+
 	/**
 	 * @param audioFile
 	 * @throws IOException
@@ -113,14 +114,14 @@ public class AudioPlayer extends Thread {
 	public AudioPlayer(File audioFile) throws IOException, UnsupportedAudioFileException {
 		this.ais = AudioSystem.getAudioInputStream(audioFile);
 	}
-	
+
 	/**
 	 * @param ais
 	 */
 	public AudioPlayer(AudioInputStream ais) {
 		this.ais = ais;
 	}
-	
+
 	/**
 	 * @param audioFile
 	 * @param lineListener
@@ -131,7 +132,7 @@ public class AudioPlayer extends Thread {
 		this.ais = AudioSystem.getAudioInputStream(audioFile);
 		this.lineListener = lineListener;
 	}
-	
+
 	/**
 	 * @param ais
 	 * @param lineListener
@@ -140,7 +141,7 @@ public class AudioPlayer extends Thread {
 		this.ais = ais;
 		this.lineListener = lineListener;
 	}
-	
+
 	/**
 	 * @param audioFile
 	 * @param line
@@ -148,12 +149,13 @@ public class AudioPlayer extends Thread {
 	 * @throws IOException
 	 * @throws UnsupportedAudioFileException
 	 */
-	public AudioPlayer(File audioFile, SourceDataLine line, LineListener lineListener) throws IOException, UnsupportedAudioFileException {
+	public AudioPlayer(File audioFile, SourceDataLine line, LineListener lineListener)
+			throws IOException, UnsupportedAudioFileException {
 		this.ais = AudioSystem.getAudioInputStream(audioFile);
 		this.setLine(line);
 		this.lineListener = lineListener;
 	}
-	
+
 	/**
 	 * @param ais
 	 * @param line
@@ -164,41 +166,38 @@ public class AudioPlayer extends Thread {
 		this.setLine(line);
 		this.lineListener = lineListener;
 	}
-	
+
 	/**
 	 * 
-	 * @param audioFile
-	 *            audiofile
-	 * @param line
-	 *            line
-	 * @param lineListener
-	 *            lineListener
-	 * @param outputMode
-	 *            if MONO, force output to be mono; if STEREO, force output to be STEREO; if LEFT_ONLY, play a mono signal over the left channel of a
-	 *            stereo output, or mute the right channel of a stereo signal; if RIGHT_ONLY, do the same with the right output channel.
-	 * @throws IOException
-	 *             IOException
-	 * @throws UnsupportedAudioFileException
-	 *             UnsupportedAudioFileException
+	 * @param audioFile    audiofile
+	 * @param line         line
+	 * @param lineListener lineListener
+	 * @param outputMode   if MONO, force output to be mono; if STEREO, force output
+	 *                     to be STEREO; if LEFT_ONLY, play a mono signal over the
+	 *                     left channel of a stereo output, or mute the right
+	 *                     channel of a stereo signal; if RIGHT_ONLY, do the same
+	 *                     with the right output channel.
+	 * @throws IOException                   IOException
+	 * @throws UnsupportedAudioFileException UnsupportedAudioFileException
 	 */
-	public AudioPlayer(File audioFile, SourceDataLine line, LineListener lineListener, int outputMode) throws IOException, UnsupportedAudioFileException {
+	public AudioPlayer(File audioFile, SourceDataLine line, LineListener lineListener, int outputMode)
+			throws IOException, UnsupportedAudioFileException {
 		this.ais = AudioSystem.getAudioInputStream(audioFile);
 		this.setLine(line);
 		this.lineListener = lineListener;
 		this.outputMode = outputMode;
 	}
-	
+
 	/**
 	 * 
-	 * @param ais
-	 *            ais
-	 * @param line
-	 *            line
-	 * @param lineListener
-	 *            lineListener
-	 * @param outputMode
-	 *            if MONO, force output to be mono; if STEREO, force output to be STEREO; if LEFT_ONLY, play a mono signal over the left channel of a
-	 *            stereo output, or mute the right channel of a stereo signal; if RIGHT_ONLY, do the same with the right output channel.
+	 * @param ais          ais
+	 * @param line         line
+	 * @param lineListener lineListener
+	 * @param outputMode   if MONO, force output to be mono; if STEREO, force output
+	 *                     to be STEREO; if LEFT_ONLY, play a mono signal over the
+	 *                     left channel of a stereo output, or mute the right
+	 *                     channel of a stereo signal; if RIGHT_ONLY, do the same
+	 *                     with the right output channel.
 	 */
 	public AudioPlayer(AudioInputStream ais, SourceDataLine line, LineListener lineListener, int outputMode) {
 		this.ais = ais;
@@ -206,7 +205,7 @@ public class AudioPlayer extends Thread {
 		this.lineListener = lineListener;
 		this.outputMode = outputMode;
 	}
-	
+
 	/**
 	 * @param audio
 	 */
@@ -216,7 +215,7 @@ public class AudioPlayer extends Thread {
 		}
 		this.ais = audio;
 	}
-	
+
 	/**
 	 * Cancel the AudioPlayer which will cause the Thread to exit
 	 */
@@ -226,48 +225,50 @@ public class AudioPlayer extends Thread {
 		}
 		exitRequested = true;
 	}
-	
+
 	/**
 	 * @return The SourceDataLine
 	 */
 	public SourceDataLine getLine() {
 		return line;
 	}
-	
+
 	/**
 	 * Returns the GainValue
 	 */
 	public float getGainValue() {
 		return gain;
 	}
-	
+
 	/**
-	 * Sets Gain value. Line should be opened before calling this method. Linear scale 0.0  1.0 Threshold Coef. : 1/2 to avoid saturation.
+	 * Sets Gain value. Line should be opened before calling this method. Linear
+	 * scale 0.0 1.0 Threshold Coef. : 1/2 to avoid saturation.
 	 * 
 	 * @param fGain
 	 */
 	public void setGain(float fGain) {
-		
+
 		// if (line != null)
 		// System.out.println(((FloatControl)
 		// line.getControl(FloatControl.Type.MASTER_GAIN)).getValue())
-		
+
 		// Set the value
 		gain = fGain;
-		
+
 		// Better type
 		if (getLine() != null && getLine().isControlSupported(FloatControl.Type.MASTER_GAIN))
-			( (FloatControl) getLine().getControl(FloatControl.Type.MASTER_GAIN) ).setValue((float) ( 20 * Math.log10(fGain <= 0.0 ? 0.0000 : fGain) ));
+			((FloatControl) getLine().getControl(FloatControl.Type.MASTER_GAIN))
+					.setValue((float) (20 * Math.log10(fGain <= 0.0 ? 0.0000 : fGain)));
 		// OR (Math.log(fGain == 0.0 ? 0.0000 : fGain) / Math.log(10.0))
-		
+
 		// if (line != null)
 		// System.out.println(((FloatControl)
 		// line.getControl(FloatControl.Type.MASTER_GAIN)).getValue())
 	}
-	
+
 	@Override
 	public void run() {
-		
+
 		status = Status.PLAYING;
 		AudioFormat audioFormat = ais.getFormat();
 		if (audioFormat.getChannels() == 1) {
@@ -285,18 +286,20 @@ public class AudioPlayer extends Thread {
 				assert outputMode == 3 : "Unexpected output mode: " + outputMode;
 			}
 		}
-		
+
 		DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-		
+
 		try {
 			if (getLine() == null) {
 				boolean bIsSupportedDirectly = AudioSystem.isLineSupported(info);
 				if (!bIsSupportedDirectly) {
 					AudioFormat sourceFormat = audioFormat;
-					AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, sourceFormat.getSampleRate(), sourceFormat.getSampleSizeInBits(),
-							sourceFormat.getChannels(), sourceFormat.getChannels() * ( sourceFormat.getSampleSizeInBits() / 8 ), sourceFormat.getSampleRate(),
-							sourceFormat.isBigEndian());
-					
+					AudioFormat targetFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
+							sourceFormat.getSampleRate(), sourceFormat.getSampleSizeInBits(),
+							sourceFormat.getChannels(),
+							sourceFormat.getChannels() * (sourceFormat.getSampleSizeInBits() / 8),
+							sourceFormat.getSampleRate(), sourceFormat.isBigEndian());
+
 					ais = AudioSystem.getAudioInputStream(targetFormat, ais);
 					audioFormat = ais.getFormat();
 				}
@@ -311,107 +314,114 @@ public class AudioPlayer extends Thread {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, null, ex);
 			return;
 		}
-		
+
 		getLine().start();
 		setGain(getGainValue());
-		
+
 		int nRead = 0;
 		byte[] abData = new byte[6553];
 		int total = 0;
 		AudioStatus status = AudioStatus.release;
-		int integralIndex=0;
-		double integralTotal=0;
-		double[] buffer =null;
-		Double previousValue=null;
-		while ( ( nRead != -1 ) && ( !exitRequested ) && (!Thread.interrupted())) {
+		int integralIndex = 0;
+		double integralTotal = 0;
+		double[] buffer = null;
+		Double previousValue = null;
+		try {
+			while ((nRead != -1) && (!exitRequested) && (!Thread.interrupted())) {
 //			try {
 //				Thread.sleep(0,1);
 //			} catch (InterruptedException e) {
 //				break;
 //			}
-			try {
-				nRead = ais.read(abData, 0, abData.length);
-			} catch (IOException ex) {
-				Logger.getLogger(getClass().getName()).log(Level.WARNING, null, ex);
-			}
-			int lastIndex=0;
-			int amountToRead = nRead;
-			
-			if (nRead >= 0) {
+				try {
+					nRead = ais.read(abData, 0, abData.length);
+				} catch (IOException ex) {
+					Logger.getLogger(getClass().getName()).log(Level.WARNING, null, ex);
+				}
+				int lastIndex = 0;
+				int amountToRead = nRead;
 
-				if(speakProgress!=null) {
+				if (nRead >= 0) {
 
-					for(int i=0;i<nRead-1;i+=2) {
-						if(Thread.interrupted()) {
-							exitRequested=true;
-							break;
-						}
-						int upperByteOfAmplitude=abData[i];
-						if(upperByteOfAmplitude<0)
-							upperByteOfAmplitude+=256;
-						int lowerByteOfAmplitude=abData[i+1];
-						if(lowerByteOfAmplitude<0)
-							lowerByteOfAmplitude+=256;
-						double amplitude16Bit=(upperByteOfAmplitude<<8)+(lowerByteOfAmplitude);
-						double amplitudeUnitVector = amplitude16Bit/65535.0;// scale the amplitude to a 0-1.0 scale
-						if(previousValue==null) {
-							// initialize the previous value
-							previousValue=amplitudeUnitVector;
-						}
-						if(buffer==null) {
-							// initialize the integral term
-							integralTotal=amplitudeUnitVector*getIntegralDepth();
-							buffer=getIntegralBuffer();
-							for(int j=0;j<getIntegralDepth();j++) {
-								buffer[j]=amplitudeUnitVector;
+					if (speakProgress != null) {
+
+						for (int i = 0; i < nRead - 1; i += 2) {
+							if (Thread.interrupted()) {
+								exitRequested = true;
+								break;
+							}
+							int upperByteOfAmplitude = abData[i];
+							if (upperByteOfAmplitude < 0)
+								upperByteOfAmplitude += 256;
+							int lowerByteOfAmplitude = abData[i + 1];
+							if (lowerByteOfAmplitude < 0)
+								lowerByteOfAmplitude += 256;
+							double amplitude16Bit = (upperByteOfAmplitude << 8) + (lowerByteOfAmplitude);
+							double amplitudeUnitVector = amplitude16Bit / 65535.0;// scale the amplitude to a 0-1.0
+																					// scale
+							if (previousValue == null) {
+								// initialize the previous value
+								previousValue = amplitudeUnitVector;
+							}
+							if (buffer == null) {
+								// initialize the integral term
+								integralTotal = amplitudeUnitVector * getIntegralDepth();
+								buffer = getIntegralBuffer();
+								for (int j = 0; j < getIntegralDepth(); j++) {
+									buffer[j] = amplitudeUnitVector;
+								}
+							}
+							// update the rolling total
+							integralTotal = integralTotal + amplitudeUnitVector - buffer[integralIndex];
+							// add current value to the buffer, overwriting previous buffer value
+							buffer[integralIndex] = amplitudeUnitVector;
+							integralIndex++;
+							// wrap the buffer circularly
+							if (integralIndex == getIntegralDepth())
+								integralIndex = 0;
+							// @Finn here are the integral and derivitives of amplitude to work with
+							double currentRollingAverage = integralTotal / getIntegralDepth() * getIntegralGain();
+							double currentDerivitiveTerm = (amplitudeUnitVector - previousValue) * getDerivitiveGain();
+							AudioStatus newStat = lambda.update(status, amplitudeUnitVector, currentRollingAverage,
+									currentDerivitiveTerm);
+							boolean change = newStat != status;
+							status = newStat;
+							if (i == (nRead - 2)) {
+								change = true;
+							}
+							if (change) {
+								amountToRead = i - lastIndex;
+								total += amountToRead;
+
+								double len = (ais.getFrameLength() * 2);
+								if (total >= (len - 2)) {
+									status = AudioStatus.decay;
+								}
+								double now = total;
+								double percent = now / len * 100.0;
+								speakProgress.update(percent, status);
+								getLine().write(abData, lastIndex, amountToRead);
+								lastIndex = i;
 							}
 						}
-						// update the rolling total
-						integralTotal=integralTotal+amplitudeUnitVector-buffer[integralIndex];
-						// add current value to the buffer, overwriting previous buffer value
-						buffer[integralIndex]=amplitudeUnitVector;
-						integralIndex++;
-						// wrap the buffer circularly
-						if(integralIndex==getIntegralDepth())
-							integralIndex=0;
-						// @Finn here are the integral and derivitives of amplitude to work with
-						double currentRollingAverage=  integralTotal/getIntegralDepth()* getIntegralGain();
-						double currentDerivitiveTerm= (amplitudeUnitVector-previousValue)*getDerivitiveGain();
-						AudioStatus newStat = lambda.update(status, amplitudeUnitVector, currentRollingAverage, currentDerivitiveTerm);
-						boolean change=newStat!=status;
-						status=newStat;
-						if(i==(nRead-2)) {
-							change=true;
-						}
-						if(change) {
-							amountToRead=i-lastIndex;
-							total+=amountToRead;
-							
-							double len = (ais.getFrameLength()*2);
-							if(total>=(len-2)) {
-								status=AudioStatus.decay;
-							}
-							double now = total;
-							double percent = now/len*100.0;
-							speakProgress.update(percent,status);
-							getLine().write(abData, lastIndex, amountToRead);
-							lastIndex=i;
-						}
+					} else {
+						total += nRead;
+						double len = (ais.getFrameLength() * 2);
+						double now = total;
+						double percent = now / len * 100.0;
+						if (speakProgress != null)
+							speakProgress.update(percent, status);
+						getLine().write(abData, lastIndex, amountToRead);
 					}
-				}else {
-					total+=nRead;
-					double len = (ais.getFrameLength()*2);
-					double now = total;
-					double percent = now/len*100.0;
-					if(speakProgress!=null)
-						speakProgress.update(percent,status);
-					getLine().write(abData, lastIndex, amountToRead);
+
 				}
 
 			}
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
-		if(speakProgress!=null)
-			speakProgress.update(100,AudioStatus.decay);
+		if (speakProgress != null)
+			speakProgress.update(100, AudioStatus.decay);
 		if (!exitRequested) {
 			getLine().drain();
 		}
@@ -530,6 +540,4 @@ public class AudioPlayer extends Thread {
 		AudioPlayer.lambda = lambda;
 	}
 
-
-	
 }
