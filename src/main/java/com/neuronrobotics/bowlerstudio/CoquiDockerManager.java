@@ -6,7 +6,6 @@ import java.util.List;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -15,7 +14,6 @@ import java.time.Duration;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -24,17 +22,14 @@ import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.LogContainerCmd;
 import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerPort;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.WaitResponse;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -51,7 +46,7 @@ public class CoquiDockerManager implements ITTSEngine {
 
 	private static HashMap<String, CoquiDockerManager> managers = new HashMap<>();
 	
-	private static List<String> voiceOptions = Arrays.asList("ED" , "p225" , "p226" , "p227" , "p228" , "p229" , "p230" , "p231" , "p232" , "p233" , "p234" , "p236" , "p237" ,
+	private static List<String> voiceOptions = Arrays.asList( "p225" , "p226" , "p227" , "p228" , "p229" , "p230" , "p231" , "p232" , "p233" , "p234" , "p236" , "p237" ,
 		"p238" , "p239" , "p240" , "p241" , "p243" , "p244" , "p245" , "p246" , "p247" , "p248" , "p249" , "p250" , "p251" ,
 		"p252" , "p253" , "p254" , "p255" , "p256" , "p257" , "p258" , "p259" , "p260" , "p261" , "p262" , "p263" , "p264" , "p265" , "p266" , "p267" , "p268" , "p269" , "p270" ,
 		"p271" , "p272" , "p273" , "p274" , "p275" , "p276" , "p277" , "p278" , "p279" , "p280" , "p281" , "p282" , "p283" , "p284" , "p285" , "p286" , "p287" , "p288" , "p292" ,
@@ -190,23 +185,7 @@ public class CoquiDockerManager implements ITTSEngine {
 			Thread.sleep(1000);
 			System.out.println("Waiting for server to start");
 		}
-//		Request request = Request.builder().method(Request.Method.GET).path("/_ping").build();
-//
-//		client.execute(request);
-//		dockerClient.waitContainerCmd(id).exec(new WaitContainerResultCallback() {
-//			@Override
-//			public void onNext(WaitResponse item) {
-//				// Handle build output (optional)
-//				System.out.println(item.toString());
-//				super.onNext(item);
-//			}
-//		}).awaitCompletion();
 
-		// Get the container details
-		// InspectContainerResponse container =
-		// dockerClient.inspectContainerCmd(containerResponse.getId()).exec();
-
-		// ipAddress = container.getNetworkSettings()
 
 	}
 
@@ -248,10 +227,7 @@ public class CoquiDockerManager implements ITTSEngine {
 					string = "&speaker_id="+voiceOptions.get(voiceOption);
 			}
 			String url = "http://[::1]:5002//api/tts?text=" + content
-					+ string + "&style_wav=&language_id=HTTP/1.1\n"; // Replace
-			// with your
-			// URL
-
+					+ string + "&style_wav=&language_id=HTTP/1.1\n"; 
 			Request request = new Request.Builder().url(url).get().build();
 
 			Response response = new OkHttpClient().newCall(request).execute();
