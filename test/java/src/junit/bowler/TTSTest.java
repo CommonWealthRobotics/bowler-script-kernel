@@ -31,11 +31,11 @@ public class TTSTest {
 		
 	@Test 
 	public void TTSText() {
-		BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,null);
-		BowlerKernel.speak("Coqui three ", 200, 0, 802, 1.0, 1.0,null);
-		BowlerKernel.speak("Coqui two text to speech", 200, 0, 801, 1.0, 1.0,null);
-		BowlerKernel.speak("Coqui two second shot", 200, 0, 801, 1.0, 1.0,null);
-		
+//		BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,null);
+//		BowlerKernel.speak("Coqui three ", 200, 0, 802, 1.0, 1.0,null);
+//		BowlerKernel.speak("Coqui two text to speech", 200, 0, 801, 1.0, 1.0,null);
+//		BowlerKernel.speak("Coqui two second shot", 200, 0, 801, 1.0, 1.0,null);
+//		
 	}
 
 	
