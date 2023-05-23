@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.neuronrobotics.bowlerkernel.djl.ImagePredictorType;
 import com.neuronrobotics.bowlerkernel.djl.PredictorFactory;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
+import com.neuronrobotics.bowlerstudio.CoquiDockerManager;
 
 import ai.djl.Application;
 import ai.djl.Model;
@@ -36,10 +37,10 @@ public class TTSTest {
 //		BowlerKernel.speak("Coqui two text to speech", 200, 0, 801, 1.0, 1.0,null);
 //		BowlerKernel.speak("Coqui two second shot", 200, 0, 801, 1.0, 1.0,null);
 		
-		BowlerKernel.speak("Coqui 803 text to speech", 200, 0, 803, 1.0, 1.0,null);
-		BowlerKernel.speak("Coqui 804 text to speech", 200, 0, 804, 1.0, 1.0,null);
-		BowlerKernel.speak("Coqui 805 text to speech", 200, 0, 805, 1.0, 1.0,null);
-//		
+//		for(int i=800;i<(800+CoquiDockerManager.getNummberOfOptions());i++) {
+//			BowlerKernel.speak("Coqui " + i + " text to speech", 200, 0, i, 1.0, 1.0,null);
+//			System.out.println("\n\nVoice finished");
+//		}
 	}
 
 	

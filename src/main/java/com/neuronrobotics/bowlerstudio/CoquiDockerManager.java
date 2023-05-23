@@ -54,8 +54,7 @@ public class CoquiDockerManager implements ITTSEngine {
 		"p314" , "p316" , "p317" , "p318" , "p323" , "p326" , "p329" , "p330" , "p333" , "p334" , "p335" , "p336" , "p339" , "p340" , "p341" , "p343" , "p345" , "p347" , "p351" , 
 		"p360" , "p361" , "p362" , "p363" , "p364" , "p374" , "p376" 
 	);
-	private static List<String> options = Arrays.asList("tts_models/en/vctk/vits", "tts_models/en/jenny/jenny",
-			"tts_models/en/ljspeech/tacotron2-DCA");
+	private static List<String> options = Arrays.asList("tts_models/en/vctk/vits", "tts_models/en/jenny/jenny");
 	private static List<String> speakerNeeded = Arrays.asList("tts_models/en/vctk/vits");
 	private String voice;
 	private DockerHttpClient client;
@@ -70,12 +69,17 @@ public class CoquiDockerManager implements ITTSEngine {
 	private boolean started=false;
 	private int voiceOption =0;
 	
+	public static int getNummberOfOptions() {
+		return options.size()+voiceOptions.size();
+	}
+	
 	private CoquiDockerManager(String voice) throws InterruptedException, InvalidRemoteException, TransportException,
 			GitAPIException, IOException, URISyntaxException {
 		this.voice = voice;
 		if (managers.get(voice) != null) {
 			throw new RuntimeException("Only one manager allowed");
 		}
+		managers.clear();
 		managers.put(voice, this);
 		System.out.println("Coqui Voice " + voice);
 		String[] parts = voice.split("/");
