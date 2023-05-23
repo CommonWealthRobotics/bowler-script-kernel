@@ -42,7 +42,7 @@ import marytts.signalproc.effects.VolumeEffect;
 
 public class BowlerKernel {
 
-	//private static final String CSG = null;
+	// private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 
 	static {
@@ -91,7 +91,7 @@ public class BowlerKernel {
 	public static void main(String[] args) throws Exception {
 		try {
 			JavaFXInitializer.go();
-		}catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
 			System.err.println("ERROR No UI engine availible");
 		}
@@ -99,8 +99,8 @@ public class BowlerKernel {
 		if (args.length == 0) {
 			fail();
 		}
-		ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DeviceProviders.git",
-				"loadAll.groovy",null);
+		ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
+				null);
 		boolean gitRun = false;
 		String gitRepo = null;
 		String gitFile = null;
@@ -119,40 +119,40 @@ public class BowlerKernel {
 		}
 		Object ret = null;
 
-		if (gitRun && gitRepo != null ) {
-			
-				ScriptingEngine.pull(gitRepo);
-				ArrayList<String> files = ScriptingEngine.filesInGit(gitRepo);
-				boolean fileExists = false;
-				if(gitFile==null)
-					gitFile="launch";
-				if(gitFile.endsWith("/"))
-					gitFile+="launch";
-				for(String f:files) {
-					if(f.startsWith(gitFile)) {
-						gitFile=f;
-						fileExists=true;
-					}
-				}
-				if(!fileExists) {
-					System.err.println("\n\nERROR file does not exist: "+gitFile);
-					gitFile=null;
-				}
-				if( gitFile != null)
-					try {
-						ret=ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
+		if (gitRun && gitRepo != null) {
 
-						processReturnedObjects(ret);
-					} catch (Throwable e) {
-						e.printStackTrace();
-						fail();
-					}
-				else {
-					System.out.println("Files in git:");
-					for(String f:files) {
-						System.out.println("\t"+f);
-					}
+			ScriptingEngine.pull(gitRepo);
+			ArrayList<String> files = ScriptingEngine.filesInGit(gitRepo);
+			boolean fileExists = false;
+			if (gitFile == null)
+				gitFile = "launch";
+			if (gitFile.endsWith("/"))
+				gitFile += "launch";
+			for (String f : files) {
+				if (f.startsWith(gitFile)) {
+					gitFile = f;
+					fileExists = true;
 				}
+			}
+			if (!fileExists) {
+				System.err.println("\n\nERROR file does not exist: " + gitFile);
+				gitFile = null;
+			}
+			if (gitFile != null)
+				try {
+					ret = ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
+
+					processReturnedObjects(ret);
+				} catch (Throwable e) {
+					e.printStackTrace();
+					fail();
+				}
+			else {
+				System.out.println("Files in git:");
+				for (String f : files) {
+					System.out.println("\t" + f);
+				}
+			}
 		}
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
@@ -171,7 +171,7 @@ public class BowlerKernel {
 					fail();
 				}
 			}
-			if ( s.startsWith("-f")|| s.startsWith("-s")) {
+			if (s.startsWith("-f") || s.startsWith("-s")) {
 				startLoadingScripts = true;
 			}
 		}
@@ -207,7 +207,7 @@ public class BowlerKernel {
 				}
 				break;
 			}
-			if ( s.startsWith("-r")) {
+			if (s.startsWith("-r")) {
 				runShell = true;
 			}
 		}
@@ -242,7 +242,8 @@ public class BowlerKernel {
 			reader.getHistory().addToHistory(
 					"DeviceManager.addConnection(new DyIO(new SerialConnection(\"/dev/DyIO0\")),\"dyio\")");
 			reader.getHistory().addToHistory("BowlerKernel.speak(\"Text to speech works like this\")");
-			reader.getHistory().addToHistory("ScriptingEngine.gitScriptRun(\\\"https://github.com/OperationSmallKat/greycat.git\\\", \\\"launch.groovy\\\" , null)");
+			reader.getHistory().addToHistory(
+					"ScriptingEngine.gitScriptRun(\\\"https://github.com/OperationSmallKat/greycat.git\\\", \\\"launch.groovy\\\" , null)");
 			reader.getHistory().addToHistory("println \"Hello world!\"");
 			writeHistory(reader.getHistory().getHistoryList());
 		} else {
@@ -303,46 +304,45 @@ public class BowlerKernel {
 		}
 
 	}
+
 	private static void processReturnedObjects(Object ret) {
 		CSG.setProgressMoniter(new ICSGProgress() {
 			@Override
 			public void progressUpdate(int currentIndex, int finalIndex, String type,
 					eu.mihosoft.vrl.v3d.CSG intermediateShape) {
-	
+
 			}
-			
+
 		});
-		
+
 		ArrayList<CSG> csgBits = new ArrayList<>();
-		processReturnedObjects(ret,csgBits);
+		processReturnedObjects(ret, csgBits);
 		try {
-			new CadFileExporter()
-			.generateManufacturingParts(csgBits, new File("."));
-		}catch(Throwable t) {
+			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
+		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 	}
+
 	private static void processReturnedObjects(Object ret, ArrayList<CSG> csgBits) {
-		if(List.class.isInstance(ret)) {
-			List lst=(List)ret;
-			for(int i=0;i<lst.size();i++)
-				processReturnedObjects(lst.get(i),csgBits);
+		if (List.class.isInstance(ret)) {
+			List lst = (List) ret;
+			for (int i = 0; i < lst.size(); i++)
+				processReturnedObjects(lst.get(i), csgBits);
 			return;
 		}
-		if(CSG.class.isInstance(ret)) {
-			csgBits.add((CSG)ret);
+		if (CSG.class.isInstance(ret)) {
+			csgBits.add((CSG) ret);
 		}
-		if(MobileBase.class.isInstance(ret)) {
-			
-			MobileBase ret2 = (MobileBase)ret;
-			MobileBaseCadManager m=MobileBaseCadManager.get(ret2);
+		if (MobileBase.class.isInstance(ret)) {
+
+			MobileBase ret2 = (MobileBase) ret;
+			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
 			m.setConfigurationViewerMode(false);
 			ret2.connect();
 			ArrayList<CSG> generateBody = m.generateBody();
-			processReturnedObjects(generateBody,csgBits);
+			processReturnedObjects(generateBody, csgBits);
 		}
-		
-				
 
 	}
 
@@ -380,46 +380,59 @@ public class BowlerKernel {
 		}
 
 	}
+
 	public static int speak(String msg, ISpeakingProgress progress) {
-		return speak(msg, 200, 0, 100, 1.0, 1.0,progress);
+		return speak(msg, 200, 0, 100, 1.0, 1.0, progress);
 	}
+
 	public static int speak(String msg) {
 
-		return speak(msg, 200, 0, 301, 1.0, 1.0,null);
+		return speak(msg, 200, 0, 301, 1.0, 1.0, null);
 	}
 
 	@SuppressWarnings("unused")
-	public static int speak(String msg, Number rate, Number pitch, Number range, Number shift, Number volume) {
-		return speak(msg,rate,pitch,range,shift,volume,null);
+	public static int speak(String msg, Number rate, Number pitch, Number voice, Number shift, Number volume) {
+		return speak(msg, rate, pitch, voice, shift, volume, null);
 	}
+
 	@SuppressWarnings("unused")
-	public static int speak(String msg, Number rate, Number pitch, Number range, Number shift, Number volume, ISpeakingProgress progress) {
+	public static int speak(String msg, Number rate, Number pitch, Number voiceNumber, Number shift, Number volume,
+			ISpeakingProgress progress) {
 		if (rate.doubleValue() > 300)
 			rate = 300;
 		if (rate.doubleValue() < 10)
 			rate = 10;
+		try {
+			if (voiceNumber.doubleValue() >= 800) {
+				if(0== CoquiDockerManager.get(voiceNumber.doubleValue()).speak(msg, 2.0f, false, true, progress)) {
+					return 0;
+				}
+			}
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 		TextToSpeech tts = new TextToSpeech();
 		// cd ..
 		tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
 		// Setting the Current Voice
 		// voice =(tts.getAvailableVoices().toArray()[0].toString());
-		String voice ="dfki-poppy-hsmm";
-		if (range.doubleValue() > 600)
-			voice =("dfki-prudence-hsmm");
-		else if (range.doubleValue() > 500)
-			voice =("cmu-rms-hsmm");
-		else if (range.doubleValue() > 400)
-			voice =("cmu-bdl-hsmm");
-		else if (range.doubleValue() > 300)
-			voice =("dfki-obadiah-hsmm");
-		else if (range.doubleValue() > 200)
-			voice =("cmu-slt-hsmm");
-		else if (range.doubleValue() > 100)
-			voice =("dfki-spike-hsmm");
-		
+		String voice = "dfki-poppy-hsmm";
+		if (voiceNumber.doubleValue() > 600)
+			voice = ("dfki-prudence-hsmm");
+		else if (voiceNumber.doubleValue() > 500)
+			voice = ("cmu-rms-hsmm");
+		else if (voiceNumber.doubleValue() > 400)
+			voice = ("cmu-bdl-hsmm");
+		else if (voiceNumber.doubleValue() > 300)
+			voice = ("dfki-obadiah-hsmm");
+		else if (voiceNumber.doubleValue() > 200)
+			voice = ("cmu-slt-hsmm");
+		else if (voiceNumber.doubleValue() > 100)
+			voice = ("dfki-spike-hsmm");
+
 		tts.setVoice(voice);
-		
-		System.out.println("Using voice "+voice);
+
+		System.out.println("Using voice " + voice);
 
 		RobotiserEffect vocalTractLSE = new RobotiserEffect(); // russian drunk effect
 		vocalTractLSE.setParams("amount:" + pitch.intValue());
@@ -467,18 +480,17 @@ public class BowlerKernel {
 		System.out.println(msg + "-->" + effect);
 		tts.getMarytts().setAudioEffects(effect);
 
-		tts.speak(msg, 2.0f, false, true,progress);
+		tts.speak(msg, 2.0f, false, true, progress);
 
 		return 0;
 	}
 
 	public static void upenURL(String string) {
-		
 
-		System.err.println("Opening "+string);
-	    try {
-	    	upenURL(new URI(string));
-	    	
+		System.err.println("Opening " + string);
+		try {
+			upenURL(new URI(string));
+
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

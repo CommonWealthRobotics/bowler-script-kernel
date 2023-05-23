@@ -22,7 +22,7 @@ import marytts.signalproc.effects.AudioEffects;
  * @author GOXR3PLUS
  *
  */
-public class TextToSpeech {
+public class TextToSpeech implements ITTSEngine{
 	
 	private AudioPlayer tts;
 	private MaryInterface marytts;
@@ -56,9 +56,10 @@ public class TextToSpeech {
 	 *            <b>False</b> The current Thread calling this method will continue freely after calling this method
 	 * @param progress 
 	 */
-	public void speak(String text , float gainValue , boolean daemon , boolean join, ISpeakingProgress progress) {
+	public int speak(String text , float gainValue , boolean daemon , boolean join, ISpeakingProgress progress) {
 		// Stop the previous player
 		stopSpeaking();
+		
 		
 		try (AudioInputStream audio = marytts.generateAudio(text)) {
 			
@@ -73,7 +74,7 @@ public class TextToSpeech {
 			tts.start();
 			if (join)
 				tts.join();
-			
+			return 0;
 		} catch (SynthesisException ex) {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Error saying phrase.", ex);
 		} catch (IOException ex) {
@@ -83,7 +84,9 @@ public class TextToSpeech {
 			System.out.println("Speaking clean exit");
 			tts.cancel();
 			tts.interrupt();
+			return 1;
 		}
+		return 2;
 	}
 	
 	/**

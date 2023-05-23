@@ -12,11 +12,20 @@ import org.junit.Test;
 
 import com.neuronrobotics.bowlerkernel.djl.ImagePredictorType;
 import com.neuronrobotics.bowlerkernel.djl.PredictorFactory;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 
+import ai.djl.Application;
+import ai.djl.Model;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.output.DetectedObjects;
+import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.api.command.BuildImageCmd;
+import com.github.dockerjava.api.command.BuildImageResultCallback;
+
+
 
 public class PyTorchResNetTest {
 	String imageUrl = "https://avatars.githubusercontent.com/u/1254726?v=4";
@@ -80,6 +89,7 @@ public class PyTorchResNetTest {
 			saveBoundingBoxImage(input, objects, "yolov5");
 		}
 	}
+	
 
 	@Test
 	public void testFeatures() throws Exception {

@@ -324,7 +324,12 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	implementation 'ai.djl.pytorch:pytorch-jni:2.0.0-0.22.1'
 	implementation("ai.djl.onnxruntime:onnxruntime-engine:0.22.1") 
 	
-	
+	// https://mvnrepository.com/artifact/com.github.docker-java/docker-java
+	implementation group: 'com.github.docker-java', name: 'docker-java', version: '3.3.0'
+	implementation group: 'com.github.docker-java', name: 'docker-java-transport-okhttp', version: '3.3.0'
+	// https://mvnrepository.com/artifact/com.github.docker-java/docker-java-transport-httpclient5
+	implementation group: 'com.github.docker-java', name: 'docker-java-transport-httpclient5', version: '3.3.0'
+
 	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'2.2.0-pre.5'
 
 }
