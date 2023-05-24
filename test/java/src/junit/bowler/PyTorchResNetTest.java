@@ -5,27 +5,25 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.imageio.ImageIO;
 
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerkernel.djl.ImagePredictorType;
 import com.neuronrobotics.bowlerkernel.djl.PredictorFactory;
-import com.neuronrobotics.bowlerstudio.BowlerKernel;
-
-import ai.djl.Application;
-import ai.djl.Model;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
+import ai.djl.modality.cv.output.BoundingBox;
 import ai.djl.modality.cv.output.DetectedObjects;
-import com.github.dockerjava.core.DockerClientConfig;
-import com.github.dockerjava.core.DockerClientBuilder;
-import com.github.dockerjava.api.command.BuildImageCmd;
-import com.github.dockerjava.api.command.BuildImageResultCallback;
-
-
+import ai.djl.modality.cv.output.DetectedObjects.DetectedObject;
+import ai.djl.modality.cv.output.Landmark;
+import ai.djl.modality.cv.output.Point;
 
 public class PyTorchResNetTest {
 	String imageUrl = "https://avatars.githubusercontent.com/u/1254726?v=4";
@@ -37,6 +35,7 @@ public class PyTorchResNetTest {
 	public void testResNet() throws Exception {
 
 	}
+
 	@Test
 	public void testretinaface() throws Exception {
 		BufferedImage bimg = ImageIO.read(new URL(imageUrl));
@@ -51,17 +50,34 @@ public class PyTorchResNetTest {
 			saveBoundingBoxImage(img, objects, "retinaface");
 		}
 	}
+
 	@Test
 	public void testUltraNet() throws Exception {
 		BufferedImage bimg = ImageIO.read(new URL(imageUrl));
 
-		Predictor<Image, DetectedObjects> predictor = PredictorFactory
-				.imageContentsFactory(ImagePredictorType.ultranet).newPredictor();
+		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.ultranet)
+				.newPredictor();
 
-		for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
 			Image img = ImageFactory.getInstance().fromImage(bimg);
 
 			DetectedObjects objects = predictor.predict(img);
+			List<DetectedObject> items = objects.items();
+			for (int i = 0; i < items.size(); i++) {
+				DetectedObject c = items.get(i);
+				BoundingBox cGetBoundingBox = c.getBoundingBox();
+				cGetBoundingBox = c.getBoundingBox();
+				Iterator<Point> path = cGetBoundingBox.getPath().iterator();
+				List<Point> list = new ArrayList<>();
+				// keypoints in the image
+				path.forEachRemaining(list::add);
+				
+				Landmark lm;
+				if (Landmark.class.isInstance(cGetBoundingBox)) {
+					lm = (Landmark) cGetBoundingBox;
+					
+				}
+			}
 			saveBoundingBoxImage(img, objects, "ultranet");
 		}
 	}
@@ -80,7 +96,8 @@ public class PyTorchResNetTest {
 	@Test
 	public void testYolo() throws Exception {
 
-		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5).newPredictor();
+		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5)
+				.newPredictor();
 		for (int i = 0; i < 3; i++) {
 			Image input = ImageFactory.getInstance()
 					.fromUrl("https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg");
@@ -89,7 +106,6 @@ public class PyTorchResNetTest {
 			saveBoundingBoxImage(input, objects, "yolov5");
 		}
 	}
-	
 
 	@Test
 	public void testFeatures() throws Exception {
