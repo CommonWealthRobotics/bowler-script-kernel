@@ -43,41 +43,58 @@ public class AudioPlayer extends Thread {
 	private static int integralDepth = 30;
 	private static double integralGain = 1.0;
 	private static double derivitiveGain = 1.0;
-	private static IAudioProcessingLambda lambda = new IAudioProcessingLambda() {
-
+	private static IAudioProcessingLambda lambda =  new IAudioProcessingLambda() {
+		// code reference from the face application https://github.com/adafruit/Adafruit_Learning_System_Guides/blob/main/AdaVoice/adavoice_face/adavoice_face.ino
+		int xfadeDistance=16;
+		double [] samples = new double[xfadeDistance];
+		int xfadeIndex=0;
+		boolean stare=true;
 		@Override
 		public AudioStatus update(AudioStatus currentStatus, double amplitudeUnitVector, double currentRollingAverage,
 				double currentDerivitiveTerm) {
-			switch (currentStatus) {
-			case attack:
-				if (amplitudeUnitVector > getThreshhold()) {
-					currentStatus = AudioStatus.sustain;
+			if(stare) {
+				stare=false;
+				for(int i=0;i<xfadeDistance;i++) {
+					samples[i]=currentRollingAverage;
 				}
-				break;
-			case decay:
-				if (amplitudeUnitVector < getLowerThreshhold()) {
-					currentStatus = AudioStatus.release;
-				}
-				break;
-			case release:
-				if (amplitudeUnitVector > getThreshhold()) {
-					currentStatus = AudioStatus.attack;
-				}
-				break;
-			case sustain:
-				if (amplitudeUnitVector < getLowerThreshhold()) {
-					currentStatus = AudioStatus.decay;
-				}
-				break;
-			default:
-				break;
+			}
+			double index=samples[xfadeIndex];
+			samples[xfadeIndex]=currentRollingAverage;
+			xfadeIndex++;
+			if(xfadeIndex==xfadeDistance) {
+				xfadeIndex=0;
+			}
+			double val = (currentRollingAverage+index)/2*currentDerivitiveTerm;
+			switch(currentStatus) {
+				case attack:
+					if(val>AudioPlayer.getThreshhold()) {
+						currentStatus=AudioStatus.sustain;
+					}
+					break;
+				case decay:
+					if(val<AudioPlayer.getLowerThreshhold()) {
+						currentStatus=AudioStatus.release;
+					}
+					break;
+				case release:
+					if(val>AudioPlayer.getThreshhold()) {
+						currentStatus=AudioStatus.attack;
+					}
+					break;
+				case sustain:
+					if(val<AudioPlayer.getLowerThreshhold()) {
+						currentStatus=AudioStatus.decay;
+					}
+					break;
+				default:
+					break;
 			}
 			return currentStatus;
 		}
 
 		@Override
 		public void startProcessing() {
-
+			stare=true;
 		}
 	};
 
@@ -382,6 +399,7 @@ public class AudioPlayer extends Thread {
 							// @Finn here are the integral and derivitives of amplitude to work with
 							double currentRollingAverage = integralTotal / getIntegralDepth() * getIntegralGain();
 							double currentDerivitiveTerm = (amplitudeUnitVector - previousValue) * getDerivitiveGain();
+							previousValue = amplitudeUnitVector;
 							AudioStatus newStat = lambda.update(status, amplitudeUnitVector, currentRollingAverage,
 									currentDerivitiveTerm);
 							boolean change = newStat != status;
