@@ -51,7 +51,7 @@ public class AudioPlayer extends Thread {
 		boolean stare=true;
 		@Override
 		public AudioStatus update(AudioStatus currentStatus, double amplitudeUnitVector, double currentRollingAverage,
-				double currentDerivitiveTerm) {
+				double currentDerivitiveTerm, double percent) {
 			if(stare) {
 				stare=false;
 				for(int i=0;i<xfadeDistance;i++) {
@@ -66,24 +66,24 @@ public class AudioPlayer extends Thread {
 			}
 			double val = (currentRollingAverage+index)/2*currentDerivitiveTerm;
 			switch(currentStatus) {
-				case attack:
+				case B_KST_SOUNDS:
 					if(val>AudioPlayer.getThreshhold()) {
-						currentStatus=AudioStatus.sustain;
+						currentStatus=AudioStatus.D_AA_SOUNDS;
 					}
 					break;
-				case decay:
+				case G_F_V_SOUNDS:
 					if(val<AudioPlayer.getLowerThreshhold()) {
-						currentStatus=AudioStatus.release;
+						currentStatus=AudioStatus.X_NO_SOUND;
 					}
 					break;
-				case release:
+				case X_NO_SOUND:
 					if(val>AudioPlayer.getThreshhold()) {
-						currentStatus=AudioStatus.attack;
+						currentStatus=AudioStatus.B_KST_SOUNDS;
 					}
 					break;
-				case sustain:
+				case D_AA_SOUNDS:
 					if(val<AudioPlayer.getLowerThreshhold()) {
-						currentStatus=AudioStatus.decay;
+						currentStatus=AudioStatus.G_F_V_SOUNDS;
 					}
 					break;
 				default:
@@ -93,7 +93,7 @@ public class AudioPlayer extends Thread {
 		}
 
 		@Override
-		public void startProcessing() {
+		public void startProcessing(AudioInputStream ais) {
 			stare=true;
 		}
 	};
@@ -338,7 +338,7 @@ public class AudioPlayer extends Thread {
 		int nRead = 0;
 		byte[] abData = new byte[6553];
 		int total = 0;
-		AudioStatus status = AudioStatus.release;
+		AudioStatus status = AudioStatus.X_NO_SOUND;
 		int integralIndex = 0;
 		double integralTotal = 0;
 		double[] buffer = null;
@@ -400,8 +400,13 @@ public class AudioPlayer extends Thread {
 							double currentRollingAverage = integralTotal / getIntegralDepth() * getIntegralGain();
 							double currentDerivitiveTerm = (amplitudeUnitVector - previousValue) * getDerivitiveGain();
 							previousValue = amplitudeUnitVector;
+							double tmpAmtToRead = i - lastIndex;
+							double tmpTotal = total+tmpAmtToRead;
+							double len = (ais.getFrameLength() * 2);
+							double percentTmp = tmpTotal / len * 100.0;
+
 							AudioStatus newStat = lambda.update(status, amplitudeUnitVector, currentRollingAverage,
-									currentDerivitiveTerm);
+									currentDerivitiveTerm,percentTmp);
 							boolean change = newStat != status;
 							status = newStat;
 							if (i == (nRead - 2)) {
@@ -411,9 +416,9 @@ public class AudioPlayer extends Thread {
 								amountToRead = i - lastIndex;
 								total += amountToRead;
 
-								double len = (ais.getFrameLength() * 2);
+								
 								if (total >= (len - 2)) {
-									status = AudioStatus.decay;
+									status = AudioStatus.X_NO_SOUND;
 								}
 								double now = total;
 								double percent = now / len * 100.0;
@@ -439,7 +444,7 @@ public class AudioPlayer extends Thread {
 			t.printStackTrace();
 		}
 		if (speakProgress != null)
-			speakProgress.update(100, AudioStatus.decay);
+			speakProgress.update(100, AudioStatus.X_NO_SOUND);
 		if (!exitRequested) {
 			getLine().drain();
 		}
