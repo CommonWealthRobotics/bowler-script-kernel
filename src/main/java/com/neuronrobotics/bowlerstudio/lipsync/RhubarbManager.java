@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -84,7 +85,9 @@ public class RhubarbManager implements IAudioProcessingLambda {
 		int exitCode = process.waitFor();
 
 		InputStream is = process.getInputStream();
-		String result = IOUtils.toString(is, StandardCharsets.UTF_8);
+		StringWriter writer = new StringWriter();
+		IOUtils.copy(is, writer, StandardCharsets.UTF_8);
+		String result = writer.toString();
 		// System.out.println(status);
 		// System.out.println(result);
 		Type TT_mapStringString = new TypeToken<HashMap<String, Object>>() {
