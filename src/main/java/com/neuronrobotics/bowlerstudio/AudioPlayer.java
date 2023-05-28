@@ -43,58 +43,60 @@ public class AudioPlayer extends Thread {
 	private static int integralDepth = 30;
 	private static double integralGain = 1.0;
 	private static double derivitiveGain = 1.0;
-	private static IAudioProcessingLambda lambda =  new IAudioProcessingLambda() {
-		// code reference from the face application https://github.com/adafruit/Adafruit_Learning_System_Guides/blob/main/AdaVoice/adavoice_face/adavoice_face.ino
-		int xfadeDistance=16;
-		double [] samples = new double[xfadeDistance];
-		int xfadeIndex=0;
-		boolean stare=true;
+	private static IAudioProcessingLambda lambda = new IAudioProcessingLambda() {
+		// code reference from the face application
+		// https://github.com/adafruit/Adafruit_Learning_System_Guides/blob/main/AdaVoice/adavoice_face/adavoice_face.ino
+		int xfadeDistance = 16;
+		double[] samples = new double[xfadeDistance];
+		int xfadeIndex = 0;
+		boolean stare = true;
+
 		@Override
 		public AudioStatus update(AudioStatus currentStatus, double amplitudeUnitVector, double currentRollingAverage,
 				double currentDerivitiveTerm, double percent) {
-			if(stare) {
-				stare=false;
-				for(int i=0;i<xfadeDistance;i++) {
-					samples[i]=currentRollingAverage;
+			if (stare) {
+				stare = false;
+				for (int i = 0; i < xfadeDistance; i++) {
+					samples[i] = currentRollingAverage;
 				}
 			}
-			double index=samples[xfadeIndex];
-			samples[xfadeIndex]=currentRollingAverage;
+			double index = samples[xfadeIndex];
+			samples[xfadeIndex] = currentRollingAverage;
 			xfadeIndex++;
-			if(xfadeIndex==xfadeDistance) {
-				xfadeIndex=0;
+			if (xfadeIndex == xfadeDistance) {
+				xfadeIndex = 0;
 			}
-			double val = (currentRollingAverage+index)/2*currentDerivitiveTerm;
-			switch(currentStatus) {
-				case B_KST_SOUNDS:
-					if(val>AudioPlayer.getThreshhold()) {
-						currentStatus=AudioStatus.D_AA_SOUNDS;
-					}
-					break;
-				case G_F_V_SOUNDS:
-					if(val<AudioPlayer.getLowerThreshhold()) {
-						currentStatus=AudioStatus.X_NO_SOUND;
-					}
-					break;
-				case X_NO_SOUND:
-					if(val>AudioPlayer.getThreshhold()) {
-						currentStatus=AudioStatus.B_KST_SOUNDS;
-					}
-					break;
-				case D_AA_SOUNDS:
-					if(val<AudioPlayer.getLowerThreshhold()) {
-						currentStatus=AudioStatus.G_F_V_SOUNDS;
-					}
-					break;
-				default:
-					break;
+			double val = (currentRollingAverage + index) / 2 * currentDerivitiveTerm;
+			switch (currentStatus) {
+			case B_KST_SOUNDS:
+				if (val > AudioPlayer.getThreshhold()) {
+					currentStatus = AudioStatus.D_AA_SOUNDS;
+				}
+				break;
+			case G_F_V_SOUNDS:
+				if (val < AudioPlayer.getLowerThreshhold()) {
+					currentStatus = AudioStatus.X_NO_SOUND;
+				}
+				break;
+			case X_NO_SOUND:
+				if (val > AudioPlayer.getThreshhold()) {
+					currentStatus = AudioStatus.B_KST_SOUNDS;
+				}
+				break;
+			case D_AA_SOUNDS:
+				if (val < AudioPlayer.getLowerThreshhold()) {
+					currentStatus = AudioStatus.G_F_V_SOUNDS;
+				}
+				break;
+			default:
+				break;
 			}
 			return currentStatus;
 		}
 
 		@Override
 		public AudioInputStream startProcessing(AudioInputStream ais) {
-			stare=true;
+			stare = true;
 			return ais;
 		}
 	};
@@ -403,12 +405,12 @@ public class AudioPlayer extends Thread {
 							double currentDerivitiveTerm = (amplitudeUnitVector - previousValue) * getDerivitiveGain();
 							previousValue = amplitudeUnitVector;
 							double tmpAmtToRead = i - lastIndex;
-							double tmpTotal = total+tmpAmtToRead;
+							double tmpTotal = total + tmpAmtToRead;
 							double len = (ais.getFrameLength() * 2);
 							double percentTmp = tmpTotal / len * 100.0;
 
 							AudioStatus newStat = lambda.update(status, amplitudeUnitVector, currentRollingAverage,
-									currentDerivitiveTerm,percentTmp);
+									currentDerivitiveTerm, percentTmp);
 							boolean change = newStat != status;
 							status = newStat;
 							// ensure the final frame is played
@@ -419,7 +421,6 @@ public class AudioPlayer extends Thread {
 								amountToRead = i - lastIndex;
 								total += amountToRead;
 
-								
 								if (total >= (len - 2)) {
 									status = AudioStatus.X_NO_SOUND;
 								}
@@ -446,8 +447,12 @@ public class AudioPlayer extends Thread {
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
-		if (speakProgress != null)
-			speakProgress.update(100, AudioStatus.X_NO_SOUND);
+		try {
+			if (speakProgress != null)
+				speakProgress.update(100, AudioStatus.X_NO_SOUND);
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 		if (!exitRequested) {
 			getLine().drain();
 		}

@@ -92,6 +92,32 @@ public enum AudioStatus {
 	public static AudioStatus get(char code) {
 		return lookup.get(code);
 	}
+	
+	public double mouthOpenVector() {
+		switch(this) {
+		case A_PBM_SOUNDS:
+			break;
+		case B_KST_SOUNDS:
+			return 0.3;
+		case C_EH_AE_SOUNDS:
+			return 0.6;
+		case D_AA_SOUNDS:
+			return 1;
+		case E_AO_ER_SOUNDS:
+			return 0.6;
+		case F_UW_OW_W_SOUNDS:
+			return 0;
+		case G_F_V_SOUNDS:
+			return 0;
+		case H_L_SOUNDS:
+			return 1;
+		case X_NO_SOUND:
+		default:
+			break;
+		}
+		return 0;
+	}
+	
 	public boolean isOpen() {
 		switch(this) {
 		case B_KST_SOUNDS:
