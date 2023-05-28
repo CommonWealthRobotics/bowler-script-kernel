@@ -411,6 +411,7 @@ public class AudioPlayer extends Thread {
 									currentDerivitiveTerm,percentTmp);
 							boolean change = newStat != status;
 							status = newStat;
+							// ensure the final frame is played
 							if (i == (nRead - 2)) {
 								change = true;
 							}
