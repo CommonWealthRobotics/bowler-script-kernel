@@ -330,6 +330,10 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.robokind/org.robokind.api.speech
 	implementation group: 'org.robokind', name: 'org.robokind.api.speech', version: '0.9.5'
+	
+	// https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j
+	implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+	
 
 
 }
