@@ -93,8 +93,9 @@ public class AudioPlayer extends Thread {
 		}
 
 		@Override
-		public void startProcessing(AudioInputStream ais) {
+		public AudioInputStream startProcessing(AudioInputStream ais) {
 			stare=true;
+			return ais;
 		}
 	};
 
@@ -287,6 +288,7 @@ public class AudioPlayer extends Thread {
 	public void run() {
 
 		status = Status.PLAYING;
+		ais = lambda.startProcessing(ais);
 		AudioFormat audioFormat = ais.getFormat();
 		if (audioFormat.getChannels() == 1) {
 			if (outputMode != 0) {
