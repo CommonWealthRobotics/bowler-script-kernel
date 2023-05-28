@@ -23,7 +23,7 @@ public class TTSTest {
 				System.out.println(percentage+" "+status.toString());
 			}
 		};
-		BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
+		//BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
 //		BowlerKernel.speak("Coqui three ", 200, 0, 802, 1.0, 1.0,null);
 //		BowlerKernel.speak("Coqui two text to speech", 200, 0, 801, 1.0, 1.0,null);
 //		BowlerKernel.speak("Coqui two second shot", 200, 0, 801, 1.0, 1.0,null);
