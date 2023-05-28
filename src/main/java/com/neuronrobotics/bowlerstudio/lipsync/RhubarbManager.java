@@ -11,6 +11,7 @@ import java.io.StringWriter;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,7 +87,8 @@ public class RhubarbManager implements IAudioProcessingLambda {
 
 		InputStream is = process.getInputStream();
 		StringWriter writer = new StringWriter();
-		IOUtils.copy(is, writer, StandardCharsets.UTF_8);
+		Charset utf8 = StandardCharsets.UTF_8;
+		IOUtils.copy(is, writer, utf8);
 		String result = writer.toString();
 		// System.out.println(status);
 		// System.out.println(result);
