@@ -87,7 +87,7 @@ public class RhubarbManager implements IAudioProcessingLambda {
 
 		InputStream is = process.getInputStream();
 		StringWriter writer = new StringWriter();
-		Charset utf8 = StandardCharsets.UTF_8;
+		String utf8 = StandardCharsets.UTF_8.toString();
 		IOUtils.copy(is, writer, utf8);
 		String result = writer.toString();
 		// System.out.println(status);
