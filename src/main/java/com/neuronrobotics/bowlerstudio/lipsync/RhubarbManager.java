@@ -84,9 +84,7 @@ public class RhubarbManager implements IAudioProcessingLambda {
 		int exitCode = process.waitFor();
 
 		InputStream is = process.getInputStream();
-		InputStream err = process.getErrorStream();
 		String result = IOUtils.toString(is, StandardCharsets.UTF_8);
-		String status = IOUtils.toString(err, StandardCharsets.UTF_8);
 		// System.out.println(status);
 		// System.out.println(result);
 		Type TT_mapStringString = new TypeToken<HashMap<String, Object>>() {
