@@ -80,8 +80,9 @@ public class RhubarbManager implements IAudioProcessingLambda {
 		boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
 		Process process;
-
-		process = Runtime.getRuntime().exec(exe + " --machineReadable -f json " + f.getAbsolutePath());
+		String command = exe + " --machineReadable -f json " + f.getAbsolutePath();
+		System.out.println(command);
+		process = Runtime.getRuntime().exec(command);
 
 		int exitCode = process.waitFor();
 
