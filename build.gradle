@@ -3,15 +3,15 @@ buildscript {
 		springBootVersion = '1.2.7.RELEASE'
 	}
 	repositories {
-		[ jcenter(), mavenCentral()]
+		[jcenter(), mavenCentral()]
 	}
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:5.0.0'
-    }
-//	dependencies {
-//		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-//		classpath('io.spring.gradle:dependency-management-plugin:0.5.2.RELEASE')
-//	}commons-io
+	dependencies {
+		classpath 'com.github.jengelman.gradle.plugins:shadow:5.0.0'
+	}
+	//	dependencies {
+	//		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	//		classpath('io.spring.gradle:dependency-management-plugin:0.5.2.RELEASE')
+	//	}commons-io
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -27,10 +27,11 @@ apply plugin: 'maven'
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 sourceSets {
-	
+
 	test {
 		java {
-			srcDirs = ["test/java/src" ]  // Note @Peter's comment below
+			srcDirs = [
+				"test/java/src" ]  // Note @Peter's comment below
 		}
 	}
 }
@@ -53,46 +54,46 @@ boolean is64Bit() {
 	////System.out.println("Arch: "+getOsArch());
 	return getOsArch().startsWith("x86_64") || getOsArch().startsWith("amd64");
 }
- boolean isARM() {
+boolean isARM() {
 	return getOsArch().startsWith("arm");
 }
- boolean isCortexA8(){
+boolean isCortexA8(){
 	if(isARM()){
 		//TODO check for cortex a8 vs arm9 generic
 		return true;
 	}
 	return false;
 }
- boolean isWindows() {
+boolean isWindows() {
 	////System.out.println("OS name: "+getOsName());
 	return getOsName().toLowerCase().startsWith("windows") ||getOsName().toLowerCase().startsWith("microsoft") || getOsName().toLowerCase().startsWith("ms");
 }
 
- boolean isLinux() {
+boolean isLinux() {
 	return getOsName().toLowerCase().startsWith("linux");
 }
 
- boolean isOSX() {
+boolean isOSX() {
 	return getOsName().toLowerCase().startsWith("mac");
 }
 
- String getExtension() {
+String getExtension() {
 	if(isWindows()) {
 		return ".dll";
 	}
-	
+
 	if(isLinux()) {
 		return ".so";
 	}
-	
+
 	if(isOSX()) {
 		return ".jnilib";
 	}
-	
+
 	return "";
 }
 
-String getOsName() {	
+String getOsName() {
 	return System.getProperty("os.name");
 }
 
@@ -104,75 +105,75 @@ String getOsArch() {
 
 
 repositories {
-    mavenCentral()
-    jcenter()	
+	mavenCentral()
+	jcenter()
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/'  }
 	maven { url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'  }
 	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
 	//com.neuronrobotics hosting point
 	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
-//    maven {
-//        url "https://dl.bintray.com/s1m0nw1/KtsRunner"
-//        content {
-//            includeGroup("de.swirtz")
-//        }
-//    }
-//	maven {
-//		url "https://dl.bintray.com/ihmcrobotics/maven-release/"
-//		content {
-//			includeGroup("us.ihmc")
-//		}
-//	}
-//	maven {
-//		url "https://dl.bintray.com/ihmcrobotics/maven-vendor/"
-//		content {
-//			includeGroup("us.ihmc.thirdparty.jinput")
-//		}
-//	}
+	//    maven {
+	//        url "https://dl.bintray.com/s1m0nw1/KtsRunner"
+	//        content {
+	//            includeGroup("de.swirtz")
+	//        }
+	//    }
+	//	maven {
+	//		url "https://dl.bintray.com/ihmcrobotics/maven-release/"
+	//		content {
+	//			includeGroup("us.ihmc")
+	//		}
+	//	}
+	//	maven {
+	//		url "https://dl.bintray.com/ihmcrobotics/maven-vendor/"
+	//		content {
+	//			includeGroup("us.ihmc.thirdparty.jinput")
+	//		}
+	//	}
 }
 
 dependencies {
-	
+
 	//compile group: "de.swirtz", name: "ktsRunner", version: "0.0.7"
 	compile 'us.ihmc:jinput:2.0.6-ihmc2'
 	compile group: 'us.ihmc', name: 'ihmc-native-library-loader', version: '1.3.1'
-	
-	
+
+
 	compile 'com.google.crypto.tink:tink:1.3.0-rc1'
-	
+
 	compile group: 'org.json', name: 'json', version: '20180813'
-	
+
 	compile 'gov.nist.math:jama:1.0.2'
 
 	compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6'
 
 	compile group: 'org.reactfx', name: 'reactfx', version: '2.0-SNAPSHOT'
-		
+
 	compile group: 'org.codehaus.groovy', name: 'groovy', version:'2.3.7';
-//make grapes work
-		compile group: 'org.apache.ivy', name:'ivy', version:'2.2.0'
-			
+	//make grapes work
+	compile group: 'org.apache.ivy', name:'ivy', version:'2.2.0'
+
 	//compile group: 'org.controlsfx', name: 'controlsfx', version: '8.0.6'
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	compile group: 'commons-codec', name: 'commons-codec', version: '1.7'
 
 
-		
-// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
-implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.13.1.202206130422-r'
-// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.ssh.apache
-implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit.ssh.apache', version: '5.13.1.202206130422-r'
+
+	// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
+	implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.13.1.202206130422-r'
+	// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.ssh.apache
+	implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit.ssh.apache', version: '5.13.1.202206130422-r'
 
 
-// https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
-compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1'
+	// https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
+	compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1'
 
 
-	
+
 	compile group: 'com.squareup.okhttp', name: 'okhttp-urlconnection', version: '2.0.0'
 	compile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
 	compile group: 'com.infradna.tool', name: 'bridge-method-injector', version: '1.14'
-	
+
 	compile 'com.miglayout:miglayout-swing:4.2'
 	compile 'commons-io:commons-io:2.6'
 	compile group:'org.python',name:'jython',version:'2.5.3'
@@ -184,19 +185,19 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	compile "org.eclipse.jetty:jetty-servlets:9.0.2.v20130417"
 	compile "org.eclipse.jetty:jetty-webapp:9.0.2.v20130417"
 	compile "javax.servlet:javax.servlet-api:3.1.0"
-	
-	
+
+
 	//compile 'org.clojure:tools.nrepl:0.2.10'
 	//compile "overtone:overtone:0.9.1"
 	//compile "edu.cmu.sphinx:sphinx4-core:5prealpha-SNAPSHOT"
 	//compile "edu.cmu.sphinx:sphinx4-data:5prealpha-SNAPSHOT"
 	compile group: 'java3d', name: 'vecmath', version: '1.3.1'
-    compile 'org.slf4j:slf4j-simple:1.6.1'
-	
-	
+	compile 'org.slf4j:slf4j-simple:1.6.1'
+
+
 	//compile group: 'com.neuronrobotics', name:'GithubPasswordManager', version:'0.6.1'
-    //compile "com.neuronrobotics:JavaCad:0.14.0"
-    compile project('JCSG')
+	//compile "com.neuronrobotics:JavaCad:0.14.0"
+	compile project('JCSG')
 	//compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
 	//compile "com.neuronrobotics:java-bowler:3.25.4"
 	compile project('java-bowler')
@@ -205,77 +206,72 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.23.3-jar-with-dependencies.jar'])
 	//compile fileTree (dir: '../JCSG/build/libs/', includes: ['JavaCad-0.8.2.jar'])
 	//compile "com.neuronroboticsp:WalnutiQ:2.3.3"
-	
-	
+
+
 	/*
-	String basedir =System.getenv("OPENCV_DIR")+"/java/opencv-249.jar";
-	
-	if(isWindows()){
-	 	basedir =System.getenv("OPENCV_DIR")+"\\..\\..\\java\\opencv-249.jar";
-		println("OPENCV_DIR="+basedir);
-		compile files(basedir)
-	}
-	if(isOSX()){
-		basedir =System.getenv("OPENCV_DIR")+"../../java/opencv-249.jar";
-		println("OPENCV_DIR="+basedir);
-		if(System.getenv("OPENCV_DIR")!=null)
-			compile files(basedir)
-		else
-			//If you set your OPENCV_DIR environment variable, then we wouldnt have to do hacky things
-			compile files('/Applications/BowlerStudio.app/Contents/MacOS/opencv249build/bin/opencv-249.jar')
-	}
-	if(isLinux()){
-		//compile files('/usr/share/java/opencv-249.jar')
-		if(new File("/usr/share/OpenCV/java/").exists()){
-			System.out.println("Using the legacy opencv dir ")
-			compile fileTree (dir: '/usr/share/OpenCV/java/', includes: ['*opencv-24*.jar'])
-		}else{
-			compile fileTree (dir: '/usr/share/java/', includes: ['*opencv-24*.jar'])
-		}
-	}
-	*/
+	 String basedir =System.getenv("OPENCV_DIR")+"/java/opencv-249.jar";
+	 if(isWindows()){
+	 basedir =System.getenv("OPENCV_DIR")+"\\..\\..\\java\\opencv-249.jar";
+	 println("OPENCV_DIR="+basedir);
+	 compile files(basedir)
+	 }
+	 if(isOSX()){
+	 basedir =System.getenv("OPENCV_DIR")+"../../java/opencv-249.jar";
+	 println("OPENCV_DIR="+basedir);
+	 if(System.getenv("OPENCV_DIR")!=null)
+	 compile files(basedir)
+	 else
+	 //If you set your OPENCV_DIR environment variable, then we wouldnt have to do hacky things
+	 compile files('/Applications/BowlerStudio.app/Contents/MacOS/opencv249build/bin/opencv-249.jar')
+	 }
+	 if(isLinux()){
+	 //compile files('/usr/share/java/opencv-249.jar')
+	 if(new File("/usr/share/OpenCV/java/").exists()){
+	 System.out.println("Using the legacy opencv dir ")
+	 compile fileTree (dir: '/usr/share/OpenCV/java/', includes: ['*opencv-24*.jar'])
+	 }else{
+	 compile fileTree (dir: '/usr/share/java/', includes: ['*opencv-24*.jar'])
+	 }
+	 }
+	 */
 	//compile group: 'jfree', name: 'jfreechart', version: '1.0.12'
 	//compile group: 'jexcelapi', name: 'jxl', version: '2.4.2'
 	//compile group: 'com.google.zxing', name: 'zxing-parent', version: '3.2.0'
 	//compile group:'com.github.ellzord', name:'JALSE', version:'1.0.9'
-	
+
 	compile group:'de.huxhorn.sulky', name:'de.huxhorn.sulky.3rdparty.jlayer', version:'1.0'
-    //compile("org.springframework.boot:spring-boot-starter-web:1.2.7.RELEASE")
-    
-    compile 'com.google.code.gson:gson:2.5'
-    compile 'org.jsoup:jsoup:1.8.3'
+	//compile("org.springframework.boot:spring-boot-starter-web:1.2.7.RELEASE")
+
+	compile 'com.google.code.gson:gson:2.5'
+	compile 'org.jsoup:jsoup:1.8.3'
 	compile 'org.apache.httpcomponents:httpclient:4.5.1'
 	//compile 'cz.advel.jbullet:jbullet:20101010-1'
 	//compile 'org.bubblecloud.jbullet:jbullet:2.72.2.4'// jars local because mave repo for this went down
 	//compile "alda:alda:1.0.0-rc14"
-	
+
 	//Deep Learning 4 j and dependancies
 	/*
-	compile 'org.deeplearning4j:deeplearning4j-core:0.4-rc3.8'
-
-	//compile 'org.nd4j:nd4j-x86:0.4-rc3.8'
-	
-	compile 'org.deeplearning4j:deeplearning4j-nlp:0.4-rc3.8'
-	
-	compile 'org.deeplearning4j:deeplearning4j-ui:0.4-rc3.8'
-	
-	//compile 'com.google.guava:guava:19.0'
-	compile 'org.nd4j:canova-nd4j-image:0.0.0.14'
-	compile 'org.nd4j:canova-nd4j-codec:0.0.0.14'
-	compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1'
-	*/
+	 compile 'org.deeplearning4j:deeplearning4j-core:0.4-rc3.8'
+	 //compile 'org.nd4j:nd4j-x86:0.4-rc3.8'
+	 compile 'org.deeplearning4j:deeplearning4j-nlp:0.4-rc3.8'
+	 compile 'org.deeplearning4j:deeplearning4j-ui:0.4-rc3.8'
+	 //compile 'com.google.guava:guava:19.0'
+	 compile 'org.nd4j:canova-nd4j-image:0.0.0.14'
+	 compile 'org.nd4j:canova-nd4j-codec:0.0.0.14'
+	 compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1'
+	 */
 	// JScience:
-    //compile 'org.jscience:jscience:4.3.1'
-    
+	//compile 'org.jscience:jscience:4.3.1'
+
 	//compile 'javax.media:jmf:2.1.1e'
-	
-	//Weka 
+
+	//Weka
 	//compile 'nz.ac.waikato.cms.weka:weka-stable:3.6.13'
-	
+
 	//Firmata
 	compile 'com.github.kurbatov:firmata4j:2.3.4.1'
 
-	
+
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
 	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2')
@@ -286,10 +282,10 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-//	implementation('de.dfki.mary:voice-cmu-awb-time:5.2')
-//	{
-//		exclude group: 'commons-io', module: 'commons-io'
-//	}
+	//	implementation('de.dfki.mary:voice-cmu-awb-time:5.2')
+	//	{
+	//		exclude group: 'commons-io', module: 'commons-io'
+	//	}
 	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
@@ -322,8 +318,8 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	implementation 'ai.djl:api:'
 	implementation 'ai.djl.pytorch:pytorch-engine:0.22.1'
 	implementation 'ai.djl.pytorch:pytorch-jni:2.0.0-0.22.1'
-	implementation("ai.djl.onnxruntime:onnxruntime-engine:0.22.1") 
-	
+	implementation("ai.djl.onnxruntime:onnxruntime-engine:0.22.1")
+
 	// https://mvnrepository.com/artifact/com.github.docker-java/docker-java
 	implementation group: 'com.github.docker-java', name: 'docker-java', version: '3.3.0'
 	implementation group: 'com.github.docker-java', name: 'docker-java-transport-okhttp', version: '3.3.0'
@@ -331,6 +327,14 @@ compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version
 	implementation group: 'com.github.docker-java', name: 'docker-java-transport-httpclient5', version: '3.3.0'
 
 	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'2.2.0-pre.5'
+
+	// https://mvnrepository.com/artifact/org.robokind/org.robokind.api.speech
+	implementation group: 'org.robokind', name: 'org.robokind.api.speech', version: '0.9.5'
+	
+	// https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j
+	implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
+	
+
 
 }
 
@@ -341,29 +345,29 @@ jar {
 	jar.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	jar.baseName= "bowler-kernel";
 
-	manifest {  
-	    attributes(	
-	    				"Main-Class": 'com.neuronrobotics.bowlerstudio.BowlerKernel',
-		    			"Manifest-Version": "1.0",
-		    			"Created-By": "CommonWealth Cooperative",
-		    			"Specification-Title": props."app.name",
-		    			"Specification-Version": props."app.version",
-		    			"Specification-Vendor": "CommonWealth Robotics Cooperative",
-		    			"Implementation-Title": props."app.name",
-		    			"Implementation-Version" : props."app.version",
-		    			"Implementation-Vendor": "CommonWealth Robotics Cooperative"
+	manifest {
+		attributes(
+				"Main-Class": 'com.neuronrobotics.bowlerstudio.BowlerKernel',
+				"Manifest-Version": "1.0",
+				"Created-By": "CommonWealth Cooperative",
+				"Specification-Title": props."app.name",
+				"Specification-Version": props."app.version",
+				"Specification-Vendor": "CommonWealth Robotics Cooperative",
+				"Implementation-Title": props."app.name",
+				"Implementation-Version" : props."app.version",
+				"Implementation-Vendor": "CommonWealth Robotics Cooperative"
 
-		        		
-		    )
-		}
+
+				)
+	}
 }
 
 shadowJar {
 	zip64 true
-   //mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
-   baseName = 'bowler-kernel'
-   classifier = ""
-    mergeServiceFiles()
+	//mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
+	baseName = 'bowler-kernel'
+	classifier = ""
+	mergeServiceFiles()
 }
 
 group = "com.neuronrobotics"
@@ -388,53 +392,46 @@ test {
 	}
 }
 /*
-signing {
-	sign configurations.archives
-}
-
-uploadArchives {
-	repositories {
-	  mavenDeployer {
-		beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-  
-		repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-		  authentication(userName: ossrhUsername, password: ossrhPassword)
-		}
-  
-		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-		  authentication(userName: ossrhUsername, password: ossrhPassword)
-		}
-  
-		pom.project {
-		  name 'Bowler Scripting Kernel'
-		  packaging 'jar'
-		  // optionally artifactId can be defined here
-		  description 'A command line utility for accsing the bowler framework.'
-		  url 'http://neuronrobotics.com'
-  
-		  scm {
-			connection 			'scm:git:https://github.com/NeuronRobotics/bowler-script-kernel.git'
-			developerConnection 'scm:git:git@github.com:NeuronRobotics/bowler-script-kernel.git'
-			url 'https://github.com/NeuronRobotics/bowler-script-kernel'
-		  }
-  
-		  licenses {
-			license {
-			  name 'The Apache License, Version 2.0'
-			  url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-			}
-		  }
-  
-		  developers {
-			developer {
-			  id 'madhephaestus'
-			  name 'Kevin Harrington'
-			  email 'kharrington@neuronrobotics.com'
-			}
-		  }
-		}
-	  }
-	}
-  }
-  */
+ signing {
+ sign configurations.archives
+ }
+ uploadArchives {
+ repositories {
+ mavenDeployer {
+ beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+ repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+ authentication(userName: ossrhUsername, password: ossrhPassword)
+ }
+ snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+ authentication(userName: ossrhUsername, password: ossrhPassword)
+ }
+ pom.project {
+ name 'Bowler Scripting Kernel'
+ packaging 'jar'
+ // optionally artifactId can be defined here
+ description 'A command line utility for accsing the bowler framework.'
+ url 'http://neuronrobotics.com'
+ scm {
+ connection 			'scm:git:https://github.com/NeuronRobotics/bowler-script-kernel.git'
+ developerConnection 'scm:git:git@github.com:NeuronRobotics/bowler-script-kernel.git'
+ url 'https://github.com/NeuronRobotics/bowler-script-kernel'
+ }
+ licenses {
+ license {
+ name 'The Apache License, Version 2.0'
+ url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+ }
+ }
+ developers {
+ developer {
+ id 'madhephaestus'
+ name 'Kevin Harrington'
+ email 'kharrington@neuronrobotics.com'
+ }
+ }
+ }
+ }
+ }
+ }
+ */
 

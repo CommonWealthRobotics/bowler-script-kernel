@@ -237,7 +237,7 @@ public class CoquiDockerManager implements ITTSEngine {
 			Response response = new OkHttpClient().newCall(request).execute();
 			// Handle the response as needed
 			InputStream is = response.body().byteStream();
-			AudioPlayer tts = new AudioPlayer();
+			AudioPlayer tts = new AudioPlayer(text);
 			AudioInputStream audio = AudioSystem.getAudioInputStream(new BufferedInputStream(is));
 			tts.setAudio(audio);
 			tts.setGain(gainValue);
