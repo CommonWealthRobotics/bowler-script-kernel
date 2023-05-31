@@ -42,7 +42,7 @@ public class RhubarbManager implements IAudioProcessingLambda {
 	ArrayList<HashMap<AudioStatus, Double>> timeCodedVisemes = null;
 	private static String RhubarbVersion = "1.13.0";
 
-	public void processRaw(File f) throws Exception {
+	public void processRaw(File f, String TTSString) throws Exception {
 		String os = OSUtil.isLinux() ? "Linux" : OSUtil.isOSX() ? "macOS" : "Windows";
 		String exeExtention = OSUtil.isWindows() ? ".exe" : "";
 		File exe = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/Rhubarb-Lip-Sync/Rhubarb-Lip-Sync-"
@@ -115,14 +115,14 @@ public class RhubarbManager implements IAudioProcessingLambda {
 	}
 
 	@Override
-	public AudioInputStream startProcessing(AudioInputStream ais) {
+	public AudioInputStream startProcessing(AudioInputStream ais, String TTSString) {
 		File audio = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/tmp-tts.wav");
 		try {
 			System.out.println("Begin writing..");
 			AudioSystem.write(ais, AudioFileFormat.Type.WAVE, audio);
 			ais = AudioSystem.getAudioInputStream(audio);
 			// rhubarb!
-			processRaw(audio);
+			processRaw(audio,TTSString);
 			System.out.println("Done writing!");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

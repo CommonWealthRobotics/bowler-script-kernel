@@ -38,6 +38,7 @@ public class AudioPlayer extends Thread {
 	private Status status = Status.WAITING;
 	private boolean exitRequested = false;
 	private float gain = 1.0f;
+	private String TTSString;
 	private static double threshhold = 600 / 65535.0;
 	private static double lowerThreshhold = 100 / 65535.0;;
 	private static int integralDepth = 30;
@@ -95,7 +96,7 @@ public class AudioPlayer extends Thread {
 		}
 
 		@Override
-		public AudioInputStream startProcessing(AudioInputStream ais) {
+		public AudioInputStream startProcessing(AudioInputStream ais, String TTSString) {
 			stare = true;
 			return ais;
 		}
@@ -123,7 +124,8 @@ public class AudioPlayer extends Thread {
 	 * setAudio().
 	 *
 	 */
-	public AudioPlayer() {
+	public AudioPlayer(String tts) {
+		TTSString=tts;
 	}
 
 	/**
@@ -290,7 +292,7 @@ public class AudioPlayer extends Thread {
 	public void run() {
 
 		status = Status.PLAYING;
-		ais = lambda.startProcessing(ais);
+		ais = lambda.startProcessing(ais,TTSString);
 		AudioFormat audioFormat = ais.getFormat();
 		if (audioFormat.getChannels() == 1) {
 			if (outputMode != 0) {

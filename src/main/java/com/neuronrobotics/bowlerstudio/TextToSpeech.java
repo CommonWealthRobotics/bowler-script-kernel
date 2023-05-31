@@ -65,7 +65,7 @@ public class TextToSpeech implements ITTSEngine{
 			
 			// Player is a thread(threads can only run one time) so it can be
 			// used has to be initiated every time
-			tts = new AudioPlayer();
+			tts = new AudioPlayer(text);
 			tts.setAudio(audio);
 			tts.setGain(gainValue);
 			tts.setDaemon(daemon);
