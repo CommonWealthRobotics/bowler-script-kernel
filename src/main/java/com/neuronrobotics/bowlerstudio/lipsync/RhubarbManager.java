@@ -1,30 +1,22 @@
 package com.neuronrobotics.bowlerstudio.lipsync;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
-
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.UnsupportedAudioFileException;
-
 import org.apache.commons.io.IOUtils;
 
 import com.google.gson.Gson;
@@ -42,7 +34,7 @@ public class RhubarbManager implements IAudioProcessingLambda {
 	ArrayList<HashMap<AudioStatus, Double>> timeCodedVisemes = null;
 	private static String RhubarbVersion = "1.13.0";
 
-	public void processRaw(File f, String TTSString) throws Exception {
+	public void processRaw(File f, String ttsLocation) throws Exception {
 		String os = OSUtil.isLinux() ? "Linux" : OSUtil.isOSX() ? "macOS" : "Windows";
 		String exeExtention = OSUtil.isWindows() ? ".exe" : "";
 		File exe = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/Rhubarb-Lip-Sync/Rhubarb-Lip-Sync-"
@@ -80,7 +72,7 @@ public class RhubarbManager implements IAudioProcessingLambda {
 		boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
 		Process process;
-		String command = exe + " --machineReadable -f json " + f.getAbsolutePath();
+		String command = exe +" --dialogFile "+ttsLocation+" --machineReadable -f json " + f.getAbsolutePath();
 		System.out.println(command);
 		process = Runtime.getRuntime().exec(command);
 
@@ -121,8 +113,18 @@ public class RhubarbManager implements IAudioProcessingLambda {
 			System.out.println("Begin writing..");
 			AudioSystem.write(ais, AudioFileFormat.Type.WAVE, audio);
 			ais = AudioSystem.getAudioInputStream(audio);
+			File text = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/tmp-tts.txt");
+			if (!text.exists())
+				text.createNewFile();
+			try {
+				FileWriter myWriter = new FileWriter(text);
+				myWriter.write(TTSString);
+				myWriter.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			// rhubarb!
-			processRaw(audio,TTSString);
+			processRaw(audio, text.getAbsolutePath());
 			System.out.println("Done writing!");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -139,7 +141,7 @@ public class RhubarbManager implements IAudioProcessingLambda {
 			HashMap<AudioStatus, Double> map = timeCodedVisemes.get(0);
 			AudioStatus key = (AudioStatus) map.keySet().toArray()[0];
 			double value = map.get(key);
-			if(percent > value) {
+			if (percent > value) {
 				timeCodedVisemes.remove(0);
 				return update(key, amplitudeUnitVector, currentRollingAverage, currentDerivitiveTerm, percent);
 			}
