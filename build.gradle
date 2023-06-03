@@ -334,7 +334,9 @@ dependencies {
 	// https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j
 	implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
 	
-
+	// https://mvnrepository.com/artifact/com.alphacephei/vosk
+	implementation group: 'com.alphacephei', name: 'vosk', version: '0.3.45'
+	
 
 }
 

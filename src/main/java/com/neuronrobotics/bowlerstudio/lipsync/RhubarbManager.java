@@ -31,7 +31,7 @@ import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
 public class RhubarbManager implements IAudioProcessingLambda {
-	ArrayList<HashMap<AudioStatus, Double>> timeCodedVisemes = null;
+	ArrayList<TimeCodedViseme> timeCodedVisemes = null;
 	private static String RhubarbVersion = "1.13.0";
 
 	public void processRaw(File f, String ttsLocation) throws Exception {
@@ -95,12 +95,14 @@ public class RhubarbManager implements IAudioProcessingLambda {
 		List<Map<String, Object>> cues = (List<Map<String, Object>>) resultParsed.get("mouthCues");
 		for (Map<String, Object> cue : cues) {
 			double end = Double.parseDouble(cue.get("end").toString());
-			double percent = end / duration * 100.0;
-
+			double start = Double.parseDouble(cue.get("start").toString());
+//			double percent = end / duration * 100.0;
+//
 			AudioStatus val = AudioStatus.get(cue.get("value").toString().charAt(0));
-			System.out.println("End at " + percent + " " + val);
-			HashMap<AudioStatus, Double> map = new HashMap<>();
-			map.put(val, percent);
+//			System.out.println("End at " + percent + " " + val);
+//			HashMap<AudioStatus, Double> map = new HashMap<>();
+//			map.put(val, percent);
+			TimeCodedViseme map = new TimeCodedViseme(val, start, end, duration);
 			timeCodedVisemes.add(map);
 		}
 
@@ -134,20 +136,34 @@ public class RhubarbManager implements IAudioProcessingLambda {
 		return ais;
 	}
 
-	@Override
 	public AudioStatus update(AudioStatus current, double amplitudeUnitVector, double currentRollingAverage,
 			double currentDerivitiveTerm, double percent) {
+		// println timeCodedVisemes
+		AudioStatus ret = null;
 		if (timeCodedVisemes.size() > 0) {
-			HashMap<AudioStatus, Double> map = timeCodedVisemes.get(0);
-			AudioStatus key = (AudioStatus) map.keySet().toArray()[0];
-			double value = map.get(key);
+			TimeCodedViseme map = timeCodedVisemes.get(0);
+			AudioStatus key = map.status;
+			double value = map.getEndPercentage();
 			if (percent > value) {
 				timeCodedVisemes.remove(0);
-				return update(key, amplitudeUnitVector, currentRollingAverage, currentDerivitiveTerm, percent);
-			}
-			return key;
+				if (timeCodedVisemes.size() > 0)
+					ret = timeCodedVisemes.get(0).status;
+				else {
+					// println "\n\nERROR Audio got ahead of lip sync "+percent+"\n\n"
+					ret = AudioStatus.X_NO_SOUND;
+				}
+			} else if (percent > map.getStartPercentage())
+				ret = key;
+		} else {
+			// println "\n\nERROR Audio got ahead of lip sync "+percent+"\n\n"
 		}
-		return current;
+		if (ret == null)
+			ret = current;
+		if (current != ret) {
+			// println ret.toString()+" staarting at "+percent
+		}
+		return ret;
+
 	}
 
 }

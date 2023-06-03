@@ -7,6 +7,7 @@ import com.neuronrobotics.bowlerstudio.AudioStatus;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.ISpeakingProgress;
 import com.neuronrobotics.bowlerstudio.lipsync.RhubarbManager;
+import com.neuronrobotics.bowlerstudio.lipsync.VoskLipSync;
 
 
 
@@ -24,6 +25,9 @@ public class TTSTest {
 			}
 		};
 		//BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
+		AudioPlayer.setLambda (com.neuronrobotics.bowlerstudio.lipsync.VoskLipSync.get());
+		//BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
+
 //		BowlerKernel.speak("Coqui three ", 200, 0, 802, 1.0, 1.0,null);
 //		BowlerKernel.speak("Coqui two text to speech", 200, 0, 801, 1.0, 1.0,null);
 //		BowlerKernel.speak("Coqui two second shot", 200, 0, 801, 1.0, 1.0,null);
