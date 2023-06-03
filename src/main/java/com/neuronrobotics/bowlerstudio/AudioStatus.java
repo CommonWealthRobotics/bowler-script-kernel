@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 /**
  * Define the types of mouth shapes
  * 
@@ -82,21 +83,79 @@ public enum AudioStatus {
 	X_NO_SOUND('X');
 
 	private static final Map<Character, AudioStatus> lookup = new HashMap<>();
+	private static Map<String, AudioStatus> ArpabetToBlair;
 
 	static {
 		for (AudioStatus s : EnumSet.allOf(AudioStatus.class))
 			lookup.put(s.parsed, s);
+		ArpabetToBlair = new HashMap<>();
+		ArpabetToBlair.put("-", AudioStatus.X_NO_SOUND);
+		ArpabetToBlair.put("aa", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("ae", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("ah", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("ao", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("aw", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("ax", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("ay", AudioStatus.C_EH_AE_SOUNDS);
+		ArpabetToBlair.put("b", AudioStatus.A_PBM_SOUNDS);
+		ArpabetToBlair.put("bl", AudioStatus.A_PBM_SOUNDS);
+		ArpabetToBlair.put("ch", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("d", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("dx", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("dh", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("eh", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("em", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("el", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("en", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("eng", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("er", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("ey", AudioStatus.C_EH_AE_SOUNDS);
+		ArpabetToBlair.put("f", AudioStatus.G_F_V_SOUNDS);
+		ArpabetToBlair.put("g", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("hh", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("ih", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("iy", AudioStatus.C_EH_AE_SOUNDS);
+		ArpabetToBlair.put("jh", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("k", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("l", AudioStatus.H_L_SOUNDS);
+		ArpabetToBlair.put("m", AudioStatus.A_PBM_SOUNDS);
+		ArpabetToBlair.put("n", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("ng", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("nx", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("ow", AudioStatus.F_UW_OW_W_SOUNDS);
+		ArpabetToBlair.put("oy", AudioStatus.F_UW_OW_W_SOUNDS);
+		ArpabetToBlair.put("p", AudioStatus.A_PBM_SOUNDS);
+		ArpabetToBlair.put("q", AudioStatus.F_UW_OW_W_SOUNDS);
+		ArpabetToBlair.put("r", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("s", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("sh", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("t", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("th", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("uh", AudioStatus.D_AA_SOUNDS);
+		ArpabetToBlair.put("uw", AudioStatus.F_UW_OW_W_SOUNDS);
+		ArpabetToBlair.put("v", AudioStatus.G_F_V_SOUNDS);
+		ArpabetToBlair.put("w", AudioStatus.F_UW_OW_W_SOUNDS);
+		ArpabetToBlair.put("y", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("z", AudioStatus.B_KST_SOUNDS);
+		ArpabetToBlair.put("zh", AudioStatus.B_KST_SOUNDS);
 	}
 	public final char parsed;
 
 	public static AudioStatus get(char code) {
 		return lookup.get(code);
 	}
+	public static AudioStatus get(String code) {
+		return lookup.get((char)code.getBytes()[0]);
+	}
+	public static AudioStatus getFromPhoneme(String code) {
+		return ArpabetToBlair.get(code);
+	}
+	public static Set<String> getPhonemes() {
+		return ArpabetToBlair.keySet();
+	}
 	
 	public double mouthOpenVector() {
 		switch(this) {
-		case A_PBM_SOUNDS:
-			break;
 		case B_KST_SOUNDS:
 			return 0.3;
 		case C_EH_AE_SOUNDS:
@@ -106,11 +165,13 @@ public enum AudioStatus {
 		case E_AO_ER_SOUNDS:
 			return 0.6;
 		case F_UW_OW_W_SOUNDS:
-			return 0;
+			return 0.2;
 		case G_F_V_SOUNDS:
-			return 0;
+			return 0.1;
 		case H_L_SOUNDS:
-			return 1;
+			return 0.9;
+		case A_PBM_SOUNDS:
+			return 0.05;
 		case X_NO_SOUND:
 		default:
 			break;
