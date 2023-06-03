@@ -25,7 +25,7 @@ public class TTSTest {
 			}
 		};
 		//BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
-		AudioPlayer.setLambda (VoskLipSync.get());
+		AudioPlayer.setLambda (com.neuronrobotics.bowlerstudio.lipsync.VoskLipSync.get());
 		//BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
 
 //		BowlerKernel.speak("Coqui three ", 200, 0, 802, 1.0, 1.0,null);
