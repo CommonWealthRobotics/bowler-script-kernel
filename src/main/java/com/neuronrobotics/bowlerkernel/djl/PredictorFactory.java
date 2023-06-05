@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerkernel.djl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import ai.djl.MalformedModelException;
@@ -102,7 +103,21 @@ public class PredictorFactory {
 		}
 		return features;
 	}
-
+	public static float calculSimilarFaceFeature(float[] feature1, ArrayList<float[]> people) {
+		float ret = 0.0f;
+		float mod1 = 0.0f;
+		float mod2 = 0.0f;
+		int length = feature1.length;
+		for(int j=0;j<people.size();j++) {
+			float[] feature2 = people.get(j);
+			for (int i = 0; i < length; ++i) {
+				ret += feature1[i] * feature2[i];
+				mod1 += feature1[i] * feature1[i];
+				mod2 += feature2[i] * feature2[i];
+			}
+		}
+		return (float) ((ret / Math.sqrt(mod1) / Math.sqrt(mod2) + 1) / 2.0f);
+	}
 	public static float calculSimilarFaceFeature(float[] feature1, float[] feature2) {
 		float ret = 0.0f;
 		float mod1 = 0.0f;
