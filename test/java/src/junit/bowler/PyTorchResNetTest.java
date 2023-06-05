@@ -41,7 +41,7 @@ public class PyTorchResNetTest {
 		BufferedImage bimg = ImageIO.read(new URL(imageUrl));
 
 		Predictor<Image, DetectedObjects> predictor = PredictorFactory
-				.imageContentsFactory(ImagePredictorType.retinaface).newPredictor();
+				.imageContentsFactory(ImagePredictorType.retinaface);
 
 		for (int i = 0; i < 3; i++) {
 			Image img = ImageFactory.getInstance().fromImage(bimg);
@@ -55,8 +55,8 @@ public class PyTorchResNetTest {
 	public void testUltraNet() throws Exception {
 		BufferedImage bimg = ImageIO.read(new URL(imageUrl));
 
-		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.ultranet)
-				.newPredictor();
+		Predictor<Image, DetectedObjects> predictor = PredictorFactory
+				.imageContentsFactory(ImagePredictorType.ultranet);
 
 		for (int j = 0; j < 3; j++) {
 			Image img = ImageFactory.getInstance().fromImage(bimg);
@@ -71,11 +71,11 @@ public class PyTorchResNetTest {
 				List<Point> list = new ArrayList<>();
 				// keypoints in the image
 				path.forEachRemaining(list::add);
-				
+
 				Landmark lm;
 				if (Landmark.class.isInstance(cGetBoundingBox)) {
 					lm = (Landmark) cGetBoundingBox;
-					
+
 				}
 			}
 			saveBoundingBoxImage(img, objects, "ultranet");
@@ -96,8 +96,7 @@ public class PyTorchResNetTest {
 	@Test
 	public void testYolo() throws Exception {
 
-		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5)
-				.newPredictor();
+		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5);
 		for (int i = 0; i < 3; i++) {
 			Image input = ImageFactory.getInstance()
 					.fromUrl("https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg");
