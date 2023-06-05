@@ -336,8 +336,8 @@ dependencies {
 	
 	// https://mvnrepository.com/artifact/com.alphacephei/vosk
 	implementation group: 'com.alphacephei', name: 'vosk', version: '0.3.45'
-	
-
+	// Add OpenCV 
+	implementation 'org.openpnp:opencv:4.7.0-0'
 }
 
 
