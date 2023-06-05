@@ -19,10 +19,10 @@ public class PredictorFactory {
 	static {
 		Engine.getEngine("PyTorch"); // Make sure PyTorch engine is loaded
 	}
-	private static HashMap<ImagePredictorType, ZooModel<Image, DetectedObjects>> preloaded = new HashMap<>();
+	private static HashMap<ImagePredictorType, Predictor<Image, DetectedObjects>> preloaded = new HashMap<>();
 	private static Predictor<Image, float[]> features = null;
 
-	public static ZooModel<Image, DetectedObjects> imageContentsFactory(ImagePredictorType type)
+	public static Predictor<Image, DetectedObjects> imageContentsFactory(ImagePredictorType type)
 			throws ModelNotFoundException, MalformedModelException, IOException {
 		JniUtils.setGraphExecutorOptimize(false);
 
@@ -49,7 +49,8 @@ public class PredictorFactory {
 																													// engine
 						.build();
 
-				preloaded.put(type, criteriaretinaface.loadModel());
+				preloaded.put(type, criteriaretinaface.loadModel().newPredictor());
+				break;
 			case ultranet:
 				double confThresh = 0.85f;
 				double nmsThresh = 0.45f;
@@ -67,17 +68,20 @@ public class PredictorFactory {
 																										// engine
 						.build();
 
-				preloaded.put(type, criteria.loadModel());
-
+				preloaded.put(type, criteria.loadModel().newPredictor());
+				break;
 			case yolov5:
 				String MODEL_URL = "https://mlrepo.djl.ai/model/cv/object_detection/ai/djl/onnxruntime/yolo5s/0.0.1/yolov5s.zip";
 
 				Criteria<Image, DetectedObjects> criteria2 = Criteria.builder()
 						.setTypes(Image.class, DetectedObjects.class).optModelUrls(MODEL_URL).optEngine("OnnxRuntime")
 						.optTranslatorFactory(new YoloV5TranslatorFactory()).build();
-				preloaded.put(type, criteria2.loadModel());
+				preloaded.put(type, criteria2.loadModel().newPredictor());
+				break;
+			default:
+				throw new RuntimeException("No Model availible of type " + type);
+
 			}
-			throw new RuntimeException("No Model availible of type " + type);
 		}
 		return preloaded.get(type);
 	}
