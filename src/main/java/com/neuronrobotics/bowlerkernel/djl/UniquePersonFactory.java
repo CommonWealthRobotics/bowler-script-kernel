@@ -52,7 +52,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	private ArrayList<UniquePerson> shortTermMemory = new ArrayList<>();;
 	Predictor<Image, float[]> features;
 
-	private static double confidence = 0.90;
+	private static double confidence = 0.7;
 	private static long timeout = 30000;
 	private static long countPeople = 1;
 	private static int numberOfTrainingHashes = 20;
@@ -353,8 +353,9 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						});
 					}
 				}
-				if(p.features.size() > numberOfTrainingHashes) {
+				if(p.features.size() >= numberOfTrainingHashes && p.confidenceTarget != confidence) {
 					p.confidenceTarget = confidence;
+					save();
 				}
 			}
 		}
