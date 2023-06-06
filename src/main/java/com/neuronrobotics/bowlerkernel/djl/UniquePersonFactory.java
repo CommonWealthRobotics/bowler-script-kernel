@@ -322,10 +322,10 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 					if (found == false) {
 						resetHash();
-						countPeople++;
 						UniquePerson p = new UniquePerson();
 						p.features.add(id);
 						p.name = "Person " + (countPeople);
+						p.UUID = countPeople;
 						String tmpDirsLocation = System.getProperty("java.io.tmpdir") + "/idFiles/" + p.name + ".jpeg";
 						UniquePersonUI UI = getUI(p);
 						p.referenceImageLocation = tmpDirsLocation;
