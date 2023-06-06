@@ -248,15 +248,14 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					ai.djl.modality.cv.Image cmp = factory.fromImage(imgBuff);
 					Point point = local.get(imgBuff);
 					// println "Processing new image "
-					int minSize = 70;
-					if (imgBuff.getHeight() < minSize || imgBuff.getWidth() < minSize)
+					if (imgBuff.getHeight() < imgBuff.getWidth())
 						continue;
 					float[] id;
 					try {
 						id = features.predict(cmp);
 					} catch (Throwable ex) {
 						System.out.println("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
-						ex.printStackTrace();
+						//ex.printStackTrace();
 						continue;
 					}
 					boolean found = false;
