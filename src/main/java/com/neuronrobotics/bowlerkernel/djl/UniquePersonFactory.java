@@ -247,62 +247,12 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					}
 					boolean found = false;
 					ArrayList<UniquePerson> duplicates = new ArrayList<UniquePerson>();
-
+					// check long term first.
+					for (UniquePerson pp : longTermMemory) {
+						found = processMemory(tmpPersons, imgBuff, point, id, found, duplicates, pp);
+					}
 					for (UniquePerson pp : shortTermMemory) {
-						UniquePerson p = pp;
-
-						int count = 0;
-						// for(int i=0;i<p.features.size();i++) {
-						// float[] featureFloats =p.features.get(i);
-						float result = PredictorFactory.calculSimilarFaceFeature(id, p.features);
-						// println "Difference from "+p.name+" is "+result
-						if (result > p.confidenceTarget) {
-							if (found) {
-								duplicates.add(p);
-							} else {
-								count++;
-
-								p.timesSeen++;
-								found = true;
-								if (p.timesSeen > 2)
-									tmpPersons.put(p, point);
-								UniquePersonUI UI = getUI(p);
-
-								if (p.timesSeen > 3 && !workingMemory.getChildren().contains(UI.box)) {
-									// on the third seen, display
-									WritableImage tmpImg = SwingFXUtils.toFXImage(imgBuff, null);
-									UI.box.getChildren().addAll(new ImageView(tmpImg));
-									UI.box.getChildren().addAll(new Label(p.name));
-									UI.percent = new Label();
-									UI.box.getChildren().addAll(UI.percent);
-									Platform.runLater(() -> {
-										workingMemory.getChildren().add(UI.box);
-									});
-								}
-								p.time = System.currentTimeMillis();
-								// if(result<(confidence+0.01))
-								// if (p.features.size() < numberOfTrainingHashes) {
-								p.features.add(id);
-								int percent = (int) (((double) p.features.size()) / ((double) numberOfTrainingHashes)
-										* 100);
-								if (percent > 100)
-									percent = 100;
-								double perc = percent;
-								// println "Trained "+percent;
-								Platform.runLater(() -> {
-									UI.percent.setText(" : Trained " + perc + "%");
-								});
-								p.confidenceTarget = confidence;
-								if (p.features.size() == numberOfTrainingHashes) {
-									// println " Trained "+p.name;
-									Platform.runLater(() -> {
-										UI.box.getChildren().addAll(new Label(" Done! "));
-									});
-
-								}
-								// }
-							}
-						}
+						found = processMemory(tmpPersons, imgBuff, point, id, found, duplicates, pp);
 					}
 					for (int i = 0; i < shortTermMemory.size(); i++) {
 						UniquePerson p = shortTermMemory.get(i);
@@ -311,7 +261,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						}
 					}
 					for (UniquePerson p : duplicates) {
-						shortTermMemory.remove(p);
+						if(!longTermMemory.contains(p))
+							shortTermMemory.remove(p);
 						UniquePersonUI UI = getUI(p);
 						uiElelments.remove(p);
 						Platform.runLater(() -> {
@@ -341,6 +292,65 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			}
 
 		}
+	}
+
+	private boolean processMemory(HashMap<UniquePerson, org.opencv.core.Point> tmpPersons, BufferedImage imgBuff,
+			Point point, float[] id, boolean found, ArrayList<UniquePerson> duplicates, UniquePerson pp) {
+		UniquePerson p = pp;
+
+		int count = 0;
+		// for(int i=0;i<p.features.size();i++) {
+		// float[] featureFloats =p.features.get(i);
+		float result = PredictorFactory.calculSimilarFaceFeature(id, p.features);
+		// println "Difference from "+p.name+" is "+result
+		if (result > p.confidenceTarget) {
+			if (found) {
+				duplicates.add(p);
+			} else {
+				count++;
+
+				p.timesSeen++;
+				found = true;
+				if (p.timesSeen > 2)
+					tmpPersons.put(p, point);
+				UniquePersonUI UI = getUI(p);
+
+				if (p.timesSeen > 3 && !workingMemory.getChildren().contains(UI.box)) {
+					// on the third seen, display
+					WritableImage tmpImg = SwingFXUtils.toFXImage(imgBuff, null);
+					UI.box.getChildren().addAll(new ImageView(tmpImg));
+					UI.box.getChildren().addAll(new Label(p.name));
+					UI.percent = new Label();
+					UI.box.getChildren().addAll(UI.percent);
+					Platform.runLater(() -> {
+						workingMemory.getChildren().add(UI.box);
+					});
+				}
+				p.time = System.currentTimeMillis();
+				// if(result<(confidence+0.01))
+				// if (p.features.size() < numberOfTrainingHashes) {
+				p.features.add(id);
+				int percent = (int) (((double) p.features.size()) / ((double) numberOfTrainingHashes)
+						* 100);
+				if (percent > 100)
+					percent = 100;
+				double perc = percent;
+				// println "Trained "+percent;
+				Platform.runLater(() -> {
+					UI.percent.setText(" : Trained " + perc + "%");
+				});
+				p.confidenceTarget = confidence;
+				if (p.features.size() == numberOfTrainingHashes) {
+					// println " Trained "+p.name;
+					Platform.runLater(() -> {
+						UI.box.getChildren().addAll(new Label(" Done! "));
+					});
+
+				}
+				// }
+			}
+		}
+		return found;
 	}
 
 	@Override
@@ -415,9 +425,6 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			try {
 				jsonString = new String(Files.readAllBytes(Paths.get(database.getAbsolutePath())));
 				longTermMemory = gson.fromJson(jsonString, TT_mapStringString);
-				for (UniquePerson u : longTermMemory) {
-					shortTermMemory.add(u);
-				}
 				resetHash();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
