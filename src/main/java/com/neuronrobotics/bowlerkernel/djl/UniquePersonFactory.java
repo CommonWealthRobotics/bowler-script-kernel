@@ -67,7 +67,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 	private class UniquePersonUI {
 		HBox box = new HBox();
-		TextField percent = new TextField();
+		TextField name = new TextField();
+		Label percent = new Label();
 	}
 
 	private HashMap<UniquePerson, UniquePersonUI> uiElelments = new HashMap<UniquePerson, UniquePersonFactory.UniquePersonUI>();
@@ -271,11 +272,13 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					for (UniquePerson p : duplicates) {
 						if (!longTermMemory.contains(p))
 							shortTermMemory.remove(p);
-						UniquePersonUI UI = getUI(p);
-						uiElelments.remove(p);
-						Platform.runLater(() -> {
-							workingMemory.getChildren().remove(UI.box);
-						});
+						if (workingMemory != null) {
+							UniquePersonUI UI = getUI(p);
+							uiElelments.remove(p);
+							Platform.runLater(() -> {
+								workingMemory.getChildren().remove(UI.box);
+							});
+						}
 						// println "Removing "+p.name
 					}
 
@@ -286,13 +289,13 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						p.name = "Person " + (countPeople);
 						p.UUID = countPeople;
 						String tmpDirsLocation = System.getProperty("java.io.tmpdir") + "/idFiles/" + p.name + ".jpeg";
-						UniquePersonUI UI = getUI(p);
-						UI.percent.setOnAction(event->{
-							String newName = UI.percent.getText();
-							System.out.println("Renaming "+p.name+" to "+newName);
-							p.name=newName;
-							save();
-						});
+						if (workingMemory != null)
+							getUI(p).name.setOnAction(event -> {
+								String newName = getUI(p).name.getText();
+								System.out.println("Renaming " + p.name + " to " + newName);
+								p.name = newName;
+								save();
+							});
 						p.referenceImageLocation = tmpDirsLocation;
 						// println "New person found! "+tmpDirsLocation
 						shortTermMemory.add(p);
@@ -328,17 +331,18 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				if (p.timesSeen > 2)
 					tmpPersons.put(p, point);
 				UniquePersonUI UI = getUI(p);
-
-				if (p.timesSeen > 3 && !workingMemory.getChildren().contains(UI.box)) {
-					// on the third seen, display
-					WritableImage tmpImg = SwingFXUtils.toFXImage(imgBuff, null);
-					UI.box.getChildren().addAll(new ImageView(tmpImg));
-					UI.box.getChildren().addAll(new Label(p.name));
-					UI.box.getChildren().addAll(UI.percent);
-					Platform.runLater(() -> {
-						workingMemory.getChildren().add(UI.box);
-					});
-				}
+				if (workingMemory != null)
+					if (p.timesSeen > 3 && !workingMemory.getChildren().contains(UI.box)) {
+						// on the third seen, display
+						UI.name.setText(p.name);
+						WritableImage tmpImg = SwingFXUtils.toFXImage(imgBuff, null);
+						UI.box.getChildren().addAll(new ImageView(tmpImg));
+						UI.box.getChildren().addAll(UI.name);
+						UI.box.getChildren().addAll(UI.percent);
+						Platform.runLater(() -> {
+							workingMemory.getChildren().add(UI.box);
+						});
+					}
 				p.time = System.currentTimeMillis();
 				// if(result<(confidence+0.01))
 				int percent = (int) (((double) p.features.size()) / ((double) numberOfTrainingHashes) * 100);
@@ -346,20 +350,22 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					percent = 100;
 				double perc = percent;
 				// println "Trained "+percent;
-				Platform.runLater(() -> {
-					UI.percent.setText(" : Trained " + perc + "%");
-				});
+				if (workingMemory != null)
+					Platform.runLater(() -> {
+						UI.percent.setText(" : Trained " + perc + "%");
+					});
 
 				if (p.features.size() < numberOfTrainingHashes && result < 0.95) {
 					p.features.add(id);
 					if (p.features.size() == numberOfTrainingHashes) {
 						// println " Trained "+p.name;
-						Platform.runLater(() -> {
-							UI.box.getChildren().addAll(new Label(" Done! "));
-						});
+						if (workingMemory != null)
+							Platform.runLater(() -> {
+								UI.box.getChildren().addAll(new Label(" Done! "));
+							});
 					}
 				}
-				if(p.features.size() >= numberOfTrainingHashes && p.confidenceTarget != confidence) {
+				if (p.features.size() >= numberOfTrainingHashes && p.confidenceTarget != confidence) {
 					p.confidenceTarget = confidence;
 					save();
 				}
@@ -386,7 +392,6 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 		return tmp;
 	}
-
 
 	/**
 	 * @param workingMemory the workingMemory to set
