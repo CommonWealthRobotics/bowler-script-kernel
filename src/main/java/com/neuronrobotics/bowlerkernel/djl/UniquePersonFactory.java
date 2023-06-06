@@ -40,6 +40,7 @@ import java.util.List;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class UniquePersonFactory extends NonBowlerDevice {
@@ -189,15 +190,21 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		try {
 			Mat tmpImg = new Mat(matrix, crop);
 			Mat image_roi = new Mat();
+			int fixedWidth = 100;
+			double scale = ((double) tmpImg.cols()) / ((double) fixedWidth);
+
 			// Converting the image to grey scale
 			Imgproc.cvtColor(tmpImg, image_roi, Imgproc.COLOR_RGB2GRAY);
-			BufferedImage image = new BufferedImage(crop.width,
-					crop.height, BufferedImage.TYPE_BYTE_GRAY);
+			int rows = (int) (image_roi.rows() / scale);
+			Mat image_roi_resized = new Mat(rows, 100, Imgproc.COLOR_RGB2GRAY);
+			Imgproc.resize(image_roi, image_roi_resized, image_roi_resized.size(), 0, 0, Imgproc.INTER_NEAREST);
+			BufferedImage image = new BufferedImage(image_roi_resized.width(), image_roi_resized.height(),
+					BufferedImage.TYPE_BYTE_GRAY);
 			WritableRaster raster = image.getRaster();
 			DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
 			byte[] data = dataBuffer.getData();
-			image_roi.get(0, 0, data);
-			local.put(image, new Point(nose.getX(),nose.getY()));
+			image_roi_resized.get(0, 0, data);
+			local.put(image, new Point(nose.getX(), nose.getY()));
 		} catch (Throwable tr) {
 			tr.printStackTrace();
 		}
@@ -220,15 +227,15 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				local.putAll(factoryFromImageTMp);
 				factoryFromImageTMp = null;
 				for (UniquePerson up : shortTermMemory) {
-					if (up.timesSeen > numberOfTrainingHashes) {
+					if (up.features.size() >= numberOfTrainingHashes) {
 						if (!longTermMemory.contains(up)) {
 							longTermMemory.add(up);
-							System.out.println("Saving new Face to dataabase " + up.name);
+							System.out.println("Saving new Face to database " + up.name);
 							save();
 						}
 					}
 				}
-				
+
 				HashMap<UniquePerson, org.opencv.core.Point> tmpPersons = new HashMap<>();
 				for (BufferedImage imgBuff : local.keySet()) {
 					ai.djl.modality.cv.Image cmp = factory.fromImage(imgBuff);
@@ -261,7 +268,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						}
 					}
 					for (UniquePerson p : duplicates) {
-						if(!longTermMemory.contains(p))
+						if (!longTermMemory.contains(p))
 							shortTermMemory.remove(p);
 						UniquePersonUI UI = getUI(p);
 						uiElelments.remove(p);
@@ -328,10 +335,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				}
 				p.time = System.currentTimeMillis();
 				// if(result<(confidence+0.01))
-				// if (p.features.size() < numberOfTrainingHashes) {
-				p.features.add(id);
-				int percent = (int) (((double) p.features.size()) / ((double) numberOfTrainingHashes)
-						* 100);
+				int percent = (int) (((double) p.features.size()) / ((double) numberOfTrainingHashes) * 100);
 				if (percent > 100)
 					percent = 100;
 				double perc = percent;
@@ -339,15 +343,19 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				Platform.runLater(() -> {
 					UI.percent.setText(" : Trained " + perc + "%");
 				});
-				p.confidenceTarget = confidence;
-				if (p.features.size() == numberOfTrainingHashes) {
-					// println " Trained "+p.name;
-					Platform.runLater(() -> {
-						UI.box.getChildren().addAll(new Label(" Done! "));
-					});
 
+				if (p.features.size() < numberOfTrainingHashes && result < 0.95) {
+					p.features.add(id);
+					if (p.features.size() == numberOfTrainingHashes) {
+						// println " Trained "+p.name;
+						Platform.runLater(() -> {
+							UI.box.getChildren().addAll(new Label(" Done! "));
+						});
+					}
 				}
-				// }
+				if(p.features.size() > numberOfTrainingHashes) {
+					p.confidenceTarget = confidence;
+				}
 			}
 		}
 		return found;
@@ -397,12 +405,12 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		countPeople = 0;
 		for (UniquePerson u : longTermMemory) {
 			if (u.UUID >= countPeople)
-				countPeople = u.UUID+1;
+				countPeople = u.UUID + 1;
 
 		}
 		for (UniquePerson u : shortTermMemory) {
 			if (u.UUID >= countPeople)
-				countPeople = u.UUID+1;
+				countPeople = u.UUID + 1;
 
 		}
 	}
