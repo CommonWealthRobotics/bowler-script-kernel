@@ -55,7 +55,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	private ArrayList<UniquePerson> shortTermMemory = new ArrayList<>();;
 	Predictor<Image, float[]> features;
 
-	private static double confidence = 0.7;
+	private static double confidence = 0.8;
 	private static long timeout = 30000;
 	private static long countPeople = 1;
 	private static int numberOfTrainingHashes = 20;
@@ -275,14 +275,15 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						}
 					}
 					for (UniquePerson p : duplicates) {
-						if (!longTermMemory.contains(p))
+						if (!longTermMemory.contains(p)) {
 							shortTermMemory.remove(p);
-						if (workingMemory != null) {
-							UniquePersonUI UI = getUI(p);
-							uiElelments.remove(p);
-							Platform.runLater(() -> {
-								workingMemory.getChildren().remove(UI.box);
-							});
+							if (workingMemory != null) {
+								UniquePersonUI UI = getUI(p);
+								uiElelments.remove(p);
+								Platform.runLater(() -> {
+									workingMemory.getChildren().remove(UI.box);
+								});
+							}
 						}
 						// println "Removing "+p.name
 					}

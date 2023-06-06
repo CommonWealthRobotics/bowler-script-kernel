@@ -9,5 +9,5 @@ public class UniquePerson {
 	public String referenceImageLocation;
 	public long timesSeen = 1;
 	public long time=System.currentTimeMillis();
-	double confidenceTarget = 0.7;
+	double confidenceTarget = UniquePersonFactory.getConfidence();
 }
