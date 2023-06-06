@@ -228,7 +228,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			processFlag = false;
 			try {
 				HashMap<BufferedImage, Point> local = new HashMap<>();
-				local.putAll(factoryFromImageTMp);
+				if (factoryFromImageTMp != null)
+					local.putAll(factoryFromImageTMp);
 				factoryFromImageTMp = null;
 				for (UniquePerson up : shortTermMemory) {
 					if (up.features.size() >= numberOfTrainingHashes) {
@@ -311,7 +312,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			String newName = getUI(p).name.getText();
 			System.out.println("Renaming " + p.name + " to " + newName);
 			p.name = newName;
-			new Thread(()->save()).start();
+			new Thread(() -> save()).start();
 		};
 	}
 
