@@ -230,6 +230,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				HashMap<BufferedImage, Point> local = new HashMap<>();
 				if (factoryFromImageTMp != null)
 					local.putAll(factoryFromImageTMp);
+				else
+					continue;
 				factoryFromImageTMp = null;
 				for (UniquePerson up : shortTermMemory) {
 					if (up.features.size() >= numberOfTrainingHashes) {
