@@ -185,6 +185,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		if (factoryFromImageTMp == null) {
 			factoryFromImageTMp = new HashMap<BufferedImage, Point>();
 		}
+		HashMap<BufferedImage, Point> local = factoryFromImageTMp;
 		try {
 			Mat tmpImg = new Mat(matrix, crop);
 			Mat image_roi = new Mat();
@@ -196,7 +197,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
 			byte[] data = dataBuffer.getData();
 			image_roi.get(0, 0, data);
-			factoryFromImageTMp.put(image, new Point(nose.getX(),nose.getY()));
+			local.put(image, new Point(nose.getX(),nose.getY()));
 		} catch (Throwable tr) {
 			tr.printStackTrace();
 		}
