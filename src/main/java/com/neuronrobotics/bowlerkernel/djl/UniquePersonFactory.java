@@ -58,7 +58,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	private static double confidence = 0.8;
 	private static long timeout = 30000;
 	private static long countPeople = 1;
-	private static int numberOfTrainingHashes = 20;
+	private static int numberOfTrainingHashes = 30;
 	private Thread processor;
 	private boolean run = true;
 	private HashMap<BufferedImage, Point> factoryFromImageTMp = null;
