@@ -22,6 +22,8 @@ import ai.djl.pytorch.jni.JniUtils;
 import ai.djl.repository.zoo.ModelNotFoundException;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
@@ -289,13 +291,6 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						p.name = "Person " + (countPeople);
 						p.UUID = countPeople;
 						String tmpDirsLocation = System.getProperty("java.io.tmpdir") + "/idFiles/" + p.name + ".jpeg";
-						if (workingMemory != null)
-							getUI(p).name.setOnAction(event -> {
-								String newName = getUI(p).name.getText();
-								System.out.println("Renaming " + p.name + " to " + newName);
-								p.name = newName;
-								save();
-							});
 						p.referenceImageLocation = tmpDirsLocation;
 						// println "New person found! "+tmpDirsLocation
 						shortTermMemory.add(p);
@@ -309,6 +304,15 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			}
 
 		}
+	}
+
+	private EventHandler<ActionEvent> setAction(UniquePerson p) {
+		return event -> {
+			String newName = getUI(p).name.getText();
+			System.out.println("Renaming " + p.name + " to " + newName);
+			p.name = newName;
+			new Thread(()->save()).start();
+		};
 	}
 
 	private boolean processMemory(HashMap<UniquePerson, org.opencv.core.Point> tmpPersons, BufferedImage imgBuff,
@@ -339,6 +343,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						UI.box.getChildren().addAll(new ImageView(tmpImg));
 						UI.box.getChildren().addAll(UI.name);
 						UI.box.getChildren().addAll(UI.percent);
+						UI.name.setOnAction(setAction(p));
 						Platform.runLater(() -> {
 							workingMemory.getChildren().add(UI.box);
 						});
