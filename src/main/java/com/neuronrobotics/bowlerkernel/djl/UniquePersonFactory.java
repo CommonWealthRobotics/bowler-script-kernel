@@ -387,12 +387,12 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		countPeople = 0;
 		for (UniquePerson u : longTermMemory) {
 			if (u.UUID >= countPeople)
-				countPeople = u.UUID;
+				countPeople = u.UUID+1;
 
 		}
 		for (UniquePerson u : shortTermMemory) {
 			if (u.UUID >= countPeople)
-				countPeople = u.UUID;
+				countPeople = u.UUID+1;
 
 		}
 	}
