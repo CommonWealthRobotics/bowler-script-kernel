@@ -23,6 +23,7 @@ import ai.djl.repository.zoo.ModelNotFoundException;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.HBox;
@@ -66,7 +67,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 	private class UniquePersonUI {
 		HBox box = new HBox();
-		Label percent = new Label();
+		TextField percent = new TextField();
 	}
 
 	private HashMap<UniquePerson, UniquePersonUI> uiElelments = new HashMap<UniquePerson, UniquePersonFactory.UniquePersonUI>();
@@ -286,6 +287,12 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						p.UUID = countPeople;
 						String tmpDirsLocation = System.getProperty("java.io.tmpdir") + "/idFiles/" + p.name + ".jpeg";
 						UniquePersonUI UI = getUI(p);
+						UI.percent.setOnAction(event->{
+							String newName = UI.percent.getText();
+							System.out.println("Renaming "+p.name+" to "+newName);
+							p.name=newName;
+							save();
+						});
 						p.referenceImageLocation = tmpDirsLocation;
 						// println "New person found! "+tmpDirsLocation
 						shortTermMemory.add(p);
@@ -327,7 +334,6 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					WritableImage tmpImg = SwingFXUtils.toFXImage(imgBuff, null);
 					UI.box.getChildren().addAll(new ImageView(tmpImg));
 					UI.box.getChildren().addAll(new Label(p.name));
-					UI.percent = new Label();
 					UI.box.getChildren().addAll(UI.percent);
 					Platform.runLater(() -> {
 						workingMemory.getChildren().add(UI.box);
@@ -381,12 +387,6 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		return tmp;
 	}
 
-	/**
-	 * @return the workingMemory
-	 */
-	public VBox getWorkingMemory() {
-		return workingMemory;
-	}
 
 	/**
 	 * @param workingMemory the workingMemory to set
