@@ -300,9 +300,11 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						shortTermMemory.add(p);
 					}
 				}
-				if (currentPersons != null)
-					currentPersons.clear();
-				currentPersons = tmpPersons;
+				synchronized (currentPersons) {
+					if (currentPersons != null)
+						currentPersons.clear();
+					currentPersons = tmpPersons;
+				}
 			} catch (Throwable tr) {
 				tr.printStackTrace(); // run=false;
 			}
@@ -396,8 +398,9 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		if (currentPersons == null)
 			return null;
 		HashMap<UniquePerson, Point> tmp = new HashMap<UniquePerson, Point>();
-
-		tmp.putAll(currentPersons);
+		synchronized (currentPersons) {
+			tmp.putAll(currentPersons);
+		}
 
 		return tmp;
 	}
