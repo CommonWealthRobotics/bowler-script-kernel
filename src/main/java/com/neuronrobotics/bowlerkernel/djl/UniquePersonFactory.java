@@ -386,12 +386,12 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	private void resetHash() {
 		countPeople = 0;
 		for (UniquePerson u : longTermMemory) {
-			if (u.UUID > countPeople)
+			if (u.UUID >= countPeople)
 				countPeople = u.UUID;
 
 		}
 		for (UniquePerson u : shortTermMemory) {
-			if (u.UUID > countPeople)
+			if (u.UUID >= countPeople)
 				countPeople = u.UUID;
 
 		}
