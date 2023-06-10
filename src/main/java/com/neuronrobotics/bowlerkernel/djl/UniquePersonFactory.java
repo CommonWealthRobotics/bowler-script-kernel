@@ -115,14 +115,14 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 	public void clear() {
 		if (currentPersons == null)
-			return ;
+			return;
 		else
 			synchronized (currentPersons) {
 				currentPersons.clear();
 			}
 		if (factoryFromImageTMp != null) {
 			factoryFromImageTMp.clear();
-			factoryFromImageTMp=null;
+			factoryFromImageTMp = null;
 		}
 	}
 
@@ -137,6 +137,12 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if (workingMemory != null)
+			for (UniquePerson up : shortTermMemory) {
+				Platform.runLater(() -> {
+					getUI(up).name.setText(up.name);
+				});
+			}
 		return jsonString;
 	}
 
@@ -377,7 +383,6 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				if (workingMemory != null)
 					Platform.runLater(() -> {
 						UI.percent.setText(" : Trained " + perc + "%");
-						UI.name.setText(p.name);
 					});
 
 				if (p.features.size() < numberOfTrainingHashes && result < 0.95) {
