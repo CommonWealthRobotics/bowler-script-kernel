@@ -364,6 +364,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				if (workingMemory != null)
 					Platform.runLater(() -> {
 						UI.percent.setText(" : Trained " + perc + "%");
+						UI.name.setText(p.name);
 					});
 
 				if (p.features.size() < numberOfTrainingHashes && result < 0.95) {
