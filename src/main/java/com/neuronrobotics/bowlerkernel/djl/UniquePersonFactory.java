@@ -114,9 +114,14 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	public void clear() {
-		if (currentPersons == null)
-			return;
-		else
+		while(isProcessFlag()) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		if (currentPersons != null)
 			synchronized (currentPersons) {
 				currentPersons.clear();
 			}
