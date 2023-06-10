@@ -113,6 +113,19 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 	}
 
+	public void clear() {
+		if (currentPersons == null)
+			return ;
+		else
+			synchronized (currentPersons) {
+				currentPersons.clear();
+			}
+		if (factoryFromImageTMp != null) {
+			factoryFromImageTMp.clear();
+			factoryFromImageTMp=null;
+		}
+	}
+
 	public String save() {
 		String jsonString = gson.toJson(longTermMemory, TT_mapStringString);
 		Path path = Paths.get(getDatabase().getAbsolutePath());
@@ -211,7 +224,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			image_roi_resized.get(0, 0, data);
 			local.put(image, new Point(nose.getX(), nose.getY()));
 		} catch (Throwable tr) {
-			tr.printStackTrace();
+			// tr.printStackTrace();
 		}
 	}
 
@@ -228,7 +241,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			}
 
 			try {
-				
+
 				for (UniquePerson up : shortTermMemory) {
 					if (up.features.size() >= numberOfTrainingHashes) {
 						if (!longTermMemory.contains(up)) {
@@ -239,7 +252,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					}
 				}
 				HashMap<BufferedImage, Point> local = localMailbox;
-				localMailbox=null;
+				localMailbox = null;
 				HashMap<UniquePerson, org.opencv.core.Point> tmpPersons = new HashMap<>();
 				for (BufferedImage imgBuff : local.keySet()) {
 					ai.djl.modality.cv.Image cmp = factory.fromImage(imgBuff);
@@ -252,7 +265,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						id = features.predict(cmp);
 					} catch (Throwable ex) {
 						System.out.println("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
-						//ex.printStackTrace();
+						// ex.printStackTrace();
 						continue;
 					}
 					boolean found = false;
@@ -297,13 +310,13 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					}
 				}
 				local.clear();
-				local=null;
+				local = null;
 				if (currentPersons != null) {
 					synchronized (currentPersons) {
 						currentPersons.clear();
 						currentPersons = tmpPersons;
 					}
-				}else
+				} else
 					currentPersons = tmpPersons;
 			} catch (Throwable tr) {
 				tr.printStackTrace(); // run=false;
@@ -411,10 +424,11 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	 * @param workingMemory the workingMemory to set
 	 */
 	public void setWorkingMemory(VBox workingMemory) {
-		if(this.workingMemory !=null) {
+		if (this.workingMemory != null) {
 			this.workingMemory.getChildren().clear();
 			uiElelments.clear();
 		}
+		clear();
 		this.workingMemory = workingMemory;
 	}
 
@@ -476,11 +490,11 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	 * @param processFlag the processFlag to set
 	 */
 	public void setProcessFlag() {
-		if(isProcessFlag() ) {
-			//discard this set of faces to process.
+		if (isProcessFlag()) {
+			// discard this set of faces to process.
 			factoryFromImageTMp.clear();
-			factoryFromImageTMp=null;
-			return ;//processor is running, do not interrupt it.
+			factoryFromImageTMp = null;
+			return;// processor is running, do not interrupt it.
 		}
 		localMailbox = new HashMap<>();
 		if (factoryFromImageTMp != null)
@@ -489,6 +503,6 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			return;
 		factoryFromImageTMp = null;
 		this.processFlag = true;
-		
+
 	}
 }
