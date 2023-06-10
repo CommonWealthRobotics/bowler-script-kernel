@@ -74,6 +74,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	private HashMap<UniquePerson, UniquePersonUI> uiElelments = new HashMap<UniquePerson, UniquePersonFactory.UniquePersonUI>();
+	private HashMap<BufferedImage, Point> localMailbox;
 
 	private UniquePersonUI getUI(UniquePerson p) {
 		if (uiElelments.get(p) == null) {
@@ -112,6 +113,24 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 	}
 
+	public void clear() {
+		while(isProcessFlag()) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		if (currentPersons != null)
+			synchronized (currentPersons) {
+				currentPersons.clear();
+			}
+		if (factoryFromImageTMp != null) {
+			factoryFromImageTMp.clear();
+			factoryFromImageTMp = null;
+		}
+	}
+
 	public String save() {
 		String jsonString = gson.toJson(longTermMemory, TT_mapStringString);
 		Path path = Paths.get(getDatabase().getAbsolutePath());
@@ -123,6 +142,12 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		if (workingMemory != null)
+			for (UniquePerson up : shortTermMemory) {
+				Platform.runLater(() -> {
+					getUI(up).name.setText(up.name);
+				});
+			}
 		return jsonString;
 	}
 
@@ -210,7 +235,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 			image_roi_resized.get(0, 0, data);
 			local.put(image, new Point(nose.getX(), nose.getY()));
 		} catch (Throwable tr) {
-			tr.printStackTrace();
+			// tr.printStackTrace();
 		}
 	}
 
@@ -225,14 +250,9 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				}
 				continue;
 			}
-			processFlag = false;
+
 			try {
-				HashMap<BufferedImage, Point> local = new HashMap<>();
-				if (factoryFromImageTMp != null)
-					local.putAll(factoryFromImageTMp);
-				else
-					continue;
-				factoryFromImageTMp = null;
+
 				for (UniquePerson up : shortTermMemory) {
 					if (up.features.size() >= numberOfTrainingHashes) {
 						if (!longTermMemory.contains(up)) {
@@ -242,7 +262,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						}
 					}
 				}
-
+				HashMap<BufferedImage, Point> local = localMailbox;
+				localMailbox = null;
 				HashMap<UniquePerson, org.opencv.core.Point> tmpPersons = new HashMap<>();
 				for (BufferedImage imgBuff : local.keySet()) {
 					ai.djl.modality.cv.Image cmp = factory.fromImage(imgBuff);
@@ -255,7 +276,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						id = features.predict(cmp);
 					} catch (Throwable ex) {
 						System.out.println("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
-						//ex.printStackTrace();
+						// ex.printStackTrace();
 						continue;
 					}
 					boolean found = false;
@@ -299,17 +320,19 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						shortTermMemory.add(p);
 					}
 				}
-				if (currentPersons != null)
+				local.clear();
+				local = null;
+				if (currentPersons != null) {
 					synchronized (currentPersons) {
 						currentPersons.clear();
 						currentPersons = tmpPersons;
 					}
-				else
+				} else
 					currentPersons = tmpPersons;
 			} catch (Throwable tr) {
 				tr.printStackTrace(); // run=false;
 			}
-
+			processFlag = false;
 		}
 	}
 
@@ -411,6 +434,11 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	 * @param workingMemory the workingMemory to set
 	 */
 	public void setWorkingMemory(VBox workingMemory) {
+		if (this.workingMemory != null) {
+			this.workingMemory.getChildren().clear();
+			uiElelments.clear();
+		}
+		clear();
 		this.workingMemory = workingMemory;
 	}
 
@@ -472,6 +500,19 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	 * @param processFlag the processFlag to set
 	 */
 	public void setProcessFlag() {
+		if (isProcessFlag()) {
+			// discard this set of faces to process.
+			factoryFromImageTMp.clear();
+			factoryFromImageTMp = null;
+			return;// processor is running, do not interrupt it.
+		}
+		localMailbox = new HashMap<>();
+		if (factoryFromImageTMp != null)
+			localMailbox.putAll(factoryFromImageTMp);
+		else
+			return;
+		factoryFromImageTMp = null;
 		this.processFlag = true;
+
 	}
 }
