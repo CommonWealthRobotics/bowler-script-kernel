@@ -153,6 +153,7 @@ public class BowlerKernel {
 					System.out.println("\t" + f);
 				}
 			}
+			return;
 		}
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
@@ -316,7 +317,7 @@ public class BowlerKernel {
 		});
 
 		ArrayList<CSG> csgBits = new ArrayList<>();
-		if (MobileBase.class.isInstance(ret)) {
+		if (!MobileBase.class.isInstance(ret)) {
 			processReturnedObjects(ret, csgBits);
 			try {
 				new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
@@ -328,7 +329,7 @@ public class BowlerKernel {
 			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
 			m.setConfigurationViewerMode(false);
 			ret2.connect();
-			ArrayList<CSG> generateBody = m.generateBody();
+			m.generateBody();
 			try {
 				m.generateStls((MobileBase) ret2,  new File("."), false);
 			} catch (Exception e) {
