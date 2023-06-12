@@ -316,11 +316,25 @@ public class BowlerKernel {
 		});
 
 		ArrayList<CSG> csgBits = new ArrayList<>();
-		processReturnedObjects(ret, csgBits);
-		try {
-			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
-		} catch (Throwable t) {
-			t.printStackTrace();
+		if (MobileBase.class.isInstance(ret)) {
+			processReturnedObjects(ret, csgBits);
+			try {
+				new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		}else {
+			MobileBase ret2 = (MobileBase) ret;
+			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
+			m.setConfigurationViewerMode(false);
+			ret2.connect();
+			ArrayList<CSG> generateBody = m.generateBody();
+			try {
+				m.generateStls((MobileBase) ret2,  new File("."), false);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -334,16 +348,6 @@ public class BowlerKernel {
 		if (CSG.class.isInstance(ret)) {
 			csgBits.add((CSG) ret);
 		}
-		if (MobileBase.class.isInstance(ret)) {
-
-			MobileBase ret2 = (MobileBase) ret;
-			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
-			m.setConfigurationViewerMode(false);
-			ret2.connect();
-			ArrayList<CSG> generateBody = m.generateBody();
-			processReturnedObjects(generateBody, csgBits);
-		}
-
 	}
 
 	public static ArrayList<String> loadHistory() throws IOException {
