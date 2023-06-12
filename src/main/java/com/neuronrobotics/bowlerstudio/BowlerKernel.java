@@ -153,7 +153,7 @@ public class BowlerKernel {
 					System.out.println("\t" + f);
 				}
 			}
-			return;
+			System.exit(0);
 		}
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
@@ -317,26 +317,13 @@ public class BowlerKernel {
 		});
 
 		ArrayList<CSG> csgBits = new ArrayList<>();
-		if (!MobileBase.class.isInstance(ret)) {
-			processReturnedObjects(ret, csgBits);
-			try {
-				new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
-		}else {
-			MobileBase ret2 = (MobileBase) ret;
-			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
-			m.setConfigurationViewerMode(false);
-			ret2.connect();
-			m.generateBody();
-			try {
-				m.generateStls((MobileBase) ret2,  new File("."), false);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		processReturnedObjects(ret, csgBits);
+		try {
+			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
+
 	}
 
 	private static void processReturnedObjects(Object ret, ArrayList<CSG> csgBits) {
@@ -348,6 +335,19 @@ public class BowlerKernel {
 		}
 		if (CSG.class.isInstance(ret)) {
 			csgBits.add((CSG) ret);
+		}
+		if (MobileBase.class.isInstance(ret)) {
+			MobileBase ret2 = (MobileBase) ret;
+			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
+			m.setConfigurationViewerMode(false);
+			ret2.connect();
+			m.generateBody();
+			try {
+				m.generateStls((MobileBase) ret2,  new File("."), false);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
