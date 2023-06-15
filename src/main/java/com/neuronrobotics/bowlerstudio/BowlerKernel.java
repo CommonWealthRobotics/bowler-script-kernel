@@ -367,6 +367,8 @@ public class BowlerKernel {
 				// Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
 				long heapMaxSize = Runtime.getRuntime().maxMemory();
 				System.out.println("Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+				System.out.println("Of Heap "+(heapMaxSize));
+
 				File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
 				if (!dir.exists())
 					dir.mkdirs();
