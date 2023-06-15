@@ -359,16 +359,27 @@ public class BowlerKernel {
 				System.out.println("Found arrangeBed API in CAD engine");
 				List<CSG> totalAssembly = bed.arrangeBed(base);
 				base.disconnect();
+				Thread.sleep(1000);
 				System.gc();
+				// Get current size of heap in bytes
+				long heapSize = Runtime.getRuntime().totalMemory(); 
+
+				// Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
+				long heapMaxSize = Runtime.getRuntime().maxMemory();
+				System.out.println("Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 				File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
 				if (!dir.exists())
 					dir.mkdirs();
 				for(int i=0;i<totalAssembly.size();i++) {
 					List<CSG> tmp = Arrays.asList(totalAssembly.get(i));
 					totalAssembly.set(i,null);
+					System.out.println("Before Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+
 					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, baseDirForFiles);
 					tmp=null;
-					System.gc();		
+					System.gc();
+					System.out.println("After Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
