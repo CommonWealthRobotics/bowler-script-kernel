@@ -27,6 +27,7 @@ import jline.ConsoleReader;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.creature.CadFileExporter;
+import com.neuronrobotics.bowlerstudio.creature.IgenerateBed;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -343,7 +344,27 @@ public class BowlerKernel {
 			ret2.connect();
 			m.generateBody();
 			try {
-				m.generateStls((MobileBase) ret2,  new File("."), false);
+				MobileBase base=(MobileBase) ret2;
+				File baseDirForFiles=new File(".");
+				boolean kinematic=false;
+				IgenerateBed bed=null;
+				try{
+				 bed= m.getIgenerateBed();
+				}catch(Throwable T) {
+					throw new RuntimeException(T.getMessage());
+				}
+				if (bed == null || kinematic) {
+					 m._generateStls(base, baseDirForFiles, kinematic);
+				}
+				System.out.println("Found arrangeBed API in CAD engine");
+				List<CSG> totalAssembly = bed.arrangeBed(base);
+				base.disconnect();
+				System.gc();
+				File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
+				if (!dir.exists())
+					dir.mkdirs();
+
+				new CadFileExporter(m.getUi()).generateManufacturingParts(totalAssembly, baseDirForFiles);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

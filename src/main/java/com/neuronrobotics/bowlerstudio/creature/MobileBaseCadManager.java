@@ -556,7 +556,7 @@ public class MobileBaseCadManager implements Runnable {
 		return null;
 	}
 
-	private IgenerateBed getIgenerateBed() throws Throwable{
+	public IgenerateBed getIgenerateBed() throws Throwable{
 		Object cadForBodyEngine = scriptFromFileInfo(base.getScriptingName(),base.getGitCadEngine(), () -> {
 			run();
 		});
@@ -781,7 +781,7 @@ public class MobileBaseCadManager implements Runnable {
 		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, baseDirForFiles);
 	}
 
-	private ArrayList<File> _generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws IOException {
+	public ArrayList<File> _generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws IOException {
 		ArrayList<File> allCadStl = new ArrayList<>();
 		ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
 		double numLimbs = limbs.size();
