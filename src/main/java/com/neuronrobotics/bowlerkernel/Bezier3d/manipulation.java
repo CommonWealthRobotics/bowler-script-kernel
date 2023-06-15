@@ -92,33 +92,36 @@ public class manipulation {
 			TransformFactory.nrToAffine(globalPose, manipulationMatrix);
 		});
 		
-		map.put(MouseEvent.ANY, event -> {
-			String name = event.getEventType().getName();
-			switch(name) {
-			case "MOUSE_PRESSED":
-				pressed(event);
-				break;
-			case "MOUSE_DRAGGED":
-				dragged(event);
-				break;
-			case "MOUSE_RELEASED":
-				release(event);
-				break;
-			case "MOUSE_MOVED":
-				// ignore
-				break;	
-			case "MOUSE_ENTERED":
-				m.getMesh().setMaterial(highlight);
-				break;	
-			case "MOUSE_EXITED":
-				if(state==DragState.IDLE)
-					m.getMesh().setMaterial(color);
-				break;	
-			default:
-				//System.out.println("UNKNOWN! Mouse event "+name);
-				break;
+		map.put(MouseEvent.ANY, new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				String name = event.getEventType().getName();
+				switch(name) {
+				case "MOUSE_PRESSED":
+					pressed(event);
+					break;
+				case "MOUSE_DRAGGED":
+					dragged(event);
+					break;
+				case "MOUSE_RELEASED":
+					release(event);
+					break;
+				case "MOUSE_MOVED":
+					// ignore
+					break;	
+				case "MOUSE_ENTERED":
+					m.getMesh().setMaterial(highlight);
+					break;	
+				case "MOUSE_EXITED":
+					if(state==DragState.IDLE)
+						m.getMesh().setMaterial(color);
+					break;	
+				default:
+					//System.out.println("UNKNOWN! Mouse event "+name);
+					break;
+				}
+				
 			}
-			
 		});
 		manip.getStorage().set("manipulator", map);
 		manip.setManipulator(manipulationMatrix);
