@@ -363,8 +363,13 @@ public class BowlerKernel {
 				File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
 				if (!dir.exists())
 					dir.mkdirs();
-
-				new CadFileExporter(m.getUi()).generateManufacturingParts(totalAssembly, baseDirForFiles);
+				for(int i=0;i<totalAssembly.size();i++) {
+					List<CSG> tmp = Arrays.asList(totalAssembly.get(i));
+					totalAssembly.set(i,null);
+					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, baseDirForFiles);
+					tmp=null;
+					System.gc();		
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
