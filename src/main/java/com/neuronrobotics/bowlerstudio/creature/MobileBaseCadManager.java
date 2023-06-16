@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.python.google.common.io.Files;
+
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -763,14 +765,27 @@ public class MobileBaseCadManager implements Runnable {
 
 	public ArrayList<File> generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws Exception {
 		IgenerateBed bed=null;
+		String baseURL = base.getGitSelfSource()[0];
+		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
+		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/bom.json");
+		if(bom.exists()) {
+			Files.copy(bom,new File(baseDirForFiles.getAbsolutePath()+"/bom.json"));
+		}
 		try{
 		 bed= getIgenerateBed();
 		}catch(Throwable T) {
 			throw new RuntimeException(T.getMessage());
 		}
+		if(bed == null) {
+			File printArrangment = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/printbed.json");
+			if(printArrangment.exists()) {
+				bed = new UserManagedPrintBed(printArrangment,this);
+			}
+		}
 		if (bed == null || kinematic) {
 			return _generateStls(base, baseDirForFiles, kinematic);
 		}
+		
 		System.out.println("Found arrangeBed API in CAD engine");
 		List<CSG> totalAssembly = bed.arrangeBed(base);
 		getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
@@ -778,7 +793,7 @@ public class MobileBaseCadManager implements Runnable {
 		if (!dir.exists())
 			dir.mkdirs();
 
-		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, baseDirForFiles);
+		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, dir);
 	}
 
 	public ArrayList<File> _generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws IOException {
