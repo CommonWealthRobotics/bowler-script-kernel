@@ -1638,6 +1638,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return gistDir;
 
 	}
+	public static String locateGitUrl(File f) throws IOException {
+		File gitRepoFile = f;
+		while (gitRepoFile != null) {
+			gitRepoFile = gitRepoFile.getParentFile();
+			if (gitRepoFile != null)
+				if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+					// System.err.println("Fount git repo for file: "+gitRepoFile);
+					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
+					Git git = openGit(localRepo);
+					String url = git.getRepository().getConfig().getString("remote", "origin", "url");
+					closeGit(git);
+					return url;
+				}
+		}
+
+		return null;
+	}
 
 	public static Git locateGit(File f) throws IOException {
 		File gitRepoFile = f;
