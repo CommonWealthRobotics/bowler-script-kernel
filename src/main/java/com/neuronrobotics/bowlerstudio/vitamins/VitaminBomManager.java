@@ -20,7 +20,6 @@ import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
 
 public class VitaminBomManager {
-	private MobileBase base;
 
 	private class VitaminElement {
 		String name;
@@ -33,10 +32,10 @@ public class VitaminBomManager {
 	}.getType();
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	private HashMap<String, ArrayList<VitaminElement>> database = new HashMap<String, ArrayList<VitaminElement>>();
+	private String baseURL;
 
-	public VitaminBomManager(MobileBase base) throws IOException {
-		this.base = base;
-		String baseURL = base.getGitSelfSource()[0];
+	public VitaminBomManager(String url) throws IOException {
+		baseURL = url;
 		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
 		File bom = new File(baseWorkspaceFile.getAbsolutePath() + "/manufacturing/bom.json");
 		if (!bom.exists()) {
@@ -134,7 +133,7 @@ public class VitaminBomManager {
 	}
 	private synchronized void saveLocal() {
 		String content = gson.toJson(database);
-		String[] source = base.getGitSelfSource();
+		//String[] source = base.getGitSelfSource();
 		String csv ="name,qty,source";
 		for(String key:database.keySet()) {
 			VitaminElement e  =database.get(key).get(0);
@@ -144,9 +143,9 @@ public class VitaminBomManager {
 		}
 				
 		try {
-			ScriptingEngine.commit(source[0], ScriptingEngine.getBranch(source[0]),"manufacturing/bom.json", content,
+			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL),"manufacturing/bom.json", content,
 					"Save Bill Of Material", true);
-			ScriptingEngine.commit(source[0], ScriptingEngine.getBranch(source[0]),"manufacturing/bom.csv", csv,
+			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL),"manufacturing/bom.csv", csv,
 					"Save Bill Of Material", true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
