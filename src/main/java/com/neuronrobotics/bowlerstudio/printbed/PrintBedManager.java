@@ -34,11 +34,13 @@ public class PrintBedManager {
 	private String url;
 	HashMap<Integer ,CSG>  bedReps = new HashMap<Integer, CSG>();
 	ArrayList<PrintBedObject> objects = new ArrayList<PrintBedObject>();
-	private List<CSG> parts;
+	private ArrayList<CSG> parts;
 
-	public PrintBedManager(String url, List<CSG> parts) {
+	public PrintBedManager(String url, ArrayList<CSG> parts) {
 		this.url = url;
 		this.parts = parts;
+		if(url==null)
+			return;
 		File f = new File(ScriptingEngine.getRepositoryCloneDirectory(url).getAbsolutePath() + "/" + file);
 		if (f.exists()) {
 			String source;
@@ -85,6 +87,8 @@ public class PrintBedManager {
 	}
 	
 	public ArrayList<CSG> makePrintBeds(){
+		if(url==null)
+			return parts;
 		HashMap<Integer, ArrayList<CSG>> beds = new HashMap<>();
 		for (CSG bit : parts) {
 			String name = bit.getName();

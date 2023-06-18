@@ -29,6 +29,7 @@ import jline.Terminal;
 import com.neuronrobotics.bowlerstudio.creature.CadFileExporter;
 import com.neuronrobotics.bowlerstudio.creature.IgenerateBed;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
+import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
@@ -143,7 +144,7 @@ public class BowlerKernel {
 				try {
 					ret = ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
 
-					processReturnedObjects(ret);
+					processReturnedObjectsStart(ret,gitRepo);
 				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
@@ -177,7 +178,7 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjects(ret);
+		processReturnedObjectsStart(ret,null);
 		startLoadingScripts = false;
 
 		for (String s : args) {
@@ -194,7 +195,7 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjects(ret);
+		processReturnedObjectsStart(ret,null);
 
 		boolean runShell = false;
 		String groovy = "Groovy";
@@ -294,7 +295,7 @@ public class BowlerKernel {
 					if (ret != null) {
 						System.out.println(ret);
 					}
-					processReturnedObjects(ret);
+					processReturnedObjectsStart(ret,null);
 				} catch (Error e) {
 					e.printStackTrace();
 				} catch (Exception e) {
@@ -307,7 +308,7 @@ public class BowlerKernel {
 
 	}
 
-	private static void processReturnedObjects(Object ret) {
+	private static void processReturnedObjectsStart(Object ret,String url) {
 		CSG.setProgressMoniter(new ICSGProgress() {
 			@Override
 			public void progressUpdate(int currentIndex, int finalIndex, String type,
@@ -320,6 +321,7 @@ public class BowlerKernel {
 		ArrayList<CSG> csgBits = new ArrayList<>();
 		processReturnedObjects(ret, csgBits);
 		try {
+			csgBits=new PrintBedManager(url,csgBits).makePrintBeds();
 			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
 		} catch (Throwable t) {
 			t.printStackTrace();
