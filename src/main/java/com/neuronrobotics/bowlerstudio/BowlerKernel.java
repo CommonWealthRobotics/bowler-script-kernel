@@ -27,7 +27,9 @@ import jline.ConsoleReader;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.creature.CadFileExporter;
+import com.neuronrobotics.bowlerstudio.creature.IgenerateBed;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
+import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
@@ -142,7 +144,7 @@ public class BowlerKernel {
 				try {
 					ret = ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
 
-					processReturnedObjects(ret);
+					processReturnedObjectsStart(ret,gitRepo);
 				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
@@ -153,6 +155,7 @@ public class BowlerKernel {
 					System.out.println("\t" + f);
 				}
 			}
+			System.exit(0);
 		}
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
@@ -175,7 +178,7 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjects(ret);
+		processReturnedObjectsStart(ret,null);
 		startLoadingScripts = false;
 
 		for (String s : args) {
@@ -192,7 +195,7 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjects(ret);
+		processReturnedObjectsStart(ret,null);
 
 		boolean runShell = false;
 		String groovy = "Groovy";
@@ -292,7 +295,7 @@ public class BowlerKernel {
 					if (ret != null) {
 						System.out.println(ret);
 					}
-					processReturnedObjects(ret);
+					processReturnedObjectsStart(ret,null);
 				} catch (Error e) {
 					e.printStackTrace();
 				} catch (Exception e) {
@@ -305,7 +308,7 @@ public class BowlerKernel {
 
 	}
 
-	private static void processReturnedObjects(Object ret) {
+	private static void processReturnedObjectsStart(Object ret,String url) {
 		CSG.setProgressMoniter(new ICSGProgress() {
 			@Override
 			public void progressUpdate(int currentIndex, int finalIndex, String type,
@@ -318,10 +321,12 @@ public class BowlerKernel {
 		ArrayList<CSG> csgBits = new ArrayList<>();
 		processReturnedObjects(ret, csgBits);
 		try {
+			csgBits=new PrintBedManager(url,csgBits).makePrintBeds();
 			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
+
 	}
 
 	private static void processReturnedObjects(Object ret, ArrayList<CSG> csgBits) {
@@ -335,15 +340,56 @@ public class BowlerKernel {
 			csgBits.add((CSG) ret);
 		}
 		if (MobileBase.class.isInstance(ret)) {
-
 			MobileBase ret2 = (MobileBase) ret;
 			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
 			m.setConfigurationViewerMode(false);
 			ret2.connect();
-			ArrayList<CSG> generateBody = m.generateBody();
-			processReturnedObjects(generateBody, csgBits);
-		}
+			m.generateBody();
+			try {
+				MobileBase base=(MobileBase) ret2;
+				File baseDirForFiles=new File(".");
+				boolean kinematic=false;
+				IgenerateBed bed=null;
+				try{
+				 bed= m.getIgenerateBed();
+				}catch(Throwable T) {
+					throw new RuntimeException(T.getMessage());
+				}
+				if (bed == null || kinematic) {
+					 m._generateStls(base, baseDirForFiles, kinematic);
+				}
+				System.out.println("Found arrangeBed API in CAD engine");
+				List<CSG> totalAssembly = bed.arrangeBed(base);
+				base.disconnect();
+				Thread.sleep(1000);
+				System.gc();
+				// Get current size of heap in bytes
+				long heapSize = Runtime.getRuntime().totalMemory(); 
 
+				// Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
+				long heapMaxSize = Runtime.getRuntime().maxMemory();
+				System.out.println("Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+				System.out.println("Of Heap "+(heapMaxSize));
+
+				File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
+				if (!dir.exists())
+					dir.mkdirs();
+				for(int i=0;i<totalAssembly.size();i++) {
+					List<CSG> tmp = Arrays.asList(totalAssembly.get(i));
+					totalAssembly.set(i,null);
+					System.out.println("Before Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+
+					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, baseDirForFiles);
+					tmp=null;
+					System.gc();
+					System.out.println("After Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static ArrayList<String> loadHistory() throws IOException {

@@ -13,6 +13,7 @@ import com.neuronrobotics.bowlerstudio.IAudioProcessingLambda;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -68,7 +69,6 @@ public class VoskLipSync implements IAudioProcessingLambda {
 		List<VoskResultWord> result;
 	}
 
-
 	Type partailType = new TypeToken<VoskPartial>() {
 	}.getType();
 	Type resultType = new TypeToken<VoskResultl>() {
@@ -81,7 +81,6 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	private static AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 60000, 16, 2, 4, 44100, false);
 
 	static {
-
 
 		setModelName("vosk-model-en-us-daanzu-20200905");
 		try {
@@ -141,6 +140,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	int CHUNK_SIZE = 4096;
 	byte[] abData = new byte[CHUNK_SIZE];
 	ArrayList<TimeCodedViseme> timeCodedVisemes = null;
+	ArrayList<TimeCodedViseme> timeCodedVisemesCache = new ArrayList<TimeCodedViseme>();
 	int words = 0;
 	private double positionInTrack;
 
@@ -194,6 +194,8 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	private void add(TimeCodedViseme v) {
 		// println "Adding "+ v
 		timeCodedVisemes.add(v);
+		timeCodedVisemesCache.add(v);
+
 	}
 
 	private void processWords(List<VoskResultWord> wordList, long len) {
@@ -215,6 +217,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 		long durationInMillis = (long) (1000 * getAudioInputStream.getFrameLength()
 				/ getAudioInputStream.getFormat().getFrameRate());
 		long start = System.currentTimeMillis();
+		timeCodedVisemesCache.clear();
 		Thread t = new Thread(() -> {
 			try {
 
@@ -252,6 +255,15 @@ public class VoskLipSync implements IAudioProcessingLambda {
 					TimeCodedViseme tc = new TimeCodedViseme(AudioStatus.X_NO_SOUND, tcLast.end, secLen, secLen);
 					add(tc);
 				}
+				File json = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/tmp-tts-visime.json");
+				if (!json.exists()) {
+					json.createNewFile();
+				}
+				String s = gson.toJson(timeCodedVisemesCache);
+				BufferedWriter writer = new BufferedWriter(new FileWriter(json.getAbsolutePath()));
+				writer.write(s);
+				writer.close();
+				timeCodedVisemesCache.clear();
 			} catch (Throwable tr) {
 				// BowlerStudio.printStackTrace(t);
 			}
@@ -330,10 +342,11 @@ public class VoskLipSync implements IAudioProcessingLambda {
 		return ret;
 
 	}
-	
+
 	public static String promptFromMicrophone() throws IOException, LineUnavailableException {
-		if(model==null)
-			throw new RuntimeException("Vosk Model failed to load, check "+ScriptingEngine.getWorkspace().getAbsolutePath() + "/" + getModelName());
+		if (model == null)
+			throw new RuntimeException("Vosk Model failed to load, check "
+					+ ScriptingEngine.getWorkspace().getAbsolutePath() + "/" + getModelName());
 		Recognizer recognizer = new Recognizer(model, 120000);
 
 		DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
@@ -347,30 +360,31 @@ public class VoskLipSync implements IAudioProcessingLambda {
 		int bytesRead = 0;
 
 		byte[] b = new byte[4096];
-		//println "Listening..."
-		String result=null;
+		// println "Listening..."
+		String result = null;
 		long start = System.currentTimeMillis();
-		Type STTType = new TypeToken<HashMap<String, String>>() {}.getType();
-		try{
-			while (((System.currentTimeMillis()-start)<30000) && !Thread.interrupted()) {
-				//Thread.sleep(0,100);
+		Type STTType = new TypeToken<HashMap<String, String>>() {
+		}.getType();
+		try {
+			while (((System.currentTimeMillis() - start) < 30000) && !Thread.interrupted()) {
+				// Thread.sleep(0,100);
 				numBytesRead = microphone.read(b, 0, CHUNK_SIZE);
 				bytesRead += numBytesRead;
 
 				if (recognizer.acceptWaveForm(b, numBytesRead)) {
-					result=recognizer.getResult();
+					result = recognizer.getResult();
 					HashMap<String, String> db = gson.fromJson(result, STTType);
 					result = db.get("text");
-					if(result.length()>2)
+					if (result.length() > 2)
 						break;
 					else {
-						//println "Listening..."
+						// println "Listening..."
 					}
 				} else {
-					//System.out.println(recognizer.getPartialResult());
+					// System.out.println(recognizer.getPartialResult());
 				}
 			}
-		}catch(Throwable t){
+		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 		System.out.println(result);
