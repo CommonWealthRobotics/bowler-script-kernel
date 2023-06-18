@@ -767,6 +767,10 @@ public class MobileBaseCadManager implements Runnable {
 		IgenerateBed bed=null;
 		String baseURL = base.getGitSelfSource()[0];
 		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
+		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/bom.csv");
+		if(bomCSV.exists()) {
+			Files.copy(bomCSV,new File(baseDirForFiles.getAbsolutePath()+"/bom.csv"));
+		}
 		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/bom.json");
 		if(bom.exists()) {
 			Files.copy(bom,new File(baseDirForFiles.getAbsolutePath()+"/bom.json"));
