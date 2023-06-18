@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.printbed;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,69 +26,69 @@ import javafx.scene.paint.Color;
 
 public class PrintBedManager {
 
-	private UserManagedPrintBedData database;
+	private UserManagedPrintBedData database = null;
 	Type type = new TypeToken<UserManagedPrintBedData>() {
 	}.getType();
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	String file = "printbed.json";
-	List<Color> colors = Arrays.asList(Color.WHITE,Color.GREY,Color.BLUE,Color.TAN);
+	List<Color> colors = Arrays.asList(Color.WHITE, Color.GREY, Color.BLUE, Color.TAN);
 	private String url;
-	HashMap<Integer ,CSG>  bedReps = new HashMap<Integer, CSG>();
+	HashMap<Integer, CSG> bedReps = new HashMap<Integer, CSG>();
 	ArrayList<PrintBedObject> objects = new ArrayList<PrintBedObject>();
 	private ArrayList<CSG> parts;
 
 	public PrintBedManager(String url, ArrayList<CSG> parts) {
 		this.url = url;
 		this.parts = parts;
-		if(url==null)
+		if (url == null)
 			return;
 		File f = new File(ScriptingEngine.getRepositoryCloneDirectory(url).getAbsolutePath() + "/" + file);
 		if (f.exists()) {
 			String source;
+			byte[] bytes;
 			try {
-				source = FileUtils.readFileToString(f, "UTF-8");
+				bytes = Files.readAllBytes(f.toPath());
+				source = new String(bytes, "UTF-8");
 				database = gson.fromJson(source, type);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
-		}else {
-			database=new UserManagedPrintBedData();
+
+		}
+		if (database == null) {
+			database = new UserManagedPrintBedData();
 			database.init();
 		}
-		for(CSG bit:parts) {
+		for (CSG bit : parts) {
 			int index = bit.getPrintBedIndex();
-			int colorIndex = index%4;
-			double zrot = -90*(index);
-			double yval = index>4?database.bedX*(index-4):0;
-			System.out.println(bit.getName()+" on "+index+" rot "+zrot+" y "+yval); 
-			
-			CSG bed = new Cube(database.bedX,database.bedY,1).toCSG()
-						.toXMin()
-						.toYMin()
-						.toZMax()
-						.rotz(zrot)
-						.movey(yval);
+			int colorIndex = index % 4;
+			double zrot = -90 * (index);
+			double yval = index > 4 ? database.bedX * (index - 4) : 0;
+			System.out.println(bit.getName() + " on " + index + " rot " + zrot + " y " + yval);
+
+			CSG bed = new Cube(database.bedX, database.bedY, 1).toCSG().toXMin().toYMin().toZMax().rotz(zrot)
+					.movey(yval);
 			bed.setColor(colors.get(colorIndex));
 			bedReps.put(index, bed);
 			String name = bit.getName();
-			CSG prepedBit=bit.prepForManufacturing();
-			if(prepedBit!=null && name.length()>0) {
-				if(database.locations.get(name)==null) {
-					database.locations.put(name,new TransformNR());
+			CSG prepedBit = bit.prepForManufacturing();
+			if (prepedBit != null && name.length() > 0) {
+				if (database.locations.get(name) == null) {
+					database.locations.put(name, new TransformNR());
 				}
-				PrintBedObject obj  = new PrintBedObject(name, prepedBit, bed.getMaxX(), bed.getMinX(), bed.getMaxY(), bed.getMinY(), database.locations.get(name));
+				PrintBedObject obj = new PrintBedObject(name, prepedBit, bed.getMaxX(), bed.getMinX(), bed.getMaxY(),
+						bed.getMinY(), database.locations.get(name));
 				objects.add(obj);
-				obj.addSaveListener(() ->{ 
+				obj.addSaveListener(() -> {
 					obj.checkBounds();
 					save();
 				});
 			}
 		}
 	}
-	
-	public ArrayList<CSG> makePrintBeds(){
-		if(url==null)
+
+	public ArrayList<CSG> makePrintBeds() {
+		if (url == null)
 			return parts;
 		HashMap<Integer, ArrayList<CSG>> beds = new HashMap<>();
 		for (CSG bit : parts) {
@@ -128,29 +129,31 @@ public class PrintBedManager {
 		}
 		return bedsOutputs;
 	}
-	
-	public ArrayList<CSG> get(){
+
+	public ArrayList<CSG> get() {
 		ArrayList<CSG> back = new ArrayList<>();
-		for(CSG c:bedReps.values()) {
+		for (CSG c : bedReps.values()) {
 			back.add(c);
 		}
-		for(PrintBedObject pbo:objects) {
+		for (PrintBedObject pbo : objects) {
 			back.addAll(pbo.get());
 		}
 		return back;
 	}
+
 	private synchronized void saveLocal() {
 		String content = gson.toJson(database);
 		try {
-			ScriptingEngine.commit(url, ScriptingEngine.getBranch(url),file, content,
-					"Save Print Bed Locations", true);
+			ScriptingEngine.commit(url, ScriptingEngine.getBranch(url), file, content, "Save Print Bed Locations",
+					true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
 	private void save() {
-		new Thread(()->{
+		new Thread(() -> {
 			saveLocal();
 		}).start();
 	}
