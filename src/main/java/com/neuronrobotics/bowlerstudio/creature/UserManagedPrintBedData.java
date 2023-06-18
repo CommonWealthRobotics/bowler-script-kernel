@@ -6,7 +6,12 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 public class UserManagedPrintBedData {
 	public HashMap<String,TransformNR> locations;
-	double bedX;
-	double bedY;
+	public double bedX;
+	public double bedY;
+	public void init() {
+		locations=new HashMap<String, TransformNR>();
+		bedX=250;
+		bedY=250;
+	}
 
 }

@@ -35,7 +35,7 @@ public class manipulation {
 	private Vector3d orintation;
 	private CSG manip;
 	private TransformNR globalPose;
-	TransformNR currentPose;
+	public TransformNR currentPose;
 	private PhongMaterial color;// = new PhongMaterial(getColor());
 	private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
 	private enum DragState{
