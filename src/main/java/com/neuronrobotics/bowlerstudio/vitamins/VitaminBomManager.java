@@ -80,7 +80,7 @@ public class VitaminBomManager {
 	public CSG get(String name) {
 		VitaminElement e = getElement(name);
 		if (e == null)
-			throw new RuntimeException("Vitamine must be defined before it is used: " + name);
+			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
 
 		try {
 			CSG transformed = Vitamins.get(e.type, e.size).transformed(TransformFactory.nrToCSG(e.pose));
