@@ -52,17 +52,21 @@ public class PrintBedManager {
 		for(CSG bit:parts) {
 			int index = bit.getPrintBedIndex();
 			int colorIndex = index%4;
+			double zrot = -90*(index);
+			double yval = index>4?database.bedX*(index-4):0;
+			System.out.println(bit.getName()+" on "+index+" rot "+zrot+" y "+yval); 
+			
 			CSG bed = new Cube(database.bedX,database.bedY,1).toCSG()
 						.toXMin()
-						.toYMax()
+						.toYMin()
 						.toZMax()
-						.rotz(90*index)
-						.movey(index>4?database.bedX*(index-4):0);
+						.rotz(zrot)
+						.movey(yval);
 			bed.setColor(colors.get(colorIndex));
 			bedReps.put(index, bed);
 			String name = bit.getName();
 			CSG prepedBit=bit.prepForManufacturing();
-			if(prepedBit!=null) {
+			if(prepedBit!=null && name.length()>0) {
 				if(database.locations.get(name)==null) {
 					database.locations.put(name,new TransformNR());
 				}

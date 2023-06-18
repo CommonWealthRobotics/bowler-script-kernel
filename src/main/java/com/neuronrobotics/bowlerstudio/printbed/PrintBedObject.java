@@ -30,7 +30,7 @@ public class PrintBedObject {
 		this.globalPose = startPose;
 		
 		manip = new manipulation(affine, new Vector3d(1, 1, 0), part, startPose);
-		
+		checkBounds();
 	}
 	public void addEventListener(Runnable r) {
 		manip.addEventListener(r);
@@ -67,6 +67,7 @@ public class PrintBedObject {
 			globalPose.translateY(-maxYTest);
 		if(maxXTest>0)
 			globalPose.translateX(-maxXTest);
+		manip.set(globalPose.getX(), globalPose.getY(), globalPose.getZ());
 	}
 
 }
