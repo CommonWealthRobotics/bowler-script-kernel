@@ -14,11 +14,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.creature.UserManagedPrintBedData;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.Transform;
 import javafx.scene.paint.Color;
 
 public class PrintBedManager {
@@ -32,9 +34,11 @@ public class PrintBedManager {
 	private String url;
 	HashMap<Integer ,CSG>  bedReps = new HashMap<Integer, CSG>();
 	ArrayList<PrintBedObject> objects = new ArrayList<PrintBedObject>();
+	private List<CSG> parts;
 
 	public PrintBedManager(String url, List<CSG> parts) {
 		this.url = url;
+		this.parts = parts;
 		File f = new File(ScriptingEngine.getRepositoryCloneDirectory(url).getAbsolutePath() + "/" + file);
 		if (f.exists()) {
 			String source;
@@ -79,6 +83,48 @@ public class PrintBedManager {
 			}
 		}
 	}
+	
+	public ArrayList<CSG> makePrintBeds(){
+		HashMap<Integer, ArrayList<CSG>> beds = new HashMap<>();
+		for (CSG bit : parts) {
+			String name = bit.getName();
+			int index = bit.getPrintBedIndex();
+			bit = bit.prepForManufacturing();
+			if (bit != null) {
+				if (beds.get(index) == null) {
+					beds.put(index, new ArrayList<CSG>());
+				}
+				TransformNR location = database.locations.get(name);
+				if (location != null) {
+					Transform csfMove = TransformFactory.nrToCSG(location);
+					bit = bit.transformed(csfMove);
+				}
+				beds.get(index).add(bit);
+			}
+		}
+		ArrayList<CSG> bedsOutputs = new ArrayList<CSG>();
+		for (Integer i : beds.keySet()) {
+			String name = "Print-Bed-" + i;
+			ArrayList<CSG> bedComps = beds.get(i);
+			CSG bed = null;
+			for (CSG p : bedComps) {
+				if (bed == null)
+					bed = p;
+				else {
+					bed = bed.dumbUnion(p);
+				}
+			}
+			if (bed != null)
+				bed.setName(name);
+			else {
+				bed = new Cube().toCSG();
+				bed.setManufacturing(incoming -> null);
+			}
+			bedsOutputs.add(bed);
+		}
+		return bedsOutputs;
+	}
+	
 	public ArrayList<CSG> get(){
 		ArrayList<CSG> back = new ArrayList<>();
 		for(CSG c:bedReps.values()) {
