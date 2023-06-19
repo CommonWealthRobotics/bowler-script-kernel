@@ -159,10 +159,15 @@ public class VitaminBomManager {
 			// String[] source = base.getGitSelfSource();
 
 			for (String key : database.keySet()) {
-				VitaminElement e = database.get(key).get(0);
-				String size = database.get(key).size() + "";
-				String URL = (String) getConfiguration(e.name).get("source");
-				csv += key + "," + size + "," + URL + "\n";
+				ArrayList<VitaminElement> list = database.get(key);
+				if(list.size()>0) {
+					VitaminElement e = list.get(0);
+					String size = database.get(key).size() + "";
+					String URL = (String) getConfiguration(e.name).get("source");
+					csv += key + "," + size + "," + URL + "\n";
+				}else {
+					System.out.println("Failure on "+key);
+				}
 			}
 		
 		
