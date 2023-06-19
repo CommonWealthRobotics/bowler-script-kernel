@@ -380,7 +380,7 @@ public class BowlerKernel {
 					totalAssembly.set(i,null);
 					System.out.println("Before Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 
-					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, baseDirForFiles);
+					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, dir);
 					tmp=null;
 					System.gc();
 					System.out.println("After Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
