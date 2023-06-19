@@ -347,7 +347,7 @@ public class BowlerKernel {
 			m.generateBody();
 			try {
 				MobileBase base=(MobileBase) ret2;
-				File baseDirForFiles=new File(".");
+				File baseDirForFiles=new File("./manufacturing/");
 				boolean kinematic=false;
 				IgenerateBed bed=null;
 				try{
