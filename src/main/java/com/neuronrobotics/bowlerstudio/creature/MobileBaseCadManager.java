@@ -768,6 +768,21 @@ public class MobileBaseCadManager implements Runnable {
 		IgenerateBed bed=null;
 		String baseURL = base.getGitSelfSource()[0];
 		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
+		bed = getPrintBed(baseDirForFiles, bed, baseWorkspaceFile);
+		if (bed == null || kinematic) {
+			return _generateStls(base, baseDirForFiles, kinematic);
+		}
+		
+		System.out.println("Found arrangeBed API in CAD engine");
+		List<CSG> totalAssembly = bed.arrangeBed(base);
+		getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
+		File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
+		if (!dir.exists())
+			dir.mkdirs();
+
+		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, dir);
+	}
+	public IgenerateBed getPrintBed(File baseDirForFiles, IgenerateBed bed, File baseWorkspaceFile) throws IOException {
 		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/bom.csv");
 		if(bomCSV.exists()) {
 			Files.copy(bomCSV,new File(baseDirForFiles.getAbsolutePath()+"/bom.csv"));
@@ -787,18 +802,7 @@ public class MobileBaseCadManager implements Runnable {
 				bed = new UserManagedPrintBed(printArrangment,this);
 			}
 		}
-		if (bed == null || kinematic) {
-			return _generateStls(base, baseDirForFiles, kinematic);
-		}
-		
-		System.out.println("Found arrangeBed API in CAD engine");
-		List<CSG> totalAssembly = bed.arrangeBed(base);
-		getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
-		File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
-		if (!dir.exists())
-			dir.mkdirs();
-
-		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, dir);
+		return bed;
 	}
 
 	public ArrayList<File> _generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws IOException {

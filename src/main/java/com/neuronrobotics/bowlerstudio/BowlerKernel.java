@@ -355,6 +355,7 @@ public class BowlerKernel {
 				}catch(Throwable T) {
 					throw new RuntimeException(T.getMessage());
 				}
+				bed=m.getPrintBed(baseDirForFiles,bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
 				if (bed == null || kinematic) {
 					 m._generateStls(base, baseDirForFiles, kinematic);
 				}
