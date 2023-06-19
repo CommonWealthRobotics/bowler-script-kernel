@@ -1,6 +1,8 @@
 package com.neuronrobotics.bowlerstudio.printbed;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -10,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -153,14 +158,24 @@ public class PrintBedManager {
 	private synchronized void saveLocal() {
 		String content = gson.toJson(database);
 		try {
-			ScriptingEngine.commit(url, ScriptingEngine.getBranch(url), file, content, "Save Print Bed Locations",
-					true);
+			write(file,content);
+//			ScriptingEngine.commit(url, ScriptingEngine.getBranch(url), file, content, "Save Print Bed Locations",
+//					true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-
+	private void write(String file, String content)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		File f = ScriptingEngine.fileFromGit(url, file);
+		if (!f.exists()) {
+			f.createNewFile();
+		}
+		BufferedWriter writer = new BufferedWriter(new FileWriter(f.getAbsolutePath()));
+		writer.write(content);
+		writer.close();
+	}
 	private void save() {
 		new Thread(() -> {
 			saveLocal();
