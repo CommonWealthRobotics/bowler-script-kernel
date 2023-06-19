@@ -347,7 +347,7 @@ public class BowlerKernel {
 			m.generateBody();
 			try {
 				MobileBase base=(MobileBase) ret2;
-				File baseDirForFiles=new File(".");
+				File baseDirForFiles=new File("./manufacturing/");
 				boolean kinematic=false;
 				IgenerateBed bed=null;
 				try{
@@ -355,6 +355,7 @@ public class BowlerKernel {
 				}catch(Throwable T) {
 					throw new RuntimeException(T.getMessage());
 				}
+				bed=m.getPrintBed(baseDirForFiles,bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
 				if (bed == null || kinematic) {
 					 m._generateStls(base, baseDirForFiles, kinematic);
 				}

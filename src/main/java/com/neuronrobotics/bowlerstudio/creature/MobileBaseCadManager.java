@@ -22,6 +22,7 @@ import org.python.google.common.io.Files;
 
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
@@ -767,6 +768,21 @@ public class MobileBaseCadManager implements Runnable {
 		IgenerateBed bed=null;
 		String baseURL = base.getGitSelfSource()[0];
 		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
+		bed = getPrintBed(baseDirForFiles, bed, baseWorkspaceFile);
+		if (bed == null || kinematic) {
+			return _generateStls(base, baseDirForFiles, kinematic);
+		}
+		
+		System.out.println("Found arrangeBed API in CAD engine");
+		List<CSG> totalAssembly = bed.arrangeBed(base);
+		getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
+		File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
+		if (!dir.exists())
+			dir.mkdirs();
+
+		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, dir);
+	}
+	public IgenerateBed getPrintBed(File baseDirForFiles, IgenerateBed bed, File baseWorkspaceFile) throws IOException {
 		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/bom.csv");
 		if(bomCSV.exists()) {
 			Files.copy(bomCSV,new File(baseDirForFiles.getAbsolutePath()+"/bom.csv"));
@@ -781,23 +797,12 @@ public class MobileBaseCadManager implements Runnable {
 			throw new RuntimeException(T.getMessage());
 		}
 		if(bed == null) {
-			File printArrangment = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/printbed.json");
+			File printArrangment = new File(baseWorkspaceFile.getAbsolutePath()+"/"+PrintBedManager.file);
 			if(printArrangment.exists()) {
 				bed = new UserManagedPrintBed(printArrangment,this);
 			}
 		}
-		if (bed == null || kinematic) {
-			return _generateStls(base, baseDirForFiles, kinematic);
-		}
-		
-		System.out.println("Found arrangeBed API in CAD engine");
-		List<CSG> totalAssembly = bed.arrangeBed(base);
-		getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
-		File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
-		if (!dir.exists())
-			dir.mkdirs();
-
-		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, dir);
+		return bed;
 	}
 
 	public ArrayList<File> _generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws IOException {
