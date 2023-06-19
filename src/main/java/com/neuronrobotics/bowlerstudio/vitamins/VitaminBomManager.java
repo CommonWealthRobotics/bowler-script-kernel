@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.vitamins;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,8 +51,15 @@ public class VitaminBomManager {
 			}
 			save();
 		} else {
-			String source = FileUtils.readFileToString(bom, "UTF-8");
-			database = gson.fromJson(source, type);
+			String source ;
+			byte[] bytes;
+			try {
+				bytes = Files.readAllBytes(bom.toPath());
+				source = new String(bytes, "UTF-8");
+				database = gson.fromJson(source, type);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 
