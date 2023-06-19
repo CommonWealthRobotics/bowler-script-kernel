@@ -146,17 +146,27 @@ public class VitaminBomManager {
 		String content = gson.toJson(database);
 		//String[] source = base.getGitSelfSource();
 		String csv ="name,qty,source\n";
-		for(String key:database.keySet()) {
+		for(Object key:database.keySet().toArray()) {
 			VitaminElement e  =database.get(key).get(0);
 			String size = database.get(key).size()+"";
 			String URL = (String) getConfiguration(e.name).get("source");
 			csv+=key+","+size+","+URL+"\n";
 		}
-				
+		try {
+			String current = ScriptingEngine.codeFromGit(baseURL,MANUFACTURING_BOM_CSV)[0];
+			String currentJ = ScriptingEngine.codeFromGit(baseURL,MANUFACTURING_BOM_JSON)[0];
+			if(current.contentEquals(csv) && currentJ.contentEquals(content)) {
+				System.out.println("No update, BoM current");
+				return;
+			}
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL),MANUFACTURING_BOM_JSON, content,
 					"Save Bill Of Material", true);
-			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL),"manufacturing/bom.csv", csv,
+			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL),MANUFACTURING_BOM_CSV, csv,
 					"Save Bill Of Material", true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
