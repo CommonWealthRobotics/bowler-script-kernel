@@ -1,6 +1,8 @@
 package com.neuronrobotics.bowlerstudio.vitamins;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
@@ -9,6 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -25,6 +31,7 @@ public class VitaminBomManager {
 	public static final String MANUFACTURING_BOM_JSON = MANUFACTURING_BOM_BASE + ".json";
 	public static final String MANUFACTURING_BOM_CSV = MANUFACTURING_BOM_BASE + ".csv";
 	private static boolean saving = false;
+
 	private class VitaminElement {
 		String name;
 		String type;
@@ -78,13 +85,13 @@ public class VitaminBomManager {
 		newElement.size = size;
 		newElement.type = type;
 		String key = type + ":" + size;
-		//synchronized (database) {
-			if (database.get(key) == null) {
-				database.put(key, new ArrayList<VitaminBomManager.VitaminElement>());
-			}
-			if (toAdd)
-				database.get(key).add(newElement);
-		//}
+		// synchronized (database) {
+		if (database.get(key) == null) {
+			database.put(key, new ArrayList<VitaminBomManager.VitaminElement>());
+		}
+		if (toAdd)
+			database.get(key).add(newElement);
+		// }
 		save();
 		// newElement.url=(String) getConfiguration(name).get("source");
 	}
@@ -132,51 +139,50 @@ public class VitaminBomManager {
 	}
 
 	private VitaminElement getElement(String name) {
-		//synchronized (database) {
-			for (String testName : database.keySet()) {
-				ArrayList<VitaminElement> list = database.get(testName);
-				for (VitaminElement el : list) {
-					if (el.name.contentEquals(name))
-						return el;
-				}
+		// synchronized (database) {
+		for (String testName : database.keySet()) {
+			ArrayList<VitaminElement> list = database.get(testName);
+			for (VitaminElement el : list) {
+				if (el.name.contentEquals(name))
+					return el;
 			}
-		//}
+		}
+		// }
 		return null;
 	}
 
 	public void clear() {
-		//synchronized (database) {
-			database.clear();
-		//}
+		// synchronized (database) {
+		database.clear();
+		// }
 	}
 
 	private void saveLocal() {
-		saving=true;
+		saving = true;
 		String csv = "name,qty,source\n";
 		String content = null;
-		
-			content = gson.toJson(database);
-			// String[] source = base.getGitSelfSource();
 
-			for (String key : database.keySet()) {
-				ArrayList<VitaminElement> list = database.get(key);
-				if(list.size()>0) {
-					VitaminElement e = list.get(0);
-					String size = database.get(key).size() + "";
-					String URL = (String) getConfiguration(e.name).get("source");
-					csv += key + "," + size + "," + URL + "\n";
-				}else {
-					System.out.println("Failure on "+key);
-				}
+		content = gson.toJson(database);
+		// String[] source = base.getGitSelfSource();
+
+		for (String key : database.keySet()) {
+			ArrayList<VitaminElement> list = database.get(key);
+			if (list.size() > 0) {
+				VitaminElement e = list.get(0);
+				String size = database.get(key).size() + "";
+				String URL = (String) getConfiguration(e.name).get("source");
+				csv += key + "," + size + "," + URL + "\n";
+			} else {
+				System.out.println("Failure on " + key);
 			}
-		
-		
+		}
+
 		try {
 			String current = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_CSV)[0];
 			String currentJ = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_JSON)[0];
 			if (current.contentEquals(csv) && currentJ.contentEquals(content)) {
 				System.out.println("No update, BoM current");
-				saving=false;
+				saving = false;
 				return;
 			}
 		} catch (Exception e1) {
@@ -184,16 +190,31 @@ public class VitaminBomManager {
 			e1.printStackTrace();
 		}
 		try {
-			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL), MANUFACTURING_BOM_JSON, content,
-					"Save Bill Of Material", true);
-			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL), MANUFACTURING_BOM_CSV, csv,
-					"Save Bill Of Material", true);
+			write(MANUFACTURING_BOM_JSON, content);
+			write(MANUFACTURING_BOM_CSV, csv);
+//			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL), MANUFACTURING_BOM_JSON, content,
+//					"Save Bill Of Material", true);
+//			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL), MANUFACTURING_BOM_CSV, csv,
+//					"Save Bill Of Material", true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		saving=false;
-		
+		saving = false;
+
+	}
+
+	private void write(String file, String content)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		File f = ScriptingEngine.fileFromGit(baseURL, file);
+		if (!f.getParentFile().exists())
+			f.getParentFile().mkdir();
+		if (!f.exists()) {
+			f.createNewFile();
+		}
+		BufferedWriter writer = new BufferedWriter(new FileWriter(f.getAbsolutePath()));
+		writer.write(content);
+		writer.close();
 	}
 
 	public void save() {
