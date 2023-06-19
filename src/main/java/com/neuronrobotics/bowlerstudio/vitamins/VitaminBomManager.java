@@ -21,6 +21,9 @@ import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
 
 public class VitaminBomManager {
+	public static final String MANUFACTURING_BOM_BASE = "manufacturing/bom";
+	public static final String MANUFACTURING_BOM_JSON = MANUFACTURING_BOM_BASE+".json";
+	public static final String MANUFACTURING_BOM_CSV = MANUFACTURING_BOM_BASE+".csv";
 
 	private class VitaminElement {
 		String name;
@@ -38,7 +41,7 @@ public class VitaminBomManager {
 	public VitaminBomManager(String url) throws IOException {
 		baseURL = url;
 		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
-		File bom = new File(baseWorkspaceFile.getAbsolutePath() + "/manufacturing/bom.json");
+		File bom = new File(baseWorkspaceFile.getAbsolutePath() + "/"+MANUFACTURING_BOM_JSON);
 		if (!bom.exists()) {
 			if (!bom.getParentFile().exists()) {
 				bom.getParentFile().mkdir();
@@ -151,7 +154,7 @@ public class VitaminBomManager {
 		}
 				
 		try {
-			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL),"manufacturing/bom.json", content,
+			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL),MANUFACTURING_BOM_JSON, content,
 					"Save Bill Of Material", true);
 			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL),"manufacturing/bom.csv", csv,
 					"Save Bill Of Material", true);
