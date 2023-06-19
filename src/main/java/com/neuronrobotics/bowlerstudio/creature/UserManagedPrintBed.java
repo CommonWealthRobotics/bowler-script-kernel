@@ -26,7 +26,6 @@ import java.nio.file.Path;
 public class UserManagedPrintBed implements IgenerateBed {
 
 	private MobileBaseCadManager mobileBaseCadManager;
-	private UserManagedPrintBedData data;
 	Type type = new TypeToken<UserManagedPrintBedData>() {
 	}.getType();
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
@@ -34,8 +33,7 @@ public class UserManagedPrintBed implements IgenerateBed {
 	private String source;
 	public UserManagedPrintBed(File printArrangment, MobileBaseCadManager mobileBaseCadManager) throws IOException {
 		this.mobileBaseCadManager = mobileBaseCadManager;
-		source = FileUtils.readFileToString(printArrangment, "UTF-8");
-		data = gson.fromJson(source, type);
+		source= mobileBaseCadManager.getMobileBase().getGitSelfSource()[0];
 	}
 
 	@Override

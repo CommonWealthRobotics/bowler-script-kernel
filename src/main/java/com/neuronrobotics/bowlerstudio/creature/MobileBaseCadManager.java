@@ -22,6 +22,7 @@ import org.python.google.common.io.Files;
 
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
@@ -781,7 +782,7 @@ public class MobileBaseCadManager implements Runnable {
 			throw new RuntimeException(T.getMessage());
 		}
 		if(bed == null) {
-			File printArrangment = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/printbed.json");
+			File printArrangment = new File(baseWorkspaceFile.getAbsolutePath()+"/"+PrintBedManager.file);
 			if(printArrangment.exists()) {
 				bed = new UserManagedPrintBed(printArrangment,this);
 			}

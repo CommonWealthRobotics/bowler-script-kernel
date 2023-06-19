@@ -30,7 +30,7 @@ public class PrintBedManager {
 	Type type = new TypeToken<UserManagedPrintBedData>() {
 	}.getType();
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-	String file = "printbed.json";
+	public static String file = "printbed.json";
 	List<Color> colors = Arrays.asList(Color.WHITE, Color.GREY, Color.BLUE, Color.TAN);
 	private String url;
 	HashMap<Integer, CSG> bedReps = new HashMap<Integer, CSG>();
