@@ -42,7 +42,7 @@ public class VitaminBomManager {
 	Type type = new TypeToken<HashMap<String, ArrayList<VitaminElement>>>() {
 	}.getType();
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-	private HashMap<String, ArrayList<VitaminElement>> database = new HashMap<String, ArrayList<VitaminElement>>();
+	private HashMap<String, ArrayList<VitaminElement>> database = null;//
 	private String baseURL;
 
 	public VitaminBomManager(String url) throws IOException {
@@ -70,6 +70,9 @@ public class VitaminBomManager {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
+		}
+		if(database==null) {
+			database=new HashMap<String, ArrayList<VitaminElement>>();
 		}
 	}
 
