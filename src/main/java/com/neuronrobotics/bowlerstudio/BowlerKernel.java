@@ -375,8 +375,6 @@ public class BowlerKernel {
 				long heapMaxSize = Runtime.getRuntime().maxMemory();
 				System.out.println("Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 				System.out.println("Of Heap "+(heapMaxSize));
-
-
 				for(int i=0;i<totalAssembly.size();i++) {
 					List<CSG> tmp = Arrays.asList(totalAssembly.get(i));
 					totalAssembly.set(i,null);
