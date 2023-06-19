@@ -184,7 +184,7 @@ public class VitaminBomManager {
 			String current = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_CSV)[0];
 			String currentJ = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_JSON)[0];
 			if (current.contentEquals(csv) && currentJ.contentEquals(content)) {
-				System.out.println("No update, BoM current");
+				//System.out.println("No update, BoM current");
 				saving = false;
 				return;
 			}
