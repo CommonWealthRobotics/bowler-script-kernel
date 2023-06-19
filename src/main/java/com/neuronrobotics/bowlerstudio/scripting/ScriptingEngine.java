@@ -1648,6 +1648,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
 					Git git = openGit(localRepo);
 					String url = git.getRepository().getConfig().getString("remote", "origin", "url");
+					if(!url.endsWith(".git"))
+						url+=".git";
 					closeGit(git);
 					return url;
 				}
@@ -1756,10 +1758,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static String[] findGitTagFromFile(File currentFile) throws IOException {
-
+		String string = locateGitUrl(currentFile);
 		Git git = locateGit(currentFile);
 		try {
-			String[] strings = new String[] { git.getRepository().getConfig().getString("remote", "origin", "url"),
+			String[] strings = new String[] { string,
 					findLocalPath(currentFile, git) };
 			closeGit(git);
 			return strings;
