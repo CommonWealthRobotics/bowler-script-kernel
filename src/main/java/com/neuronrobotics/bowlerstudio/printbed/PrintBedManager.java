@@ -92,6 +92,7 @@ public class PrintBedManager {
 			return parts;
 		HashMap<Integer, ArrayList<CSG>> beds = new HashMap<>();
 		for (CSG bit : parts) {
+			ArrayList<String> formats = bit.getExportFormats();
 			String name = bit.getName();
 			int index = bit.getPrintBedIndex();
 			bit = bit.prepForManufacturing();
@@ -104,6 +105,9 @@ public class PrintBedManager {
 					Transform csfMove = TransformFactory.nrToCSG(location);
 					bit = bit.transformed(csfMove);
 				}
+				if (formats != null)
+					for (String s : formats)
+						bit.addExportFormat(s);
 				beds.get(index).add(bit);
 			}
 		}
@@ -113,11 +117,15 @@ public class PrintBedManager {
 			ArrayList<CSG> bedComps = beds.get(i);
 			CSG bed = null;
 			for (CSG p : bedComps) {
+				ArrayList<String> formats = p.getExportFormats();
 				if (bed == null)
 					bed = p;
 				else {
 					bed = bed.dumbUnion(p);
 				}
+				if (formats != null)
+					for (String s : formats)
+						bed.addExportFormat(s);
 			}
 			if (bed != null)
 				bed.setName(name);
@@ -127,6 +135,7 @@ public class PrintBedManager {
 			}
 			bedsOutputs.add(bed);
 		}
+		bedsOutputs.addAll(parts);
 		return bedsOutputs;
 	}
 
