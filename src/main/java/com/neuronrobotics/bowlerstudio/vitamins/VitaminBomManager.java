@@ -33,7 +33,7 @@ public class VitaminBomManager {
 	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	private HashMap<String, ArrayList<VitaminElement>> database = new HashMap<String, ArrayList<VitaminElement>>();
 	private String baseURL;
-
+	
 	public VitaminBomManager(String url) throws IOException {
 		baseURL = url;
 		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
@@ -134,7 +134,7 @@ public class VitaminBomManager {
 	private synchronized void saveLocal() {
 		String content = gson.toJson(database);
 		//String[] source = base.getGitSelfSource();
-		String csv ="name,qty,source";
+		String csv ="name,qty,source\n";
 		for(String key:database.keySet()) {
 			VitaminElement e  =database.get(key).get(0);
 			String size = database.get(key).size()+"";
