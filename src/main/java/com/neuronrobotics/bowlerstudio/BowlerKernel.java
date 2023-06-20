@@ -346,8 +346,12 @@ public class BowlerKernel {
 			ret2.connect();
 			m.generateBody();
 			try {
+	
 				MobileBase base=(MobileBase) ret2;
-				File baseDirForFiles=new File("./manufacturing/");
+				File baseDir=new File("./manufacturing/");
+				File dir = new File(baseDir.getAbsolutePath() + "/" + base.getScriptingName());
+				if (!dir.exists())
+					dir.mkdirs();
 				boolean kinematic=false;
 				IgenerateBed bed=null;
 				try{
@@ -355,9 +359,9 @@ public class BowlerKernel {
 				}catch(Throwable T) {
 					throw new RuntimeException(T.getMessage());
 				}
-				bed=m.getPrintBed(baseDirForFiles,bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
+				bed=m.getPrintBed(dir,bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
 				if (bed == null || kinematic) {
-					 m._generateStls(base, baseDirForFiles, kinematic);
+					 m._generateStls(base, dir, kinematic);
 				}
 				System.out.println("Found arrangeBed API in CAD engine");
 				List<CSG> totalAssembly = bed.arrangeBed(base);
@@ -371,16 +375,12 @@ public class BowlerKernel {
 				long heapMaxSize = Runtime.getRuntime().maxMemory();
 				System.out.println("Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 				System.out.println("Of Heap "+(heapMaxSize));
-
-				File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
-				if (!dir.exists())
-					dir.mkdirs();
 				for(int i=0;i<totalAssembly.size();i++) {
 					List<CSG> tmp = Arrays.asList(totalAssembly.get(i));
 					totalAssembly.set(i,null);
 					System.out.println("Before Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 
-					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, baseDirForFiles);
+					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, dir);
 					tmp=null;
 					System.gc();
 					System.out.println("After Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));

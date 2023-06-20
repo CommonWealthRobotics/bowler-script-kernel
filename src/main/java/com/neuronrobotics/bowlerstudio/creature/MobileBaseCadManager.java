@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.creature;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.text.DecimalFormat;
@@ -18,7 +19,6 @@ import java.util.stream.Collectors;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.python.google.common.io.Files;
 
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
@@ -27,6 +27,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
 import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
+import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractKinematicsNR;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
@@ -765,31 +766,33 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public ArrayList<File> generateStls(MobileBase base, File baseDirForFiles, boolean kinematic) throws Exception {
+		File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
+		if (!dir.exists())
+			dir.mkdirs();
 		IgenerateBed bed=null;
 		String baseURL = base.getGitSelfSource()[0];
 		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
-		bed = getPrintBed(baseDirForFiles, bed, baseWorkspaceFile);
+		bed = getPrintBed(dir, bed, baseWorkspaceFile);
 		if (bed == null || kinematic) {
-			return _generateStls(base, baseDirForFiles, kinematic);
+			return _generateStls(base, dir, kinematic);
 		}
 		
 		System.out.println("Found arrangeBed API in CAD engine");
 		List<CSG> totalAssembly = bed.arrangeBed(base);
 		getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
-		File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName());
-		if (!dir.exists())
-			dir.mkdirs();
+
 
 		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, dir);
 	}
 	public IgenerateBed getPrintBed(File baseDirForFiles, IgenerateBed bed, File baseWorkspaceFile) throws IOException {
-		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/bom.csv");
+		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_CSV);
 		if(bomCSV.exists()) {
-			Files.copy(bomCSV,new File(baseDirForFiles.getAbsolutePath()+"/bom.csv"));
+			
+			Files.copy(bomCSV.toPath(),new File(baseDirForFiles.getAbsolutePath()+"/bom.csv").toPath());
 		}
-		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/bom.json");
+		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_JSON);
 		if(bom.exists()) {
-			Files.copy(bom,new File(baseDirForFiles.getAbsolutePath()+"/bom.json"));
+			Files.copy(bom.toPath(),new File(baseDirForFiles.getAbsolutePath()+"/bom.json").toPath());
 		}
 		try{
 		 bed= getIgenerateBed();
