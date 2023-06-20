@@ -788,11 +788,17 @@ public class MobileBaseCadManager implements Runnable {
 		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_CSV);
 		if(bomCSV.exists()) {
 			
-			Files.copy(bomCSV.toPath(),new File(baseDirForFiles.getAbsolutePath()+"/bom.csv").toPath());
+			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.csv");
+			if(file.exists())
+				file.delete();
+			Files.copy(bomCSV.toPath(),file.toPath());
 		}
 		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_JSON);
 		if(bom.exists()) {
-			Files.copy(bom.toPath(),new File(baseDirForFiles.getAbsolutePath()+"/bom.json").toPath());
+			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.json");
+			if(file.exists())
+				file.delete();
+			Files.copy(bom.toPath(),file.toPath());
 		}
 		try{
 		 bed= getIgenerateBed();
