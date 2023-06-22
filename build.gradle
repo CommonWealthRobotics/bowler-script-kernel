@@ -281,11 +281,11 @@ dependencies {
 
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
-	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2')
+	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.+')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2')
+	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2.+')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
@@ -293,11 +293,11 @@ dependencies {
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2')
+	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2.+')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2')
+	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2.+')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
@@ -317,7 +317,7 @@ dependencies {
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	implementation('de.dfki.mary:marytts-lang-en:5.2')
+	implementation('de.dfki.mary:marytts-lang-en:5.2.+')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
