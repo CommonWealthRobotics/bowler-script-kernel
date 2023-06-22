@@ -294,22 +294,22 @@ dependencies {
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
+//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
+//	{
+//		exclude group: 'commons-io', module: 'commons-io'
+//	}
+//	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2')
+//	{
+//		exclude group: 'commons-io', module: 'commons-io'
+//	}
 	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2')
-	{
-		exclude group: 'commons-io', module: 'commons-io'
-	}
-	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
-	{
-		exclude group: 'commons-io', module: 'commons-io'
-	}
-	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2')
-	{
-		exclude group: 'commons-io', module: 'commons-io'
-	}
+//	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2')
+//	{
+//		exclude group: 'commons-io', module: 'commons-io'
+//	}
 	implementation('de.dfki.mary:marytts-lang-en:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
