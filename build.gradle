@@ -13,7 +13,6 @@ buildscript {
 				url "https://plugins.gradle.org/m2/"
 			},
 			mavenLocal()
-			
 		]
 	}
 
@@ -117,8 +116,16 @@ String getOsArch() {
 
 
 repositories {
-	maven {
-		url "https://repo1.maven.org/maven2/"
+	maven { url 'https://repo1.maven.org/maven2/'}
+	exclusiveContent {
+		forRepository {
+			maven {
+				url 'https://mlt.jfrog.io/artifactory/mlt-mvn-releases-local'
+			}
+		}
+		filter {
+			includeGroup 'de.dfki.lt.jtok'
+		}
 	}
 	mavenCentral()
 	jcenter()
@@ -293,42 +300,52 @@ dependencies {
 	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
 	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
-	//	implementation('de.dfki.mary:voice-cmu-awb-time:5.2.1')
-	//	{
-	//		exclude group: 'commons-io', module: 'commons-io'
-	//	}
+//		implementation('de.dfki.mary:voice-cmu-awb-time:5.2')
+//		{
+//			exclude group: 'commons-io', module: 'commons-io'
+//		}
 	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
 	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
-	//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2.1')
-	//	{
-	//		exclude group: 'commons-io', module: 'commons-io'
-	//	}
-	//	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2.1')
-	//	{
-	//		exclude group: 'commons-io', module: 'commons-io'
-	//	}
-	//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2.1')
-	//	{
-	//		exclude group: 'commons-io', module: 'commons-io'
-	//	}
-	//	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2.1')
-	//	{
-	//		exclude group: 'commons-io', module: 'commons-io'
-	//	}
+		implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
+		{
+			exclude group: 'commons-io', module: 'commons-io'
+		}
+		implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2')
+		{
+			exclude group: 'commons-io', module: 'commons-io'
+		}
+		implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
+		{
+			exclude group: 'commons-io', module: 'commons-io'
+		}
+		implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2')
+		{
+			exclude group: 'commons-io', module: 'commons-io'
+		}
 	implementation('de.dfki.mary:marytts-lang-en:5.2.1')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
 
 	implementation 'ai.djl:api:'
