@@ -116,34 +116,28 @@ String getOsArch() {
 
 
 repositories {
-	maven { url 'https://repo1.maven.org/maven2/'}
-	exclusiveContent {
-		forRepository {
-			maven {
-				url 'https://mlt.jfrog.io/artifactory/mlt-mvn-releases-local'
-			}
-		}
-		filter {
-			includeGroup 'de.dfki'
-		}
-	}
 	mavenCentral()
-	jcenter()
+	maven {
+		url 'https://mlt.jfrog.io/artifactory/mlt-mvn-releases-local/'
+	}
+	maven { url 'https://repo.maven.apache.org/maven2/' }
+	
+	maven { url 'https://repo1.maven.org/maven2/'}
+
+
+	//jcenter()
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/'  }
 	//maven { url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'  }
 	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
 	//com.neuronrobotics hosting point
 	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
-	maven {
-		url 'https://mlt.jfrog.io/artifactory/mlt-mvn-releases-local'
-	}
 
-	//    maven {
-	//        url "https://dl.bintray.com/s1m0nw1/KtsRunner"
-	//        content {
-	//            includeGroup("de.swirtz")
-	//        }
-	//    }
+	    maven {
+	        url "https://repo.myrobotlab.org/artifactory/myrobotlab/"
+	        content {
+	            includeGroup("de.dfki.mary")
+	        }
+	    }
 	//	maven {
 	//		url "https://dl.bintray.com/ihmcrobotics/maven-release/"
 	//		content {
@@ -331,18 +325,30 @@ dependencies {
 		implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
 		{
 			exclude group: 'commons-io', module: 'commons-io'
+			
+			exclude group: 'com.twmacinta', module: 'fast-md5'
+			exclude group: 'gov.nist.math', module: 'Jampack'
 		}
 		implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2')
 		{
 			exclude group: 'commons-io', module: 'commons-io'
+			
+			exclude group: 'com.twmacinta', module: 'fast-md5'
+			exclude group: 'gov.nist.math', module: 'Jampack'
 		}
 		implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
 		{
 			exclude group: 'commons-io', module: 'commons-io'
+			
+			exclude group: 'com.twmacinta', module: 'fast-md5'
+			exclude group: 'gov.nist.math', module: 'Jampack'
 		}
 		implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2')
 		{
 			exclude group: 'commons-io', module: 'commons-io'
+			
+			exclude group: 'com.twmacinta', module: 'fast-md5'
+			exclude group: 'gov.nist.math', module: 'Jampack'
 		}
 	implementation('de.dfki.mary:marytts-lang-en:5.2.1')
 	{
