@@ -395,7 +395,6 @@ public class BowlerKernel {
 				File dir = new File(baseDir.getAbsolutePath() + "/" + base.getScriptingName());
 				if (!dir.exists())
 					dir.mkdirs();
-				boolean kinematic=false;
 				IgenerateBed bed=null;
 				try{
 				 bed= m.getIgenerateBed();
@@ -403,8 +402,9 @@ public class BowlerKernel {
 					throw new RuntimeException(T.getMessage());
 				}
 				bed=m.getPrintBed(dir,bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
-				if (bed == null || kinematic) {
-					 m._generateStls(base, dir, kinematic);
+				if (bed == null ) {
+					 m._generateStls(base, dir, false);
+					 return;
 				}
 				System.out.println("Found arrangeBed API in CAD engine");
 				List<CSG> totalAssembly = bed.arrangeBed(base);
