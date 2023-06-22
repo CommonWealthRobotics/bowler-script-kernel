@@ -234,7 +234,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	    		t.printStackTrace();
 	    		System.exit(-5);
 	    	}
-	    	return;
+	    	throw new RuntimeException(t);
 	    }
 		
 		if (processing) {
