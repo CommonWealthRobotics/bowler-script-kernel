@@ -3,13 +3,17 @@ buildscript {
 		springBootVersion = '1.2.7.RELEASE'
 	}
 	repositories {
-		[jcenter(), mavenCentral(),maven {
-		  url "https://plugins.gradle.org/m2/"
-		}]
+		[
+			jcenter(),
+			mavenCentral(),
+			maven {
+				url "https://plugins.gradle.org/m2/"
+			}
+		]
 	}
 
 	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:5.0.0'
+		classpath 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
 	}
 	//	dependencies {
 	//		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -297,22 +301,22 @@ dependencies {
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
-//	{
-//		exclude group: 'commons-io', module: 'commons-io'
-//	}
-//	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2')
-//	{
-//		exclude group: 'commons-io', module: 'commons-io'
-//	}
-//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
-//	{
-//		exclude group: 'commons-io', module: 'commons-io'
-//	}
-//	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2')
-//	{
-//		exclude group: 'commons-io', module: 'commons-io'
-//	}
+	//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
+	//	{
+	//		exclude group: 'commons-io', module: 'commons-io'
+	//	}
+	//	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2')
+	//	{
+	//		exclude group: 'commons-io', module: 'commons-io'
+	//	}
+	//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
+	//	{
+	//		exclude group: 'commons-io', module: 'commons-io'
+	//	}
+	//	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2')
+	//	{
+	//		exclude group: 'commons-io', module: 'commons-io'
+	//	}
 	implementation('de.dfki.mary:marytts-lang-en:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
@@ -333,18 +337,18 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.robokind/org.robokind.api.speech
 	implementation group: 'org.robokind', name: 'org.robokind.api.speech', version: '0.9.5'
-	
+
 	// https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j
 	implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
-	
+
 	// https://mvnrepository.com/artifact/com.alphacephei/vosk
 	implementation group: 'com.alphacephei', name: 'vosk', version: '0.3.45'
-	// Add OpenCV 
+	// Add OpenCV
 	implementation 'org.openpnp:opencv:4.7.0-0'
-	
+
 	// https://mvnrepository.com/artifact/com.neuronrobotics/SimplePacketComsJava
 	implementation group: 'com.neuronrobotics', name: 'SimplePacketComsJava', version: '1.0.0'
-	
+
 }
 
 
