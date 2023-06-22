@@ -124,7 +124,7 @@ repositories {
 			}
 		}
 		filter {
-			includeGroup 'de.dfki.lt.jtok'
+			includeGroup 'de.dfki'
 		}
 	}
 	mavenCentral()
@@ -134,6 +134,9 @@ repositories {
 	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
 	//com.neuronrobotics hosting point
 	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
+	maven {
+		url 'https://mlt.jfrog.io/artifactory/mlt-mvn-releases-local'
+	}
 
 	//    maven {
 	//        url "https://dl.bintray.com/s1m0nw1/KtsRunner"
