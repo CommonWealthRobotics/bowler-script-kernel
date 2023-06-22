@@ -117,6 +117,9 @@ String getOsArch() {
 
 
 repositories {
+	maven {
+		url "https://repo1.maven.org/maven2/"
+	}
 	mavenCentral()
 	jcenter()
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/'  }
@@ -124,6 +127,7 @@ repositories {
 	maven { url 'https://oss.sonatype.org/content/repositories/releases/'  }
 	//com.neuronrobotics hosting point
 	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
+
 	//    maven {
 	//        url "https://dl.bintray.com/s1m0nw1/KtsRunner"
 	//        content {
@@ -286,11 +290,11 @@ dependencies {
 
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
-	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1')
+	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2.1')
+	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
@@ -298,11 +302,11 @@ dependencies {
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2.1')
+	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2.1')
+	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
@@ -322,7 +326,7 @@ dependencies {
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	implementation('de.dfki.mary:marytts-lang-en:5.2.1')
+	implementation('de.dfki.mary:marytts-lang-en:5.2')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
