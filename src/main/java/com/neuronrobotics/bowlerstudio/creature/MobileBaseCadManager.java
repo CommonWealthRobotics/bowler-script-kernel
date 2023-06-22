@@ -848,21 +848,24 @@ public class MobileBaseCadManager implements Runnable {
 						else
 							totalAssembly.add(tmp);
 						LinkConfiguration conf = getLinkConfiguration(parts.get(j));
-
-						String linkNum = conf.getLinkIndex() + "_Link_";
-
-						File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName() + "/"
-								+ l.getScriptingName());
-						if (!dir.exists())
-							dir.mkdirs();
-						System.out.println("Making STL for " + name);
-						File stl = new File(
-								dir.getAbsolutePath() + "/" + linkNum + name + "_limb_" + i + "_Part_" + j + ".stl");
-						FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
-						allCadStl.add(stl);
-						// totalAssembly.add(tmp);
-						getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
-						set(base, i, j);
+						if(conf!=null) {
+							String linkNum = conf.getLinkIndex() + "_Link_";
+	
+							File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName() + "/"
+									+ l.getScriptingName());
+							if (!dir.exists())
+								dir.mkdirs();
+							System.out.println("Making STL for " + name);
+							File stl = new File(
+									dir.getAbsolutePath() + "/" + linkNum + name + "_limb_" + i + "_Part_" + j + ".stl");
+							FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
+							allCadStl.add(stl);
+							// totalAssembly.add(tmp);
+							getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
+							set(base, i, j);
+						}else {
+							System.err.println("ERROR "+parts.get(j).getName()+" has no link associated ");
+						}
 					}
 				} catch (Exception ex) {
 					getUi().highlightException(getCadScriptFromMobileBase(base), ex);
