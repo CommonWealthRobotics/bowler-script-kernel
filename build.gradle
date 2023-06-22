@@ -182,7 +182,7 @@ dependencies {
 
 
 	// https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
-	compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.+.1'
+	compile group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1'
 
 
 
@@ -290,43 +290,43 @@ dependencies {
 
 	testCompile 'junit:junit:4.10'
 	compile fileTree (dir: 'libs', includes: ['*.jar'])
-	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.+')
+	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2.+')
+	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2.1')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	//	implementation('de.dfki.mary:voice-cmu-awb-time:5.2.+')
+	//	implementation('de.dfki.mary:voice-cmu-awb-time:5.2.1')
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2.+')
+	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2.1')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2.+')
+	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2.1')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
-	//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2.+')
+	//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2.1')
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	//	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2.+')
+	//	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2.1')
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2.+')
+	//	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2.1')
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	//	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2.+')
+	//	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2.1')
 	//	{
 	//		exclude group: 'commons-io', module: 'commons-io'
 	//	}
-	implementation('de.dfki.mary:marytts-lang-en:5.2.+')
+	implementation('de.dfki.mary:marytts-lang-en:5.2.1')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
 	}
