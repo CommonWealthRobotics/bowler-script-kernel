@@ -788,11 +788,17 @@ public class MobileBaseCadManager implements Runnable {
 		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_CSV);
 		if(bomCSV.exists()) {
 			
-			Files.copy(bomCSV.toPath(),new File(baseDirForFiles.getAbsolutePath()+"/bom.csv").toPath());
+			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.csv");
+			if(file.exists())
+				file.delete();
+			Files.copy(bomCSV.toPath(),file.toPath());
 		}
 		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_JSON);
 		if(bom.exists()) {
-			Files.copy(bom.toPath(),new File(baseDirForFiles.getAbsolutePath()+"/bom.json").toPath());
+			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.json");
+			if(file.exists())
+				file.delete();
+			Files.copy(bom.toPath(),file.toPath());
 		}
 		try{
 		 bed= getIgenerateBed();
@@ -842,21 +848,24 @@ public class MobileBaseCadManager implements Runnable {
 						else
 							totalAssembly.add(tmp);
 						LinkConfiguration conf = getLinkConfiguration(parts.get(j));
-
-						String linkNum = conf.getLinkIndex() + "_Link_";
-
-						File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName() + "/"
-								+ l.getScriptingName());
-						if (!dir.exists())
-							dir.mkdirs();
-						System.out.println("Making STL for " + name);
-						File stl = new File(
-								dir.getAbsolutePath() + "/" + linkNum + name + "_limb_" + i + "_Part_" + j + ".stl");
-						FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
-						allCadStl.add(stl);
-						// totalAssembly.add(tmp);
-						getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
-						set(base, i, j);
+						if(conf!=null) {
+							String linkNum = conf.getLinkIndex() + "_Link_";
+	
+							File dir = new File(baseDirForFiles.getAbsolutePath() + "/" + base.getScriptingName() + "/"
+									+ l.getScriptingName());
+							if (!dir.exists())
+								dir.mkdirs();
+							System.out.println("Making STL for " + name);
+							File stl = new File(
+									dir.getAbsolutePath() + "/" + linkNum + name + "_limb_" + i + "_Part_" + j + ".stl");
+							FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
+							allCadStl.add(stl);
+							// totalAssembly.add(tmp);
+							getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
+							set(base, i, j);
+						}else {
+							System.err.println("ERROR "+parts.get(j).getName()+" has no link associated ");
+						}
 					}
 				} catch (Exception ex) {
 					getUi().highlightException(getCadScriptFromMobileBase(base), ex);

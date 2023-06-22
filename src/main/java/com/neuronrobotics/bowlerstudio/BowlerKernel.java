@@ -16,7 +16,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 //import org.springframework.boot.SpringApplication;
 //import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -27,6 +29,7 @@ import jline.ConsoleReader;
 import jline.Terminal;
 
 import com.neuronrobotics.bowlerstudio.creature.CadFileExporter;
+import com.neuronrobotics.bowlerstudio.creature.IMobileBaseUI;
 import com.neuronrobotics.bowlerstudio.creature.IgenerateBed;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
@@ -36,6 +39,7 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ICSGProgress;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
+import javafx.scene.transform.Affine;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
 import marytts.signalproc.effects.ChorusEffectBase;
@@ -319,12 +323,13 @@ public class BowlerKernel {
 		});
 
 		ArrayList<CSG> csgBits = new ArrayList<>();
-		processReturnedObjects(ret, csgBits);
 		try {
+			processReturnedObjects(ret, csgBits);
 			csgBits=new PrintBedManager(url,csgBits).makePrintBeds();
 			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
 		} catch (Throwable t) {
 			t.printStackTrace();
+			fail();
 		}
 
 	}
@@ -342,6 +347,44 @@ public class BowlerKernel {
 		if (MobileBase.class.isInstance(ret)) {
 			MobileBase ret2 = (MobileBase) ret;
 			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
+			m.setUi(new IMobileBaseUI() {
+				
+				@Override
+				public void setSelectedCsg(Collection<CSG> selectedCsg) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void setSelected(Affine rootListener) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void setAllCSG(Collection<CSG> toAdd, File source) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void highlightException(File fileEngineRunByName, Throwable ex) {
+					ex.printStackTrace();
+					fail();
+				}
+				
+				@Override
+				public Set<CSG> getVisibleCSGs() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+				
+				@Override
+				public void addCSG(Collection<CSG> toAdd, File source) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
 			m.setConfigurationViewerMode(false);
 			ret2.connect();
 			m.generateBody();
@@ -352,7 +395,6 @@ public class BowlerKernel {
 				File dir = new File(baseDir.getAbsolutePath() + "/" + base.getScriptingName());
 				if (!dir.exists())
 					dir.mkdirs();
-				boolean kinematic=false;
 				IgenerateBed bed=null;
 				try{
 				 bed= m.getIgenerateBed();
@@ -360,8 +402,9 @@ public class BowlerKernel {
 					throw new RuntimeException(T.getMessage());
 				}
 				bed=m.getPrintBed(dir,bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
-				if (bed == null || kinematic) {
-					 m._generateStls(base, dir, kinematic);
+				if (bed == null ) {
+					 m._generateStls(base, dir, false);
+					 return;
 				}
 				System.out.println("Found arrangeBed API in CAD engine");
 				List<CSG> totalAssembly = bed.arrangeBed(base);
@@ -389,6 +432,7 @@ public class BowlerKernel {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				fail();
 			}
 		}
 	}

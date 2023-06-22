@@ -30,6 +30,7 @@ import javafx.scene.control.ButtonType;
 public class IssueReportingExceptionHandler implements UncaughtExceptionHandler {
 	private static int timerErrorCount = 0;
 	String stacktraceFromHandlerInstantiation;
+	private int fxExceptionCount;
 	private static boolean processing = false;
 	private static HashMap<Throwable, String> exceptionQueue = new HashMap<Throwable, String>();
 	private static boolean reportIssues = false;
@@ -110,15 +111,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 							}
 							return;
 						}else if (java.lang.OutOfMemoryError.class.isInstance(e)||stacktrace.contains("java.lang.OutOfMemoryError")) {
-							runLater(()->{
-								Alert alert = new Alert(AlertType.CONFIRMATION);
-								alert.setTitle("Out Of Memory FAULT ");
-								alert.setHeaderText("It's just gunna crash, sorry...");
-								alert.setContentText("I can wait till you hit yes, buts its basically done...\n"+stacktrace);
-								Optional<ButtonType> result = alert.showAndWait();
-								System.exit(-1);
-							});
-
+							e.printStackTrace();
+							System.exit(-1);
 						}
 				}
 
@@ -234,7 +228,13 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(new Exception());
 		if (Platform.isFxApplicationThread()) {
 	    	System.err.println("Exception in Javafx thread! \n"+org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
-	    	return;
+	    	fxExceptionCount++;
+	    	if(fxExceptionCount>10) {
+	    		System.err.println(stacktraceFromCatch);
+	    		t.printStackTrace();
+	    		System.exit(-5);
+	    	}
+	    	throw new RuntimeException(t);
 	    }
 		
 		if (processing) {
