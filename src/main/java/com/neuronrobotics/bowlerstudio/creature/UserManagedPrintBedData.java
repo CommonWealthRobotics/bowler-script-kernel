@@ -10,8 +10,8 @@ public class UserManagedPrintBedData {
 	public double bedY;
 	public void init() {
 		locations=new HashMap<String, TransformNR>();
-		bedX=250;
-		bedY=250;
+		bedX=240;
+		bedY=200;
 	}
 
 }

@@ -101,7 +101,9 @@ public class PrintBedManager {
 			String name = bit.getName();
 			int index = bit.getPrintBedIndex();
 			bit = bit.prepForManufacturing();
-			if (bit != null) {
+			if (bit != null && name.length()>0) {
+				if(bit.getMinZ()<0)
+					bit=bit.toZMin();
 				if (beds.get(index) == null) {
 					beds.put(index, new ArrayList<CSG>());
 				}
