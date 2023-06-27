@@ -379,7 +379,7 @@ dependencies {
 	implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
 
 	// https://mvnrepository.com/artifact/com.alphacephei/vosk
-	implementation group: 'com.alphacephei', name: 'vosk', version: '0.3.45'
+	implementation group: 'com.alphacephei', name: 'vosk', version: '0.3.38'
 	// Add OpenCV
 	implementation 'org.openpnp:opencv:4.7.0-0'
 
