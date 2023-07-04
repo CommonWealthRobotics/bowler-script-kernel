@@ -416,17 +416,17 @@ public class BowlerKernel {
 
 				// Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
 				long heapMaxSize = Runtime.getRuntime().maxMemory();
-				System.out.println("Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
-				System.out.println("Of Heap "+(heapMaxSize));
+				//System.out.println("Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+				//System.out.println("Of Heap "+(heapMaxSize));
 				for(int i=0;i<totalAssembly.size();i++) {
 					List<CSG> tmp = Arrays.asList(totalAssembly.get(i));
 					totalAssembly.set(i,null);
-					System.out.println("Before Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+					//System.out.println("Before Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 
 					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, dir);
 					tmp=null;
 					System.gc();
-					System.out.println("After Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+					//System.out.println("After Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 
 				}
 			} catch (Exception e) {

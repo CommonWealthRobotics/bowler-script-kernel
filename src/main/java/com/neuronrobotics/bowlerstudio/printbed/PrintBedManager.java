@@ -134,10 +134,13 @@ public class PrintBedManager {
 					for (String s : formats)
 						bed.addExportFormat(s);
 			}
-			if (bed != null)
+			if (bed != null) {
+				//System.out.println("Mesh fixing for "+name);
+				//bed=bed.union(bed);
 				bed.setName(name);
+			}
 			else {
-				bed = new Cube().toCSG();
+				bed = new Cube().toCSG().toZMin();
 				bed.setManufacturing(incoming -> null);
 			}
 			bedsOutputs.add(bed);
