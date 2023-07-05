@@ -30,6 +30,7 @@ public class PrintBedObject {
 		this.globalPose = startPose;
 		
 		manip = new manipulation(affine, new Vector3d(1, 1, 0), part, startPose);
+		manip.addSaveListener(() -> System.out.println("Saving PrintBedObject "+name));
 		checkBounds();
 	}
 	public void addEventListener(Runnable r) {
