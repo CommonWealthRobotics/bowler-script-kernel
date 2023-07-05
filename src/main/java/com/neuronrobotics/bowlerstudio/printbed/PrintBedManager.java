@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -41,6 +42,7 @@ public class PrintBedManager {
 	HashMap<Integer, CSG> bedReps = new HashMap<Integer, CSG>();
 	ArrayList<PrintBedObject> objects = new ArrayList<PrintBedObject>();
 	private ArrayList<CSG> parts;
+	private HashSet<String> names = new HashSet<String>();
 
 	public PrintBedManager(String url, ArrayList<CSG> parts) {
 		this.url = url;
@@ -64,20 +66,25 @@ public class PrintBedManager {
 			database = new UserManagedPrintBedData();
 			database.init();
 		}
+		names.clear();
 		for (CSG bit : parts) {
 			int index = bit.getPrintBedIndex();
 			int colorIndex = index % 4;
 			double zrot = -90 * (index);
 			double yval = index > 4 ? database.bedX * (index - 4) : 0;
-			System.out.println(bit.getName() + " on " + index + " rot " + zrot + " y " + yval);
 
 			CSG bed = new Cube(database.bedX, database.bedY, 1).toCSG().toXMin().toYMin().toZMax().rotz(zrot)
 					.movey(yval);
 			bed.setColor(colors.get(colorIndex));
 			bedReps.put(index, bed);
 			String name = bit.getName();
+			
 			CSG prepedBit = bit.prepForManufacturing();
 			if (prepedBit != null && name.length() > 0) {
+				if(names.contains(name))
+					continue;
+				names.add(name);
+				System.out.println(bit.getName() + " on " + index + " rot " + zrot + " y " + yval);
 				if (database.locations.get(name) == null) {
 					database.locations.put(name, new TransformNR());
 				}
@@ -96,12 +103,16 @@ public class PrintBedManager {
 		if (url == null)
 			return parts;
 		HashMap<Integer, ArrayList<CSG>> beds = new HashMap<>();
+		names.clear();
 		for (CSG bit : parts) {
 			ArrayList<String> formats = bit.getExportFormats();
 			String name = bit.getName();
 			int index = bit.getPrintBedIndex();
 			bit = bit.prepForManufacturing();
 			if (bit != null && name.length()>0) {
+				if(names.contains(name))
+					continue;
+				names.add(name);
 				if(bit.getMinZ()<0)
 					bit=bit.toZMin();
 				if (beds.get(index) == null) {
@@ -115,6 +126,7 @@ public class PrintBedManager {
 				if (formats != null)
 					for (String s : formats)
 						bit.addExportFormat(s);
+				bit.setName(name);
 				beds.get(index).add(bit);
 			}
 		}
@@ -124,6 +136,7 @@ public class PrintBedManager {
 			ArrayList<CSG> bedComps = beds.get(i);
 			CSG bed = null;
 			for (CSG p : bedComps) {
+				bedsOutputs.add(p);
 				ArrayList<String> formats = p.getExportFormats();
 				if (bed == null)
 					bed = p;
@@ -145,7 +158,7 @@ public class PrintBedManager {
 			}
 			bedsOutputs.add(bed);
 		}
-		bedsOutputs.addAll(parts);
+		
 		return bedsOutputs;
 	}
 
