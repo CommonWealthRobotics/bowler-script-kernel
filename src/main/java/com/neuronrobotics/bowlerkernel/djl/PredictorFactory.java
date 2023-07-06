@@ -19,6 +19,7 @@ import ai.djl.training.util.ProgressBar;
 public class PredictorFactory {
 	static {
 		Engine.getEngine("PyTorch"); // Make sure PyTorch engine is loaded
+		Engine.getEngine("OnnxRuntime"); // Make sure PyTorch engine is loaded
 	}
 	private static HashMap<ImagePredictorType, Predictor<Image, DetectedObjects>> preloaded = new HashMap<>();
 	private static Predictor<Image, float[]> features = null;
@@ -75,7 +76,8 @@ public class PredictorFactory {
 				String MODEL_URL = "https://mlrepo.djl.ai/model/cv/object_detection/ai/djl/onnxruntime/yolo5s/0.0.1/yolov5s.zip";
 
 				Criteria<Image, DetectedObjects> criteria2 = Criteria.builder()
-						.setTypes(Image.class, DetectedObjects.class).optModelUrls(MODEL_URL).optEngine("OnnxRuntime")
+						.setTypes(Image.class, DetectedObjects.class).optModelUrls(MODEL_URL)
+						.optEngine("OnnxRuntime")
 						.optTranslatorFactory(new YoloV5TranslatorFactory()).build();
 				preloaded.put(type, criteria2.loadModel().newPredictor());
 				break;
