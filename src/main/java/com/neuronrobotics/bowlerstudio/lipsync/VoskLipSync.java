@@ -83,7 +83,11 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	static {
 
 		setModelName("vosk-model-en-us-daanzu-20200905");
-		try {
+		loadDictionary();
+	}
+
+	public static void loadDictionary() {
+		try {			
 			File phoneticDatabaseFile = ScriptingEngine
 					.fileFromGit("https://github.com/madhephaestus/TextToSpeechASDRTest.git", "cmudict-0.7b.txt");
 			dict = new PhoneticDictionary(phoneticDatabaseFile);

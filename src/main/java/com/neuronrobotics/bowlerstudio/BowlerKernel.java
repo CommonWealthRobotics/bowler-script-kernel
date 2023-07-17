@@ -95,6 +95,7 @@ public class BowlerKernel {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
+		long startTime= System.currentTimeMillis();
 		try {
 			JavaFXInitializer.go();
 		} catch (Throwable t) {
@@ -159,7 +160,7 @@ public class BowlerKernel {
 					System.out.println("\t" + f);
 				}
 			}
-			System.exit(0);
+			finish(startTime);
 		}
 //		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
@@ -219,9 +220,9 @@ public class BowlerKernel {
 			}
 		}
 
-		if (!runShell)
-			System.exit(0);
-
+		if (!runShell) {
+			finish(startTime);
+		}
 		System.out.println("Starting Bowler REPL in langauge: " + shellTypeStorage);
 		// sample from
 		// http://jline.sourceforge.net/testapidocs/src-html/jline/example/Example.html
@@ -233,7 +234,7 @@ public class BowlerKernel {
 
 		ConsoleReader reader = new ConsoleReader();
 		reader.addTriggeredAction(Terminal.CTRL_C, e -> {
-			System.exit(0);
+			finish(startTime);
 		});
 
 		if (!historyFile.exists()) {
@@ -310,6 +311,11 @@ public class BowlerKernel {
 			e.printStackTrace();
 		}
 
+	}
+
+	private static void finish(long startTime) {
+		System.out.println("Process took "+(((double)(System.currentTimeMillis()-startTime)))/60000.0+" minutes");
+		System.exit(0);
 	}
 
 	private static void processReturnedObjectsStart(Object ret,String url) {
