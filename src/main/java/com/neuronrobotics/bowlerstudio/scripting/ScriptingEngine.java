@@ -625,14 +625,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void waitForRepo(String remoteURI, String reason) {
 		while (ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(1000);
-			System.out.println("\n\n\nPaused " + reason + " by another thread, waiting for repo " + remoteURI);
-			new Exception().printStackTrace(System.err);
+			ThreadUtil.wait(500);
 			for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
 				Git g = iterator.next();
 				GitTimeoutThread t = gitOpenTimeout.get(g);
 				if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
 					t.getException().printStackTrace(System.err);
+					System.err.println("\n\n\nPaused " + reason + " by another thread, waiting for repo " + remoteURI);
+					new Exception().printStackTrace(System.err);
 				}
 			}
 		}

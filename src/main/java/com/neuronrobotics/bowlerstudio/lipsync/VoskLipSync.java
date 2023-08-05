@@ -35,6 +35,7 @@ import org.vosk.Recognizer;
 import net.lingala.zip4j.ZipFile;
 
 public class VoskLipSync implements IAudioProcessingLambda {
+	private static double PercentageTimeOfLipSyncReadahead = 0.1;
 	private static VoskLipSync singelton = null;
 
 	private VoskLipSync() {
@@ -147,6 +148,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	ArrayList<TimeCodedViseme> timeCodedVisemesCache = new ArrayList<TimeCodedViseme>();
 	int words = 0;
 	private double positionInTrack;
+	private double timeLeadLag=0.5;
 
 	private AudioStatus toStatus(String phoneme) {
 		AudioStatus s = AudioStatus.getFromPhoneme(phoneme);
@@ -171,13 +173,12 @@ public class VoskLipSync implements IAudioProcessingLambda {
 			// println "\n\n unknown word "+w+"\n\n"
 			return;
 		}
-
 		double phonemeLength = wordLen / phonemes.size();
 		for (int i = 0; i < phonemes.size(); i++) {
 			String phoneme = phonemes.get(i);
 			AudioStatus stat = toStatus(phoneme);
-			double myStart = wordStart + phonemeLength * ((double) i);
-			double myEnd = wordStart + phonemeLength * ((double) (i + 1));
+			double myStart = wordStart + phonemeLength * ((double) i)+getTimeLeadLag();
+			double myEnd = wordStart + phonemeLength * ((double) (i + 1))+getTimeLeadLag();
 			TimeCodedViseme tc = new TimeCodedViseme(stat, myStart, myEnd, secLen);
 			if (timeCodedVisemes.size() > 0) {
 				TimeCodedViseme tcLast = timeCodedVisemes.get(timeCodedVisemes.size() - 1);
@@ -269,12 +270,12 @@ public class VoskLipSync implements IAudioProcessingLambda {
 				writer.close();
 				timeCodedVisemesCache.clear();
 			} catch (Throwable tr) {
-				// BowlerStudio.printStackTrace(t);
+				tr.printStackTrace();
 			}
 		});
 		t.start();
 
-		while (t.isAlive() && positionInTrack < 1 && (System.currentTimeMillis() - start < durationInMillis)) {
+		while (t.isAlive() && positionInTrack < getPercentageTimeOfLipSyncReadahead() && (System.currentTimeMillis() - start < durationInMillis)) {
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
@@ -391,9 +392,38 @@ public class VoskLipSync implements IAudioProcessingLambda {
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
-		System.out.println(result);
+		recognizer.close();
+		//System.out.println(result);
 		microphone.close();
 		return result;
+	}
+
+	/**
+	 * @return the percentageTimeOfLipSyncReadahead
+	 */
+	public static double getPercentageTimeOfLipSyncReadahead() {
+		return PercentageTimeOfLipSyncReadahead;
+	}
+
+	/**
+	 * @param percentageTimeOfLipSyncReadahead the percentageTimeOfLipSyncReadahead to set
+	 */
+	public static void setPercentageTimeOfLipSyncReadahead(double percentageTimeOfLipSyncReadahead) {
+		PercentageTimeOfLipSyncReadahead = percentageTimeOfLipSyncReadahead;
+	}
+
+	/**
+	 * @return the timeLeadLag
+	 */
+	public double getTimeLeadLag() {
+		return timeLeadLag;
+	}
+
+	/**
+	 * @param timeLeadLag the timeLeadLag to set
+	 */
+	public void setTimeLeadLag(double timeLeadLag) {
+		this.timeLeadLag = timeLeadLag;
 	}
 
 }
