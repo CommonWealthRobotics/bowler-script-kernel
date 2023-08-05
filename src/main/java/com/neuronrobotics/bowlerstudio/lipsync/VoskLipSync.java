@@ -35,7 +35,7 @@ import org.vosk.Recognizer;
 import net.lingala.zip4j.ZipFile;
 
 public class VoskLipSync implements IAudioProcessingLambda {
-	private static double PercentageTimeOfLipSyncReadahead = 0.1;
+	private static double PercentageTimeOfLipSyncReadahead = 2;
 	private static VoskLipSync singelton = null;
 
 	private VoskLipSync() {
@@ -268,6 +268,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(json.getAbsolutePath()));
 				writer.write(s);
 				writer.close();
+				System.out.println("Lip Sync data writen to "+json.getAbsolutePath());
 				timeCodedVisemesCache.clear();
 			} catch (Throwable tr) {
 				tr.printStackTrace();
