@@ -492,7 +492,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					relaative=relaative+"\\Documents";
 				}
 			}
-			setWorkspace(new File(relaative + "/bowler-workspace/"));
+			
+			File file = new File(relaative + "/bowler-workspace/");
+			file.mkdirs();
+			setWorkspace(file);
 		}
 		return workspace;
 	}
