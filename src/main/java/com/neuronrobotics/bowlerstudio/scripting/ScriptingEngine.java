@@ -483,6 +483,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static File getWorkspace() {
 		if (workspace == null) {
 			String relative= FileSystemView.getFileSystemView().getDefaultDirectory().getPath();
+			// https://github.com/CommonWealthRobotics/BowlerStudio/issues/378
 			if(OSUtil.isOSX()||OSUtil.isLinux())
 				if(!relative.endsWith("Documents")) {
 					relative=relative+"/Documents";
