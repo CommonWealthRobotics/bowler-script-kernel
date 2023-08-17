@@ -88,7 +88,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	}
 
 	public static void loadDictionary() {
-		try {			
+		try {
 			File phoneticDatabaseFile = ScriptingEngine
 					.fileFromGit("https://github.com/madhephaestus/TextToSpeechASDRTest.git", "cmudict-0.7b.txt");
 			dict = new PhoneticDictionary(phoneticDatabaseFile);
@@ -148,7 +148,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	ArrayList<TimeCodedViseme> timeCodedVisemesCache = new ArrayList<TimeCodedViseme>();
 	int words = 0;
 	private double positionInTrack;
-	private double timeLeadLag=0.5;
+	private double timeLeadLag = 0.5;
 
 	private AudioStatus toStatus(String phoneme) {
 		AudioStatus s = AudioStatus.getFromPhoneme(phoneme);
@@ -169,26 +169,128 @@ public class VoskLipSync implements IAudioProcessingLambda {
 		double wordEnd = word.end;
 		double wordLen = wordEnd - wordStart;
 		ArrayList<String> phonemes = dict.find(w);
+		// println w + ", " + wordStart + ", " + phonemes;
 		if (phonemes == null) {
 			// println "\n\n unknown word "+w+"\n\n"
 			return;
 		}
+
 		double phonemeLength = wordLen / phonemes.size();
+
+		// Random rand = new Random();
+		double timeLeadLag = -(1 / 24.0 / 2048); // -0.0416667 // rand.nextDouble() / 10.0 //0.04
+
+		// @finn this is where to adjust the lead/lag of the lip sync with the audio
+		// playback
+		// mtc -- this is where we can fuck with sequencing and add transition frames.
+		// the transition's probably going to require some sort of javaFX bullshit but
+		// we'll see.
 		for (int i = 0; i < phonemes.size(); i++) {
 			String phoneme = phonemes.get(i);
 			AudioStatus stat = toStatus(phoneme);
-			double myStart = wordStart + phonemeLength * ((double) i)+getTimeLeadLag();
-			double myEnd = wordStart + phonemeLength * ((double) (i + 1))+getTimeLeadLag();
+
+			// short the LeadLag for the H_L_SOUNDS viseme
+			if (stat == AudioStatus.H_L_SOUNDS) {
+				timeLeadLag = -(1 / 24.0 / 128);
+			}
+
+			double myStart = Math.max(wordStart + phonemeLength * ((double) i) + timeLeadLag, 0);
+			double myEnd = wordStart + phonemeLength * ((double) (i + 1)) + timeLeadLag;
+			double segLen = myEnd - myStart;
 			TimeCodedViseme tc = new TimeCodedViseme(stat, myStart, myEnd, secLen);
+
+			// adds a transitional silent viseme when a silence is detected
 			if (timeCodedVisemes.size() > 0) {
 				TimeCodedViseme tcLast = timeCodedVisemes.get(timeCodedVisemes.size() - 1);
-				if (tcLast.end < myStart) {
-					// termination sound of nothing
-					TimeCodedViseme tcSilent = new TimeCodedViseme(AudioStatus.X_NO_SOUND, tcLast.end, myStart, secLen);
+				if (myStart - tcLast.end > 0.03) {
+
+					// for longer pauses, transition through partially open mouth to close
+					double siLength = myStart - tcLast.end;
+					double hLength = siLength / 3.0;
+					double mouthClosedTime = myStart - hLength;
+
+					TimeCodedViseme tcSilentH = new TimeCodedViseme(AudioStatus.H_L_SOUNDS, tcLast.end, mouthClosedTime,
+							secLen);
+					TimeCodedViseme tcSilentX = new TimeCodedViseme(AudioStatus.X_NO_SOUND, mouthClosedTime, myStart,
+							secLen);
+
+					// println "ln 297";
+					add(tcSilentH);
+					add(tcSilentX);
+				} else if (myStart - tcLast.end > 0) {
+					// short transition to partially open mouth
+					TimeCodedViseme tcSilent = new TimeCodedViseme(AudioStatus.H_L_SOUNDS, tcLast.end, myStart, secLen);
 					add(tcSilent);
 				}
 			}
-			add(tc);
+
+			// looks for transition situations between visemes within a word (i.e. it bails
+			// at the last syllable)
+			if (i < phonemes.size() - 1) {
+				String next_phoneme = phonemes.get(i + 1);
+				AudioStatus stat_next = toStatus(next_phoneme);
+				// identifies transition sitautions
+				// ⒶⒸⒹ and ⒷⒸⒹ
+				// ⒸⒺⒻ and ⒹⒺⒻ
+				if (
+				// A or B preceeding D
+				(stat_next == AudioStatus.D_AA_SOUNDS
+						&& (stat == AudioStatus.A_PBM_SOUNDS || stat == AudioStatus.B_KST_SOUNDS)) ||
+				// D preceeding A or B
+						((stat_next == AudioStatus.A_PBM_SOUNDS || stat_next == AudioStatus.B_KST_SOUNDS)
+								&& stat == AudioStatus.D_AA_SOUNDS)
+						||
+						// C or D preceeding an F
+						(stat_next == AudioStatus.F_UW_OW_W_SOUNDS
+								&& (stat == AudioStatus.C_EH_AE_SOUNDS || stat == AudioStatus.D_AA_SOUNDS))
+						||
+						// F preceeding a C or D
+						((stat_next == AudioStatus.C_EH_AE_SOUNDS || stat_next == AudioStatus.D_AA_SOUNDS)
+								&& stat == AudioStatus.F_UW_OW_W_SOUNDS)) {
+					// println "transition situation detected";
+
+					// determine the current length of the viseme, and the length and start point of
+					// the transition to be applied
+					double visLength = tc.end - tc.start;
+					double transLength = visLength / 3.0;
+					double transStart = tc.end - transLength;
+
+					AudioStatus transViseme = tc.status;
+
+					// based on the situation, set the appropriate transition viseme
+					if (stat_next == AudioStatus.F_UW_OW_W_SOUNDS || stat == AudioStatus.F_UW_OW_W_SOUNDS) {
+						// C or D found preceeding an F, or
+						// F found preceeding a C or D
+						// println "E_AO_ER inserted"
+						transViseme = AudioStatus.E_AO_ER_SOUNDS;
+					} else if (stat_next == AudioStatus.D_AA_SOUNDS || stat == AudioStatus.D_AA_SOUNDS) {
+						// A or B found preceeding a D, or
+						// D found preceeding an A or B
+						// println "C_EH_AE inserted"
+						transViseme = AudioStatus.C_EH_AE_SOUNDS;
+					} else {
+						// println "ERR_TRANSITION"
+					}
+
+					// create the transition viseme
+					TimeCodedViseme tc_transition = new TimeCodedViseme(transViseme, transStart, tc.end, secLen);
+
+					// push back the end point of the main viseme to the start point of the
+					// transition viseme
+					tc.end = transStart;
+
+					// add the modified original viseme, and then the transition viseme
+					add(tc);
+					add(tc_transition);
+				} else {
+					// handles situations within words where the following viseme does not require a
+					// transition
+					add(tc);
+				}
+			} else {
+				// handles situations at the end of words
+				add(tc);
+			}
 		}
 
 		// println "Word "+w+" starts at "+wordStart+" ends at "+wordEnd+" each phoneme
@@ -268,7 +370,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(json.getAbsolutePath()));
 				writer.write(s);
 				writer.close();
-				System.out.println("Lip Sync data writen to "+json.getAbsolutePath());
+				System.out.println("Lip Sync data writen to " + json.getAbsolutePath());
 				timeCodedVisemesCache.clear();
 			} catch (Throwable tr) {
 				tr.printStackTrace();
@@ -276,7 +378,8 @@ public class VoskLipSync implements IAudioProcessingLambda {
 		});
 		t.start();
 
-		while (t.isAlive() && positionInTrack < getPercentageTimeOfLipSyncReadahead() && (System.currentTimeMillis() - start < durationInMillis)) {
+		while (t.isAlive() && positionInTrack < getPercentageTimeOfLipSyncReadahead()
+				&& (System.currentTimeMillis() - start < durationInMillis)) {
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
@@ -394,7 +497,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 			t.printStackTrace();
 		}
 		recognizer.close();
-		//System.out.println(result);
+		// System.out.println(result);
 		microphone.close();
 		return result;
 	}
@@ -407,7 +510,8 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	}
 
 	/**
-	 * @param percentageTimeOfLipSyncReadahead the percentageTimeOfLipSyncReadahead to set
+	 * @param percentageTimeOfLipSyncReadahead the percentageTimeOfLipSyncReadahead
+	 *                                         to set
 	 */
 	public static void setPercentageTimeOfLipSyncReadahead(double percentageTimeOfLipSyncReadahead) {
 		PercentageTimeOfLipSyncReadahead = percentageTimeOfLipSyncReadahead;
