@@ -4,6 +4,8 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
+import com.neuronrobotics.video.OSUtil;
+
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -72,6 +74,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+
+import javax.swing.filechooser.FileSystemView;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -478,7 +482,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static File getWorkspace() {
 		if (workspace == null) {
-			setWorkspace(new File(System.getProperty("user.home") + "/bowler-workspace/"));
+			String relaative= FileSystemView.getFileSystemView().getDefaultDirectory().getPath();
+			if(OSUtil.isOSX()||OSUtil.isLinux())
+				if(!relaative.endsWith("Documents")) {
+					relaative=relaative+"/Documents";
+				}
+			if(OSUtil.isWindows()) {
+				if(!relaative.endsWith("Documents")) {
+					relaative=relaative+"\\Documents";
+				}
+			}
+			setWorkspace(new File(relaative + "/bowler-workspace/"));
 		}
 		return workspace;
 	}
