@@ -630,9 +630,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				Git g = iterator.next();
 				GitTimeoutThread t = gitOpenTimeout.get(g);
 				if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
-					t.getException().printStackTrace(System.err);
+					
 					System.err.println("\n\n\nPaused " + reason + " by another thread, waiting for repo " + remoteURI);
 					new Exception().printStackTrace(System.err);
+					System.err.println("Paused by:");
+					t.getException().printStackTrace(System.err);
+					System.err.println("\n\n\n");
+
 				}
 			}
 		}
