@@ -80,7 +80,14 @@ public enum AudioStatus {
 	 * on your art style and personal taste. If you decide not to use it, you can
 	 * specify so using the extendedShapes option.
 	 */
-	X_NO_SOUND('X');
+	X_NO_SOUND('X'),
+	
+	// User defined visemes
+	I_user_defined('I'),
+	J_user_defined('J'),
+	K_user_defined('K'),
+	L_user_defined('L'),
+	M_user_defined('M');
 
 	private static final Map<Character, AudioStatus> lookup = new HashMap<>();
 	private static Map<String, AudioStatus> ArpabetToBlair;
@@ -138,6 +145,29 @@ public enum AudioStatus {
 		ArpabetToBlair.put("y", AudioStatus.B_KST_SOUNDS);
 		ArpabetToBlair.put("z", AudioStatus.B_KST_SOUNDS);
 		ArpabetToBlair.put("zh", AudioStatus.B_KST_SOUNDS);
+		
+
+		//rhubarb docs
+		AudioStatus.ArpabetToBlair.put("ao", AudioStatus.E_AO_ER_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("er", AudioStatus.E_AO_ER_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("ae", AudioStatus.C_EH_AE_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("eh", AudioStatus.C_EH_AE_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("q", AudioStatus.B_KST_SOUNDS);
+
+
+		//fn opinion
+		AudioStatus.ArpabetToBlair.put("hh", AudioStatus.D_AA_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("uh", AudioStatus.F_UW_OW_W_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("aa", AudioStatus.C_EH_AE_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("ih", AudioStatus.C_EH_AE_SOUNDS);
+
+		AudioStatus.ArpabetToBlair.put("k", AudioStatus.C_EH_AE_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("n", AudioStatus.C_EH_AE_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("r", AudioStatus.E_AO_ER_SOUNDS);
+
+		AudioStatus.ArpabetToBlair.put("d", AudioStatus.H_L_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("y", AudioStatus.C_EH_AE_SOUNDS);
+		AudioStatus.ArpabetToBlair.put("z", AudioStatus.C_EH_AE_SOUNDS);
 	}
 	public final char parsed;
 

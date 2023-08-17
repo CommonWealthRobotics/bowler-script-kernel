@@ -71,6 +71,10 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		HBox box = new HBox();
 		TextField name = new TextField();
 		Label percent = new Label();
+		UniquePersonUI(){
+			box.getChildren().addAll(name);
+			box.getChildren().addAll(percent);
+		}
 	}
 
 	private HashMap<UniquePerson, UniquePersonUI> uiElelments = new HashMap<UniquePerson, UniquePersonFactory.UniquePersonUI>();
@@ -371,8 +375,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						UI.name.setText(p.name);
 						WritableImage tmpImg = SwingFXUtils.toFXImage(imgBuff, null);
 						UI.box.getChildren().addAll(new ImageView(tmpImg));
-						UI.box.getChildren().addAll(UI.name);
-						UI.box.getChildren().addAll(UI.percent);
+
 						UI.name.setOnAction(setAction(p));
 						Platform.runLater(() -> {
 							workingMemory.getChildren().add(UI.box);
@@ -436,6 +439,9 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	public void setWorkingMemory(VBox workingMemory) {
 		if (this.workingMemory != null) {
 			this.workingMemory.getChildren().clear();
+			for(UniquePersonUI ui:uiElelments.values()) {
+				ui.box.getChildren().clear();
+			}
 			uiElelments.clear();
 		}
 		clear();
