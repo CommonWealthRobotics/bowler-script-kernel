@@ -482,18 +482,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static File getWorkspace() {
 		if (workspace == null) {
-			String relaative= FileSystemView.getFileSystemView().getDefaultDirectory().getPath();
+			String relative= FileSystemView.getFileSystemView().getDefaultDirectory().getPath();
 			if(OSUtil.isOSX()||OSUtil.isLinux())
-				if(!relaative.endsWith("Documents")) {
-					relaative=relaative+"/Documents";
+				if(!relative.endsWith("Documents")) {
+					relative=relative+"/Documents";
 				}
 			if(OSUtil.isWindows()) {
-				if(!relaative.endsWith("Documents")) {
-					relaative=relaative+"\\Documents";
+				if(!relative.endsWith("Documents")) {
+					relative=relative+"\\Documents";
 				}
 			}
 			
-			File file = new File(relaative + "/bowler-workspace/");
+			File file = new File(relative + "/bowler-workspace/");
 			file.mkdirs();
 			setWorkspace(file);
 		}
