@@ -113,6 +113,9 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 								System.exit(-5);
 							}
 							return;
+						}else if (element[0].getClassName().contains("DropHandler.handleDrag")) {
+							e.printStackTrace();
+							return;
 						} else if (java.lang.OutOfMemoryError.class.isInstance(e)
 								|| stacktrace.contains("java.lang.OutOfMemoryError")) {
 							e.printStackTrace();
