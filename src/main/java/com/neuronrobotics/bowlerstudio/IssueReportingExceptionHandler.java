@@ -113,7 +113,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 								System.exit(-5);
 							}
 							return;
-						}else if (element[0].getClassName().contains("DropHandler.handleDrag")) {
+						} else if (checkIgnoreExceptions(e)) {
 							e.printStackTrace();
 							return;
 						} else if (java.lang.OutOfMemoryError.class.isInstance(e)
@@ -232,7 +232,15 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 
 	public void except(Throwable t) {
 		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(new Exception());
+		StackTraceElement[] element = t.getStackTrace();
+
+		String className = element[0].getClassName();
+		if (checkIgnoreExceptions(t)) {
+			t.printStackTrace();
+			return;
+		}
 		if (Platform.isFxApplicationThread()) {
+			
 			System.err.println("Exception in Javafx thread! \n"
 					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
 			fxExceptionCount++;
@@ -250,6 +258,10 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		}
 
 		except(t, stacktraceFromCatch);
+	}
+
+	private boolean checkIgnoreExceptions(Throwable t) {
+		return t.getStackTrace()[0].getClassName().contains("DropHandler") || t.getMessage().contains("Key already associated with a running event loop");
 	}
 
 	public static String getTitle(Throwable element) {
