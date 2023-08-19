@@ -34,8 +34,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	private static boolean processing = false;
 	private static HashMap<Throwable, String> exceptionQueue = new HashMap<Throwable, String>();
 	private static boolean reportIssues = false;
-	
-	private static HashMap<String,Integer> exceptionCounter = new HashMap<String, Integer>(); 
+
+	private static HashMap<String, Integer> exceptionCounter = new HashMap<String, Integer>();
 
 	public IssueReportingExceptionHandler() {
 		stacktraceFromHandlerInstantiation = org.apache.commons.lang.exception.ExceptionUtils
@@ -51,32 +51,35 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		except(e);
 
 	}
+
 	public static void runLater(Runnable r) {
-		runLater(r,new Exception("UI Thread Exception here!"));
+		runLater(r, new Exception("UI Thread Exception here!"));
 	}
-	public static void runLater(Runnable r,Throwable ex) {
-		Platform.runLater(()->{
+
+	public static void runLater(Runnable r, Throwable ex) {
+		Platform.runLater(() -> {
 			try {
 				r.run();
-			}catch(Throwable t) {
+			} catch (Throwable t) {
 				t.printStackTrace();
 				ex.printStackTrace();
 			}
-			
+
 		});
 	}
+
 	public void except(Throwable e, String stacktraceFromCatch) {
 		System.out.println(stacktraceFromCatch);
 		new Thread(() -> {
 			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e);
 			StackTraceElement[] element = e.getStackTrace();
 			String source = getTitle(element);
-			
-			if(exceptionCounter.get(source) == null) {
+
+			if (exceptionCounter.get(source) == null) {
 				exceptionCounter.put(source, 0);
 			}
-			exceptionCounter.put(source, exceptionCounter.get(source)+1);
-			if(exceptionCounter.get(source)>1) {
+			exceptionCounter.put(source, exceptionCounter.get(source) + 1);
+			if (exceptionCounter.get(source) > 1) {
 //				Alert alert = new Alert(AlertType.CONFIRMATION);
 //				alert.setTitle("IRRECOVERABLE FAULT");
 //				alert.setHeaderText("Its just gunna crash, sorry...");
@@ -110,12 +113,12 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 								System.exit(-5);
 							}
 							return;
-						}else if (java.lang.OutOfMemoryError.class.isInstance(e)||stacktrace.contains("java.lang.OutOfMemoryError")) {
+						} else if (java.lang.OutOfMemoryError.class.isInstance(e)
+								|| stacktrace.contains("java.lang.OutOfMemoryError")) {
 							e.printStackTrace();
 							System.exit(-1);
 						}
 				}
-
 
 			String javaVersion = System.getProperty("java.version");
 			String javafxVersion = System.getProperty("javafx.version");
@@ -163,7 +166,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				GHRepository repo = github.getOrganization("CommonWealthRobotics").getRepository("BowlerStudio");
 				List<GHIssue> issues = repo.getIssues(GHIssueState.ALL);
 				String source = getTitle(element);
-				
+
 				for (GHIssue i : issues) {
 					System.err.println("Issues are :" + i.getTitle());
 					if (i.getTitle().contains(source)) {
@@ -227,21 +230,22 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	public void except(Throwable t) {
 		String stacktraceFromCatch = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(new Exception());
 		if (Platform.isFxApplicationThread()) {
-	    	System.err.println("Exception in Javafx thread! \n"+org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
-	    	fxExceptionCount++;
-	    	if(fxExceptionCount>10) {
-	    		System.err.println(stacktraceFromCatch);
-	    		t.printStackTrace();
-	    		System.exit(-5);
-	    	}
-	    	throw new RuntimeException(t);
-	    }
-		
+			System.err.println("Exception in Javafx thread! \n"
+					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
+			fxExceptionCount++;
+			if (fxExceptionCount > 10) {
+				System.err.println(stacktraceFromCatch);
+				t.printStackTrace();
+				System.exit(-5);
+			}
+			throw new RuntimeException(t);
+		}
+
 		if (processing) {
 			exceptionQueue.put(t, stacktraceFromCatch);
 			return;
 		}
-		
+
 		except(t, stacktraceFromCatch);
 	}
 
