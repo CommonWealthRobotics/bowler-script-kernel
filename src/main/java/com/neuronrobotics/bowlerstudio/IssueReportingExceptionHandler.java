@@ -261,7 +261,11 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	}
 
 	private boolean checkIgnoreExceptions(Throwable t) {
-		return t.getStackTrace()[0].getClassName().contains("DropHandler") || t.getMessage().contains("Key already associated with a running event loop");
+		try {
+			return t.getStackTrace()[0].getClassName().contains("DropHandler") || t.getMessage().contains("Key already associated with a running event loop");
+		}catch(Throwable tf) {
+			return false;
+		}
 	}
 
 	public static String getTitle(Throwable element) {
