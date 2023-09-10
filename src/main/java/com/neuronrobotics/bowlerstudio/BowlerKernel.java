@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import com.neuronrobotics.bowlerstudio.creature.IgenerateBed;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -327,7 +329,35 @@ public class BowlerKernel {
 			}
 
 		});
-
+		File baseDirForFiles = new File("./manufacturing/");
+		if(!baseDirForFiles.exists())
+			baseDirForFiles.mkdir();
+		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(url);
+		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_CSV);
+		if(bomCSV.exists()) {
+			
+			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.csv");
+			if(file.exists())
+				file.delete();
+			try {
+				Files.copy(bomCSV.toPath(),file.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_JSON);
+		if(bom.exists()) {
+			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.json");
+			if(file.exists())
+				file.delete();
+			try {
+				Files.copy(bom.toPath(),file.toPath());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		ArrayList<CSG> csgBits = new ArrayList<>();
 		try {
 			processReturnedObjects(ret, csgBits);
