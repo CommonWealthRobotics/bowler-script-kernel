@@ -332,33 +332,35 @@ public class BowlerKernel {
 			}
 
 		});
-		File baseDirForFiles = new File("./manufacturing/");
-		if(!baseDirForFiles.exists())
-			baseDirForFiles.mkdir();
-		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(url);
-		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_CSV);
-		if(bomCSV.exists()) {
-			
-			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.csv");
-			if(file.exists())
-				file.delete();
-			try {
-				Files.copy(bomCSV.toPath(),file.toPath());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if (url != null) {
+			File baseDirForFiles = new File("./manufacturing/");
+			if (!baseDirForFiles.exists())
+				baseDirForFiles.mkdir();
+			File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(url);
+			File bomCSV = new File(baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.MANUFACTURING_BOM_CSV);
+			if (bomCSV.exists()) {
+
+				File file = new File(baseDirForFiles.getAbsolutePath() + "/bom.csv");
+				if (file.exists())
+					file.delete();
+				try {
+					Files.copy(bomCSV.toPath(), file.toPath());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-		}
-		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_JSON);
-		if(bom.exists()) {
-			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.json");
-			if(file.exists())
-				file.delete();
-			try {
-				Files.copy(bom.toPath(),file.toPath());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			File bom = new File(baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.MANUFACTURING_BOM_JSON);
+			if (bom.exists()) {
+				File file = new File(baseDirForFiles.getAbsolutePath() + "/bom.json");
+				if (file.exists())
+					file.delete();
+				try {
+					Files.copy(bom.toPath(), file.toPath());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		ArrayList<CSG> csgBits = new ArrayList<>();
