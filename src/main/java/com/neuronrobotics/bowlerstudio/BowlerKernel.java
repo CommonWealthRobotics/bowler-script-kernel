@@ -127,7 +127,7 @@ public class BowlerKernel {
 			}
 		}
 		Object ret = null;
-
+		String url = null;
 		if (gitRun && gitRepo != null) {
 
 			ScriptingEngine.pull(gitRepo);
@@ -150,7 +150,7 @@ public class BowlerKernel {
 			if (gitFile != null)
 				try {
 					ret = ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
-
+					url = gitRepo;
 					processReturnedObjectsStart(ret,gitRepo);
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -175,7 +175,9 @@ public class BowlerKernel {
 			if (startLoadingScripts) {
 				try {
 
-					ret = ScriptingEngine.inlineFileScriptRun(new File(s), null);
+					File f = new File(s);
+					url=ScriptingEngine.locateGitUrl(f);
+					ret = ScriptingEngine.inlineFileScriptRun(f, null);
 				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
@@ -185,9 +187,10 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjectsStart(ret,null);
+		processReturnedObjectsStart(ret,url);
 		startLoadingScripts = false;
-
+		finish(startTime);
+		
 		for (String s : args) {
 
 			if (startLoadingScripts) {
@@ -203,7 +206,7 @@ public class BowlerKernel {
 			}
 		}
 		processReturnedObjectsStart(ret,null);
-
+		finish(startTime);
 		boolean runShell = false;
 		String groovy = "Groovy";
 		String shellTypeStorage = groovy;
