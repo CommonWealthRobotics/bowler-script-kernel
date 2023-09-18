@@ -97,7 +97,7 @@ public class BowlerKernel {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
-		long startTime= System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
 		try {
 			JavaFXInitializer.go();
 		} catch (Throwable t) {
@@ -127,8 +127,10 @@ public class BowlerKernel {
 			}
 		}
 		Object ret = null;
-		String url = null;
+		File baseWorkspaceFile = null;
 		if (gitRun && gitRepo != null) {
+			String url = null;
+
 
 			ScriptingEngine.pull(gitRepo);
 			ArrayList<String> files = ScriptingEngine.filesInGit(gitRepo);
@@ -151,7 +153,9 @@ public class BowlerKernel {
 				try {
 					ret = ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
 					url = gitRepo;
-					processReturnedObjectsStart(ret,gitRepo);
+					baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(url);
+
+					processReturnedObjectsStart(ret, baseWorkspaceFile);
 				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
@@ -176,7 +180,7 @@ public class BowlerKernel {
 				try {
 
 					File f = new File(s);
-					url=ScriptingEngine.locateGitUrl(f);
+					baseWorkspaceFile=f.getParentFile();
 					ret = ScriptingEngine.inlineFileScriptRun(f, null);
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -187,10 +191,10 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjectsStart(ret,url);
+		processReturnedObjectsStart(ret, baseWorkspaceFile);
 		startLoadingScripts = false;
 		finish(startTime);
-		
+
 		for (String s : args) {
 
 			if (startLoadingScripts) {
@@ -205,7 +209,7 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjectsStart(ret,null);
+		processReturnedObjectsStart(ret, null);
 		finish(startTime);
 		boolean runShell = false;
 		String groovy = "Groovy";
@@ -305,7 +309,7 @@ public class BowlerKernel {
 					if (ret != null) {
 						System.out.println(ret);
 					}
-					processReturnedObjectsStart(ret,null);
+					processReturnedObjectsStart(ret, null);
 				} catch (Error e) {
 					e.printStackTrace();
 				} catch (Exception e) {
@@ -319,11 +323,13 @@ public class BowlerKernel {
 	}
 
 	private static void finish(long startTime) {
-		System.out.println("Process took "+(((double)(System.currentTimeMillis()-startTime)))/60000.0+" minutes");
+		System.out.println(
+				"Process took " + (((double) (System.currentTimeMillis() - startTime))) / 60000.0 + " minutes");
 		System.exit(0);
 	}
 
-	private static void processReturnedObjectsStart(Object ret,String url) {
+	private static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
+
 		CSG.setProgressMoniter(new ICSGProgress() {
 			@Override
 			public void progressUpdate(int currentIndex, int finalIndex, String type,
@@ -332,41 +338,43 @@ public class BowlerKernel {
 			}
 
 		});
-		if (url != null) {
+		if (baseWorkspaceFile != null) {
 			File baseDirForFiles = new File("./manufacturing/");
-			if (!baseDirForFiles.exists())
-				baseDirForFiles.mkdir();
-			File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(url);
-			File bomCSV = new File(baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.MANUFACTURING_BOM_CSV);
-			if (bomCSV.exists()) {
+			if (baseDirForFiles.exists()) {
+				// baseDirForFiles.mkdir();
+				File bomCSV = new File(
+						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.MANUFACTURING_BOM_CSV);
+				if (bomCSV.exists()) {
 
-				File file = new File(baseDirForFiles.getAbsolutePath() + "/bom.csv");
-				if (file.exists())
-					file.delete();
-				try {
-					Files.copy(bomCSV.toPath(), file.toPath());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					File file = new File(baseDirForFiles.getAbsolutePath() + "/bom.csv");
+					if (file.exists())
+						file.delete();
+					try {
+						Files.copy(bomCSV.toPath(), file.toPath());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-			}
-			File bom = new File(baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.MANUFACTURING_BOM_JSON);
-			if (bom.exists()) {
-				File file = new File(baseDirForFiles.getAbsolutePath() + "/bom.json");
-				if (file.exists())
-					file.delete();
-				try {
-					Files.copy(bom.toPath(), file.toPath());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				File bom = new File(
+						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.MANUFACTURING_BOM_JSON);
+				if (bom.exists()) {
+					File file = new File(baseDirForFiles.getAbsolutePath() + "/bom.json");
+					if (file.exists())
+						file.delete();
+					try {
+						Files.copy(bom.toPath(), file.toPath());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}
 		ArrayList<CSG> csgBits = new ArrayList<>();
 		try {
 			processReturnedObjects(ret, csgBits);
-			csgBits=new PrintBedManager(url,csgBits).makePrintBeds();
+			csgBits = new PrintBedManager(ScriptingEngine.locateGitUrl(baseWorkspaceFile), csgBits).makePrintBeds();
 			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -389,63 +397,63 @@ public class BowlerKernel {
 			MobileBase ret2 = (MobileBase) ret;
 			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
 			m.setUi(new IMobileBaseUI() {
-				
+
 				@Override
 				public void setSelectedCsg(Collection<CSG> selectedCsg) {
 					// TODO Auto-generated method stub
-					
+
 				}
-				
+
 				@Override
 				public void setSelected(Affine rootListener) {
 					// TODO Auto-generated method stub
-					
+
 				}
-				
+
 				@Override
 				public void setAllCSG(Collection<CSG> toAdd, File source) {
 					// TODO Auto-generated method stub
-					
+
 				}
-				
+
 				@Override
 				public void highlightException(File fileEngineRunByName, Throwable ex) {
 					ex.printStackTrace();
 					fail();
 				}
-				
+
 				@Override
 				public Set<CSG> getVisibleCSGs() {
 					// TODO Auto-generated method stub
 					return null;
 				}
-				
+
 				@Override
 				public void addCSG(Collection<CSG> toAdd, File source) {
 					// TODO Auto-generated method stub
-					
+
 				}
 			});
 			m.setConfigurationViewerMode(false);
 			ret2.connect();
 			m.generateBody();
 			try {
-	
-				MobileBase base=(MobileBase) ret2;
-				File baseDir=new File("./manufacturing/");
+
+				MobileBase base = (MobileBase) ret2;
+				File baseDir = new File("./manufacturing/");
 				File dir = new File(baseDir.getAbsolutePath() + "/" + base.getScriptingName());
 				if (!dir.exists())
 					dir.mkdirs();
-				IgenerateBed bed=null;
-				try{
-				 bed= m.getIgenerateBed();
-				}catch(Throwable T) {
+				IgenerateBed bed = null;
+				try {
+					bed = m.getIgenerateBed();
+				} catch (Throwable T) {
 					throw new RuntimeException(T.getMessage());
 				}
-				bed=m.getPrintBed(dir,bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
-				if (bed == null ) {
-					 m._generateStls(base, dir, false);
-					 return;
+				bed = m.getPrintBed(dir, bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
+				if (bed == null) {
+					m._generateStls(base, dir, false);
+					return;
 				}
 				System.out.println("Found arrangeBed API in CAD engine");
 				List<CSG> totalAssembly = bed.arrangeBed(base);
@@ -453,21 +461,25 @@ public class BowlerKernel {
 				Thread.sleep(1000);
 				System.gc();
 				// Get current size of heap in bytes
-				long heapSize = Runtime.getRuntime().totalMemory(); 
+				long heapSize = Runtime.getRuntime().totalMemory();
 
-				// Get maximum size of heap in bytes. The heap cannot grow beyond this size.// Any attempt will result in an OutOfMemoryException.
+				// Get maximum size of heap in bytes. The heap cannot grow beyond this size.//
+				// Any attempt will result in an OutOfMemoryException.
 				long heapMaxSize = Runtime.getRuntime().maxMemory();
-				//System.out.println("Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
-				//System.out.println("Of Heap "+(heapMaxSize));
-				for(int i=0;i<totalAssembly.size();i++) {
+				// System.out.println("Heap remaining
+				// "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+				// System.out.println("Of Heap "+(heapMaxSize));
+				for (int i = 0; i < totalAssembly.size(); i++) {
 					List<CSG> tmp = Arrays.asList(totalAssembly.get(i));
-					totalAssembly.set(i,null);
-					//System.out.println("Before Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+					totalAssembly.set(i, null);
+					// System.out.println("Before Heap remaining
+					// "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 
 					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, dir);
-					tmp=null;
+					tmp = null;
 					System.gc();
-					//System.out.println("After Heap remaining "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
+					// System.out.println("After Heap remaining
+					// "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 
 				}
 			} catch (Exception e) {
@@ -536,7 +548,7 @@ public class BowlerKernel {
 			rate = 10;
 		try {
 			if (voiceNumber.doubleValue() >= 800) {
-				if(0== CoquiDockerManager.get(voiceNumber.doubleValue()).speak(msg, 2.0f, false, true, progress)) {
+				if (0 == CoquiDockerManager.get(voiceNumber.doubleValue()).speak(msg, 2.0f, false, true, progress)) {
 					return 0;
 				}
 			}
