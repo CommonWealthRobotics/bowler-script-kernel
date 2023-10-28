@@ -715,10 +715,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 
 	}
+
 	private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion) {
-		loadFilesToList( f,  directory,  extnetion);
+		loadFilesToList(f, directory, extnetion);
 	}
-	private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion,Git ref) {
+
+	private static void loadFilesToList(ArrayList<String> f, File directory, String extnetion, Git ref) {
 		if (directory == null)
 			return;
 		for (final File fileEntry : directory.listFiles()) {
@@ -731,12 +733,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						continue;// skip this file as it fails the filter
 			// from the user
 			if (fileEntry.isDirectory()) {
-				loadFilesToList(f, fileEntry, extnetion,ref);
+				loadFilesToList(f, fileEntry, extnetion, ref);
 			} else {
 
 				for (IScriptingLanguage l : langauges.values()) {
 					if (l.isSupportedFileExtenetion(fileEntry.getName())) {
-						f.add(findLocalPath(fileEntry,ref));
+						f.add(findLocalPath(fileEntry, ref));
 						break;
 					}
 				}
@@ -744,24 +746,29 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		}
 	}
+
 	public static ArrayList<String> filesInGit(String remote, String branch, String extnetion) throws Exception {
-		return filesInGit( remote,  branch,  extnetion,null);
+		return filesInGit(remote, branch, extnetion, null);
 	}
-	public static ArrayList<String> filesInGit(String remote, String branch, String extnetion,Git ref) throws Exception {
+
+	public static ArrayList<String> filesInGit(String remote, String branch, String extnetion, Git ref)
+			throws Exception {
 		ArrayList<String> f = new ArrayList<>();
 
 		// waitForLogin();
 		File gistDir = cloneRepo(remote, branch);
-		loadFilesToList(f, gistDir, extnetion,ref);
+		loadFilesToList(f, gistDir, extnetion, ref);
 
 		return f;
 
 	}
+
 	public static ArrayList<String> filesInGit(String remote) throws Exception {
-		return filesInGit(remote, null, null,null);
+		return filesInGit(remote, null, null, null);
 	}
-	public static ArrayList<String> filesInGit(String remote,Git ref) throws Exception {
-		return filesInGit(remote, null, null,ref);
+
+	public static ArrayList<String> filesInGit(String remote, Git ref) throws Exception {
+		return filesInGit(remote, null, null, ref);
 	}
 
 	public static String getUserIdOfGist(String id) throws Exception {
@@ -865,7 +872,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if (!desired.getName().contentEquals("csgDatabase.json")) {
 				String[] gitID = ScriptingEngine.findGitTagFromFile(desired, gitRef);
 				String remoteURI = gitID[0];
-				ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI,gitRef);
+				ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI, gitRef);
 				for (String s : f) {
 					if (s.contentEquals("csgDatabase.json")) {
 
@@ -875,7 +882,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						CSGDatabase.saveDatabase();
 						@SuppressWarnings("resource")
 						String c = new Scanner(dbFile).useDelimiter("\\Z").next();
-						ScriptingEngine.commit(remoteURI, branch, s, c, "saving CSG database", false,gitRef);
+						ScriptingEngine.commit(remoteURI, branch, s, c, "saving CSG database", false, gitRef);
 					}
 				}
 			}
@@ -1681,27 +1688,28 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return gistDir;
 
 	}
-	public static String locateGitUrl(File f) throws IOException{
-		return locateGitUrl(f,null);
+
+	public static String locateGitUrl(File f) throws IOException {
+		return locateGitUrl(f, null);
 	}
-	public static String locateGitUrl(File f,Git ref) throws IOException {
+
+	public static String locateGitUrl(File f, Git ref) throws IOException {
 		File gitRepoFile = new File(f.getAbsolutePath());
 		while (gitRepoFile != null) {
+			if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+				// System.err.println("Fount git repo for file: "+gitRepoFile);
+				Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
+				Git git = ref;
+				if (git == null)
+					git = openGit(localRepo);
+				String url = git.getRepository().getConfig().getString("remote", "origin", "url");
+				if (!url.endsWith(".git"))
+					url += ".git";
+				if (ref == null)
+					closeGit(git);
+				return url;
+			}
 			gitRepoFile = gitRepoFile.getParentFile();
-			if (gitRepoFile != null)
-				if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
-					// System.err.println("Fount git repo for file: "+gitRepoFile);
-					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
-					Git git=ref;
-					if(git==null)
-						git	= openGit(localRepo);
-					String url = git.getRepository().getConfig().getString("remote", "origin", "url");
-					if (!url.endsWith(".git"))
-						url += ".git";
-					if(ref==null)
-						closeGit(git);
-					return url;
-				}
 		}
 
 		return null;
@@ -1785,7 +1793,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static String findLocalPath(File currentFile, Git git) {
-		if(git==null)
+		if (git == null)
 			return findLocalPath(currentFile);
 		File dir = git.getRepository().getDirectory().getParentFile();
 
@@ -1813,17 +1821,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static String[] findGitTagFromFile(File currentFile, Git ref) throws IOException {
-		String string = locateGitUrl(currentFile,ref);
+		String string = locateGitUrl(currentFile, ref);
 		Git git = ref;
 		if (git == null)
 			git = locateGit(currentFile);
 		try {
 			String[] strings = new String[] { string, findLocalPath(currentFile, git) };
-			if(ref==null)closeGit(git);
+			if (ref == null)
+				closeGit(git);
 			return strings;
 		} catch (Throwable t) {
 			t.printStackTrace();
-			if(ref==null)closeGit(git);
+			if (ref == null)
+				closeGit(git);
 			throw t;
 		}
 	}
