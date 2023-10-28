@@ -393,7 +393,7 @@ public class BowlerKernel {
 			processReturnedObjects(ret, csgBits);
 			String url = ScriptingEngine.locateGitUrl(baseWorkspaceFile);
 			System.out.println("Loading printbed URL  "+url);
-			csgBits = new PrintBedManager(url, csgBits).makePrintBeds();
+			csgBits = new PrintBedManager(baseWorkspaceFile, csgBits).makePrintBeds();
 			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
 		} catch (Throwable t) {
 			t.printStackTrace();

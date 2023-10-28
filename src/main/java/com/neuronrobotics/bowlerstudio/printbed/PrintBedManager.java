@@ -43,14 +43,30 @@ public class PrintBedManager {
 	ArrayList<PrintBedObject> objects = new ArrayList<PrintBedObject>();
 	private ArrayList<CSG> parts;
 	private HashSet<String> names = new HashSet<String>();
-
 	public PrintBedManager(String url, ArrayList<CSG> parts) {
-		this.url = url;
+		this.url=url;
+		File dir = new File(ScriptingEngine.getRepositoryCloneDirectory(url).getAbsolutePath());
+		init(dir,  parts);
+		
+	}
+	
+	public PrintBedManager(File dir, ArrayList<CSG> parts) {
+		try {
+			this.url=ScriptingEngine.locateGitUrl(dir);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		init(dir,  parts);
+	}
+	public void init(File dir, ArrayList<CSG> parts) {
 		this.parts = parts;
 		if (url == null)
 			return;
-		File f = new File(ScriptingEngine.getRepositoryCloneDirectory(url).getAbsolutePath() + "/" + file);
+		File f = new File(dir.getAbsolutePath() + "/" + file);
+		System.out.println("Searching for printbed at "+f);
 		if (f.exists()) {
+			System.out.println("Print Bed file found! "+f.getAbsolutePath());
 			String source;
 			byte[] bytes;
 			try {
@@ -61,6 +77,8 @@ public class PrintBedManager {
 				ex.printStackTrace();
 			}
 
+		}else {
+			System.out.println("Print Bed NOT file found! "+f.getAbsolutePath());
 		}
 		if (database == null) {
 			database = new UserManagedPrintBedData();
