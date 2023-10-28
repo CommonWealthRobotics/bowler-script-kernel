@@ -1685,7 +1685,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return locateGitUrl(f,null);
 	}
 	public static String locateGitUrl(File f,Git ref) throws IOException {
-		File gitRepoFile = f;
+		File gitRepoFile = new File(f.getAbsolutePath());
 		while (gitRepoFile != null) {
 			gitRepoFile = gitRepoFile.getParentFile();
 			if (gitRepoFile != null)

@@ -131,7 +131,6 @@ public class BowlerKernel {
 		if (gitRun && gitRepo != null) {
 			String url = null;
 
-
 			ScriptingEngine.pull(gitRepo);
 			ArrayList<String> files = ScriptingEngine.filesInGit(gitRepo);
 			boolean fileExists = false;
@@ -180,7 +179,7 @@ public class BowlerKernel {
 				try {
 
 					File f = new File(s);
-					baseWorkspaceFile=f.getParentFile();
+					baseWorkspaceFile = f.getParentFile();
 					ret = ScriptingEngine.inlineFileScriptRun(f, null);
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -191,9 +190,12 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjectsStart(ret, baseWorkspaceFile);
-		startLoadingScripts = false;
-		finish(startTime);
+		if (startLoadingScripts) {
+			processReturnedObjectsStart(ret, baseWorkspaceFile);
+			startLoadingScripts = false;
+			finish(startTime);
+			return;
+		}
 
 		for (String s : args) {
 
@@ -209,8 +211,11 @@ public class BowlerKernel {
 				startLoadingScripts = true;
 			}
 		}
-		processReturnedObjectsStart(ret, null);
-		finish(startTime);
+		if (startLoadingScripts) {
+			processReturnedObjectsStart(ret, null);
+			finish(startTime);
+			return;
+		}
 		boolean runShell = false;
 		String groovy = "Groovy";
 		String shellTypeStorage = groovy;
@@ -329,7 +334,8 @@ public class BowlerKernel {
 	}
 
 	private static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
-
+		if(baseWorkspaceFile!=null)
+			System.out.println("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
 		CSG.setProgressMoniter(new ICSGProgress() {
 			@Override
 			public void progressUpdate(int currentIndex, int finalIndex, String type,
