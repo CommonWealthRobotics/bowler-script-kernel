@@ -179,7 +179,18 @@ public class BowlerKernel {
 				try {
 
 					File f = new File(s);
-					baseWorkspaceFile = f.getParentFile();
+					String location  =f.getParentFile().getAbsolutePath();
+					if(location.endsWith(".")) {
+						location=location.substring(0,location.length()-1);
+					}		
+					if(!location.endsWith("/")) {
+						location+="/";
+					}
+					baseWorkspaceFile = new File(location);
+					
+					System.out.println("Using working directory  "+baseWorkspaceFile.getAbsolutePath());
+					f=new File(baseWorkspaceFile.getAbsolutePath()+"/"+f.getName());
+					System.out.println("File   "+f.getName());
 					ret = ScriptingEngine.inlineFileScriptRun(f, null);
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -380,7 +391,9 @@ public class BowlerKernel {
 		ArrayList<CSG> csgBits = new ArrayList<>();
 		try {
 			processReturnedObjects(ret, csgBits);
-			csgBits = new PrintBedManager(ScriptingEngine.locateGitUrl(baseWorkspaceFile), csgBits).makePrintBeds();
+			String url = ScriptingEngine.locateGitUrl(baseWorkspaceFile);
+			System.out.println("Loading printbed URL  "+url);
+			csgBits = new PrintBedManager(url, csgBits).makePrintBeds();
 			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
 		} catch (Throwable t) {
 			t.printStackTrace();
