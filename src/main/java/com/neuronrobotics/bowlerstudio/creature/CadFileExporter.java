@@ -94,7 +94,12 @@ public class CadFileExporter {
 			nameBase = dir.getAbsolutePath()+"/"+name;
 			index++;
 			if(part.getExportFormats()==null){
-				allCadStl.add(makeStl(nameBase,manufactured));// default to stl
+				try {
+					allCadStl.add(makeStl(nameBase,manufactured));// default to stl
+				}catch(Throwable t) {
+					System.err.println("Failed to generate "+part.getName());
+					t.printStackTrace();
+				}
 			}else{
 
 				for(String format:part.getExportFormats()){
