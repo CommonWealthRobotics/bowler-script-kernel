@@ -371,6 +371,8 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.github.docker-java/docker-java-transport-httpclient5
 	implementation group: 'com.github.docker-java', name: 'docker-java-transport-httpclient5', version: '3.3.0'
 
+	//MuJoCo
+	implementation group: 'org.bytedeco', name: 'javacpp', version: '1.5.7'
 	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'2.2.0-pre.7'
 
 	// https://mvnrepository.com/artifact/org.robokind/org.robokind.api.speech
