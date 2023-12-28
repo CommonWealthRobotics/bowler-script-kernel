@@ -179,7 +179,11 @@ public class BowlerKernel {
 				try {
 
 					File f = new File(s);
-					String location  =f.getParentFile().getAbsolutePath();
+					File parentFile = f.getParentFile();
+					if(parentFile==null) {
+						parentFile=new File(".");
+					}
+					String location  =parentFile.getAbsolutePath();
 					if(location.endsWith(".")) {
 						location=location.substring(0,location.length()-1);
 					}		
