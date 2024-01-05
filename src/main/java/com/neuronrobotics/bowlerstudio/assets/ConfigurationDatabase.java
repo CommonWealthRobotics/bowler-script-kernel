@@ -106,8 +106,17 @@ public class ConfigurationDatabase {
 			ScriptingEngine.pull(getGitSource());
 			database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile(), null);
 			// new Exception().printStackTrace();
-		} catch (Exception e) {
+		} catch (org.eclipse.jgit.api.errors.WrongRepositoryStateException e) {
 			// oignore and use new one
+			try {
+				ScriptingEngine.deleteRepo(getGitSource());
+				return getDatabase() ;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}catch (Exception ex) {
+			ex.printStackTrace();
 		}
 		if (database == null) {
 			database = new HashMap<String, HashMap<String, Object>>();
