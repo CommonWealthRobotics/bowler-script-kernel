@@ -102,6 +102,17 @@ public class MobileBaseCadManager implements Runnable {
 				
 			}
 	}
+	/**
+	 * get the progress of the cad in an integer percent
+	 * @return percent completion of CAD
+	 */
+	public int getCADProgressPercent() {
+		return (int)(Math.round(getProcesIndictor().get()*100));
+	}
+	
+	public boolean isCADFinished() {
+		return getCADProgressPercent()==100;
+	}
 	protected void clear() {
 		// Cad generator
 		cadScriptCache.clear();
