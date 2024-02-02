@@ -31,7 +31,7 @@ name=name
 		.movex(1)
 		.movey(1)
 CSG tag = nametagBase.union(name)
-//			.setName("KevinsNametag")
+			.setName("KevinsNametag")
 
 
 return tag

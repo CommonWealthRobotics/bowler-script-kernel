@@ -43,6 +43,7 @@ public class PrintBedManager {
 	ArrayList<PrintBedObject> objects = new ArrayList<PrintBedObject>();
 	private ArrayList<CSG> parts;
 	private HashSet<String> names = new HashSet<String>();
+	private boolean hasPrintBed = false;
 	public PrintBedManager(String url, ArrayList<CSG> parts) {
 		this.url=url;
 		File dir = new File(ScriptingEngine.getRepositoryCloneDirectory(url).getAbsolutePath());
@@ -57,12 +58,12 @@ public class PrintBedManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		init(dir,  parts);
+		setHasPrintBed(init(dir,  parts));
 	}
-	public void init(File dir, ArrayList<CSG> parts) {
+	public boolean init(File dir, ArrayList<CSG> parts) {
 		this.parts = parts;
 		if (url == null)
-			return;
+			return false;
 		File f = new File(dir.getAbsolutePath() + "/" + file);
 		System.out.println("Searching for printbed at "+f);
 		if (f.exists()) {
@@ -79,6 +80,7 @@ public class PrintBedManager {
 
 		}else {
 			System.out.println("Print Bed NOT file found! "+f.getAbsolutePath());
+			return false;
 		}
 		if (database == null) {
 			database = new UserManagedPrintBedData();
@@ -115,6 +117,7 @@ public class PrintBedManager {
 				});
 			}
 		}
+		return true;
 	}
 
 	public ArrayList<CSG> makePrintBeds() {
@@ -216,6 +219,20 @@ public class PrintBedManager {
 		new Thread(() -> {
 			saveLocal();
 		}).start();
+	}
+
+	/**
+	 * @return the hasPrintBed
+	 */
+	public boolean hasPrintBed() {
+		return hasPrintBed;
+	}
+
+	/**
+	 * @param hasPrintBed the hasPrintBed to set
+	 */
+	public void setHasPrintBed(boolean hasPrintBed) {
+		this.hasPrintBed = hasPrintBed;
 	}
 
 }

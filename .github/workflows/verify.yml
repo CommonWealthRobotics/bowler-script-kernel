@@ -26,8 +26,6 @@ jobs:
     - name: initialize the X11 DISPLAY variable
       run:
         export DISPLAY=:0
-
-
           
     - name: Pull a JavaFX JDK
       run: wget http://static.azul.com/zulu/bin/zulu8.33.0.1-ca-fx-jdk8.0.192-linux_x64.tar.gz

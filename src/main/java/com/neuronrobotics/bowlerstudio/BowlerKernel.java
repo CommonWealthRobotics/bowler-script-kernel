@@ -397,7 +397,12 @@ public class BowlerKernel {
 			processReturnedObjects(ret, csgBits);
 			String url = ScriptingEngine.locateGitUrl(baseWorkspaceFile);
 			System.out.println("Loading printbed URL  "+url);
-			csgBits = new PrintBedManager(baseWorkspaceFile, csgBits).makePrintBeds();
+			PrintBedManager printBedManager = new PrintBedManager(baseWorkspaceFile, csgBits);
+			if(printBedManager.hasPrintBed())
+				csgBits = printBedManager.makePrintBeds();
+			else {
+				System.out.println("Exporting files without print bed");
+			}
 			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
 		} catch (Throwable t) {
 			t.printStackTrace();

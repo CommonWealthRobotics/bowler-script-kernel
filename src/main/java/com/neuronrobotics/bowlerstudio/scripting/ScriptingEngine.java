@@ -1693,7 +1693,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static String locateGitUrl(File f, Git ref) throws IOException {
 		File gitRepoFile = new File(f.getAbsolutePath());
 		while (gitRepoFile != null) {
-			if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+			if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
 				// System.err.println("Fount git repo for file: "+gitRepoFile);
 				Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
 				Git git = ref;
@@ -1717,7 +1717,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		while (gitRepoFile != null) {
 			gitRepoFile = gitRepoFile.getParentFile();
 			if (gitRepoFile != null)
-				if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+				if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
 					// System.err.println("Fount git repo for file: "+gitRepoFile);
 					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
 					return openGit(localRepo);
