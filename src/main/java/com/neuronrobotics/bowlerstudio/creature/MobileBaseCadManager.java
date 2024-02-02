@@ -866,9 +866,10 @@ public class MobileBaseCadManager implements Runnable {
 									+ l.getScriptingName());
 							if (!dir.exists())
 								dir.mkdirs();
-							System.out.println("Making STL for " + name);
+							
 							File stl = new File(
 									dir.getAbsolutePath() + "/" + linkNum + name + "_limb_" + i + "_Part_" + j + ".stl");
+							System.out.println("Writing STL for " + name+" to "+stl.getAbsolutePath());
 							FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
 							allCadStl.add(stl);
 							// totalAssembly.add(tmp);
