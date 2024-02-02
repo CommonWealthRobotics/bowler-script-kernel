@@ -169,8 +169,7 @@ public class ConfigurationDatabase {
 				for (String objectKey : val.keySet()) {
 					Object defaultValue = val.get(objectKey);
 					Object value = getObject(pkey, objectKey, defaultValue);
-					System.out.println("Setting " + pkey + ":" + objectKey + " to " + value + " with previous being "
-							+ defaultValue);
+					System.err.println("Setting " + pkey + ":" + objectKey + " to " + value + " with previous being "+ defaultValue);
 				}
 
 			}
