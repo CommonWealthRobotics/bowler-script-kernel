@@ -1158,11 +1158,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		git = openGit(localRepo);
 		try {
-			if (source == null)
-				source = git.log().setMaxCount(1).call().iterator().next();
-			newBranchLocal(newBranch, remoteURI, git, source);
-		} catch (NoHeadException ex) {
-			newBranchLocal(newBranch, remoteURI, git, null);
+			try {
+				if (source == null)
+					source = git.log().setMaxCount(1).call().iterator().next();
+				newBranchLocal(newBranch, remoteURI, git, source);
+			} catch (NoHeadException ex) {
+				newBranchLocal(newBranch, remoteURI, git, null);
+			}
 		} catch (Throwable ex) {
 			closeGit(git);
 			throw ex;
@@ -1299,8 +1301,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return branchNames;
 	}
 
-	public static void pull(String remoteURI, String branch)
-			throws IOException, CheckoutConflictException, NoHeadException, InvalidRemoteException, WrongRepositoryStateException {
+	public static void pull(String remoteURI, String branch) throws IOException, CheckoutConflictException,
+			NoHeadException, InvalidRemoteException, WrongRepositoryStateException {
 		waitForRepo(remoteURI, "pull");
 		// new Exception().printStackTrace();
 
