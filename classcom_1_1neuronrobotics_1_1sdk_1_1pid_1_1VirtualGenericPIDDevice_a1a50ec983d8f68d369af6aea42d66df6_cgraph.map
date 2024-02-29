@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.pid.VirtualGenericPIDDevice.GetPIDPosition" name="com.neuronrobotics.sdk.pid.VirtualGenericPIDDevice.GetPIDPosition">
+<area shape="rect" id="node1" title=" " alt="" coords="5,50,288,91"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1VirtualGenericPIDDevice.html#a1fac4ee21a08845b097d734116d7d219" title=" " alt="" coords="336,5,579,61"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1InterpolationEngine.html#a2f6a1d5468af0ee83e7e475ac4e430b8" title=" " alt="" coords="344,86,571,127"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1InterpolationEngine.html#a52acddd2dbe544e8b4c6196feb8b8076" title=" " alt="" coords="627,86,835,127"/>
+</map>

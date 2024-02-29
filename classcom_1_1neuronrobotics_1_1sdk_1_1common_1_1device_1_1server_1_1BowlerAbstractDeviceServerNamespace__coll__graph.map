@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.common.device.server.BowlerAbstractDeviceServerNamespace" name="com.neuronrobotics.sdk.common.device.server.BowlerAbstractDeviceServerNamespace">
+<area shape="rect" id="node1" title=" " alt="" coords="695,48,1029,89"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1MACAddress.html" title=" " alt="" coords="334,5,577,47"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1common_1_1ISendable.html" title=" " alt="" coords="5,5,248,47"/>
+<area shape="rect" id="node4" title=" " alt="" coords="297,71,613,112"/>
+</map>

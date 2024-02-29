@@ -1,0 +1,5 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.IHardwareSyncPulseReciver" name="com.neuronrobotics.sdk.addons.kinematics.IHardwareSyncPulseReciver">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,315,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkFactory.html" title=" " alt="" coords="363,5,672,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1MobileBase.html" title=" " alt="" coords="363,71,672,112"/>
+</map>

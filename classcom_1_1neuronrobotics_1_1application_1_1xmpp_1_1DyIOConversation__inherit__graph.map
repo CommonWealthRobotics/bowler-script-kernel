@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.application.xmpp.DyIOConversation" name="com.neuronrobotics.application.xmpp.DyIOConversation">
+<area shape="rect" id="node1" title=" " alt="" coords="325,64,597,105"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1neuronrobotics_1_1application_1_1xmpp_1_1IConversation.html" title=" " alt="" coords="5,5,277,47"/>
+<area shape="rect" id="node3" title=" " alt="" coords="75,71,207,98"/>
+<area shape="rect" id="node4" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1IChannelEventListener.html" title=" " alt="" coords="34,123,249,164"/>
+</map>

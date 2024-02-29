@@ -1,0 +1,13 @@
+<map id="com.neuronrobotics.sdk.namespace.bcs.pid.LegacyPidNamespaceImp.SetPIDSetPoint" name="com.neuronrobotics.sdk.namespace.bcs.pid.LegacyPidNamespaceImp.SetPIDSetPoint">
+<area shape="rect" id="node1" title=" " alt="" coords="5,129,316,171"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#af8e4f1d6659eafa3313737065c564741" title=" " alt="" coords="364,5,675,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#af739d08f616cbab5be4ddced56deaf10" title=" " alt="" coords="364,71,675,112"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a12412536f26318b59763fde09206d0c1" title=" " alt="" coords="777,197,1019,239"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#a34ded63101868d4374d2f82ad02278e9" title=" " alt="" coords="398,188,641,229"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#a1b6f192c3c3f21aa3b70e792c8e62c29" title=" " alt="" coords="397,253,642,295"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#ae768bbe0d598973e70ba8655863e6d7a" title=" " alt="" coords="1121,61,1432,103"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#a72694beb8b192c41cdebd303afd33cd4" title=" " alt="" coords="723,132,1073,173"/>
+<area shape="rect" id="node5" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#a12dbb2fbf18e87cd8a57f049575932a0" title=" " alt="" coords="1480,61,1791,103"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="1155,197,1398,239"/>
+<area shape="rect" id="node11" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#ac8f42a985b3c0de84e3297b6370c48b1" title=" " alt="" coords="795,263,1001,304"/>
+</map>

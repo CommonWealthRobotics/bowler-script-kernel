@@ -1,0 +1,8 @@
+<map id="com.neuronrobotics.sdk.common.NonBowlerDevice.connect" name="com.neuronrobotics.sdk.common.NonBowlerDevice.connect">
+<area shape="rect" id="node1" title=" " alt="" coords="5,71,248,112"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1NonBowlerDevice.html#a730b8d2f2233907bea16f282ef56c888" title=" " alt="" coords="305,5,568,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#aa60d52cd56b4e707dcd89f7736e6be33" title=" " alt="" coords="296,71,577,112"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1NonBowlerDevice.html#a84df7e61e0d3e1943c4f8b159cf0d15c" title=" " alt="" coords="315,136,558,177"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#abaf6e39993e818dd6436db1cbd4b8ac7" title=" " alt="" coords="625,23,888,79"/>
+<area shape="rect" id="node5" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1common_1_1IDeviceConnectionEventListener.html#aa4b503151773872fbe0660acccbbbc8d" title=" " alt="" coords="631,103,883,159"/>
+</map>

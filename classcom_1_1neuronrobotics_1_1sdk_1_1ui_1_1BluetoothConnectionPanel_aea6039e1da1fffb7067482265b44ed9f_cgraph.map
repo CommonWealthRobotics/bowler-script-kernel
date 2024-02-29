@@ -1,0 +1,10 @@
+<map id="com.neuronrobotics.sdk.ui.BluetoothConnectionPanel.BluetoothConnectionPanel" name="com.neuronrobotics.sdk.ui.BluetoothConnectionPanel.BluetoothConnectionPanel">
+<area shape="rect" id="node1" title=" " alt="" coords="5,91,265,147"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1ConnectionImageIconFactory.html#a46ac26c6ada900f1128993c5cae2b6d0" title=" " alt="" coords="313,65,573,106"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1BluetoothConnectionPanel.html#a029d1ce74697c7a7d7738a67026baa39" title=" " alt="" coords="322,130,565,171"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1util_1_1ProcessMonitor.html#a43d69cb7910b3eb86b245f04c301bb4a" title=" " alt="" coords="638,5,887,61"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1AbstractConnectionPanel.html#a2f366edbf3227920f69993721b5693f9" title=" " alt="" coords="621,85,904,141"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a12412536f26318b59763fde09206d0c1" title=" " alt="" coords="641,166,884,207"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1util_1_1ProcessMonitor.html#a264e2a3d1ec79d1cfe36929c54a56f59" title=" " alt="" coords="659,231,866,273"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="952,166,1195,207"/>
+</map>

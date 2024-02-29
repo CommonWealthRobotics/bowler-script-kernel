@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.AbstractRotoryLink" name="com.neuronrobotics.sdk.addons.kinematics.AbstractRotoryLink">
+<area shape="rect" id="node1" title=" " alt="" coords="653,104,963,145"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AnalogRotoryLink.html" title=" " alt="" coords="1053,5,1362,47"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1MockRotoryLink.html" title=" " alt="" coords="1053,71,1362,112"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1PidRotoryLink.html" title=" " alt="" coords="1053,136,1362,177"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1gcodebridge_1_1GcodeRotory.html" title=" " alt="" coords="1011,201,1404,243"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html" title=" " alt="" coords="296,104,605,145"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1common_1_1IFlushable.html" title=" " alt="" coords="5,104,248,145"/>
+</map>

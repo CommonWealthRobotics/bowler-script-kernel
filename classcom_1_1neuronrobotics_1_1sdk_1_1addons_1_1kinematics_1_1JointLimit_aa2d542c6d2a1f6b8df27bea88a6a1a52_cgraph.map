@@ -1,0 +1,11 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.JointLimit.JointLimit" name="com.neuronrobotics.sdk.addons.kinematics.JointLimit.JointLimit">
+<area shape="rect" id="node1" title=" " alt="" coords="5,235,315,276"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDLimitEvent.html#a463064717d0a9941f10d2fd07ac93bcc" title=" " alt="" coords="414,5,621,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#af1d0abf477cb7aa3f8ff6087c4c87520" title=" " alt="" coords="363,71,672,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDLimitEvent.html#a5d3fc0ca263b3997fcd7f706a046e66b" title=" " alt="" coords="410,136,625,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDLimitEvent.html#ae0288030c18956ed3d5b5a4f6762be3b" title=" " alt="" coords="414,201,621,243"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1JointLimit.html#ab55db2d682469fa62d70e6b906d4099f" title=" " alt="" coords="363,267,672,308"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1JointLimit.html#a7fd864210809336ddd3a5b57d4d6ed74" title=" " alt="" coords="363,332,672,373"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1JointLimit.html#a0352d2bffdd697a863c8fc652604c20d" title=" " alt="" coords="363,397,672,439"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1JointLimit.html#a3f5173bd6d5721e235bc7c8b7aae2e2b" title=" " alt="" coords="363,463,672,504"/>
+</map>

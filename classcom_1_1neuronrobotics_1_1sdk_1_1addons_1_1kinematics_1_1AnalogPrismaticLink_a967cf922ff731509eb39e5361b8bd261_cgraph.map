@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.AnalogPrismaticLink.AnalogPrismaticLink" name="com.neuronrobotics.sdk.addons.kinematics.AnalogPrismaticLink.AnalogPrismaticLink">
+<area shape="rect" id="node1" title=" " alt="" coords="5,43,315,84"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AnalogPrismaticLink.html#a2b65c8061146040e22aedf7c3c58d61f" title=" " alt="" coords="363,43,672,84"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1AnalogInputChannel.html#aa0e5dbcdae946d00d839346e067cdc1d" title=" " alt="" coords="725,5,1035,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1DyIOAbstractPeripheral.html#a0a356573e32d9fd6df35aab73eafad80" title=" " alt="" coords="720,71,1040,127"/>
+</map>

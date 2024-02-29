@@ -1,0 +1,10 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics.setChain" name="com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics.setChain">
+<area shape="rect" id="node1" title=" " alt="" coords="5,201,315,243"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#a377690465e0b9a4702b436b36862884d" title=" " alt="" coords="368,5,684,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#ae40674a1b7e103bf92615f6a2dbcba0a" title=" " alt="" coords="363,71,689,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#af10d24978093d4ec0c711896324ab51c" title=" " alt="" coords="371,136,681,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#a373441b67135a748e065d2a5f3862301" title=" " alt="" coords="371,201,681,243"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkFactory.html#a04f761ff13637330f1c49747843b64cf" title=" " alt="" coords="371,267,681,308"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1DHChain.html#ad05e1399a2d43ddb0eb8405b37a2875d" title=" " alt="" coords="371,332,681,373"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#afd2cebecb3bbd3d9743a52b4286d2329" title=" " alt="" coords="371,397,681,439"/>
+</map>

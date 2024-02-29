@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.dyio.peripherals.UARTChannel.inStreamDataReady" name="com.neuronrobotics.sdk.dyio.peripherals.UARTChannel.inStreamDataReady">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,296,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1UARTChannel.html#ad9824e1301400a072c47707386a2a88a" title=" " alt="" coords="344,39,635,80"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1UARTChannel_1_1UARTRxChannel.html#aea563556172125cebacf11cb18a1f82a" title=" " alt="" coords="683,39,1012,80"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOInputStream.html#a77013a6073b7d6a277d93ef39860f5ce" title=" " alt="" coords="1060,39,1275,80"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a73f921295cf249654a5182fd1905bbe1" title=" " alt="" coords="1323,39,1565,80"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#ad18011ddae9c433676bd7165bb8a1959" title=" " alt="" coords="1613,5,1857,47"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a59386982420a078926e71b88fe876da7" title=" " alt="" coords="1614,71,1857,112"/>
+</map>

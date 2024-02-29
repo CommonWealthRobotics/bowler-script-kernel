@@ -1,0 +1,7 @@
+<map id="com.neuronrobotics.sdk.namespace.bcs.pid.PidNamespaceImp.ConfigurePDVelovityController" name="com.neuronrobotics.sdk.namespace.bcs.pid.PidNamespaceImp.ConfigurePDVelovityController">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,351,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PDVelocityConfiguration.html#abaec6cad3cf2c1a4aa2dcd39e59c1afd" title=" " alt="" coords="437,5,671,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1PidNamespaceImp.html#a9804cb6e6cf3a21042f314e946adc485" title=" " alt="" coords="399,71,709,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#af8e4f1d6659eafa3313737065c564741" title=" " alt="" coords="757,37,1068,79"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#a34ded63101868d4374d2f82ad02278e9" title=" " alt="" coords="791,103,1034,144"/>
+</map>

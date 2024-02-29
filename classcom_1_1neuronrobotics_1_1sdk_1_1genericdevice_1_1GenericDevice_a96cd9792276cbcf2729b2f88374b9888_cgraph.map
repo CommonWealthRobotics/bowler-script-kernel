@@ -1,0 +1,11 @@
+<map id="com.neuronrobotics.sdk.genericdevice.GenericDevice.GenericDevice" name="com.neuronrobotics.sdk.genericdevice.GenericDevice.GenericDevice">
+<area shape="rect" id="node1" title=" " alt="" coords="5,127,283,168"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#ab580bd073e8f62463a4f6d407b7f440c" title=" " alt="" coords="341,49,583,91"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#a10f537d36d6566c7911c6e3fe5cd421e" title=" " alt="" coords="331,159,593,200"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1MACAddress.html#a376858a3ef35ddc5619b05a50f9ab20b" title=" " alt="" coords="667,5,910,47"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html#a74688526b11b0905fb8a3eff13e59d01" title=" " alt="" coords="641,71,936,127"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html#a20360c9a9ba54b76a4b80b94cf3b75ec" title=" " alt="" coords="645,151,932,207"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#abaf6e39993e818dd6436db1cbd4b8ac7" title=" " alt="" coords="657,231,920,287"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#a7808ab50f598c7d28f4cbc2713ad4f23" title=" " alt="" coords="663,311,914,367"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html#ad495ce0e110ae270f88b422365da8674" title=" " alt="" coords="984,311,1263,367"/>
+</map>

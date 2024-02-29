@@ -1,0 +1,22 @@
+<map id="com.neuronrobotics.sdk.dyio.sequencer.CoreScheduler.addServoChannel" name="com.neuronrobotics.sdk.dyio.sequencer.CoreScheduler.addServoChannel">
+<area shape="rect" id="node1" title=" " alt="" coords="5,332,289,373"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1CoreScheduler.html#a1bf2abb6d161558ee624e7c2cb42f7e6" title=" " alt="" coords="357,5,641,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1DyIOAbstractPeripheral.html#a6fc89af9806ac579da1004136cee3df1" title=" " alt="" coords="353,71,644,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1DyIOAbstractPeripheral.html#a3b772bc84708e30e30e50205d7635414" title=" " alt="" coords="353,136,644,177"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1CoreScheduler.html#a8b4467674b7487de9251df72ec3f1813" title=" " alt="" coords="357,201,641,243"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1CoreScheduler.html#a5fccd4ce3502801ee35bef26f0d5a6c9" title=" " alt="" coords="357,267,641,308"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1CoreScheduler.html#a956037b4dbf845ef1a9124dbadbdce11" title=" " alt="" coords="357,332,641,373"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1CoreScheduler.html#afcb9f61a712b2e5dfa8dd669b8d28737" title=" " alt="" coords="357,397,641,439"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1DyIOAbstractPeripheral.html#af9f91a6bb45f65e2d3f73b2cd0d6c935" title=" " alt="" coords="353,463,644,504"/>
+<area shape="rect" id="node11" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#a6f9bdfca0bdc346fd9d38b7c7e6f8cbb" title=" " alt="" coords="391,528,606,569"/>
+<area shape="rect" id="node12" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#a51c22203d889a59474d1132c1bbf88ee" title=" " alt="" coords="337,593,660,635"/>
+<area shape="rect" id="node20" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1ServoChannel.html#afae6b74f60b46021fc9a62cc371df52c" title=" " alt="" coords="353,659,644,700"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#a521d103fa2465b8744791389256662f7" title=" " alt="" coords="783,136,997,177"/>
+<area shape="rect" id="node13" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#a0d469ff1c93063cb3bc0e7d239ce18ff" title=" " alt="" coords="708,397,1072,439"/>
+<area shape="rect" id="node14" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#adf6c8cd7a07276e4da4e8bd31a21eb17" title=" " alt="" coords="728,463,1052,504"/>
+<area shape="rect" id="node15" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#ad878acfea75dbf09fb5c12e31ebddf94" title=" " alt="" coords="734,528,1046,569"/>
+<area shape="rect" id="node16" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#a763100e188557b9bb4f193b439d5b529" title=" " alt="" coords="736,593,1044,635"/>
+<area shape="rect" id="node17" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#a94420f653e60105bfc1711f06f586744" title=" " alt="" coords="709,659,1071,700"/>
+<area shape="rect" id="node18" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#a97c5b27edcf6cc9672e339f63497fad2" title=" " alt="" coords="729,724,1051,765"/>
+<area shape="rect" id="node19" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#a478745477d7b42538568723a78c6a2f5" title=" " alt="" coords="745,789,1035,831"/>
+</map>

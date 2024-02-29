@@ -1,0 +1,5 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.MobileBase.calcHome" name="com.neuronrobotics.sdk.addons.kinematics.MobileBase.calcHome">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,315,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#a3991147f3e89fbcd48393b30a1e1833c" title=" " alt="" coords="363,5,672,47"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1ICalcLimbHomeProvider.html#af234baf31bd4becc581141735135a61f" title=" " alt="" coords="363,71,672,112"/>
+</map>

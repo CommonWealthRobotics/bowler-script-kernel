@@ -1,0 +1,7 @@
+<map id="com.neuronrobotics.sdk.dyio.peripherals.AnalogInputChannel.onChannelEvent" name="com.neuronrobotics.sdk.dyio.peripherals.AnalogInputChannel.onChannelEvent">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,296,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1AnalogInputChannel.html#a4f562caea7510ed50f39079f506a971d" title=" " alt="" coords="344,5,635,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannelEvent.html#abe12f5dad41a0be85e91c97815edd14c" title=" " alt="" coords="356,71,623,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a6a186fbb8241276052313826729e9ad4" title=" " alt="" coords="683,37,925,79"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannelEvent.html#ad0c98e6772dcde2a01cbdfeb9622c736" title=" " alt="" coords="697,103,911,144"/>
+</map>

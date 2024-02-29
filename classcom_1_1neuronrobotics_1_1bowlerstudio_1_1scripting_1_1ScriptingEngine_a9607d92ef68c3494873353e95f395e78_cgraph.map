@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine.deleteFolder" name="com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine.deleteFolder">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,308,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1util_1_1FileChangeWatcher.html#a01957bc34b2c66964502f5e2dbdcdd06" title=" " alt="" coords="356,5,624,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1util_1_1FileChangeWatcher.html#a461c2832f1a1a4568c6bb384ad303fc7" title=" " alt="" coords="356,71,624,112"/>
+<area shape="rect" id="node4" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1util_1_1IFileChangeListener.html#a6d431a2d7db7048cdd81b385de3b1130" title=" " alt="" coords="672,71,940,112"/>
+</map>

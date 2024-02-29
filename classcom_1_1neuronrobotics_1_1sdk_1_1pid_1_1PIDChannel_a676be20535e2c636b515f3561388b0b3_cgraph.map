@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.pid.PIDChannel.ConfigurePIDController" name="com.neuronrobotics.sdk.pid.PIDChannel.ConfigurePIDController">
+<area shape="rect" id="node1" title=" " alt="" coords="5,71,255,112"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#a2d9054e47c98b4b45e21a43a399f6460" title=" " alt="" coords="303,5,625,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#af874e296544509a648493f2aecbbbb18" title=" " alt="" coords="361,71,567,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDConfiguration.html#a6a4a24ef5112ac18578aeb6b79e50954" title=" " alt="" coords="361,136,567,177"/>
+</map>

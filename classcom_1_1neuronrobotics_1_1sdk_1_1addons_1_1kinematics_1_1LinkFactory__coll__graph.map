@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.LinkFactory" name="com.neuronrobotics.sdk.addons.kinematics.LinkFactory">
+<area shape="rect" id="node1" title=" " alt="" coords="1115,136,1424,177"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1IHardwareSyncPulseReciver.html" title=" " alt="" coords="574,5,883,47"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1IHardwareSyncPulseProvider.html" title=" " alt="" coords="574,71,883,112"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,56,396,127"/>
+<area shape="rect" id="node5" title=" " alt="" coords="513,136,944,177"/>
+<area shape="rect" id="node6" title=" " alt="" coords="537,201,920,243"/>
+<area shape="rect" id="node7" title=" " alt="" coords="537,267,920,308"/>
+</map>

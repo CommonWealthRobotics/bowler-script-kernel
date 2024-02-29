@@ -1,0 +1,5 @@
+<map id="com.neuronrobotics.sdk.pid.PIDChannel.ResetPIDChannel" name="com.neuronrobotics.sdk.pid.PIDChannel.ResetPIDChannel">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,219,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#af874e296544509a648493f2aecbbbb18" title=" " alt="" coords="319,5,525,47"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#ad1578e4e098b2803896e52eb9670a866" title=" " alt="" coords="267,71,577,112"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.AbstractKinematicsNR.blockingInterpolatedMove" name="com.neuronrobotics.sdk.addons.kinematics.AbstractKinematicsNR.blockingInterpolatedMove">
+<area shape="rect" id="node1" title=" " alt="" coords="5,143,348,184"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1InterpolationEngine.html#ad1a26855d97563f4a5de96472656ced8" title=" " alt="" coords="396,55,653,111"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1InterpolationEngine.html#a97295aa467b8775605d2038cd8069e0e" title=" " alt="" coords="411,135,638,191"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1util_1_1ThreadUtil.html#a8e09e8722fc2c7d7575ba2d7f48c44d9" title=" " alt="" coords="421,216,628,257"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1InterpolationEngine.html#a0e82388781067be3d2358644825d3093" title=" " alt="" coords="701,5,959,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1InterpolationEngine.html#a615ea5a1d2d372ab8542f11ce7fb57fe" title=" " alt="" coords="702,71,958,112"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1InterpolationEngine.html#a52acddd2dbe544e8b4c6196feb8b8076" title=" " alt="" coords="726,143,934,184"/>
+</map>

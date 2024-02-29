@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.bowlerstudio.sequence.TimeSequence.addWavFileRun" name="com.neuronrobotics.bowlerstudio.sequence.TimeSequence.addWavFileRun">
+<area shape="rect" id="node1" title=" " alt="" coords="5,169,315,211"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1scripting_1_1ScriptingEngine.html#adb196a1fed1cefe908761ec8f4fd1300" title=" " alt="" coords="366,5,669,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1sequence_1_1TimeSequence.html#a0ee59390287e64c71ba95a3e701bc4c4" title=" " alt="" coords="363,71,672,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1sequence_1_1TimeSequence.html#a597af39d319d89e15494c70a0ff050d6" title=" " alt="" coords="363,136,672,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1sequence_1_1TimeSequence.html#a4a6b7d9e62dd42c1ed913c7a50e10b54" title=" " alt="" coords="363,201,672,243"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1sequence_1_1TimeSequence.html#a5ec3cddfe608049962b3c522ce8f2a0c" title=" " alt="" coords="363,267,672,308"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1util_1_1ThreadUtil.html#a8e09e8722fc2c7d7575ba2d7f48c44d9" title=" " alt="" coords="414,332,621,373"/>
+</map>

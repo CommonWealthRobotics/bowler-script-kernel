@@ -1,0 +1,16 @@
+<map id="com.neuronrobotics.sdk.addons.irobot.CreateArm.home" name="com.neuronrobotics.sdk.addons.irobot.CreateArm.home">
+<area shape="rect" id="node1" title=" " alt="" coords="5,352,280,393"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a6df7cce2c029f9be51ad9ffd050760db" title=" " alt="" coords="328,156,603,197"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#ac6f80c4fcdd3e2e9db425361fd28b7f0" title=" " alt="" coords="328,319,603,360"/>
+<area shape="rect" id="node13" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#aa695cda2b53b8e960e8ba7d5918bdc48" title=" " alt="" coords="328,384,603,425"/>
+<area shape="rect" id="node14" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a9ce7381199f5d284437ca74685680826" title=" " alt="" coords="328,449,603,491"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a16fd35de5a7f8af1b0009cc4da110110" title=" " alt="" coords="659,5,933,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#ade84a6a5219cbe38ea3586e90530b5a7" title=" " alt="" coords="989,93,1264,135"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a5ef9af3c901362beb5db925678e88922" title=" " alt="" coords="659,123,933,164"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a89d18f70a51e7ab675f5d0a5b74c0d0e" title=" " alt="" coords="659,188,933,229"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#ae4b65463ed1d7c00fbc4506b62c25118" title=" " alt="" coords="659,253,933,295"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a7f23ea970c152dc9b24ee8e379c542e1" title=" " alt="" coords="1312,60,1587,101"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a800d8c1be81b2125d9ae2cd230c87a54" title=" " alt="" coords="1312,125,1587,167"/>
+<area shape="rect" id="node11" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a30aa9b99d9319432d75af1a01a107668" title=" " alt="" coords="659,319,933,360"/>
+<area shape="rect" id="node12" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1ServoChannel.html#afae6b74f60b46021fc9a62cc371df52c" title=" " alt="" coords="651,384,941,425"/>
+</map>

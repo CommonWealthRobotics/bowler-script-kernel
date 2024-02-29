@@ -1,0 +1,40 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration.LinkConfiguration" name="com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration.LinkConfiguration">
+<area shape="rect" id="node1" title=" " alt="" coords="5,875,315,916"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a5a3085cf183354d7e804b196afbb7219" title=" " alt="" coords="803,35,1045,76"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a53c83df7326b51ccf62706d409520449" title=" " alt="" coords="378,163,687,204"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a46f62683f524e533a986304f86a18dfe" title=" " alt="" coords="769,247,1079,288"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1xml_1_1XmlFactory.html#a37540022e54c1c74bc7f357e127d4f99" title=" " alt="" coords="363,397,702,439"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#acaf9551882bb51be1a0e9177816dd383" title=" " alt="" coords="378,463,687,504"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#ac5dc282dec3c7e71bca513507a375da9" title=" " alt="" coords="769,325,1079,367"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a3f3d4c66acf03cfb93c1df1d4b1e5701" title=" " alt="" coords="378,528,687,569"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#acb3f3cd6c4f4cacb2969ecb9555b3927" title=" " alt="" coords="363,593,703,635"/>
+<area shape="rect" id="node14" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#af5f3340c3a97506ef200e2ace641e305" title=" " alt="" coords="378,724,687,765"/>
+<area shape="rect" id="node15" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#accf2829aa0c455a6cf45128e818a199e" title=" " alt="" coords="769,789,1079,831"/>
+<area shape="rect" id="node16" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a2d3bf5a173f98ffa342d66733481982c" title=" " alt="" coords="769,1028,1079,1069"/>
+<area shape="rect" id="node17" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#acc0fdcb78658eeeaedda9c442a594288" title=" " alt="" coords="378,1089,687,1131"/>
+<area shape="rect" id="node19" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a5feff74f86799e555ce563f1f4d5c7f2" title=" " alt="" coords="378,1155,687,1196"/>
+<area shape="rect" id="node20" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#ae0676b41db4661a106a4e82b4f30ddca" title=" " alt="" coords="378,1220,687,1261"/>
+<area shape="rect" id="node21" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#abde916c58e663773c718259f60b07ca4" title=" " alt="" coords="376,1285,689,1327"/>
+<area shape="rect" id="node22" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a1c3b230d281473f97362a24493d7c0e2" title=" " alt="" coords="378,659,687,700"/>
+<area shape="rect" id="node23" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a97729d4e7c716d838eadfc311aecde2f" title=" " alt="" coords="378,907,687,948"/>
+<area shape="rect" id="node26" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#acc87390adf8782e37770fbceb64f80b9" title=" " alt="" coords="378,972,687,1013"/>
+<area shape="rect" id="node27" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#ae2273a94f036283ef4c4616c5c2b02ab" title=" " alt="" coords="378,1351,687,1392"/>
+<area shape="rect" id="node28" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a543721d6e7a3b1a90a98e026abc02dc3" title=" " alt="" coords="378,97,687,139"/>
+<area shape="rect" id="node30" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#aa6525f593d5dd33e56e109045bff56c9" title=" " alt="" coords="378,1416,687,1457"/>
+<area shape="rect" id="node31" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a67016555df4b00f3e9817965338ff0b5" title=" " alt="" coords="378,1481,687,1523"/>
+<area shape="rect" id="node32" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a1282fec8c4a9d8cb50e0f445d1e50c7a" title=" " alt="" coords="378,1547,687,1588"/>
+<area shape="rect" id="node34" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#abd206228e20f64fe815b73ad313fb843" title=" " alt="" coords="378,1612,687,1653"/>
+<area shape="rect" id="node35" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a76d3a4c06f4659f73603d862d3e94a12" title=" " alt="" coords="378,280,687,321"/>
+<area shape="rect" id="node36" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#ad2390b9c08f86a052c326b2516e723cd" title=" " alt="" coords="378,1677,687,1719"/>
+<area shape="rect" id="node37" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a05ac16ff65ea68aad58e9fa14543b5cc" title=" " alt="" coords="378,841,687,883"/>
+<area shape="rect" id="node38" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a9de6eda174b7da357c52eef2355f07a3" title=" " alt="" coords="378,1743,687,1784"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="1197,68,1440,109"/>
+<area shape="rect" id="node11" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1TransformNR.html#a4b714c559ba23e4d94274bf22e66ad52" title=" " alt="" coords="751,593,1097,635"/>
+<area shape="rect" id="node13" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1TransformNR.html#adac491f30bbe48cd25e92c48bb5765b5" title=" " alt="" coords="751,659,1097,700"/>
+<area shape="rect" id="node12" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1TransformNR.html#a4bd63baf6501ab83ed4c86763d740d02" title=" " alt="" coords="1145,625,1492,667"/>
+<area shape="rect" id="node18" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a009a2adbb49b67ac6c6d6bd8036a0b70" title=" " alt="" coords="769,1124,1079,1165"/>
+<area shape="rect" id="node24" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a00b42c141319d1936870bcbdda70a38a" title=" " alt="" coords="769,868,1079,909"/>
+<area shape="rect" id="node25" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a619b681da2c5eed6ccf84ee982291055" title=" " alt="" coords="769,959,1079,1000"/>
+<area shape="rect" id="node29" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a12412536f26318b59763fde09206d0c1" title=" " alt="" coords="803,100,1045,141"/>
+<area shape="rect" id="node33" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a07fa740c2d270cdcf6ce27215dce30b0" title=" " alt="" coords="769,1579,1079,1620"/>
+</map>

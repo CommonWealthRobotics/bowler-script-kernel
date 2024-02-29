@@ -1,0 +1,26 @@
+<map id="com.neuronrobotics.sdk.dyio.peripherals.SPIChannel.read" name="com.neuronrobotics.sdk.dyio.peripherals.SPIChannel.read">
+<area shape="rect" id="node1" title=" " alt="" coords="5,409,296,450"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1SPIChannel.html#ad6592b8a8f9385e3e48bfae3de84ae84" title=" " alt="" coords="344,409,635,450"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#abac7dc5e0560e03b531a2ea09979195a" title=" " alt="" coords="1317,307,1560,349"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#afab576fd6f7e64cec5588e06ac79c254" title=" " alt="" coords="707,198,949,239"/>
+<area shape="rect" id="node14" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a4c99a0ec2846e96398b3dffdab8f5fb0" title=" " alt="" coords="707,291,949,333"/>
+<area shape="rect" id="node21" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIO.html#ace307d0a9c7fd85a4db889ace6ee2a66" title=" " alt="" coords="721,409,935,450"/>
+<area shape="rect" id="node22" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIO.html#a4489aac2badf482ab6c925c3540aeee4" title=" " alt="" coords="1038,539,1253,581"/>
+<area shape="rect" id="node23" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1SPIChannel.html#acfe53ae8c3b16b688c2262e778920e42" title=" " alt="" coords="683,474,973,515"/>
+<area shape="rect" id="node24" href="$classcom_1_1neuronrobotics_1_1sdk_1_1util_1_1ThreadUtil.html#a8e09e8722fc2c7d7575ba2d7f48c44d9" title=" " alt="" coords="725,591,931,633"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a73f921295cf249654a5182fd1905bbe1" title=" " alt="" coords="1627,307,1870,349"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#ad18011ddae9c433676bd7165bb8a1959" title=" " alt="" coords="1937,498,2181,539"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a59386982420a078926e71b88fe876da7" title=" " alt="" coords="1938,337,2181,378"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#a3d8f31db726a5744e6e5996375070b8c" title=" " alt="" coords="1021,135,1269,177"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#a1bdae6923f4b2cc88d4e46068e9a18fd" title=" " alt="" coords="1627,177,1870,218"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a4496697f71f458db302de136de67678e" title=" " alt="" coords="1317,73,1560,114"/>
+<area shape="rect" id="node13" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#a84daea310bb352b167c9cd61da864927" title=" " alt="" coords="1317,190,1560,231"/>
+<area shape="rect" id="node11" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a800373ed348e980a75eb780e8e27d732" title=" " alt="" coords="1608,5,1889,61"/>
+<area shape="rect" id="node12" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a68a766542b23c426a6394e0b1835a5f4" title=" " alt="" coords="1627,86,1870,127"/>
+<area shape="rect" id="node15" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a383c955bb3352583b84e6fb4410e5c89" title=" " alt="" coords="1024,474,1267,515"/>
+<area shape="rect" id="node20" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a721342e29eac1ee0dac6238c64ebd37c" title=" " alt="" coords="1024,409,1267,450"/>
+<area shape="rect" id="node16" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a12412536f26318b59763fde09206d0c1" title=" " alt="" coords="1317,502,1560,543"/>
+<area shape="rect" id="node18" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a0cd615f480caab40c026bbb9a874fc74" title=" " alt="" coords="1317,425,1560,466"/>
+<area shape="rect" id="node17" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="1627,514,1870,555"/>
+<area shape="rect" id="node19" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a7ed2d2a07e6a70ed4764092e57c6ab86" title=" " alt="" coords="1627,425,1870,466"/>
+</map>

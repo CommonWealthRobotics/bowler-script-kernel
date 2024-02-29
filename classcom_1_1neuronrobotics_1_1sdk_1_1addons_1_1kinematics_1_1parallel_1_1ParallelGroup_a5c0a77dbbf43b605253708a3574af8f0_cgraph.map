@@ -1,0 +1,10 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup.removeLimb" name="com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup.removeLimb">
+<area shape="rect" id="node1" title=" " alt="" coords="5,169,368,211"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkFactory.html#a79db1dd8f9b5d3c2298b60db7df0b8dc" title=" " alt="" coords="443,71,752,112"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1parallel_1_1ParallelGroup.html#a68e4fe74edc14baaaab26758b2180d0b" title=" " alt="" coords="416,136,779,177"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#af10d24978093d4ec0c711896324ab51c" title=" " alt="" coords="443,201,752,243"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#a82fd8fdbc555ce707b8594bb2a46499c" title=" " alt="" coords="443,267,752,308"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html#a9d717c0d95fab3f29db42d60cc21c764" title=" " alt="" coords="853,5,1163,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkFactory.html#a04f761ff13637330f1c49747843b64cf" title=" " alt="" coords="853,71,1163,112"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1parallel_1_1ParallelGroup.html#a08ff1c780a5294cf05855fd0497f6eb7" title=" " alt="" coords="827,136,1189,177"/>
+</map>

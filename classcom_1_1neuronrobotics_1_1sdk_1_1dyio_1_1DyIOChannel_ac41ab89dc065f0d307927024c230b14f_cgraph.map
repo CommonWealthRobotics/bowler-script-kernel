@@ -1,0 +1,35 @@
+<map id="com.neuronrobotics.sdk.dyio.DyIOChannel.getValue" name="com.neuronrobotics.sdk.dyio.DyIOChannel.getValue">
+<area shape="rect" id="node1" title=" " alt="" coords="5,444,220,485"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a5a3085cf183354d7e804b196afbb7219" title=" " alt="" coords="268,157,511,199"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#afab576fd6f7e64cec5588e06ac79c254" title=" " alt="" coords="268,255,511,296"/>
+<area shape="rect" id="node15" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#afc96f078037dff6a810fac23994c5c40" title=" " alt="" coords="282,379,497,420"/>
+<area shape="rect" id="node16" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#ae845ac9e9803f27f5439b274c66b28de" title=" " alt="" coords="277,444,501,485"/>
+<area shape="rect" id="node17" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannelEvent.html#a6bb14e0c5a5f38a1fe96f60b5f2b9dbf" title=" " alt="" coords="282,509,497,551"/>
+<area shape="rect" id="node26" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a2d5a42d68c6450eecdb2448230e52ced" title=" " alt="" coords="571,320,813,361"/>
+<area shape="rect" id="node31" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIO.html#a4489aac2badf482ab6c925c3540aeee4" title=" " alt="" coords="282,575,497,616"/>
+<area shape="rect" id="node32" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#abf17a1854254975d5d0b04444bc40c72" title=" " alt="" coords="282,640,497,681"/>
+<area shape="rect" id="node33" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#a36dfe0171bcf043e5f4fc679d153aa40" title=" " alt="" coords="278,705,501,747"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="571,124,813,165"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#a3d8f31db726a5744e6e5996375070b8c" title=" " alt="" coords="568,189,816,231"/>
+<area shape="rect" id="node11" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#abac7dc5e0560e03b531a2ea09979195a" title=" " alt="" coords="571,255,813,296"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#a1bdae6923f4b2cc88d4e46068e9a18fd" title=" " alt="" coords="1183,163,1426,204"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a4496697f71f458db302de136de67678e" title=" " alt="" coords="873,72,1116,113"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#a84daea310bb352b167c9cd61da864927" title=" " alt="" coords="873,137,1116,179"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a800373ed348e980a75eb780e8e27d732" title=" " alt="" coords="1164,71,1445,127"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a68a766542b23c426a6394e0b1835a5f4" title=" " alt="" coords="1183,5,1426,47"/>
+<area shape="rect" id="node12" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a73f921295cf249654a5182fd1905bbe1" title=" " alt="" coords="873,255,1116,296"/>
+<area shape="rect" id="node13" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#ad18011ddae9c433676bd7165bb8a1959" title=" " alt="" coords="1183,249,1427,291"/>
+<area shape="rect" id="node14" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a59386982420a078926e71b88fe876da7" title=" " alt="" coords="1183,315,1426,356"/>
+<area shape="rect" id="node18" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannelEvent.html#ad87871b64edb3c90209692150c983d71" title=" " alt="" coords="581,575,803,616"/>
+<area shape="rect" id="node19" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#aac7f32b55b3abf1317e4afd923a8b8b1" title=" " alt="" coords="1197,663,1413,704"/>
+<area shape="rect" id="node20" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannelEvent.html#a2ab81f1679eb0daee794c2efd7b3b506" title=" " alt="" coords="567,509,817,551"/>
+<area shape="rect" id="node23" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannelEvent.html#abe12f5dad41a0be85e91c97815edd14c" title=" " alt="" coords="559,444,825,485"/>
+<area shape="rect" id="node24" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#afa2f8399e8908ac1ef46a5a2110b4f60" title=" " alt="" coords="581,692,803,733"/>
+<area shape="rect" id="node21" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a6a186fbb8241276052313826729e9ad4" title=" " alt="" coords="873,451,1116,492"/>
+<area shape="rect" id="node22" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannelEvent.html#ad0c98e6772dcde2a01cbdfeb9622c736" title=" " alt="" coords="887,516,1102,557"/>
+<area shape="rect" id="node25" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1DyIOChannel.html#a763627b766f1900aa49c5427a3ecfebb" title=" " alt="" coords="887,692,1102,733"/>
+<area shape="rect" id="node27" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a721342e29eac1ee0dac6238c64ebd37c" title=" " alt="" coords="873,320,1116,361"/>
+<area shape="rect" id="node30" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a66ca807199bb117ec6e1f19ac58a225b" title=" " alt="" coords="873,385,1116,427"/>
+<area shape="rect" id="node28" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a0cd615f480caab40c026bbb9a874fc74" title=" " alt="" coords="1183,380,1426,421"/>
+<area shape="rect" id="node29" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ByteList.html#a7ed2d2a07e6a70ed4764092e57c6ab86" title=" " alt="" coords="1493,380,1736,421"/>
+</map>

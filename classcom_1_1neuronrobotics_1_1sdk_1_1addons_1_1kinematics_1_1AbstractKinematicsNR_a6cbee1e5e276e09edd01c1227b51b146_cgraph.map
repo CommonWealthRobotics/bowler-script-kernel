@@ -1,0 +1,10 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.AbstractKinematicsNR.getBestTime" name="com.neuronrobotics.sdk.addons.kinematics.AbstractKinematicsNR.getBestTime">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,315,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html#ad8d8eb3563c38d6ec6ea09c661861f8b" title=" " alt="" coords="363,39,681,80"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#aa35ca0348a01140ec29aac43f161076a" title=" " alt="" coords="729,5,1039,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html#a5427c5e36d916c349cc1e82f8a03f1fe" title=" " alt="" coords="729,71,1039,112"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html#a57371dc8defb06e08a60ae3f6825a3fc" title=" " alt="" coords="1087,37,1396,79"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html#a07af8a7b660fd8959a0a25950aa57e45" title=" " alt="" coords="1087,103,1396,144"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#aa162a326b1c224b4b3112209b48d7c5e" title=" " alt="" coords="1444,37,1753,79"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#af1d0abf477cb7aa3f8ff6087c4c87520" title=" " alt="" coords="1444,103,1753,144"/>
+</map>

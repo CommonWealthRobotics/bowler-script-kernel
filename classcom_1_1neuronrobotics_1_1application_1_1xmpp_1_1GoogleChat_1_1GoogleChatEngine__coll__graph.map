@@ -1,0 +1,10 @@
+<map id="com.neuronrobotics.application.xmpp.GoogleChat.GoogleChatEngine" name="com.neuronrobotics.application.xmpp.GoogleChat.GoogleChatEngine">
+<area shape="rect" id="node1" title=" " alt="" coords="489,150,761,191"/>
+<area shape="rect" id="node2" title=" " alt="" coords="97,5,259,32"/>
+<area shape="rect" id="node3" title=" " alt="" coords="87,56,269,83"/>
+<area shape="rect" id="node4" title=" " alt="" coords="123,107,233,133"/>
+<area shape="rect" id="node5" title=" " alt="" coords="137,157,219,184"/>
+<area shape="rect" id="node6" title=" " alt="" coords="112,208,244,235"/>
+<area shape="rect" id="node7" title=" " alt="" coords="5,259,351,301"/>
+<area shape="rect" id="node8" href="$interfacecom_1_1neuronrobotics_1_1application_1_1xmpp_1_1IConversationFactory.html" title=" " alt="" coords="42,325,314,366"/>
+</map>

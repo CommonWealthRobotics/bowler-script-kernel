@@ -1,0 +1,5 @@
+<map id="com.neuronrobotics.sdk.addons.irobot.CreateArm.gripClose" name="com.neuronrobotics.sdk.addons.irobot.CreateArm.gripClose">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,280,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a30aa9b99d9319432d75af1a01a107668" title=" " alt="" coords="336,5,611,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1ServoChannel.html#afae6b74f60b46021fc9a62cc371df52c" title=" " alt="" coords="328,71,619,112"/>
+</map>

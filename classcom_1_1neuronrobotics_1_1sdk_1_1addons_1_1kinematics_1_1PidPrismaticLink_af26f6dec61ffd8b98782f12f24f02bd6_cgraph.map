@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.PidPrismaticLink.getCurrentPosition" name="com.neuronrobotics.sdk.addons.kinematics.PidPrismaticLink.getCurrentPosition">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,315,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#a4186547fe3168427596a8383b7b9bb8e" title=" " alt="" coords="363,39,569,80"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#af874e296544509a648493f2aecbbbb18" title=" " alt="" coords="669,5,876,47"/>
+<area shape="rect" id="node4" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#ab63899ad1b9659aa3406b0aaac410646" title=" " alt="" coords="617,71,928,112"/>
+</map>

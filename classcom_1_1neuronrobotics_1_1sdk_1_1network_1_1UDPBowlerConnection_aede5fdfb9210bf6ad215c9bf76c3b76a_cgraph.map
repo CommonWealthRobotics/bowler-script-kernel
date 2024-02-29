@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.network.UDPBowlerConnection.loadPacketFromPhy" name="com.neuronrobotics.sdk.network.UDPBowlerConnection.loadPacketFromPhy">
+<area shape="rect" id="node1" title=" " alt="" coords="5,63,304,104"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1network_1_1UDPBowlerConnection.html#a1f269f09e9c98f495a6d3df833b158af" title=" " alt="" coords="352,92,629,133"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a12412536f26318b59763fde09206d0c1" title=" " alt="" coords="677,29,920,71"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html#aa42432cba7e4e538e5edd1963b28847a" title=" " alt="" coords="677,95,920,136"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1network_1_1UDPBowlerConnection.html#ad5605f45b4c8d0d74c02c09372fec426" title=" " alt="" coords="679,160,918,201"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="987,29,1229,71"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html#a1aabd5becbcce4f03e5eb9b1571da583" title=" " alt="" coords="968,160,1248,201"/>
+</map>

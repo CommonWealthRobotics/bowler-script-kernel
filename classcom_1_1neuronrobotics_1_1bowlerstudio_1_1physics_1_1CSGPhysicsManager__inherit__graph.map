@@ -1,0 +1,7 @@
+<map id="com.neuronrobotics.bowlerstudio.physics.CSGPhysicsManager" name="com.neuronrobotics.bowlerstudio.physics.CSGPhysicsManager">
+<area shape="rect" id="node1" title=" " alt="" coords="349,71,645,112"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1physics_1_1HingeCSGPhysicsManager.html" title=" " alt="" coords="693,5,989,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1physics_1_1VehicleCSGPhysicsManager.html" title=" " alt="" coords="693,71,989,112"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1physics_1_1WheelCSGPhysicsManager.html" title=" " alt="" coords="693,136,989,177"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1physics_1_1IPhysicsManager.html" title=" " alt="" coords="5,71,301,112"/>
+</map>

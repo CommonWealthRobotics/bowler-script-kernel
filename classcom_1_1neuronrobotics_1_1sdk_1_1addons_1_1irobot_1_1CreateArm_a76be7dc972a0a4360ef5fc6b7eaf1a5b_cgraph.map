@@ -1,0 +1,10 @@
+<map id="com.neuronrobotics.sdk.addons.irobot.CreateArm.setAngles" name="com.neuronrobotics.sdk.addons.irobot.CreateArm.setAngles">
+<area shape="rect" id="node1" title=" " alt="" coords="5,147,280,188"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#ade84a6a5219cbe38ea3586e90530b5a7" title=" " alt="" coords="336,59,611,100"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a7f23ea970c152dc9b24ee8e379c542e1" title=" " alt="" coords="667,5,941,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a800d8c1be81b2125d9ae2cd230c87a54" title=" " alt="" coords="667,76,941,117"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a12412536f26318b59763fde09206d0c1" title=" " alt="" coords="352,176,595,217"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a30aa9b99d9319432d75af1a01a107668" title=" " alt="" coords="336,241,611,283"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1ServoChannel.html#afae6b74f60b46021fc9a62cc371df52c" title=" " alt="" coords="328,307,619,348"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="683,176,925,217"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="com.neuronrobotics.sdk.pid.PIDChannel.SetPDVelocity" name="com.neuronrobotics.sdk.pid.PIDChannel.SetPDVelocity">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,212,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#af874e296544509a648493f2aecbbbb18" title=" " alt="" coords="312,5,519,47"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#ac5d2f661331066bb701766a7f43fa2a5" title=" " alt="" coords="260,71,571,112"/>
+</map>

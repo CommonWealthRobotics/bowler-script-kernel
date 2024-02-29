@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.javaxusb.UsbCDCSerialConnection" name="com.neuronrobotics.sdk.javaxusb.UsbCDCSerialConnection">
+<area shape="rect" id="node1" title=" " alt="" coords="299,71,544,112"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html" title=" " alt="" coords="7,5,249,47"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1javaxusb_1_1IUsbDeviceEventListener.html" title=" " alt="" coords="5,71,251,112"/>
+<area shape="rect" id="node4" title=" " alt="" coords="56,137,200,163"/>
+</map>

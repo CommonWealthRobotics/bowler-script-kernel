@@ -1,0 +1,8 @@
+<map id="com.neuronrobotics.sdk.network.BowlerTCPClient.disconnect" name="com.neuronrobotics.sdk.network.BowlerTCPClient.disconnect">
+<area shape="rect" id="node1" title=" " alt="" coords="5,104,244,145"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html#af90a2c3a3ba11db02637022584665022" title=" " alt="" coords="297,5,566,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html#a450548369dfcb1a2534010857cb43dd1" title=" " alt="" coords="297,71,565,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractConnection.html#a3a68904832b32f6c0fc501411c1f4ac8" title=" " alt="" coords="292,136,571,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a7607d57e04afc92a4777544a45e82cb2" title=" " alt="" coords="310,201,553,243"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="619,201,861,243"/>
+</map>

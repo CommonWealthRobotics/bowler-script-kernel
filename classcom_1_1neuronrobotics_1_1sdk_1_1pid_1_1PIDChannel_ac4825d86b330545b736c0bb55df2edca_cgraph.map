@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.pid.PIDChannel.setPid" name="com.neuronrobotics.sdk.pid.PIDChannel.setPid">
+<area shape="rect" id="node1" title=" " alt="" coords="5,169,212,211"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#a5b110572166f7d274f1481bd2de91475" title=" " alt="" coords="260,5,571,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#ac3128993500d2d68e32b37a52fcc0174" title=" " alt="" coords="312,71,519,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#a15305cbedf203a172564a04db08b7266" title=" " alt="" coords="308,136,523,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#a2a726180f6940108ca173c617b3c020e" title=" " alt="" coords="306,201,525,243"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDEvent.html#a2d396c3c8a76e641d7048278645446fe" title=" " alt="" coords="312,267,519,308"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDLimitEvent.html#acbf98b88a0b2046e9bdad70275c2f684" title=" " alt="" coords="312,332,519,373"/>
+</map>

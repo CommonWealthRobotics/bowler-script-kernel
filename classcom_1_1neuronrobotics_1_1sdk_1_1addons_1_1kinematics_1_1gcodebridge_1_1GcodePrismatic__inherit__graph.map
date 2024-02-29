@@ -1,0 +1,7 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.gcodebridge.GcodePrismatic" name="com.neuronrobotics.sdk.addons.kinematics.gcodebridge.GcodePrismatic">
+<area shape="rect" id="node1" title=" " alt="" coords="1095,39,1488,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractPrismaticLink.html" title=" " alt="" coords="695,5,1005,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html" title=" " alt="" coords="296,5,605,47"/>
+<area shape="rect" id="node4" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1common_1_1IFlushable.html" title=" " alt="" coords="5,5,248,47"/>
+<area shape="rect" id="node5" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1gcodebridge_1_1IGCodeChannel.html" title=" " alt="" coords="653,71,1047,112"/>
+</map>

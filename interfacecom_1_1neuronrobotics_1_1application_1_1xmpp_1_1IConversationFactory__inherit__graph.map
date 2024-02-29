@@ -1,0 +1,5 @@
+<map id="com.neuronrobotics.application.xmpp.IConversationFactory" name="com.neuronrobotics.application.xmpp.IConversationFactory">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,277,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1application_1_1xmpp_1_1DyIOConversationFactory.html" title=" " alt="" coords="345,5,617,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1application_1_1xmpp_1_1GoogleChat_1_1GoogleChatConversationFactory.html" title=" " alt="" coords="325,71,636,112"/>
+</map>

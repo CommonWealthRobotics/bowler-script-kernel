@@ -1,0 +1,14 @@
+<map id="com.neuronrobotics.bowlerstudio.AudioPlayer.run" name="com.neuronrobotics.bowlerstudio.AudioPlayer.run">
+<area shape="rect" id="node1" title=" " alt="" coords="5,312,248,353"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer.html#a2f62c76ecf2fe5f2f759587a8e4b7873" title=" " alt="" coords="319,5,562,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer.html#a4ffdbf4f004b9ddeb58d0259c29a3ffe" title=" " alt="" coords="319,71,562,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer.html#a5600fd094bc35f389799f554c753f29d" title=" " alt="" coords="319,136,562,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer.html#ad059fd07c6f71b5533e181e303986c77" title=" " alt="" coords="633,165,876,207"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer.html#afeaa06847d3a02b73192bcab6d10528b" title=" " alt="" coords="319,253,562,295"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer.html#a61b784bf96c1b56dd9a066632d9a6948" title=" " alt="" coords="633,341,876,383"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer.html#ab0b01acc99091d091687f360ddbf5a50" title=" " alt="" coords="319,371,562,412"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer.html#ac561e67b8d5b04b98d3e483d59268324" title=" " alt="" coords="319,436,562,477"/>
+<area shape="rect" id="node10" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1IAudioProcessingLambda.html#ac02119e1eb9e9302b4512bf16c0d1ff3" title=" " alt="" coords="296,501,585,543"/>
+<area shape="rect" id="node11" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1IAudioProcessingLambda.html#af6f633d97211ec9bc3ee664a18b62dae" title=" " alt="" coords="319,567,562,608"/>
+<area shape="rect" id="node12" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1ISpeakingProgress.html#a93797cb81d89058e758b20d3a0ff5782" title=" " alt="" coords="319,632,562,673"/>
+</map>

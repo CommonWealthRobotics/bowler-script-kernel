@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.ui.UsbConnectionPanel" name="com.neuronrobotics.sdk.ui.UsbConnectionPanel">
+<area shape="rect" id="node1" title=" " alt="" coords="408,39,607,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1AbstractConnectionPanel.html" title=" " alt="" coords="138,5,337,47"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,13,67,39"/>
+<area shape="rect" id="node4" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1javaxusb_1_1IUsbDeviceEventListener.html" title=" " alt="" coords="115,71,360,112"/>
+</map>

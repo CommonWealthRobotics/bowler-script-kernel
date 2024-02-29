@@ -1,0 +1,12 @@
+<map id="com.neuronrobotics.sdk.addons.irobot.CreateArm.setCartesianPose" name="com.neuronrobotics.sdk.addons.irobot.CreateArm.setCartesianPose">
+<area shape="rect" id="node1" title=" " alt="" coords="5,224,280,265"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a0f7c9d32063c665401797789e0171ed1" title=" " alt="" coords="328,5,603,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a2960535bc6ac1cbaca4910febd259733" title=" " alt="" coords="328,71,603,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a16fd35de5a7f8af1b0009cc4da110110" title=" " alt="" coords="328,136,603,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a12412536f26318b59763fde09206d0c1" title=" " alt="" coords="651,323,893,364"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#aa695cda2b53b8e960e8ba7d5918bdc48" title=" " alt="" coords="328,253,603,295"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a89d18f70a51e7ab675f5d0a5b74c0d0e" title=" " alt="" coords="328,319,603,360"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#af223e6f22dff3293325b2df81572eea7" title=" " alt="" coords="328,384,603,425"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1irobot_1_1CreateArm.html#a8a14072fe948f2aa3dd09b1890cfe7dc" title=" " alt="" coords="328,449,603,491"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="941,323,1184,364"/>
+</map>

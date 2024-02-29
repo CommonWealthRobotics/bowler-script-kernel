@@ -1,0 +1,11 @@
+<map id="com.neuronrobotics.bowlerstudio.sequence.SequenceEvent" name="com.neuronrobotics.bowlerstudio.sequence.SequenceEvent">
+<area shape="rect" id="node1" title=" " alt="" coords="1247,71,1556,112"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1IOnInterpolationDone.html" title=" " alt="" coords="829,5,1139,47"/>
+<area shape="rect" id="node3" href="$enumcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1InterpolationType.html" title=" " alt="" coords="881,71,1087,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1TransformNR.html" title=" " alt="" coords="811,136,1157,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html" title=" " alt="" coords="318,93,665,135"/>
+<area shape="rect" id="node6" title=" " alt="" coords="5,50,156,77"/>
+<area shape="rect" id="node7" title=" " alt="" coords="42,101,119,127"/>
+<area shape="rect" id="node8" title=" " alt="" coords="24,151,137,178"/>
+<area shape="rect" id="node9" title=" " alt="" coords="281,159,701,200"/>
+</map>

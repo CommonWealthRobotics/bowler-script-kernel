@@ -1,0 +1,5 @@
+<map id="com.neuronrobotics.bowlerstudio.creature.UserManagedPrintBed.UserManagedPrintBed" name="com.neuronrobotics.bowlerstudio.creature.UserManagedPrintBed.UserManagedPrintBed">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,321,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1MobileBase.html#a40aa5b10eb0f5e7723fd3457e7767e02" title=" " alt="" coords="369,5,679,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1creature_1_1MobileBaseCadManager.html#a33793ab26507084003b042d175a923af" title=" " alt="" coords="373,71,675,112"/>
+</map>

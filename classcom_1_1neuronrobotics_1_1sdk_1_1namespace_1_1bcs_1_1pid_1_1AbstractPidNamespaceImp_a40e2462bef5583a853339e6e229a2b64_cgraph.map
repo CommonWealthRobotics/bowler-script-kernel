@@ -1,0 +1,12 @@
+<map id="com.neuronrobotics.sdk.namespace.bcs.pid.AbstractPidNamespaceImp.AbstractPidNamespaceImp" name="com.neuronrobotics.sdk.namespace.bcs.pid.AbstractPidNamespaceImp.AbstractPidNamespaceImp">
+<area shape="rect" id="node1" title=" " alt="" coords="5,169,384,211"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#abdafb5d6b64fcb8a7a8ddbffc9b54edc" title=" " alt="" coords="432,5,769,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDEvent.html#a2d396c3c8a76e641d7048278645446fe" title=" " alt="" coords="497,71,704,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#af739d08f616cbab5be4ddced56deaf10" title=" " alt="" coords="445,136,756,177"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDEvent.html#acaef86b6a50bd8aa595fb844d0822923" title=" " alt="" coords="497,201,704,243"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#a6a356ac412353337e7ddb76330fd8ae6" title=" " alt="" coords="466,267,735,308"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#a6e8abb6986a2546b081ad1c4a57feaf6" title=" " alt="" coords="445,332,756,373"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#ae768bbe0d598973e70ba8655863e6d7a" title=" " alt="" coords="1216,136,1527,177"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#a72694beb8b192c41cdebd303afd33cd4" title=" " alt="" coords="817,207,1168,248"/>
+<area shape="rect" id="node6" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#a12dbb2fbf18e87cd8a57f049575932a0" title=" " alt="" coords="1575,136,1885,177"/>
+</map>

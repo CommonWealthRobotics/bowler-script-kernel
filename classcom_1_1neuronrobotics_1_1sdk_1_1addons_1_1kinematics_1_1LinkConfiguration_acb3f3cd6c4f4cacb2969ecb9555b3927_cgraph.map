@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration.setCenterOfMassFromCentroid" name="com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration.setCenterOfMassFromCentroid">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,345,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1TransformNR.html#a4b714c559ba23e4d94274bf22e66ad52" title=" " alt="" coords="393,5,740,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1TransformNR.html#adac491f30bbe48cd25e92c48bb5765b5" title=" " alt="" coords="393,71,740,112"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1TransformNR.html#a4bd63baf6501ab83ed4c86763d740d02" title=" " alt="" coords="788,39,1135,80"/>
+</map>

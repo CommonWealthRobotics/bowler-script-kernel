@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.namespace.bcs.pid.AbstractPidNamespaceImp.firePIDResetEvent" name="com.neuronrobotics.sdk.namespace.bcs.pid.AbstractPidNamespaceImp.firePIDResetEvent">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,324,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#af21b82948dbcf7f76b807f210c5fe5ed" title=" " alt="" coords="372,39,695,80"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#af739d08f616cbab5be4ddced56deaf10" title=" " alt="" coords="743,5,1053,47"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#a6a356ac412353337e7ddb76330fd8ae6" title=" " alt="" coords="763,71,1033,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#ae768bbe0d598973e70ba8655863e6d7a" title=" " alt="" coords="1500,5,1811,47"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#a72694beb8b192c41cdebd303afd33cd4" title=" " alt="" coords="1101,76,1452,117"/>
+<area shape="rect" id="node5" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#a12dbb2fbf18e87cd8a57f049575932a0" title=" " alt="" coords="1859,5,2169,47"/>
+</map>

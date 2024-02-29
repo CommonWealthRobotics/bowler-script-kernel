@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.AbstractLink.setMaxVelocityEngineeringUnits" name="com.neuronrobotics.sdk.addons.kinematics.AbstractLink.setMaxVelocityEngineeringUnits">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,324,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a9de6eda174b7da357c52eef2355f07a3" title=" " alt="" coords="372,5,681,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html#a5ff796ece0049d7b36d0f26f81e8d75f" title=" " alt="" coords="372,71,681,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html#a57371dc8defb06e08a60ae3f6825a3fc" title=" " alt="" coords="729,37,1039,79"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractLink.html#a07af8a7b660fd8959a0a25950aa57e45" title=" " alt="" coords="729,103,1039,144"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#aa162a326b1c224b4b3112209b48d7c5e" title=" " alt="" coords="1087,37,1396,79"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#af1d0abf477cb7aa3f8ff6087c4c87520" title=" " alt="" coords="1087,103,1396,144"/>
+</map>

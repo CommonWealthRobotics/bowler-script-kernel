@@ -1,0 +1,10 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.MobileBase.DriveVelocityArc" name="com.neuronrobotics.sdk.addons.kinematics.MobileBase.DriveVelocityArc">
+<area shape="rect" id="node1" title=" " alt="" coords="5,71,315,112"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1IDriveEngine.html#a5017a2513b4e21b68d757e581506509a" title=" " alt="" coords="363,5,672,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1MobileBase.html#a6352e67eb84de440958c05519dcb29bb" title=" " alt="" coords="363,71,672,112"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1MobileBase.html#a9f25725ad9bcaa278a6af4fe24ee06e2" title=" " alt="" coords="363,136,672,177"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1IDriveEngine.html#ac695048d2ef90aca1a951a5875ce79cf" title=" " alt="" coords="723,5,1033,47"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1MobileBase.html#a79f7160a8156152cba1e685806e1e8f0" title=" " alt="" coords="720,103,1036,144"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#add51aeeaa755925632fe3ed36bfb8792" title=" " alt="" coords="723,168,1033,209"/>
+<area shape="rect" id="node7" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1IOnMobileBaseRenderChange.html#ab5129e9ac77752912edc1b917bb529aa" title=" " alt="" coords="1084,95,1417,151"/>
+</map>

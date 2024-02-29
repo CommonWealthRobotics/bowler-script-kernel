@@ -1,0 +1,14 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.math.RotationNR.RotationNR" name="com.neuronrobotics.sdk.addons.kinematics.math.RotationNR.RotationNR">
+<area shape="rect" id="node1" title=" " alt="" coords="5,193,352,235"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a5a3085cf183354d7e804b196afbb7219" title=" " alt="" coords="452,29,695,71"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#ac4664e35815cf1483a7ad84cc5ebe97c" title=" " alt="" coords="400,95,747,136"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#aa24c6a88eda6e9264b0ccb4dc9324d29" title=" " alt="" coords="400,160,747,201"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#a29ea0cb5c9ffe9bade72fa2c1b296c5c" title=" " alt="" coords="400,225,747,267"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#a24ae348cbbe2bb3f0bcc1cf423046017" title=" " alt="" coords="400,291,747,332"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#a49cad35dabb2672945144c785d971af3" title=" " alt="" coords="400,356,747,397"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="847,29,1089,71"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#a985b1a3b0c2e212360e74f1f851c0cf5" title=" " alt="" coords="795,192,1141,233"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#af43637f90225a922162ab35a6650e13c" title=" " alt="" coords="795,291,1141,332"/>
+<area shape="rect" id="node11" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#af186dfed38e02aa3ce81420b474461a4" title=" " alt="" coords="795,356,1141,397"/>
+<area shape="rect" id="node12" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1math_1_1RotationNR.html#adcf39b7e1e7fa0d1723b29eb6e65cd97" title=" " alt="" coords="795,421,1141,463"/>
+</map>

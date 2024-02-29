@@ -1,0 +1,13 @@
+<map id="com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration.setPidConfiguration" name="com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration.setPidConfiguration">
+<area shape="rect" id="node1" title=" " alt="" coords="5,300,315,341"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#a53c83df7326b51ccf62706d409520449" title=" " alt="" coords="365,5,674,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDConfiguration.html#a90aaa8ae4ccb4c06f3fd64d0a6c8634d" title=" " alt="" coords="406,71,633,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDConfiguration.html#aed65e7cae8a6d4f71c13935767b37c73" title=" " alt="" coords="416,136,623,177"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDConfiguration.html#afa05f6e4c29eec554d25b2f9790f41c9" title=" " alt="" coords="416,201,623,243"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDConfiguration.html#ab7bf6cd02a05be4c41b1007acdcda792" title=" " alt="" coords="416,267,623,308"/>
+<area shape="rect" id="node7" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#a7caedec5507fc842d2579c09e76c08b5" title=" " alt="" coords="364,332,675,373"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDConfiguration.html#aa024897ccf42a3a61a9ac26216c3a39f" title=" " alt="" coords="416,397,623,439"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDConfiguration.html#a2a26d20333e9c841014bc99cd83b6235" title=" " alt="" coords="405,463,634,504"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDConfiguration.html#a3ffd7466e6cb6895c5a682d01045c298" title=" " alt="" coords="416,528,623,569"/>
+<area shape="rect" id="node11" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1LinkConfiguration.html#abde916c58e663773c718259f60b07ca4" title=" " alt="" coords="363,593,676,635"/>
+</map>

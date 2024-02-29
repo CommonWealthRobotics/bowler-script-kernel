@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.sdk.pid.VirtualGenericPIDDevice.disconnect" name="com.neuronrobotics.sdk.pid.VirtualGenericPIDDevice.disconnect">
+<area shape="rect" id="node1" title=" " alt="" coords="5,53,261,94"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#a55231827c4c8f8c02cbf19be50628264" title=" " alt="" coords="309,53,609,94"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerAbstractDevice.html#abaf6e39993e818dd6436db1cbd4b8ac7" title=" " alt="" coords="657,5,920,61"/>
+<area shape="rect" id="node4" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1common_1_1IDeviceConnectionEventListener.html#a9366b30e69bf4bc642d62860571821e7" title=" " alt="" coords="663,85,915,141"/>
+</map>

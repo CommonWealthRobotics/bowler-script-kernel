@@ -1,0 +1,8 @@
+<map id="com.neuronrobotics.sdk.javaxusb.UsbCDCSerialConnection.resetUsbSystem" name="com.neuronrobotics.sdk.javaxusb.UsbCDCSerialConnection.resetUsbSystem">
+<area shape="rect" id="node1" title=" " alt="" coords="5,43,301,84"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1util_1_1OsInfoUtil.html#aa593fe4ee13d3fe8a1282e3e205339d5" title=" " alt="" coords="406,5,613,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1javaxusb_1_1UsbCDCSerialConnection.html#a92a6921a3df0b5178b1fe209da3b6742" title=" " alt="" coords="349,71,669,127"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1util_1_1OsInfoUtil.html#a0ed29a8a0a605ec7dee4c3635e8a79a1" title=" " alt="" coords="763,5,969,47"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1javaxusb_1_1UsbCDCSerialConnection.html#ac2e5033b09c02374045ab76b5d005a66" title=" " alt="" coords="717,71,1015,127"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1javaxusb_1_1UsbCDCSerialConnection.html#a07bf101f49850571ae6488a5d8b6295c" title=" " alt="" coords="1063,79,1333,120"/>
+</map>

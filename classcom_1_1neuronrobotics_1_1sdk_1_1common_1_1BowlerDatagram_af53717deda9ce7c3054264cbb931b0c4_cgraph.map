@@ -1,0 +1,12 @@
+<map id="com.neuronrobotics.sdk.common.BowlerDatagram.onTimeout" name="com.neuronrobotics.sdk.common.BowlerDatagram.onTimeout">
+<area shape="rect" id="node1" title=" " alt="" coords="5,209,248,251"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#a5a3085cf183354d7e804b196afbb7219" title=" " alt="" coords="315,29,558,71"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a800373ed348e980a75eb780e8e27d732" title=" " alt="" coords="296,95,577,151"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a68a766542b23c426a6394e0b1835a5f4" title=" " alt="" coords="315,176,558,217"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#acafa687999e75493ba1cdc2b9c788cb0" title=" " alt="" coords="315,241,558,283"/>
+<area shape="rect" id="node9" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#a1bdae6923f4b2cc88d4e46068e9a18fd" title=" " alt="" coords="637,345,880,387"/>
+<area shape="rect" id="node10" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1BowlerDatagram.html#a84daea310bb352b167c9cd61da864927" title=" " alt="" coords="315,359,558,400"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1Log.html#ad1957aec5ba52407a3db816c6f49ef44" title=" " alt="" coords="637,29,880,71"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a0d9113c4163ed8655adf2690f8dd5d60" title=" " alt="" coords="637,201,880,243"/>
+<area shape="rect" id="node8" href="$classcom_1_1neuronrobotics_1_1sdk_1_1common_1_1ThreadedTimeout.html#a97d67b6398501e35943778a241b02d2b" title=" " alt="" coords="625,267,892,308"/>
+</map>

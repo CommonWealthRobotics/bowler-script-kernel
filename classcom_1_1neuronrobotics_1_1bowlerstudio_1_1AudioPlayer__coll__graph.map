@@ -1,0 +1,10 @@
+<map id="com.neuronrobotics.bowlerstudio.AudioPlayer" name="com.neuronrobotics.bowlerstudio.AudioPlayer">
+<area shape="rect" id="node1" title=" " alt="" coords="396,181,639,222"/>
+<area shape="rect" id="node2" title=" " alt="" coords="93,5,160,32"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1IAudioProcessingLambda.html" title=" " alt="" coords="5,57,248,98"/>
+<area shape="rect" id="node4" href="$enumcom_1_1neuronrobotics_1_1bowlerstudio_1_1AudioPlayer_1_1Status.html" title=" " alt="" coords="5,122,248,163"/>
+<area shape="rect" id="node5" title=" " alt="" coords="76,188,177,215"/>
+<area shape="rect" id="node6" title=" " alt="" coords="57,239,196,265"/>
+<area shape="rect" id="node7" title=" " alt="" coords="65,289,189,316"/>
+<area shape="rect" id="node8" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1ISpeakingProgress.html" title=" " alt="" coords="5,341,248,382"/>
+</map>

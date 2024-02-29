@@ -1,0 +1,8 @@
+<map id="com.neuronrobotics.sdk.namespace.bcs.pid.AbstractPidNamespaceImp.GetCachedPosition" name="com.neuronrobotics.sdk.namespace.bcs.pid.AbstractPidNamespaceImp.GetCachedPosition">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,331,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1pid_1_1PIDChannel.html#a8979419a690c6c0132ec6f3d0645116e" title=" " alt="" coords="399,5,669,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#af739d08f616cbab5be4ddced56deaf10" title=" " alt="" coords="379,71,689,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#ae768bbe0d598973e70ba8655863e6d7a" title=" " alt="" coords="1136,71,1447,112"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1AbstractPidNamespaceImp.html#a72694beb8b192c41cdebd303afd33cd4" title=" " alt="" coords="737,141,1088,183"/>
+<area shape="rect" id="node5" href="$interfacecom_1_1neuronrobotics_1_1sdk_1_1namespace_1_1bcs_1_1pid_1_1IPidControlNamespace.html#a12dbb2fbf18e87cd8a57f049575932a0" title=" " alt="" coords="1495,71,1805,112"/>
+</map>

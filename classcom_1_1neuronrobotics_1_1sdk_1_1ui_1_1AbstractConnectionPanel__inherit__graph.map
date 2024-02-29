@@ -1,0 +1,9 @@
+<map id="com.neuronrobotics.sdk.ui.AbstractConnectionPanel" name="com.neuronrobotics.sdk.ui.AbstractConnectionPanel">
+<area shape="rect" id="node1" title=" " alt="" coords="115,136,313,177"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1BluetoothConnectionPanel.html" title=" " alt="" coords="361,5,560,47"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1SerialConnectionPanel.html" title=" " alt="" coords="361,71,560,112"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1TCPConnectionPanel.html" title=" " alt="" coords="361,136,560,177"/>
+<area shape="rect" id="node6" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1UDPConnectionPanel.html" title=" " alt="" coords="361,201,560,243"/>
+<area shape="rect" id="node7" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1UsbConnectionPanel.html" title=" " alt="" coords="361,267,560,308"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,143,67,170"/>
+</map>

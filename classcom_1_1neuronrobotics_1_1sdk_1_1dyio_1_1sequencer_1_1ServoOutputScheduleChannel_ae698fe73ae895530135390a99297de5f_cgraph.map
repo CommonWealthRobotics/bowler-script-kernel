@@ -1,0 +1,5 @@
+<map id="com.neuronrobotics.sdk.dyio.sequencer.ServoOutputScheduleChannel.pauseRecording" name="com.neuronrobotics.sdk.dyio.sequencer.ServoOutputScheduleChannel.pauseRecording">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,328,80"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1peripherals_1_1AnalogInputChannel.html#a73ffdebbd93d370c9f1b08f55e5033af" title=" " alt="" coords="376,5,713,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1dyio_1_1sequencer_1_1ServoOutputScheduleChannel.html#a8542d4019740f2cfe0e7359b50591574" title=" " alt="" coords="393,71,697,112"/>
+</map>

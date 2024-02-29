@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.bowlerstudio.creature.IgenerateBody" name="com.neuronrobotics.bowlerstudio.creature.IgenerateBody">
+<area shape="rect" id="node1" title=" " alt="" coords="5,5,307,47"/>
+<area shape="rect" id="node2" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1creature_1_1ICadGenerator.html" title=" " alt="" coords="5,95,307,136"/>
+<area shape="rect" id="node3" href="$interfacecom_1_1neuronrobotics_1_1bowlerstudio_1_1creature_1_1IgenerateBed.html" title=" " alt="" coords="5,184,307,225"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1creature_1_1UserManagedPrintBed.html" title=" " alt="" coords="5,273,307,315"/>
+</map>

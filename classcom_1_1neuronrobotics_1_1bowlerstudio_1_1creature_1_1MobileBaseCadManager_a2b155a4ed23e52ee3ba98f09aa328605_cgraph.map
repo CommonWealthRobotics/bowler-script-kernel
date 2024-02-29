@@ -1,0 +1,6 @@
+<map id="com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager.set" name="com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager.set">
+<area shape="rect" id="node1" title=" " alt="" coords="5,71,307,112"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1MobileBase.html#a5adad3ebe92037ab600b8467ac51e520" title=" " alt="" coords="355,5,664,47"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1addons_1_1kinematics_1_1AbstractKinematicsNR.html#ac0c1626970f7ec84170a4a44ac635a89" title=" " alt="" coords="355,71,664,112"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1bowlerstudio_1_1creature_1_1MobileBaseCadManager.html#abe485f9e17c571e40dab9312701c52ff" title=" " alt="" coords="359,136,660,177"/>
+</map>

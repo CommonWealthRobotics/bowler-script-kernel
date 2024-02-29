@@ -1,0 +1,7 @@
+<map id="com.neuronrobotics.sdk.ui.UsbConnectionPanel.refresh" name="com.neuronrobotics.sdk.ui.UsbConnectionPanel.refresh">
+<area shape="rect" id="node1" title=" " alt="" coords="5,93,211,134"/>
+<area shape="rect" id="node2" href="$classcom_1_1neuronrobotics_1_1sdk_1_1javaxusb_1_1UsbCDCSerialConnection.html#ac2e5033b09c02374045ab76b5d005a66" title=" " alt="" coords="259,5,556,61"/>
+<area shape="rect" id="node4" href="$classcom_1_1neuronrobotics_1_1sdk_1_1ui_1_1AbstractConnectionPanel.html#a2f366edbf3227920f69993721b5693f9" title=" " alt="" coords="266,85,549,141"/>
+<area shape="rect" id="node5" href="$classcom_1_1neuronrobotics_1_1sdk_1_1javaxusb_1_1UsbCDCSerialConnection.html#af8e2531b3d606f260a8cb0f235fd76f4" title=" " alt="" coords="272,166,543,207"/>
+<area shape="rect" id="node3" href="$classcom_1_1neuronrobotics_1_1sdk_1_1javaxusb_1_1UsbCDCSerialConnection.html#a07bf101f49850571ae6488a5d8b6295c" title=" " alt="" coords="604,13,875,54"/>
+</map>
