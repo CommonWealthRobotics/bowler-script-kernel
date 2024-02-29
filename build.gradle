@@ -221,7 +221,7 @@ dependencies {
 	//compile group: 'com.neuronrobotics', name:'GithubPasswordManager', version:'0.6.1'
 	//compile "com.neuronrobotics:JavaCad:0.14.0"
 	//compile project('JCSG')
-	compile group: 'com.neuronrobotics', name: 'JavaCad', version:'0.30.1'
+	compile group: 'com.neuronrobotics', name: 'JavaCad', version:'0.30.2'
 	
 	//compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
 	//compile "com.neuronrobotics:java-bowler:3.25.4"
