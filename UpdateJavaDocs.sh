@@ -34,5 +34,3 @@ git add search/*
 git commit -a -m"updating the doxygen"
 git push
 cd ..
-
-git checkout development
