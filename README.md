@@ -1,7 +1,7 @@
 
 # Documentation
 
-[Javadoc Generated Documentation](https://commonwealthrobotics.github.io/bowler-script-kernel/annotated.html) 
+[Javadoc Generated Documentation](https://commonwealthrobotics.com/bowler-script-kernel/namespaces.html) 
 
 
 # Bowler Kernel Scripting environment
