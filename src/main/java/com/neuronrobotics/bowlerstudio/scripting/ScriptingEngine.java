@@ -532,7 +532,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static GitHub setupAnyonmous() throws IOException {
-		ScriptingEngine.setAutoupdate(false);
+		//ScriptingEngine.setAutoupdate(false);
 		return PasswordManager.setupAnyonmous();
 	}
 
@@ -1770,18 +1770,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		PasswordManager.setLoginManager(lm);
 	}
 
-	public static boolean isAutoupdate() {
-		return autoupdate;
-	}
-
-	public static boolean setAutoupdate(boolean autoupdate) throws IOException {
-		if (autoupdate && !ScriptingEngine.autoupdate) {
-			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
-			// PasswordManager.setAutoupdate(autoupdate);
-		}
-		ScriptingEngine.autoupdate = autoupdate;
-		return ScriptingEngine.autoupdate;
-	}
+//	public static boolean isAutoupdate() {
+//		return autoupdate;
+//	}
+//
+//	public static boolean setAutoupdate(boolean autoupdate) throws IOException {
+//		if (autoupdate && !ScriptingEngine.autoupdate) {
+//			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
+//			// PasswordManager.setAutoupdate(autoupdate);
+//		}
+//		ScriptingEngine.autoupdate = autoupdate;
+//		return ScriptingEngine.autoupdate;
+//	}
 
 	@SuppressWarnings("unused")
 	private static File fileFromGistID(String string, String string2)

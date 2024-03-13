@@ -568,7 +568,7 @@ public class Vitamins {
 			checked = true;
 			try {
 				if (PasswordManager.getUsername() != null) {
-					true);
+					//ScriptingEngine.setAutoupdate(true);
 					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
 					try {
 						GHRepository repo =github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions" ); 
@@ -587,7 +587,13 @@ public class Vitamins {
 				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 			}
 			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
-			ScriptingEngine.pull(gitRpoDatabase);
+			try {
+				ScriptingEngine.pull(gitRpoDatabase);
+			} catch (IOException | GitAPIException e) {
+				ScriptingEngine.deleteRepo(gitRpoDatabase);
+				ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
+			}
+
 		}
 		return gitRpoDatabase;
 	}
