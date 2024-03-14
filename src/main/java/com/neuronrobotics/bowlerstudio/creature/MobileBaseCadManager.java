@@ -546,7 +546,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	private IgenerateBody getIgenerateBody(MobileBase b) throws Throwable{
-		if (configMode)
+		if (isConfigMode())
 			return getConfigurationDisplay();
 		Object cadForBodyEngine = scriptFromFileInfo(b.getScriptingName(),b.getGitCadEngine(), () -> {
 			run();
@@ -559,7 +559,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	private IgenerateCad getIgenerateCad(DHParameterKinematics dh) throws Throwable{
-		if (configMode)
+		if (isConfigMode())
 			return getConfigurationDisplay();
 		Object cadForBodyEngine = scriptFromFileInfo(dh.getScriptingName(),dh.getGitCadEngine(), () -> {
 			run();
@@ -590,7 +590,7 @@ public class MobileBaseCadManager implements Runnable {
 							for (MobileBase manager : cadmap.keySet()) {
 								mobileBaseCadManager = cadmap.get(manager);
 								if (mobileBaseCadManager.autoRegen)
-									if (mobileBaseCadManager.configMode)
+									if (mobileBaseCadManager.isConfigMode())
 										mobileBaseCadManager.generateCad();
 							}
 						} catch (Exception e) {
@@ -995,7 +995,7 @@ public class MobileBaseCadManager implements Runnable {
 		try {
 			IgenerateCad generatorToUse = getConfigurationDisplay();
 			Object object = getIgenerateCad(dh);
-			if (object != null && !configMode) {
+			if (object != null && !isConfigMode()) {
 				if (IgenerateCad.class.isInstance(object))
 					generatorToUse = (IgenerateCad) object;
 			}
@@ -1301,7 +1301,7 @@ public class MobileBaseCadManager implements Runnable {
 
 	public void setConfigurationViewerMode(boolean b) {
 		System.out.println("Setting config mode " + b);
-		configMode = b;
+		setConfigMode(b);
 		for (MobileBaseCadManager m : slaves) {
 			m.setConfigurationViewerMode(b);
 		}
@@ -1309,6 +1309,18 @@ public class MobileBaseCadManager implements Runnable {
 	public void invalidateModelCache() {
 		// TODO Auto-generated method stub
 		
+	}
+	/**
+	 * @return the configMode
+	 */
+	public boolean isConfigMode() {
+		return configMode;
+	}
+	/**
+	 * @param configMode the configMode to set
+	 */
+	public void setConfigMode(boolean configMode) {
+		this.configMode = configMode;
 	}
 
 }
