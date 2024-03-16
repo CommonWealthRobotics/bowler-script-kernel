@@ -38,6 +38,7 @@ public class MuJoCoBowlerIntegrationTest {
 		System.out.println(s);
 		System.out.println(f.getAbsolutePath());
 		System.out.println("Parts size = "+parts.size());
+		manager.close();
 	}
 
 }

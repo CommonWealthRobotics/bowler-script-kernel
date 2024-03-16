@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.mujoco.MuJoCoModelManager;
 import org.mujoco.MuJoCoXML;
 import org.mujoco.xml.Mujoco;
 import org.mujoco.xml.Mujoco.Actuator.Builder;
@@ -39,7 +40,7 @@ public class MuJoCoPhysicsManager {
 	private String name;
 	private double timestep=0.002;
 	private int iterations=100;
-
+	private MuJoCoModelManager mRuntime;
 	public MuJoCoPhysicsManager(String name,List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
 			File workingDir) throws IOException, JAXBException {
 		this.name = name;
@@ -85,7 +86,30 @@ public class MuJoCoPhysicsManager {
 				}
 			}
 		File f= getXMLFile();
-		
+		mRuntime = new MuJoCoModelManager(f);
+
+	}
+	public double getCurrentSimulationTimeSeconds() {
+		return mRuntime.getCurrentSimulationTimeSeconds();
+	}
+	public long getTimestepMilliSeconds() {
+		return mRuntime.getTimestepMilliSeconds();
+	}
+	public void stepAndWait() {
+		long start = System.currentTimeMillis();
+		mRuntime.step();
+		long time = System.currentTimeMillis()-start;
+		long diff = getTimestepMilliSeconds() -time;
+		if(diff>0) {
+			try {
+				Thread.sleep(diff);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else {
+			System.err.println("MuJoCo Real time broken, expected "+getTimestepMilliSeconds()+" took "+time);
+		}
 	}
 
 	public void close() {
@@ -98,6 +122,8 @@ public class MuJoCoPhysicsManager {
 		builder = null;
 		addWorldbody = null;
 		asset = null;
+		if(mRuntime!=null)
+			mRuntime.close();
 	}
 	
 	public String getXML() throws JAXBException {
