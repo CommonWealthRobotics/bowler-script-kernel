@@ -22,7 +22,9 @@ public class MuJoCoBowlerIntegrationTest {
 				"javaCad.groovy");
 		ArrayList<CSG> lifted =new ArrayList<>();
 		ArrayList<CSG> terrain = new ArrayList<>();
-		for(int i=45;i<parts.size();i++) {
+		for(int i=0;i<parts.size();i++) {
+			if (i==27||i==25)
+				continue;
 			CSG p= parts.get(i);
 			CSG pl=p.movez(200);
 			pl.setName(p.getName());
