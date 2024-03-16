@@ -375,7 +375,7 @@ dependencies {
 
 	//MuJoCo
 	implementation group: 'org.bytedeco', name: 'javacpp', version: '1.5.7'
-	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'3.1.3-pre.4'
+	implementation group: 'com.neuronrobotics', name: 'mujoco-java', version:'3.1.3-pre.6'
 
 	// https://mvnrepository.com/artifact/org.robokind/org.robokind.api.speech
 	implementation group: 'org.robokind', name: 'org.robokind.api.speech', version: '0.9.5'
