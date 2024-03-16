@@ -26,7 +26,7 @@ public class MuJoCoBowlerIntegrationTest {
 			if (i==27||i==25)
 				continue;
 			CSG p= parts.get(i);
-			CSG pl=p.movez(200);
+			CSG pl=p.roty(15).movez(200);
 			pl.setName(p.getName());
 			lifted.add(pl);
 			terrain.add(p);
