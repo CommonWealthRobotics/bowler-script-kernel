@@ -37,11 +37,11 @@ public class MuJoCoPhysicsManager {
 	private File workingDir;
 	private int count=0;
 	private String name;
-	private double timestep;
-	private int iterations;
+	private double timestep=0.002;
+	private int iterations=100;
 
 	public MuJoCoPhysicsManager(String name,List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
-			File workingDir) {
+			File workingDir) throws IOException, JAXBException {
 		this.name = name;
 		this.bases = bases;
 		this.freeObjects = freeObjects;
@@ -54,12 +54,10 @@ public class MuJoCoPhysicsManager {
 			if (!workingDir.isDirectory())
 				throw new RuntimeException("Working Directory must be a directory");
 		}
-		setTimestep(0.002);
-		setIterations(100);
 		generateNewModel();
 	}
 
-	public void generateNewModel() {
+	public void generateNewModel() throws IOException, JAXBException {
 		initializeModel(name);
 		if (bases != null)
 			if (bases.size() > 0) {
@@ -86,6 +84,8 @@ public class MuJoCoPhysicsManager {
 					e.printStackTrace();
 				}
 			}
+		File f= getXMLFile();
+		
 	}
 
 	public void close() {
