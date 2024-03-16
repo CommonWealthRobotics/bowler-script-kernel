@@ -17,6 +17,7 @@ public class MuJoCoBowlerIntegrationTest {
 
 	@Test
 	public void test() throws Exception {
+		@SuppressWarnings("unchecked")
 		List<CSG> parts = (List<CSG>) ScriptingEngine.gitScriptRun(
 				"https://gist.github.com/4814b39ee72e9f590757.git",
 				"javaCad.groovy");
@@ -32,12 +33,18 @@ public class MuJoCoBowlerIntegrationTest {
 			terrain.add(p);
 		}
 		MuJoCoPhysicsManager manager = new MuJoCoPhysicsManager("javaCadTest", null, lifted, terrain, new File("./physicsTest"));
-		
+		manager.setTimestep(0.005);
+		manager.generateNewModel();
 		File f = manager.getXMLFile();
 		String s = manager.getXML();
 		System.out.println(s);
 		System.out.println(f.getAbsolutePath());
 		System.out.println("Parts size = "+parts.size());
+		while(manager.getCurrentSimulationTimeSeconds()<5) {
+			if(!manager.stepAndWait()) {
+				fail();
+			}
+		}
 		manager.close();
 	}
 

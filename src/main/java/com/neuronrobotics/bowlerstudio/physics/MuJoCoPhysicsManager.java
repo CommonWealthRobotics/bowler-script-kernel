@@ -29,7 +29,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 
 public class MuJoCoPhysicsManager {
 	private static final int Density_OF_PLA = 1250;
-	private Mujoco.Builder<Void> builder;
+	private Mujoco.Builder<Void> builder=null;
 	private Mujoco.Worldbody.Builder<?> addWorldbody;
 	private Mujoco.Asset.Builder<?> asset;
 	private List<MobileBase> bases;
@@ -38,7 +38,7 @@ public class MuJoCoPhysicsManager {
 	private File workingDir;
 	private int count=0;
 	private String name;
-	private double timestep=0.002;
+	private double timestep=0.005;
 	private int iterations=100;
 	private MuJoCoModelManager mRuntime;
 	public MuJoCoPhysicsManager(String name,List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
@@ -55,7 +55,6 @@ public class MuJoCoPhysicsManager {
 			if (!workingDir.isDirectory())
 				throw new RuntimeException("Working Directory must be a directory");
 		}
-		generateNewModel();
 	}
 
 	public void generateNewModel() throws IOException, JAXBException {
@@ -86,6 +85,8 @@ public class MuJoCoPhysicsManager {
 				}
 			}
 		File f= getXMLFile();
+		if(mRuntime!=null)
+			mRuntime.close();
 		mRuntime = new MuJoCoModelManager(f);
 
 	}
@@ -95,7 +96,7 @@ public class MuJoCoPhysicsManager {
 	public long getTimestepMilliSeconds() {
 		return mRuntime.getTimestepMilliSeconds();
 	}
-	public void stepAndWait() {
+	public boolean stepAndWait() {
 		long start = System.currentTimeMillis();
 		mRuntime.step();
 		long time = System.currentTimeMillis()-start;
@@ -103,13 +104,17 @@ public class MuJoCoPhysicsManager {
 		if(diff>0) {
 			try {
 				Thread.sleep(diff);
+				return true;
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}else if(diff==0){
+			return true;
 		}else {
 			System.err.println("MuJoCo Real time broken, expected "+getTimestepMilliSeconds()+" took "+time);
 		}
+		return false;
 	}
 
 	public void close() {
@@ -158,7 +163,7 @@ public class MuJoCoPhysicsManager {
 			.addFlag()
 				.withMulticcd(FlagSimpleType.ENABLE)
 		;
-		builder.addSize().withNjmax(8000).withNconmax(4000);
+		builder.addSize();
 		builder.addVisual().addMap().withForce(new BigDecimal(0.1)).withZfar(new BigDecimal(30));
 		builder.addStatistic().withCenter("0 0 0.7");
 		asset = builder.addAsset();
