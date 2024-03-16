@@ -14,6 +14,7 @@ import org.mujoco.MuJoCoXML;
 import org.mujoco.xml.Mujoco;
 import org.mujoco.xml.Mujoco.Actuator.Builder;
 import org.mujoco.xml.attributetypes.BuiltinType;
+import org.mujoco.xml.attributetypes.FlagSimpleType;
 import org.mujoco.xml.attributetypes.GeomtypeType;
 import org.mujoco.xml.attributetypes.IntegratorType;
 
@@ -122,13 +123,14 @@ public class MuJoCoPhysicsManager {
 	private void initializeModel(String name) {
 		builder = Mujoco.builder().withModel(name);
 
-		
 		builder.addOption()
-		.withTimestep(new BigDecimal(getTimestep()))
-		.withIterations(getIterations())
-		.withIntegrator(IntegratorType.IMPLICIT)
-		.withViscosity(BigDecimal.valueOf(0.00002))
-		.addFlag().withClampctrl(null)
+			.withTimestep(new BigDecimal(getTimestep()))
+			.withIterations(getIterations())
+			.withIntegrator(IntegratorType.RK_4)
+			.withViscosity(BigDecimal.valueOf(0.002))
+			.withDensity(BigDecimal.valueOf(1.204))
+			.addFlag()
+				.withMulticcd(FlagSimpleType.ENABLE)
 		;
 		builder.addSize().withNjmax(8000).withNconmax(4000);
 		builder.addVisual().addMap().withForce(new BigDecimal(0.1)).withZfar(new BigDecimal(30));
@@ -149,7 +151,10 @@ public class MuJoCoPhysicsManager {
 	}
 
 	private void addPart(CSG part, boolean isFree) throws IOException {
-		CSG hull = part;
+		long start = System.currentTimeMillis();
+		CSG hull = part.moveToCenter();
+		Vector3d center = part.getCenter();
+		
 		String nameOfCSG = part.getName();
 		if(nameOfCSG.length()==0) {
 			nameOfCSG = "Part-"+(count);
@@ -164,7 +169,10 @@ public class MuJoCoPhysicsManager {
 		} else {
 			tempFile = new File(workingDir.getAbsolutePath() + "/" + nameOfCSG + ".obj");
 		}
+		
+		System.out.print("\nWriting "+tempFile.getName());
 		Files.write(Paths.get(tempFile.getAbsolutePath()), xml.getBytes());
+		System.out.print(" "+(System.currentTimeMillis()-start));
 		asset.addMesh()
 			.withFile(tempFile.getName())
 			.withName(nameOfCSG)
@@ -174,10 +182,18 @@ public class MuJoCoPhysicsManager {
 		if(isFree) {
 			org.mujoco.xml.BodyarchType.Builder<?> addBody = addWorldbody.addBody();
 			addBody.addFreejoint();
+			addBody.withPos(center.x/1000.0+" "+
+					center.y/1000.0+" "+
+					center.z/1000.0+" "
+			);
 			addBody.withName(nameOfCSG);
 			geom= addBody.addGeom();
 		}else {
 			geom=addWorldbody.addGeom();
+			geom.withPos(center.x/1000.0+" "+
+					center.y/1000.0+" "+
+					center.z/1000.0+" "
+			);
 		}
 		/*
 		 * condim
@@ -189,10 +205,11 @@ public class MuJoCoPhysicsManager {
 		geom.withName(nameOfCSG)
 		.withType(GeomtypeType.MESH)
 		.withMesh(nameOfCSG)
-		.withGroup(isFree?1:2)
-		.withConaffinity(1)
-		.withCondim(3)
-		.withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0));
+		//.withGroup(isFree?1:2)
+		//.withConaffinity(1)
+		.withCondim(6)
+		.withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
+		;
 	}
 
 	private void loadBase(MobileBase cat, Builder<?> actuators) {
