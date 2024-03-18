@@ -57,6 +57,7 @@ public class MuJoCoBowlerIntegrationTest {
 //		System.out.println(s);
 //		System.out.println(f.getAbsolutePath());
 		System.out.println("Parts size = "+parts.size());
+		manager.generateNewModel();// generate model before start counting time
 		long start = System.currentTimeMillis();
 		double now = 0;
 		while((now=manager.getCurrentSimulationTimeSeconds())<5) {
