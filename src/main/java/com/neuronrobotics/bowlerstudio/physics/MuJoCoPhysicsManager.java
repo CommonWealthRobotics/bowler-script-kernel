@@ -244,14 +244,16 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		org.mujoco.xml.BodyarchType.Builder<?> addBody = addWorldbody.addBody()
 				.withName(bodyName);
 		addBody.addFreejoint();
+		TransformNR center = cat.getCenterOfMassFromCentroid();
+		setStartLocation(center, addBody);
 		for (int i = 0; i < arrayList.size(); i++) {
-			CSG part = arrayList.get(i).hull();
+			CSG part = arrayList.get(i);
+					
 			if(!checkForPhysics(part))
 				continue;
 			bodyParts++;
 			String nameOfCSG = bodyName+"_CSG_"+bodyParts;
-			TransformNR center = cat.getCenterOfMassFromCentroid();
-			CSG hull = part.transformed(TransformFactory.nrToCSG(center).inverse());
+			CSG hull = part.transformed(TransformFactory.nrToCSG(center).inverse()).hull();
 			hull.setManipulator(new Affine());
 			putCSGInAssets(nameOfCSG, hull,true);
 			org.mujoco.xml.body.GeomType.Builder<?> geom = addBody.addGeom();
