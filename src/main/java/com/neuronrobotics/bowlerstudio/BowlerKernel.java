@@ -41,6 +41,7 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ICSGProgress;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
+import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
@@ -681,5 +682,38 @@ public class BowlerKernel {
 				e.printStackTrace();
 			}
 	}
+
+	@SuppressWarnings("restriction")
+	public static void runLater(Runnable r) {
+		if (Platform.isFxApplicationThread())
+			try {
+				r.run();
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		else
+			runLater(r, new Exception("UI Thread Exception here!"));
+	}
+
+	@SuppressWarnings("restriction")
+	public static void runLater(Runnable r, Throwable ex) {
+		if (Platform.isFxApplicationThread())
+			try {
+				r.run();
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		else
+			Platform.runLater(() -> {
+				try {
+					r.run();
+				} catch (Throwable t) {
+					t.printStackTrace();
+					ex.printStackTrace();
+				}
+
+			});
+	}
+
 
 }
