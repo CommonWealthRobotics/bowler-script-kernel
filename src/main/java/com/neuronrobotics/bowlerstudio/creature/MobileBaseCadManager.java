@@ -84,7 +84,6 @@ public class MobileBaseCadManager implements Runnable {
 	private HashMap<String, Object> cadScriptCache = new HashMap<>();
 	private static ArrayList<Runnable> toRun = new ArrayList<Runnable>();
 	private ArrayList<IRenderSynchronizationEvent> rendersync=new ArrayList<>();
-	
 	public void addIRenderSynchronizationEvent(IRenderSynchronizationEvent ev) {
 		if(rendersync.contains(ev))
 			return;
@@ -1321,6 +1320,10 @@ public class MobileBaseCadManager implements Runnable {
 	 */
 	public void setConfigMode(boolean configMode) {
 		this.configMode = configMode;
+	}
+	public boolean isCADstarted() {
+		// TODO Auto-generated method stub
+		return cadGenerating;
 	}
 
 }
