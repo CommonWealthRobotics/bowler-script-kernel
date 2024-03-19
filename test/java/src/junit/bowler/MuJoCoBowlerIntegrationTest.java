@@ -40,7 +40,7 @@ public class MuJoCoBowlerIntegrationTest {
 		ArrayList<CSG> lifted =new ArrayList<>();
 		ArrayList<CSG> terrain = new ArrayList<>();
 		//terrain.add(new Cube(10000,10000,100).toCSG().toZMax());
-		for(int i=35;i<parts.size();i++) {
+		for(int i=45;i<parts.size();i++) {
 			if (i==27||i==25)
 				continue;
 			CSG p= parts.get(i);
