@@ -74,6 +74,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 	public  long timeSinceUIUpdate = 0;
 	public Mujoco.Contact.Builder<? > contacts;
 	private IntegratorType integratorType=IntegratorType.RK_4;
+	public HashMap<AbstractLink, Double> gearRatios = new HashMap<>();
 	public MuJoCoPhysicsManager(String name,List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
 			File workingDir) throws IOException, JAXBException {
 		this.name = name;
@@ -100,7 +101,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 			AbstractLink link = mapNameToLink.get(s);
 			if(link==null)
 				continue;
-			double target =link.getCurrentEngineeringUnits();
+			double target =Math.toRadians( link.getCurrentEngineeringUnits())*gearRatios.get(link);
 //			double error = target-positions.get(s);
 //			double effort = error * kp;
 			//System.out.println("Actuator "+s+" position "+positions.get(s)+" effort "+effort);
@@ -129,7 +130,21 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 			}
 		}
 	}
-	
+	public void close() {
+		if(bases!=null)
+		bases.clear();
+		if(freeObjects!=null)
+		freeObjects.clear();
+		if(fixedObjects!=null)
+		fixedObjects.clear();
+		builder = null;
+		addWorldbody = null;
+		asset = null;
+		if(getmRuntime()!=null)
+			getmRuntime().close();
+		mapNameToCSG.clear();
+		gearRatios.clear();
+	}
 	public int getLinkIndex(AbstractLink l, DHParameterKinematics k) {
 		for (int i=0;i<k.getNumberOfLinks();i++) {
 			if(k.getAbstractLink(i)==l)
@@ -151,6 +166,8 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		for(String name:mapNameToCSG.keySet()) {
 			parts.addAll(mapNameToCSG.get(name));
 		}
+		if(fixedObjects!=null)
+			parts.addAll(fixedObjects);
 		return parts;
 	}
 	public void generateNewModel() throws IOException, JAXBException {
@@ -224,30 +241,21 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				return true;
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}else if(diff==0){
+			if(Thread.interrupted())
+				throw new RuntimeException("Interrupted exception!");
 			return true;
 		}else {
 			System.err.println("MuJoCo Real time broken, expected "+getTimestepMilliSeconds()+" took "+time);
 		}
+		if(Thread.interrupted())
+			throw new RuntimeException("Interrupted exception!");
 		return false;
 	}
 
-	public void close() {
-		if(bases!=null)
-		bases.clear();
-		if(freeObjects!=null)
-		freeObjects.clear();
-		if(fixedObjects!=null)
-		fixedObjects.clear();
-		builder = null;
-		addWorldbody = null;
-		asset = null;
-		if(getmRuntime()!=null)
-			getmRuntime().close();
-		mapNameToCSG.clear();
-	}
+
 	
 	public String getXML() throws JAXBException {
 		Mujoco m =builder.build();
@@ -291,13 +299,10 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				.withReflectance(BigDecimal.valueOf(0.2));
 		addWorldbody = builder.addWorldbody();
 		contacts= builder.addContact();
-
-		try {
-			addPart(floor,false);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(fixedObjects==null) {
+			fixedObjects=new ArrayList<>();
 		}
+		fixedObjects.add(floor);
 	}
 
 	public  int getIterations() {
@@ -308,7 +313,15 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 	public  boolean checkForPhysics(CSG c) {
 		return !c.getStorage().getValue("no-physics").isPresent();
 	}
-
+	private boolean checkLinkPhysics(MobileBaseCadManager cadMan,LinkConfiguration conf) {
+		ArrayList<CSG>  parts=cadMan.getLinktoCadMap().get(conf);
+		for(CSG c:parts) {
+			if(checkForPhysics(c))
+				return true;
+		}
+		return false;
+	}
+	
 	public void loadBase(MobileBase cat, Builder<?> actuators) throws IOException {
 		if(contacts==null)
 			contacts= builder.addContact();
@@ -323,10 +336,10 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				center.getZ()/1000.0+" ";
 		org.mujoco.xml.BodyarchType.Builder<?> addBody = addWorldbody.addBody()
 				.withName(bodyName);
-		addBody.addInertial()
-				.withMass(BigDecimal.valueOf(cat.getMassKg()))
-				.withPos(centerString)
-				.withDiaginertia("1 1 1" );
+		//		addBody.addInertial()
+		//				.withMass(BigDecimal.valueOf(cat.getMassKg()/1000.0))
+		//				.withPos(centerString)
+		//				.withDiaginertia("1 1 1" );
 		addBody.addFreejoint();
 		//setStartLocation(center, addBody);
 		for (int i = 0; i < arrayList.size(); i++) {
@@ -352,7 +365,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				continue;
 			String lastName = bodyName;
 			for(int i=0;i<l.getNumberOfLinks();i++) {
-				
+
 				AbstractLink link = l.getAbstractLink(i);
 				LinkConfiguration conf = link.getLinkConfiguration();
 				if(!checkLinkPhysics(cadMan,conf))
@@ -378,7 +391,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				continue;
 			org.mujoco.xml.BodyarchType.Builder<?> linkBody =addBody;
 			HashMap<AbstractLink,org.mujoco.xml.BodyarchType.Builder<?>> linkToBulder = new HashMap<>();
-			
+
 			for(int i=0;i<k.getNumberOfLinks();i++) {
 				AbstractLink link = k.getAbstractLink(i);
 				LinkConfiguration conf = link.getLinkConfiguration();
@@ -387,14 +400,6 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 					linkBody=loadLink(k,i,parts,linkBody,actuators,linkToBulder);
 			}
 		}
-	}
-	private boolean checkLinkPhysics(MobileBaseCadManager cadMan,LinkConfiguration conf) {
-		ArrayList<CSG>  parts=cadMan.getLinktoCadMap().get(conf);
-		for(CSG c:parts) {
-			if(checkForPhysics(c))
-				return true;
-		}
-		return false;
 	}
 
 	public org.mujoco.xml.BodyarchType.Builder<?> loadLink(DHParameterKinematics l,int index,ArrayList<CSG>  cad,org.mujoco.xml.BodyarchType.Builder<?> addBody, Builder<?> actuators,HashMap<AbstractLink,org.mujoco.xml.BodyarchType.Builder<?>> linkToBulderMap) {
@@ -437,10 +442,10 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				.withName(name)
 				.withPos(x+" "+y+" "+z)
 				.withQuat(quat);
-//		linkBody.addInertial()
-//				.withMass(conf.getMassKg())
-//				.withPos(centerString)
-//				.withDiaginertia("1 1 1" )
+		//		linkBody.addInertial()
+		//				.withMass(conf.getMassKg())
+		//				.withPos(centerString)
+		//				.withDiaginertia("1 1 1" )
 		linkToBulderMap.put(link, linkBody);
 		TransformNR axis;
 		if(index==0) {
@@ -448,35 +453,41 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		}else {
 			axis=l.forwardOffset(l.getLinkTip(index));
 		}
-		double upper = link.getMaxEngineeringUnits();
-		double lower = link.getMinEngineeringUnits();
+		double gear =260;
+		gearRatios.put(link,1.0d*gear);
+		double upper = Math.toRadians(link.getMaxEngineeringUnits());
+		double lower = Math.toRadians(link.getMinEngineeringUnits());
 		String range=lower+" "+upper;
+		String ctrlRange=(lower*gear)+" "+(upper*gear);
 		double rangeVal=upper-lower;
 		JointType.Builder<?> jointBuilder = linkBody.addJoint();
 		String pos=0+" "+0+" "+0;
 		TransformNR unit = new TransformNR()
 				.times(new  TransformNR(0,0,1,new RotationNR()));
 		String axisJoint =sig(unit.getX())+" "+sig(unit.getY())+" "+sig(unit.getZ());
+
 		jointBuilder
-				.withPos(pos)
-				.withAxis(axisJoint)
-				.withRange(range)
-				.withType(JointtypeType.HINGE)
-				.withLimited(true)
-				//.withDamping(BigDecimal.valueOf(7.5))
+				.withPos(pos)// the kinematic center
+				.withAxis(axisJoint) // rotate about the z axis per dh convention
+				.withRange(ctrlRange) // engineering units range
+				.withRef(BigDecimal.ZERO) // set the reference position on loading as the links 0 degrees value
+				.withType(JointtypeType.HINGE) // hinge type
+				.withFrictionloss(BigDecimal.valueOf(0.0001))// experementally determined
+				//.withLimited(true)
+				//.withDamping(BigDecimal.valueOf(0.00001))
 				//.withStiffness(BigDecimal.valueOf(1))
 				.withName(name)
 		;
-		actuators.addPosition()
-				.withKp(BigDecimal.valueOf(0.00008))
-				.withForcelimited(true)
-				.withForcerange(range)
-				.withName(name)
-				.withJoint(name)
-				.withGear("120")
-				.withForcelimited(true)
-				.withKv(BigDecimal.valueOf(0.00000008))
-				.withInheritrange(BigDecimal.valueOf(rangeVal/2));
+		actuators.addPosition()// A position controller to model a servo
+				.withKp(BigDecimal.valueOf(0.00004)) // experementally determined value
+				//.withForcelimited(true)
+				//.withForcerange(range)
+				.withCtrlrange(ctrlRange)
+				.withName(name)// name the motor
+				.withJoint(name)// which joint this motor powers
+				.withGear(""+gear) // gear ratio between virtual motor and output
+				.withKv(BigDecimal.valueOf(0.0000008)); // damping term experementally determenied
+				//.withInheritrange(BigDecimal.valueOf(rangeVal));// sets the range of the control signal to match the limits
 		for (int i = 0; i < cad.size(); i++) {
 			CSG part = cad.get(i);
 			if(!checkForPhysics(part))
@@ -499,15 +510,15 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 							)
 							));
 					CSG hull = transformed.hull();
-//					if(myLink!=link)
-//						hull = part.hull();
+					//					if(myLink!=link)
+					//						hull = part.hull();
 					transformed.setManipulator(new Affine());
 					String geomname=name+" "+i;
 
 					try {
 						putCSGInAssets(geomname, hull,true);
 						org.mujoco.xml.body.GeomType.Builder<?> geom = linkToBulderMap.get(myLink).addGeom();
-						
+
 						ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 						parts.add( transformed);
 						setCSGMeshToGeom(geomname, geom);
@@ -667,7 +678,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		if (viewer) {
 			cadMan.setConfigurationViewerMode(false);
@@ -676,7 +687,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 		waitForCad(cadMan,start);
@@ -692,6 +703,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			System.out.println("Waiting for cad to process " + percent);
 		}
@@ -739,6 +751,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		case 4:
 		case 6:
 			this.condim = condim;
+			return;
 		default:
 			throw new RuntimeException("	 * condim\n" + "		1 Frictionless contact.\n"
 					+ "		3 Regular frictional contact, opposing slip in the tangent plane.\n"
