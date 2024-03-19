@@ -110,6 +110,8 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		manager.setActualtorCtrl(setEfforts);
 		for (int i = 0; i < bases.size(); i++) {
 			MobileBase b = bases.get(i);
+			if(b==null)
+				continue;
 			String bodyName = getMujocoName(b);
 			for (Iterator<String> iterator = manager.getBodyNames().iterator(); iterator.hasNext();) {
 				String s = iterator.next();
@@ -122,8 +124,13 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 					Double rotxAcceleration=0.0;
 					Double rotyAcceleration=0.0;
 					Double rotzAcceleration=0.0;
-					b.getImu().setVirtualState(new IMUUpdate( xAcceleration, yAcceleration, zAcceleration,
-							rotxAcceleration, rotyAcceleration, rotzAcceleration ));
+					try {
+						b.getImu().setVirtualState(new IMUUpdate( xAcceleration, yAcceleration, zAcceleration,
+								rotxAcceleration, rotyAcceleration, rotzAcceleration ));
+					}catch(NullPointerException e) {
+						// startup sync problems, ignore
+						System.out.println(e.getMessage());
+					}
 		
 				}
 				//System.out.println("Body "+s+" pose "+);
@@ -248,7 +255,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				throw new RuntimeException("Interrupted exception!");
 			return true;
 		}else {
-			System.err.println("MuJoCo Real time broken, expected "+getTimestepMilliSeconds()+" took "+time);
+			//System.err.println("MuJoCo Real time broken, expected "+getTimestepMilliSeconds()+" took "+time);
 		}
 		if(Thread.interrupted())
 			throw new RuntimeException("Interrupted exception!");
@@ -619,7 +626,8 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		} else {
 			tempFile = new File(workingDir.getAbsolutePath() + "/" + nameOfCSG + ".obj");
 			if(tempFile.exists()) {
-				//useCache=true;
+				// this should be enabled using a hash of the configuration to determine if the files are stale
+				//useCache=true; 
 			}
 		}
 		if(!useCache) {
