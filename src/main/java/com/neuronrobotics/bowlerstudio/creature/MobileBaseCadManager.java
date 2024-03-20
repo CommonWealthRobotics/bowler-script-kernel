@@ -86,6 +86,13 @@ public class MobileBaseCadManager implements Runnable {
 	private HashMap<String, Object> cadScriptCache = new HashMap<>();
 	private static ArrayList<Runnable> toRun = new ArrayList<Runnable>();
 	private ArrayList<IRenderSynchronizationEvent> rendersync=new ArrayList<>();
+	private boolean forceChage = true;
+	public void render() {
+		run();
+		forceChage=true;
+		while(forceChage)
+			ThreadUtil.wait(1);
+	}
 	public void addIRenderSynchronizationEvent(IRenderSynchronizationEvent ev) {
 		if(rendersync.contains(ev))
 			return;
@@ -116,6 +123,7 @@ public class MobileBaseCadManager implements Runnable {
 		return getCADProgressPercent()==100;
 	}
 	public Vector3d computeHighestPoint() {
+		render();
 		MobileBase cat=base;
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
 		Vector3d highest =null;
@@ -167,6 +175,7 @@ public class MobileBaseCadManager implements Runnable {
 		return highest;
 	}
 	public Vector3d computeLowestPoint() {
+		render();
 		MobileBase cat=base;
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
 		Vector3d lowest =null;
@@ -356,6 +365,10 @@ public class MobileBaseCadManager implements Runnable {
 						try {
 							do {
 								Thread.sleep(5);
+								if(forceChage) {
+									forceChage=false;
+									l.onIOnMobileBaseRenderChange();
+								}
 							} while (rendering || changed == false);
 						} catch (InterruptedException e) {
 							getUi().highlightException(null, e);

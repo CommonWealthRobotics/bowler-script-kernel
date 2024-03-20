@@ -36,6 +36,7 @@ import com.neuronrobotics.sdk.addons.kinematics.imu.IMUUpdate;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.time.ITimeProvider;
+import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
@@ -235,6 +236,9 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		if(mRuntime!=null)
 			mRuntime.close();
 		setmRuntime(new MuJoCoModelManager(f));
+		if(bases!=null)
+			for(MobileBase b:bases)
+				b.setTimeProvider(this);
 
 	}
 	public double getCurrentSimulationTimeSeconds() {
@@ -243,7 +247,29 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	public long getTimestepMilliSeconds() {
 		return getmRuntime().getTimestepMilliSeconds();
 	}
-	public boolean stepAndWait() {
+	public long stepAndWait() {
+		long start = System.currentTimeMillis();
+		step();
+		long time = System.currentTimeMillis()-start;
+		long diff = getTimestepMilliSeconds() -time;
+		if(diff>0) {
+			try {
+				Thread.sleep(diff);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				throw new RuntimeException(e);
+			}
+		}else if(diff==0){
+			if(Thread.interrupted())
+				throw new RuntimeException("Interrupted exception!");
+		}else {
+			//System.err.println("MuJoCo Real time broken, expected "+getTimestepMilliSeconds()+" took "+time);
+		}
+		if(Thread.interrupted())
+			throw new RuntimeException("Interrupted exception!");
+		return time;
+	}
+	private void step() {
 		long start = System.currentTimeMillis();
 		getmRuntime().step();
 		if(start-timeSinceUIUpdate>16) {
@@ -266,26 +292,6 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				poss.clear();
 			});
 		}
-		long time = System.currentTimeMillis()-start;
-		long diff = getTimestepMilliSeconds() -time;
-		if(diff>0) {
-			try {
-				Thread.sleep(diff);
-				return true;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				throw new RuntimeException(e);
-			}
-		}else if(diff==0){
-			if(Thread.interrupted())
-				throw new RuntimeException("Interrupted exception!");
-			return true;
-		}else {
-			//System.err.println("MuJoCo Real time broken, expected "+getTimestepMilliSeconds()+" took "+time);
-		}
-		if(Thread.interrupted())
-			throw new RuntimeException("Interrupted exception!");
-		return false;
 	}
 
 
@@ -361,14 +367,14 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		return cadMan.computeLowestPoint().z;
 	}
 	public void loadBase(MobileBase cat, Builder<?> actuators) throws IOException {
-		cat.setTimeProvider(this);
 		if(contacts==null)
 			contacts= builder.addContact();
-		double lowestPoint = (-computeLowestPoint(cat)+2)/1000.0;
 		//println "\n\nLowest point "+lowestPoint+" \n\n";
 		String bodyName = getMujocoName(cat);
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
 		loadCadForMobileBase(cadMan);
+		double lowestPoint = (-computeLowestPoint(cat)+2)/1000.0;
+
 		int bodyParts=0;
 		ArrayList<CSG> arrayList = cadMan.getBasetoCadMap().get(cat);
 		TransformNR center = cat.getCenterOfMassFromCentroid();
@@ -713,7 +719,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	}
 
 	public  void loadCadForMobileBase(MobileBaseCadManager cadMan) {
-		
+		cadMan.run();
 		if(!cadMan.isCADstarted() && cadMan.getProcesIndictor().get()<0.1) {
 			cadMan.generateCad();
 		}
@@ -737,6 +743,9 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			}
 		}
 		waitForCad(cadMan,start);
+		cadMan.render();
+		ThreadUtil.wait(100);
+
 	}
 
 	public  void waitForCad(MobileBaseCadManager cadMan, long start) {
