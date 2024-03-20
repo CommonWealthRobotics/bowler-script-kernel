@@ -78,14 +78,20 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	private IntegratorType integratorType=IntegratorType.RK_4;
 	public HashMap<AbstractLink, Double> gearRatios = new HashMap<>();
 	public long currentTimeMillis() {
-		//if ()
-		return System.currentTimeMillis();
+		return (long)(getmRuntime().getCurrentSimulationTimeSeconds()*1000.0);
 	}
 	public void sleep(long time) throws InterruptedException {
 		sleep(time,0);
 	}
 	public void sleep(long ms,int ns) throws InterruptedException {
-		Thread.sleep(ms,ns);
+		double seconds = (((double)ms)/1000.0)+(((double)ns)/10000000000.0);
+		double now = getmRuntime().getCurrentSimulationTimeSeconds();
+		double future=now+seconds;
+		while(getmRuntime().getCurrentSimulationTimeSeconds()<future) {
+			if(getmRuntime().getCurrentSimulationTimeSeconds()<now)
+				throw new InterruptedException("Simulation reset!");
+			Thread.sleep(getmRuntime().getTimestepMilliSeconds());
+		}
 	}
 	public MuJoCoPhysicsManager(String name,List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
 			File workingDir) throws IOException, JAXBException {
