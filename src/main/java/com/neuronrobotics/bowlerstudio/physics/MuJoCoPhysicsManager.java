@@ -496,12 +496,12 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		//				.withPos(centerString)
 		//				.withDiaginertia("1 1 1" )
 		linkToBulderMap.put(link, linkBody);
-		TransformNR axis;
-		if(index==0) {
-			axis=l.getRobotToFiducialTransform().copy();
-		}else {
-			axis=l.forwardOffset(l.getLinkTip(index));
-		}
+//		TransformNR axis;
+//		if(index==0) {
+//			axis=l.getRobotToFiducialTransform().copy();
+//		}else {
+//			axis=l.forwardOffset(l.getLinkTip(index));
+//		}
 		double gear =260;
 		gearRatios.put(link,1.0d*gear);
 		double upper = Math.toRadians(link.getMaxEngineeringUnits());
@@ -510,13 +510,10 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		String ctrlRange=(lower*gear)+" "+(upper*gear);
 		double rangeVal=upper-lower;
 		JointType.Builder<?> jointBuilder = linkBody.addJoint();
-		String pos=0+" "+0+" "+0;
-		TransformNR unit = new TransformNR()
-				.times(new  TransformNR(0,0,1,new RotationNR()));
-		String axisJoint =sig(unit.getX())+" "+sig(unit.getY())+" "+sig(unit.getZ());
+		String axisJoint ="0 0 1";
 
 		jointBuilder
-				.withPos(pos)// the kinematic center
+				.withPos("0 0 0")// the kinematic center
 				.withAxis(axisJoint) // rotate about the z axis per dh convention
 				.withRange(ctrlRange) // engineering units range
 				.withRef(BigDecimal.ZERO) // set the reference position on loading as the links 0 degrees value
@@ -554,7 +551,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 							.nrToCSG(
 							new TransformNR(
 							k.getDhLink(
-							getLinkIndex(myLink, k)
+									k.getLinkIndex(myLink)
 							).DhStep(0)
 							)
 							));

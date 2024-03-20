@@ -48,6 +48,8 @@ import com.neuronrobotics.sdk.pid.PIDLimitEvent;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
+import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import javafx.beans.property.*;
 import javafx.scene.transform.Affine;
@@ -93,6 +95,7 @@ public class MobileBaseCadManager implements Runnable {
 		if(rendersync.contains(ev))
 			rendersync.remove(ev);
 	}
+	
 	private void fireIRenderSynchronizationEvent() {
 		for(int i=0;i<rendersync.size();i++)
 			try {
@@ -111,6 +114,108 @@ public class MobileBaseCadManager implements Runnable {
 	
 	public boolean isCADFinished() {
 		return getCADProgressPercent()==100;
+	}
+	public Vector3d computeHighestPoint() {
+		MobileBase cat=base;
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
+		Vector3d highest =null;
+		Affine l =(Affine) cat.getRootListener();
+		TransformNR tmp = TransformFactory.affineToNr(l);
+		Transform baseloc = TransformFactory.nrToCSG(tmp);
+		for(CSG c:cadMan.getBasetoCadMap().get(cat)) {
+
+			CSG moved = c.transformed(baseloc);
+			double z = moved.getMaxZ();
+			double y= moved.getMaxY();
+			double x=moved.getMaxX();
+			Vector3d high = new Vector3d(x, y, z);
+			
+			if(highest==null)
+				highest=high;
+			if(high.x>highest.x)
+				highest.x=high.x;
+			if(high.y>highest.y)
+				highest.y=high.y;
+			if(high.z>highest.z)
+				highest.z=high.z;
+		}
+		for(DHParameterKinematics k:cat.getAllDHChains()) {
+			for(int i=0;i<k.getNumberOfLinks();i++) {
+				DHLink dhLink = k.getChain().getLinks().get(i);
+				Affine a = (Affine) dhLink.getListener();
+				TransformNR tmpl = TransformFactory.affineToNr(a);
+				Transform t=TransformFactory.nrToCSG(tmpl);
+				LinkConfiguration conf= k.getLinkConfiguration(i);
+				for(CSG c:cadMan.getLinktoCadMap().get(conf)) {
+					CSG moved = c.transformed(t);
+					double z = moved.getMaxZ();
+					double y= moved.getMaxY();
+					double x=moved.getMaxX();
+					Vector3d high = new Vector3d(x, y, z);
+					
+					if(highest==null)
+						highest=high;
+					if(high.x>highest.x)
+						highest.x=high.x;
+					if(high.y>highest.y)
+						highest.y=high.y;
+					if(high.z>highest.z)
+						highest.z=high.z;
+				}
+			}
+		}
+		return highest;
+	}
+	public Vector3d computeLowestPoint() {
+		MobileBase cat=base;
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
+		Vector3d lowest =null;
+		Affine l =(Affine) cat.getRootListener();
+		TransformNR tmp = TransformFactory.affineToNr(l);
+		Transform baseloc = TransformFactory.nrToCSG(tmp);
+		for(CSG c:cadMan.getBasetoCadMap().get(cat)) {
+
+			CSG moved = c.transformed(baseloc);
+			double z = moved.getMinZ();
+			double y= moved.getMinY();
+			double x=moved.getMinX();
+			Vector3d low = new Vector3d(x, y, z);
+			
+			if(lowest==null)
+				lowest=low;
+			if(low.x<lowest.x)
+				lowest.x=low.x;
+			if(low.y<lowest.y)
+				lowest.y=low.y;
+			if(low.z<lowest.z)
+				lowest.z=low.z;
+		}
+		for(DHParameterKinematics k:cat.getAllDHChains()) {
+			for(int i=0;i<k.getNumberOfLinks();i++) {
+				DHLink dhLink = k.getChain().getLinks().get(i);
+				Affine a = (Affine) dhLink.getListener();
+				TransformNR tmpl = TransformFactory.affineToNr(a);
+				Transform t=TransformFactory.nrToCSG(tmpl);
+				LinkConfiguration conf= k.getLinkConfiguration(i);
+				for(CSG c:cadMan.getLinktoCadMap().get(conf)) {
+					CSG moved = c.transformed(t);
+					double z = moved.getMinZ();
+					double y= moved.getMinY();
+					double x=moved.getMinX();
+					Vector3d low = new Vector3d(x, y, z);
+					
+					if(lowest==null)
+						lowest=low;
+					if(low.x<lowest.x)
+						lowest.x=low.x;
+					if(low.y<lowest.y)
+						lowest.y=low.y;
+					if(low.z<lowest.z)
+						lowest.z=low.z;
+				}
+			}
+		}
+		return lowest;
 	}
 	protected void clear() {
 		// Cad generator
