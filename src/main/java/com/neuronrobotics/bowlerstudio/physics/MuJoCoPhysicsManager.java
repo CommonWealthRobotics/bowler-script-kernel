@@ -28,6 +28,7 @@ import org.mujoco.xml.body.JointType;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
+import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -320,7 +321,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 	public  boolean checkForPhysics(CSG c) {
 		return !c.getStorage().getValue("no-physics").isPresent();
 	}
-	private boolean checkLinkPhysics(MobileBaseCadManager cadMan,LinkConfiguration conf) {
+	public boolean checkLinkPhysics(MobileBaseCadManager cadMan,LinkConfiguration conf) {
 		ArrayList<CSG>  parts=cadMan.getLinktoCadMap().get(conf);
 		for(CSG c:parts) {
 			if(checkForPhysics(c))
@@ -329,9 +330,45 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		return false;
 	}
 	
+	public double computeLowestPoint(MobileBase cat) {
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
+		Double lowest =null;
+		Affine l =(Affine) cat.getRootListener();
+		TransformNR tmp = TransformFactory.affineToNr(l);
+		Transform baseloc = TransformFactory.nrToCSG(tmp);
+		for(CSG c:cadMan.getBasetoCadMap().get(cat)) {
+
+			CSG moved = c.transformed(baseloc);
+			double low = moved.getMinZ();
+			if(lowest==null)
+				lowest=low;
+			if(low<lowest)
+				lowest=low;
+		}
+		for(DHParameterKinematics k:cat.getAllDHChains()) {
+			for(int i=0;i<k.getNumberOfLinks();i++) {
+				DHLink dhLink = k.getChain().getLinks().get(i);
+				Affine a = (Affine) dhLink.getListener();
+				TransformNR tmpl = TransformFactory.affineToNr(a);
+				Transform t=TransformFactory.nrToCSG(tmpl);
+				LinkConfiguration conf= k.getLinkConfiguration(i);
+				for(CSG c:cadMan.getLinktoCadMap().get(conf)) {
+					CSG moved = c.transformed(t);
+					double low = moved.getMinZ();
+					if(lowest==null)
+						lowest=low;
+					if(low<lowest)
+						lowest=low;
+				}
+			}
+		}
+		return lowest;
+	}
 	public void loadBase(MobileBase cat, Builder<?> actuators) throws IOException {
 		if(contacts==null)
 			contacts= builder.addContact();
+		double lowestPoint = (-computeLowestPoint(cat)+2)/1000.0;
+		//println "\n\nLowest point "+lowestPoint+" \n\n";
 		String bodyName = getMujocoName(cat);
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
 		loadCadForMobileBase(cadMan);
@@ -348,7 +385,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		//				.withPos(centerString)
 		//				.withDiaginertia("1 1 1" );
 		addBody.addFreejoint();
-		//setStartLocation(center, addBody);
+		addBody.withPos("0 0 "+lowestPoint);// move the base to 1mm above the z=0 surface
 		for (int i = 0; i < arrayList.size(); i++) {
 			CSG part = arrayList.get(i);
 
@@ -357,7 +394,12 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 			bodyParts++;
 			String nameOfCSG = bodyName+"_CSG_"+bodyParts;
 			CSG transformed = part.transformed(TransformFactory.nrToCSG(center).inverse());
-			CSG hull = transformed.hull();
+			CSG hull ;
+			try {
+					hull=transformed.hull();
+			}catch(Exception ex) {
+				hull=transformed;
+			}
 			transformed=part.clone();
 			transformed.setManipulator(new Affine());
 			putCSGInAssets(nameOfCSG, hull,true);
