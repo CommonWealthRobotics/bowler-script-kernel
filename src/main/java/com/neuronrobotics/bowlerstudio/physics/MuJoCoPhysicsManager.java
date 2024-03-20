@@ -150,6 +150,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		asset = null;
 		if(getmRuntime()!=null)
 			getmRuntime().close();
+		mRuntime=null;
 		mapNameToCSG.clear();
 		gearRatios.clear();
 	}
@@ -332,37 +333,8 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 	
 	public double computeLowestPoint(MobileBase cat) {
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
-		Double lowest =null;
-		Affine l =(Affine) cat.getRootListener();
-		TransformNR tmp = TransformFactory.affineToNr(l);
-		Transform baseloc = TransformFactory.nrToCSG(tmp);
-		for(CSG c:cadMan.getBasetoCadMap().get(cat)) {
-
-			CSG moved = c.transformed(baseloc);
-			double low = moved.getMinZ();
-			if(lowest==null)
-				lowest=low;
-			if(low<lowest)
-				lowest=low;
-		}
-		for(DHParameterKinematics k:cat.getAllDHChains()) {
-			for(int i=0;i<k.getNumberOfLinks();i++) {
-				DHLink dhLink = k.getChain().getLinks().get(i);
-				Affine a = (Affine) dhLink.getListener();
-				TransformNR tmpl = TransformFactory.affineToNr(a);
-				Transform t=TransformFactory.nrToCSG(tmpl);
-				LinkConfiguration conf= k.getLinkConfiguration(i);
-				for(CSG c:cadMan.getLinktoCadMap().get(conf)) {
-					CSG moved = c.transformed(t);
-					double low = moved.getMinZ();
-					if(lowest==null)
-						lowest=low;
-					if(low<lowest)
-						lowest=low;
-				}
-			}
-		}
-		return lowest;
+	
+		return cadMan.computeLowestPoint().z;
 	}
 	public void loadBase(MobileBase cat, Builder<?> actuators) throws IOException {
 		if(contacts==null)
