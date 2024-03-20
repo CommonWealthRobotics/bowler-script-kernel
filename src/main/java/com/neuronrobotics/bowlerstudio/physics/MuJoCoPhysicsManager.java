@@ -35,6 +35,7 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.imu.IMUUpdate;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.addons.kinematics.time.ITimeProvider;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
@@ -45,7 +46,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 
 @SuppressWarnings("restriction")
-public class MuJoCoPhysicsManager implements IMujocoController {
+public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	public  static final int Density_OF_PLA = 1250;
 	public  Mujoco.Builder<Void> builder=null;
 	public  Mujoco.Worldbody.Builder<?> addWorldbody;
@@ -76,6 +77,16 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 	public Mujoco.Contact.Builder<? > contacts;
 	private IntegratorType integratorType=IntegratorType.RK_4;
 	public HashMap<AbstractLink, Double> gearRatios = new HashMap<>();
+	public long currentTimeMillis() {
+		//if ()
+		return System.currentTimeMillis();
+	}
+	public void sleep(long time) throws InterruptedException {
+		sleep(time,0);
+	}
+	public void sleep(long ms,int ns) throws InterruptedException {
+		Thread.sleep(ms,ns);
+	}
 	public MuJoCoPhysicsManager(String name,List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
 			File workingDir) throws IOException, JAXBException {
 		this.name = name;
@@ -102,6 +113,8 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 			AbstractLink link = mapNameToLink.get(s);
 			if(link==null)
 				continue;
+			if(link.getLinkConfiguration().isPassive())
+				continue;
 			double target =Math.toRadians( link.getCurrentEngineeringUnits())*gearRatios.get(link);
 //			double error = target-positions.get(s);
 //			double effort = error * kp;
@@ -127,7 +140,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 					Double rotzAcceleration=0.0;
 					try {
 						b.getImu().setVirtualState(new IMUUpdate( xAcceleration, yAcceleration, zAcceleration,
-								rotxAcceleration, rotyAcceleration, rotzAcceleration ));
+								rotxAcceleration, rotyAcceleration, rotzAcceleration,currentTimeMillis() ));
 					}catch(NullPointerException e) {
 						// startup sync problems, ignore
 						System.out.println(e.getMessage());
@@ -138,19 +151,24 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 			}
 		}
 	}
+
 	public void close() {
-		if(bases!=null)
-		bases.clear();
-		if(freeObjects!=null)
-		freeObjects.clear();
-		if(fixedObjects!=null)
-		fixedObjects.clear();
+		if (bases != null) {
+			for(MobileBase b:bases) {
+				b.setTimeProvider(new ITimeProvider() {});
+			}
+			bases.clear();
+		}
+		if (freeObjects != null)
+			freeObjects.clear();
+		if (fixedObjects != null)
+			fixedObjects.clear();
 		builder = null;
 		addWorldbody = null;
 		asset = null;
-		if(getmRuntime()!=null)
+		if (getmRuntime() != null)
 			getmRuntime().close();
-		mRuntime=null;
+		mRuntime = null;
 		mapNameToCSG.clear();
 		gearRatios.clear();
 	}
@@ -337,6 +355,7 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 		return cadMan.computeLowestPoint().z;
 	}
 	public void loadBase(MobileBase cat, Builder<?> actuators) throws IOException {
+		cat.setTimeProvider(this);
 		if(contacts==null)
 			contacts= builder.addContact();
 		double lowestPoint = (-computeLowestPoint(cat)+2)/1000.0;
@@ -496,16 +515,18 @@ public class MuJoCoPhysicsManager implements IMujocoController {
 				//.withStiffness(BigDecimal.valueOf(1))
 				.withName(name)
 		;
-		actuators.addPosition()// A position controller to model a servo
-				.withKp(BigDecimal.valueOf(0.00004)) // experementally determined value
-				//.withForcelimited(true)
-				//.withForcerange(range)
-				.withCtrlrange(ctrlRange)
-				.withName(name)// name the motor
-				.withJoint(name)// which joint this motor powers
-				.withGear(""+gear) // gear ratio between virtual motor and output
-				.withKv(BigDecimal.valueOf(0.0000008)); // damping term experementally determenied
-				//.withInheritrange(BigDecimal.valueOf(rangeVal));// sets the range of the control signal to match the limits
+		if (!conf.isPassive()) {
+			actuators.addPosition()// A position controller to model a servo
+					.withKp(BigDecimal.valueOf(0.00004)) // experementally determined value
+					//.withForcelimited(true)
+					//.withForcerange(range)
+					.withCtrlrange(ctrlRange)
+					.withName(name)// name the motor
+					.withJoint(name)// which joint this motor powers
+					.withGear(""+gear) // gear ratio between virtual motor and output
+					.withKv(BigDecimal.valueOf(0.0000008)); // damping term experementally determenied
+					//.withInheritrange(BigDecimal.valueOf(rangeVal));// sets the range of the control signal to match the limits
+		}
 		for (int i = 0; i < cad.size(); i++) {
 			CSG part = cad.get(i);
 			if(!checkForPhysics(part))

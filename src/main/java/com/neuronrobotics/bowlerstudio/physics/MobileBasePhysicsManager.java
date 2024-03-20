@@ -83,7 +83,7 @@ public class MobileBasePhysicsManager {
 						+ (orentTrans.origin.z / PhysicsGravityScalar);
 				// tell the virtual IMU the system updated
 				base.setVirtualState(new IMUUpdate(xAcceleration, yAcceleration, zAcceleration, rotxAcceleration,
-						rotyAcceleration, rotzAcceleration));
+						rotyAcceleration, rotzAcceleration,base.currentTimeMillis()));
 				// update the old variables
 				oldavelocity.set(avelocity);
 				oldvelocity.set(velocity);

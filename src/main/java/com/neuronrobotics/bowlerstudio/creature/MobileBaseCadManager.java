@@ -716,7 +716,7 @@ public class MobileBaseCadManager implements Runnable {
 		if (!base.isAvailable())
 			throw new RuntimeException("Device " + base.getScriptingName() + " is not connected, can not generate cad");
 
-		getProcesIndictor().set(0);
+		setProgress(0);
 		if (clear) {
 			getAllCad().clear();
 			setAllCad(new ArrayList<>());
@@ -727,7 +727,7 @@ public class MobileBaseCadManager implements Runnable {
 			getBasetoCadMap().put(device, new ArrayList<CSG>());
 		}
 
-		getProcesIndictor().set(0.1);
+		setProgress(0.1);
 		try {
 
 			if (showingStl) {
@@ -777,11 +777,11 @@ public class MobileBaseCadManager implements Runnable {
 			getUi().highlightException(getCadScriptFromMobileBase(device), e);
 		}
 		System.out.println("Displaying Body");
-		getProcesIndictor().set(0.35);
+		setProgress(0.35);
 		// clears old robot and places base
 		getUi().setAllCSG(getBasetoCadMap().get(device), getCadScriptFromMobileBase(device));
 		System.out.println("Rendering limbs");
-		getProcesIndictor().set(0.4);
+		setProgress(0.4);
 		ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
 		double numLimbs = limbs.size();
 		int i = 0;
@@ -824,7 +824,7 @@ public class MobileBaseCadManager implements Runnable {
 			getAllCad().addAll(m.generateBody(m.base, false));
 		}
 		showingStl = false;
-		getProcesIndictor().set(1);
+		setProgress(1);
 		// PhysicsEngine.clear();
 		// MobileBasePhysicsManager m = new MobileBasePhysicsManager(base,
 		// baseCad, getSimplecad());
@@ -865,7 +865,7 @@ public class MobileBaseCadManager implements Runnable {
 		double progress = ((double) ((limb * dh.getNumberOfLinks()) + link)) / partsTotal;
 		// System.out.println("Cad progress " + progress + " limb " + limb + " link " +
 		// link + " total parts " + partsTotal);
-		getProcesIndictor().set(0.333 + (2 * (progress / 3)));
+		setProgress(0.333 + (2 * (progress / 3)));
 	}
 
 	public LinkConfiguration getLinkConfiguration(CSG cad) {
@@ -940,7 +940,7 @@ public class MobileBaseCadManager implements Runnable {
 		for (i = 0; i < limbs.size(); i += 1) {
 
 			double progress = (1.0 - ((numLimbs - i) / numLimbs)) / 2;
-			getProcesIndictor().set(progress);
+			setProgress(progress);
 
 			DHParameterKinematics l = limbs.get(i);
 			ArrayList<CSG> parts = getDHtoCadMap().get(l);
@@ -1028,7 +1028,7 @@ public class MobileBaseCadManager implements Runnable {
 		// ui.addCsg(c,getCadScript());
 		// }
 		showingStl = true;
-		getProcesIndictor().set(1);
+		setProgress(1);
 		return allCadStl;
 	}
 
@@ -1247,12 +1247,17 @@ public class MobileBaseCadManager implements Runnable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				getProcesIndictor().set(1);
+				setProgress(1);
 				// System.gc();
 			}
 		}.start();
 	}
-
+	private void setProgress(double val) {
+		if(cadGenerating==false) {
+			val=1;
+		}
+		getProcesIndictor().set(val);
+	}
 	public void onTabClosing() {
 
 	}
