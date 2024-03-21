@@ -640,7 +640,6 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			.withRange(ctrlRange) // engineering units range
 			.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
 			.withType(JointtypeType.HINGE) // hinge type
-			.withFrictionloss(BigDecimal.valueOf(0.01))// experementally determined
 			//.withLimited(true)
 			//.withDamping(BigDecimal.valueOf(0.00001))
 			//.withStiffness(BigDecimal.valueOf(1))
@@ -654,7 +653,8 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		newtonMeterLimit=Double.parseDouble(torque.toString())/gear;
 	}
 	if (!conf.isPassive()) {
-		
+		jointBuilder.withFrictionloss(BigDecimal.valueOf(0.01));// experementally determined
+
 		actuators.addPosition()// A position controller to model a servo
 				.withKp(BigDecimal.valueOf(0.000006)) // experementally determined value
 				//.withForcelimited(true)
@@ -695,7 +695,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 					double height = part.getTotalZ();
 					double radius =( part.getTotalY()+part.getTotalX())/4.0;
 					hull = new RoundedCylinder(radius, radius, height, 40)
-									.cornerRadius(radius/4)
+									.cornerRadius(height/4)
 									.toCSG()
 									.toZMin()
 									.movez(transformed.getMinZ())
