@@ -526,8 +526,10 @@ public class MobileBaseCadManager implements Runnable {
 			TransformNR nr = ll.get(index);
 			if (nr != null && af != null)
 				map2.put(af, nr);
-			if (k.getSlaveMobileBase(i) != null) {
-				updateMobileBase(k.getSlaveMobileBase(i), nr, map2, jointPoses);
+			MobileBase slv = k.getSlaveMobileBase(i);
+			if (slv!= null) {
+				//slv.setRootListener(af);
+				updateMobileBase(slv, nr, map2, jointPoses);
 			}
 		}
 		k.setGlobalToFiducialTransform(previous, false);
