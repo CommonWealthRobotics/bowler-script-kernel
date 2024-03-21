@@ -369,6 +369,10 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	public void loadBase(MobileBase cat, Builder<?> actuators) throws IOException {
 		if(contacts==null)
 			contacts= builder.addContact();
+		boolean freeBase=cat.getSteerable().size()>0||
+				cat.getDrivable().size()>0||
+				cat.getLegs().size()>0;
+		
 		//println "\n\nLowest point "+lowestPoint+" \n\n";
 		String bodyName = getMujocoName(cat);
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
@@ -387,8 +391,10 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		//				.withMass(BigDecimal.valueOf(cat.getMassKg()/1000.0))
 		//				.withPos(centerString)
 		//				.withDiaginertia("1 1 1" );
-		addBody.addFreejoint();
-		addBody.withPos("0 0 "+lowestPoint);// move the base to 1mm above the z=0 surface
+		if(freeBase) {
+			addBody.addFreejoint();
+			addBody.withPos("0 0 "+lowestPoint);// move the base to 1mm above the z=0 surface
+		}
 		for (int i = 0; i < arrayList.size(); i++) {
 			CSG part = arrayList.get(i);
 
@@ -437,7 +443,6 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				lastName=name;
 			}
 		}
-
 		for(DHParameterKinematics k:cat.getAllDHChains()) {
 			if(k.getScriptingName().contains("Dummy"))
 				continue;
@@ -454,8 +459,12 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		}
 	}
 
-	public org.mujoco.xml.BodyarchType.Builder<?> loadLink(DHParameterKinematics l,int index,ArrayList<CSG>  cad,org.mujoco.xml.BodyarchType.Builder<?> addBody, Builder<?> actuators,HashMap<AbstractLink,org.mujoco.xml.BodyarchType.Builder<?>> linkToBulderMap) {
-
+	public org.mujoco.xml.BodyarchType.Builder<?> loadLink(
+			DHParameterKinematics l,
+			int index,ArrayList<CSG>  cad,
+			org.mujoco.xml.BodyarchType.Builder<?> addBody, 
+			Builder<?> actuators,
+			HashMap<AbstractLink,org.mujoco.xml.BodyarchType.Builder<?>> linkToBulderMap) {
 		AbstractLink link = l.getAbstractLink(index);
 		LinkConfiguration conf = link.getLinkConfiguration();
 
@@ -514,12 +523,13 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		double rangeVal=upper-lower;
 		JointType.Builder<?> jointBuilder = linkBody.addJoint();
 		String axisJoint ="0 0 1";
-
+		double position = Math.toRadians(link.getCurrentEngineeringUnits())*gearRatios.get(link);
+		//position=0;
 		jointBuilder
 				.withPos("0 0 0")// the kinematic center
 				.withAxis(axisJoint) // rotate about the z axis per dh convention
 				.withRange(ctrlRange) // engineering units range
-				.withRef(BigDecimal.ZERO) // set the reference position on loading as the links 0 degrees value
+				.withRef(BigDecimal.valueOf(position)) // set the reference position on loading as the links 0 degrees value
 				.withType(JointtypeType.HINGE) // hinge type
 				.withFrictionloss(BigDecimal.valueOf(0.0001))// experementally determined
 				//.withLimited(true)
@@ -549,17 +559,16 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				if(affineNameMapGet!=null) {
 
 					AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
+					double myposition = link.getCurrentEngineeringUnits();
 					DHParameterKinematics k = l;
 					CSG transformed = part
 							.transformed(
 							TransformFactory
 							.nrToCSG(
 							new TransformNR(
-							k.getDhLink(
-									k.getLinkIndex(myLink)
-							).DhStep(0)
+							k.getDhLink(myLink).DhStep(0)
 							)
-							));
+							).rotZ(position));
 					CSG hull = transformed.hull();
 					//					if(myLink!=link)
 					//						hull = part.hull();
