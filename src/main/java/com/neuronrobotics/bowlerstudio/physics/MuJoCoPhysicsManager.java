@@ -236,10 +236,26 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		if(mRuntime!=null)
 			mRuntime.close();
 		setmRuntime(new MuJoCoModelManager(f));
-		if(bases!=null)
-			for(MobileBase b:bases)
+		HashMap<String,Double> setPoitions = new HashMap<>();
+		if(bases!=null) {
+			for(MobileBase b:bases) {
 				b.setTimeProvider(this);
-
+				for(AbstractLink l:mapNameToLink.values()) {
+						String name = getName(l);
+						double position = Math.toRadians(l.getCurrentEngineeringUnits())*gearRatios.get(l);
+						setPoitions.put(name, position);
+					}
+				
+			}
+			//getmRuntime().setAllJointPositions(setPoitions);
+		}
+	}
+	public String getName(AbstractLink l) {
+		for(String s:mapNameToLink.keySet()) {
+			if(mapNameToLink.get(s)==l)
+				return s;
+		}
+		return null;
 	}
 	public double getCurrentSimulationTimeSeconds() {
 		return getmRuntime().getCurrentSimulationTimeSeconds();
@@ -831,6 +847,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	public MuJoCoModelManager getmRuntime() {
 		if(mRuntime==null)
 			try {
+				new RuntimeException("ERROR loading runtime before it was generated").printStackTrace();
 				generateNewModel();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
