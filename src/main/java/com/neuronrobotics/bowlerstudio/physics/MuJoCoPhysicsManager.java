@@ -42,8 +42,10 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.Parabola;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.RoundedCylinder;
+import eu.mihosoft.vrl.v3d.Sphere;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.scene.paint.Color;
@@ -424,7 +426,9 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 						offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
 			addBody.withPos(centerString)
 					.withQuat(quat);// move the base to 1mm above the z=0 surface
-			
+			if(freeBase) {
+				addBody.addFreejoint();
+			}
 		}else {
 			String centerString = offsetGlobal.getX()/1000.0+" "+
 			offsetGlobal.getY()/1000.0+" "+
@@ -441,9 +445,6 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		addBody.withName(bodyName);
 		
 		
-		if(freeBase) {
-			addBody.addFreejoint();
-		}
 	//			addBody.addInertial()
 	//					.withMass(BigDecimal.valueOf(cat.getMassKg()/1000.0))
 	//					.withPos(centerString)
@@ -451,6 +452,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		ArrayList<CSG> arrayList = cadMan.getAllCad();
 		HashMap<CSG,TransformNR > baseParts=new HashMap<>();
 		HashMap<CSG,TransformNR > limbBase=new HashMap<>();
+
 		for (int i = 0; i < arrayList.size(); i++) {
 			CSG part = arrayList.get(i);
 			if(!checkForPhysics(part))
@@ -476,6 +478,11 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			}
 			baseParts.put(part,center.copy());
 
+		}
+		if(baseParts.size()==0){
+			CSG CoM =new Sphere(2).toCSG();
+			baseParts.put(CoM,cat.getCenterOfMassFromCentroid().copy());
+			limbBase.put(CoM, new TransformNR());
 		}
 		for(CSG part:baseParts.keySet()) {
 			TransformNR center = baseParts.get(part);
@@ -667,6 +674,19 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				.withKv(BigDecimal.valueOf(0.00000001)); // damping term experementally determenied
 				//.withInheritrange(BigDecimal.valueOf(rangeVal));// sets the range of the control signal to match the limits
 	}
+//	CSG CoM  = new Sphere(2)
+//					.toCSG()
+//					.transformed(
+//					TransformFactory
+//					.nrToCSG( 
+//						cat.getCenterOfMassFromCentroid().copy()
+//						)
+//					);
+//	org.mujoco.xml.body.GeomType.Builder<?> geomCom = linkBody.addGeom();
+//	putCSGInAssets(name+"_CoM", CoM,true);
+//	setCSGMeshToGeom(name+"_CoM", geomCom);
+//	
+					
 	for (int i = 0; i < cad.size(); i++) {
 		CSG part = cad.get(i);
 		if(!checkForPhysics(part))
@@ -694,14 +714,21 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				if(cat.isWheel(myLink)) {
 					double height = part.getTotalZ();
 					double radius =( part.getTotalY()+part.getTotalX())/4.0;
-					hull = new RoundedCylinder(radius, radius, height, 40)
-									.cornerRadius(height/4)
-									.toCSG()
-									.toZMin()
-									.movez(transformed.getMinZ())
-									;
+					double contact =5;
+					if(contact>height)
+						contact=contact/2;
+					CSG cone = Parabola.cone(radius, height/2-contact/2).movez(contact/2);
+					cone=cone.union(cone.rotx(180)).hull();
+					hull = cone
+							.toZMin()
+							.movez(transformed.getMinZ())
+							;
 				}else
-					hull = transformed.hull();
+					try {
+						hull = transformed.hull();
+					}catch(Exception ex) {
+						hull=transformed;
+					}
 				//					if(myLink!=link)
 				//						hull = part.hull();
 				transformed.setManipulator(new Affine());
