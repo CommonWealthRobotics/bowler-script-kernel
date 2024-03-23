@@ -115,7 +115,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				workingDir.mkdirs();
 			}
 			if (!workingDir.isDirectory())
-				throw new RuntimeException("Working Directory must be a directory");
+				throw new RuntimeException("Working Directory must be a directory, "+workingDir.getAbsolutePath());
 		}
 	}
 	@Override
