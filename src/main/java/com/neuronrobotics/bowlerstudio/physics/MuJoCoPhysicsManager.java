@@ -647,7 +647,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			.withRange(ctrlRange) // engineering units range
 			.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
 			.withType(JointtypeType.HINGE) // hinge type
-			//.withLimited(true)
+			.withLimited(true)
 			//.withDamping(BigDecimal.valueOf(0.00001))
 			//.withStiffness(BigDecimal.valueOf(1))
 			.withName(name)
