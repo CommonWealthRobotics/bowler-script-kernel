@@ -650,6 +650,8 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			.withLimited(true)
 			//.withDamping(BigDecimal.valueOf(0.00001))
 			//.withStiffness(BigDecimal.valueOf(1))
+			.withSolreflimit("4e-3 1")
+			.withSolimplimit(".95 .99 1e-3")
 			.withName(name)
 	;
 	double forceKgCm=3.5;//mg92b default
@@ -822,6 +824,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		.withCondim(getCondim())
 		.withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
 		.withMaterial(nameOfCSG)
+		.withSolimp(".99 .99 0")
 		;
 	}
 
