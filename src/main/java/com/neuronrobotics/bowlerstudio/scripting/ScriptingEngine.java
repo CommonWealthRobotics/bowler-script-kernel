@@ -532,7 +532,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static GitHub setupAnyonmous() throws IOException {
-		ScriptingEngine.setAutoupdate(false);
+		//ScriptingEngine.setAutoupdate(false);
 		return PasswordManager.setupAnyonmous();
 	}
 
@@ -1158,11 +1158,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		git = openGit(localRepo);
 		try {
-			if (source == null)
-				source = git.log().setMaxCount(1).call().iterator().next();
-			newBranchLocal(newBranch, remoteURI, git, source);
-		} catch (NoHeadException ex) {
-			newBranchLocal(newBranch, remoteURI, git, null);
+			try {
+				if (source == null)
+					source = git.log().setMaxCount(1).call().iterator().next();
+				newBranchLocal(newBranch, remoteURI, git, source);
+			} catch (NoHeadException ex) {
+				newBranchLocal(newBranch, remoteURI, git, null);
+			}
 		} catch (Throwable ex) {
 			closeGit(git);
 			throw ex;
@@ -1299,8 +1301,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return branchNames;
 	}
 
-	public static void pull(String remoteURI, String branch)
-			throws IOException, CheckoutConflictException, NoHeadException, InvalidRemoteException {
+	public static void pull(String remoteURI, String branch) throws IOException, CheckoutConflictException,
+			NoHeadException, InvalidRemoteException, WrongRepositoryStateException {
 		waitForRepo(remoteURI, "pull");
 		// new Exception().printStackTrace();
 
@@ -1349,7 +1351,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				closeGit(git);
 				PasswordManager.checkInternet();
 				// deleteRepo(remoteURI);
-				pull(remoteURI, branch);
+				throw e;
 			} catch (InvalidConfigurationException e) {
 
 				PasswordManager.checkInternet();
@@ -1432,10 +1434,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			closeGit(git);
 			throw new InvalidRemoteException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (Throwable t) {
-			t.printStackTrace();
-			PasswordManager.checkInternet();
 			closeGit(git);
-			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + t.getMessage());
 		}
 
 	}
@@ -1696,7 +1695,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static String locateGitUrl(File f, Git ref) throws IOException {
 		File gitRepoFile = new File(f.getAbsolutePath());
 		while (gitRepoFile != null) {
-			if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+			if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
 				// System.err.println("Fount git repo for file: "+gitRepoFile);
 				Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
 				Git git = ref;
@@ -1720,7 +1719,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		while (gitRepoFile != null) {
 			gitRepoFile = gitRepoFile.getParentFile();
 			if (gitRepoFile != null)
-				if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+				if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
 					// System.err.println("Fount git repo for file: "+gitRepoFile);
 					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
 					return openGit(localRepo);
@@ -1773,18 +1772,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		PasswordManager.setLoginManager(lm);
 	}
 
-	public static boolean isAutoupdate() {
-		return autoupdate;
-	}
-
-	public static boolean setAutoupdate(boolean autoupdate) throws IOException {
-		if (autoupdate && !ScriptingEngine.autoupdate) {
-			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
-			// PasswordManager.setAutoupdate(autoupdate);
-		}
-		ScriptingEngine.autoupdate = autoupdate;
-		return ScriptingEngine.autoupdate;
-	}
+//	public static boolean isAutoupdate() {
+//		return autoupdate;
+//	}
+//
+//	public static boolean setAutoupdate(boolean autoupdate) throws IOException {
+//		if (autoupdate && !ScriptingEngine.autoupdate) {
+//			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
+//			// PasswordManager.setAutoupdate(autoupdate);
+//		}
+//		ScriptingEngine.autoupdate = autoupdate;
+//		return ScriptingEngine.autoupdate;
+//	}
 
 	@SuppressWarnings("unused")
 	private static File fileFromGistID(String string, String string2)

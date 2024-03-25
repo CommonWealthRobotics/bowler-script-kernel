@@ -240,15 +240,16 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			return;
 		}
 		if (Platform.isFxApplicationThread()) {
-			
-			System.err.println("Exception in Javafx thread! \n"
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
+			if (fxExceptionCount < 10)
+				System.err.println("Exception in Javafx thread! \n"
+						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
 			fxExceptionCount++;
-			if (fxExceptionCount > 10) {
-				System.err.println(stacktraceFromCatch);
-				t.printStackTrace();
-				System.exit(-5);
-			}
+//			if (fxExceptionCount > 10) {
+//				//System.err.println(stacktraceFromCatch);
+//				//t.printStackTrace();
+//				System.exit(-5);
+//			}
+			
 			throw new RuntimeException(t);
 		}
 

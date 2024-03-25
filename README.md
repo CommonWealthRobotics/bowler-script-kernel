@@ -1,3 +1,9 @@
+
+# Documentation
+
+[Javadoc Generated Documentation](https://commonwealthrobotics.com/bowler-script-kernel/namespaces.html) 
+
+
 # Bowler Kernel Scripting environment
 
 [![Join the chat at https://gitter.im/CommonWealthRobotics/bowler-script-kernel](https://badges.gitter.im/NeuronRobotics/bowler-script-kernel.svg)](https://gitter.im/NeuronRobotics/bowler-script-kernel?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

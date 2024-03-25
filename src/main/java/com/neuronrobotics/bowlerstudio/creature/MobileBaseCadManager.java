@@ -38,8 +38,10 @@ import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
 import com.neuronrobotics.sdk.addons.kinematics.IOnMobileBaseRenderChange;
 import com.neuronrobotics.sdk.addons.kinematics.IRegistrationListenerNR;
 import com.neuronrobotics.sdk.addons.kinematics.ITaskSpaceUpdateListenerNR;
+import com.neuronrobotics.sdk.addons.kinematics.IVitaminHolder;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
@@ -48,6 +50,8 @@ import com.neuronrobotics.sdk.pid.PIDLimitEvent;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
+import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import javafx.beans.property.*;
 import javafx.scene.transform.Affine;
@@ -67,6 +71,7 @@ public class MobileBaseCadManager implements Runnable {
 	private HashMap<DHParameterKinematics, ArrayList<CSG>> DHtoCadMap = new HashMap<>();
 	private HashMap<LinkConfiguration, ArrayList<CSG>> LinktoCadMap = new HashMap<>();
 	private HashMap<MobileBase, ArrayList<CSG>> BasetoCadMap = new HashMap<>();
+	private HashMap<VitaminLocation,CSG> vitamins=new HashMap<>();
 
 	private boolean cadGenerating = false;
 	private boolean showingStl = false;
@@ -84,7 +89,46 @@ public class MobileBaseCadManager implements Runnable {
 	private HashMap<String, Object> cadScriptCache = new HashMap<>();
 	private static ArrayList<Runnable> toRun = new ArrayList<Runnable>();
 	private ArrayList<IRenderSynchronizationEvent> rendersync=new ArrayList<>();
+	private boolean forceChage = true;
 	
+	public CSG getVitamin(VitaminLocation vitamin) throws Exception {
+		if(!vitamins.containsKey(vitamin)) {
+			CSG starting = Vitamins.get(vitamin.getType(), vitamin.getSize())
+					.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
+			vitamins.put(vitamin, starting);
+		}
+		return vitamins.get(vitamin);
+	}
+	public ArrayList<CSG> getVitamins(IVitaminHolder link,Affine manipulator) {
+		ArrayList<CSG> parts = new ArrayList<CSG>();
+		for(VitaminLocation vi:link.getVitamins()) {
+			CSG vitamin;
+			try {
+				vitamin = getVitamin(vi);
+				vitamin.setManipulator(manipulator);
+				parts.add(vitamin);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return parts;
+	}
+	public ArrayList<CSG> getVitamins(AbstractLink link,Affine manipulator) {
+		LinkConfiguration conf = link.getLinkConfiguration();
+		return getVitamins(conf, manipulator);
+	}
+	public ArrayList<CSG> getVitamins(MobileBase base) {
+		Affine rootListener = (Affine) base.getRootListener();
+		return getVitamins(base, rootListener);
+	}
+	
+	public void render() {
+		run();
+		forceChage=true;
+		while(forceChage)
+			ThreadUtil.wait(1);
+	}
 	public void addIRenderSynchronizationEvent(IRenderSynchronizationEvent ev) {
 		if(rendersync.contains(ev))
 			return;
@@ -94,6 +138,7 @@ public class MobileBaseCadManager implements Runnable {
 		if(rendersync.contains(ev))
 			rendersync.remove(ev);
 	}
+	
 	private void fireIRenderSynchronizationEvent() {
 		for(int i=0;i<rendersync.size();i++)
 			try {
@@ -101,6 +146,121 @@ public class MobileBaseCadManager implements Runnable {
 			}catch(Exception e) {
 				
 			}
+	}
+	/**
+	 * get the progress of the cad in an integer percent
+	 * @return percent completion of CAD
+	 */
+	public int getCADProgressPercent() {
+		return (int)(Math.round(getProcesIndictor().get()*100));
+	}
+	
+	public boolean isCADFinished() {
+		return getCADProgressPercent()==100;
+	}
+	public Vector3d computeHighestPoint() {
+		render();
+		MobileBase cat=base;
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
+		Vector3d highest =null;
+		Affine l =(Affine) cat.getRootListener();
+		TransformNR tmp = TransformFactory.affineToNr(l);
+		Transform baseloc = TransformFactory.nrToCSG(tmp);
+		for(CSG c:cadMan.getBasetoCadMap().get(cat)) {
+
+			CSG moved = c.transformed(baseloc);
+			double z = moved.getMaxZ();
+			double y= moved.getMaxY();
+			double x=moved.getMaxX();
+			Vector3d high = new Vector3d(x, y, z);
+			
+			if(highest==null)
+				highest=high;
+			if(high.x>highest.x)
+				highest.x=high.x;
+			if(high.y>highest.y)
+				highest.y=high.y;
+			if(high.z>highest.z)
+				highest.z=high.z;
+		}
+		for(DHParameterKinematics k:cat.getAllDHChains()) {
+			for(int i=0;i<k.getNumberOfLinks();i++) {
+				DHLink dhLink = k.getChain().getLinks().get(i);
+				Affine a = (Affine) dhLink.getListener();
+				TransformNR tmpl = TransformFactory.affineToNr(a);
+				Transform t=TransformFactory.nrToCSG(tmpl);
+				LinkConfiguration conf= k.getLinkConfiguration(i);
+				for(CSG c:cadMan.getLinktoCadMap().get(conf)) {
+					CSG moved = c.transformed(t);
+					double z = moved.getMaxZ();
+					double y= moved.getMaxY();
+					double x=moved.getMaxX();
+					Vector3d high = new Vector3d(x, y, z);
+					
+					if(highest==null)
+						highest=high;
+					if(high.x>highest.x)
+						highest.x=high.x;
+					if(high.y>highest.y)
+						highest.y=high.y;
+					if(high.z>highest.z)
+						highest.z=high.z;
+				}
+			}
+		}
+		return highest;
+	}
+	public Vector3d computeLowestPoint() {
+		render();
+		MobileBase cat=base;
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
+		Vector3d lowest =null;
+		Affine l =(Affine) cat.getRootListener();
+		TransformNR tmp = TransformFactory.affineToNr(l);
+		Transform baseloc = TransformFactory.nrToCSG(tmp);
+		for(CSG c:cadMan.getBasetoCadMap().get(cat)) {
+
+			CSG moved = c.transformed(baseloc);
+			double z = moved.getMinZ();
+			double y= moved.getMinY();
+			double x=moved.getMinX();
+			Vector3d low = new Vector3d(x, y, z);
+			
+			if(lowest==null)
+				lowest=low;
+			if(low.x<lowest.x)
+				lowest.x=low.x;
+			if(low.y<lowest.y)
+				lowest.y=low.y;
+			if(low.z<lowest.z)
+				lowest.z=low.z;
+		}
+		for(DHParameterKinematics k:cat.getAllDHChains()) {
+			for(int i=0;i<k.getNumberOfLinks();i++) {
+				DHLink dhLink = k.getChain().getLinks().get(i);
+				Affine a = (Affine) dhLink.getListener();
+				TransformNR tmpl = TransformFactory.affineToNr(a);
+				Transform t=TransformFactory.nrToCSG(tmpl);
+				LinkConfiguration conf= k.getLinkConfiguration(i);
+				for(CSG c:cadMan.getLinktoCadMap().get(conf)) {
+					CSG moved = c.transformed(t);
+					double z = moved.getMinZ();
+					double y= moved.getMinY();
+					double x=moved.getMinX();
+					Vector3d low = new Vector3d(x, y, z);
+					
+					if(lowest==null)
+						lowest=low;
+					if(low.x<lowest.x)
+						lowest.x=low.x;
+					if(low.y<lowest.y)
+						lowest.y=low.y;
+					if(low.z<lowest.z)
+						lowest.z=low.z;
+				}
+			}
+		}
+		return lowest;
 	}
 	protected void clear() {
 		// Cad generator
@@ -131,7 +291,7 @@ public class MobileBaseCadManager implements Runnable {
 		for (MobileBaseCadManager m : slaves) {
 			m.clear();
 		}
-
+		vitamins.clear();
 	}
 
 	private static class IMobileBaseUIlocal implements IMobileBaseUI {
@@ -241,6 +401,10 @@ public class MobileBaseCadManager implements Runnable {
 						try {
 							do {
 								Thread.sleep(5);
+								if(forceChage) {
+									forceChage=false;
+									l.onIOnMobileBaseRenderChange();
+								}
 							} while (rendering || changed == false);
 						} catch (InterruptedException e) {
 							getUi().highlightException(null, e);
@@ -398,8 +562,10 @@ public class MobileBaseCadManager implements Runnable {
 			TransformNR nr = ll.get(index);
 			if (nr != null && af != null)
 				map2.put(af, nr);
-			if (k.getSlaveMobileBase(i) != null) {
-				updateMobileBase(k.getSlaveMobileBase(i), nr, map2, jointPoses);
+			MobileBase slv = k.getSlaveMobileBase(i);
+			if (slv!= null) {
+				//slv.setRootListener(af);
+				updateMobileBase(slv, nr, map2, jointPoses);
 			}
 		}
 		k.setGlobalToFiducialTransform(previous, false);
@@ -535,7 +701,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	private IgenerateBody getIgenerateBody(MobileBase b) throws Throwable{
-		if (configMode)
+		if (isConfigMode())
 			return getConfigurationDisplay();
 		Object cadForBodyEngine = scriptFromFileInfo(b.getScriptingName(),b.getGitCadEngine(), () -> {
 			run();
@@ -548,7 +714,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	private IgenerateCad getIgenerateCad(DHParameterKinematics dh) throws Throwable{
-		if (configMode)
+		if (isConfigMode())
 			return getConfigurationDisplay();
 		Object cadForBodyEngine = scriptFromFileInfo(dh.getScriptingName(),dh.getGitCadEngine(), () -> {
 			run();
@@ -579,7 +745,7 @@ public class MobileBaseCadManager implements Runnable {
 							for (MobileBase manager : cadmap.keySet()) {
 								mobileBaseCadManager = cadmap.get(manager);
 								if (mobileBaseCadManager.autoRegen)
-									if (mobileBaseCadManager.configMode)
+									if (mobileBaseCadManager.isConfigMode())
 										mobileBaseCadManager.generateCad();
 							}
 						} catch (Exception e) {
@@ -601,7 +767,7 @@ public class MobileBaseCadManager implements Runnable {
 		if (!base.isAvailable())
 			throw new RuntimeException("Device " + base.getScriptingName() + " is not connected, can not generate cad");
 
-		getProcesIndictor().set(0);
+		setProgress(0);
 		if (clear) {
 			getAllCad().clear();
 			setAllCad(new ArrayList<>());
@@ -612,7 +778,7 @@ public class MobileBaseCadManager implements Runnable {
 			getBasetoCadMap().put(device, new ArrayList<CSG>());
 		}
 
-		getProcesIndictor().set(0.1);
+		setProgress(0.1);
 		try {
 
 			if (showingStl) {
@@ -662,11 +828,11 @@ public class MobileBaseCadManager implements Runnable {
 			getUi().highlightException(getCadScriptFromMobileBase(device), e);
 		}
 		System.out.println("Displaying Body");
-		getProcesIndictor().set(0.35);
+		setProgress(0.35);
 		// clears old robot and places base
 		getUi().setAllCSG(getBasetoCadMap().get(device), getCadScriptFromMobileBase(device));
 		System.out.println("Rendering limbs");
-		getProcesIndictor().set(0.4);
+		setProgress(0.4);
 		ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
 		double numLimbs = limbs.size();
 		int i = 0;
@@ -709,7 +875,7 @@ public class MobileBaseCadManager implements Runnable {
 			getAllCad().addAll(m.generateBody(m.base, false));
 		}
 		showingStl = false;
-		getProcesIndictor().set(1);
+		setProgress(1);
 		// PhysicsEngine.clear();
 		// MobileBasePhysicsManager m = new MobileBasePhysicsManager(base,
 		// baseCad, getSimplecad());
@@ -750,7 +916,7 @@ public class MobileBaseCadManager implements Runnable {
 		double progress = ((double) ((limb * dh.getNumberOfLinks()) + link)) / partsTotal;
 		// System.out.println("Cad progress " + progress + " limb " + limb + " link " +
 		// link + " total parts " + partsTotal);
-		getProcesIndictor().set(0.333 + (2 * (progress / 3)));
+		setProgress(0.333 + (2 * (progress / 3)));
 	}
 
 	public LinkConfiguration getLinkConfiguration(CSG cad) {
@@ -825,7 +991,7 @@ public class MobileBaseCadManager implements Runnable {
 		for (i = 0; i < limbs.size(); i += 1) {
 
 			double progress = (1.0 - ((numLimbs - i) / numLimbs)) / 2;
-			getProcesIndictor().set(progress);
+			setProgress(progress);
 
 			DHParameterKinematics l = limbs.get(i);
 			ArrayList<CSG> parts = getDHtoCadMap().get(l);
@@ -855,9 +1021,10 @@ public class MobileBaseCadManager implements Runnable {
 									+ l.getScriptingName());
 							if (!dir.exists())
 								dir.mkdirs();
-							System.out.println("Making STL for " + name);
+							
 							File stl = new File(
 									dir.getAbsolutePath() + "/" + linkNum + name + "_limb_" + i + "_Part_" + j + ".stl");
+							System.out.println("Writing STL for " + name+" to "+stl.getAbsolutePath());
 							FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
 							allCadStl.add(stl);
 							// totalAssembly.add(tmp);
@@ -912,7 +1079,7 @@ public class MobileBaseCadManager implements Runnable {
 		// ui.addCsg(c,getCadScript());
 		// }
 		showingStl = true;
-		getProcesIndictor().set(1);
+		setProgress(1);
 		return allCadStl;
 	}
 
@@ -983,7 +1150,7 @@ public class MobileBaseCadManager implements Runnable {
 		try {
 			IgenerateCad generatorToUse = getConfigurationDisplay();
 			Object object = getIgenerateCad(dh);
-			if (object != null && !configMode) {
+			if (object != null && !isConfigMode()) {
 				if (IgenerateCad.class.isInstance(object))
 					generatorToUse = (IgenerateCad) object;
 			}
@@ -1131,12 +1298,17 @@ public class MobileBaseCadManager implements Runnable {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				getProcesIndictor().set(1);
+				setProgress(1);
 				// System.gc();
 			}
 		}.start();
 	}
-
+	private void setProgress(double val) {
+		if(cadGenerating==false) {
+			val=1;
+		}
+		getProcesIndictor().set(val);
+	}
 	public void onTabClosing() {
 
 	}
@@ -1289,7 +1461,7 @@ public class MobileBaseCadManager implements Runnable {
 
 	public void setConfigurationViewerMode(boolean b) {
 		System.out.println("Setting config mode " + b);
-		configMode = b;
+		setConfigMode(b);
 		for (MobileBaseCadManager m : slaves) {
 			m.setConfigurationViewerMode(b);
 		}
@@ -1297,6 +1469,22 @@ public class MobileBaseCadManager implements Runnable {
 	public void invalidateModelCache() {
 		// TODO Auto-generated method stub
 		
+	}
+	/**
+	 * @return the configMode
+	 */
+	public boolean isConfigMode() {
+		return configMode;
+	}
+	/**
+	 * @param configMode the configMode to set
+	 */
+	public void setConfigMode(boolean configMode) {
+		this.configMode = configMode;
+	}
+	public boolean isCADstarted() {
+		// TODO Auto-generated method stub
+		return cadGenerating;
 	}
 
 }
