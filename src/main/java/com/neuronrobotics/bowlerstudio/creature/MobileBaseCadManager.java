@@ -38,8 +38,10 @@ import com.neuronrobotics.sdk.addons.kinematics.ILinkListener;
 import com.neuronrobotics.sdk.addons.kinematics.IOnMobileBaseRenderChange;
 import com.neuronrobotics.sdk.addons.kinematics.IRegistrationListenerNR;
 import com.neuronrobotics.sdk.addons.kinematics.ITaskSpaceUpdateListenerNR;
+import com.neuronrobotics.sdk.addons.kinematics.IVitaminHolder;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
@@ -69,6 +71,7 @@ public class MobileBaseCadManager implements Runnable {
 	private HashMap<DHParameterKinematics, ArrayList<CSG>> DHtoCadMap = new HashMap<>();
 	private HashMap<LinkConfiguration, ArrayList<CSG>> LinktoCadMap = new HashMap<>();
 	private HashMap<MobileBase, ArrayList<CSG>> BasetoCadMap = new HashMap<>();
+	private HashMap<VitaminLocation,CSG> vitamins=new HashMap<>();
 
 	private boolean cadGenerating = false;
 	private boolean showingStl = false;
@@ -87,6 +90,39 @@ public class MobileBaseCadManager implements Runnable {
 	private static ArrayList<Runnable> toRun = new ArrayList<Runnable>();
 	private ArrayList<IRenderSynchronizationEvent> rendersync=new ArrayList<>();
 	private boolean forceChage = true;
+	
+	public CSG getVitamin(VitaminLocation vitamin) throws Exception {
+		if(!vitamins.containsKey(vitamin)) {
+			CSG starting = Vitamins.get(vitamin.getType(), vitamin.getSize())
+					.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
+			vitamins.put(vitamin, starting);
+		}
+		return vitamins.get(vitamin);
+	}
+	public ArrayList<CSG> getVitamins(IVitaminHolder link,Affine manipulator) {
+		ArrayList<CSG> parts = new ArrayList<CSG>();
+		for(VitaminLocation vi:link.getVitamins()) {
+			CSG vitamin;
+			try {
+				vitamin = getVitamin(vi);
+				vitamin.setManipulator(manipulator);
+				parts.add(vitamin);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return parts;
+	}
+	public ArrayList<CSG> getVitamins(AbstractLink link,Affine manipulator) {
+		LinkConfiguration conf = link.getLinkConfiguration();
+		return getVitamins(conf, manipulator);
+	}
+	public ArrayList<CSG> getVitamins(MobileBase base) {
+		Affine rootListener = (Affine) base.getRootListener();
+		return getVitamins(base, rootListener);
+	}
+	
 	public void render() {
 		run();
 		forceChage=true;
@@ -255,7 +291,7 @@ public class MobileBaseCadManager implements Runnable {
 		for (MobileBaseCadManager m : slaves) {
 			m.clear();
 		}
-
+		vitamins.clear();
 	}
 
 	private static class IMobileBaseUIlocal implements IMobileBaseUI {

@@ -12,6 +12,7 @@ import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.STL;
+import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
@@ -159,6 +160,14 @@ public class Vitamins {
 																									// the library
 						repostring.toString(), // file to load
 						servoMeasurments);
+				Map<String, Object> configuration = Vitamins.getConfiguration(type, id);
+
+				Transform com = new Transform()
+									.movex(Double.parseDouble(configuration.get("massCentroidX").toString()))
+									.movey(Double.parseDouble(configuration.get("massCentroidY").toString()))
+									.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
+				newVitamin.getStorage().set("massKg", configuration.get("massKg"));
+				newVitamin.getStorage().set("massCentroid", com);
 				return newVitamin;
 			} else {
 				Log.error(key + " Failed to load from script");
