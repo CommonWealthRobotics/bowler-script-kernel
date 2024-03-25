@@ -569,7 +569,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 				ArrayList<org.mujoco.xml.body.GeomType.Builder<?>> geoms = geomToCSGMap.get(affineNameMapGet);
 				double mass = myLink.getLinkConfiguration().getMassKg()/parts.size();
-				if(mass<0.001) {
+				if(mass<0.001|| Double.isNaN(mass)||Double.isInfinite(mass)) {
 					mass=0.001;
 				}
 				for(org.mujoco.xml.body.GeomType.Builder<?>geom:geoms) {
