@@ -38,7 +38,7 @@ public class ConfigurationDatabase {
 
 	}
 
-	public static Object getObject(String paramsKey, String objectKey, Object defaultValue) {
+	public static synchronized Object getObject(String paramsKey, String objectKey, Object defaultValue) {
 		if (getParamMap(paramsKey).get(objectKey) == null) {
 			System.err.println("Cant find: " + paramsKey + ":" + objectKey);
 			setObject(paramsKey, objectKey, defaultValue);
@@ -53,7 +53,7 @@ public class ConfigurationDatabase {
 		return getDatabase().get(paramsKey);
 	}
 
-	public static Object setObject(String paramsKey, String objectKey, Object value) {
+	public static synchronized Object setObject(String paramsKey, String objectKey, Object value) {
 		return getParamMap(paramsKey).put(objectKey, value);
 	}
 
@@ -61,7 +61,7 @@ public class ConfigurationDatabase {
 		return getParamMap(paramsKey).remove(objectKey);
 	}
 
-	public static void save() {
+	public static synchronized void save() {
 		if (loggedInAs == null)
 			return;
 		String writeOut = null;
