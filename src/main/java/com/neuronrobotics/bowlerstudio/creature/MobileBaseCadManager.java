@@ -138,6 +138,7 @@ public class MobileBaseCadManager implements Runnable {
 			Affine frameOffset = TransformFactory.nrToAffine(vitamin.getLocation());
 			vitaminLocation.put(vitamin, frameOffset);
 			vitamin.addChangeListener(()->{
+				//System.out.println(vitamin.getName()+" changed to "+vitamin.getLocation().toSimpleString());
 				BowlerKernel.runLater(()->{
 					TransformFactory.nrToAffine(vitamin.getLocation(),frameOffset);
 				});
