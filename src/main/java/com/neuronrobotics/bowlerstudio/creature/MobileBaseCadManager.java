@@ -754,7 +754,7 @@ public class MobileBaseCadManager implements Runnable {
 						try {
 							System.err.println("Clearing the compiled CAD script for " + key);
 							cadScriptCache.remove(key);
-							ex.printStackTrace();
+							//ex.printStackTrace();
 							r.run();
 						} catch (Exception e) {
 							getUi().highlightException(f, e);
@@ -885,7 +885,7 @@ public class MobileBaseCadManager implements Runnable {
 			getAllCad().clear();
 			setAllCad(new ArrayList<>());
 		}
-		System.gc();
+		//System.gc();
 		MobileBase device = base;
 		if (getBasetoCadMap().get(device) == null) {
 			getBasetoCadMap().put(device, new ArrayList<CSG>());
@@ -1219,6 +1219,9 @@ public class MobileBaseCadManager implements Runnable {
 		for (DHParameterKinematics k : base.getAllDHChains()) {
 			k.setRenderWrangler(this);
 		}
+		base.setConfigurationUpdate(()->{
+			generateCad();
+		});
 		run();
 		// new Exception("Adding the mysteryListener
 		// "+b.getScriptingName()).printStackTrace();
