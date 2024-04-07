@@ -135,7 +135,10 @@ public class MobileBaseCadManager implements Runnable {
 		if(!vitaminDisplay.containsKey(vitamin)) {
 			CSG starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
 			starting.setManipulator(manipulator);
-			Affine frameOffset = TransformFactory.nrToAffine(vitamin.getLocation());
+			Affine frameOffset=new Affine();
+			BowlerKernel.runLater(() -> {
+				TransformFactory.nrToAffine(vitamin.getLocation(), frameOffset);
+			});
 			vitaminLocation.put(vitamin, frameOffset);
 			vitamin.addChangeListener(()->{
 				//System.out.println(vitamin.getName()+" changed to "+vitamin.getLocation().toSimpleString());
@@ -1547,5 +1550,21 @@ public class MobileBaseCadManager implements Runnable {
 		// TODO Auto-generated method stub
 		return cadGenerating;
 	}
+
+	public static MobileBaseCadManager get(IVitaminHolder holder) {
+		for(MobileBase b:cadmap.keySet()) {
+			if(b==holder)
+				return get(b);
+			for(DHParameterKinematics k:b.getAllDHChains()) {
+				for(int i=0;i<k.getNumberOfLinks();i++) {
+					if(k.getAbstractLink(i)==holder|| k.getLinkConfiguration(i)==holder) {
+						return get(b);
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
 
 }
