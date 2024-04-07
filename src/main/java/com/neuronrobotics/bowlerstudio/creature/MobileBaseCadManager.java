@@ -20,6 +20,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
@@ -71,7 +72,10 @@ public class MobileBaseCadManager implements Runnable {
 	private HashMap<DHParameterKinematics, ArrayList<CSG>> DHtoCadMap = new HashMap<>();
 	private HashMap<LinkConfiguration, ArrayList<CSG>> LinktoCadMap = new HashMap<>();
 	private HashMap<MobileBase, ArrayList<CSG>> BasetoCadMap = new HashMap<>();
-	private HashMap<VitaminLocation,CSG> vitamins=new HashMap<>();
+	private HashMap<VitaminLocation,CSG> vitaminCad=new HashMap<>();
+	private HashMap<VitaminLocation,CSG> vitaminDisplay=new HashMap<>();
+	private HashMap<VitaminLocation,Affine> vitaminLocation=new HashMap<>();
+
 
 	private boolean cadGenerating = false;
 	private boolean showingStl = false;
@@ -90,15 +94,15 @@ public class MobileBaseCadManager implements Runnable {
 	private static ArrayList<Runnable> toRun = new ArrayList<Runnable>();
 	private ArrayList<IRenderSynchronizationEvent> rendersync=new ArrayList<>();
 	private boolean forceChage = true;
-	
 	public CSG getVitamin(VitaminLocation vitamin) throws Exception {
-		if(!vitamins.containsKey(vitamin)) {
+		if(!vitaminCad.containsKey(vitamin)) {
 			CSG starting = Vitamins.get(vitamin.getType(), vitamin.getSize())
 					.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
-			vitamins.put(vitamin, starting);
+			vitaminCad.put(vitamin, starting);
 		}
-		return vitamins.get(vitamin);
+		return vitaminCad.get(vitamin);
 	}
+	
 	public ArrayList<CSG> getVitamins(IVitaminHolder link,Affine manipulator) {
 		ArrayList<CSG> parts = new ArrayList<CSG>();
 		for(VitaminLocation vi:link.getVitamins()) {
@@ -114,6 +118,10 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		return parts;
 	}
+	public ArrayList<CSG> getVitamins(AbstractLink link) {
+		LinkConfiguration conf = link.getLinkConfiguration();
+		return getVitamins(conf, (Affine) link.getGlobalPositionListener());
+	}
 	public ArrayList<CSG> getVitamins(AbstractLink link,Affine manipulator) {
 		LinkConfiguration conf = link.getLinkConfiguration();
 		return getVitamins(conf, manipulator);
@@ -121,6 +129,57 @@ public class MobileBaseCadManager implements Runnable {
 	public ArrayList<CSG> getVitamins(MobileBase base) {
 		Affine rootListener = (Affine) base.getRootListener();
 		return getVitamins(base, rootListener);
+	}
+	
+	public CSG getVitaminDisplay(VitaminLocation vitamin,Affine manipulator) throws Exception {
+		if(!vitaminDisplay.containsKey(vitamin)) {
+			CSG starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
+			starting.setManipulator(manipulator);
+			Affine frameOffset = TransformFactory.nrToAffine(vitamin.getLocation());
+			vitaminLocation.put(vitamin, frameOffset);
+			vitamin.addChangeListener(()->{
+				BowlerKernel.runLater(()->{
+					TransformFactory.nrToAffine(vitamin.getLocation(),frameOffset);
+				});
+			});
+			starting.getMesh().getTransforms().add(frameOffset);
+			vitaminDisplay.put(vitamin, starting);
+		}
+		return vitaminDisplay.get(vitamin);
+	}
+
+	public Affine getVitaminAffine(VitaminLocation vitamin) {
+		Affine a = vitaminLocation.get(vitamin);
+		if(a!=null)
+			return a;
+		throw new RuntimeException("Affine not present! "+vitamin.getName());
+	}
+	
+	public ArrayList<CSG> getVitaminsDisplay(IVitaminHolder link,Affine manipulator) {
+		ArrayList<CSG> parts = new ArrayList<CSG>();
+		for(VitaminLocation vi:link.getVitamins()) {
+			CSG vitamin;
+			try {
+				vitamin = getVitaminDisplay(vi,manipulator);
+				parts.add(vitamin);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return parts;
+	}
+	public ArrayList<CSG> getVitaminsDisplay(AbstractLink link) {
+		LinkConfiguration conf = link.getLinkConfiguration();
+		return getVitaminsDisplay(conf, (Affine) link.getGlobalPositionListener());
+	}
+	public ArrayList<CSG> getVitaminsDisplay(AbstractLink link,Affine manipulator) {
+		LinkConfiguration conf = link.getLinkConfiguration();
+		return getVitaminsDisplay(conf, manipulator);
+	}
+	public ArrayList<CSG> getVitaminsDisplay(MobileBase base) {
+		Affine rootListener = (Affine) base.getRootListener();
+		return getVitaminsDisplay(base, rootListener);
 	}
 	
 	public void render() {
@@ -291,7 +350,8 @@ public class MobileBaseCadManager implements Runnable {
 		for (MobileBaseCadManager m : slaves) {
 			m.clear();
 		}
-		vitamins.clear();
+		vitaminCad.clear();
+		vitaminDisplay.clear();
 	}
 
 	private static class IMobileBaseUIlocal implements IMobileBaseUI {
