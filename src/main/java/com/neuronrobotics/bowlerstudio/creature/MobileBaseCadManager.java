@@ -95,21 +95,34 @@ public class MobileBaseCadManager implements Runnable {
 	private ArrayList<IRenderSynchronizationEvent> rendersync=new ArrayList<>();
 	private boolean forceChage = true;
 	public CSG getVitamin(VitaminLocation vitamin) throws Exception {
+		return getVitamin(vitamin,new Affine());
+	}
+	public CSG getVitamin(VitaminLocation vitamin,Affine manipulator)  {
 		if(!vitaminCad.containsKey(vitamin)) {
-			CSG starting = Vitamins.get(vitamin.getType(), vitamin.getSize())
-					.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
+			CSG starting;
+			try {
+				starting = Vitamins.get(vitamin.getType(), vitamin.getSize())
+						.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
 			vitaminCad.put(vitamin, starting);
+			starting.setManipulator(manipulator);
 		}
 		return vitaminCad.get(vitamin);
 	}
-	
 	public ArrayList<CSG> getVitamins(IVitaminHolder link,Affine manipulator) {
+		ArrayList<VitaminLocation> vitamins = link.getVitamins();
+		return toVitaminCad(vitamins,manipulator);
+	}
+	private ArrayList<CSG> toVitaminCad(ArrayList<VitaminLocation> vitamins,Affine manipulator) {
 		ArrayList<CSG> parts = new ArrayList<CSG>();
-		for(VitaminLocation vi:link.getVitamins()) {
+		for(VitaminLocation vi:vitamins) {
 			CSG vitamin;
 			try {
-				vitamin = getVitamin(vi);
-				vitamin.setManipulator(manipulator);
+				vitamin = getVitamin(vi,manipulator);
 				parts.add(vitamin);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -118,10 +131,22 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		return parts;
 	}
+	
+	
 	public ArrayList<CSG> getVitamins(AbstractLink link) {
 		LinkConfiguration conf = link.getLinkConfiguration();
 		return getVitamins(conf, (Affine) link.getGlobalPositionListener());
 	}
+	public ArrayList<CSG> getNonActuatorVitamins(AbstractLink link,Affine manipulator) {
+		return toVitaminCad(link.getNonActuatorVitamins(),manipulator);
+	}
+	public CSG getVitaminsShafts(AbstractLink link,Affine manipulator) {
+		return getVitamin(link.getShaftVitamin(),manipulator);
+	}
+	public CSG getVitaminsElectroMechanical(AbstractLink link,Affine manipulator) {
+		return getVitamin(link.getElectroMechanicalVitamin(),manipulator);
+	}
+	
 	public ArrayList<CSG> getVitamins(AbstractLink link,Affine manipulator) {
 		LinkConfiguration conf = link.getLinkConfiguration();
 		return getVitamins(conf, manipulator);
@@ -131,9 +156,16 @@ public class MobileBaseCadManager implements Runnable {
 		return getVitamins(base, rootListener);
 	}
 	
-	public CSG getVitaminDisplay(VitaminLocation vitamin,Affine manipulator) throws Exception {
+	public CSG getVitaminDisplay(VitaminLocation vitamin,Affine manipulator){
 		if(!vitaminDisplay.containsKey(vitamin)) {
-			CSG starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
+			CSG starting;
+			try {
+				starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
 			starting.setManipulator(manipulator);
 			Affine frameOffset=new Affine();
 			BowlerKernel.runLater(() -> {
@@ -160,8 +192,14 @@ public class MobileBaseCadManager implements Runnable {
 	}
 	
 	public ArrayList<CSG> getVitaminsDisplay(IVitaminHolder link,Affine manipulator) {
+		
+		return vitaminsToDisplay(link.getVitamins(),manipulator);
+	}
+	
+	
+	public ArrayList<CSG> vitaminsToDisplay(ArrayList<VitaminLocation> l,Affine manipulator){
 		ArrayList<CSG> parts = new ArrayList<CSG>();
-		for(VitaminLocation vi:link.getVitamins()) {
+		for(VitaminLocation vi:l) {
 			CSG vitamin;
 			try {
 				vitamin = getVitaminDisplay(vi,manipulator);
@@ -173,6 +211,7 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		return parts;
 	}
+	
 	public ArrayList<CSG> getVitaminsDisplay(AbstractLink link) {
 		LinkConfiguration conf = link.getLinkConfiguration();
 		return getVitaminsDisplay(conf, (Affine) link.getGlobalPositionListener());
@@ -181,6 +220,16 @@ public class MobileBaseCadManager implements Runnable {
 		LinkConfiguration conf = link.getLinkConfiguration();
 		return getVitaminsDisplay(conf, manipulator);
 	}
+	public ArrayList<CSG> getNonActuatorVitaminsDisplay(AbstractLink link,Affine manipulator) {
+		return vitaminsToDisplay(link.getNonActuatorVitamins(),manipulator);
+	}
+	public CSG getVitaminsShaftsDisplay(AbstractLink link,Affine manipulator) {
+		return getVitaminDisplay(link.getShaftVitamin(),manipulator);
+	}
+	public CSG getVitaminsElectroMechanicalDisplay(AbstractLink link,Affine manipulator) {
+		return getVitaminDisplay(link.getElectroMechanicalVitamin(),manipulator);
+	}
+	
 	public ArrayList<CSG> getVitaminsDisplay(MobileBase base) {
 		Affine rootListener = (Affine) base.getRootListener();
 		return getVitaminsDisplay(base, rootListener);
