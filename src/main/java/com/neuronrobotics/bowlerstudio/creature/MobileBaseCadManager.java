@@ -735,14 +735,7 @@ public class MobileBaseCadManager implements Runnable {
 		try {
 			File f = ScriptingEngine.fileFromGit(args[0], args[1]);
 			if (cadScriptCache.get(key) == null) {
-				try {
-					System.err.println(
-							"Building the compiled CAD script for " + key + " " + base + " " + base.getScriptingName());
-					cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
-				} catch (Throwable e) {
-					getUi().highlightException(f, e);
-					throw e;
-				}
+				build(key, f);
 				FileChangeWatcher watcher = FileChangeWatcher.watch(f);
 				Exception ex = new Exception("CAD script declared here and regenerated");
 				IFileChangeListener l = new IFileChangeListener() {
@@ -754,6 +747,12 @@ public class MobileBaseCadManager implements Runnable {
 						try {
 							System.err.println("Clearing the compiled CAD script for " + key);
 							cadScriptCache.remove(key);
+							try {
+								build(key, f);
+							} catch (Throwable e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 							//ex.printStackTrace();
 							r.run();
 						} catch (Exception e) {
@@ -788,6 +787,16 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		throw new RuntimeException("File Missing!");
 
+	}
+	private void build(String key, File f) throws Throwable {
+		try {
+			System.err.println(
+					"Building the compiled CAD script for " + key + " " + base + " " + base.getScriptingName());
+			cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
+		} catch (Throwable e) {
+			getUi().highlightException(f, e);
+			throw e;
+		}
 	}
 
 	private void closeScriptFromFileInfo(String[] args) {
