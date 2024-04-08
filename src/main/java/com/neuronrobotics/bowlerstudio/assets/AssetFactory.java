@@ -26,7 +26,7 @@ import java.util.List;
 public class AssetFactory {
 
   public static final String repo = "BowlerStudioImageAssets";
-  private static String gitSource = "https://github.com/madhephaestus/" + repo + ".git";
+  private static String gitSource = "https://github.com/CommonWealthRobotics/" + repo + ".git";
   private static HashMap<String, Image> cache = new HashMap<>();
   private static HashMap<String, FXMLLoader> loaders = new HashMap<>();
   private static String assetRepoBranch = "";
