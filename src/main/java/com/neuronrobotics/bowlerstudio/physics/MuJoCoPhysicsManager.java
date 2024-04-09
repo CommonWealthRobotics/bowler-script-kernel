@@ -908,29 +908,8 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		if(!cadMan.isCADstarted() && cadMan.getProcesIndictor().get()<0.1) {
 			cadMan.generateCad();
 		}
-		boolean viewer = cadMan.isConfigMode();
 		long start = System.currentTimeMillis();
 		waitForCad(cadMan,start);
-		try {
-			Thread.sleep(500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			throw new RuntimeException(e);
-		}
-		if (viewer) {
-			cadMan.setConfigurationViewerMode(false);
-			cadMan.generateCad();
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				throw new RuntimeException(e);
-			}
-		}
-		waitForCad(cadMan,start);
-		cadMan.render();
-		ThreadUtil.wait(100);
-
 	}
 
 	public  void waitForCad(MobileBaseCadManager cadMan, long start) {
