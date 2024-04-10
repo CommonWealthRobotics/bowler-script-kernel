@@ -250,7 +250,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 //				System.exit(-5);
 //			}
 			
-			throw new RuntimeException(t);
+			//throw new RuntimeException(t);
+			return;
 		}
 
 		if (processing) {
