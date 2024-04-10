@@ -748,7 +748,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 
-	private Object scriptFromFileInfo(String name,String[] args, Runnable r) throws Throwable{
+	private Object scriptFromFileInfo(String name,String[] args, Runnable runner) throws Throwable{
 		String key = args[0] + ":" + args[1];
 		try {
 			File f = ScriptingEngine.fileFromGit(args[0], args[1]);
@@ -772,7 +772,7 @@ public class MobileBaseCadManager implements Runnable {
 								e.printStackTrace();
 							}
 							//ex.printStackTrace();
-							r.run();
+							runner.run();
 						} catch (Exception e) {
 							getUi().highlightException(f, e);
 						}
@@ -878,21 +878,30 @@ public class MobileBaseCadManager implements Runnable {
 
 	private ICadGenerator getConfigurationDisplay()throws Throwable {
 		if (cadEngineConfiguration == null) {
-			Object cadForBodyEngine = scriptFromFileInfo("ConfigDisplay",new String[] {
-					"https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy" }, () -> {
-						MobileBaseCadManager mobileBaseCadManager = null;
-						try {
-							for (MobileBase manager : cadmap.keySet()) {
-								mobileBaseCadManager = cadmap.get(manager);
-								if (mobileBaseCadManager.autoRegen)
-									if (mobileBaseCadManager.isConfigMode())
-										mobileBaseCadManager.generateCad();
-							}
-						} catch (Exception e) {
-							if (mobileBaseCadManager != null)
-								mobileBaseCadManager.getUi().highlightException(null, e);
-						}
-					});
+			String[] args = new String[] {
+					"https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git", "dhcad.groovy" };
+			Object cadForBodyEngine = scriptFromFileInfo("ConfigDisplay", args, () -> {
+				cadEngineConfiguration = null;
+				try {
+					getConfigurationDisplay();
+				} catch (Throwable e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				MobileBaseCadManager mobileBaseCadManager = null;
+				try {
+					for (MobileBase manager : cadmap.keySet()) {
+						mobileBaseCadManager = cadmap.get(manager);
+						if (mobileBaseCadManager.autoRegen)
+							if (mobileBaseCadManager.isConfigMode())
+								mobileBaseCadManager.generateCad();
+					}
+				} catch (Exception e) {
+					if (mobileBaseCadManager != null)
+						mobileBaseCadManager.getUi().highlightException(null, e);
+				}
+
+			});
 			if (ICadGenerator.class.isInstance(cadForBodyEngine))
 				cadEngineConfiguration = (ICadGenerator) cadForBodyEngine;
 		}
@@ -1509,9 +1518,7 @@ public class MobileBaseCadManager implements Runnable {
 		return mobileBaseCadManager;
 	}
 
-	private void setMaster(MobileBaseCadManager master) {
-		this.master = master;
-	}
+
 
 	public static MobileBaseCadManager get(MobileBase device) {
 		if (cadmap.get(device) == null) {
