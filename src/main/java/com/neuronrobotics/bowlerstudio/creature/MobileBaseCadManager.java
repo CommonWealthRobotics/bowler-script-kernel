@@ -42,6 +42,7 @@ import com.neuronrobotics.sdk.addons.kinematics.ITaskSpaceUpdateListenerNR;
 import com.neuronrobotics.sdk.addons.kinematics.IVitaminHolder;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminFrame;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
@@ -103,6 +104,7 @@ public class MobileBaseCadManager implements Runnable {
 			try {
 				starting = Vitamins.get(vitamin.getType(), vitamin.getSize())
 						.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
+				starting.setIsWireFrame(true);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -117,6 +119,32 @@ public class MobileBaseCadManager implements Runnable {
 		ArrayList<VitaminLocation> vitamins = link.getVitamins();
 		return toVitaminCad(vitamins,manipulator);
 	}
+	public  ArrayList<CSG>  getOriginVitamins(IVitaminHolder link,Affine manipulator){
+		ArrayList<VitaminLocation> vitamins = link.getOriginVitamins();
+		return toVitaminCad(vitamins,manipulator);
+	}
+	public  ArrayList<CSG>  getDefaultVitamins(IVitaminHolder link,Affine manipulator){
+		ArrayList<VitaminLocation> vitamins = link.getDefaultVitamins();
+		return toVitaminCad(vitamins,manipulator);
+	}
+	public ArrayList<CSG>  getPreviousLinkVitamins(IVitaminHolder link,Affine manipulator){
+		ArrayList<VitaminLocation> vitamins = link.getPreviousLinkVitamins();
+		return toVitaminCad(vitamins,manipulator);
+	}
+
+	public  ArrayList<CSG>  getOriginVitaminsDisplay(IVitaminHolder link,Affine manipulator){
+		ArrayList<VitaminLocation> vitamins = link.getOriginVitamins();
+		return vitaminsToDisplay(vitamins,manipulator);
+	}
+	public  ArrayList<CSG>  getDefaultVitaminsDisplay(IVitaminHolder link,Affine manipulator){
+		ArrayList<VitaminLocation> vitamins = link.getDefaultVitamins();
+		return vitaminsToDisplay(vitamins,manipulator);
+	}
+	public ArrayList<CSG>  getPreviousLinkVitaminsDisplay(IVitaminHolder link,Affine manipulator){
+		ArrayList<VitaminLocation> vitamins = link.getPreviousLinkVitamins();
+		return vitaminsToDisplay(vitamins,manipulator);
+	}
+	
 	private ArrayList<CSG> toVitaminCad(ArrayList<VitaminLocation> vitamins,Affine manipulator) {
 		ArrayList<CSG> parts = new ArrayList<CSG>();
 		for(VitaminLocation vi:vitamins) {
