@@ -1369,8 +1369,10 @@ public class MobileBaseCadManager implements Runnable {
 			System.err.println("Limb not loaded yet");
 		}
 	}
-
 	public void generateCad() {
+		generateCadWithEnd((Runnable)null);
+	}
+	public void generateCadWithEnd(Runnable done) {
 		if (cadGenerating || !getAutoRegen())
 			return;
 		cadGenerating = true;
@@ -1414,7 +1416,14 @@ public class MobileBaseCadManager implements Runnable {
 					e.printStackTrace();
 				}
 				setProgress(1);
-				// System.gc();
+				if(done!=null) {
+					try {
+						done.run();
+					}catch(Throwable t) {
+						t.printStackTrace();
+					}
+				}
+				System.gc();
 			}
 		}.start();
 	}
