@@ -719,17 +719,7 @@ public class MobileBaseCadManager implements Runnable {
 		setMobileBase(base);
 	}
 
-//	public File getCadScript() {
-//		return cadScript;
-//	}
 
-//	public void setCadScript(File cadScript) {
-//		if (cadScript == null)
-//			return;
-//		FileWatchDeviceWrapper.watch(base, cadScript, cadWatcher);
-//
-//		this.cadScript = cadScript;
-//	}
 	private Object scriptFromFileInfo(String name,String[] args, Runnable r) throws Throwable{
 		String key = args[0] + ":" + args[1];
 		try {
@@ -934,7 +924,7 @@ public class MobileBaseCadManager implements Runnable {
 				ArrayList<CSG> arrayList = getBasetoCadMap().get(device);
 				if (clear) {
 					arrayList.clear();
-					System.gc();
+					//System.gc();
 				}
 				for (CSG c : getAllCad()) {
 					arrayList.add(c);
@@ -975,7 +965,7 @@ public class MobileBaseCadManager implements Runnable {
 			} else {
 				if (clear) {
 					arrayList.clear();
-					System.gc();
+					//System.gc();
 				}
 				ArrayList<CSG> linksCad = generateCad(l);
 
@@ -997,13 +987,13 @@ public class MobileBaseCadManager implements Runnable {
 			getAllCad().addAll(m.generateBody(m.base, false));
 		}
 		showingStl = false;
-		setProgress(1);
+		//setProgress(1);
 		// PhysicsEngine.clear();
 		// MobileBasePhysicsManager m = new MobileBasePhysicsManager(base,
 		// baseCad, getSimplecad());
 		// PhysicsEngine.startPhysicsThread(50);
 		// return PhysicsEngine.getCsgFromEngine();
-		System.gc();
+
 		return getAllCad();
 	}
 
