@@ -96,14 +96,16 @@ public class MobileBaseCadManager implements Runnable {
 	private ArrayList<IRenderSynchronizationEvent> rendersync=new ArrayList<>();
 	private boolean forceChage = true;
 	public CSG getVitamin(VitaminLocation vitamin) throws Exception {
-		return getVitamin(vitamin,new Affine());
+		return getVitamin(vitamin,new Affine(),null);
 	}
-	public CSG getVitamin(VitaminLocation vitamin,Affine manipulator)  {
+	public CSG getVitamin(VitaminLocation vitamin,Affine manipulator,TransformNR offset)  {
 		if(!vitaminCad.containsKey(vitamin)) {
 			CSG starting;
 			try {
-				starting = Vitamins.get(vitamin.getType(), vitamin.getSize())
-						.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
+				starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
+				if(offset!=null)
+					starting=starting.transformed(TransformFactory.nrToCSG(offset));
+				starting=starting.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
 				starting.setIsWireFrame(true);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -117,28 +119,28 @@ public class MobileBaseCadManager implements Runnable {
 	}
 	public ArrayList<CSG> getVitamins(IVitaminHolder link,Affine manipulator) {
 		ArrayList<VitaminLocation> vitamins = link.getVitamins();
-		return toVitaminCad(vitamins,manipulator);
+		return toVitaminCad(vitamins,manipulator,null);
 	}
-	public  ArrayList<CSG>  getOriginVitamins(IVitaminHolder link,Affine manipulator){
+	public  ArrayList<CSG>  getOriginVitamins(IVitaminHolder link,Affine manipulator,TransformNR offset){
 		ArrayList<VitaminLocation> vitamins = link.getOriginVitamins();
-		return toVitaminCad(vitamins,manipulator);
+		return toVitaminCad(vitamins,manipulator,offset);
 	}
 	public  ArrayList<CSG>  getDefaultVitamins(IVitaminHolder link,Affine manipulator){
 		ArrayList<VitaminLocation> vitamins = link.getDefaultVitamins();
-		return toVitaminCad(vitamins,manipulator);
+		return toVitaminCad(vitamins,manipulator,null);
 	}
 	public ArrayList<CSG>  getPreviousLinkVitamins(IVitaminHolder link,Affine manipulator){
 		ArrayList<VitaminLocation> vitamins = link.getPreviousLinkVitamins();
-		return toVitaminCad(vitamins,manipulator);
+		return toVitaminCad(vitamins,manipulator,null);
 	}
 
 
-	private ArrayList<CSG> toVitaminCad(ArrayList<VitaminLocation> vitamins,Affine manipulator) {
+	private ArrayList<CSG> toVitaminCad(ArrayList<VitaminLocation> vitamins,Affine manipulator, TransformNR offset) {
 		ArrayList<CSG> parts = new ArrayList<CSG>();
 		for(VitaminLocation vi:vitamins) {
 			CSG vitamin;
 			try {
-				vitamin = getVitamin(vi,manipulator);
+				vitamin = getVitamin(vi,manipulator,offset);
 				parts.add(vitamin);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
