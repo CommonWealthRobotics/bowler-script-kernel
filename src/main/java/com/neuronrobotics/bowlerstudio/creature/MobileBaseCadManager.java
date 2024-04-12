@@ -44,6 +44,7 @@ import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminFrame;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
+import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
@@ -180,20 +181,25 @@ public class MobileBaseCadManager implements Runnable {
 			}
 			starting.setManipulator(manipulator);
 			Affine frameOffset=new Affine();
-			BowlerKernel.runLater(() -> {
-				TransformFactory.nrToAffine(vitamin.getLocation(), frameOffset);
-			});
-			vitaminLocation.put(vitamin, frameOffset);
+			Affine cameraFrame=new Affine();
+			setFrames(vitamin, frameOffset, cameraFrame);
+			vitaminLocation.put(vitamin, cameraFrame);
 			vitamin.addChangeListener(()->{
-				//System.out.println(vitamin.getName()+" changed to "+vitamin.getLocation().toSimpleString());
-				BowlerKernel.runLater(()->{
-					TransformFactory.nrToAffine(vitamin.getLocation(),frameOffset);
-				});
+				setFrames(vitamin, frameOffset, cameraFrame);
 			});
+			starting.getMesh().getTransforms().add(cameraFrame);
 			starting.getMesh().getTransforms().add(frameOffset);
 			vitaminDisplay.put(vitamin, starting);
 		}
 		return vitaminDisplay.get(vitamin);
+	}
+	private void setFrames(VitaminLocation vitamin, Affine frameOffset, Affine cameraFrame) {
+		BowlerKernel.runLater(() -> {
+			TransformNR translationComponent = vitamin.getLocation().copy().setRotation(new RotationNR());
+			TransformNR rotationComponent = new TransformNR().setRotation(vitamin.getLocation().getRotation());
+			TransformFactory.nrToAffine(translationComponent, cameraFrame);
+			TransformFactory.nrToAffine(rotationComponent, frameOffset);
+		});
 	}
 
 	public Affine getVitaminAffine(VitaminLocation vitamin) {
