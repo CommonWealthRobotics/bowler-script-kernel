@@ -713,19 +713,19 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 						))
 						;
 				CSG hull;
-				if(cat.isWheel(myLink)) {
-					double height = part.getTotalZ();
-					double radius =( part.getTotalY()+part.getTotalX())/4.0;
-					double contact =5;
-					if(contact>height)
-						contact=contact/2;
-					CSG cone = Parabola.cone(radius, height/2-contact/2).movez(contact/2);
-					cone=cone.union(cone.rotx(180)).hull();
-					hull = cone
-							.toZMin()
-							.movez(transformed.getMinZ())
-							;
-				}else
+//				if(cat.isWheel(myLink)) {
+//					double height = part.getTotalZ();
+//					double radius =( part.getTotalY()+part.getTotalX())/4.0;
+//					double contact =5;
+//					if(contact>height)
+//						contact=contact/2;
+//					CSG cone = Parabola.cone(radius, height/2-contact/2).movez(contact/2);
+//					cone=cone.union(cone.rotx(180)).hull();
+//					hull = cone
+//							.toZMin()
+//							.movez(transformed.getMinZ())
+//							;
+//				}else
 					try {
 						hull = transformed.hull();
 					}catch(Exception ex) {
