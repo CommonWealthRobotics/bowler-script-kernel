@@ -99,25 +99,7 @@ public class MobileBaseCadManager implements Runnable {
 	public CSG getVitamin(VitaminLocation vitamin) throws Exception {
 		return getVitamin(vitamin,new Affine(),null);
 	}
-	public CSG getVitamin(VitaminLocation vitamin,Affine manipulator,TransformNR offset)  {
-		if(!vitaminCad.containsKey(vitamin)) {
-			CSG starting;
-			try {
-				starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
-				if(offset!=null)
-					starting=starting.transformed(TransformFactory.nrToCSG(offset));
-				starting=starting.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
-				starting.setIsWireFrame(true);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-			vitaminCad.put(vitamin, starting);
-			starting.setManipulator(manipulator);
-		}
-		return vitaminCad.get(vitamin);
-	}
+
 	public ArrayList<CSG> getVitamins(IVitaminHolder link,Affine manipulator) {
 		ArrayList<VitaminLocation> vitamins = link.getVitamins();
 		return toVitaminCad(vitamins,manipulator,null);
@@ -166,14 +148,33 @@ public class MobileBaseCadManager implements Runnable {
 		Affine rootListener = (Affine) base.getRootListener();
 		return getVitamins(base, rootListener);
 	}
-	
-	public CSG getVitaminDisplay(VitaminLocation vitamin,Affine manipulator, TransformNR offset){
-		if(!vitaminDisplay.containsKey(vitamin)) {
+	public CSG getVitamin(VitaminLocation vitamin,Affine manipulator,TransformNR offset)  {
+		if(!vitaminCad.containsKey(vitamin)) {
 			CSG starting;
 			try {
 				starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
+				starting=starting.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
 				if(offset!=null)
 					starting=starting.transformed(TransformFactory.nrToCSG(offset));
+				starting.setIsWireFrame(true);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+			vitaminCad.put(vitamin, starting);
+			starting.setManipulator(manipulator);
+		}
+		return vitaminCad.get(vitamin);
+	}
+	public CSG getVitaminDisplay(VitaminLocation vitamin,Affine manipulator, TransformNR offset){
+		if(!vitaminDisplay.containsKey(vitamin)) {
+			CSG starting;
+			Affine offsetDisplay = new Affine();
+			try {
+				starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
+				if(offset!=null)
+					TransformFactory.nrToAffine(offset,offsetDisplay);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -187,6 +188,8 @@ public class MobileBaseCadManager implements Runnable {
 			vitamin.addChangeListener(()->{
 				setFrames(vitamin, frameOffset, cameraFrame);
 			});
+
+			starting.getMesh().getTransforms().add(offsetDisplay);
 			starting.getMesh().getTransforms().add(cameraFrame);
 			starting.getMesh().getTransforms().add(frameOffset);
 			vitaminDisplay.put(vitamin, starting);
