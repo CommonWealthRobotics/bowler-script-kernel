@@ -125,7 +125,7 @@ public class AssetFactory {
     return cache.get(file);
   }
 
-  public static ImageView loadIcon(String file) {
+  public static javafx.scene.image.ImageView loadIcon(String file) {
     try {
       return new ImageView(loadAsset(file));
     } catch (Exception e) {
