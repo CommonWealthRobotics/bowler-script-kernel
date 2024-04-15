@@ -173,8 +173,11 @@ public class MobileBaseCadManager implements Runnable {
 			Affine offsetDisplay = new Affine();
 			try {
 				starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
-				if(offset!=null)
-					TransformFactory.nrToAffine(offset,offsetDisplay);
+				if(offset!=null){
+					BowlerKernel.runLater(()->{
+						TransformFactory.nrToAffine(offset,offsetDisplay);
+					});
+				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
