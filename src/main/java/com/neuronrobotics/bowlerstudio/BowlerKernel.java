@@ -468,9 +468,8 @@ public class BowlerKernel {
 			m.generateBody();
 			try {
 
-				MobileBase base = (MobileBase) ret2;
 				File baseDir = new File("./manufacturing/");
-				File dir = new File(baseDir.getAbsolutePath() + "/" + base.getScriptingName());
+				File dir = new File(baseDir.getAbsolutePath() + "/" + ret2.getScriptingName());
 				if (!dir.exists())
 					dir.mkdirs();
 				IgenerateBed bed = null;
@@ -479,14 +478,17 @@ public class BowlerKernel {
 				} catch (Throwable T) {
 					throw new RuntimeException(T.getMessage());
 				}
-				bed = m.getPrintBed(dir, bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
+				String remoteURI = ret2.getGitSelfSource()[0];
+				VitaminBomManager BoM = new VitaminBomManager(remoteURI);
+				//BoM.loadBaseVitamins(ret2);
+				bed = m.getPrintBed(dir, bed, ScriptingEngine.getRepositoryCloneDirectory(remoteURI));
 				if (bed == null) {
-					m._generateStls(base, dir, false);
+					m._generateStls(ret2, dir, false);
 					return;
 				}
 				System.out.println("Found arrangeBed API in CAD engine");
-				List<CSG> totalAssembly = bed.arrangeBed(base);
-				base.disconnect();
+				List<CSG> totalAssembly = bed.arrangeBed(ret2);
+				ret2.disconnect();
 				Thread.sleep(1000);
 				System.gc();
 				// Get current size of heap in bytes

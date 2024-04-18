@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -20,29 +19,32 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
 
 public class VitaminBomManager {
-	public static final String MANUFACTURING_BOM_BASE = "manufacturing/bom";
+	public static final String MANUFACTURING_BOM_BASE = "manufacturing/Bill_Of_Materials";
 	public static final String MANUFACTURING_BOM_JSON = MANUFACTURING_BOM_BASE + ".json";
 	public static final String MANUFACTURING_BOM_CSV = MANUFACTURING_BOM_BASE + ".csv";
 	private static boolean saving = false;
 
-	private class VitaminElement {
-		String name;
-		String type;
-		String size;
-		TransformNR pose;
-	}
+//	private class VitaminLocation {
+//		String name;
+//		String type;
+//		String size;
+//		TransformNR pose;
+//	}
 
-	Type type = new TypeToken<HashMap<String, ArrayList<VitaminElement>>>() {
+	Type type = new TypeToken<HashMap<String, ArrayList<VitaminLocation>>>() {
 	}.getType();
-	Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-	private HashMap<String, ArrayList<VitaminElement>> database = null;//
+	Gson gson = new GsonBuilder().disableHtmlEscaping()
+			.excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
+	private HashMap<String, ArrayList<VitaminLocation>> database = null;//
 	private String baseURL;
 
 	public VitaminBomManager(String url) throws IOException {
@@ -59,53 +61,56 @@ public class VitaminBomManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			save();
 		} else {
 			String source;
 			byte[] bytes;
 			try {
 				bytes = Files.readAllBytes(bom.toPath());
 				source = new String(bytes, "UTF-8");
-				database = gson.fromJson(source, type);
+				if(source.length()>0)
+					database = gson.fromJson(source, type);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
 		if(database==null) {
-			database=new HashMap<String, ArrayList<VitaminElement>>();
+			database=new HashMap<String, ArrayList<VitaminLocation>>();
+			save();
 		}
 	}
 
 	public void set(String name, String type, String size, TransformNR location) {
-		VitaminElement newElement = getElement(name);
-		boolean toAdd = false;
+		VitaminLocation newElement = getElement(name);
 		if (newElement == null) {
-			newElement = new VitaminElement();
-			newElement.name = name;
-			toAdd = true;
+			newElement = new VitaminLocation(name,type,size,location);
 		}
-		newElement.pose = location;
-		newElement.size = size;
-		newElement.type = type;
-		String key = type + ":" + size;
+		newElement.setLocation(location);
+		newElement.setSize(size);
+		newElement.setType(type);
+		addVitamin(newElement);
+		// newElement.url=(String) getConfiguration(name).get("source");
+	}
+
+	public void addVitamin(VitaminLocation newElement) {
+		String key = newElement.getType() + ":" + newElement.getSize();
 		// synchronized (database) {
 		if (database.get(key) == null) {
-			database.put(key, new ArrayList<VitaminBomManager.VitaminElement>());
+			database.put(key, new ArrayList<VitaminLocation>());
 		}
+		boolean toAdd=!database.get(key).contains(newElement);
 		if (toAdd)
 			database.get(key).add(newElement);
 		// }
 		save();
-		// newElement.url=(String) getConfiguration(name).get("source");
 	}
 
 	public CSG get(String name) {
-		VitaminElement e = getElement(name);
+		VitaminLocation e = getElement(name);
 		if (e == null)
 			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
 
 		try {
-			CSG transformed = Vitamins.get(e.type, e.size).transformed(TransformFactory.nrToCSG(e.pose));
+			CSG transformed = Vitamins.get(e.getType(), e.getSize()).transformed(TransformFactory.nrToCSG(e.getLocation()));
 			transformed.setManufacturing(incominng -> {
 				return null;
 			});
@@ -120,13 +125,13 @@ public class VitaminBomManager {
 	}
 
 	public TransformNR getCoMLocation(String name) {
-		VitaminElement e = getElement(name);
+		VitaminLocation e = getElement(name);
 		double x = (double) getConfiguration(name).get("massCentroidX");
 		double y = (double) getConfiguration(name).get("massCentroidY");
 
 		double z = (double) getConfiguration(name).get("massCentroidZ");
 
-		return e.pose.copy().translateX(x).translateY(y).translateZ(z);
+		return e.getLocation().copy().translateX(x).translateY(y).translateZ(z);
 	}
 
 	public double getMassKg(String name) {
@@ -134,19 +139,19 @@ public class VitaminBomManager {
 	}
 
 	public Map<String, Object> getConfiguration(String name) {
-		VitaminElement e = getElement(name);
+		VitaminLocation e = getElement(name);
 		if (e == null)
 			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
 
-		return Vitamins.getConfiguration(e.type, e.size);
+		return Vitamins.getConfiguration(e.getType(), e.getSize());
 	}
 
-	private VitaminElement getElement(String name) {
+	private VitaminLocation getElement(String name) {
 		// synchronized (database) {
 		for (String testName : database.keySet()) {
-			ArrayList<VitaminElement> list = database.get(testName);
-			for (VitaminElement el : list) {
-				if (el.name.contentEquals(name))
+			ArrayList<VitaminLocation> list = database.get(testName);
+			for (VitaminLocation el : list) {
+				if (el.getName().contentEquals(name))
 					return el;
 			}
 		}
@@ -169,11 +174,11 @@ public class VitaminBomManager {
 		// String[] source = base.getGitSelfSource();
 
 		for (String key : database.keySet()) {
-			ArrayList<VitaminElement> list = database.get(key);
+			ArrayList<VitaminLocation> list = database.get(key);
 			if (list.size() > 0) {
-				VitaminElement e = list.get(0);
+				VitaminLocation e = list.get(0);
 				String size = database.get(key).size() + "";
-				String URL = (String) getConfiguration(e.name).get("source");
+				String URL = (String) getConfiguration(e.getName()).get("source");
 				csv += key + "," + size + "," + URL + "\n";
 			} else {
 				System.out.println("Failure on " + key);
@@ -222,6 +227,23 @@ public class VitaminBomManager {
 
 	public void save() {
 		saveLocal();
+	}
+
+	public void loadBaseVitamins(MobileBase base) {
+		for(VitaminLocation v:base.getVitamins()) {
+			addVitamin(v);
+		}
+		for(DHParameterKinematics k:base.getAllDHChains()) {
+			for(int i=0;i<k.getNumberOfLinks();i++) {
+				for(VitaminLocation v:k.getVitamins(i)) {
+					addVitamin(v);
+				}
+				MobileBase b = k.getFollowerMobileBase(i);
+				if(b!=null) {
+					loadBaseVitamins(b);
+				}
+			}
+		}
 	}
 
 }
