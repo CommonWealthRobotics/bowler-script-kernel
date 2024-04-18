@@ -480,7 +480,7 @@ public class BowlerKernel {
 				}
 				String remoteURI = ret2.getGitSelfSource()[0];
 				VitaminBomManager BoM = new VitaminBomManager(remoteURI);
-				//BoM.loadBaseVitamins(ret2);
+				BoM.loadBaseVitamins(ret2);
 				bed = m.getPrintBed(dir, bed, ScriptingEngine.getRepositoryCloneDirectory(remoteURI));
 				if (bed == null) {
 					m._generateStls(ret2, dir, false);
