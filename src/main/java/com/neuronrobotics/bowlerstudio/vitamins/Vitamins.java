@@ -161,14 +161,20 @@ public class Vitamins {
 						repostring.toString(), // file to load
 						servoMeasurments);
 				Map<String, Object> configuration = Vitamins.getConfiguration(type, id);
-
-				Transform com = new Transform()
-									.movex(Double.parseDouble(configuration.get("massCentroidX").toString()))
-									.movey(Double.parseDouble(configuration.get("massCentroidY").toString()))
-									.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
-				newVitamin.getStorage().set("massKg", configuration.get("massKg"));
-				newVitamin.getStorage().set("massCentroid", com);
-				return newVitamin;
+				try {
+					Transform com = new Transform()
+										.movex(Double.parseDouble(configuration.get("massCentroidX").toString()))
+										.movey(Double.parseDouble(configuration.get("massCentroidY").toString()))
+										.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
+					newVitamin.getStorage().set("massKg", configuration.get("massKg"));
+					newVitamin.getStorage().set("massCentroid", com);
+					return newVitamin;
+				}catch(Exception ex) {
+					Transform com = new Transform();
+					newVitamin.getStorage().set("massKg", 0.01);
+					newVitamin.getStorage().set("massCentroid", com);
+					return newVitamin;
+				}
 			} else {
 				Log.error(key + " Failed to load from script");
 				return null;
