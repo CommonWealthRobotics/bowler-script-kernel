@@ -28,7 +28,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
 
 public class VitaminBomManager {
-	public static final String MANUFACTURING_BOM_BASE = "manufacturing/Bill_Of_Materials";
+	public static final String MANUFACTURING_BOM_BASE = "manufacturing/bom";
 	public static final String MANUFACTURING_BOM_JSON = MANUFACTURING_BOM_BASE + ".json";
 	public static final String MANUFACTURING_BOM_CSV = MANUFACTURING_BOM_BASE + ".csv";
 	private static boolean saving = false;
@@ -79,17 +79,17 @@ public class VitaminBomManager {
 		}
 	}
 
-	public void set(String name, String type, String size, TransformNR location) {
-		VitaminLocation newElement = getElement(name);
-		if (newElement == null) {
-			newElement = new VitaminLocation(name,type,size,location);
-		}
-		newElement.setLocation(location);
-		newElement.setSize(size);
-		newElement.setType(type);
-		addVitamin(newElement);
-		// newElement.url=(String) getConfiguration(name).get("source");
-	}
+//	public void set(String name, String type, String size, TransformNR location) {
+//		VitaminLocation newElement = getElement(name);
+//		if (newElement == null) {
+//			newElement = new VitaminLocation(name,type,size,location);
+//		}
+//		newElement.setLocation(location);
+//		newElement.setSize(size);
+//		newElement.setType(type);
+//		addVitamin(newElement);
+//		// newElement.url=(String) getConfiguration(name).get("source");
+//	}
 
 	public void addVitamin(VitaminLocation newElement) {
 		String key = newElement.getType() + ":" + newElement.getSize();
@@ -178,7 +178,11 @@ public class VitaminBomManager {
 			if (list.size() > 0) {
 				VitaminLocation e = list.get(0);
 				String size = database.get(key).size() + "";
-				String URL = (String) getConfiguration(e.getName()).get("source");
+				Map<String, Object> configuration = getConfiguration(e.getName());
+				String URL = (String) configuration.get("source");
+				if(URL==null) {
+					System.out.println(configuration);
+				}
 				csv += key + "," + size + "," + URL + "\n";
 			} else {
 				System.out.println("Failure on " + key);
