@@ -1,5 +1,7 @@
 package com.neuronrobotics.sdk.addons.gamepad;
 
+import com.neuronrobotics.bowlerstudio.BowlerStudioController;
+
 /**
  * Sample Skeleton for "jogTrainerWidget.fxml" Controller Class
  * You can copy and paste this code into your favorite IDE
@@ -7,6 +9,7 @@ package com.neuronrobotics.sdk.addons.gamepad;
 
 import com.neuronrobotics.bowlerstudio.assets.AssetFactory;
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
+import com.neuronrobotics.bowlerstudio.assets.FontSizeManager;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -140,6 +143,12 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		// This is needed when loading on MAC
 		loader.setClassLoader(getClass().getClassLoader());
 		root = loader.load();
+		FontSizeManager.addListener(fontNum->{
+			int tmp = fontNum-10;
+			if(tmp<12)
+				tmp=12;
+			root.setStyle("-fx-font-size: "+tmp+"pt");
+		});
 		Platform.runLater(() -> {
 			primaryStage.setTitle("Configure the controller");
 
