@@ -30,7 +30,7 @@ public class AssetFactory {
   private static HashMap<String, Image> cache = new HashMap<>();
   private static HashMap<String, FXMLLoader> loaders = new HashMap<>();
   private static String assetRepoBranch = "";
-
+  
   private AssetFactory() {
   }
 
@@ -127,7 +127,15 @@ public class AssetFactory {
 
   public static javafx.scene.image.ImageView loadIcon(String file) {
     try {
-      return new ImageView(loadAsset(file));
+      ImageView imageView = new ImageView(loadAsset(file));
+      FontSizeManager.addListener(font->{
+    	  double scale =((double)font)/24.0;
+    	  if(scale<1)
+    		  scale=1;
+    	  imageView.setScaleX(scale);
+    	  imageView.setScaleY(scale);
+      });
+      return imageView;
     } catch (Exception e) {
     	e.printStackTrace();
       try {
