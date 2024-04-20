@@ -128,8 +128,8 @@ public class AssetFactory {
   public static javafx.scene.image.ImageView loadIcon(String file) {
     try {
       ImageView imageView = new ImageView(loadAsset(file));
-      FontSizeManager.addListener(font->{
-    	  double scale =((double)font)/24.0;
+      FontSizeManager.addListener(fontNum->{
+    	  double scale =((double)fontNum)/24.0;
     	  if(scale<1)
     		  scale=1;
     	  imageView.setScaleX(scale);

@@ -1,6 +1,5 @@
 package com.neuronrobotics.sdk.addons.gamepad;
 
-import com.neuronrobotics.bowlerstudio.BowlerStudioController;
 
 /**
  * Sample Skeleton for "jogTrainerWidget.fxml" Controller Class
