@@ -40,7 +40,7 @@ public class ConfigurationDatabase {
 
 	public static synchronized Object getObject(String paramsKey, String objectKey, Object defaultValue) {
 		if (getParamMap(paramsKey).get(objectKey) == null) {
-			System.err.println("Cant find: " + paramsKey + ":" + objectKey);
+			//System.err.println("Cant find: " + paramsKey + ":" + objectKey);
 			setObject(paramsKey, objectKey, defaultValue);
 		}
 		return getParamMap(paramsKey).get(objectKey);
@@ -73,7 +73,7 @@ public class ConfigurationDatabase {
 		for (int i = 0; i < 2; i++) {
 			try {
 				if (getGitSource().contentEquals(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT)) {
-					System.out.println("Not pushing changes the default branch");
+					//System.out.println("Not pushing changes the default branch");
 					return;
 				}
 				if(ScriptingEngine.isLoginSuccess())
@@ -139,7 +139,7 @@ public class ConfigurationDatabase {
 			checked = false;
 			gitSource = null;
 			database = null;
-			System.out.println("\n\nLogout from "+loggedInAs2+"\n\n");
+			//System.out.println("\n\nLogout from "+loggedInAs2+"\n\n");
 			return;
 		}
 		if (loggedInAs != null)
@@ -150,7 +150,7 @@ public class ConfigurationDatabase {
 		HashMap<String, HashMap<String, Object>> existing = database;
 		database = null;
 		try {
-			System.out.println("Setting Configurations repo to " + getGitSource());
+			//System.out.println("Setting Configurations repo to " + getGitSource());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -169,7 +169,7 @@ public class ConfigurationDatabase {
 				for (String objectKey : val.keySet()) {
 					Object defaultValue = val.get(objectKey);
 					Object value = getObject(pkey, objectKey, defaultValue);
-					System.err.println("Setting " + pkey + ":" + objectKey + " to " + value + " with previous being "+ defaultValue);
+					//System.err.println("Setting " + pkey + ":" + objectKey + " to " + value + " with previous being "+ defaultValue);
 				}
 
 			}
@@ -213,7 +213,7 @@ public class ConfigurationDatabase {
 	}
 
 	public static void setGitSource(String myAssets) {
-		System.out.println("Using my version of configuration database: " + myAssets);
+		//System.out.println("Using my version of configuration database: " + myAssets);
 		if (myAssets != null && gitSource != null && myAssets.contentEquals(gitSource))
 			return;
 		database = null;

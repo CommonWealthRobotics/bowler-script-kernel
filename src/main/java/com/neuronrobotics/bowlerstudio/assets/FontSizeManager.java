@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 
 public class FontSizeManager {
-	private static int[] fonts = new int[] { 6, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40 };
+	private static int[] fonts = new int[] { 6, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40,48 };
 	private static ArrayList<IFontSizeReciver> listeners = new ArrayList<IFontSizeReciver>();
 	public static int[] getFontOptions() {
 		return fonts;
