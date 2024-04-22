@@ -129,7 +129,7 @@ public class AssetFactory {
     try {
       ImageView imageView = new ImageView(loadAsset(file));
       FontSizeManager.addListener(fontNum->{
-    	  double scale =((double)fontNum)/24.0;
+    	  double scale =((double)fontNum)/(FontSizeManager.systemDefaultFontSize*2);
     	  if(scale<1)
     		  scale=1;
     	  imageView.setScaleX(scale);
