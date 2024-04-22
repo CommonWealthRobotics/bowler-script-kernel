@@ -22,6 +22,7 @@ public class FontSizeManager {
 				t.printStackTrace();
 			}
 		}
+		ConfigurationDatabase.save();
 	}
 	public static void addListener(IFontSizeReciver r) {
 		if(listeners.contains(r))
