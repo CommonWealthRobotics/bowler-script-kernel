@@ -59,6 +59,7 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -908,11 +909,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			OutputStream out = null;
 			try {
 				out = FileUtils.openOutputStream(desired, false);
-				IOUtils.write(content, out);
+				IOUtils.write(content, out, Charset.defaultCharset());
 				out.close(); // don't swallow close Exception if copy completes
 				// normally
 			} finally {
-				IOUtils.closeQuietly(out);
+				out.close();
 			}
 			return;
 		}
