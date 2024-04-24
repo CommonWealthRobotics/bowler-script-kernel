@@ -190,7 +190,13 @@ public class Vitamins {
 			}
 		}
 	}
+	public static String getScriptGitURL(String type) {
+		Map<String, Object> script = getMeta(type);
+		
 	
+		return script.get("scriptGit").toString();
+
+	}
 	public static File getScriptFile(String type) {
 		Map<String, Object> script = getMeta(type);
 		
