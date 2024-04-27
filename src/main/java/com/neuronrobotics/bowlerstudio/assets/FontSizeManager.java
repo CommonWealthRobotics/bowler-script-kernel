@@ -11,6 +11,11 @@ public class FontSizeManager {
 	public static int[] getFontOptions() {
 		return fonts;
 	}
+	
+	
+	public static double getImageScale() {
+		return ((double)getDefaultSize())/((double)FontSizeManager.systemDefaultFontSize);
+	}
 	public static int getDefaultSize() {
 		return  ((Number) ConfigurationDatabase.getObject("BowlerStudioConfigs", "fontsize", systemDefaultFontSize)).intValue();
 	}
