@@ -301,7 +301,7 @@ public class Vitamins {
 			System.err.println("Forked repo is missing!");
 			
 			GHRepository newRepo = repo.fork();
-			Thread.sleep(5000);
+			Thread.sleep(6000);
 			Vitamins.gitRpoDatabase = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
 			saveDatabase(type);
 			
