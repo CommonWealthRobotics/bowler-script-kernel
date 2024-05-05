@@ -227,8 +227,14 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			}
 		if (freeObjects != null) {
 			HashMap<String,ArrayList<CSG>> mapParts = new HashMap<>();
+			int count=0;
 			for (CSG part : freeObjects) {
+				count++;
 				String name2 = part.getName();
+				if(name2.length()==0) {
+					name2=""+count;
+					part.setName(name2);
+				}
 				if(!mapParts.containsKey(name2)) {
 					mapParts.put(name2, new ArrayList<CSG>());
 				}
