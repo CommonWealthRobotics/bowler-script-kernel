@@ -787,6 +787,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		
 		org.mujoco.xml.BodyarchType.Builder<?> addBody = globalFrameBody.addBody();
 		String nameOfCSG=null;
+		String nameOfBODY=null;
 		Vector3d centerGroup=null;
 		for (CSG part : partsIn) {
 			if (!checkForPhysics(part))
@@ -795,22 +796,24 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			CSG hull = part.moveToCenter();
 
 			Vector3d center = part.getCenter();
-			if (nameOfCSG == null) {
-				nameOfCSG = part.getName();
-				if (nameOfCSG.length() == 0) {
-					nameOfCSG = "Part-" + (count);
-				}
-				nameOfCSG += "-" + "free";
 
-					addBody.addFreejoint();
-					setStartLocation(center, addBody);
-					centerGroup = center;
-					addBody.withName(nameOfCSG);
-				
+			nameOfCSG = part.getName();
+			if (nameOfCSG.length() == 0) {
+				nameOfCSG = "Part-" + (count);
 			}
+			nameOfCSG += "-"+count+"-" + "free";
+
+			if (nameOfBODY == null) {
+				nameOfBODY = nameOfCSG;
+				addBody.addFreejoint();
+				setStartLocation(center, addBody);
+				centerGroup = center;
+				addBody.withName(nameOfBODY);
+			}
+
 			hull = hull.move(center.minus(centerGroup));
 			hull.setManipulator(new Affine());
-			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfCSG);
+			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfBODY);
 			putCSGInAssets(nameOfCSG, hull.hull(), true);
 			org.mujoco.xml.body.GeomType.Builder<?> geom;
 			geom = addBody.addGeom();
