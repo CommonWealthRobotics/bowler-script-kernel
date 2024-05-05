@@ -834,9 +834,9 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			Vector3d center = part.getCenter();
 			nameOfCSG = part.getName();
 			if (nameOfCSG.length() == 0) {
-				nameOfCSG = "Part-" + (count);
+				nameOfCSG = "Part-" ;
 			}
-			nameOfCSG += "-" + "fixed";
+			nameOfCSG += "-" + (count)+"-"+ "fixed";
 
 			hull.setManipulator(new Affine());
 			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfCSG);
