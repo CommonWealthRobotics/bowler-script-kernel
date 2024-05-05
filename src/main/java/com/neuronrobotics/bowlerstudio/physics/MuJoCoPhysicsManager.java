@@ -55,7 +55,7 @@ import javafx.scene.transform.Affine;
 public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	public  static final int Density_OF_PLA = 1250;
 	public  Mujoco.Builder<Void> builder=null;
-	public  Mujoco.Worldbody.Builder<?> addWorldbody;
+	public  Mujoco.Worldbody.Builder<?> globalFrameBody;
 	public  Mujoco.Asset.Builder<?> asset;
 	public  List<MobileBase> bases;
 	public  List<CSG> freeObjects;
@@ -101,6 +101,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			Thread.sleep(getmRuntime().getTimestepMilliSeconds());
 		}
 	}
+	
 	public MuJoCoPhysicsManager(String name,List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
 			File workingDir) throws IOException, JAXBException {
 		this.name = name.trim();
@@ -180,7 +181,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		if (fixedObjects != null)
 			fixedObjects.clear();
 		builder = null;
-		addWorldbody = null;
+		globalFrameBody = null;
 		asset = null;
 		if (mRuntime != null)
 			mRuntime.close();
@@ -224,24 +225,22 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 					loadBase(cat);
 				}
 			}
-		if (freeObjects != null)
+		if (freeObjects != null) {
+			HashMap<String,ArrayList<CSG>> mapParts = new HashMap<>();
 			for (CSG part : freeObjects) {
-				try {
-					addPart(part, true);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				String name2 = part.getName();
+				if(!mapParts.containsKey(name2)) {
+					mapParts.put(name2, new ArrayList<CSG>());
 				}
+				mapParts.get(name2).add(part);
 			}
+			for(String key:mapParts.keySet()) {
+				addPart(mapParts.get(key), true);
+			}
+		}
 		if (fixedObjects != null)
-			for (CSG part : fixedObjects) {
-				try {
-					addPart(part, false);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			addPart(fixedObjects, false);
+		
 		File f= getXMLFile();
 		if(mRuntime!=null)
 			mRuntime.close();
@@ -363,7 +362,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				.withRgb2(".2 .3 .4").withWidth(512).withHeight(512);
 		asset.addMaterial().withName("grid").withTexture("grid").withTexrepeat("1 1").withTexuniform(true)
 				.withReflectance(BigDecimal.valueOf(0.2));
-		addWorldbody = builder.addWorldbody();
+		globalFrameBody = builder.addWorldbody();
 		contacts= builder.addContact();
 		if(fixedObjects==null) {
 			fixedObjects=new ArrayList<>();
@@ -416,7 +415,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		org.mujoco.xml.BodyarchType.Builder<?> addBody;
 		offsetGlobal=offsetGlobal.times(cat.getRobotToFiducialTransform());
 		if(linkBody2==null) {
-			addBody= addWorldbody.addBody();
+			addBody= globalFrameBody.addBody();
 			String centerString = offsetGlobal.getX()/1000.0+" "+
 			offsetGlobal.getY()/1000.0+" "+
 			lowestPoint;
@@ -778,36 +777,49 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			return 0;
 		return x;
 	}
-	public  void addPart(CSG part, boolean isFree) throws IOException {
-		if(!checkForPhysics(part))
-			return;;
-		String nameOfCSG = part.getName();
-		if(nameOfCSG.length()==0) {
-			nameOfCSG = "Part-"+(count);
-		}
-		nameOfCSG+="-"+(isFree?"free":"fixed");
-		CSG hull = part.moveToCenter();
-		hull.setManipulator(new Affine());
-		Vector3d center = part.getCenter();
-		putCSGInAssets(nameOfCSG, hull,isFree);
-		org.mujoco.xml.body.GeomType.Builder<?> geom ;
-		if(isFree) {
-			org.mujoco.xml.BodyarchType.Builder<?> addBody = addWorldbody.addBody();
-			addBody.addFreejoint();
-			setStartLocation(center, addBody);
-			addBody.withName(nameOfCSG);
-			geom= addBody.addGeom();
-			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfCSG);
-			parts.add( hull);
-		}else {
-			geom=addWorldbody.addGeom();
-			geom.withPos(center.x/1000.0+" "+
-					center.y/1000.0+" "+
-					center.z/1000.0+" "
-			);
-		}
+	public  void addPart(List<CSG> partsIn, boolean isFree) throws IOException {
+		
+		Object builder = isFree?globalFrameBody.addBody():globalFrameBody;
+		String nameOfCSG=null;
+		Vector3d centerGroup=null;
+		for (CSG part : partsIn) {
+			if (!checkForPhysics(part))
+				continue;
+			;
+			CSG hull = part.moveToCenter();
 
-		setCSGMeshToGeom(nameOfCSG, geom);
+			Vector3d center = part.getCenter();
+			if (nameOfCSG == null) {
+				nameOfCSG = part.getName();
+				if (nameOfCSG.length() == 0) {
+					nameOfCSG = "Part-" + (count);
+				}
+				nameOfCSG += "-" + (isFree ? "free" : "fixed");
+				if (isFree) {
+					org.mujoco.xml.BodyarchType.Builder<?> addBody = (org.mujoco.xml.BodyarchType.Builder<?>) builder;
+					addBody.addFreejoint();
+					setStartLocation(center, addBody);
+					centerGroup = center;
+					addBody.withName(nameOfCSG);
+				}
+			}
+			hull = hull.move(center.minus(centerGroup));
+			hull.setManipulator(new Affine());
+			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfCSG);
+			putCSGInAssets(nameOfCSG, hull, isFree);
+			org.mujoco.xml.body.GeomType.Builder<?> geom;
+			if (isFree) {
+				org.mujoco.xml.BodyarchType.Builder<?> addBody = (org.mujoco.xml.BodyarchType.Builder<?>) builder;
+				geom = addBody.addGeom();
+				parts.add(hull);
+				setCSGMeshToGeom(nameOfCSG, geom);
+			} else {
+				org.mujoco.xml.Mujoco.Worldbody.Builder<?> globalFrameBody2 = (org.mujoco.xml.Mujoco.Worldbody.Builder<?>) builder;
+				geom = globalFrameBody2.addGeom();
+				geom.withPos(center.x / 1000.0 + " " + center.y / 1000.0 + " " + center.z / 1000.0 + " ");
+				setCSGMeshToGeom(nameOfCSG, geom);
+			}
+		}
 	}
 
 	public  ArrayList<CSG> getMapNameToCSGParts(String nameOfCSG) {
