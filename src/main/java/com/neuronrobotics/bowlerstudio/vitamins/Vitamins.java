@@ -298,10 +298,10 @@ public class Vitamins {
 		try {
 			saveDatabase(type);
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
-			
+			System.err.println("Forked repo is missing!");
 			
 			GHRepository newRepo = repo.fork();
-			
+			Thread.sleep(6000);
 			Vitamins.gitRpoDatabase = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
 			saveDatabase(type);
 			
