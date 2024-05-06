@@ -57,7 +57,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	}
 
 	public static void runLater(Runnable r, Throwable ex) {
-		Platform.runLater(() -> {
+		BowlerKernel.runLater(() -> {
 			try {
 				r.run();
 			} catch (Throwable t) {
@@ -146,7 +146,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				runReport(element, body, github);
 				return;
 			}
-			Platform.runLater(() -> {
+			BowlerKernel.runLater(() -> {
 				Alert alert = new Alert(AlertType.CONFIRMATION);
 				alert.setTitle("An Error occoured");
 				alert.setHeaderText("Would it be ok if I report this issue back to Kevin so he can fix it?");

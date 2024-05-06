@@ -12,6 +12,7 @@ import javax.vecmath.Vector3f;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.HingeConstraint;
 import com.bulletphysics.linearmath.Transform;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHLink;
@@ -122,7 +123,7 @@ public class MobileBasePhysicsManager {
 
 		TransformFactory.nrToBullet(base.getFiducialToGlobalTransform(), start);
 		start.origin.z = (float) (start.origin.z - minz + lift);
-		Platform.runLater(new Runnable() {
+		BowlerKernel.runLater(new Runnable() {
 			@Override
 			public void run() {
 				TransformFactory.bulletToAffine(baseCad.get(0).getManipulator(), start);

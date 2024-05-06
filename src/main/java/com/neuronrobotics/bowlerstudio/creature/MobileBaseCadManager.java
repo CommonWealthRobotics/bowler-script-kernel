@@ -586,7 +586,7 @@ public class MobileBaseCadManager implements Runnable {
 							TransformNR[] vals = tmp.values().stream().toArray(size->new TransformNR[size]);
 							tmp.clear();
 							if (iterator.length > 0) {
-								Platform.runLater(() -> {
+								BowlerKernel.runLater(() -> {
 									try {
 										for (int i = 0; i < iterator.length; i++) {
 											Affine af = iterator[i];

@@ -1,6 +1,8 @@
 package com.neuronrobotics.sdk.addons.gamepad;
 
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
+
 /**
  * Sample Skeleton for "jogTrainerWidget.fxml" Controller Class
  * You can copy and paste this code into your favorite IDE
@@ -117,7 +119,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		grid.add(reset, 1, i);
 		reset();
 		if(PersistantControllerMap.areAllAxisMapped(gameController.getName())) {
-			Platform.runLater(() ->fields.get(0).setDisable(true));
+			BowlerKernel.runLater(() ->fields.get(0).setDisable(true));
 			gameController.removeListeners(this);
 		}else {
 			gameController.addListeners(this);
@@ -148,7 +150,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 				tmp=12;
 			root.setStyle("-fx-font-size: "+tmp+"pt");
 		});
-		Platform.runLater(() -> {
+		BowlerKernel.runLater(() -> {
 			primaryStage.setTitle("Configure the controller");
 
 			Scene scene = new Scene(root);
@@ -164,9 +166,9 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 	public void reset() {
 		listOfMappedAxis.clear();
 		mappingIndex=0;
-		Platform.runLater(() ->fields.get(mappingIndex).setDisable(false));
+		BowlerKernel.runLater(() ->fields.get(mappingIndex).setDisable(false));
 		gameController.addListeners(this);
-		Platform.runLater(() ->controllername.setText(gameController.getName()));	
+		BowlerKernel.runLater(() ->controllername.setText(gameController.getName()));	
 		save.setDisable(true);
 	}
 
@@ -211,7 +213,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		System.out.println("Adding Axis "+name);
 		listOfMappedAxis.add(name);
 		timeOfLastAxisSet=System.currentTimeMillis();
-		Platform.runLater(() -> {
+		BowlerKernel.runLater(() -> {
 			TextField textField = fields.get(mappingIndex);
 			textField.setText(name);
 			
@@ -228,7 +230,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 
 	public static void run(BowlerJInputDevice c) {
 		//System.out.println("Launching Controller mapping");
-		Platform.runLater(new Runnable() {
+		BowlerKernel.runLater(new Runnable() {
 			@Override
 			public void run() {
 				//System.out.println("Creating stage");

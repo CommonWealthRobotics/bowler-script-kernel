@@ -18,6 +18,7 @@ import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
 import com.bulletphysics.dynamics.constraintsolver.SequentialImpulseConstraintSolver;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
@@ -206,7 +207,7 @@ public class PhysicsCore {
       o.update(timeStep);
     }
 
-    Platform.runLater(() -> {
+    BowlerKernel.runLater(() -> {
       for (IPhysicsManager o : getPhysicsObjects()) {
         try {
           TransformFactory.bulletToAffine(o.getRigidBodyLocation(), o.getUpdateTransform());
