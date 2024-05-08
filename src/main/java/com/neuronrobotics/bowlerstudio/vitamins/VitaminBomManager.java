@@ -183,7 +183,7 @@ public class VitaminBomManager {
 				if(URL==null) {
 					URL="http://commonwealthrobotics.com";
 				}
-				String price = (String) configuration.get("price").toString();
+				String price =  configuration.get("price").toString();
 				if(price==null) {
 					price="0.01";
 				}
