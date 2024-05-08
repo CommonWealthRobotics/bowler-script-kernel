@@ -183,11 +183,11 @@ public class VitaminBomManager {
 				if(URL==null) {
 					URL="http://commonwealthrobotics.com";
 				}
-				String price =  configuration.get("price").toString();
-				if(price==null) {
-					price="0.01";
-				}
-				csv += key + "," + size + "," + URL +","+price+ "\n";
+				Object object = configuration.get("price");
+				if(object==null)
+					object="0.01";
+	
+				csv += key + "," + size + "," + URL +","+object+ "\n";
 			} else {
 				System.out.println("Failure on " + key);
 			}
