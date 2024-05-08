@@ -37,7 +37,7 @@ public class MuJoCoBowlerIntegrationTest {
 //				"Marcos.xml");
 //		cat.connect();
 //		bases.add(cat);
-		List<CSG> parts = new ArrayList<>();
+		List<CSG> parts = new ArrayList<>();// uncomment the line below to run the full test with all the pieces. this is removed to work with CI ram limits
 //		List<CSG> parts = (List<CSG>) ScriptingEngine.gitScriptRun(
 //				"https://gist.github.com/4814b39ee72e9f590757.git",
 //				"javaCad.groovy");
