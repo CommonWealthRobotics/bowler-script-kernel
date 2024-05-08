@@ -198,8 +198,7 @@ public class VitaminBomManager {
 				return;
 			}
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			// file doesnt exist
 		}
 		try {
 			write(MANUFACTURING_BOM_JSON, content);
