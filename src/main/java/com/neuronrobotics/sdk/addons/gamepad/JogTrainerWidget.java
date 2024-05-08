@@ -150,6 +150,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 				tmp=12;
 			root.setStyle("-fx-font-size: "+tmp+"pt");
 		});
+		
 		BowlerKernel.runLater(() -> {
 			primaryStage.setTitle("Configure the controller");
 
@@ -176,23 +177,30 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 
 	@Override
 	public void onEvent(String name, float value) {
+		if(Math.abs(value)<0.01)
+			value=0;
 		//System.out.println(controller);
 		if(axisWaiting!=null) {
-			// waiting for that axis to go back to 0
-			if(axisWaiting.contentEquals(name)) {
-				if(Math.abs(value)>0.0001) {
-					System.out.println("Waiting for value to settle for "+axisWaiting);
-					return;
+			if(System.currentTimeMillis()-timeOfLastAxisSet<2000) {
+				// waiting for that axis to go back to 0
+				if(axisWaiting.contentEquals(name)) {
+					if(Math.abs(value)>0.01) {
+						System.out.println("Waiting for value to settle for "+axisWaiting);
+						return;
+					}else {
+						// the axis returned, moving on
+						timeOfLastAxisSet=System.currentTimeMillis();
+						System.out.println("Map done "+axisWaiting);
+						axisWaiting=null;
+						return;
+					}
 				}else {
-					// the axis returned, moving on
-					timeOfLastAxisSet=System.currentTimeMillis();
-					System.out.println("Map done "+axisWaiting);
-					axisWaiting=null;
+					System.out.println("Waiting for value to settle for "+axisWaiting+" got value from "+name);
 					return;
 				}
 			}else {
-				System.out.println("Waiting for value to settle for "+axisWaiting+" got value from "+name);
-				return;
+				System.out.println("Assuming value to settled "+axisWaiting);
+				value=0;
 			}
 		}
 		for(String s:listOfMappedAxis) {
@@ -206,7 +214,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 			if(name.contentEquals(s))
 				return;// Do not use maped axis for re-mapping
 		}
-		if(System.currentTimeMillis()-timeOfLastAxisSet<1000) {
+		if(System.currentTimeMillis()-timeOfLastAxisSet<100) {
 			return;
 		}
 		axisWaiting=name;
