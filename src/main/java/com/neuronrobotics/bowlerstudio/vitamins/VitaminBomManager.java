@@ -167,7 +167,7 @@ public class VitaminBomManager {
 
 	private void saveLocal() {
 		saving = true;
-		String csv = "name,qty,source\n";
+		String csv = "name,qty,source,unit price (USD)\n";
 		String content = null;
 
 		content = gson.toJson(database);
@@ -181,9 +181,13 @@ public class VitaminBomManager {
 				Map<String, Object> configuration = getConfiguration(e.getName());
 				String URL = (String) configuration.get("source");
 				if(URL==null) {
-					System.out.println(configuration);
+					URL="http://commonwealthrobotics.com";
 				}
-				csv += key + "," + size + "," + URL + "\n";
+				String price = (String) configuration.get("price");
+				if(price==null) {
+					price="0.01";
+				}
+				csv += key + "," + size + "," + URL +","+price+ "\n";
 			} else {
 				System.out.println("Failure on " + key);
 			}
