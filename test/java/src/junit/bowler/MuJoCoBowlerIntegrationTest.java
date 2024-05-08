@@ -37,21 +37,22 @@ public class MuJoCoBowlerIntegrationTest {
 //				"Marcos.xml");
 //		cat.connect();
 //		bases.add(cat);
-		
-		List<CSG> parts = (List<CSG>) ScriptingEngine.gitScriptRun(
-				"https://gist.github.com/4814b39ee72e9f590757.git",
-				"javaCad.groovy");
+		List<CSG> parts = new ArrayList<>();
+//		List<CSG> parts = (List<CSG>) ScriptingEngine.gitScriptRun(
+//				"https://gist.github.com/4814b39ee72e9f590757.git",
+//				"javaCad.groovy");
 		System.out.println("Parts size = "+parts.size());
 		//terrain.add(new Cube(10000,10000,100).toCSG().toZMax());
-		for(int i=45;i<parts.size();i++) {
-			if (i==27||i==25)
-				continue;
-			CSG p= parts.get(i);
-			CSG pl=p.roty(15).movez(200);
-			pl.setName(p.getName());
-			lifted.add(pl);
-			terrain.add(p);
-		}
+		if(parts.size()>45)
+			for(int i=45;i<parts.size();i++) {
+				if (i==27||i==25)
+					continue;
+				CSG p= parts.get(i);
+				CSG pl=p.roty(15).movez(200);
+				pl.setName(p.getName());
+				lifted.add(pl);
+				terrain.add(p);
+			}
 		MuJoCoPhysicsManager manager = new MuJoCoPhysicsManager("javaCadTest", bases, lifted, terrain, new File("./physicsTest"));
 		manager.setTimestep(0.005);
 		manager.setIntegratorType(IntegratorType.IMPLICITFAST);
