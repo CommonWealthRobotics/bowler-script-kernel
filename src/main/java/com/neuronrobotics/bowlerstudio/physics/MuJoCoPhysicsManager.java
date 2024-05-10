@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.vecmath.Color3b;
 import javax.xml.bind.JAXBException;
@@ -489,10 +490,17 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			baseParts.put(CoM,cat.getCenterOfMassFromCentroid().copy());
 			limbBase.put(CoM, new TransformNR());
 		}
+		double mass=0.1;// = myLink.getLinkConfiguration().getMassKg()/parts.size();
+		for(CSG part:baseParts.keySet()) {
+			Optional o =part.getStorage().getValue("massKg");
+			if(o.isPresent()) {
+				mass+=(double)o.get();
+			}
+		}
 		for(CSG part:baseParts.keySet()) {
 			TransformNR center = baseParts.get(part);
 			TransformNR offset = limbBase.get(part);
-			double mass = cat.getMassKg()/baseParts.size();
+			//double mass = cat.getMassKg()/baseParts.size();
 			bodyParts++;
 			String nameOfCSG = bodyName+"_CSG_"+bodyParts;
 			
@@ -573,13 +581,19 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
 				ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 				ArrayList<org.mujoco.xml.body.GeomType.Builder<?>> geoms = geomToCSGMap.get(affineNameMapGet);
-				double mass = myLink.getLinkConfiguration().getMassKg()/parts.size();
-				if(mass<0.001|| Double.isNaN(mass)||Double.isInfinite(mass)) {
-					mass=0.001;
+				double m=0.01;// = myLink.getLinkConfiguration().getMassKg()/parts.size();
+				for(CSG part:parts) {
+					Optional o =part.getStorage().getValue("massKg");
+					if(o.isPresent()) {
+						m+=(double)o.get();
+					}
+				}
+				if(m<0.001|| Double.isNaN(m)||Double.isInfinite(m)) {
+					m=0.001;
 				}
 				for(org.mujoco.xml.body.GeomType.Builder<?>geom:geoms) {
 					//println "Mass of "+affineNameMapGet+" is "+mass
-					geom.withMass(BigDecimal.valueOf(mass*KgtoMujocoMass));
+					geom.withMass(BigDecimal.valueOf(m*KgtoMujocoMass));
 				}
 			}
 			
