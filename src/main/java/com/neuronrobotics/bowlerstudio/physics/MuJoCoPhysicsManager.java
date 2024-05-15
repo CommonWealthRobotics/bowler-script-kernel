@@ -485,13 +485,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			baseParts.put(CoM,cat.getCenterOfMassFromCentroid().copy());
 			limbBase.put(CoM, new TransformNR());
 		}
-//		double mass=0.1;// = myLink.getLinkConfiguration().getMassKg()/parts.size();
-//		for(CSG part:baseParts.keySet()) {
-//			Optional o =part.getStorage().getValue("massKg");
-//			if(o.isPresent()) {
-//				mass+=(double)o.get();
-//			}
-//		}
+
 		for(CSG part:baseParts.keySet()) {
 			TransformNR center = baseParts.get(part);
 			TransformNR offset = limbBase.get(part);
@@ -576,16 +570,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
 				ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 				ArrayList<org.mujoco.xml.body.GeomType.Builder<?>> geoms = geomToCSGMap.get(affineNameMapGet);
-//				double m=0.01;// = myLink.getLinkConfiguration().getMassKg()/parts.size();
-//				for(CSG part:parts) {
-//					Optional o =part.getStorage().getValue("massKg");
-//					if(o.isPresent()) {
-//						m+=(double)o.get();
-//					}
-//				}
-//				if(m<0.001|| Double.isNaN(m)||Double.isInfinite(m)) {
-//					m=0.001;
-//				}
+
 				for(org.mujoco.xml.body.GeomType.Builder<?>geom:geoms) {
 					//println "Mass of "+affineNameMapGet+" is "+mass
 					CSG csg = geomToSourceCSG.get(geom);
@@ -752,12 +737,15 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 					if(cat.isWheel(myLink)) {
 						// default is 1 0.005 0.0001
 						//println "Setting Wheel Friction for "+part.getName()
-						geom.withFriction("1 0.005 0.0001");
+						geom.withFriction("1.7 0.005 0.0001");
+						if(myLink.getLinkConfiguration().isPassive()) {
+							geom.withFriction("0.01 0.005 0.0001");// this is a hack for "onmi wheels" 
+						}
 					}
 					if(cat.isFoot(myLink)) {
 						// default is 1 0.005 0.0001
 						//println "Setting Foot Friction for "+part.getName()
-						geom.withFriction("1 0.005 0.0001");
+						geom.withFriction("1.2 0.001 0.00005");
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
