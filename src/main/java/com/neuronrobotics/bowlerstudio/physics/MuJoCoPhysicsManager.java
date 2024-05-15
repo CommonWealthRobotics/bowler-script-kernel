@@ -78,7 +78,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	public  HashMap<String, ArrayList<CSG>> mapNameToCSG = new HashMap<>();
 	public HashMap<Affine,String> affineNameMap =new HashMap<>();
 	public HashMap<String,ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>> geomToCSGMap = new HashMap<>();
-
+	public HashMap<org.mujoco.xml.body.GeomType.Builder<?>,CSG> geomToSourceCSG = new HashMap<>();
 	public  HashMap<String, AbstractLink> mapNameToLink=new HashMap<>();
 	public  CSG floor = new Cube(4000,4000,1000).toCSG().toZMax().setName("floor").setColor(Color.PINK);
 	public  long timeSinceUIUpdate = 0;
@@ -450,11 +450,6 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		}
 		addBody.withName(bodyName);
 		
-		
-	//			addBody.addInertial()
-	//					.withMass(BigDecimal.valueOf(cat.getMassKg()/1000.0))
-	//					.withPos(centerString)
-	//					.withDiaginertia("1 1 1" );
 		ArrayList<CSG> arrayList = cadMan.getAllCad();
 		HashMap<CSG,TransformNR > baseParts=new HashMap<>();
 		HashMap<CSG,TransformNR > limbBase=new HashMap<>();
@@ -490,13 +485,13 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			baseParts.put(CoM,cat.getCenterOfMassFromCentroid().copy());
 			limbBase.put(CoM, new TransformNR());
 		}
-		double mass=0.1;// = myLink.getLinkConfiguration().getMassKg()/parts.size();
-		for(CSG part:baseParts.keySet()) {
-			Optional o =part.getStorage().getValue("massKg");
-			if(o.isPresent()) {
-				mass+=(double)o.get();
-			}
-		}
+//		double mass=0.1;// = myLink.getLinkConfiguration().getMassKg()/parts.size();
+//		for(CSG part:baseParts.keySet()) {
+//			Optional o =part.getStorage().getValue("massKg");
+//			if(o.isPresent()) {
+//				mass+=(double)o.get();
+//			}
+//		}
 		for(CSG part:baseParts.keySet()) {
 			TransformNR center = baseParts.get(part);
 			TransformNR offset = limbBase.get(part);
@@ -525,10 +520,10 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 						center.getRotation().getRotationMatrix2QuaturnionX()+" "+
 						center.getRotation().getRotationMatrix2QuaturnionY()+" "+
 						center.getRotation().getRotationMatrix2QuaturnionZ();
-			
+			geomToSourceCSG.put(geom, part);
 			geom.withPos(centerString)
 				.withQuat(quat)
-				.withMass(BigDecimal.valueOf(mass*KgtoMujocoMass));
+				.withMass(BigDecimal.valueOf(part.getMassKG(0.001)*KgtoMujocoMass));
 		}
 		
 		for(DHParameterKinematics l:cat.getAllDHChains()) {
@@ -581,19 +576,20 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
 				ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 				ArrayList<org.mujoco.xml.body.GeomType.Builder<?>> geoms = geomToCSGMap.get(affineNameMapGet);
-				double m=0.01;// = myLink.getLinkConfiguration().getMassKg()/parts.size();
-				for(CSG part:parts) {
-					Optional o =part.getStorage().getValue("massKg");
-					if(o.isPresent()) {
-						m+=(double)o.get();
-					}
-				}
-				if(m<0.001|| Double.isNaN(m)||Double.isInfinite(m)) {
-					m=0.001;
-				}
+//				double m=0.01;// = myLink.getLinkConfiguration().getMassKg()/parts.size();
+//				for(CSG part:parts) {
+//					Optional o =part.getStorage().getValue("massKg");
+//					if(o.isPresent()) {
+//						m+=(double)o.get();
+//					}
+//				}
+//				if(m<0.001|| Double.isNaN(m)||Double.isInfinite(m)) {
+//					m=0.001;
+//				}
 				for(org.mujoco.xml.body.GeomType.Builder<?>geom:geoms) {
 					//println "Mass of "+affineNameMapGet+" is "+mass
-					geom.withMass(BigDecimal.valueOf(m*KgtoMujocoMass));
+					CSG csg = geomToSourceCSG.get(geom);
+					geom.withMass(BigDecimal.valueOf(csg.getMassKG(0.001)*KgtoMujocoMass));
 				}
 			}
 			
@@ -644,10 +640,6 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			.withName(name)
 			.withPos(x+" "+y+" "+z)
 			.withQuat(quat);
-	//		linkBody.addInertial()
-	//				.withMass(conf.getMassKg())
-	//				.withPos(centerString)
-	//				.withDiaginertia("1 1 1" )
 	linkToBulderMap.put(link, linkBody);
 
 	double gear =460;
@@ -695,17 +687,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				.withKv(BigDecimal.valueOf(0.00000001)); // damping term experementally determenied
 				//.withInheritrange(BigDecimal.valueOf(rangeVal));// sets the range of the control signal to match the limits
 	}
-//	CSG CoM  = new Sphere(2)
-//					.toCSG()
-//					.transformed(
-//					TransformFactory
-//					.nrToCSG( 
-//						cat.getCenterOfMassFromCentroid().copy()
-//						)
-//					);
-//	org.mujoco.xml.body.GeomType.Builder<?> geomCom = linkBody.addGeom();
-//	putCSGInAssets(name+"_CoM", CoM,true);
-//	setCSGMeshToGeom(name+"_CoM", geomCom);
+
 //	
 					
 	for (int i = 0; i < cad.size(); i++) {
@@ -758,6 +740,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				try {
 					putCSGInAssets(geomname, hull,true);
 					org.mujoco.xml.body.GeomType.Builder<?> geom = linkToBulderMap.get(myLink).addGeom();
+					geomToSourceCSG.put(geom, part);
 
 					ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 					if(geomToCSGMap.get(affineNameMapGet)==null) {
@@ -769,12 +752,12 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 					if(cat.isWheel(myLink)) {
 						// default is 1 0.005 0.0001
 						//println "Setting Wheel Friction for "+part.getName()
-						geom.withFriction("1.7 0.005 0.0001");
+						geom.withFriction("1 0.005 0.0001");
 					}
 					if(cat.isFoot(myLink)) {
 						// default is 1 0.005 0.0001
 						//println "Setting Foot Friction for "+part.getName()
-						geom.withFriction("1.2 0.001 0.00005");
+						geom.withFriction("1 0.005 0.0001");
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -830,7 +813,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfBODY);
 			putCSGInAssets(nameOfCSG, hull.hull(), true);
 			org.mujoco.xml.body.GeomType.Builder<?> geom;
-			geom = addBody.addGeom();
+			geom = addBody.addGeom().withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
 			parts.add(hull);
 			setCSGMeshToGeom(nameOfCSG, geom);
 		}
@@ -859,6 +842,8 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 
 			geom = globalFrameBody.addGeom();
 			geom.withPos(center.x / 1000.0 + " " + center.y / 1000.0 + " " + center.z / 1000.0 + " ");
+			geom.withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
+
 			setCSGMeshToGeom(nameOfCSG, geom);
 
 		}
