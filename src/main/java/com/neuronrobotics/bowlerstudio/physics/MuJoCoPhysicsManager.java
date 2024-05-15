@@ -190,6 +190,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		mapNameToCSG.clear();
 		gearRatios.clear();
 		geomToCSGMap.clear();
+		geomToSourceCSG.clear();
 	}
 	public int getLinkIndex(AbstractLink l, DHParameterKinematics k) {
 		for (int i=0;i<k.getNumberOfLinks();i++) {
@@ -737,9 +738,9 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 					if(cat.isWheel(myLink)) {
 						// default is 1 0.005 0.0001
 						//println "Setting Wheel Friction for "+part.getName()
-						geom.withFriction("1.7 0.005 0.0001");
+						geom.withFriction("1.2 0.005 0.0001");
 						if(myLink.getLinkConfiguration().isPassive()) {
-							geom.withFriction("0.01 0.005 0.0001");// this is a hack for "onmi wheels" 
+							geom.withFriction("0.01 0.00005 0.000001");// this is a hack for "onmi wheels" 
 						}
 					}
 					if(cat.isFoot(myLink)) {
