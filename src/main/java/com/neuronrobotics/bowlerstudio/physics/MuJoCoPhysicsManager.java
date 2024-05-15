@@ -53,73 +53,79 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 
 @SuppressWarnings("restriction")
-public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
-	public  static final int Density_OF_PLA = 1250;
-	public  Mujoco.Builder<Void> builder=null;
-	public  Mujoco.Worldbody.Builder<?> globalFrameBody;
-	public  Mujoco.Asset.Builder<?> asset;
-	public  List<MobileBase> bases;
-	public  List<CSG> freeObjects;
-	public  List<CSG> fixedObjects;
-	public  File workingDir;
-	public  int count=0;
-	public  String name;
-	public  double timestep=0.005;
-	public  int iterations=100;
-	public  MuJoCoModelManager mRuntime;
+public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
+	public static final int Density_OF_PLA = 1250;
+	public Mujoco.Builder<Void> builder = null;
+	public Mujoco.Worldbody.Builder<?> globalFrameBody;
+	public Mujoco.Asset.Builder<?> asset;
+	public List<MobileBase> bases;
+	public List<CSG> freeObjects;
+	public List<CSG> fixedObjects;
+	public File workingDir;
+	public int count = 0;
+	public String name;
+	public double timestep = 0.005;
+	public int iterations = 100;
+	public MuJoCoModelManager mRuntime;
 	/*
-	 * condim
-		1 Frictionless contact.
-		3 Regular frictional contact, opposing slip in the tangent plane.
-		4 Frictional contact, opposing slip in the tangent plane and rotation around the contact normal. This is useful for modeling soft contacts (independent of contact penetration).
-		6 Frictional contact, opposing slip in the tangent plane, rotation around the contact normal and rotation around the two axes of the tangent plane. The latter frictional effects are useful for preventing objects from indefinite rolling.
+	 * condim 1 Frictionless contact. 3 Regular frictional contact, opposing slip in
+	 * the tangent plane. 4 Frictional contact, opposing slip in the tangent plane
+	 * and rotation around the contact normal. This is useful for modeling soft
+	 * contacts (independent of contact penetration). 6 Frictional contact, opposing
+	 * slip in the tangent plane, rotation around the contact normal and rotation
+	 * around the two axes of the tangent plane. The latter frictional effects are
+	 * useful for preventing objects from indefinite rolling.
 	 */
-	public  int condim=6;
-	public  HashMap<String, ArrayList<CSG>> mapNameToCSG = new HashMap<>();
-	public HashMap<Affine,String> affineNameMap =new HashMap<>();
-	public HashMap<String,ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>> geomToCSGMap = new HashMap<>();
-	public HashMap<org.mujoco.xml.body.GeomType.Builder<?>,CSG> geomToSourceCSG = new HashMap<>();
-	public  HashMap<String, AbstractLink> mapNameToLink=new HashMap<>();
-	public  CSG floor = new Cube(4000,4000,1000).toCSG().toZMax().setName("floor").setColor(Color.PINK);
-	public  long timeSinceUIUpdate = 0;
-	public Mujoco.Contact.Builder<? > contacts;
+	public int condim = 6;
+	public HashMap<String, ArrayList<CSG>> mapNameToCSG = new HashMap<>();
+	public HashMap<Affine, String> affineNameMap = new HashMap<>();
+	public HashMap<String, ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>> geomToCSGMap = new HashMap<>();
+	public HashMap<org.mujoco.xml.body.GeomType.Builder<?>, CSG> geomToSourceCSG = new HashMap<>();
+	public HashMap<String, AbstractLink> mapNameToLink = new HashMap<>();
+	public CSG floor = new Cube(4000, 4000, 1000).toCSG().toZMax().setName("floor").setColor(Color.PINK);
+	public long timeSinceUIUpdate = 0;
+	public Mujoco.Contact.Builder<?> contacts;
 	public Builder<?> actuators;
-	private IntegratorType integratorType=IntegratorType.RK_4;
+	private IntegratorType integratorType = IntegratorType.RK_4;
 	public HashMap<AbstractLink, Double> gearRatios = new HashMap<>();
+
 	public long currentTimeMillis() {
-		return (long)(getmRuntime().getCurrentSimulationTimeSeconds()*1000.0);
+		return (long) (getmRuntime().getCurrentSimulationTimeSeconds() * 1000.0);
 	}
+
 	public void sleep(long time) throws InterruptedException {
-		sleep(time,0);
+		sleep(time, 0);
 	}
-	public void sleep(long ms,int ns) throws InterruptedException {
-		double seconds = (((double)ms)/1000.0)+(((double)ns)/10000000000.0);
+
+	public void sleep(long ms, int ns) throws InterruptedException {
+		double seconds = (((double) ms) / 1000.0) + (((double) ns) / 10000000000.0);
 		double now = getmRuntime().getCurrentSimulationTimeSeconds();
-		double future=now+seconds;
-		while(getmRuntime().getCurrentSimulationTimeSeconds()<future) {
-			if(getmRuntime().getCurrentSimulationTimeSeconds()<now)
+		double future = now + seconds;
+		while (getmRuntime().getCurrentSimulationTimeSeconds() < future) {
+			if (getmRuntime().getCurrentSimulationTimeSeconds() < now)
 				throw new InterruptedException("Simulation reset!");
 			Thread.sleep(getmRuntime().getTimestepMilliSeconds());
 		}
 	}
-	
-	public MuJoCoPhysicsManager(String name,List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
+
+	public MuJoCoPhysicsManager(String name, List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
 			File workingDir) throws IOException, JAXBException {
 		this.name = name.trim();
-		if(!(name.length()>0))
+		if (!(name.length() > 0))
 			throw new RuntimeException("Name must be not empty");
 		this.bases = bases;
 		this.freeObjects = freeObjects;
 		this.fixedObjects = fixedObjects;
 		this.workingDir = workingDir;
 		if (workingDir != null) {
-			if(!workingDir.exists()) {
+			if (!workingDir.exists()) {
 				workingDir.mkdirs();
 			}
 			if (!workingDir.isDirectory())
-				throw new RuntimeException("Working Directory must be a directory, "+workingDir.getAbsolutePath());
+				throw new RuntimeException("Working Directory must be a directory, " + workingDir.getAbsolutePath());
 		}
 	}
+
 	@Override
 	public void controlStep(MuJoCoModelManager manager) {
 		HashMap<String, Double> setEfforts = manager.getControlInstance();
@@ -129,51 +135,53 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		for (Iterator<String> iterator = manager.getActuatorNames().iterator(); iterator.hasNext();) {
 			String s = iterator.next();
 			AbstractLink link = mapNameToLink.get(s);
-			if(link==null)
+			if (link == null)
 				continue;
-			if(link.getLinkConfiguration().isPassive())
+			if (link.getLinkConfiguration().isPassive())
 				continue;
-			double target =Math.toRadians( link.getCurrentEngineeringUnits())*gearRatios.get(link);
+			double target = Math.toRadians(link.getCurrentEngineeringUnits()) * gearRatios.get(link);
 //			double error = target-positions.get(s);
 //			double effort = error * kp;
-			//System.out.println("Actuator "+s+" position "+positions.get(s)+" effort "+effort);
-			setEfforts.put(s,target);
+			// System.out.println("Actuator "+s+" position "+positions.get(s)+" effort
+			// "+effort);
+			setEfforts.put(s, target);
 		}
 		manager.setActualtorCtrl(setEfforts);
 		for (int i = 0; i < bases.size(); i++) {
 			MobileBase b = bases.get(i);
-			if(b==null)
+			if (b == null)
 				continue;
 			String bodyName = getMujocoName(b);
 			for (Iterator<String> iterator = manager.getBodyNames().iterator(); iterator.hasNext();) {
 				String s = iterator.next();
-				if(bodyName.contentEquals(s)) {
+				if (bodyName.contentEquals(s)) {
 					TransformNR tf = mujocoToTransformNR(manager.getBodyPose(s));
-					Double xAcceleration=Math.toDegrees(tf.getRotation().getRotationTilt());
-					Double yAcceleration=Math.toDegrees(tf.getRotation().getRotationAzimuth());
-					Double zAcceleration=Math.toDegrees(tf.getRotation().getRotationElevation());
+					Double xAcceleration = Math.toDegrees(tf.getRotation().getRotationTilt());
+					Double yAcceleration = Math.toDegrees(tf.getRotation().getRotationAzimuth());
+					Double zAcceleration = Math.toDegrees(tf.getRotation().getRotationElevation());
 
-					Double rotxAcceleration=0.0;
-					Double rotyAcceleration=0.0;
-					Double rotzAcceleration=0.0;
+					Double rotxAcceleration = 0.0;
+					Double rotyAcceleration = 0.0;
+					Double rotzAcceleration = 0.0;
 					try {
-						b.getImu().setVirtualState(new IMUUpdate( xAcceleration, yAcceleration, zAcceleration,
-								rotxAcceleration, rotyAcceleration, rotzAcceleration,currentTimeMillis() ));
-					}catch(NullPointerException e) {
+						b.getImu().setVirtualState(new IMUUpdate(xAcceleration, yAcceleration, zAcceleration,
+								rotxAcceleration, rotyAcceleration, rotzAcceleration, currentTimeMillis()));
+					} catch (NullPointerException e) {
 						// startup sync problems, ignore
 						System.out.println(e.getMessage());
 					}
-		
+
 				}
-				//System.out.println("Body "+s+" pose "+);
+				// System.out.println("Body "+s+" pose "+);
 			}
 		}
 	}
 
 	public void close() {
 		if (bases != null) {
-			for(MobileBase b:bases) {
-				b.setTimeProvider(new ITimeProvider() {});
+			for (MobileBase b : bases) {
+				b.setTimeProvider(new ITimeProvider() {
+				});
 			}
 			bases.clear();
 		}
@@ -192,31 +200,33 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		geomToCSGMap.clear();
 		geomToSourceCSG.clear();
 	}
+
 	public int getLinkIndex(AbstractLink l, DHParameterKinematics k) {
-		for (int i=0;i<k.getNumberOfLinks();i++) {
-			if(k.getAbstractLink(i)==l)
+		for (int i = 0; i < k.getNumberOfLinks(); i++) {
+			if (k.getAbstractLink(i) == l)
 				return i;
 		}
 		return -1;
 	}
 
 	public DHParameterKinematics getLimb(AbstractLink l, MobileBase m) {
-		for(DHParameterKinematics k:m.getAllDHChains()) {
-			if(getLinkIndex(l, k)>=0)
+		for (DHParameterKinematics k : m.getAllDHChains()) {
+			if (getLinkIndex(l, k) >= 0)
 				return k;
 		}
 		return null;
 	}
-	
-	public ArrayList<CSG> getAllCSG(){
+
+	public ArrayList<CSG> getAllCSG() {
 		ArrayList<CSG> parts = new ArrayList<>();
-		for(String name:mapNameToCSG.keySet()) {
+		for (String name : mapNameToCSG.keySet()) {
 			parts.addAll(mapNameToCSG.get(name));
 		}
-		if(fixedObjects!=null)
+		if (fixedObjects != null)
 			parts.addAll(fixedObjects);
 		return parts;
 	}
+
 	public void generateNewModel() throws IOException, JAXBException {
 		mapNameToCSG.clear();
 		initializeModel(name);
@@ -228,92 +238,98 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 				}
 			}
 		if (freeObjects != null) {
-			HashMap<String,ArrayList<CSG>> mapParts = new HashMap<>();
-			int count=0;
+			HashMap<String, ArrayList<CSG>> mapParts = new HashMap<>();
+			int count = 0;
 			for (CSG part : freeObjects) {
 				count++;
 				String name2 = part.getName();
-				if(name2.length()==0) {
-					name2=""+count;
+				if (name2.length() == 0) {
+					name2 = "" + count;
 					part.setName(name2);
 				}
-				if(!mapParts.containsKey(name2)) {
+				if (!mapParts.containsKey(name2)) {
 					mapParts.put(name2, new ArrayList<CSG>());
 				}
 				mapParts.get(name2).add(part);
 			}
-			for(String key:mapParts.keySet()) {
+			for (String key : mapParts.keySet()) {
 				addFreePart(mapParts.get(key));
 			}
 		}
 		if (fixedObjects != null)
 			addPart(fixedObjects);
-		
-		File f= getXMLFile();
-		if(mRuntime!=null)
+
+		File f = getXMLFile();
+		if (mRuntime != null)
 			mRuntime.close();
 		setmRuntime(new MuJoCoModelManager(f));
 
-		HashMap<String,Double> setPoitions = new HashMap<>();
-		if(bases!=null) {
-			for(MobileBase b:bases) {
+		HashMap<String, Double> setPoitions = new HashMap<>();
+		if (bases != null) {
+			for (MobileBase b : bases) {
 				b.setTimeProvider(this);
-				for(AbstractLink link:mapNameToLink.values()) {
-						String name = getName(link);
-						double target =Math.toRadians( link.getCurrentEngineeringUnits());//*gearRatios.get(link);
-						setPoitions.put(name, target);
-					}
-				
+				for (AbstractLink link : mapNameToLink.values()) {
+					String name = getName(link);
+					double target = Math.toRadians(link.getCurrentEngineeringUnits());// *gearRatios.get(link);
+					setPoitions.put(name, target);
+				}
+
 			}
 			getmRuntime().setAllJointPositions(setPoitions);
 		}
 	}
+
 	public String getName(AbstractLink l) {
-		for(String s:mapNameToLink.keySet()) {
-			if(mapNameToLink.get(s)==l)
+		for (String s : mapNameToLink.keySet()) {
+			if (mapNameToLink.get(s) == l)
 				return s;
 		}
 		return null;
 	}
+
 	public double getCurrentSimulationTimeSeconds() {
 		return getmRuntime().getCurrentSimulationTimeSeconds();
 	}
+
 	public long getTimestepMilliSeconds() {
 		return getmRuntime().getTimestepMilliSeconds();
 	}
+
 	public long stepAndWait() {
 		long start = System.currentTimeMillis();
 		step();
-		long time = System.currentTimeMillis()-start;
-		long diff = getTimestepMilliSeconds() -time;
-		if(diff>0) {
+		long time = System.currentTimeMillis() - start;
+		long diff = getTimestepMilliSeconds() - time;
+		if (diff > 0) {
 			try {
 				Thread.sleep(diff);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				throw new RuntimeException(e);
 			}
-		}else if(diff==0){
-			if(Thread.interrupted())
+		} else if (diff == 0) {
+			if (Thread.interrupted())
 				throw new RuntimeException("Interrupted exception!");
-		}else {
-			//System.err.println("MuJoCo Real time broken, expected "+getTimestepMilliSeconds()+" took "+time);
+		} else {
+			// System.err.println("MuJoCo Real time broken, expected
+			// "+getTimestepMilliSeconds()+" took "+time);
 		}
-		if(Thread.interrupted())
+		if (Thread.interrupted())
 			throw new RuntimeException("Interrupted exception!");
 		return time;
 	}
+
 	private void step() {
 		long start = System.currentTimeMillis();
 		getmRuntime().step();
-		if(start-timeSinceUIUpdate>16) {
-			timeSinceUIUpdate=start;
-			HashMap<String,TransformNR> poss = new HashMap<>();
+		if (start - timeSinceUIUpdate > 16) {
+			timeSinceUIUpdate = start;
+			HashMap<String, TransformNR> poss = new HashMap<>();
 			for (Iterator<String> iterator = getmRuntime().getBodyNames().iterator(); iterator.hasNext();) {
 				String bodyName = iterator.next();
-				poss.put(bodyName,mujocoToTransformNR(getmRuntime().getBodyPose(bodyName)));
+				poss.put(bodyName, mujocoToTransformNR(getmRuntime().getBodyPose(bodyName)));
 			}
-			BowlerKernel.runLater(()->{
+			BowlerKernel.runLater(() -> {
 				for (Iterator<String> iterator = getmRuntime().getBodyNames().iterator(); iterator.hasNext();) {
 					String name = iterator.next();
 					TransformNR local = poss.get(name);
@@ -328,40 +344,32 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		}
 	}
 
-
-	
 	public String getXML() throws JAXBException {
-		Mujoco m =builder.build();
-		
+		Mujoco m = builder.build();
+
 		return MuJoCoXML.marshal(m);
 	}
-	
+
 	public File getXMLFile() throws IOException, JAXBException {
 		String xml = getXML();
 		File tempFile;
 		if (workingDir == null) {
-			tempFile = File.createTempFile(name+"-", ".xml");
+			tempFile = File.createTempFile(name + "-", ".xml");
 			tempFile.deleteOnExit();
 		} else {
 			tempFile = new File(workingDir.getAbsolutePath() + "/" + name + ".xml");
 		}
-		System.out.println("Writing "+tempFile.getAbsolutePath());
+		System.out.println("Writing " + tempFile.getAbsolutePath());
 		Files.write(Paths.get(tempFile.getAbsolutePath()), xml.getBytes());
 		return tempFile;
 	}
 
-	public  void initializeModel(String name) {
+	public void initializeModel(String name) {
 		builder = Mujoco.builder().withModel(name);
 
-		builder.addOption()
-			.withTimestep(new BigDecimal(getTimestep()))
-			.withIterations(getIterations())
-			.withIntegrator(getIntegratorType())
-			.withViscosity(BigDecimal.valueOf(0.00002))
-			.withDensity(BigDecimal.valueOf(1.204))
-			.addFlag()
-				.withMulticcd(FlagSimpleType.ENABLE)
-		;
+		builder.addOption().withTimestep(new BigDecimal(getTimestep())).withIterations(getIterations())
+				.withIntegrator(getIntegratorType()).withViscosity(BigDecimal.valueOf(0.00002))
+				.withDensity(BigDecimal.valueOf(1.204)).addFlag().withMulticcd(FlagSimpleType.ENABLE);
 		builder.addSize().withMemory("300M");
 		builder.addVisual().addMap().withForce(new BigDecimal(0.1)).withZfar(new BigDecimal(30));
 		builder.addStatistic().withCenter("0 0 0.7");
@@ -371,335 +379,317 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		asset.addMaterial().withName("grid").withTexture("grid").withTexrepeat("1 1").withTexuniform(true)
 				.withReflectance(BigDecimal.valueOf(0.2));
 		globalFrameBody = builder.addWorldbody();
-		contacts= builder.addContact();
-		if(fixedObjects==null) {
-			fixedObjects=new ArrayList<>();
+		contacts = builder.addContact();
+		if (fixedObjects == null) {
+			fixedObjects = new ArrayList<>();
 		}
 		fixedObjects.add(floor);
 	}
 
-	public  int getIterations() {
+	public int getIterations() {
 
 		return iterations;
 	}
-	
-	public  boolean checkForPhysics(CSG c) {
+
+	public boolean checkForPhysics(CSG c) {
 		return !c.getStorage().getValue("no-physics").isPresent();
 	}
-	public boolean checkLinkPhysics(MobileBaseCadManager cadMan,LinkConfiguration conf) {
-		ArrayList<CSG>  parts=cadMan.getLinktoCadMap().get(conf);
-		for(CSG c:parts) {
-			if(checkForPhysics(c))
+
+	public boolean checkLinkPhysics(MobileBaseCadManager cadMan, LinkConfiguration conf) {
+		ArrayList<CSG> parts = cadMan.getLinktoCadMap().get(conf);
+		for (CSG c : parts) {
+			if (checkForPhysics(c))
 				return true;
 		}
 		return false;
 	}
-	
+
 	public double computeLowestPoint(MobileBase cat) {
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
-	
+
 		return cadMan.computeLowestPoint().z;
 	}
-	public void loadBase(MobileBase cat) throws IOException{
-		loadBase(cat,null,new TransformNR());
+
+	public void loadBase(MobileBase cat) throws IOException {
+		loadBase(cat, null, new TransformNR());
 	}
 
-	public void loadBase(MobileBase cat, org.mujoco.xml.BodyarchType.Builder<?> linkBody2, TransformNR offsetGlobal) throws IOException {
-		if(contacts==null)
-			contacts= builder.addContact();
-		boolean freeBase=cat.getSteerable().size()>0||
-				cat.getDrivable().size()>0||
-				cat.getLegs().size()>0;
-		double KgtoMujocoMass =1.0;
-				
-		//println "\n\nLowest point "+lowestPoint+" \n\n";
+	public void loadBase(MobileBase cat, org.mujoco.xml.BodyarchType.Builder<?> linkBody2, TransformNR offsetGlobal)
+			throws IOException {
+		if (contacts == null)
+			contacts = builder.addContact();
+		boolean freeBase = cat.getSteerable().size() > 0 || cat.getDrivable().size() > 0 || cat.getLegs().size() > 0;
+		double KgtoMujocoMass = 1.0;
+
+		// println "\n\nLowest point "+lowestPoint+" \n\n";
 		String bodyName = getMujocoName(cat);
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
 		loadCadForMobileBase(cadMan);
-		double lowestPoint = (-computeLowestPoint(cat))/1000.0;
-	
-		int bodyParts=0;
+		double lowestPoint = (-computeLowestPoint(cat)) / 1000.0;
+
+		int bodyParts = 0;
 
 		org.mujoco.xml.BodyarchType.Builder<?> addBody;
-		offsetGlobal=offsetGlobal.times(cat.getRobotToFiducialTransform());
-		if(linkBody2==null) {
-			addBody= globalFrameBody.addBody();
-			String centerString = offsetGlobal.getX()/1000.0+" "+
-			offsetGlobal.getY()/1000.0+" "+
-			lowestPoint;
-			String quat =offsetGlobal.getRotation().getRotationMatrix2QuaturnionW()+" "+
-						offsetGlobal.getRotation().getRotationMatrix2QuaturnionX()+" "+
-						offsetGlobal.getRotation().getRotationMatrix2QuaturnionY()+" "+
-						offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
-			addBody.withPos(centerString)
-					.withQuat(quat);// move the base to 1mm above the z=0 surface
-			if(freeBase) {
+		offsetGlobal = offsetGlobal.times(cat.getRobotToFiducialTransform());
+		if (linkBody2 == null) {
+			addBody = globalFrameBody.addBody();
+			String centerString = offsetGlobal.getX() / 1000.0 + " " + offsetGlobal.getY() / 1000.0 + " " + lowestPoint;
+			String quat = offsetGlobal.getRotation().getRotationMatrix2QuaturnionW() + " "
+					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionX() + " "
+					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionY() + " "
+					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
+			addBody.withPos(centerString).withQuat(quat);// move the base to 1mm above the z=0 surface
+			if (freeBase) {
 				addBody.addFreejoint();
 			}
-		}else {
-			String centerString = offsetGlobal.getX()/1000.0+" "+
-			offsetGlobal.getY()/1000.0+" "+
-			offsetGlobal.getZ()/1000.0+" ";
-			String quat =offsetGlobal.getRotation().getRotationMatrix2QuaturnionW()+" "+
-						offsetGlobal.getRotation().getRotationMatrix2QuaturnionX()+" "+
-						offsetGlobal.getRotation().getRotationMatrix2QuaturnionY()+" "+
-						offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
-			addBody=linkBody2.addBody();
-			addBody.withPos(centerString)
-					.withQuat(quat);// move the base to 1mm above the z=0 surface
-			
+		} else {
+			String centerString = offsetGlobal.getX() / 1000.0 + " " + offsetGlobal.getY() / 1000.0 + " "
+					+ offsetGlobal.getZ() / 1000.0 + " ";
+			String quat = offsetGlobal.getRotation().getRotationMatrix2QuaturnionW() + " "
+					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionX() + " "
+					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionY() + " "
+					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
+			addBody = linkBody2.addBody();
+			addBody.withPos(centerString).withQuat(quat);// move the base to 1mm above the z=0 surface
+
 		}
 		addBody.withName(bodyName);
-		
+
 		ArrayList<CSG> arrayList = cadMan.getAllCad();
-		HashMap<CSG,TransformNR > baseParts=new HashMap<>();
-		HashMap<CSG,TransformNR > limbBase=new HashMap<>();
+		HashMap<CSG, TransformNR> baseParts = new HashMap<>();
+		HashMap<CSG, TransformNR> limbBase = new HashMap<>();
 
 		for (int i = 0; i < arrayList.size(); i++) {
 			CSG part = arrayList.get(i);
-			if(!checkForPhysics(part))
+			if (!checkForPhysics(part))
 				continue;
 			TransformNR center = cat.getCenterOfMassFromCentroid();
 			boolean foundPart = false;
-			for(DHParameterKinematics k: cat.getAllDHChains()) {
-				if(k.getRootListener() == part.getManipulator()) {
-					TransformNR fiducial =k.getRobotToFiducialTransform();
+			for (DHParameterKinematics k : cat.getAllDHChains()) {
+				if (k.getRootListener() == part.getManipulator()) {
+					TransformNR fiducial = k.getRobotToFiducialTransform();
 					TransformNR kfed = fiducial;
-					//center=kfed.times(center);
-					//center=kfed.times(center.inverse());
+					// center=kfed.times(center);
+					// center=kfed.times(center.inverse());
 					center = new TransformNR();
 					limbBase.put(part, kfed);
-					foundPart=true;
+					foundPart = true;
 					break;
 				}
 			}
-			if(!foundPart) {
-				if(part.getManipulator()!=cat.getRootListener())
+			if (!foundPart) {
+				if (part.getManipulator() != cat.getRootListener())
 					continue;
 				limbBase.put(part, new TransformNR());
 			}
-			baseParts.put(part,center.copy());
+			baseParts.put(part, center.copy());
 
 		}
-		if(baseParts.size()==0){
-			CSG CoM =new Sphere(2).toCSG();
-			baseParts.put(CoM,cat.getCenterOfMassFromCentroid().copy());
+		if (baseParts.size() == 0) {
+			CSG CoM = new Sphere(2).toCSG();
+			baseParts.put(CoM, cat.getCenterOfMassFromCentroid().copy());
 			limbBase.put(CoM, new TransformNR());
 		}
-
-		for(CSG part:baseParts.keySet()) {
+		int numPartsWithoutMass = 0;
+		for (CSG part : baseParts.keySet()) {
+			if (!part.getStorage().getValue("massKg").isPresent()) {
+				numPartsWithoutMass++;
+			}
+		}
+		if (numPartsWithoutMass == 0)
+			numPartsWithoutMass = 1;
+		for (CSG part : baseParts.keySet()) {
 			TransformNR center = baseParts.get(part);
 			TransformNR offset = limbBase.get(part);
-			//double mass = cat.getMassKg()/baseParts.size();
+			double mass = cat.getMassKg() / numPartsWithoutMass;
 			bodyParts++;
-			String nameOfCSG = bodyName+"_CSG_"+bodyParts;
-			
+			String nameOfCSG = bodyName + "_CSG_" + bodyParts;
+
 			CSG transformed = part.transformed(TransformFactory.nrToCSG(center.inverse().times(offset)));
-			CSG hull ;
+			CSG hull;
 			try {
-					hull=transformed.hull();
-			}catch(Exception ex) {
-				hull=transformed;
+				hull = transformed.hull();
+			} catch (Exception ex) {
+				hull = transformed;
 			}
-			transformed=part.transformed(TransformFactory.nrToCSG(offset));
+			transformed = part.transformed(TransformFactory.nrToCSG(offset));
 			transformed.setManipulator(new Affine());
-			putCSGInAssets(nameOfCSG, hull,true);
+			putCSGInAssets(nameOfCSG, hull, true);
 			org.mujoco.xml.body.GeomType.Builder<?> geom = addBody.addGeom();
 			ArrayList<CSG> parts = getMapNameToCSGParts(bodyName);
-			parts.add( transformed);
+			parts.add(transformed);
 			setCSGMeshToGeom(nameOfCSG, geom);
-			String centerString = center.getX()/1000.0+" "+
-					center.getY()/1000.0+" "+
-					center.getZ()/1000.0+" ";
-			String quat =center.getRotation().getRotationMatrix2QuaturnionW()+" "+
-						center.getRotation().getRotationMatrix2QuaturnionX()+" "+
-						center.getRotation().getRotationMatrix2QuaturnionY()+" "+
-						center.getRotation().getRotationMatrix2QuaturnionZ();
+			String centerString = center.getX() / 1000.0 + " " + center.getY() / 1000.0 + " " + center.getZ() / 1000.0
+					+ " ";
+			String quat = center.getRotation().getRotationMatrix2QuaturnionW() + " "
+					+ center.getRotation().getRotationMatrix2QuaturnionX() + " "
+					+ center.getRotation().getRotationMatrix2QuaturnionY() + " "
+					+ center.getRotation().getRotationMatrix2QuaturnionZ();
 			geomToSourceCSG.put(geom, part);
-			geom.withPos(centerString)
-				.withQuat(quat)
-				.withMass(BigDecimal.valueOf(part.getMassKG(0.001)*KgtoMujocoMass));
+			geom.withPos(centerString).withQuat(quat)
+					.withMass(BigDecimal.valueOf(part.getMassKG(mass) * KgtoMujocoMass));
 		}
-		
-		for(DHParameterKinematics l:cat.getAllDHChains()) {
-			if(l.getScriptingName().contains("Dummy"))
+
+		for (DHParameterKinematics l : cat.getAllDHChains()) {
+			if (l.getScriptingName().contains("Dummy"))
 				continue;
 			String lastName = bodyName;
-			for(int i=0;i<l.getNumberOfLinks();i++) {
-	
+			for (int i = 0; i < l.getNumberOfLinks(); i++) {
+
 				AbstractLink link = l.getAbstractLink(i);
 				LinkConfiguration conf = link.getLinkConfiguration();
-				if(!checkLinkPhysics(cadMan,conf))
+				if (!checkLinkPhysics(cadMan, conf))
 					continue;
-				String name = conf.getName().trim()+"_"+l.getScriptingName().trim();
-				if(!(name.length()>0)) {
-					name =""+conf.getXml().hashCode();
+				String name = conf.getName().trim() + "_" + l.getScriptingName().trim();
+				if (!(name.length() > 0)) {
+					name = "" + conf.getXml().hashCode();
 				}
-				//println "Loading link "+name
+				// println "Loading link "+name
 				mapNameToLink.put(name, link);
-				Affine a = (Affine)link.getGlobalPositionListener();
-				//println "Link listener "+s+" is "+a
+				Affine a = (Affine) link.getGlobalPositionListener();
+				// println "Link listener "+s+" is "+a
 				affineNameMap.put(a, name);
-				contacts.addExclude()
-						.withBody1(bodyName)
-						.withBody2(name);
-				contacts.addExclude()
-						.withBody1(lastName)
-						.withBody2(name);
-				lastName=name;
+				contacts.addExclude().withBody1(bodyName).withBody2(name);
+				contacts.addExclude().withBody1(lastName).withBody2(name);
+				lastName = name;
 			}
 		}
-		for(DHParameterKinematics k:cat.getAllDHChains()) {
-			if(k.getScriptingName().contains("Dummy"))
-					continue;
-			org.mujoco.xml.BodyarchType.Builder<?> linkBody =addBody;
-			HashMap<AbstractLink,org.mujoco.xml.BodyarchType.Builder<?>> linkToBulder = new HashMap<>();
+		for (DHParameterKinematics k : cat.getAllDHChains()) {
+			if (k.getScriptingName().contains("Dummy"))
+				continue;
+			org.mujoco.xml.BodyarchType.Builder<?> linkBody = addBody;
+			HashMap<AbstractLink, org.mujoco.xml.BodyarchType.Builder<?>> linkToBulder = new HashMap<>();
 
-			for(int i=0;i<k.getNumberOfLinks();i++) {
+			for (int i = 0; i < k.getNumberOfLinks(); i++) {
 				AbstractLink link = k.getAbstractLink(i);
-				
+
 				LinkConfiguration conf = link.getLinkConfiguration();
-				ArrayList<CSG>  parts=cadMan.getLinktoCadMap().get(conf);
-				if(checkLinkPhysics(cadMan,conf))
-					linkBody=loadLink(cat,k,i,parts,linkBody,linkToBulder);
+				ArrayList<CSG> parts = cadMan.getLinktoCadMap().get(conf);
+				if (checkLinkPhysics(cadMan, conf))
+					linkBody = loadLink(cat, k, i, parts, linkBody, linkToBulder);
 				MobileBase follower = k.getFollowerMobileBase(link);
-				if(follower!=null) {
-					loadBase(follower, linkBody,k.getDHStep(i));
+				if (follower != null) {
+					loadBase(follower, linkBody, k.getDHStep(i));
 				}
 			}
-			for(String affineNameMapGet:geomToCSGMap.keySet()) {
+			for (String affineNameMapGet : geomToCSGMap.keySet()) {
 				AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
 				ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 				ArrayList<org.mujoco.xml.body.GeomType.Builder<?>> geoms = geomToCSGMap.get(affineNameMapGet);
 
-				for(org.mujoco.xml.body.GeomType.Builder<?>geom:geoms) {
-					//println "Mass of "+affineNameMapGet+" is "+mass
+				for (org.mujoco.xml.body.GeomType.Builder<?> geom : geoms) {
+					// println "Mass of "+affineNameMapGet+" is "+mass
 					CSG csg = geomToSourceCSG.get(geom);
-					geom.withMass(BigDecimal.valueOf(csg.getMassKG(0.001)*KgtoMujocoMass));
+					geom.withMass(BigDecimal.valueOf(csg.getMassKG(0.001) * KgtoMujocoMass));
 				}
 			}
-			
+
 		}
 	}
-	
-	public org.mujoco.xml.BodyarchType.Builder<?> loadLink(
-		MobileBase cat,
-		DHParameterKinematics l,
-		int index,ArrayList<CSG>  cad,
-		org.mujoco.xml.BodyarchType.Builder<?> addBody,
-		HashMap<AbstractLink,org.mujoco.xml.BodyarchType.Builder<?>> linkToBulderMap) {
-	AbstractLink link = l.getAbstractLink(index);
-	LinkConfiguration conf = link.getLinkConfiguration();
 
-	String name=null;
-	for(String s:mapNameToLink.keySet()) {
-		if(mapNameToLink.get(s)==link) {
-			name=s;
-			break;
+	public org.mujoco.xml.BodyarchType.Builder<?> loadLink(MobileBase cat, DHParameterKinematics l, int index,
+			ArrayList<CSG> cad, org.mujoco.xml.BodyarchType.Builder<?> addBody,
+			HashMap<AbstractLink, org.mujoco.xml.BodyarchType.Builder<?>> linkToBulderMap) {
+		AbstractLink link = l.getAbstractLink(index);
+		LinkConfiguration conf = link.getLinkConfiguration();
+
+		String name = null;
+		for (String s : mapNameToLink.keySet()) {
+			if (mapNameToLink.get(s) == link) {
+				name = s;
+				break;
+			}
 		}
-	}
-	if(name ==null)
-		throw new RuntimeException("Link name missing from the map!");
+		if (name == null)
+			throw new RuntimeException("Link name missing from the map!");
 
-	TransformNR location;
-	if(index==0) {
-		location=l.getRobotToFiducialTransform().copy();
-	}else {
-		location=new TransformNR(l.getDhLink(index-1).DhStep(0));
-	}
-	TransformNR local = new TransformNR(l.getDhLink(index).DhStep(0));
-	Transform step = TransformFactory.nrToCSG(local);
-	double x = location.getX()/1000.0;
+		TransformNR location;
+		if (index == 0) {
+			location = l.getRobotToFiducialTransform().copy();
+		} else {
+			location = new TransformNR(l.getDhLink(index - 1).DhStep(0));
+		}
+		TransformNR local = new TransformNR(l.getDhLink(index).DhStep(0));
+		Transform step = TransformFactory.nrToCSG(local);
+		double x = location.getX() / 1000.0;
 
-	double y = location.getY()/1000.0;
+		double y = location.getY() / 1000.0;
 
-	double z = location.getZ()/1000.0;
-	String quat =location.getRotation().getRotationMatrix2QuaturnionW()+" "+
-			location.getRotation().getRotationMatrix2QuaturnionX()+" "+
-			location.getRotation().getRotationMatrix2QuaturnionY()+" "+
-			location.getRotation().getRotationMatrix2QuaturnionZ();
-	TransformNR center = conf.getCenterOfMassFromCentroid();
-	String centerString = center.getX()/1000.0+" "+
-			center.getY()/1000.0+" "+
-			center.getZ()/1000.0+" ";
-	org.mujoco.xml.BodyarchType.Builder<?> linkBody = addBody.addBody()
-			.withName(name)
-			.withPos(x+" "+y+" "+z)
-			.withQuat(quat);
-	linkToBulderMap.put(link, linkBody);
+		double z = location.getZ() / 1000.0;
+		String quat = location.getRotation().getRotationMatrix2QuaturnionW() + " "
+				+ location.getRotation().getRotationMatrix2QuaturnionX() + " "
+				+ location.getRotation().getRotationMatrix2QuaturnionY() + " "
+				+ location.getRotation().getRotationMatrix2QuaturnionZ();
+		TransformNR center = conf.getCenterOfMassFromCentroid();
+		String centerString = center.getX() / 1000.0 + " " + center.getY() / 1000.0 + " " + center.getZ() / 1000.0
+				+ " ";
+		org.mujoco.xml.BodyarchType.Builder<?> linkBody = addBody.addBody().withName(name)
+				.withPos(x + " " + y + " " + z).withQuat(quat);
+		linkToBulderMap.put(link, linkBody);
 
-	double gear =460;
-	gearRatios.put(link,1.0d*gear);
-	double upper = Math.toRadians(link.getMaxEngineeringUnits());
-	double lower = Math.toRadians(link.getMinEngineeringUnits());
-	String range=lower+" "+upper;
-	String ctrlRange=(lower*gear)+" "+(upper*gear);
-	double rangeVal=upper-lower;
-	JointType.Builder<?> jointBuilder = linkBody.addJoint();
-	String axisJoint ="0 0 1";
-	///position=0;
-	jointBuilder
-			.withPos("0 0 0")// the kinematic center
-			.withAxis(axisJoint) // rotate about the z axis per dh convention
-			.withRange(ctrlRange) // engineering units range
-			.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
-			.withType(JointtypeType.HINGE) // hinge type
-			.withLimited(true)
-			//.withDamping(BigDecimal.valueOf(0.00001))
-			//.withStiffness(BigDecimal.valueOf(1))
-			.withSolreflimit("4e-3 1")
-			.withSolimplimit(".95 .99 1e-3")
-			.withName(name)
-	;
-	double forceKgCm=3.5;//mg92b default
-	Map<String, Object> configELectroMech =Vitamins.getConfiguration(conf.getElectroMechanicalType(), conf.getElectroMechanicalSize());
-	Object torque =configELectroMech.get("MaxTorqueNewtonmeters");
-	double newtonMeterLimit = 0.0980665*forceKgCm/gear;
-	if(torque!=null) {
-		newtonMeterLimit=Double.parseDouble(torque.toString())/gear;
-	}
-	if (!conf.isPassive()) {
-		jointBuilder.withFrictionloss(BigDecimal.valueOf(0.01));// experementally determined
+		double gear = 460;
+		gearRatios.put(link, 1.0d * gear);
+		double upper = Math.toRadians(link.getMaxEngineeringUnits());
+		double lower = Math.toRadians(link.getMinEngineeringUnits());
+		String range = lower + " " + upper;
+		String ctrlRange = (lower * gear) + " " + (upper * gear);
+		double rangeVal = upper - lower;
+		JointType.Builder<?> jointBuilder = linkBody.addJoint();
+		String axisJoint = "0 0 1";
+		/// position=0;
+		jointBuilder.withPos("0 0 0")// the kinematic center
+				.withAxis(axisJoint) // rotate about the z axis per dh convention
+				.withRange(ctrlRange) // engineering units range
+				.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
+				.withType(JointtypeType.HINGE) // hinge type
+				.withLimited(true)
+				// .withDamping(BigDecimal.valueOf(0.00001))
+				// .withStiffness(BigDecimal.valueOf(1))
+				.withSolreflimit("4e-3 1").withSolimplimit(".95 .99 1e-3").withName(name);
+		double forceKgCm = 3.5;// mg92b default
+		Map<String, Object> configELectroMech = Vitamins.getConfiguration(conf.getElectroMechanicalType(),
+				conf.getElectroMechanicalSize());
+		Object torque = configELectroMech.get("MaxTorqueNewtonmeters");
+		double newtonMeterLimit;
+		if (torque != null) {
+			newtonMeterLimit = Double.parseDouble(torque.toString()) / gear;
+		} else {
+			newtonMeterLimit = 0.0980665 * forceKgCm / gear;
+		}
+		if (!conf.isPassive()) {
+			jointBuilder.withFrictionloss(BigDecimal.valueOf(0.01));// experementally determined
 
-		actuators.addPosition()// A position controller to model a servo
-				.withKp(BigDecimal.valueOf(0.000006)) // experementally determined value
-				//.withForcelimited(true)
-				//.withForcerange(range)
-				.withCtrlrange(ctrlRange)
-				.withForcerange((-newtonMeterLimit)+" "+newtonMeterLimit)
-				.withName(name)// name the motor
-				.withJoint(name)// which joint this motor powers
-				.withGear(""+gear) // gear ratio between virtual motor and output
-				.withKv(BigDecimal.valueOf(0.00000001)); // damping term experementally determenied
-				//.withInheritrange(BigDecimal.valueOf(rangeVal));// sets the range of the control signal to match the limits
-	}
+			actuators.addPosition()// A position controller to model a servo
+					.withKp(BigDecimal.valueOf(0.000006)) // experementally determined value
+					// .withForcelimited(true)
+					// .withForcerange(range)
+					.withCtrlrange(ctrlRange).withForcerange((-newtonMeterLimit) + " " + newtonMeterLimit)
+					.withName(name)// name the motor
+					.withJoint(name)// which joint this motor powers
+					.withGear("" + gear) // gear ratio between virtual motor and output
+					.withKv(BigDecimal.valueOf(0.00000001)); // damping term experementally determenied
+			// .withInheritrange(BigDecimal.valueOf(rangeVal));// sets the range of the
+			// control signal to match the limits
+		}
 
 //	
-					
-	for (int i = 0; i < cad.size(); i++) {
-		CSG part = cad.get(i);
-		if(!checkForPhysics(part))
-			continue;
-		Affine cGetManipulator = part.getManipulator();
-		if(cGetManipulator!=null) {
-			String affineNameMapGet = affineNameMap.get(cGetManipulator);
-			if(affineNameMapGet!=null) {
-				DHParameterKinematics k = l;
-				
-				AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
 
-				double myposition = link.getCurrentEngineeringUnits();
-				TransformNR myStep = new TransformNR(
-						k.getDhLink(myLink).DhStep(0)
-						);
-				CSG transformed = part
-						.transformed(
-						TransformFactory
-						.nrToCSG(
-						myStep
-						))
-						;
-				CSG hull;
+		for (int i = 0; i < cad.size(); i++) {
+			CSG part = cad.get(i);
+			if (!checkForPhysics(part))
+				continue;
+			Affine cGetManipulator = part.getManipulator();
+			if (cGetManipulator != null) {
+				String affineNameMapGet = affineNameMap.get(cGetManipulator);
+				if (affineNameMapGet != null) {
+					DHParameterKinematics k = l;
+
+					AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
+
+					double myposition = link.getCurrentEngineeringUnits();
+					TransformNR myStep = new TransformNR(k.getDhLink(myLink).DhStep(0));
+					CSG transformed = part.transformed(TransformFactory.nrToCSG(myStep));
+					CSG hull;
 //				if(cat.isWheel(myLink)) {
 //					double height = part.getTotalZ();
 //					double radius =( part.getTotalY()+part.getTotalX())/4.0;
@@ -715,66 +705,72 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 //				}else
 					try {
 						hull = transformed.hull();
-					}catch(Exception ex) {
-						hull=transformed;
+					} catch (Exception ex) {
+						hull = transformed;
 					}
-				//					if(myLink!=link)
-				//						hull = part.hull();
-				transformed.setManipulator(new Affine());
-				String geomname=name+" "+i;
+					// if(myLink!=link)
+					// hull = part.hull();
+					transformed.setManipulator(new Affine());
+					String geomname = name + " " + i;
 
-				try {
-					putCSGInAssets(geomname, hull,true);
-					org.mujoco.xml.body.GeomType.Builder<?> geom = linkToBulderMap.get(myLink).addGeom();
-					geomToSourceCSG.put(geom, part);
+					try {
+						putCSGInAssets(geomname, hull, true);
+						org.mujoco.xml.body.GeomType.Builder<?> geom = linkToBulderMap.get(myLink).addGeom();
+						geomToSourceCSG.put(geom, part);
 
-					ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
-					if(geomToCSGMap.get(affineNameMapGet)==null) {
-						geomToCSGMap.put(affineNameMapGet, new ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>());
-					}
-					geomToCSGMap.get(affineNameMapGet).add(geom);
-					parts.add( transformed);
-					setCSGMeshToGeom(geomname, geom);
-					if(cat.isWheel(myLink)) {
-						// default is 1 0.005 0.0001
-						//println "Setting Wheel Friction for "+part.getName()
-						geom.withFriction("1.2 0.005 0.0001");
-						if(myLink.getLinkConfiguration().isPassive()) {
-							geom.withFriction("0.01 0.00005 0.000001");// this is a hack for "onmi wheels" 
+						ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
+						if (geomToCSGMap.get(affineNameMapGet) == null) {
+							geomToCSGMap.put(affineNameMapGet,
+									new ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>());
 						}
+						geomToCSGMap.get(affineNameMapGet).add(geom);
+						parts.add(transformed);
+						if (cat.isWheel(myLink)) {
+							setWheelMeshToGeom(geomname, geom, part);
+							// default is 1 0.005 0.0001
+							// println "Setting Wheel Friction for "+part.getName()
+							geom.withFriction("1.2 0.05 0.001");
+							if (myLink.getLinkConfiguration().isPassive()) {
+								geom.withFriction("0.01 0.005 0.0001");// this is a hack for "onmi wheels"
+							}
+						} else {
+							setCSGMeshToGeom(geomname, geom);
+
+							if (cat.isFoot(myLink)) {
+								// default is 1 0.005 0.0001
+								// println "Setting Foot Friction for "+part.getName()
+								geom.withFriction("1.2 0.001 0.00005");
+							}
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					if(cat.isFoot(myLink)) {
-						// default is 1 0.005 0.0001
-						//println "Setting Foot Friction for "+part.getName()
-						geom.withFriction("1.2 0.001 0.00005");
-					}
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				} else {
+					// println "ERROR! "+name+" for part "+part.getName()+" produced no matching
+					// affine"
 				}
-			}else {
-				//println "ERROR! "+name+" for part "+part.getName()+" produced no matching affine"
 			}
 		}
+		return linkBody;
 	}
-	return linkBody;
-}
-		
-	public  double sig(double x) {
-		if(x>0.999)
+
+	public double sig(double x) {
+		if (x > 0.999)
 			return 1;
-		if(x<-0.999)
+		if (x < -0.999)
 			return -1;
-		if(x<0.001 && x>-0.001)
+		if (x < 0.001 && x > -0.001)
 			return 0;
 		return x;
 	}
-	public  void addFreePart(List<CSG> partsIn) throws IOException {
-		
+
+	public void addFreePart(List<CSG> partsIn) throws IOException {
+
 		org.mujoco.xml.BodyarchType.Builder<?> addBody = globalFrameBody.addBody();
-		String nameOfCSG=null;
-		String nameOfBODY=null;
-		Vector3d centerGroup=null;
+		String nameOfCSG = null;
+		String nameOfBODY = null;
+		Vector3d centerGroup = null;
 		for (CSG part : partsIn) {
 			if (!checkForPhysics(part))
 				continue;
@@ -787,7 +783,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			if (nameOfCSG.length() == 0) {
 				nameOfCSG = "Part-" + (count);
 			}
-			nameOfCSG += "-"+count+"-" + "free";
+			nameOfCSG += "-" + count + "-" + "free";
 
 			if (nameOfBODY == null) {
 				nameOfBODY = nameOfCSG;
@@ -808,7 +804,7 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		}
 	}
 
-	public  void addPart(List<CSG> partsIn) throws IOException {
+	public void addPart(List<CSG> partsIn) throws IOException {
 
 		String nameOfCSG = null;
 		for (CSG part : partsIn) {
@@ -820,9 +816,9 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 			Vector3d center = part.getCenter();
 			nameOfCSG = part.getName();
 			if (nameOfCSG.length() == 0) {
-				nameOfCSG = "Part-" ;
+				nameOfCSG = "Part-";
 			}
-			nameOfCSG += "-" + (count)+"-"+ "fixed";
+			nameOfCSG += "-" + (count) + "-" + "fixed";
 
 			hull.setManipulator(new Affine());
 			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfCSG);
@@ -838,113 +834,104 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		}
 	}
 
-	public  ArrayList<CSG> getMapNameToCSGParts(String nameOfCSG) {
+	public ArrayList<CSG> getMapNameToCSGParts(String nameOfCSG) {
 		mapNameToCSG.putIfAbsent(nameOfCSG, new ArrayList<CSG>());
 		return mapNameToCSG.get(nameOfCSG);
 	}
-	
-	public  void setCSGMeshToGeom(String nameOfCSG, org.mujoco.xml.body.GeomType.Builder<?> geom) {
-		geom.withName(nameOfCSG)
-		.withType(GeomtypeType.MESH)
-		.withMesh(nameOfCSG)
-		//.withGroup(isFree?1:2)
-		//.withConaffinity(1)
-		.withCondim(getCondim())
-		.withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
-		.withMaterial(nameOfCSG)
-		.withSolimp(".99 .99 0")
+
+	public void setCSGMeshToGeom(String nameOfCSG, org.mujoco.xml.body.GeomType.Builder<?> geom) {
+		geom.withName(nameOfCSG).withType(GeomtypeType.MESH).withMesh(nameOfCSG)
+				// .withGroup(isFree?1:2)
+				// .withConaffinity(1)
+				.withCondim(getCondim()).withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0)).withMaterial(nameOfCSG)
+				.withSolimp(".99 .99 0");
+	}
+
+	public void setWheelMeshToGeom(String nameOfCSG, org.mujoco.xml.body.GeomType.Builder<?> geom, CSG part) {
+
+		String fromto = "0 0 " + part.getMinZ() / 1000.0 + " 0 0 " + part.getMaxZ() / 1000.0;
+		geom.withName(nameOfCSG).withType(GeomtypeType.CYLINDER).withSize("" + part.getTotalX() / 2000.0)
+				.withFromto(fromto)
+				// .withCondim(getCondim())
+				// .withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
+				.withMaterial(nameOfCSG)
+		// .withSolimp(".99 .99 0")
 		;
 	}
 
-	public  void setStartLocation(Vector3d center, org.mujoco.xml.BodyarchType.Builder<?> addBody) {
-		addBody.withPos(center.x/1000.0+" "+
-				center.y/1000.0+" "+
-				center.z/1000.0+" "
-		);
+	public void setStartLocation(Vector3d center, org.mujoco.xml.BodyarchType.Builder<?> addBody) {
+		addBody.withPos(center.x / 1000.0 + " " + center.y / 1000.0 + " " + center.z / 1000.0 + " ");
 	}
-	public  void setStartLocation(TransformNR center, org.mujoco.xml.BodyarchType.Builder<?> addBody) {
-		addBody.withPos(center.getX()/1000.0+" "+
-				center.getY()/1000.0+" "+
-				center.getZ()/1000.0+" "
-		);
-	}
-	public  String toColorString(Color c) {
 
-		return c.getRed()+" "+c.getGreen()+" "+c.getBlue();
+	public void setStartLocation(TransformNR center, org.mujoco.xml.BodyarchType.Builder<?> addBody) {
+		addBody.withPos(center.getX() / 1000.0 + " " + center.getY() / 1000.0 + " " + center.getZ() / 1000.0 + " ");
 	}
-	public  void putCSGInAssets(String nameOfCSG, CSG hull, boolean isFree) throws IOException {
+
+	public String toColorString(Color c) {
+
+		return c.getRed() + " " + c.getGreen() + " " + c.getBlue();
+	}
+
+	public void putCSGInAssets(String nameOfCSG, CSG hull, boolean isFree) throws IOException {
 		count++;
 
 		File tempFile;
-		boolean useCache=false;
+		boolean useCache = false;
 		if (workingDir == null) {
-			tempFile = File.createTempFile(nameOfCSG+"-", ".obj");
+			tempFile = File.createTempFile(nameOfCSG + "-", ".obj");
 			tempFile.deleteOnExit();
 		} else {
 			tempFile = new File(workingDir.getAbsolutePath() + "/" + nameOfCSG + ".obj");
-			if(tempFile.exists()) {
-				// this should be enabled using a hash of the configuration to determine if the files are stale
-				//useCache=true; 
+			if (tempFile.exists()) {
+				// this should be enabled using a hash of the configuration to determine if the
+				// files are stale
+				// useCache=true;
 			}
 		}
-		if(!useCache) {
+		if (!useCache) {
 			long start = System.currentTimeMillis();
-			System.out.print("\nWriting "+tempFile.getName());
+			System.out.print("\nWriting " + tempFile.getName());
 			String xml = hull.toObjString();
 			Files.write(Paths.get(tempFile.getAbsolutePath()), xml.getBytes());
-			System.out.print(" "+(System.currentTimeMillis()-start));
-		}else {
-			System.out.println("Loading cache "+tempFile.getName());
+			System.out.print(" " + (System.currentTimeMillis() - start));
+		} else {
+			System.out.println("Loading cache " + tempFile.getName());
 		}
-		if(isFree) {
-			asset.addTexture()
-				.withRgb1(toColorString(hull.getColor()))
-				.withRgb2(toColorString(hull.getColor()))
-				.withName(nameOfCSG)
-				.withType("2d")
-				.withBuiltin(BuiltinType.FLAT)
-				.withWidth(100)
-				.withHeight(100);
-		}else {
-			asset.addTexture()
-				.withRgb1(toColorString(floor.getColor()))
-				.withRgb2(toColorString(hull.getColor()))
-				.withName(nameOfCSG)
-				.withType("2d")
-				.withBuiltin(BuiltinType.GRADIENT)
-				.withWidth(100)
-				.withHeight(100);
+		if (isFree) {
+			asset.addTexture().withRgb1(toColorString(hull.getColor())).withRgb2(toColorString(hull.getColor()))
+					.withName(nameOfCSG).withType("2d").withBuiltin(BuiltinType.FLAT).withWidth(100).withHeight(100);
+		} else {
+			asset.addTexture().withRgb1(toColorString(floor.getColor())).withRgb2(toColorString(hull.getColor()))
+					.withName(nameOfCSG).withType("2d").withBuiltin(BuiltinType.GRADIENT).withWidth(100)
+					.withHeight(100);
 		}
-		asset.addMaterial()
-			.withName(nameOfCSG)
-			.withTexture(nameOfCSG)
-			
+		asset.addMaterial().withName(nameOfCSG).withTexture(nameOfCSG)
+
 		;
 
-		asset.addMesh()
-			.withFile(tempFile.getName())
-			.withName(nameOfCSG)
-			.withScale(".001 .001 .001")// convert from mm to meters
+		asset.addMesh().withFile(tempFile.getName()).withName(nameOfCSG).withScale(".001 .001 .001")// convert from mm
+																									// to meters
 		;
 	}
-	public  String getMujocoName(MobileBase cat) {
+
+	public String getMujocoName(MobileBase cat) {
 		return cat.getScriptingName().trim() + "_base";
 	}
 
-	public  void loadCadForMobileBase(MobileBaseCadManager cadMan) {
+	public void loadCadForMobileBase(MobileBaseCadManager cadMan) {
 		cadMan.run();
-		if(!cadMan.isCADstarted() && cadMan.getProcesIndictor().get()<0.1) {
+		if (!cadMan.isCADstarted() && cadMan.getProcesIndictor().get() < 0.1) {
 			cadMan.generateCad();
 		}
 		long start = System.currentTimeMillis();
-		waitForCad(cadMan,start);
+		waitForCad(cadMan, start);
 	}
 
-	public  void waitForCad(MobileBaseCadManager cadMan, long start) {
-		double percent ;
+	public void waitForCad(MobileBaseCadManager cadMan, long start) {
+		double percent;
 
-		while ((percent =cadMan.getProcesIndictor().get()) < 0.999) {
-			
+		while ((percent = cadMan.getProcesIndictor().get()) < 0.999) {
+
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -985,11 +972,13 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	}
 
 	/*
-	 * condim
-		1 Frictionless contact.
-		3 Regular frictional contact, opposing slip in the tangent plane.
-		4 Frictional contact, opposing slip in the tangent plane and rotation around the contact normal. This is useful for modeling soft contacts (independent of contact penetration).
-		6 Frictional contact, opposing slip in the tangent plane, rotation around the contact normal and rotation around the two axes of the tangent plane. The latter frictional effects are useful for preventing objects from indefinite rolling.
+	 * condim 1 Frictionless contact. 3 Regular frictional contact, opposing slip in
+	 * the tangent plane. 4 Frictional contact, opposing slip in the tangent plane
+	 * and rotation around the contact normal. This is useful for modeling soft
+	 * contacts (independent of contact penetration). 6 Frictional contact, opposing
+	 * slip in the tangent plane, rotation around the contact normal and rotation
+	 * around the two axes of the tangent plane. The latter frictional effects are
+	 * useful for preventing objects from indefinite rolling.
 	 */
 	public void setCondim(int condim) {
 		switch (condim) {
@@ -1012,13 +1001,13 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 	 * @return the mRuntime
 	 */
 	public MuJoCoModelManager getmRuntime() {
-		if(mRuntime==null)
+		if (mRuntime == null)
 			try {
 				new RuntimeException("ERROR loading runtime before it was generated").printStackTrace();
 				generateNewModel();
 			} catch (Exception e) {
 				throw new RuntimeException(e);
-			} 
+			}
 		return mRuntime;
 	}
 
@@ -1030,26 +1019,27 @@ public class MuJoCoPhysicsManager implements IMujocoController,ITimeProvider {
 		mRuntime.setController(this);
 	}
 
+	public TransformNR mujocoToTransformNR(double[] bodyPose) {
+		// cartesian pose, Xm, Ym, Zm, QuatW, QuatX, QuatY, QuatZ
+		double x = bodyPose[0] * 1000.0;
+		double y = bodyPose[1] * 1000.0;
+		double z = bodyPose[2] * 1000.0;
 
-	public  TransformNR mujocoToTransformNR(double[] bodyPose) {
-		//cartesian pose, Xm, Ym, Zm, QuatW, QuatX, QuatY, QuatZ
-		double x = bodyPose[0]*1000.0;
-		double y = bodyPose[1]*1000.0;
-		double z = bodyPose[2]*1000.0;
-
-		//if(print)
-		//println "coords "+[x,y,z]+" "+[qw, qx, qy, qz]
+		// if(print)
+		// println "coords "+[x,y,z]+" "+[qw, qx, qy, qz]
 
 		RotationNR local = new RotationNR(bodyPose[3], bodyPose[4], bodyPose[5], bodyPose[6]);
 
-		return new TransformNR(x,y,z,local);
+		return new TransformNR(x, y, z, local);
 	}
+
 	/**
 	 * @return the integratorType
 	 */
 	public IntegratorType getIntegratorType() {
 		return integratorType;
 	}
+
 	/**
 	 * @param integratorType the integratorType to set
 	 */
