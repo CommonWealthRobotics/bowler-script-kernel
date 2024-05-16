@@ -326,8 +326,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static boolean isUrlAlreadyOpen(String URL) {
 		if (URL == null)
 			return false;
-		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-			Git g = iterator.next();
+		Object[] keySet =  gitOpenTimeout.keySet().toArray();
+		for (int i = 0; i < keySet.length; i++) {
+			Git g = (Git)keySet[i];
 			GitTimeoutThread t = gitOpenTimeout.get(g);
 			if (t.ref.toLowerCase().contentEquals(URL.toLowerCase())) {
 				// t.getException().printStackTrace(System.err);
@@ -346,8 +347,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static Git openGit(Repository localRepo) {
 
-		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-			Git g = iterator.next();
+		Object[] array = gitOpenTimeout.keySet().toArray();
+		for (int j = 0; j < array.length; j++) {
+			Object gO = array[j];
+			Git g=(Git)gO;
 			if (g.getRepository().getDirectory().getAbsolutePath()
 					.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
 				GitTimeoutThread t = gitOpenTimeout.get(g);
