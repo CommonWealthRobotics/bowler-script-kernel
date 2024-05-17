@@ -162,6 +162,7 @@ public class Vitamins {
 						servoMeasurments);
 				Map<String, Object> configuration = Vitamins.getConfiguration(type, id);
 				newVitamin.setName(type +"-"+ id);
+				newVitamin.setManufacturing(incoming -> null);
 				try {
 					Transform com = new Transform()
 										.movex(Double.parseDouble(configuration.get("massCentroidX").toString()))
