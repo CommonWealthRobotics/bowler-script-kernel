@@ -168,11 +168,12 @@ public class Vitamins {
 										.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
 					newVitamin.getStorage().set("massKg", configuration.get("massKg"));
 					newVitamin.getStorage().set("massCentroid", com);
+					newVitamin.setName(type +"-"+ id);
 					return newVitamin;
 				}catch(Exception ex) {
-					Transform com = new Transform();
-					newVitamin.getStorage().set("massKg", 0.01);
-					newVitamin.getStorage().set("massCentroid", com);
+					System.err.println(type +"-"+ id+" Failed");
+					ex.printStackTrace();
+					newVitamin.setName(type +"-"+ id);
 					return newVitamin;
 				}
 			} else {
