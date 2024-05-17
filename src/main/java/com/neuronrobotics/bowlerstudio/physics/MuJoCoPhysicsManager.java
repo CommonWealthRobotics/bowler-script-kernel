@@ -750,9 +750,10 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 							setWheelMeshToGeom(geomname, geom, part);
 							// default is 1 0.005 0.0001
 							// println "Setting Wheel Friction for "+part.getName()
-							geom.withFriction("1.2 0.005 0.001");
 							if (myLink.getLinkConfiguration().isPassive()) {
-								geom.withFriction("0.01 0.005 0.0001");// this is a hack for "onmi wheels"
+								geom.withFriction("0.0001 0.00005 0.000001");// this is a hack for "onmi wheels"
+							}else {
+								geom.withFriction("1.2 0.005 0.001");
 							}
 						} else {
 							setCSGMeshToGeom(geomname, geom);
@@ -864,24 +865,25 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		geom
 			.withName(nameOfCSG)
 			.withType(GeomtypeType.MESH).withMesh(nameOfCSG)
-			// .withGroup(isFree?1:2)
-			// .withConaffinity(1)
 			.withCondim(getCondim())
 			.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0))
 			.withMaterial(nameOfCSG)
-			//.withSolimp(".99 .99 0")
 			;
 	}
 
 	public void setWheelMeshToGeom(String nameOfCSG, org.mujoco.xml.body.GeomType.Builder<?> geom, CSG part) {
 		String fromto = "0 0 " + part.getMinZ() / 1000.0 + " 0 0 " + part.getMaxZ() / 1000.0;
 		geom.withName(nameOfCSG)
-			.withType(GeomtypeType.CYLINDER).withSize("" + part.getTotalX() / 2000.0)
-			.withFromto(fromto)
+			.withType(GeomtypeType.MESH).withMesh(nameOfCSG)
 			.withCondim(getCondim())
-			.withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
+			.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0))
 			.withMaterial(nameOfCSG)
-			//.withSolimp(".99 .99 0")
+//			.withType(GeomtypeType.CYLINDER).withSize("" + part.getTotalX() / 2000.0)
+//			.withFromto(fromto)
+//			.withCondim(getCondim())
+//			.withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
+//			.withMaterial(nameOfCSG)
+		
 			;
 	}
 
