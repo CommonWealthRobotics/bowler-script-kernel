@@ -326,7 +326,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static boolean isUrlAlreadyOpen(String URL) {
 		if (URL == null)
 			return false;
-		Object[] keySet =  gitOpenTimeout.keySet().toArray();
+		Object[] keySet;
+		synchronized(gitOpenTimeout) {
+		 keySet =  gitOpenTimeout.keySet().toArray();
+		}
 		for (int i = 0; i < keySet.length; i++) {
 			Git g = (Git)keySet[i];
 			GitTimeoutThread t = gitOpenTimeout.get(g);
@@ -347,9 +350,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static Git openGit(Repository localRepo) {
 
-		Object[] array = gitOpenTimeout.keySet().toArray();
-		for (int j = 0; j < array.length; j++) {
-			Object gO = array[j];
+		Object[] keySet;
+		synchronized(gitOpenTimeout) {
+		 keySet =  gitOpenTimeout.keySet().toArray();
+		}
+		for (int j = 0; j < keySet.length; j++) {
+			Object gO = keySet[j];
 			Git g=(Git)gO;
 			if (g.getRepository().getDirectory().getAbsolutePath()
 					.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
