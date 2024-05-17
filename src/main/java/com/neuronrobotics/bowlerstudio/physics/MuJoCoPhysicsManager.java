@@ -528,9 +528,10 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			geomToSourceCSG.put(geom, part);
 			geom.withPos(centerString)
 				.withQuat(quat);
-			if(part.hasMassSet())
-				geom.withMass(BigDecimal.valueOf(part.getMassKG(mass) * KgtoMujocoMass));
-			else {
+			if(part.hasMassSet()) {
+				double val = part.getMassKG(mass) * KgtoMujocoMass;
+				geom.withMass(BigDecimal.valueOf(val));
+			} else {
 				System.out.println("\nUsing density for "+part.getName());
 			}
 		}
@@ -595,7 +596,12 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				for (org.mujoco.xml.body.GeomType.Builder<?> geom : geoms) {
 					// println "Mass of "+affineNameMapGet+" is "+mass
 					CSG csg = geomToSourceCSG.get(geom);
-					geom.withMass(BigDecimal.valueOf(csg.getMassKG(linkMass/numPartsWithoutMassLink) * KgtoMujocoMass));
+					if(csg.hasMassSet()) {
+						double val = csg.getMassKG(linkMass/numPartsWithoutMassLink) * KgtoMujocoMass;
+						geom.withMass(BigDecimal.valueOf(val));
+					} else {
+						System.out.println("\nUsing density for "+csg.getName());
+					}
 				}
 			}
 
@@ -726,7 +732,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					// if(myLink!=link)
 					// hull = part.hull();
 					transformed.setManipulator(new Affine());
-					String geomname = name + " " + i;
+					String geomname = name + "_" + i+"_"+part.getName();
 
 					try {
 						putCSGInAssets(geomname, hull, true);
@@ -744,7 +750,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 							setWheelMeshToGeom(geomname, geom, part);
 							// default is 1 0.005 0.0001
 							// println "Setting Wheel Friction for "+part.getName()
-							//geom.withFriction("1.2 0.005 0.001");
+							geom.withFriction("1.2 0.005 0.001");
 							if (myLink.getLinkConfiguration().isPassive()) {
 								geom.withFriction("0.01 0.005 0.0001");// this is a hack for "onmi wheels"
 							}
