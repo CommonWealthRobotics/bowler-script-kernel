@@ -152,11 +152,12 @@ public class MobileBaseCadManager implements Runnable {
 		if(!vitaminCad.containsKey(vitamin)) {
 			CSG starting;
 			try {
-				starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
-				starting=starting.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
+				CSG origin = Vitamins.get(vitamin.getType(), vitamin.getSize());
+				starting=origin.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
 				if(offset!=null)
 					starting=starting.transformed(TransformFactory.nrToCSG(offset));
 				starting.setIsWireFrame(true);
+				starting.syncProperties(origin);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

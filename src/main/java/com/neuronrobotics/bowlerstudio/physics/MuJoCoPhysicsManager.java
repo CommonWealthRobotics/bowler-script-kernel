@@ -485,11 +485,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			baseParts.put(part, center.copy());
 
 		}
-		if (baseParts.size() == 0) {
-			CSG CoM = new Sphere(2).toCSG();
-			baseParts.put(CoM, cat.getCenterOfMassFromCentroid().copy());
-			limbBase.put(CoM, new TransformNR());
-		}
+//		if (baseParts.size() == 0) {
+//			CSG CoM = new Sphere(2).toCSG();
+//			baseParts.put(CoM, cat.getCenterOfMassFromCentroid().copy());
+//			limbBase.put(CoM, new TransformNR());
+//		}
 		int numPartsWithoutMass = 0;
 		for (CSG part : baseParts.keySet()) {
 			if (!part.getStorage().getValue("massKg").isPresent()) {
@@ -503,7 +503,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			TransformNR offset = limbBase.get(part);
 			double mass = cat.getMassKg() / numPartsWithoutMass;
 			bodyParts++;
-			String nameOfCSG = bodyName + "_CSG_" + bodyParts;
+			String nameOfCSG = bodyName + "_CSG_" + bodyParts+"_"+part.getName();
 
 			CSG transformed = part.transformed(TransformFactory.nrToCSG(center.inverse().times(offset)));
 			CSG hull;
@@ -526,8 +526,13 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					+ center.getRotation().getRotationMatrix2QuaturnionY() + " "
 					+ center.getRotation().getRotationMatrix2QuaturnionZ();
 			geomToSourceCSG.put(geom, part);
-			geom.withPos(centerString).withQuat(quat)
-					.withMass(BigDecimal.valueOf(part.getMassKG(mass) * KgtoMujocoMass));
+			geom.withPos(centerString)
+				.withQuat(quat);
+			if(part.hasMassSet())
+				geom.withMass(BigDecimal.valueOf(part.getMassKG(mass) * KgtoMujocoMass));
+			else {
+				System.out.println("\nUsing density for "+part.getName());
+			}
 		}
 
 		for (DHParameterKinematics l : cat.getAllDHChains()) {
