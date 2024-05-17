@@ -161,6 +161,7 @@ public class Vitamins {
 						repostring.toString(), // file to load
 						servoMeasurments);
 				Map<String, Object> configuration = Vitamins.getConfiguration(type, id);
+				newVitamin.setName(type +"-"+ id);
 				try {
 					Transform com = new Transform()
 										.movex(Double.parseDouble(configuration.get("massCentroidX").toString()))
@@ -168,12 +169,11 @@ public class Vitamins {
 										.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
 					newVitamin.getStorage().set("massKg", configuration.get("massKg"));
 					newVitamin.getStorage().set("massCentroid", com);
-					newVitamin.setName(type +"-"+ id);
+					
 					return newVitamin;
 				}catch(Exception ex) {
-					System.err.println(type +"-"+ id+" Failed");
-					ex.printStackTrace();
-					newVitamin.setName(type +"-"+ id);
+					//System.err.println(type +"-"+ id+" Failed");
+					//ex.printStackTrace();
 					return newVitamin;
 				}
 			} else {
