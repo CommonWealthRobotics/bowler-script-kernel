@@ -751,7 +751,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 							// default is 1 0.005 0.0001
 							// println "Setting Wheel Friction for "+part.getName()
 	
-							geom.withFriction("1.2 0.005 0.001");
+							geom.withFriction("2 0.001 0.00005");
 							
 						} else {
 							setCSGMeshToGeom(geomname, geom);
