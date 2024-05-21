@@ -664,7 +664,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
 				.withType(JointtypeType.HINGE) // hinge type
 				.withLimited(true)
-				.withDamping(BigDecimal.valueOf(0.000001))
+				//.withDamping(BigDecimal.valueOf(0.000001))
 				// .withStiffness(BigDecimal.valueOf(1))
 				.withSolreflimit("4e-3 1").withSolimplimit(".95 .99 1e-3").withName(name);
 		double forceKgCm = 3.5;// mg92b default
@@ -750,11 +750,9 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 							setWheelMeshToGeom(geomname, geom, part);
 							// default is 1 0.005 0.0001
 							// println "Setting Wheel Friction for "+part.getName()
-							if (myLink.getLinkConfiguration().isPassive()) {
-								geom.withFriction("0.0001 0.00005 0.000001");// this is a hack for "onmi wheels"
-							}else {
-								geom.withFriction("1.2 0.005 0.001");
-							}
+	
+							geom.withFriction("1.2 0.005 0.001");
+							
 						} else {
 							setCSGMeshToGeom(geomname, geom);
 
