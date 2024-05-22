@@ -177,7 +177,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 
 	@Override
 	public void onEvent(String name, float value) {
-		if(Math.abs(value)<0.01)
+		if(Math.abs(value)<0.25)
 			value=0;
 		//System.out.println(controller);
 		if(axisWaiting!=null) {
@@ -217,6 +217,8 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		if(System.currentTimeMillis()-timeOfLastAxisSet<100) {
 			return;
 		}
+		if(Math.abs(value)<0.25)
+			return;// axis not all the way pressed
 		axisWaiting=name;
 		System.out.println("Adding Axis "+name);
 		listOfMappedAxis.add(name);
