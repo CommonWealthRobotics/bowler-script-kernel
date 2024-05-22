@@ -664,6 +664,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
 				.withType(JointtypeType.HINGE) // hinge type
 				.withLimited(true)
+				.withFrictionloss(BigDecimal.valueOf(0.01))// experementally determined
+
 				//.withDamping(BigDecimal.valueOf(0.000001))
 				// .withStiffness(BigDecimal.valueOf(1))
 				.withSolreflimit("4e-3 1").withSolimplimit(".95 .99 1e-3").withName(name);
@@ -678,7 +680,6 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			newtonMeterLimit = 0.0980665 * forceKgCm / gear;
 		}
 		if (!conf.isPassive()) {
-			jointBuilder.withFrictionloss(BigDecimal.valueOf(0.01));// experementally determined
 
 			actuators.addPosition()// A position controller to model a servo
 					.withKp(BigDecimal.valueOf(0.000006)) // experementally determined value
