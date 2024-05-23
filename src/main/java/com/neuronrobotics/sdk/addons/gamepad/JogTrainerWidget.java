@@ -57,11 +57,11 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 	private int mappingIndex = 0;
 	private HashMap<Integer, TextField> fields = new HashMap<>();
 	private String axisWaiting=null;
-	private long timeOfLastAxisSet=0;
 	private ArrayList<String> listOfMappedAxis =new ArrayList<>();
 	private Button save;
 	private Stage primaryStage;
-
+	private HashMap<String,Float> values=new HashMap<>();
+	private HashMap<String,Long> timeOfLastAxisSet = new HashMap<>();
 	private BowlerJInputDevice gameController;
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
@@ -177,32 +177,32 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 
 	@Override
 	public void onEvent(String name, float value) {
-		if(Math.abs(value)<0.25)
+		if(Math.abs(value)<0.1)
 			value=0;
-		//System.out.println(controller);
-		if(axisWaiting!=null) {
-			if(System.currentTimeMillis()-timeOfLastAxisSet<2000) {
-				// waiting for that axis to go back to 0
-				if(axisWaiting.contentEquals(name)) {
-					if(Math.abs(value)>0.01) {
-						System.out.println("Waiting for value to settle for "+axisWaiting);
-						return;
-					}else {
-						// the axis returned, moving on
-						timeOfLastAxisSet=System.currentTimeMillis();
-						System.out.println("Map done "+axisWaiting);
-						axisWaiting=null;
-						return;
-					}
-				}else {
-					System.out.println("Waiting for value to settle for "+axisWaiting+" got value from "+name);
-					return;
-				}
-			}else {
-				System.out.println("Assuming value to settled "+axisWaiting);
-				value=0;
-			}
+
+		if(values.get(name)==null) {
+			values.put(name, value);
+			timeOfLastAxisSet.put(name, System.currentTimeMillis());
+			return;
 		}
+		if(System.currentTimeMillis()-timeOfLastAxisSet.get(name)<100) {
+			return;// wait for a value to settle
+		}
+		Float float1 = values.get(name);
+		float abs = Math.abs(float1-value);
+		if(	abs <0.5) {
+			values.put(name,value);
+			timeOfLastAxisSet.put(name, System.currentTimeMillis());
+			if(abs>0.2)
+				System.out.println("value for "+name+" seems noisy "+value+" most recent was "+values.get(name));
+			return;
+		}else {
+			System.out.println("Value changed! "+name+" "+float1+" to "+value);
+			values.put(name, value);
+			timeOfLastAxisSet.put(name, System.currentTimeMillis());
+		}
+			
+		
 		for(String s:listOfMappedAxis) {
 			if(s.contentEquals(name)) {
 				System.out.println("mapping skipped for "+name);
@@ -214,15 +214,12 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 			if(name.contentEquals(s))
 				return;// Do not use maped axis for re-mapping
 		}
-		if(System.currentTimeMillis()-timeOfLastAxisSet<100) {
-			return;
-		}
-		if(Math.abs(value)<0.25)
-			return;// axis not all the way pressed
+
 		axisWaiting=name;
 		System.out.println("Adding Axis "+name);
+		
 		listOfMappedAxis.add(name);
-		timeOfLastAxisSet=System.currentTimeMillis();
+		timeOfLastAxisSet.put(name,System.currentTimeMillis());
 		BowlerKernel.runLater(() -> {
 			TextField textField = fields.get(mappingIndex);
 			textField.setText(name);
