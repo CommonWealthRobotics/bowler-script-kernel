@@ -648,7 +648,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				.withPos(x + " " + y + " " + z).withQuat(quat);
 		linkToBulderMap.put(link, linkBody);
 
-		double gear = 460;
+		double gear = 660;
 		gearRatios.put(link, 1.0d * gear);
 		double upper = Math.toRadians(link.getMaxEngineeringUnits());
 		double lower = Math.toRadians(link.getMinEngineeringUnits());
@@ -664,7 +664,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
 				.withType(JointtypeType.HINGE) // hinge type
 				.withLimited(true)
-				.withFrictionloss(BigDecimal.valueOf(0.01))// experementally determined
+				.withFrictionloss(BigDecimal.valueOf(conf.isPassive()?0.0001:0.01))// experementally determined
 
 				//.withDamping(BigDecimal.valueOf(0.000001))
 				// .withStiffness(BigDecimal.valueOf(1))
