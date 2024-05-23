@@ -94,7 +94,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static final ArrayList<GitLogProgressMonitor> logListeners = new ArrayList<>();
 
-	private static boolean autoupdate = false;
+	private static boolean printProgress = true;
 
 	private static final String[] imports = new String[] { // "haar",
 			"java.nio.file", "java.util", "java.awt.image", "javafx.scene.text", "javafx.scene", "javafx.scene.control",
@@ -264,7 +264,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 				String str = format + "% " + stage + " " + reponame + "  " + tasks + " of task " + type;
 				if (timeofLastUpdate + 500 < System.currentTimeMillis()) {
-					System.out.println(str);
+					if(printProgress)System.out.println(str);
 					timeofLastUpdate = System.currentTimeMillis();
 				}
 				// System.err.println(str);
@@ -287,7 +287,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			@Override
 			public void endTask() {
 				String string = "100%  " + stage + " " + reponame + "  " + type;
-				System.out.println(string);
+				if(printProgress)System.out.println(string);
 				for (GitLogProgressMonitor l : logListeners) {
 					l.onUpdate(string, e);
 				}
@@ -2351,6 +2351,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			e.printStackTrace();
 		}
 		closeGit(git);
+	}
+
+	public static boolean isPrintProgress() {
+		return printProgress;
+	}
+
+	public static void setPrintProgress(boolean printProgress) {
+		ScriptingEngine.printProgress = printProgress;
 	}
 
 }
