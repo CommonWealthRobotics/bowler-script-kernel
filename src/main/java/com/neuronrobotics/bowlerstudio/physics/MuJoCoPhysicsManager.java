@@ -382,8 +382,16 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		contacts = builder.addContact();
 		if (fixedObjects == null) {
 			fixedObjects = new ArrayList<>();
-			fixedObjects.add(floor);
 		}
+		boolean hasFloor=false;
+		for(CSG item:fixedObjects) {
+			if(item.getMaxZ()>0)
+				continue;
+			hasFloor=true;
+		}
+		if(hasFloor)
+			fixedObjects.add(floor);
+
 		
 	}
 
