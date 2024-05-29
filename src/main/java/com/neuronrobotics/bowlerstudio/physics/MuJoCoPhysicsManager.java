@@ -389,7 +389,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				continue;
 			hasFloor=true;
 		}
-		if(hasFloor)
+		if(!hasFloor)
 			fixedObjects.add(floor);
 
 		
