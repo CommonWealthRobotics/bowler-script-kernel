@@ -805,32 +805,36 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			if (!checkForPhysics(part))
 				continue;
 			;
-			CSG hull = part.moveToCenter();
-
-			Vector3d center = part.getCenter();
-
-			nameOfCSG = part.getName();
-			if (nameOfCSG.length() == 0) {
-				nameOfCSG = "Part-" + (count);
+			try {
+				CSG hull = part.moveToCenter();
+	
+				Vector3d center = part.getCenter();
+	
+				nameOfCSG = part.getName();
+				if (nameOfCSG.length() == 0) {
+					nameOfCSG = "Part-" + (count);
+				}
+				nameOfCSG += "-" + count + "-" + "free";
+	
+				if (nameOfBODY == null) {
+					nameOfBODY = nameOfCSG;
+					addBody.addFreejoint();
+					setStartLocation(center, addBody);
+					centerGroup = center;
+					addBody.withName(nameOfBODY);
+				}
+	
+				hull = hull.move(center.minus(centerGroup));
+				hull.setManipulator(new Affine());
+				ArrayList<CSG> parts = getMapNameToCSGParts(nameOfBODY);
+				putCSGInAssets(nameOfCSG, hull.hull(), true);
+				org.mujoco.xml.body.GeomType.Builder<?> geom;
+				geom = addBody.addGeom().withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
+				parts.add(hull);
+				setCSGMeshToGeom(nameOfCSG, geom);
+			}catch(Throwable t) {
+				t.printStackTrace(System.out);
 			}
-			nameOfCSG += "-" + count + "-" + "free";
-
-			if (nameOfBODY == null) {
-				nameOfBODY = nameOfCSG;
-				addBody.addFreejoint();
-				setStartLocation(center, addBody);
-				centerGroup = center;
-				addBody.withName(nameOfBODY);
-			}
-
-			hull = hull.move(center.minus(centerGroup));
-			hull.setManipulator(new Affine());
-			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfBODY);
-			putCSGInAssets(nameOfCSG, hull.hull(), true);
-			org.mujoco.xml.body.GeomType.Builder<?> geom;
-			geom = addBody.addGeom().withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
-			parts.add(hull);
-			setCSGMeshToGeom(nameOfCSG, geom);
 		}
 	}
 
