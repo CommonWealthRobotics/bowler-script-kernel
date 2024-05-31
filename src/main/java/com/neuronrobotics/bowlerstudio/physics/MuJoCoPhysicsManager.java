@@ -1,8 +1,11 @@
 package com.neuronrobotics.bowlerstudio.physics;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -49,6 +52,8 @@ import eu.mihosoft.vrl.v3d.RoundedCylinder;
 import eu.mihosoft.vrl.v3d.Sphere;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import eu.mihosoft.vrl.v3d.ext.openjfx.importers.obj.ObjImporter;
+import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 
@@ -805,7 +810,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			if (!checkForPhysics(part))
 				continue;
 			;
-			try {
+//			try {
 				CSG hull = part.moveToCenter();
 	
 				Vector3d center = part.getCenter();
@@ -827,14 +832,14 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				hull = hull.move(center.minus(centerGroup));
 				hull.setManipulator(new Affine());
 				ArrayList<CSG> parts = getMapNameToCSGParts(nameOfBODY);
-				putCSGInAssets(nameOfCSG, hull.hull(), true);
+				putCSGInAssets(nameOfCSG, hull, true);
 				org.mujoco.xml.body.GeomType.Builder<?> geom;
 				geom = addBody.addGeom().withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
 				parts.add(hull);
 				setCSGMeshToGeom(nameOfCSG, geom);
-			}catch(Throwable t) {
-				t.printStackTrace(System.out);
-			}
+//			}catch(Throwable t) {
+//				t.printStackTrace(System.out);
+//			}
 		}
 	}
 
@@ -931,9 +936,23 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		if (!useCache) {
 			long start = System.currentTimeMillis();
 			System.out.print("\nWriting " + tempFile.getName());
-			String xml = hull.toObjString();
-			Files.write(Paths.get(tempFile.getAbsolutePath()), xml.getBytes());
-			System.out.print(" " + (System.currentTimeMillis() - start));
+			ArrayList<Vector3d> points = new ArrayList<>();
+			List<Polygon> polygons = hull.getPolygons();
+			for (int j = 0; j < polygons.size(); j++) {
+				Polygon p = polygons.get(j);
+				List<Vector3d> points2 = p.getPoints();
+				for (int i = 0; i < points2.size(); i++) {
+					Vector3d v = points2.get(i);
+					points.add(v);
+				}
+			}
+			String obj = HullUtil.hull(points).toObjString();
+//			InputStream in=new ByteArrayInputStream(obj.getBytes(StandardCharsets.UTF_8));
+//			
+//			ObjImporter importer = new ObjImporter(in);
+			
+			Files.write(Paths.get(tempFile.getAbsolutePath()), obj.getBytes());
+			System.out.print(" " + (System.currentTimeMillis() - start+"\n"));
 		} else {
 			System.out.println("Loading cache " + tempFile.getName());
 		}
