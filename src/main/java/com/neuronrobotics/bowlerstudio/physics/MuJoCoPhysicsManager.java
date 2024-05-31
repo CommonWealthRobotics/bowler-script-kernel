@@ -946,7 +946,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					points.add(v);
 				}
 			}
-			String obj = HullUtil.hull(points).toObjString();
+			String obj = hull.toObjString();
 //			InputStream in=new ByteArrayInputStream(obj.getBytes(StandardCharsets.UTF_8));
 //			
 //			ObjImporter importer = new ObjImporter(in);
