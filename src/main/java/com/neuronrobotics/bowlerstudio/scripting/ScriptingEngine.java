@@ -1737,7 +1737,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 		}
 
-		return null;
+		throw new RuntimeException("File "+f+" is not in a git repository");
 	}
 
 	public static String getText(URL website) throws Exception {
