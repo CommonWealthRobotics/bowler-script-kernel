@@ -1,7 +1,9 @@
 package com.neuronrobotics.bowlerstudio.assets;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,14 +19,15 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.IGithubLoginListener;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-
+import java.nio.charset.*;
+import org.apache.commons.io.*;
 public class ConfigurationDatabase {
 
-	private static final String repo = "BowlerStudioConfiguration";
-	private static final String HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT = "https://github.com/CommonWealthRobotics/"
-			+ repo + ".git";
+	//private static final String repo = "BowlerStudioConfiguration";
+	//private static final String HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT = "https://github.com/CommonWealthRobotics/"
+	//		+ repo + ".git";
 
-	private static String gitSource = null; // madhephaestus
+	//private static String gitSource = null; // madhephaestus
 	private static String dbFile = "database.json";
 	private static boolean checked;
 	private static HashMap<String, HashMap<String, Object>> database = null;
@@ -33,7 +36,7 @@ public class ConfigurationDatabase {
 	// chreat the gson object, this is the parsing factory
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	private static IssueReportingExceptionHandler reporter = new IssueReportingExceptionHandler();
-	private static String loggedInAs = null;
+	//private static String loggedInAs = null;
 	static {
 
 	}
@@ -54,44 +57,34 @@ public class ConfigurationDatabase {
 	}
 
 	public static synchronized Object setObject(String paramsKey, String objectKey, Object value) {
-		return getParamMap(paramsKey).put(objectKey, value);
+		Object put = getParamMap(paramsKey).put(objectKey, value);
+		save();
+		return put;
 	}
 
 	public static Object removeObject(String paramsKey, String objectKey) {
-		return getParamMap(paramsKey).remove(objectKey);
+		Object remove = getParamMap(paramsKey).remove(objectKey);
+		save();
+		return remove;
 	}
 
 	public static synchronized void save() {
-		if (loggedInAs == null)
-			return;
 		String writeOut = null;
 		getDatabase();
-		// synchronized(database){
-		writeOut = gson.toJson(database, TT_mapStringString);
-		// }
-
-		for (int i = 0; i < 2; i++) {
-			try {
-				if (getGitSource().contentEquals(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT)) {
-					//System.out.println("Not pushing changes the default branch");
-					return;
-				}
-				if(ScriptingEngine.isLoginSuccess())
-				ScriptingEngine.pushCodeToGit(getGitSource(), ScriptingEngine.getFullBranch(getGitSource()),
-						getDbFile(), writeOut, "Saving database");
-				return;
-			} catch (Exception e) {
-				e.printStackTrace();
-				try {
-					ScriptingEngine.deleteRepo(getGitSource());
-					Thread.sleep(500);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			}
-
+		synchronized(database){
+			writeOut = gson.toJson(database, TT_mapStringString);
 		}
+		File f=loadFile();
+		
 
+		try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
+		    out.println(writeOut);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		System.out.println("Saved "+f.getName());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -99,136 +92,51 @@ public class ConfigurationDatabase {
 		if (database != null) {
 			return database;
 		}
-		HashMap<String, HashMap<String, Object>> existing = null;
-		try {
-			existing = (HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile(), null);
-
-			ScriptingEngine.pull(getGitSource());
-			database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile(), null);
-			// new Exception().printStackTrace();
-		} catch (org.eclipse.jgit.api.errors.WrongRepositoryStateException e) {
-			// oignore and use new one
+		File loadFile = loadFile();
+		if(loadFile.exists())
 			try {
-				ScriptingEngine.deleteRepo(getGitSource());
-				return getDatabase() ;
-			} catch (Exception e1) {
+				database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile, null);
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				e.printStackTrace();
 			}
-		}catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		
 		if (database == null) {
 			database = new HashMap<String, HashMap<String, Object>>();
 			// new Exception().printStackTrace();
 		}
-		// Copy over the existing database values into the newly logged in user
-		syncOldDBToNew(existing);
+
 		return database;
 	}
 
-	public static File loadFile() throws Exception {
-		return ScriptingEngine.fileFromGit(getGitSource(), // git repo, change
-				getDbFile());
-	}
-
-	public static void loginEvent(String username) {
-		if (username == null) {
-			String loggedInAs2 = loggedInAs;
-			loggedInAs = null;
-			checked = false;
-			gitSource = null;
-			database = null;
-			//System.out.println("\n\nLogout from "+loggedInAs2+"\n\n");
-			return;
-		}
-		if (loggedInAs != null)
-			if (username.contentEquals(loggedInAs))
-				return;
-		checked = false;
-		gitSource = null;
-		HashMap<String, HashMap<String, Object>> existing = database;
-		database = null;
-		try {
-			//System.out.println("Setting Configurations repo to " + getGitSource());
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// Copy over the existing database values into the newly logged in user
-		syncOldDBToNew(existing);
-		loggedInAs = username;
-
-	}
-
-	private static void syncOldDBToNew(HashMap<String, HashMap<String, Object>> existing) {
-		if (existing != null)
-			for (String pkey : existing.keySet()) {
-				HashMap<String, Object> val = existing.get(pkey);
-
-				for (String objectKey : val.keySet()) {
-					Object defaultValue = val.get(objectKey);
-					Object value = getObject(pkey, objectKey, defaultValue);
-					//System.err.println("Setting " + pkey + ":" + objectKey + " to " + value + " with previous being "+ defaultValue);
-				}
-
+	public static File loadFile() {
+		File f = new File(ScriptingEngine.getWorkspace().getAbsolutePath()+"/ConfigurationDatabase.json");
+		if(!f.exists()) {
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage());
 			}
-	}
-
-	public static String getGitSource() throws Exception {
-		if (!checked) {
-			if (ScriptingEngine.hasNetwork() && ScriptingEngine.isLoginSuccess()) {
-				org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-				try {
-					GHRepository myConfigRepo = github.getRepository(PasswordManager.getLoginID() + "/" + repo);
-					setRepo(myConfigRepo);
-					checked = true;
-				} catch (Throwable t) {
-					if (gitSource == null) {
-						GHRepository defaultRep = github.getRepository("CommonWealthRobotics/" + repo);
-						GHRepository forkedRep = defaultRep.fork();
-						setRepo(forkedRep);
-						checked = true;
+			String username = PasswordManager.getLoginID();
+		    try {
+				File file =ScriptingEngine.fileFromGit("https://github.com/"+username+"/BowlerStudioConfiguration.git", "database.json");
+				if(file.exists()) {
+					String contents= FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+					try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
+					    out.println(contents);
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					if (PasswordManager.getUsername() != null) {
-						setGitSource("https://github.com/" + PasswordManager.getUsername() + "/" + repo + ".git");
-					} else {
-						setGitSource(HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT);
-					}
-
 				}
-			} else if (ScriptingEngine.isLoginSuccess()) {
-				// no network but has logged in before
-				setGitSource("https://github.com/" + PasswordManager.getUsername() + "/" + repo + ".git");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-
 		}
-		return gitSource;
-
+		return f;
 	}
 
-	private static void setRepo(GHRepository forkedRep) {
-		String myAssets = forkedRep.getGitTransportUrl().replaceAll("git://", "https://");
-		setGitSource(myAssets);
-	}
 
-	public static void setGitSource(String myAssets) {
-		//System.out.println("Using my version of configuration database: " + myAssets);
-		if (myAssets != null && gitSource != null && myAssets.contentEquals(gitSource))
-			return;
-		database = null;
-		// new Exception("Changing from "+gitSource+" to "+myAssets).printStackTrace();
-		checked = false;
-		gitSource = myAssets;
-		getDatabase();
-	}
 
-	public static String getDbFile() {
-		return dbFile;
-	}
-
-	public static void setDbFile(String dbFile) {
-		ConfigurationDatabase.dbFile = dbFile;
-		setGitSource(gitSource);
-	}
 }
