@@ -57,7 +57,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	}
 
 	public static void runLater(Runnable r, Throwable ex) {
-		Platform.runLater(() -> {
+		BowlerKernel.runLater(() -> {
 			try {
 				r.run();
 			} catch (Throwable t) {
@@ -146,7 +146,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				runReport(element, body, github);
 				return;
 			}
-			Platform.runLater(() -> {
+			BowlerKernel.runLater(() -> {
 				Alert alert = new Alert(AlertType.CONFIRMATION);
 				alert.setTitle("An Error occoured");
 				alert.setHeaderText("Would it be ok if I report this issue back to Kevin so he can fix it?");
@@ -240,16 +240,10 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			return;
 		}
 		if (Platform.isFxApplicationThread()) {
-			
 			System.err.println("Exception in Javafx thread! \n"
-					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
-			fxExceptionCount++;
-			if (fxExceptionCount > 10) {
-				System.err.println(stacktraceFromCatch);
-				t.printStackTrace();
-				System.exit(-5);
-			}
-			throw new RuntimeException(t);
+						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
+			//throw new RuntimeException(t);
+			return;
 		}
 
 		if (processing) {

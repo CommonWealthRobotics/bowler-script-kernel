@@ -1,17 +1,8 @@
 package junit.bowler;
 
-import java.awt.image.BufferedImage;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.imageio.ImageIO;
-
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerkernel.djl.ImagePredictorType;
@@ -19,11 +10,7 @@ import com.neuronrobotics.bowlerkernel.djl.PredictorFactory;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
-import ai.djl.modality.cv.output.BoundingBox;
 import ai.djl.modality.cv.output.DetectedObjects;
-import ai.djl.modality.cv.output.DetectedObjects.DetectedObject;
-import ai.djl.modality.cv.output.Landmark;
-import ai.djl.modality.cv.output.Point;
 
 public class PyTorchResNetTest {
 	String imageUrl = "https://avatars.githubusercontent.com/u/1254726?v=4";
@@ -87,30 +74,30 @@ public class PyTorchResNetTest {
 //		}
 //	}
 //
-//	private static void saveBoundingBoxImage(Image img, DetectedObjects detection, String type) throws Exception {
-//		Path outputDir = Paths.get("build/output");
-//		Files.createDirectories(outputDir);
+	private static void saveBoundingBoxImage(Image img, DetectedObjects detection, String type) throws Exception {
+		Path outputDir = Paths.get("build/output");
+		Files.createDirectories(outputDir);
+
+		img.drawBoundingBoxes(detection);
+
+		Path imagePath = outputDir.resolve(type + ".png").toAbsolutePath();
+		img.save(Files.newOutputStream(imagePath), "png");
+		System.out.println("Face detection result image has been saved in: {} " + imagePath);
+	}
 //
-//		img.drawBoundingBoxes(detection);
-//
-//		Path imagePath = outputDir.resolve(type + ".png").toAbsolutePath();
-//		img.save(Files.newOutputStream(imagePath), "png");
-//		System.out.println("Face detection result image has been saved in: {} " + imagePath);
-//	}
-//
-//	@Test
-//	public void testYolo() throws Exception {
-//		System.err.println(Thread.currentThread().getStackTrace()[1].getMethodName());
-//
-//		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5);
-//		for (int i = 0; i < 3; i++) {
-//			Image input = ImageFactory.getInstance()
-//					.fromUrl("https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg");
-//
-//			DetectedObjects objects = predictor.predict(input);
-//			saveBoundingBoxImage(input, objects, "yolov5");
-//		}
-//	}
+	@Test
+	public void testYolo() throws Exception {
+		System.err.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+
+		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5);
+		for (int i = 0; i < 3; i++) {
+			Image input = ImageFactory.getInstance()
+					.fromUrl("https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg");
+
+			DetectedObjects objects = predictor.predict(input);
+			saveBoundingBoxImage(input, objects, "yolov5");
+		}
+	}
 //
 //	@Test
 //	public void testFeatures() throws Exception {

@@ -9,6 +9,7 @@ import java.io.IOException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.opencv.OpenCVManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.common.DeviceManager;
@@ -148,7 +149,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		}
 		if (workingMemory != null)
 			for (UniquePerson up : shortTermMemory) {
-				Platform.runLater(() -> {
+				BowlerKernel.runLater(() -> {
 					getUI(up).name.setText(up.name);
 				});
 			}
@@ -304,7 +305,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 							if (workingMemory != null) {
 								UniquePersonUI UI = getUI(p);
 								uiElelments.remove(p);
-								Platform.runLater(() -> {
+								BowlerKernel.runLater(() -> {
 									workingMemory.getChildren().remove(UI.box);
 								});
 							}
@@ -377,7 +378,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 						UI.box.getChildren().addAll(new ImageView(tmpImg));
 
 						UI.name.setOnAction(setAction(p));
-						Platform.runLater(() -> {
+						BowlerKernel.runLater(() -> {
 							workingMemory.getChildren().add(UI.box);
 						});
 					}
@@ -389,7 +390,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				double perc = percent;
 				// println "Trained "+percent;
 				if (workingMemory != null)
-					Platform.runLater(() -> {
+					BowlerKernel.runLater(() -> {
 						UI.percent.setText(" : Trained " + perc + "%");
 					});
 

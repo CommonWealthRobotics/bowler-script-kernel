@@ -1,5 +1,8 @@
 package com.neuronrobotics.sdk.addons.gamepad;
 
+
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
+
 /**
  * Sample Skeleton for "jogTrainerWidget.fxml" Controller Class
  * You can copy and paste this code into your favorite IDE
@@ -7,6 +10,7 @@ package com.neuronrobotics.sdk.addons.gamepad;
 
 import com.neuronrobotics.bowlerstudio.assets.AssetFactory;
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
+import com.neuronrobotics.bowlerstudio.assets.FontSizeManager;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -53,11 +57,11 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 	private int mappingIndex = 0;
 	private HashMap<Integer, TextField> fields = new HashMap<>();
 	private String axisWaiting=null;
-	private long timeOfLastAxisSet=0;
 	private ArrayList<String> listOfMappedAxis =new ArrayList<>();
 	private Button save;
 	private Stage primaryStage;
-
+	private HashMap<String,Float> values=new HashMap<>();
+	private HashMap<String,Long> timeOfLastAxisSet = new HashMap<>();
 	private BowlerJInputDevice gameController;
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
@@ -115,7 +119,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		grid.add(reset, 1, i);
 		reset();
 		if(PersistantControllerMap.areAllAxisMapped(gameController.getName())) {
-			Platform.runLater(() ->fields.get(0).setDisable(true));
+			BowlerKernel.runLater(() ->fields.get(0).setDisable(true));
 			gameController.removeListeners(this);
 		}else {
 			gameController.addListeners(this);
@@ -140,7 +144,14 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		// This is needed when loading on MAC
 		loader.setClassLoader(getClass().getClassLoader());
 		root = loader.load();
-		Platform.runLater(() -> {
+		FontSizeManager.addListener(fontNum->{
+			int tmp = fontNum-10;
+			if(tmp<12)
+				tmp=12;
+			root.setStyle("-fx-font-size: "+tmp+"pt");
+		});
+		
+		BowlerKernel.runLater(() -> {
 			primaryStage.setTitle("Configure the controller");
 
 			Scene scene = new Scene(root);
@@ -156,9 +167,9 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 	public void reset() {
 		listOfMappedAxis.clear();
 		mappingIndex=0;
-		Platform.runLater(() ->fields.get(mappingIndex).setDisable(false));
+		BowlerKernel.runLater(() ->fields.get(mappingIndex).setDisable(false));
 		gameController.addListeners(this);
-		Platform.runLater(() ->controllername.setText(gameController.getName()));	
+		BowlerKernel.runLater(() ->controllername.setText(gameController.getName()));	
 		save.setDisable(true);
 	}
 
@@ -166,25 +177,32 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 
 	@Override
 	public void onEvent(String name, float value) {
-		//System.out.println(controller);
-		if(axisWaiting!=null) {
-			// waiting for that axis to go back to 0
-			if(axisWaiting.contentEquals(name)) {
-				if(Math.abs(value)>0.0001) {
-					System.out.println("Waiting for value to settle for "+axisWaiting);
-					return;
-				}else {
-					// the axis returned, moving on
-					timeOfLastAxisSet=System.currentTimeMillis();
-					System.out.println("Map done "+axisWaiting);
-					axisWaiting=null;
-					return;
-				}
-			}else {
-				System.out.println("Waiting for value to settle for "+axisWaiting+" got value from "+name);
-				return;
-			}
+		if(Math.abs(value)<0.1)
+			value=0;
+
+		if(values.get(name)==null) {
+			values.put(name, value);
+			timeOfLastAxisSet.put(name, System.currentTimeMillis());
+			return;
 		}
+		if(System.currentTimeMillis()-timeOfLastAxisSet.get(name)<100) {
+			return;// wait for a value to settle
+		}
+		Float float1 = values.get(name);
+		float abs = Math.abs(float1-value);
+		if(	abs <0.5) {
+			values.put(name,value);
+			timeOfLastAxisSet.put(name, System.currentTimeMillis());
+			if(abs>0.2)
+				System.out.println("value for "+name+" seems noisy "+value+" most recent was "+values.get(name));
+			return;
+		}else {
+			System.out.println("Value changed! "+name+" "+float1+" to "+value);
+			values.put(name, value);
+			timeOfLastAxisSet.put(name, System.currentTimeMillis());
+		}
+			
+		
 		for(String s:listOfMappedAxis) {
 			if(s.contentEquals(name)) {
 				System.out.println("mapping skipped for "+name);
@@ -196,14 +214,13 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 			if(name.contentEquals(s))
 				return;// Do not use maped axis for re-mapping
 		}
-		if(System.currentTimeMillis()-timeOfLastAxisSet<1000) {
-			return;
-		}
+
 		axisWaiting=name;
 		System.out.println("Adding Axis "+name);
+		
 		listOfMappedAxis.add(name);
-		timeOfLastAxisSet=System.currentTimeMillis();
-		Platform.runLater(() -> {
+		timeOfLastAxisSet.put(name,System.currentTimeMillis());
+		BowlerKernel.runLater(() -> {
 			TextField textField = fields.get(mappingIndex);
 			textField.setText(name);
 			
@@ -220,7 +237,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 
 	public static void run(BowlerJInputDevice c) {
 		//System.out.println("Launching Controller mapping");
-		Platform.runLater(new Runnable() {
+		BowlerKernel.runLater(new Runnable() {
 			@Override
 			public void run() {
 				//System.out.println("Creating stage");

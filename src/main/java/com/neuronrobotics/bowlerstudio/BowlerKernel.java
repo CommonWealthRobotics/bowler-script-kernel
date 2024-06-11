@@ -41,6 +41,7 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ICSGProgress;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
+import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
@@ -179,7 +180,11 @@ public class BowlerKernel {
 				try {
 
 					File f = new File(s);
-					String location  =f.getParentFile().getAbsolutePath();
+					File parentFile = f.getParentFile();
+					if(parentFile==null) {
+						parentFile=new File(".");
+					}
+					String location  =parentFile.getAbsolutePath();
 					if(location.endsWith(".")) {
 						location=location.substring(0,location.length()-1);
 					}		
@@ -393,7 +398,12 @@ public class BowlerKernel {
 			processReturnedObjects(ret, csgBits);
 			String url = ScriptingEngine.locateGitUrl(baseWorkspaceFile);
 			System.out.println("Loading printbed URL  "+url);
-			csgBits = new PrintBedManager(baseWorkspaceFile, csgBits).makePrintBeds();
+			PrintBedManager printBedManager = new PrintBedManager(baseWorkspaceFile, csgBits);
+			if(printBedManager.hasPrintBed())
+				csgBits = printBedManager.makePrintBeds();
+			else {
+				System.out.println("Exporting files without print bed");
+			}
 			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -458,9 +468,8 @@ public class BowlerKernel {
 			m.generateBody();
 			try {
 
-				MobileBase base = (MobileBase) ret2;
 				File baseDir = new File("./manufacturing/");
-				File dir = new File(baseDir.getAbsolutePath() + "/" + base.getScriptingName());
+				File dir = new File(baseDir.getAbsolutePath() + "/" + ret2.getScriptingName());
 				if (!dir.exists())
 					dir.mkdirs();
 				IgenerateBed bed = null;
@@ -469,14 +478,17 @@ public class BowlerKernel {
 				} catch (Throwable T) {
 					throw new RuntimeException(T.getMessage());
 				}
-				bed = m.getPrintBed(dir, bed, ScriptingEngine.getRepositoryCloneDirectory(base.getGitSelfSource()[0]));
+				String remoteURI = ret2.getGitSelfSource()[0];
+				VitaminBomManager BoM = new VitaminBomManager(remoteURI);
+				BoM.loadBaseVitamins(ret2);
+				bed = m.getPrintBed(dir, bed, ScriptingEngine.getRepositoryCloneDirectory(remoteURI));
 				if (bed == null) {
-					m._generateStls(base, dir, false);
+					m._generateStls(ret2, dir, false);
 					return;
 				}
 				System.out.println("Found arrangeBed API in CAD engine");
-				List<CSG> totalAssembly = bed.arrangeBed(base);
-				base.disconnect();
+				List<CSG> totalAssembly = bed.arrangeBed(ret2);
+				ret2.disconnect();
 				Thread.sleep(1000);
 				System.gc();
 				// Get current size of heap in bytes
@@ -672,5 +684,38 @@ public class BowlerKernel {
 				e.printStackTrace();
 			}
 	}
+
+	@SuppressWarnings("restriction")
+	public static void runLater(Runnable r) {
+		if (Platform.isFxApplicationThread())
+			try {
+				r.run();
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		else
+			runLater(r, new Exception("UI Thread Exception here!"));
+	}
+
+	@SuppressWarnings("restriction")
+	public static void runLater(Runnable r, Throwable ex) {
+		if (Platform.isFxApplicationThread())
+			try {
+				r.run();
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		else
+			Platform.runLater(() -> {
+				try {
+					r.run();
+				} catch (Throwable t) {
+					t.printStackTrace();
+					ex.printStackTrace();
+				}
+
+			});
+	}
+
 
 }

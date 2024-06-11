@@ -139,12 +139,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 				public void run() {
 					setName("Game Controller Poll thread");
 					Log.warning("Starting game Pad Poller");
-					try {
-						ConfigurationDatabase.getGitSource();
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+
 					
 					try {
 						while (run) {

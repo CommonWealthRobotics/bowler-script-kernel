@@ -26,3 +26,6 @@ hs_err_pid*
 .idea
 out
 manufacturing
+html
+physicsTest
+/MUJOCO_LOG.TXT

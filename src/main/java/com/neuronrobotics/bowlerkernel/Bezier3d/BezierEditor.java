@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerkernel.Bezier3d;
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
@@ -192,7 +193,7 @@ public class BezierEditor {
 		for (int i = 0; i < getNumParts(); i++) {
 			TransformNR nr = TransformFactory.csgToNR(transforms.get(i));
 			Affine partsGetGetManipulator = getPartsInternal().get(i).getManipulator();
-			Platform.runLater(() -> {
+			BowlerKernel.runLater(() -> {
 				TransformFactory.nrToAffine(nr, partsGetGetManipulator);
 			});
 		}

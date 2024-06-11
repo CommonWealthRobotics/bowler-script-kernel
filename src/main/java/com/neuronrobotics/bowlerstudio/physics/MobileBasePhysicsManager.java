@@ -12,6 +12,7 @@ import javax.vecmath.Vector3f;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.constraintsolver.HingeConstraint;
 import com.bulletphysics.linearmath.Transform;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHLink;
@@ -30,8 +31,8 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 import Jama.Matrix;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
-import eu.mihosoft.vvecmath.Vector3d;
+//import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
+//import eu.mihosoft.vvecmath.Vector3d;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -83,7 +84,7 @@ public class MobileBasePhysicsManager {
 						+ (orentTrans.origin.z / PhysicsGravityScalar);
 				// tell the virtual IMU the system updated
 				base.setVirtualState(new IMUUpdate(xAcceleration, yAcceleration, zAcceleration, rotxAcceleration,
-						rotyAcceleration, rotzAcceleration));
+						rotyAcceleration, rotzAcceleration,base.currentTimeMillis()));
 				// update the old variables
 				oldavelocity.set(avelocity);
 				oldvelocity.set(velocity);
@@ -122,25 +123,25 @@ public class MobileBasePhysicsManager {
 
 		TransformFactory.nrToBullet(base.getFiducialToGlobalTransform(), start);
 		start.origin.z = (float) (start.origin.z - minz + lift);
-		Platform.runLater(new Runnable() {
+		BowlerKernel.runLater(new Runnable() {
 			@Override
 			public void run() {
 				TransformFactory.bulletToAffine(baseCad.get(0).getManipulator(), start);
 			}
 		});
 		CSG collisionBod;
-		ArrayList<Vector3d> points = new ArrayList<Vector3d>();
-		try {
-			for (DHParameterKinematics leg : base.getAllDHChains()) {
-				TransformNR limbRoot = leg.getRobotToFiducialTransform();
-				points.add(Vector3d.xyz(limbRoot.getX(), limbRoot.getY(), limbRoot.getZ()));
-				points.add(Vector3d.xyz(limbRoot.getX(), limbRoot.getY(), Maxz));
-			}
-
-			collisionBod = HullUtil.hull(points);
-		} catch (Exception ex) {
+//		ArrayList<Vector3d> points = new ArrayList<Vector3d>();
+//		try {
+//			for (DHParameterKinematics leg : base.getAllDHChains()) {
+//				TransformNR limbRoot = leg.getRobotToFiducialTransform();
+//				points.add(Vector3d.xyz(limbRoot.getX(), limbRoot.getY(), limbRoot.getZ()));
+//				points.add(Vector3d.xyz(limbRoot.getX(), limbRoot.getY(), Maxz));
+//			}
+//
+//			collisionBod = HullUtil.hull(points);
+//		} catch (Exception ex) {
 			collisionBod = CSG.hullAll(MobileBaseCadManager.getBaseCad(base));
-		}
+//		}
 
 		CSGPhysicsManager baseManager = new CSGPhysicsManager((List<CSG>) Arrays.asList(collisionBod), start,
 				base.getMassKg(), false, core);

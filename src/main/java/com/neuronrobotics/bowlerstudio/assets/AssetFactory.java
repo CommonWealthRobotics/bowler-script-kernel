@@ -26,11 +26,11 @@ import java.util.List;
 public class AssetFactory {
 
   public static final String repo = "BowlerStudioImageAssets";
-  private static String gitSource = "https://github.com/madhephaestus/" + repo + ".git";
+  private static String gitSource = "https://github.com/CommonWealthRobotics/" + repo + ".git";
   private static HashMap<String, Image> cache = new HashMap<>();
   private static HashMap<String, FXMLLoader> loaders = new HashMap<>();
   private static String assetRepoBranch = "";
-
+  
   private AssetFactory() {
   }
 
@@ -125,9 +125,14 @@ public class AssetFactory {
     return cache.get(file);
   }
 
-  public static ImageView loadIcon(String file) {
+  public static javafx.scene.image.ImageView loadIcon(String file) {
     try {
-      return new ImageView(loadAsset(file));
+      ImageView imageView = new ImageView(loadAsset(file));
+      FontSizeManager.addListener(fontNum->{
+    	  imageView.setScaleX(FontSizeManager.getImageScale());
+    	  imageView.setScaleY(FontSizeManager.getImageScale());
+      });
+      return imageView;
     } catch (Exception e) {
     	e.printStackTrace();
       try {

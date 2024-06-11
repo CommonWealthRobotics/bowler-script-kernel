@@ -11,7 +11,9 @@ public class PersistantControllerMap {
 	
 	public static List<String> getDefaultMaps() {
 		return Arrays.asList("l-joy-up-down", "l-joy-left-right", "r-joy-up-down", "r-joy-left-right", "l-trig-button",
-				"r-trig-button", "x-mode", "y-mode", "a-mode", "b-mode", "start", "select", "analog-trig");
+				"r-trig-button", "x-mode", "y-mode", "a-mode", "b-mode", "start", "select", "analog-trig",
+				"arrow-up-down",
+				"arrow-left-right");
 	}
 	
 	public static boolean areAllAxisMapped(String controllerName) {

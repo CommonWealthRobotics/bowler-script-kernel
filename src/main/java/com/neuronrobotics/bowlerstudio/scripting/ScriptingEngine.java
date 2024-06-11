@@ -59,6 +59,7 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -93,7 +94,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static final ArrayList<GitLogProgressMonitor> logListeners = new ArrayList<>();
 
-	private static boolean autoupdate = false;
+	private static boolean printProgress = true;
 
 	private static final String[] imports = new String[] { // "haar",
 			"java.nio.file", "java.util", "java.awt.image", "javafx.scene.text", "javafx.scene", "javafx.scene.control",
@@ -263,7 +264,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 				String str = format + "% " + stage + " " + reponame + "  " + tasks + " of task " + type;
 				if (timeofLastUpdate + 500 < System.currentTimeMillis()) {
-					System.out.println(str);
+					if(printProgress)System.out.println(str);
 					timeofLastUpdate = System.currentTimeMillis();
 				}
 				// System.err.println(str);
@@ -286,7 +287,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			@Override
 			public void endTask() {
 				String string = "100%  " + stage + " " + reponame + "  " + type;
-				System.out.println(string);
+				if(printProgress)System.out.println(string);
 				for (GitLogProgressMonitor l : logListeners) {
 					l.onUpdate(string, e);
 				}
@@ -325,8 +326,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static boolean isUrlAlreadyOpen(String URL) {
 		if (URL == null)
 			return false;
-		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-			Git g = iterator.next();
+		Object[] keySet;
+		synchronized(gitOpenTimeout) {
+		 keySet =  gitOpenTimeout.keySet().toArray();
+		}
+		for (int i = 0; i < keySet.length; i++) {
+			Git g = (Git)keySet[i];
 			GitTimeoutThread t = gitOpenTimeout.get(g);
 			if (t.ref.toLowerCase().contentEquals(URL.toLowerCase())) {
 				// t.getException().printStackTrace(System.err);
@@ -345,8 +350,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static Git openGit(Repository localRepo) {
 
-		for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-			Git g = iterator.next();
+		Object[] keySet;
+		synchronized(gitOpenTimeout) {
+		 keySet =  gitOpenTimeout.keySet().toArray();
+		}
+		for (int j = 0; j < keySet.length; j++) {
+			Object gO = keySet[j];
+			Git g=(Git)gO;
 			if (g.getRepository().getDirectory().getAbsolutePath()
 					.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
 				GitTimeoutThread t = gitOpenTimeout.get(g);
@@ -532,7 +542,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static GitHub setupAnyonmous() throws IOException {
-		ScriptingEngine.setAutoupdate(false);
+		//ScriptingEngine.setAutoupdate(false);
 		return PasswordManager.setupAnyonmous();
 	}
 
@@ -908,11 +918,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			OutputStream out = null;
 			try {
 				out = FileUtils.openOutputStream(desired, false);
-				IOUtils.write(content, out);
+				IOUtils.write(content, out, Charset.defaultCharset());
 				out.close(); // don't swallow close Exception if copy completes
 				// normally
 			} finally {
-				IOUtils.closeQuietly(out);
+				out.close();
 			}
 			return;
 		}
@@ -1158,11 +1168,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		git = openGit(localRepo);
 		try {
-			if (source == null)
-				source = git.log().setMaxCount(1).call().iterator().next();
-			newBranchLocal(newBranch, remoteURI, git, source);
-		} catch (NoHeadException ex) {
-			newBranchLocal(newBranch, remoteURI, git, null);
+			try {
+				if (source == null)
+					source = git.log().setMaxCount(1).call().iterator().next();
+				newBranchLocal(newBranch, remoteURI, git, source);
+			} catch (NoHeadException ex) {
+				newBranchLocal(newBranch, remoteURI, git, null);
+			}
 		} catch (Throwable ex) {
 			closeGit(git);
 			throw ex;
@@ -1299,8 +1311,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return branchNames;
 	}
 
-	public static void pull(String remoteURI, String branch)
-			throws IOException, CheckoutConflictException, NoHeadException, InvalidRemoteException {
+	public static void pull(String remoteURI, String branch) throws IOException, CheckoutConflictException,
+			NoHeadException, InvalidRemoteException, WrongRepositoryStateException {
 		waitForRepo(remoteURI, "pull");
 		// new Exception().printStackTrace();
 
@@ -1349,7 +1361,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				closeGit(git);
 				PasswordManager.checkInternet();
 				// deleteRepo(remoteURI);
-				pull(remoteURI, branch);
+				throw e;
 			} catch (InvalidConfigurationException e) {
 
 				PasswordManager.checkInternet();
@@ -1432,10 +1444,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			closeGit(git);
 			throw new InvalidRemoteException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 		} catch (Throwable t) {
-			t.printStackTrace();
-			PasswordManager.checkInternet();
 			closeGit(git);
-			throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + t.getMessage());
 		}
 
 	}
@@ -1696,7 +1705,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static String locateGitUrl(File f, Git ref) throws IOException {
 		File gitRepoFile = new File(f.getAbsolutePath());
 		while (gitRepoFile != null) {
-			if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+			if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
 				// System.err.println("Fount git repo for file: "+gitRepoFile);
 				Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
 				Git git = ref;
@@ -1720,7 +1729,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		while (gitRepoFile != null) {
 			gitRepoFile = gitRepoFile.getParentFile();
 			if (gitRepoFile != null)
-				if (new File(gitRepoFile.getAbsolutePath() + "/.git").exists()) {
+				if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
 					// System.err.println("Fount git repo for file: "+gitRepoFile);
 					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
 					return openGit(localRepo);
@@ -1728,7 +1737,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 		}
 
-		return null;
+		throw new RuntimeException("File "+f+" is not in a git repository");
 	}
 
 	public static String getText(URL website) throws Exception {
@@ -1773,18 +1782,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		PasswordManager.setLoginManager(lm);
 	}
 
-	public static boolean isAutoupdate() {
-		return autoupdate;
-	}
-
-	public static boolean setAutoupdate(boolean autoupdate) throws IOException {
-		if (autoupdate && !ScriptingEngine.autoupdate) {
-			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
-			// PasswordManager.setAutoupdate(autoupdate);
-		}
-		ScriptingEngine.autoupdate = autoupdate;
-		return ScriptingEngine.autoupdate;
-	}
+//	public static boolean isAutoupdate() {
+//		return autoupdate;
+//	}
+//
+//	public static boolean setAutoupdate(boolean autoupdate) throws IOException {
+//		if (autoupdate && !ScriptingEngine.autoupdate) {
+//			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
+//			// PasswordManager.setAutoupdate(autoupdate);
+//		}
+//		ScriptingEngine.autoupdate = autoupdate;
+//		return ScriptingEngine.autoupdate;
+//	}
 
 	@SuppressWarnings("unused")
 	private static File fileFromGistID(String string, String string2)
@@ -2342,6 +2351,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			e.printStackTrace();
 		}
 		closeGit(git);
+	}
+
+	public static boolean isPrintProgress() {
+		return printProgress;
+	}
+
+	public static void setPrintProgress(boolean printProgress) {
+		ScriptingEngine.printProgress = printProgress;
 	}
 
 }

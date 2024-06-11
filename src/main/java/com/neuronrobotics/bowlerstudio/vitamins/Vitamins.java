@@ -8,14 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.neuronrobotics.imageprovider.NativeResource;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.STL;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
-import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
@@ -28,21 +26,12 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
-import javafx.scene.paint.Color;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
-import java.nio.file.WatchEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-
-import org.apache.batik.parser.LengthPairListParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -51,7 +40,6 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.kohsuke.github.GHIssueState;
-import org.kohsuke.github.GHMyself;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
@@ -172,7 +160,23 @@ public class Vitamins {
 																									// the library
 						repostring.toString(), // file to load
 						servoMeasurments);
-				return newVitamin;
+				Map<String, Object> configuration = Vitamins.getConfiguration(type, id);
+				newVitamin.setName(type +"-"+ id);
+				newVitamin.setManufacturing(incoming -> null);
+				try {
+					Transform com = new Transform()
+										.movex(Double.parseDouble(configuration.get("massCentroidX").toString()))
+										.movey(Double.parseDouble(configuration.get("massCentroidY").toString()))
+										.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
+					newVitamin.getStorage().set("massKg", configuration.get("massKg"));
+					newVitamin.getStorage().set("massCentroid", com);
+					
+					return newVitamin;
+				}catch(Exception ex) {
+					//System.err.println(type +"-"+ id+" Failed");
+					//ex.printStackTrace();
+					return newVitamin;
+				}
 			} else {
 				Log.error(key + " Failed to load from script");
 				return null;
@@ -188,7 +192,13 @@ public class Vitamins {
 			}
 		}
 	}
+	public static String getScriptGitURL(String type) {
+		Map<String, Object> script = getMeta(type);
+		
 	
+		return script.get("scriptGit").toString();
+
+	}
 	public static File getScriptFile(String type) {
 		Map<String, Object> script = getMeta(type);
 		
@@ -290,10 +300,10 @@ public class Vitamins {
 		try {
 			saveDatabase(type);
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
-			
+			System.err.println("Forked repo is missing!");
 			
 			GHRepository newRepo = repo.fork();
-			
+			Thread.sleep(6000);
 			Vitamins.gitRpoDatabase = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
 			saveDatabase(type);
 			
@@ -581,7 +591,7 @@ public class Vitamins {
 			checked = true;
 			try {
 				if (PasswordManager.getUsername() != null) {
-					ScriptingEngine.setAutoupdate(true);
+					//ScriptingEngine.setAutoupdate(true);
 					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
 					try {
 						GHRepository repo =github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions" ); 
@@ -600,6 +610,13 @@ public class Vitamins {
 				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 			}
 			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
+			try {
+				ScriptingEngine.pull(gitRpoDatabase);
+			} catch (IOException | GitAPIException e) {
+				ScriptingEngine.deleteRepo(gitRpoDatabase);
+				ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
+			}
+
 		}
 		return gitRpoDatabase;
 	}
