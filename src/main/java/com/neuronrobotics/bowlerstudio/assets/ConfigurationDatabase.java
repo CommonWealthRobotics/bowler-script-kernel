@@ -62,7 +62,7 @@ public class ConfigurationDatabase {
 		return put;
 	}
 
-	public static Object removeObject(String paramsKey, String objectKey) {
+	public static synchronized Object removeObject(String paramsKey, String objectKey) {
 		Object remove = getParamMap(paramsKey).remove(objectKey);
 		save();
 		return remove;
@@ -71,9 +71,9 @@ public class ConfigurationDatabase {
 	public static synchronized void save() {
 		String writeOut = null;
 		getDatabase();
-		synchronized(database){
+		//synchronized(database){
 			writeOut = gson.toJson(database, TT_mapStringString);
-		}
+		//}
 		File f=loadFile();
 		
 
