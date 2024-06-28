@@ -188,7 +188,7 @@ public class DownloadManager {
 	public static File getConfigExecutable(String exeType ,IExternalEditor editor) {
 		return getExecutable(exeType,editor,"configExecutable");
 	}
-	public static File getExecutable(String exeType ,IExternalEditor editor,String executable) {
+	private static File getExecutable(String exeType ,IExternalEditor editor,String executable) {
 		String key = discoverKey();
 		
 		try {
