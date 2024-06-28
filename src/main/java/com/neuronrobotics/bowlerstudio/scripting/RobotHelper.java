@@ -46,7 +46,7 @@ public class RobotHelper implements IScriptingLanguage {
 		MobileBase mb = null;
 		try {
 			mb = new MobileBase(IOUtils.toInputStream(code, "UTF-8"));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;

@@ -393,7 +393,8 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/com.neuronrobotics/SimplePacketComsJava
 	implementation group: 'com.neuronrobotics', name: 'SimplePacketComsJava', version: '1.0.0'
-
+	// Zip and unzip, tar and untar
+	implementation 'org.apache.commons:commons-compress:1.26.2'
 }
 
 
