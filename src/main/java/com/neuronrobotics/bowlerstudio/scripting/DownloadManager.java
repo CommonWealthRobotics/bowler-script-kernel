@@ -82,20 +82,6 @@ public class DownloadManager {
 //			}
 			try {
 				// creating the process
-				/*
-				ProcessBuilder pb = new ProcessBuilder(finalCommand);
-				Map<String, String> envir = pb.environment();
-				// set environment variable u
-				envir.putAll(env);
-				for (String s : env.keySet()) {
-					System.out.println("Environment var set: "+s+" to "+envir.get(s));
-				}
-				// setting the directory
-				pb.directory(dir);
-				// startinf the process
-				Process process = pb.start();
-				*/
-				// for reading the ouput from stream
 		        CommandLine cmdLine = new CommandLine(finalCommand.get(0));
 		        
 		        // Add arguments
@@ -117,21 +103,7 @@ public class DownloadManager {
 	            executor.setStreamHandler(streamHandler);
 	            startOutputReader(outPipeIn, "OUTPUT",out);
 	            startOutputReader(errPipeIn, "ERROR",out);
-	            
-
-				/*
-				process.waitFor();
-				int ev = process.exitValue();
-				// out.println("Running "+commands);
-				if (ev != 0) {
-					System.out.println("ERROR PROCESS Process exited with " + ev);
-				}
-				while (process.isAlive()) {
-					Thread.sleep(100);
-				}
-				*/
-	            ev = executor.execute(cmdLine, env);
-	            
+	            ev = executor.execute(cmdLine, env);	            
 				out.println("");
 				if(editor!=null)editor.onProcessExit(ev);
 					
@@ -143,14 +115,6 @@ public class DownloadManager {
 						alert.setHeaderText("failed to run "+cmd);
 						alert.setContentText("Close to bring me to the install website");
 						alert.showAndWait();
-//						new Thread(() -> {
-//							try {
-//								BowlerKernel.openExternalWebpage(editor.getInstallURL());
-//							} catch (MalformedURLException e1) {
-//								// TODO Auto-generated catch block
-//								e1.printStackTrace(out);
-//							}
-//						}).start();
 					});
 				else
 					e.printStackTrace();
