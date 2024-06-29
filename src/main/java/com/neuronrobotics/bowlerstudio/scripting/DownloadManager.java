@@ -114,8 +114,8 @@ public class DownloadManager {
 	            
 	            PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
 	            executor.setStreamHandler(streamHandler);
-	            startOutputReader(outPipeIn, "OUTPUT");
-	            startOutputReader(errPipeIn, "ERROR");
+	            startOutputReader(outPipeIn, "OUTPUT",out);
+	            startOutputReader(errPipeIn, "ERROR",out);
 	            
 
 				/*
@@ -161,12 +161,12 @@ public class DownloadManager {
 		thread.start();
 		return thread;
 	}
-    private static void startOutputReader(final InputStream is, final String type) {
+    private static void startOutputReader(final InputStream is, final String type, PrintStream out) {
         new Thread(() -> {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    System.out.println(type + "> " + line);
+                    out.println(type + "> " + line);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
