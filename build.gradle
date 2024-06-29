@@ -395,6 +395,8 @@ dependencies {
 	implementation group: 'com.neuronrobotics', name: 'SimplePacketComsJava', version: '1.0.0'
 	// Zip and unzip, tar and untar
 	implementation 'org.apache.commons:commons-compress:1.26.2'
+	// Addiing advance system execution for advanced editors
+	implementation 'org.apache.commons:commons-exec:1.3'
 }
 
 
