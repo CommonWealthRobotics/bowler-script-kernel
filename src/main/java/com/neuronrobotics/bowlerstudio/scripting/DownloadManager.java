@@ -57,20 +57,13 @@ public class DownloadManager {
 	private static String editorsURL= "https://github.com/CommonWealthRobotics/ExternalEditorsBowlerStudio.git";
 	private static String 		bindir = System.getProperty("user.home") + "/bin/BowlerStudioInstall/";
 	private static int ev=0;
+	private static String cmd="";
 	private static ButtonType buttonType=null;
 	public static Thread run(IExternalEditor editor,File dir, PrintStream out,List<String> finalCommand) {
 		return run(new HashMap<String,String>(),editor,dir,out,finalCommand);
 	}
 	public static Thread run(Map<String,String> envincoming,IExternalEditor editor,File dir, PrintStream out,List<String> finalCommand) {
-		List<String> tnp = finalCommand;
-		String command ="";
-		out.println("Running:\n\n");
-		for(String s:tnp)
-			command+=(s+" ");
-		String cmd = command;
-		System.out.println(command);
-		out.println("\nIn "+dir.getAbsolutePath());
-		out.println("\n\n");
+
 		//String[] splited = command.split("\\s+");
 
 		Thread thread = new Thread(() -> {
@@ -82,12 +75,18 @@ public class DownloadManager {
 //			}
 			try {
 				// creating the process
-		        CommandLine cmdLine = new CommandLine(finalCommand.get(0));
+		        CommandLine cmdLine = new CommandLine(sanitize(finalCommand.get(0)));
 		        
 		        // Add arguments
 		        for (int i=1;i<finalCommand.size();i++) {
-		            cmdLine.addArgument(finalCommand.get(i));
+		            cmdLine.addArgument(sanitize(finalCommand.get(i)),false);
 		        }
+		        cmd=cmdLine.getExecutable();
+		        out.println("Running command:\n");
+				out.println(cmd);
+
+				out.println("\nIn "+dir.getAbsolutePath());
+				out.println("\n\n");
 
 		        DefaultExecutor executor = new DefaultExecutor();
 		        executor.setWorkingDirectory(dir);
@@ -108,6 +107,7 @@ public class DownloadManager {
 				if(editor!=null)editor.onProcessExit(ev);
 					
 			} catch (Throwable e) {
+				e.printStackTrace(out);
 				if(editor!=null)
 					BowlerKernel.runLater(()->{
 						Alert alert = new Alert(AlertType.ERROR);
@@ -116,8 +116,7 @@ public class DownloadManager {
 						alert.setContentText("Close to bring me to the install website");
 						alert.showAndWait();
 					});
-				else
-					e.printStackTrace();
+				
 			
 
 			}
@@ -125,7 +124,15 @@ public class DownloadManager {
 		thread.start();
 		return thread;
 	}
-    private static void startOutputReader(final InputStream is, final String type, PrintStream out) {
+    private static String sanitize(String s) {
+    	String string =s;
+		if(isWin()) {
+				string ="\""+s+"\"";
+			
+		}
+		return string;
+	}
+	private static void startOutputReader(final InputStream is, final String type, PrintStream out) {
         new Thread(() -> {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
                 String line;
