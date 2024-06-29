@@ -104,6 +104,7 @@ public class DownloadManager {
 		        }
 
 		        DefaultExecutor executor = new DefaultExecutor();
+		        executor.setWorkingDirectory(dir);
 	            Map<String, String> env = EnvironmentUtils.getProcEnvironment();
 	            env.putAll(envincoming);
 		        
@@ -131,7 +132,6 @@ public class DownloadManager {
 				*/
 	            ev = executor.execute(cmdLine, env);
 	            
-	            System.out.println("Arduino IDE launched. Exit value: " + ev);
 				out.println("");
 				if(editor!=null)editor.onProcessExit(ev);
 					
