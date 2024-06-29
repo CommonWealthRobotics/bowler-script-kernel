@@ -216,16 +216,16 @@ public class DownloadManager {
 							environment=(Map<String, String>) o;
 						}else
 							environment= new HashMap<>();
-						
+						String targetdir=exeType;
 						File jvmArchive = download("", jvmURL, 400000000, bindir, name + "." + type,exeType);
-						File dest = new File(bindir + name);
-						String cmd = bindir + name + "/"+exeInZip;
+						File dest = new File(bindir + targetdir);
+						String cmd = bindir + targetdir + "/"+exeInZip;
 						if (!dest.exists()) {
 							if (type.toLowerCase().contains("zip")) {
-								unzip(jvmArchive, bindir+name);
+								unzip(jvmArchive, bindir+targetdir);
 							}
 							if (type.toLowerCase().contains("tar.gz")) {
-								untar(jvmArchive, bindir+name);
+								untar(jvmArchive, bindir+targetdir);
 							}
 							Object configurations =database.get("Meta-Configuration");
 							if(configurations!=null) {
@@ -276,7 +276,7 @@ public class DownloadManager {
 								for(int i=0;i<configs.size();i++) {
 									System.out.println("Running "+exeType+" Configuration "+(i+1)+" of "+configs.size());
 									ArrayList<String> toRun=new ArrayList<>();
-									toRun.add(bindir + name + "/"+configexe);
+									toRun.add(bindir + targetdir + "/"+configexe);
 									String[] conf = configs.get(i).split(" ");
 									for(int j=0;j<conf.length;j++) {
 										toRun.add(conf[j]);
