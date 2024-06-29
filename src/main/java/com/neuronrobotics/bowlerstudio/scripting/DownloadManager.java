@@ -1,5 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
+import org.apache.commons.exec.*;
+import org.apache.commons.exec.environment.EnvironmentUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -41,9 +45,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
-import com.neuronrobotics.bowlerstudio.scripting.IExternalEditor;
-import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
-import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.video.OSUtil;
 
 import javafx.scene.control.Alert;
@@ -60,7 +61,7 @@ public class DownloadManager {
 	public static Thread run(IExternalEditor editor,File dir, PrintStream out,List<String> finalCommand) {
 		return run(new HashMap<String,String>(),editor,dir,out,finalCommand);
 	}
-	public static Thread run(Map<String,String> env,IExternalEditor editor,File dir, PrintStream out,List<String> finalCommand) {
+	public static Thread run(Map<String,String> envincoming,IExternalEditor editor,File dir, PrintStream out,List<String> finalCommand) {
 		List<String> tnp = finalCommand;
 		String command ="";
 		out.println("Running:\n\n");
@@ -81,7 +82,7 @@ public class DownloadManager {
 //			}
 			try {
 				// creating the process
-				
+				/*
 				ProcessBuilder pb = new ProcessBuilder(finalCommand);
 				Map<String, String> envir = pb.environment();
 				// set environment variable u
@@ -93,21 +94,31 @@ public class DownloadManager {
 				pb.directory(dir);
 				// startinf the process
 				Process process = pb.start();
-				
+				*/
 				// for reading the ouput from stream
-				BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-				BufferedReader errInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+		        CommandLine cmdLine = new CommandLine(finalCommand.get(0));
+		        
+		        // Add arguments
+		        for (int i=1;i<finalCommand.size();i++) {
+		            cmdLine.addArgument(finalCommand.get(i));
+		        }
 
-				String s = null;
-				String e = null;
-				Thread.sleep(100);
-				while ((s = stdInput.readLine()) != null || (e = errInput.readLine()) != null) {
-					if (s != null)
-						out.println(s);
-					if (e != null)
-						out.println(e);
-					//
-				}
+		        DefaultExecutor executor = new DefaultExecutor();
+	            Map<String, String> env = EnvironmentUtils.getProcEnvironment();
+	            env.putAll(envincoming);
+		        
+	            PipedOutputStream outPipe = new PipedOutputStream();
+	            PipedInputStream outPipeIn = new PipedInputStream(outPipe);
+	            PipedOutputStream errPipe = new PipedOutputStream();
+	            PipedInputStream errPipeIn = new PipedInputStream(errPipe);
+	            
+	            PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
+	            executor.setStreamHandler(streamHandler);
+	            startOutputReader(outPipeIn, "OUTPUT");
+	            startOutputReader(errPipeIn, "ERROR");
+	            
+
+				/*
 				process.waitFor();
 				int ev = process.exitValue();
 				// out.println("Running "+commands);
@@ -117,6 +128,10 @@ public class DownloadManager {
 				while (process.isAlive()) {
 					Thread.sleep(100);
 				}
+				*/
+	            ev = executor.execute(cmdLine, env);
+	            
+	            System.out.println("Arduino IDE launched. Exit value: " + ev);
 				out.println("");
 				if(editor!=null)editor.onProcessExit(ev);
 					
@@ -146,6 +161,18 @@ public class DownloadManager {
 		thread.start();
 		return thread;
 	}
+    private static void startOutputReader(final InputStream is, final String type) {
+        new Thread(() -> {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    System.out.println(type + "> " + line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
 	public static Map<String,String> getEnvironment(String exeType) {
 		String key = discoverKey();
 		
