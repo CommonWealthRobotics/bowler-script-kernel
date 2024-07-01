@@ -8,13 +8,9 @@ import java.util.HashMap;
 
 public class ArduinoLoader implements IScriptingLanguage {
 
-  private static String ARDUINO = "arduino";
-
-  HashMap<String, HashMap<String, Object>> database;
 
   private static String defaultPort = null;
   private static String defaultBoard = null;
-  private static boolean loadedBowler = false;
 
   @SuppressWarnings("unchecked")
   @Override
@@ -22,79 +18,48 @@ public class ArduinoLoader implements IScriptingLanguage {
     if (args == null) {
       args = new ArrayList<>();
     }
-    if (database == null) {
-      database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
-          .gitScriptRun("https://github.com/madhephaestus/Arduino-Boards-JSON.git",
-              "boards.json", null);
-    }
-    String execString = getARDUINOExec();
+
+    ArrayList<String> commands = new ArrayList<> ();
+    commands.add( getARDUINOExec());
 
     if (args.size() > 0) {
       setDefaultBoard((String) args.get(0));
     }
     if (getDefaultBoard() != null) {
-      execString += " --board " + getDefaultBoard();
+      commands.add("board");
+      commands.add(getDefaultBoard());
       if (args.size() > 1) {
         setDefaultPort((String) args.get(1));
       }
     }
     if (getDefaultPort() != null) {
-      execString += " --port " + getDefaultPort();
+      commands.add("port");
+      commands.add(getDefaultPort());
     }
-    HashMap<String, Object> configs = database.get(getDefaultBoard());
     File ino = findIno(code);
     if (ino == null) {
       //System.out.println("Error: no .ino file found!");
       return null;
     }
-    execString += " --upload " + ino.getAbsolutePath().replaceAll(" ", "\\ ");
-    ;
+    
+    commands.add("upload");
+    commands.add(ino.getAbsolutePath());
 
     //System.out.println("Arduino Load: \n"+execString);
-    if (!loadedBowler) {
-      loadedBowler = true;
-      run(getARDUINOExec() + " --install-library BowlerCom");
-    }
-    run(execString);
+    Thread ret = DownloadManager.run(null, ino.getParentFile(), System.out, commands);
+    ret.join();
 
     return null;
   }
 
-  public static void installBoard(String product, String arch) throws Exception {
-    run(getARDUINOExec() + " --install-boards " + product + ":" + arch);
-  }
+//  public static void installBoard(String product, String arch) throws Exception {
+//    run(getARDUINOExec() + " --install-boards " + product + ":" + arch);
+//  }
+//
+//  public static void installLibrary(String lib) throws Exception {
+//    run(getARDUINOExec() + " --install-library " + lib);
+//  }
 
-  public static void installLibrary(String lib) throws Exception {
-    run(getARDUINOExec() + " --install-library " + lib);
-  }
-
-  public static void run(String execString) throws Exception {
-    System.out.println("Running:\n" + execString);
-    // Get runtime
-    java.lang.Runtime rt = java.lang.Runtime.getRuntime();
-    // Start a new process
-    java.lang.Process p = rt.exec(execString);
-    // You can or maybe should wait for the process to complete
-    p.waitFor();
-    // Get process' output: its InputStream
-    java.io.InputStream is = p.getInputStream();
-    java.io.InputStream err = p.getInputStream();
-    java.io.BufferedReader reader = new java.io.BufferedReader(new InputStreamReader(is));
-    java.io.BufferedReader readerErr = new java.io.BufferedReader(new InputStreamReader(err));
-
-    // And print each line
-    String s = null;
-    while ((s = reader.readLine()) != null) {
-      System.out.println(s);// This is how the scripts output to the print stream
-    }
-
-    s = null;
-    while ((s = readerErr.readLine()) != null) {
-      System.out.println(s);// This is how the scripts output to the print stream
-    }
-    is.close();
-    err.close();
-  }
 
   private File findIno(File start) {
     if (start == null) {
@@ -193,12 +158,9 @@ public class ArduinoLoader implements IScriptingLanguage {
   }
 
   public static String getARDUINOExec() {
-    return ARDUINO;
+    return DownloadManager.getRunExecutable("arduino-cli", null).getAbsolutePath();
   }
 
-  public static void setARDUINOExec(String aRDUINO) {
-    ARDUINO = aRDUINO;
-  }
 
   @Override
   public ArrayList<String> getFileExtenetion() {
