@@ -364,7 +364,7 @@ public class DownloadManager {
 		throw new RuntimeException("Executable for OS: "+key+" has no entry for "+exeType);
 	}
 	
-	private static void dmgExtract(File jvmArchive, String string,String exe) {
+	private static void dmgExtract(File jvmArchive, String string,String appDir) {
 		// since DMG is Mac only, and Mac always has the command line extractors, we will use those
 		File location = new File(string);
 
@@ -386,20 +386,14 @@ public class DownloadManager {
 			Object[] array = after.toArray();
 			String newMount = (String) array[0];
 			System.out.println("Extracted "+jvmArchive.getAbsolutePath()+" is mounted at "+newMount);
+			//asr restore --source "$MOUNT_POINT" --target "$DEST_PATH" --erase --noprompt
 			if(!location.exists()) {
 				location.mkdirs();
 			}
-			//asr restore --source "$MOUNT_POINT" --target "$DEST_PATH" --erase --noprompt
-			Thread tcopy=run(null,new File("."),System.out, Arrays.asList("cp", "-r","-v","/Volumes/"+newMount+"/"+exe,"/tmp/"));
-			tcopy.join();
-			tcopy=run(null,new File("."),System.err, Arrays.asList("xattr", "-cr","/tmp/"+exe));
-			tcopy.join();
-			//codesign --force --deep --sign - 
-			tcopy=run(null,new File("."),System.err, Arrays.asList("codesign", "--force","--deep","--sign","-","/tmp/"+exe));
+			Thread tcopy=run(null,new File("."),System.out, Arrays.asList("rsync", "-avtP","/Volumes/"+newMount+"/"+appDir,string+"/"));
 			tcopy.join();
 
-			tcopy=run(null,new File("."),System.err, Arrays.asList("mv", "/tmp/"+exe,string));
-			tcopy.join();
+			
 			Thread tdetach=run(null,new File("."),System.err, Arrays.asList("hdiutil", "detach","/Volumes/"+newMount));
 			tdetach.join();
 		} catch (Exception e) {
