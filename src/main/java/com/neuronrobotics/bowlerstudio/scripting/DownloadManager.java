@@ -2,6 +2,9 @@ package com.neuronrobotics.bowlerstudio.scripting;
 
 import org.apache.commons.exec.*;
 import org.apache.commons.exec.environment.EnvironmentUtils;
+
+import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.run;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,7 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -64,46 +69,94 @@ public class DownloadManager {
 	}
 	public static Thread run(Map<String,String> envincoming,IExternalEditor editor,File dir, PrintStream out,List<String> finalCommand) {
 
-		//String[] splited = command.split("\\s+");
 
 		Thread thread = new Thread(() -> {
 			
-//			ArrayList<String>asList= new ArrayList<>();
-//			for(int i=0;i<splited.length;i++) {
-//				if(splited[i].length()>0)
-//					asList.add(splited[i]);
-//			}
+
 			try {
 				// creating the process
-		        CommandLine cmdLine = new CommandLine(sanitize(finalCommand.get(0)));
-		        
-		        // Add arguments
-		        for (int i=1;i<finalCommand.size();i++) {
-		            cmdLine.addArgument(sanitize(finalCommand.get(i)),false);
+		        CommandLine cmdLine;
+		        if(isMac()) {
+		        	cmd="";
+		        	for(String s:finalCommand) {
+		        		cmd+=sanitize(s)+" ";
+		        	}
+					ProcessBuilder pb = new ProcessBuilder(finalCommand);
+					Map<String, String> envir = pb.environment();
+					// set environment variable u
+					envir.putAll(envincoming);
+					for (String s : envincoming.keySet()) {
+						System.out.println("Environment var set: "+s+" to "+envir.get(s));
+					}
+					// setting the directory
+					pb.directory(dir);
+					// startinf the process
+			        out.println("Running command:\n");
+					out.println(cmd);
+
+					out.println("\nIn "+dir.getAbsolutePath());
+					out.println("\n\n");
+
+					Process process = pb.start();
+					
+					// for reading the ouput from stream
+					BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+					BufferedReader errInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+					String s = null;
+					String e = null;
+					Thread.sleep(100);
+					while ((s = stdInput.readLine()) != null || (e = errInput.readLine()) != null) {
+						if (s != null)
+							out.println(s);
+						if (e != null)
+							out.println(e);
+						//
+					}
+					process.waitFor();
+					int ev = process.exitValue();
+					// out.println("Running "+commands);
+					if (ev != 0) {
+						System.out.println("ERROR PROCESS Process exited with " + ev);
+					}
+					while (process.isAlive()) {
+						Thread.sleep(100);
+					}
+					out.println("");
+		        }else {
+			        cmdLine= new CommandLine(sanitize(finalCommand.get(0)));
+			        cmd=cmdLine.getExecutable();
+	
+			        // Add arguments
+			        for (int i=1;i<finalCommand.size();i++) {
+			        	String san = sanitize(finalCommand.get(i));
+			        	cmd+=" "+san;
+			            cmdLine.addArgument(san,false);
+			        }
+			        out.println("Running command:\n");
+					out.println(cmd);
+
+					out.println("\nIn "+dir.getAbsolutePath());
+					out.println("\n\n");
+
+			        DefaultExecutor executor = new DefaultExecutor();
+			        executor.setWorkingDirectory(dir);
+		            Map<String, String> env = EnvironmentUtils.getProcEnvironment();
+		            env.putAll(envincoming);
+			        
+		            PipedOutputStream outPipe = new PipedOutputStream();
+		            PipedInputStream outPipeIn = new PipedInputStream(outPipe);
+		            PipedOutputStream errPipe = new PipedOutputStream();
+		            PipedInputStream errPipeIn = new PipedInputStream(errPipe);
+		            
+		            PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
+		            executor.setStreamHandler(streamHandler);
+		            startOutputReader(outPipeIn, "OUTPUT",out);
+		            startOutputReader(errPipeIn, "ERROR",out);
+		            ev = executor.execute(cmdLine, env);	            
+					out.println("");
 		        }
-		        cmd=cmdLine.getExecutable();
-		        out.println("Running command:\n");
-				out.println(cmd);
 
-				out.println("\nIn "+dir.getAbsolutePath());
-				out.println("\n\n");
-
-		        DefaultExecutor executor = new DefaultExecutor();
-		        executor.setWorkingDirectory(dir);
-	            Map<String, String> env = EnvironmentUtils.getProcEnvironment();
-	            env.putAll(envincoming);
-		        
-	            PipedOutputStream outPipe = new PipedOutputStream();
-	            PipedInputStream outPipeIn = new PipedInputStream(outPipe);
-	            PipedOutputStream errPipe = new PipedOutputStream();
-	            PipedInputStream errPipeIn = new PipedInputStream(errPipe);
-	            
-	            PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
-	            executor.setStreamHandler(streamHandler);
-	            startOutputReader(outPipeIn, "OUTPUT",out);
-	            startOutputReader(errPipeIn, "ERROR",out);
-	            ev = executor.execute(cmdLine, env);	            
-				out.println("");
 				if(editor!=null)editor.onProcessExit(ev);
 					
 			} catch (Throwable e) {
@@ -125,10 +178,11 @@ public class DownloadManager {
 		return thread;
 	}
     private static String sanitize(String s) {
+
     	String string =s;
-		if(isWin()) {
+		if(s.contains(" ")) {
+
 				string ="\""+s+"\"";
-			
 		}
 		return string;
 	}
@@ -225,6 +279,10 @@ public class DownloadManager {
 							if (type.toLowerCase().contains("tar.gz")) {
 								untar(jvmArchive, bindir+targetdir);
 							}
+							if (type.toLowerCase().contains("dmg")) {
+								dmgExtract(jvmArchive, bindir+targetdir,exeInZip);
+							}
+							
 							Object configurations =database.get("Meta-Configuration");
 							if(configurations!=null) {
 								List<String> configs=(List<String>) configurations;
@@ -306,6 +364,54 @@ public class DownloadManager {
 		throw new RuntimeException("Executable for OS: "+key+" has no entry for "+exeType);
 	}
 	
+	private static void dmgExtract(File jvmArchive, String string,String exe) {
+		// since DMG is Mac only, and Mac always has the command line extractors, we will use those
+		File location = new File(string);
+
+		File[] listFiles = new File("/Volumes/").listFiles();
+		Set<String> before =Stream.of(listFiles)
+	      .filter(file -> file.isDirectory())
+	      .map(File::getName)
+	      .collect(Collectors.toSet());
+		Thread t=run(null,new File("."),System.err, Arrays.asList("hdiutil", "attach",jvmArchive.getAbsolutePath()));
+		try {
+			t.join();
+			Thread.sleep(2000);// wait for mount to settle
+			File[] listFilesAfter = new File("/Volumes/").listFiles();
+			Set<String> after =Stream.of(listFilesAfter)
+				      .filter(file -> file.isDirectory())
+				      .map(File::getName)
+				      .collect(Collectors.toSet());
+			after.removeAll(before);
+			Object[] array = after.toArray();
+			String newMount = (String) array[0];
+			System.out.println("Extracted "+jvmArchive.getAbsolutePath()+" is mounted at "+newMount);
+			if(!location.exists()) {
+				location.mkdirs();
+			}
+			//asr restore --source "$MOUNT_POINT" --target "$DEST_PATH" --erase --noprompt
+			Thread tcopy=run(null,new File("."),System.out, Arrays.asList("cp", "-r","-v","/Volumes/"+newMount+"/"+exe,"/tmp/"));
+			tcopy.join();
+			tcopy=run(null,new File("."),System.err, Arrays.asList("xattr", "-cr","/tmp/"+exe));
+			tcopy.join();
+			//codesign --force --deep --sign - 
+			tcopy=run(null,new File("."),System.err, Arrays.asList("codesign", "--force","--deep","--sign","-","/tmp/"+exe));
+			tcopy.join();
+
+			tcopy=run(null,new File("."),System.err, Arrays.asList("mv", "/tmp/"+exe,string));
+			tcopy.join();
+			Thread tdetach=run(null,new File("."),System.err, Arrays.asList("hdiutil", "detach","/Volumes/"+newMount));
+			tdetach.join();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}//wait for the mount to finish
+
+		System.out.println("Extracted "+jvmArchive.getAbsolutePath());
+
+		
+	}
 	public static boolean isExecutable(ZipArchiveEntry entry) {
 		int unixMode = entry.getUnixMode();
 		// Check if any of the executable bits are set for user, group, or others.
