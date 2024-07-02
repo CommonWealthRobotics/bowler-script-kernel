@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
+import java.io.RandomAccessFile;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -37,6 +38,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarUtils;
@@ -58,47 +61,51 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 
-public class DownloadManager {
-	private static String editorsURL= "https://github.com/CommonWealthRobotics/ExternalEditorsBowlerStudio.git";
-	private static String 		bindir = System.getProperty("user.home") + "/bin/BowlerStudioInstall/";
-	private static int ev=0;
-	private static String cmd="";
-	private static ButtonType buttonType=null;
-	public static Thread run(IExternalEditor editor,File dir, PrintStream out,List<String> finalCommand) {
-		return run(new HashMap<String,String>(),editor,dir,out,finalCommand);
-	}
-	public static Thread run(Map<String,String> envincoming,IExternalEditor editor,File dir, PrintStream out,List<String> finalCommand) {
+import net.sf.sevenzipjbinding.*;
+import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 
+public class DownloadManager {
+	private static String editorsURL = "https://github.com/CommonWealthRobotics/ExternalEditorsBowlerStudio.git";
+	private static String bindir = System.getProperty("user.home") + "/bin/BowlerStudioInstall/";
+	private static int ev = 0;
+	private static String cmd = "";
+	private static ButtonType buttonType = null;
+
+	public static Thread run(IExternalEditor editor, File dir, PrintStream out, List<String> finalCommand) {
+		return run(new HashMap<String, String>(), editor, dir, out, finalCommand);
+	}
+
+	public static Thread run(Map<String, String> envincoming, IExternalEditor editor, File dir, PrintStream out,
+			List<String> finalCommand) {
 
 		Thread thread = new Thread(() -> {
-			
 
 			try {
 				// creating the process
-		        CommandLine cmdLine;
-		        if(isMac()) {
-		        	cmd="";
-		        	for(String s:finalCommand) {
-		        		cmd+=sanitize(s)+" ";
-		        	}
+				CommandLine cmdLine;
+				if (isMac()) {
+					cmd = "";
+					for (String s : finalCommand) {
+						cmd += sanitize(s) + " ";
+					}
 					ProcessBuilder pb = new ProcessBuilder(finalCommand);
 					Map<String, String> envir = pb.environment();
 					// set environment variable u
 					envir.putAll(envincoming);
 					for (String s : envincoming.keySet()) {
-						System.out.println("Environment var set: "+s+" to "+envir.get(s));
+						System.out.println("Environment var set: " + s + " to " + envir.get(s));
 					}
 					// setting the directory
 					pb.directory(dir);
 					// startinf the process
-			        out.println("Running command:\n");
+					out.println("Running command:\n");
 					out.println(cmd);
 
-					out.println("\nIn "+dir.getAbsolutePath());
+					out.println("\nIn " + dir.getAbsolutePath());
 					out.println("\n\n");
 
 					Process process = pb.start();
-					
+
 					// for reading the ouput from stream
 					BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
 					BufferedReader errInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -123,238 +130,246 @@ public class DownloadManager {
 						Thread.sleep(100);
 					}
 					out.println("");
-		        }else {
-			        cmdLine= new CommandLine(sanitize(finalCommand.get(0)));
-			        cmd=cmdLine.getExecutable();
-	
-			        // Add arguments
-			        for (int i=1;i<finalCommand.size();i++) {
-			        	String san = sanitize(finalCommand.get(i));
-			        	cmd+=" "+san;
-			            cmdLine.addArgument(san,false);
-			        }
-			        out.println("Running command:\n");
+				} else {
+					cmdLine = new CommandLine(sanitize(finalCommand.get(0)));
+					cmd = cmdLine.getExecutable();
+
+					// Add arguments
+					for (int i = 1; i < finalCommand.size(); i++) {
+						String san = sanitize(finalCommand.get(i));
+						cmd += " " + san;
+						cmdLine.addArgument(san, false);
+					}
+					out.println("Running command:\n");
 					out.println(cmd);
 
-					out.println("\nIn "+dir.getAbsolutePath());
+					out.println("\nIn " + dir.getAbsolutePath());
 					out.println("\n\n");
 
-			        DefaultExecutor executor = new DefaultExecutor();
-			        executor.setWorkingDirectory(dir);
-		            Map<String, String> env = EnvironmentUtils.getProcEnvironment();
-		            env.putAll(envincoming);
-			        
-		            PipedOutputStream outPipe = new PipedOutputStream();
-		            PipedInputStream outPipeIn = new PipedInputStream(outPipe);
-		            PipedOutputStream errPipe = new PipedOutputStream();
-		            PipedInputStream errPipeIn = new PipedInputStream(errPipe);
-		            
-		            PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
-		            executor.setStreamHandler(streamHandler);
-		            startOutputReader(outPipeIn, "OUTPUT",out);
-		            startOutputReader(errPipeIn, "ERROR",out);
-		            ev = executor.execute(cmdLine, env);	            
-					out.println("");
-		        }
+					DefaultExecutor executor = new DefaultExecutor();
+					executor.setWorkingDirectory(dir);
+					Map<String, String> env = EnvironmentUtils.getProcEnvironment();
+					env.putAll(envincoming);
 
-				if(editor!=null)editor.onProcessExit(ev);
-					
+					PipedOutputStream outPipe = new PipedOutputStream();
+					PipedInputStream outPipeIn = new PipedInputStream(outPipe);
+					PipedOutputStream errPipe = new PipedOutputStream();
+					PipedInputStream errPipeIn = new PipedInputStream(errPipe);
+
+					PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
+					executor.setStreamHandler(streamHandler);
+					startOutputReader(outPipeIn, "OUTPUT", out);
+					startOutputReader(errPipeIn, "ERROR", out);
+					ev = executor.execute(cmdLine, env);
+					out.println("");
+				}
+
+				if (editor != null)
+					editor.onProcessExit(ev);
+
 			} catch (Throwable e) {
 				e.printStackTrace(out);
-				if(editor!=null)
-					BowlerKernel.runLater(()->{
+				if (editor != null)
+					BowlerKernel.runLater(() -> {
 						Alert alert = new Alert(AlertType.ERROR);
-						alert.setTitle(editor.nameOfEditor()+" is missing");
-						alert.setHeaderText("failed to run "+cmd);
+						alert.setTitle(editor.nameOfEditor() + " is missing");
+						alert.setHeaderText("failed to run " + cmd);
 						alert.setContentText("Close to bring me to the install website");
 						alert.showAndWait();
 					});
-				
-			
 
 			}
 		});
 		thread.start();
 		return thread;
 	}
-    private static String sanitize(String s) {
 
-    	String string =s;
-		if(s.contains(" ")) {
+	private static String sanitize(String s) {
 
-				string ="\""+s+"\"";
+		String string = s;
+		if (s.contains(" ")) {
+			if (!s.contains("\""))
+				string = "\"" + s + "\"";
 		}
 		return string;
 	}
+
 	private static void startOutputReader(final InputStream is, final String type, PrintStream out) {
-        new Thread(() -> {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    out.println(type + "> " + line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-	public static Map<String,String> getEnvironment(String exeType) {
+		new Thread(() -> {
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+				String line;
+				while ((line = br.readLine()) != null) {
+					out.println(type + "> " + line);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}).start();
+	}
+
+	public static Map<String, String> getEnvironment(String exeType) {
 		String key = discoverKey();
-		
+
 		try {
-			for(String f:ScriptingEngine.filesInGit(editorsURL)) {
+			for (String f : ScriptingEngine.filesInGit(editorsURL)) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
-				if( file.getName().toLowerCase().startsWith(exeType.toLowerCase())&&
-					file.getName().toLowerCase().endsWith(".json")) {
+				if (file.getName().toLowerCase().startsWith(exeType.toLowerCase())
+						&& file.getName().toLowerCase().endsWith(".json")) {
 					String jsonText = new String(Files.readAllBytes(file.toPath()));
 					Type TT_mapStringString = new TypeToken<HashMap<String, Object>>() {
 					}.getType();
 					Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 					HashMap<String, Object> database = gson.fromJson(jsonText, TT_mapStringString);
 					Map<String, Object> vm = (Map<String, Object>) database.get(key);
-					if(vm!=null) {
+					if (vm != null) {
 						String baseURL = vm.get("url").toString();
 						String type = vm.get("type").toString();
 						String name = vm.get("name").toString();
-						String exeInZip=vm.get("executable").toString();
+						String exeInZip = vm.get("executable").toString();
 						String jvmURL = baseURL + name + "." + type;
-						Map<String,String> environment;
+						Map<String, String> environment;
 						Object o = vm.get("environment");
-						if(o!=null) {
-							System.out.println("Environment found for "+exeType+" on "+key);
+						if (o != null) {
+							System.out.println("Environment found for " + exeType + " on " + key);
 
 							return (Map<String, String>) o;
-						}						
+						}
 					}
 				}
 			}
-		}catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
-			
+
 		}
 		return new HashMap<>();
 	}
-	public static File getRunExecutable(String exeType ,IExternalEditor editor) {
-		return getExecutable(exeType,editor,"executable");
+
+	public static File getRunExecutable(String exeType, IExternalEditor editor) {
+		return getExecutable(exeType, editor, "executable");
 	}
-	public static File getConfigExecutable(String exeType ,IExternalEditor editor) {
-		return getExecutable(exeType,editor,"configExecutable");
+
+	public static File getConfigExecutable(String exeType, IExternalEditor editor) {
+		return getExecutable(exeType, editor, "configExecutable");
 	}
-	private static File getExecutable(String exeType ,IExternalEditor editor,String executable) {
+
+	private static File getExecutable(String exeType, IExternalEditor editor, String executable) {
 		String key = discoverKey();
-		
+
 		try {
-			for(String f:ScriptingEngine.filesInGit(editorsURL)) {
+			for (String f : ScriptingEngine.filesInGit(editorsURL)) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
-				if( file.getName().toLowerCase().startsWith(exeType.toLowerCase())&&
-					file.getName().toLowerCase().endsWith(".json")) {
+				if (file.getName().toLowerCase().startsWith(exeType.toLowerCase())
+						&& file.getName().toLowerCase().endsWith(".json")) {
 					String jsonText = new String(Files.readAllBytes(file.toPath()));
 					Type TT_mapStringString = new TypeToken<HashMap<String, Object>>() {
 					}.getType();
 					Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 					HashMap<String, Object> database = gson.fromJson(jsonText, TT_mapStringString);
 					Map<String, Object> vm = (Map<String, Object>) database.get(key);
-					if(vm!=null) {
-						System.out.println("Configuration found for "+exeType+" on "+key);
+					if (vm != null) {
+						System.out.println("Configuration found for " + exeType + " on " + key);
 						String baseURL = vm.get("url").toString();
 						String type = vm.get("type").toString();
 						String name = vm.get("name").toString();
-						String exeInZip=vm.get(executable).toString();
-						String configexe=vm.get("configExecutable").toString();
+						String exeInZip = vm.get(executable).toString();
+						String configexe = vm.get("configExecutable").toString();
 						String jvmURL = baseURL + name + "." + type;
-						Map<String,String> environment;
+						Map<String, String> environment;
 						Object o = vm.get("environment");
-						if(o!=null) {
-							environment=(Map<String, String>) o;
-						}else
-							environment= new HashMap<>();
-						String targetdir=exeType;
-						File jvmArchive = download("", jvmURL, 400000000, bindir, name + "." + type,exeType);
+						if (o != null) {
+							environment = (Map<String, String>) o;
+						} else
+							environment = new HashMap<>();
+						String targetdir = exeType;
+						File jvmArchive = download("", jvmURL, 400000000, bindir, name + "." + type, exeType);
 						File dest = new File(bindir + targetdir);
-						String cmd = bindir + targetdir + "/"+exeInZip;
+						String cmd = bindir + targetdir + "/" + exeInZip;
 						if (!dest.exists()) {
 							if (type.toLowerCase().contains("zip")) {
-								unzip(jvmArchive, bindir+targetdir);
+								unzip(jvmArchive, bindir + targetdir);
 							}
 							if (type.toLowerCase().contains("tar.gz")) {
-								untar(jvmArchive, bindir+targetdir);
+								untar(jvmArchive, bindir + targetdir);
 							}
 							if (type.toLowerCase().contains("dmg")) {
-								dmgExtract(jvmArchive, bindir+targetdir,exeInZip);
+								dmgExtract(jvmArchive, bindir + targetdir, exeInZip);
 							}
 							if (type.toLowerCase().contains("appimage")) {
 								appimage(type, name, targetdir, cmd);
 							}
-							
-							Object configurations =database.get("Meta-Configuration");
-							if(configurations!=null) {
-								List<String> configs=(List<String>) configurations;
-								System.out.println("Got Configurations "+configs.size());
-								ev=-1;
+							// extract7zArchive
+							if (type.toLowerCase().contains("7z")) {
+								extract7zArchive(jvmArchive.getAbsolutePath(), bindir + targetdir);
+							}
+							Object configurations = database.get("Meta-Configuration");
+							if (configurations != null) {
+								List<String> configs = (List<String>) configurations;
+								System.out.println("Got Configurations " + configs.size());
+								ev = -1;
 								IExternalEditor errorcheckerEditor = new IExternalEditor() {
-									
-									
 
 									@Override
 									public void onProcessExit(int e) {
 										ev = e;
 										// TODO Auto-generated method stub
-										
+
 									}
-									
+
 									@Override
 									public String nameOfEditor() {
 										// TODO Auto-generated method stub
 										return null;
 									}
-									
+
 									@Override
 									public void launch(File file, Button advanced) {
 										// TODO Auto-generated method stub
-										
+
 									}
-									
+
 									@Override
 									public Class getSupportedLangauge() {
 										// TODO Auto-generated method stub
 										return null;
 									}
-									
+
 									@Override
 									public URL getInstallURL() throws MalformedURLException {
 										// TODO Auto-generated method stub
 										return null;
 									}
-									
+
 									@Override
 									public Image getImage() {
 										// TODO Auto-generated method stub
 										return null;
 									}
 								};
-								for(int i=0;i<configs.size();i++) {
-									System.out.println("Running "+exeType+" Configuration "+(i+1)+" of "+configs.size());
-									ArrayList<String> toRun=new ArrayList<>();
-									toRun.add(bindir + targetdir + "/"+configexe);
+								for (int i = 0; i < configs.size(); i++) {
+									System.out.println("Running " + exeType + " Configuration " + (i + 1) + " of "
+											+ configs.size());
+									ArrayList<String> toRun = new ArrayList<>();
+									toRun.add(bindir + targetdir + "/" + configexe);
 									String[] conf = configs.get(i).split(" ");
-									for(int j=0;j<conf.length;j++) {
+									for (int j = 0; j < conf.length; j++) {
 										toRun.add(conf[j]);
 									}
-									//= +" "+configs.get(i);
-									
-									//System.out.println(toRun);
-									
-									Thread thread =run(errorcheckerEditor,new File(bindir), System.out,toRun);
+									// = +" "+configs.get(i);
+
+									// System.out.println(toRun);
+
+									Thread thread = run(errorcheckerEditor, new File(bindir), System.out, toRun);
 									thread.join();
-									if(ev!=0) {
-										throw new RuntimeException("Configuration failed for OS: "+key+" has no entry for "+exeType);
+									if (ev != 0) {
+										throw new RuntimeException(
+												"Configuration failed for OS: " + key + " has no entry for " + exeType);
 									}
 								}
 							}
 						} else {
 							System.out.println("Not extraction, VM exists " + dest.getAbsolutePath());
 						}
-						
+
 						return new File(cmd);
 					}
 				}
@@ -363,72 +378,72 @@ public class DownloadManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		throw new RuntimeException("Executable for OS: "+key+" has no entry for "+exeType);
+
+		throw new RuntimeException("Executable for OS: " + key + " has no entry for " + exeType);
 	}
+
+	private static boolean deleteDirectory(File directoryToBeDeleted) {
+		File[] allContents = directoryToBeDeleted.listFiles();
+		if (allContents != null) {
+			for (File file : allContents) {
+				deleteDirectory(file);
+			}
+		}
+		return directoryToBeDeleted.delete();
+	}
+
 	private static void appimage(String type, String name, String targetdir, String cmd) throws InterruptedException {
-		File dir=new File(bindir + targetdir );
-		if(!dir.exists())
+		File dir = new File(bindir + targetdir);
+		if (!dir.exists())
 			dir.mkdirs();
-		Thread t=run(null,new File("."),System.err, 
-				Arrays.asList(
-					"mv", 
-					bindir+name+"."+type,
-					cmd
-					));
+		Thread t = run(null, new File("."), System.err, Arrays.asList("mv", bindir + name + "." + type, cmd));
 		t.join();
-		
-		t=run(null,new File("."),System.err, 
-				Arrays.asList(
-					"chmod", 
-					"+x",
-					cmd
-					));
+
+		t = run(null, new File("."), System.err, Arrays.asList("chmod", "+x", cmd));
 		t.join();
 	}
-	
-	private static void dmgExtract(File jvmArchive, String string,String appDir) {
-		// since DMG is Mac only, and Mac always has the command line extractors, we will use those
+
+	private static void dmgExtract(File jvmArchive, String string, String appDir) {
+		// since DMG is Mac only, and Mac always has the command line extractors, we
+		// will use those
 		File location = new File(string);
 
 		File[] listFiles = new File("/Volumes/").listFiles();
-		Set<String> before =Stream.of(listFiles)
-	      .filter(file -> file.isDirectory())
-	      .map(File::getName)
-	      .collect(Collectors.toSet());
-		Thread t=run(null,new File("."),System.err, Arrays.asList("hdiutil", "attach",jvmArchive.getAbsolutePath()));
+		Set<String> before = Stream.of(listFiles).filter(file -> file.isDirectory()).map(File::getName)
+				.collect(Collectors.toSet());
+		Thread t = run(null, new File("."), System.err,
+				Arrays.asList("hdiutil", "attach", jvmArchive.getAbsolutePath()));
 		try {
 			t.join();
 			Thread.sleep(2000);// wait for mount to settle
 			File[] listFilesAfter = new File("/Volumes/").listFiles();
-			Set<String> after =Stream.of(listFilesAfter)
-				      .filter(file -> file.isDirectory())
-				      .map(File::getName)
-				      .collect(Collectors.toSet());
+			Set<String> after = Stream.of(listFilesAfter).filter(file -> file.isDirectory()).map(File::getName)
+					.collect(Collectors.toSet());
 			after.removeAll(before);
 			Object[] array = after.toArray();
 			String newMount = (String) array[0];
-			System.out.println("Extracted "+jvmArchive.getAbsolutePath()+" is mounted at "+newMount);
-			//asr restore --source "$MOUNT_POINT" --target "$DEST_PATH" --erase --noprompt
-			if(!location.exists()) {
+			System.out.println("Extracted " + jvmArchive.getAbsolutePath() + " is mounted at " + newMount);
+			// asr restore --source "$MOUNT_POINT" --target "$DEST_PATH" --erase --noprompt
+			if (!location.exists()) {
 				location.mkdirs();
 			}
-			Thread tcopy=run(null,new File("."),System.out, Arrays.asList("rsync", "-avtP","/Volumes/"+newMount+"/"+appDir,string+"/"));
+			Thread tcopy = run(null, new File("."), System.out,
+					Arrays.asList("rsync", "-avtP", "/Volumes/" + newMount + "/" + appDir, string + "/"));
 			tcopy.join();
 
-			
-			Thread tdetach=run(null,new File("."),System.err, Arrays.asList("hdiutil", "detach","/Volumes/"+newMount));
+			Thread tdetach = run(null, new File("."), System.err,
+					Arrays.asList("hdiutil", "detach", "/Volumes/" + newMount));
 			tdetach.join();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return;
-		}//wait for the mount to finish
+		} // wait for the mount to finish
 
-		System.out.println("Extracted "+jvmArchive.getAbsolutePath());
+		System.out.println("Extracted " + jvmArchive.getAbsolutePath());
 
-		
 	}
+
 	public static boolean isExecutable(ZipArchiveEntry entry) {
 		int unixMode = entry.getUnixMode();
 		// Check if any of the executable bits are set for user, group, or others.
@@ -436,8 +451,99 @@ public class DownloadManager {
 		// executable: 0001 (0x01)
 		return (unixMode & 0x49) != 0;
 	}
+
+	public static void extract7zArchive(String archivePath, String outputPath) {
+		try (RandomAccessFile randomAccessFile = new RandomAccessFile(archivePath, "r");
+				IInArchive inArchive = SevenZip.openInArchive(null, new RandomAccessFileInStream(randomAccessFile))) {
+
+			System.out.println("Archive size: " + randomAccessFile.length() + " bytes");
+			System.out.println("Items in archive: " + inArchive.getNumberOfItems());
+
+			for (int i = 0; i < inArchive.getNumberOfItems(); i++) {
+				Boolean isFolder = (Boolean) inArchive.getProperty(i, PropID.IS_FOLDER);
+				if (isFolder == null || !isFolder) {
+					extractItem(inArchive, i, outputPath);
+				}
+			}
+
+			System.out.println("Extraction completed successfully.");
+
+		} catch (Exception e) {
+			System.err.println("Error extracting archive: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	private static void extractItem(IInArchive inArchive, int index, String outputPath)
+			throws SevenZipException, IOException {
+		String path = inArchive.getStringProperty(index, PropID.PATH);
+		Long size = (Long) inArchive.getProperty(index, PropID.SIZE);
+
+		File outputFile = new File(outputPath, path);
+		File parentDir = outputFile.getParentFile();
+		if (!parentDir.exists()) {
+			parentDir.mkdirs();
+		}
+
+		ExtractOperationResult result;
+
+		try (FileOutputStream fos = new FileOutputStream(outputFile)) {
+			result = inArchive.extractSlow(index, new ISequentialOutStream() {
+				public int write(byte[] data) throws SevenZipException {
+					try {
+						System.out.println("Inflate 7z .. "+outputFile.getAbsolutePath());
+						fos.write(data);
+					} catch (IOException e) {
+						throw new SevenZipException("Error writing to file: " + e.getMessage());
+					}
+					return data.length;
+				}
+			});
+		}
+
+		if (result == ExtractOperationResult.OK) {
+			System.out.println("Extracted: " + path);
+		} else {
+			System.err.println("Error extracting " + path + ": " + result);
+		}
+	}
+
+	/*
+	 * public static void extract7zArchive(String archivePath, String outputPath) {
+	 * 
+	 * 
+	 * File archiveFile = new File(archivePath); File outputDir = new
+	 * File(outputPath);
+	 * 
+	 * if (!outputDir.exists()) { outputDir.mkdirs(); }
+	 * 
+	 * try (SevenZFile sevenZFile = new
+	 * SevenZFile.Builder().setFile(archiveFile).get()) { SevenZArchiveEntry entry;
+	 * while ((entry = sevenZFile.getNextEntry()) != null) { if
+	 * (entry.isDirectory()) { continue; } File outputFile = new File(outputDir,
+	 * entry.getName()); File parent = outputFile.getParentFile(); if
+	 * (!parent.exists()) { parent.mkdirs(); }
+	 * System.out.println("Inflating 7z "+outputFile.getAbsolutePath()); try
+	 * (FileOutputStream out = new FileOutputStream(outputFile)) { byte[] content =
+	 * new byte[(int) entry.getSize()]; sevenZFile.read(content, 0, content.length);
+	 * out.write(content); } }
+	 * System.out.println("Extraction completed successfully."); } catch
+	 * (IOException e) { e.printStackTrace(System.out);
+	 * System.err.println("Deleting partial extraction, using system 7z");
+	 * deleteDirectory(outputDir); outputDir.mkdirs();
+	 * 
+	 * System.err.println("Error extracting archive: " + e.getMessage()); File EXE =
+	 * getRunExecutable("sevenzip", null); List<String> args =
+	 * Arrays.asList(EXE.getAbsolutePath(), "x", // Extract with full paths
+	 * archivePath, // Path to the .7z file "-o\"" + outputPath+"\"", // Output
+	 * directory "-y" // Assume Yes on all queries ); Thread t = run(null,
+	 * outputDir, System.out, args); try { t.join(); } catch (InterruptedException
+	 * e1) { // TODO Auto-generated catch block e1.printStackTrace(); } }
+	 * 
+	 * }
+	 */
 	public static void unzip(File path, String dir) throws Exception {
-		System.out.println("Unzipping "+path.getName()+" into "+dir);
+		System.out.println("Unzipping " + path.getName() + " into " + dir);
 		String fileBaseName = FilenameUtils.getBaseName(path.getName().toString());
 		Path destFolderPath = new File(dir).toPath();
 
@@ -453,12 +559,12 @@ public class DownloadManager {
 						Files.createDirectories(entryPath.getParent());
 						try (InputStream in = zipFile.getInputStream(entry)) {
 							try {
-								//ar.setExternalAttributes(entry.extraAttributes);
+								// ar.setExternalAttributes(entry.extraAttributes);
 								if (entry.isUnixSymlink()) {
 									String text = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))
 											.lines().collect(Collectors.joining("\n"));
 									Path target = Paths.get(".", text);
-									System.out.println("Creating symlink "+entryPath+" with "+target);
+									System.out.println("Creating symlink " + entryPath + " with " + target);
 
 									Files.createSymbolicLink(entryPath, target);
 									continue;
@@ -468,10 +574,10 @@ public class DownloadManager {
 							}
 							try (OutputStream out = new FileOutputStream(entryPath.toFile())) {
 								IOUtils.copy(in, out);
-								System.out.println("Inflating "+entryPath);
+								System.out.println("Inflating " + entryPath);
 
 							}
-							if(isExecutable(entry)) {
+							if (isExecutable(entry)) {
 								entryPath.toFile().setExecutable(true);
 							}
 						}
@@ -482,15 +588,15 @@ public class DownloadManager {
 	}
 
 	public static void untar(File tarFile, String dir) throws Exception {
-		System.out.println("Untaring "+tarFile.getName()+" into "+dir);
+		System.out.println("Untaring " + tarFile.getName() + " into " + dir);
 
 		File dest = new File(dir);
 		dest.mkdir();
 		TarArchiveInputStream tarIn = null;
 		try {
-		tarIn = new TarArchiveInputStream(
-				new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(tarFile))));
-		}catch (java.io.IOException ex) {
+			tarIn = new TarArchiveInputStream(
+					new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(tarFile))));
+		} catch (java.io.IOException ex) {
 			tarFile.delete();
 			return;
 		}
@@ -523,18 +629,24 @@ public class DownloadManager {
 	private static String bits(byte b) {
 		return String.format("%6s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
 	}
+
 	public static boolean isWin() {
 		return System.getProperty("os.name").toLowerCase().contains("windows");
 	}
+
 	public static boolean isLin() {
 		return System.getProperty("os.name").toLowerCase().contains("linux");
 	}
+
 	public static boolean isMac() {
 		return System.getProperty("os.name").toLowerCase().contains("mac");
 	}
+
 	public static boolean isArm() {
-		return System.getProperty("os.arch").toLowerCase().contains("aarch64")||System.getProperty("os.arch").toLowerCase().contains("arm");
+		return System.getProperty("os.arch").toLowerCase().contains("aarch64")
+				|| System.getProperty("os.arch").toLowerCase().contains("arm");
 	}
+
 	public static String discoverKey() {
 		String key = "UNKNOWN";
 		if (isLin()) {
@@ -559,27 +671,29 @@ public class DownloadManager {
 				key = "Windows-x64";
 			}
 		}
-		if(key.contentEquals("UNKNOWN")) {
-			throw new RuntimeException("Unsupported OS/Arch "+System.getProperty("os.name")+" "+System.getProperty("os.arch"));
+		if (key.contentEquals("UNKNOWN")) {
+			throw new RuntimeException(
+					"Unsupported OS/Arch " + System.getProperty("os.name") + " " + System.getProperty("os.arch"));
 		}
 		return key;
 	}
 
+	public static File download(String version, String downloadJsonURL, long sizeOfJson, String bindir, String filename,
+			String downloadName)
+			throws MalformedURLException, IOException, FileNotFoundException, InterruptedException {
 
-	public static File download(String version, String downloadJsonURL, long sizeOfJson,String bindir, String filename, String downloadName) throws MalformedURLException, IOException, FileNotFoundException, InterruptedException {
-		
-		
 		URL url = new URL(downloadJsonURL);
 		URLConnection connection = url.openConnection();
 		InputStream is = connection.getInputStream();
 		ProcessInputStream pis = new ProcessInputStream(is, (int) sizeOfJson);
 		pis.addListener(new Listener() {
-			long timeSinceePrint=System.currentTimeMillis();
+			long timeSinceePrint = System.currentTimeMillis();
+
 			@Override
 			public void process(double percent) {
-				if(System.currentTimeMillis()-timeSinceePrint>100) {
-					timeSinceePrint=System.currentTimeMillis();
-					System.out.println("Download percent " + (int)(percent*100));
+				if (System.currentTimeMillis() - timeSinceePrint > 100) {
+					timeSinceePrint = System.currentTimeMillis();
+					System.out.println("Download percent " + (int) (percent * 100));
 				}
 //				if(progress!=null)
 //					Platform.runLater(() -> {
@@ -591,30 +705,30 @@ public class DownloadManager {
 		File exe = new File(bindir + version + "/" + filename);
 
 		if (!folder.exists() || !exe.exists()) {
-			buttonType=null;
-			
-			BowlerKernel.runLater(()->{
+			buttonType = null;
+
+			BowlerKernel.runLater(() -> {
 				Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
 				alert.setTitle("Message");
-				alert.setHeaderText("Would you like to download: "+downloadName+"\nfrom:\n"+downloadJsonURL);
+				alert.setHeaderText("Would you like to download: " + downloadName + "\nfrom:\n" + downloadJsonURL);
 				Optional<ButtonType> result = alert.showAndWait();
 				buttonType = result.get();
 				alert.close();
 			});
-			
-			while(buttonType==null) {
+
+			while (buttonType == null) {
 				Thread.sleep(100);
-				
+
 			}
-			
-			if (buttonType.equals(ButtonType.OK)) { 
+
+			if (buttonType.equals(ButtonType.OK)) {
 				System.out.println("Start Downloading " + filename);
 
-			}else  {
+			} else {
 				pis.close();
 				throw new RuntimeException("No Eclipse insalled");
 			}
-			
+
 			folder.mkdirs();
 			exe.createNewFile();
 			byte dataBuffer[] = new byte[1024];
@@ -626,7 +740,7 @@ public class DownloadManager {
 			fileOutputStream.close();
 			pis.close();
 			System.out.println("Finished downloading " + filename);
-			System.out.println("Download percent " + (int)(1*100));
+			System.out.println("Download percent " + (int) (1 * 100));
 		} else {
 			System.out.println("Not downloadeing, it existst " + filename);
 		}
@@ -646,6 +760,7 @@ public class DownloadManager {
 	public static void setEditorsURL(String editorsURL) {
 		DownloadManager.editorsURL = editorsURL;
 	}
+
 	public static String delim() {
 		if (OSUtil.isWindows())
 			return "\\";
