@@ -46,6 +46,7 @@ import org.apache.commons.compress.archivers.tar.TarUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -107,8 +108,8 @@ public class DownloadManager {
 		return thread;
 	}
 
-	private static void legacySystemRun(Map<String, String> envincoming, File dir, PrintStream out, List<String> finalCommand)
-			throws IOException, InterruptedException {
+	private static void legacySystemRun(Map<String, String> envincoming, File dir, PrintStream out,
+			List<String> finalCommand) throws IOException, InterruptedException {
 		cmd = "";
 		for (String s : finalCommand) {
 			cmd += sanitize(s) + " ";
@@ -116,7 +117,7 @@ public class DownloadManager {
 		ProcessBuilder pb = new ProcessBuilder(finalCommand);
 		Map<String, String> envir = pb.environment();
 		// set environment variable u
-		if(envincoming!=null) {
+		if (envincoming != null) {
 			envir.putAll(envincoming);
 			for (String s : envincoming.keySet()) {
 				System.out.println("Environment var set: " + s + " to " + envir.get(s));
@@ -159,8 +160,8 @@ public class DownloadManager {
 		out.println("");
 	}
 
-	private static void advancedSystemRun(Map<String, String> envincoming, File dir, PrintStream out, List<String> finalCommand)
-			throws IOException, ExecuteException {
+	private static void advancedSystemRun(Map<String, String> envincoming, File dir, PrintStream out,
+			List<String> finalCommand) throws IOException, ExecuteException {
 		CommandLine cmdLine;
 		cmdLine = new CommandLine(sanitize(finalCommand.get(0)));
 		cmd = cmdLine.getExecutable();
@@ -296,8 +297,8 @@ public class DownloadManager {
 						File dest = new File(bindir + targetdir);
 						String cmd = bindir + targetdir + "/" + exeInZip;
 						if (!new File(cmd).exists()) {
-							if(dest.exists()) {
-								System.out.println("Erasing stale dir "+dest.getAbsolutePath());
+							if (dest.exists()) {
+								System.out.println("Erasing stale dir " + dest.getAbsolutePath());
 								deleteDirectory(dest);
 							}
 							if (type.toLowerCase().contains("zip")) {
@@ -305,6 +306,10 @@ public class DownloadManager {
 							}
 							if (type.toLowerCase().contains("tar.gz")) {
 								untar(jvmArchive, bindir + targetdir);
+							}
+							// extractTarXz
+							if (type.toLowerCase().contains("tar.xz")) {
+								extractTarXz(jvmArchive.getAbsolutePath(), bindir + targetdir);
 							}
 							if (type.toLowerCase().contains("dmg")) {
 								dmgExtract(jvmArchive, bindir + targetdir, exeInZip);
@@ -479,11 +484,9 @@ public class DownloadManager {
 		outputDir.mkdirs();
 
 		File EXE = getRunExecutable("sevenzip", null);
-		List<String> args = Arrays.asList(
-				EXE.getAbsolutePath(),
-				"x", // Extract with full paths
+		List<String> args = Arrays.asList(EXE.getAbsolutePath(), "x", // Extract with full paths
 				archivePath, // Path to the .7z file
-				"-o" + outputPath , // Output directory
+				"-o" + outputPath, // Output directory
 				"-y", // Assume Yes on all queries
 				"-bsp1"
 
@@ -624,6 +627,37 @@ public class DownloadManager {
 		}
 	}
 
+	public static void extractTarXz(String inputFile, String outputDir) throws IOException {
+		Path outDir = Paths.get(outputDir);
+		if (!Files.exists(outDir)) {
+			Files.createDirectories(outDir);
+		}
+
+		try (FileInputStream fis = new FileInputStream(inputFile);
+				XZCompressorInputStream xzIn = new XZCompressorInputStream(fis);
+				TarArchiveInputStream tarIn = new TarArchiveInputStream(xzIn)) {
+
+			TarArchiveEntry entry;
+			while ((entry = tarIn.getNextTarEntry()) != null) {
+				Path outPath = outDir.resolve(entry.getName());
+
+				if (entry.isDirectory()) {
+					Files.createDirectories(outPath);
+				} else {
+					Files.createDirectories(outPath.getParent());
+					try (OutputStream out = Files.newOutputStream(outPath)) {
+						byte[] buffer = new byte[1024];
+						int len;
+						System.out.println("Inflate Tar XZ " + outPath.toAbsolutePath());
+						while ((len = tarIn.read(buffer)) != -1) {
+							out.write(buffer, 0, len);
+						}
+					}
+				}
+			}
+		}
+	}
+
 	public static void untar(File tarFile, String dir) throws Exception {
 		System.out.println("Untaring " + tarFile.getName() + " into " + dir);
 
@@ -728,7 +762,7 @@ public class DownloadManager {
 
 			@Override
 			public void process(double percent) {
-				if (System.currentTimeMillis() - timeSinceePrint > 100) {
+				if (System.currentTimeMillis() - timeSinceePrint > 1000) {
 					timeSinceePrint = System.currentTimeMillis();
 					System.out.println("Download percent " + (int) (percent * 100));
 				}
@@ -763,7 +797,7 @@ public class DownloadManager {
 
 			} else {
 				pis.close();
-				throw new RuntimeException("No Eclipse insalled");
+				throw new RuntimeException("No Application insalled");
 			}
 
 			folder.mkdirs();
@@ -779,7 +813,7 @@ public class DownloadManager {
 			System.out.println("Finished downloading " + filename);
 			System.out.println("Download percent " + (int) (1 * 100));
 		} else {
-			System.out.println("Not downloadeing, it existst " + filename);
+			System.out.println("Not downloading, it existst " + filename);
 		}
 		return exe;
 	}
