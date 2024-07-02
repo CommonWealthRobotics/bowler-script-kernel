@@ -81,87 +81,10 @@ public class DownloadManager {
 		Thread thread = new Thread(() -> {
 
 			try {
-				// creating the process
-				CommandLine cmdLine;
 				if (isMac()) {
-					cmd = "";
-					for (String s : finalCommand) {
-						cmd += sanitize(s) + " ";
-					}
-					ProcessBuilder pb = new ProcessBuilder(finalCommand);
-					Map<String, String> envir = pb.environment();
-					// set environment variable u
-					envir.putAll(envincoming);
-					for (String s : envincoming.keySet()) {
-						System.out.println("Environment var set: " + s + " to " + envir.get(s));
-					}
-					// setting the directory
-					pb.directory(dir);
-					// startinf the process
-					out.println("Running command:\n");
-					out.println(cmd);
-
-					out.println("\nIn " + dir.getAbsolutePath());
-					out.println("\n\n");
-
-					Process process = pb.start();
-
-					// for reading the ouput from stream
-					BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
-					BufferedReader errInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-
-					String s = null;
-					String e = null;
-					Thread.sleep(100);
-					while ((s = stdInput.readLine()) != null || (e = errInput.readLine()) != null) {
-						if (s != null)
-							out.println(s);
-						if (e != null)
-							out.println(e);
-						//
-					}
-					process.waitFor();
-					int ev = process.exitValue();
-					// out.println("Running "+commands);
-					if (ev != 0) {
-						System.out.println("ERROR PROCESS Process exited with " + ev);
-					}
-					while (process.isAlive()) {
-						Thread.sleep(100);
-					}
-					out.println("");
+					legacySystemRun(envincoming, dir, out, finalCommand);
 				} else {
-					cmdLine = new CommandLine(sanitize(finalCommand.get(0)));
-					cmd = cmdLine.getExecutable();
-
-					// Add arguments
-					for (int i = 1; i < finalCommand.size(); i++) {
-						String san = sanitize(finalCommand.get(i));
-						cmd += " " + san;
-						cmdLine.addArgument(san, false);
-					}
-					out.println("Running command:\n");
-					out.println(cmd);
-
-					out.println("\nIn " + dir.getAbsolutePath());
-					out.println("\n\n");
-
-					DefaultExecutor executor = new DefaultExecutor();
-					executor.setWorkingDirectory(dir);
-					Map<String, String> env = EnvironmentUtils.getProcEnvironment();
-					env.putAll(envincoming);
-
-					PipedOutputStream outPipe = new PipedOutputStream();
-					PipedInputStream outPipeIn = new PipedInputStream(outPipe);
-					PipedOutputStream errPipe = new PipedOutputStream();
-					PipedInputStream errPipeIn = new PipedInputStream(errPipe);
-
-					PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
-					executor.setStreamHandler(streamHandler);
-					startOutputReader(outPipeIn, "OUTPUT", out);
-					startOutputReader(errPipeIn, "ERROR", out);
-					ev = executor.execute(cmdLine, env);
-					out.println("");
+					advancedSystemRun(envincoming, dir, out, finalCommand);
 				}
 
 				if (editor != null)
@@ -182,6 +105,94 @@ public class DownloadManager {
 		});
 		thread.start();
 		return thread;
+	}
+
+	private static void legacySystemRun(Map<String, String> envincoming, File dir, PrintStream out, List<String> finalCommand)
+			throws IOException, InterruptedException {
+		cmd = "";
+		for (String s : finalCommand) {
+			cmd += sanitize(s) + " ";
+		}
+		ProcessBuilder pb = new ProcessBuilder(finalCommand);
+		Map<String, String> envir = pb.environment();
+		// set environment variable u
+		if(envincoming!=null) {
+			envir.putAll(envincoming);
+			for (String s : envincoming.keySet()) {
+				System.out.println("Environment var set: " + s + " to " + envir.get(s));
+			}
+		}
+		// setting the directory
+		pb.directory(dir);
+		// startinf the process
+		out.println("Running command:\n");
+		out.println(cmd);
+
+		out.println("\nIn " + dir.getAbsolutePath());
+		out.println("\n\n");
+
+		Process process = pb.start();
+
+		// for reading the ouput from stream
+		BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		BufferedReader errInput = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+
+		String s = null;
+		String e = null;
+		Thread.sleep(100);
+		while ((s = stdInput.readLine()) != null || (e = errInput.readLine()) != null) {
+			if (s != null)
+				out.println(s);
+			if (e != null)
+				out.println(e);
+			//
+		}
+		process.waitFor();
+		int ev = process.exitValue();
+		// out.println("Running "+commands);
+		if (ev != 0) {
+			System.out.println("ERROR PROCESS Process exited with " + ev);
+		}
+		while (process.isAlive()) {
+			Thread.sleep(100);
+		}
+		out.println("");
+	}
+
+	private static void advancedSystemRun(Map<String, String> envincoming, File dir, PrintStream out, List<String> finalCommand)
+			throws IOException, ExecuteException {
+		CommandLine cmdLine;
+		cmdLine = new CommandLine(sanitize(finalCommand.get(0)));
+		cmd = cmdLine.getExecutable();
+
+		// Add arguments
+		for (int i = 1; i < finalCommand.size(); i++) {
+			String san = sanitize(finalCommand.get(i));
+			cmd += " " + san;
+			cmdLine.addArgument(san, false);
+		}
+		out.println("Running command:\n");
+		out.println(cmd);
+
+		out.println("\nIn " + dir.getAbsolutePath());
+		out.println("\n\n");
+
+		DefaultExecutor executor = new DefaultExecutor();
+		executor.setWorkingDirectory(dir);
+		Map<String, String> env = EnvironmentUtils.getProcEnvironment();
+		env.putAll(envincoming);
+
+		PipedOutputStream outPipe = new PipedOutputStream();
+		PipedInputStream outPipeIn = new PipedInputStream(outPipe);
+		PipedOutputStream errPipe = new PipedOutputStream();
+		PipedInputStream errPipeIn = new PipedInputStream(errPipe);
+
+		PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
+		executor.setStreamHandler(streamHandler);
+		startOutputReader(outPipeIn, "OUTPUT", out);
+		startOutputReader(errPipeIn, "ERROR", out);
+		ev = executor.execute(cmdLine, env);
+		out.println("");
 	}
 
 	private static String sanitize(String s) {
@@ -284,7 +295,11 @@ public class DownloadManager {
 						File jvmArchive = download("", jvmURL, 400000000, bindir, name + "." + type, exeType);
 						File dest = new File(bindir + targetdir);
 						String cmd = bindir + targetdir + "/" + exeInZip;
-						if (!dest.exists()) {
+						if (!new File(cmd).exists()) {
+							if(dest.exists()) {
+								System.out.println("Erasing stale dir "+dest.getAbsolutePath());
+								deleteDirectory(dest);
+							}
 							if (type.toLowerCase().contains("zip")) {
 								unzip(jvmArchive, bindir + targetdir);
 							}
@@ -299,7 +314,10 @@ public class DownloadManager {
 							}
 							// extract7zArchive
 							if (type.toLowerCase().contains("7z")) {
-								extract7zArchive(jvmArchive.getAbsolutePath(), bindir + targetdir);
+								if (isWin() && !exeType.contentEquals("sevenzip")) {
+									extract7zSystemCall(jvmArchive.getAbsolutePath(), bindir + targetdir);
+								} else
+									extract7zArchive(jvmArchive.getAbsolutePath(), bindir + targetdir);
 							}
 							Object configurations = database.get("Meta-Configuration");
 							if (configurations != null) {
@@ -452,6 +470,35 @@ public class DownloadManager {
 		return (unixMode & 0x49) != 0;
 	}
 
+	private static void extract7zSystemCall(String archivePath, String outputPath) {
+		File outputDir = new File(outputPath);
+		if (outputDir.exists()) {
+			System.err.println("Deleting partial extraction, using system 7z");
+			deleteDirectory(outputDir);
+		}
+		outputDir.mkdirs();
+
+		File EXE = getRunExecutable("sevenzip", null);
+		List<String> args = Arrays.asList(
+				EXE.getAbsolutePath(),
+				"x", // Extract with full paths
+				archivePath, // Path to the .7z file
+				"-o" + outputPath , // Output directory
+				"-y", // Assume Yes on all queries
+				"-bsp1"
+
+		);
+		try {
+			legacySystemRun(null, outputDir, System.out, args);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public static void extract7zArchive(String archivePath, String outputPath) {
 		try (RandomAccessFile randomAccessFile = new RandomAccessFile(archivePath, "r");
 				IInArchive inArchive = SevenZip.openInArchive(null, new RandomAccessFileInStream(randomAccessFile))) {
@@ -491,7 +538,7 @@ public class DownloadManager {
 			result = inArchive.extractSlow(index, new ISequentialOutStream() {
 				public int write(byte[] data) throws SevenZipException {
 					try {
-						System.out.println("Inflate 7z .. "+outputFile.getAbsolutePath());
+						System.out.println("Inflate 7z .. " + outputFile.getAbsolutePath());
 						fos.write(data);
 					} catch (IOException e) {
 						throw new SevenZipException("Error writing to file: " + e.getMessage());
@@ -528,17 +575,7 @@ public class DownloadManager {
 	 * new byte[(int) entry.getSize()]; sevenZFile.read(content, 0, content.length);
 	 * out.write(content); } }
 	 * System.out.println("Extraction completed successfully."); } catch
-	 * (IOException e) { e.printStackTrace(System.out);
-	 * System.err.println("Deleting partial extraction, using system 7z");
-	 * deleteDirectory(outputDir); outputDir.mkdirs();
-	 * 
-	 * System.err.println("Error extracting archive: " + e.getMessage()); File EXE =
-	 * getRunExecutable("sevenzip", null); List<String> args =
-	 * Arrays.asList(EXE.getAbsolutePath(), "x", // Extract with full paths
-	 * archivePath, // Path to the .7z file "-o\"" + outputPath+"\"", // Output
-	 * directory "-y" // Assume Yes on all queries ); Thread t = run(null,
-	 * outputDir, System.out, args); try { t.join(); } catch (InterruptedException
-	 * e1) { // TODO Auto-generated catch block e1.printStackTrace(); } }
+	 * (IOException e) { e.printStackTrace(System.out); } }
 	 * 
 	 * }
 	 */
