@@ -76,8 +76,11 @@ public class Vitamins {
 		fileLastLoaded.clear();
 	}
 	public static CSG get(File resource) {
+		return get(resource,false);
+	}
+	public static CSG get(File resource, boolean forceRefresh) {
 
-		if (fileLastLoaded.get(resource.getAbsolutePath()) == null) {
+		if (fileLastLoaded.get(resource.getAbsolutePath()) == null||forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
 			try {

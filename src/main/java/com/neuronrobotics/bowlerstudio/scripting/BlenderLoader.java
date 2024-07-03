@@ -9,6 +9,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
+import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.STL;
 
@@ -18,13 +20,13 @@ public class BlenderLoader implements IScriptingLanguage {
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
 		File stl = new File(code.getAbsolutePath()+".stl");
 		toSTLFile(code,stl);
-		CSG back = STL.file(code.toPath());
+		CSG back = Vitamins.get(stl,true);
 		return back;
 	}
 
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
-		throw new RuntimeException("Blender can not run from a file");
+		throw new RuntimeException("Blender can not run from a string");
 	}
 
 	@Override
@@ -57,7 +59,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		args.add("--");
 		args.add(blenderfile.getAbsolutePath());
 		args.add(stlout.getAbsolutePath());
-		DownloadManager.legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.err, args);
+		DownloadManager.legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
 		
 	}
 	@Override
@@ -81,7 +83,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		args.add("--python-expr");
 		args.add("import bpy; bpy.ops.wm.save_as_mainfile(filepath='"+absolutePath+"')");
 		try {
-			DownloadManager.legacySystemRun(null, parent, System.err, args);
+			DownloadManager.legacySystemRun(null, parent, System.out, args);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
