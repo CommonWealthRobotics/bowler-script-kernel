@@ -1,6 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting;
+import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
-import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.isMac;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +18,8 @@ public class BlenderLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-		File stl = new File(code.getAbsolutePath()+".stl");
+		File stl = File.createTempFile(code.getName(), ".stl");
+		stl.deleteOnExit();
 		toSTLFile(code,stl);
 		CSG back = Vitamins.get(stl,true);
 		return back;
@@ -41,7 +42,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		return ext;
 	}
 	public void toSTLFile(File blenderfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
-		File exe = DownloadManager.getRunExecutable("blender", null);
+		File exe = getRunExecutable("blender", null);
 		File export = ScriptingEngine.fileFromGit(
 				"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
 				"export.py");
@@ -59,12 +60,12 @@ public class BlenderLoader implements IScriptingLanguage {
 		args.add("--");
 		args.add(blenderfile.getAbsolutePath());
 		args.add(stlout.getAbsolutePath());
-		DownloadManager.legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
+		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
 		
 	}
 	@Override
 	public void getDefaultContents(File source) {
-		File exe = DownloadManager.getRunExecutable("blender", null);
+		File exe = getRunExecutable("blender", null);
 		String absolutePath = source.getAbsolutePath();
 		File parent = new File(absolutePath).getParentFile();
 		if(source.exists()) {

@@ -834,7 +834,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	@SuppressWarnings("deprecation")
 	public static void commit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile, Git gitRef) throws Exception {
-
+		if(content !=null)
+		if("Binary File".contentEquals(content)){
+			content=null;
+		}
 		if (PasswordManager.getUsername() == null)
 			login();
 		if (!hasNetwork())
@@ -907,6 +910,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void pushCodeToGit(String remoteURI, String branch, String FileName, String content,
 			String commitMessage, boolean flagNewFile) throws Exception {
 		waitForRepo(remoteURI, "push");
+		if(content!=null)
+			if("Binary File".contentEquals(content)){
+				content=null;
+			}
 		commit(remoteURI, branch, FileName, content, commitMessage, flagNewFile);
 		if (PasswordManager.getUsername() == null)
 			login();
