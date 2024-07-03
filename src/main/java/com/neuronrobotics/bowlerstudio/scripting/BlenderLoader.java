@@ -54,6 +54,9 @@ public class BlenderLoader implements IScriptingLanguage {
 		if(stlout.exists())
 			stlout.delete();
 		args.add(exe.getAbsolutePath());
+		if(isMac()) {
+			args.add("--args");
+		}
 		args.add("--background");
 		args.add("--python");
 		args.add(export.getAbsolutePath());
@@ -79,6 +82,9 @@ public class BlenderLoader implements IScriptingLanguage {
 		}
 		//blender --background --factory-startup --python-expr ""
 		args.add(exe.getAbsolutePath());
+		if(isMac()) {
+			args.add("--args");
+		}
 		args.add("--background");
 		args.add("--factory-startup");
 		args.add("--python-expr");
