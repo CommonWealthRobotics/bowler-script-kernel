@@ -24,9 +24,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -211,7 +213,7 @@ public class DownloadManager {
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 				String line;
 				while ((line = br.readLine()) != null) {
-					out.println(type + "> " + line);
+					out.println( line);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -390,7 +392,7 @@ public class DownloadManager {
 								}
 							}
 						} else {
-							System.out.println("Not extraction, VM exists " + dest.getAbsolutePath());
+							System.out.println("Not extraction, Application exists " + cmd);
 						}
 
 						return new File(cmd);
@@ -626,7 +628,19 @@ public class DownloadManager {
 			}
 		}
 	}
+	private static boolean isPosixCompliantSystem() {
+	    return FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
+	}
 
+	private static Set<PosixFilePermission> getPosixPermissions(int mode) {
+	    StringBuilder permissions = new StringBuilder("rwxrwxrwx");
+	    for (int i = 0; i < 9; i++) {
+	        if ((mode & (1 << (8 - i))) == 0) {
+	            permissions.setCharAt(i, '-');
+	        }
+	    }
+	    return java.nio.file.attribute.PosixFilePermissions.fromString(permissions.toString());
+	}
 	public static void extractTarXz(String inputFile, String outputDir) throws IOException {
 		Path outDir = Paths.get(outputDir);
 		if (!Files.exists(outDir)) {
@@ -641,7 +655,21 @@ public class DownloadManager {
 			while ((entry = tarIn.getNextTarEntry()) != null) {
 				Path outPath = outDir.resolve(entry.getName());
 
-				if (entry.isDirectory()) {
+				if (entry.isSymbolicLink()) {
+				    Path target = Paths.get(entry.getLinkName());
+				    try {
+				        Files.createSymbolicLink(outPath, target);
+				    } catch (IOException | UnsupportedOperationException e) {
+				        System.err.println("Failed to create symlink " + outPath + ". Copying target instead.");
+				        // Fallback: copy the target file instead
+				        Path resolvedTarget = outPath.getParent().resolve(target).normalize();
+				        if (Files.exists(resolvedTarget)) {
+				            Files.copy(resolvedTarget, outPath);
+				        } else {
+				            System.err.println("Symlink target does not exist: " + resolvedTarget);
+				        }
+				    }
+				}else if (entry.isDirectory()) {
 					Files.createDirectories(outPath);
 				} else {
 					Files.createDirectories(outPath.getParent());
@@ -652,6 +680,13 @@ public class DownloadManager {
 						while ((len = tarIn.read(buffer)) != -1) {
 							out.write(buffer, 0, len);
 						}
+		                if (isPosixCompliantSystem()) {
+		                    Set<PosixFilePermission> permissions = getPosixPermissions(entry.getMode());
+		                    Files.setPosixFilePermissions(outPath, permissions);
+		                } else {
+		                    // For non-POSIX systems (e.g., Windows)
+		                    outPath.toFile().setExecutable((entry.getMode() & 0100) != 0);
+		                }
 					}
 				}
 			}
