@@ -80,7 +80,9 @@ public class DownloadManager {
 
 	public static Thread run(Map<String, String> envincoming, IExternalEditor editor, File dir, PrintStream out,
 			List<String> finalCommand) {
-
+		if(dir==null) {
+			throw new NullPointerException("Parent directory can not be mull");
+		}
 		Thread thread = new Thread(() -> {
 
 			try {
@@ -110,7 +112,7 @@ public class DownloadManager {
 		return thread;
 	}
 
-	private static void legacySystemRun(Map<String, String> envincoming, File dir, PrintStream out,
+	public static void legacySystemRun(Map<String, String> envincoming, File dir, PrintStream out,
 			List<String> finalCommand) throws IOException, InterruptedException {
 		cmd = "";
 		for (String s : finalCommand) {
@@ -162,7 +164,7 @@ public class DownloadManager {
 		out.println("");
 	}
 
-	private static void advancedSystemRun(Map<String, String> envincoming, File dir, PrintStream out,
+	public static void advancedSystemRun(Map<String, String> envincoming, File dir, PrintStream out,
 			List<String> finalCommand) throws IOException, ExecuteException {
 		CommandLine cmdLine;
 		cmdLine = new CommandLine(sanitize(finalCommand.get(0)));
