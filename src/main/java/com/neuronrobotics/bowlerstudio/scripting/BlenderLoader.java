@@ -42,21 +42,16 @@ public class BlenderLoader implements IScriptingLanguage {
 		return ext;
 	}
 	public void toSTLFile(File blenderfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
-		File exe = getRunExecutable("blender", null);
+		File exe = getConfigExecutable("blender", null);
 		File export = ScriptingEngine.fileFromGit(
 				"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
 				"export.py");
 		ArrayList<String> args = new ArrayList<>();
-		if(isMac()) {
-			args.add("open");
-			args.add("-a");
-		}
+
 		if(stlout.exists())
 			stlout.delete();
 		args.add(exe.getAbsolutePath());
-		if(isMac()) {
-			args.add("--args");
-		}
+
 		args.add("--background");
 		args.add("--python");
 		args.add(export.getAbsolutePath());
@@ -68,7 +63,7 @@ public class BlenderLoader implements IScriptingLanguage {
 	}
 	@Override
 	public void getDefaultContents(File source) {
-		File exe = getRunExecutable("blender", null);
+		File exe = getConfigExecutable("blender", null);
 		String absolutePath = source.getAbsolutePath();
 		File parent = new File(absolutePath).getParentFile();
 		if(source.exists()) {
@@ -76,15 +71,10 @@ public class BlenderLoader implements IScriptingLanguage {
 			source.delete();
 		}
 		ArrayList<String> args = new ArrayList<>();
-		if(isMac()) {
-			args.add("open");
-			args.add("-a");
-		}
+
 		//blender --background --factory-startup --python-expr ""
 		args.add(exe.getAbsolutePath());
-		if(isMac()) {
-			args.add("--args");
-		}
+
 		args.add("--background");
 		args.add("--factory-startup");
 		args.add("--python-expr");
