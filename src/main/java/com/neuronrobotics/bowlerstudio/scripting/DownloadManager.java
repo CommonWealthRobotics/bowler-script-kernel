@@ -3,8 +3,6 @@ package com.neuronrobotics.bowlerstudio.scripting;
 import org.apache.commons.exec.*;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 
-import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.run;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,13 +33,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
-import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarUtils;
@@ -55,13 +50,12 @@ import org.apache.commons.io.FilenameUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.video.OSUtil;
 
-import javafx.scene.control.Alert;
+//import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Alert.AlertType;
+//import javafx.scene.control.ButtonType;
+//import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 
 import net.sf.sevenzipjbinding.*;
@@ -72,7 +66,14 @@ public class DownloadManager {
 	private static String bindir = System.getProperty("user.home") + "/bin/BowlerStudioInstall/";
 	private static int ev = 0;
 	private static String cmd = "";
-	private static ButtonType buttonType = null;
+	private static IApprovalForDownload approval= new IApprovalForDownload() {
+		
+		@Override
+		public boolean get(String name, String url){
+			System.out.println("Command line mode, assuming yes to downloading \n"+name+" \nfrom \n"+url);
+			return true;
+		}
+	};
 
 	public static Thread run(IExternalEditor editor, File dir, PrintStream out, List<String> finalCommand) {
 		return run(new HashMap<String, String>(), editor, dir, out, finalCommand);
@@ -97,15 +98,6 @@ public class DownloadManager {
 
 			} catch (Throwable e) {
 				e.printStackTrace(out);
-				if (editor != null)
-					BowlerKernel.runLater(() -> {
-						Alert alert = new Alert(AlertType.ERROR);
-						alert.setTitle(editor.nameOfEditor() + " is missing");
-						alert.setHeaderText("failed to run " + cmd);
-						alert.setContentText("Close to bring me to the install website");
-						alert.showAndWait();
-					});
-
 			}
 		});
 		thread.start();
@@ -813,23 +805,9 @@ public class DownloadManager {
 		File exe = new File(bindir + version + "/" + filename);
 
 		if (!folder.exists() || !exe.exists()) {
-			buttonType = null;
+			
 
-			BowlerKernel.runLater(() -> {
-				Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-				alert.setTitle("Message");
-				alert.setHeaderText("Would you like to download: " + downloadName + "\nfrom:\n" + downloadJsonURL);
-				Optional<ButtonType> result = alert.showAndWait();
-				buttonType = result.get();
-				alert.close();
-			});
-
-			while (buttonType == null) {
-				Thread.sleep(100);
-
-			}
-
-			if (buttonType.equals(ButtonType.OK)) {
+			if (approval.get(downloadName, downloadJsonURL)) {
 				System.out.println("Start Downloading " + filename);
 
 			} else {
@@ -890,5 +868,13 @@ public class DownloadManager {
 //		else
 //			System.out.println("Failed to load file!\n"+f.getAbsolutePath());
 //	}
+
+	public static IApprovalForDownload getApproval() {
+		return approval;
+	}
+
+	public static void setApproval(IApprovalForDownload approval) {
+		DownloadManager.approval = approval;
+	}
 
 }
