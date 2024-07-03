@@ -143,6 +143,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new SvgLoader());
 		addScriptingLanguage(new BashLoader());
 		addScriptingLanguage(new SequenceRunner());
+		addScriptingLanguage(new BlenderLoader());
 	}
 
 	public static void setWorkspace(File file) {
