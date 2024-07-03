@@ -1,7 +1,15 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.util.io.AutoLFInputStream.IsBinaryException;
 
 import javafx.scene.Group;
 
@@ -63,15 +71,44 @@ public interface IScriptingLanguage {
    * Get the contents of an empty file
    * @return
    */
-  String getDefaultContents();
+  default void getDefaultContents(File source) {
+	  if(getIsTextFile()) {
+			OutputStream out = null;
+			try {
 
+				out = FileUtils.openOutputStream(source, false);
+				IOUtils.write(getDefaultContents(), out, Charset.defaultCharset());
+				out.close(); // don't swallow close Exception if copy completes
+				// normally
+			} catch(Throwable t){
+				t.printStackTrace();
+			}finally {
+				try {
+					out.close();
+				} catch (Exception e) {
+					
+				}
+			}
+	  }else
+		  throw new RuntimeException("This langauge needs to save its own files");
+  }
+  /**
+   * Get the contents of an empty file
+   * @return
+   */
+  String getDefaultContents();
   /**
    * Get the contents of an empty file
  * @param fileSlug 
    * @return
    */
-  default String getDefaultContents(String gitURL, String fileSlug) {
-	  return getDefaultContents();
+  default void getDefaultContents(String gitURL, String fileSlug) {
+	   try {
+		getDefaultContents(ScriptingEngine.fileFromGit(gitURL, fileSlug));
+	} catch (GitAPIException | IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
   }
   /**
    * This function returns if this is a binary file or a text file

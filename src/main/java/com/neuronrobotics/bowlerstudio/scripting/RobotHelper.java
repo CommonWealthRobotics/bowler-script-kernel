@@ -2,10 +2,13 @@ package com.neuronrobotics.bowlerstudio.scripting;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader;
@@ -82,7 +85,7 @@ public class RobotHelper implements IScriptingLanguage {
 	 * @return
 	 */
 	@SuppressWarnings("restriction")
-	public String getDefaultContents(String gitURL, String slug) {
+	public void getDefaultContents(String gitURL, String slug) {
 		MobileBase back = new MobileBase();
 		back.setScriptingName(slug);
 		back.setGitSelfSource(Arrays.asList(gitURL, slug + ".xml").toArray(new String[0]));
@@ -110,7 +113,23 @@ public class RobotHelper implements IScriptingLanguage {
 		limb.addNewLink(newLink, nextLink);
 		back.getAppendages().add(limb);
 
-		return back.getXml();
+		OutputStream out = null;
+		try {
+			File source = ScriptingEngine.fileFromGit(back.getGitSelfSource()[0], back.getGitSelfSource()[1]);
+
+			out = FileUtils.openOutputStream(source, false);
+			IOUtils.write(back.getXml(), out, Charset.defaultCharset());
+			out.close(); // don't swallow close Exception if copy completes
+			// normally
+		} catch(Throwable t){
+			t.printStackTrace();
+		}finally {
+			try {
+				out.close();
+			} catch (Exception e) {
+				
+			}
+		}
 	}
 
 	@Override
