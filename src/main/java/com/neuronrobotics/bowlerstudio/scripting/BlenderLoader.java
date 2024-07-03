@@ -1,9 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
-import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.delim;
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.isMac;
-import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.run;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,30 +9,34 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
+import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.STL;
+
 public class BlenderLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		File stl = new File(code.getAbsolutePath()+".stl");
+		toSTLFile(code,stl);
+		CSG back = STL.file(code.toPath());
+		return back;
 	}
 
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		throw new RuntimeException("Blender can not run from a file");
 	}
 
 	@Override
 	public String getShellType() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Blender";
 	}
 
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<String> ext = new ArrayList<>();
+		ext.add("blend");
+		return ext;
 	}
 	public void toSTLFile(File blenderfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = DownloadManager.getRunExecutable("blender", null);
