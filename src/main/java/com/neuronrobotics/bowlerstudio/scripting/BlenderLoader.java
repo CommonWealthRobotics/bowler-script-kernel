@@ -41,7 +41,36 @@ public class BlenderLoader implements IScriptingLanguage {
 		ext.add("blend");
 		return ext;
 	}
-	public void toSTLFile(File blenderfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void toBlenderFile(File stlIn,File blenderfile) {
+		System.out.println("Converting to Blender file before loading");
+		File dir = stlIn.getAbsoluteFile().getParentFile();
+
+		try {
+			File importFile = ScriptingEngine.fileFromGit(
+					"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
+					"import.py");
+			if(!blenderfile.exists()) {
+				//blender --background --python import_stl_to_blend.py -- /path/to/input/file.stl /path/to/output/file.blend
+				ArrayList<String> args = new ArrayList<>();
+
+				args.add(DownloadManager.getConfigExecutable("blender", null).getAbsolutePath());
+
+				args.add("--background");
+				args.add("--python");
+				args.add(importFile.getAbsolutePath());
+				args.add("--");
+				args.add(stlIn.getAbsolutePath());
+				args.add(blenderfile.getAbsolutePath());
+				Thread t=run(null, dir, System.out, args);
+				t.join();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+	}
+	public static void toSTLFile(File blenderfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("blender", null);
 		File export = ScriptingEngine.fileFromGit(
 				"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
