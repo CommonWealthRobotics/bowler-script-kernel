@@ -44,16 +44,32 @@ public class BlenderLoader implements IScriptingLanguage {
 		return ext;
 	}
 	public static void toBlenderFile(CSG stlIn,File blenderfile) throws IOException {
+		File stl = getTmpSTL(stlIn);
+		toBlenderFile(stl, blenderfile);
+	}
+
+	private static File getTmpSTL(CSG stlIn) throws IOException {
 		String name = stlIn.getName();
 		if(name.length()==0)
 			name="CSG_EXPORT";
 		File stl = File.createTempFile(name, ".stl");
 		stl.deleteOnExit();
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlIn.toStlString());
-		toBlenderFile(stl, blenderfile);
+		return stl;
 	}
-	public static void toBlenderFile(File stlIn,File blenderfile) {
+	public static void toBlenderFile(File incoming,File blenderfile) {
 		System.out.println("Converting to Blender file before loading");
+		
+		File stlIn;
+		try {
+			stlIn = File.createTempFile(incoming.getName(), ".stl");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		stlIn.deleteOnExit();
+		scaleStl(incoming,stlIn,0.001);
 		File dir = stlIn.getAbsoluteFile().getParentFile();
 
 		try {
@@ -81,6 +97,15 @@ public class BlenderLoader implements IScriptingLanguage {
 			return;
 		}
 	}
+	public static void scaleStl(File incoming, File outgoing, double scale) {
+		CSG back = Vitamins.get(incoming,true).scale(scale);
+		try {
+			FileUtil.write(Paths.get(outgoing.getAbsolutePath()), back.toStlString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
 	public static void toSTLFile(File blenderfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("blender", null);
 		File export = ScriptingEngine.fileFromGit(
@@ -99,7 +124,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		args.add(blenderfile.getAbsolutePath());
 		args.add(stlout.getAbsolutePath());
 		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
-		
+		scaleStl(stlout,stlout,1000.0);
 	}
 	@Override
 	public void getDefaultContents(File source) {
