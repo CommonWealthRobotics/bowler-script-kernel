@@ -15,7 +15,7 @@ public class BlenderLoadingTest {
 		CSG loaded =(CSG)ScriptingEngine.gitScriptRun(
 				"https://github.com/madhephaestus/TestRepo.git",
 				"TestRepo4.blend");
-		if(loaded.getPolygons().size()==0)
+		if(loaded.getPolygons().size()!=12)
 			fail("Failed to load polygon!");
 		System.out.println("Blender file loaded num polys: "+loaded.getPolygons().size());
 	}
