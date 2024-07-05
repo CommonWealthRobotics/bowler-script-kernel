@@ -44,7 +44,10 @@ public class BlenderLoader implements IScriptingLanguage {
 		return ext;
 	}
 	public static void toBlenderFile(CSG stlIn,File blenderfile) throws IOException {
-		File stl = File.createTempFile(stlIn.getName(), ".stl");
+		String name = stlIn.getName();
+		if(name.length()==0)
+			name="CSG_EXPORT";
+		File stl = File.createTempFile(name, ".stl");
 		stl.deleteOnExit();
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlIn.toStlString());
 		toBlenderFile(stl, blenderfile);
