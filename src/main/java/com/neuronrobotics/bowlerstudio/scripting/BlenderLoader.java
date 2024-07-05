@@ -3,6 +3,7 @@ import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -12,6 +13,7 @@ import org.eclipse.jgit.api.errors.TransportException;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.STL;
 
 public class BlenderLoader implements IScriptingLanguage {
@@ -40,6 +42,12 @@ public class BlenderLoader implements IScriptingLanguage {
 		ArrayList<String> ext = new ArrayList<>();
 		ext.add("blend");
 		return ext;
+	}
+	public static void toBlenderFile(CSG stlIn,File blenderfile) throws IOException {
+		File stl = File.createTempFile(stlIn.getName(), ".stl");
+		stl.deleteOnExit();
+		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlIn.toStlString());
+		toBlenderFile(stl, blenderfile);
 	}
 	public static void toBlenderFile(File stlIn,File blenderfile) {
 		System.out.println("Converting to Blender file before loading");

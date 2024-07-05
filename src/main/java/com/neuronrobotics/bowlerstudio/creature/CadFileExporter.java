@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 
+import com.neuronrobotics.bowlerstudio.scripting.BlenderLoader;
+
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
@@ -104,7 +106,11 @@ public class CadFileExporter {
 
 				for(String format:part.getExportFormats()){
 					if(format.toLowerCase().contains("obj")){
-						allCadStl.add(makeObj(nameBase,manufactured));// default to stl
+						allCadStl.add(makeObj(nameBase,manufactured));//
+						ui.setCsg(manufactured , null);
+					}
+					if(format.toLowerCase().contains("blend")){
+						allCadStl.add(makeBlender(nameBase,manufactured));// 
 						ui.setCsg(manufactured , null);
 					}
 					if(format.toLowerCase().contains("stl")){
@@ -118,6 +124,7 @@ public class CadFileExporter {
 						svgParts.add(manufactured);
 						ui.setAllCSG(svgParts , null);
 					}
+					
 				}
 
 			}
@@ -142,7 +149,14 @@ public class CadFileExporter {
 		System.out.println("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
-
+	
+	private File makeBlender(String nameBase,CSG tmp ) throws IOException{
+		File blend = new File(nameBase + ".blend");
+		System.out.println("Writing "+blend.getAbsolutePath());
+		BlenderLoader.toBlenderFile(tmp, blend);
+		return blend;
+	}
+	
 	private File makeSvg(String nameBase, List<CSG> currentCsg) throws IOException {
 		File stl = new File(nameBase + ".svg");
 
