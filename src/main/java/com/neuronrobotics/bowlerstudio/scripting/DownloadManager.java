@@ -26,6 +26,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -310,8 +311,11 @@ public class DownloadManager {
 							if (type.toLowerCase().contains("dmg")) {
 								dmgExtract(jvmArchive, bindir + targetdir, exeInZip);
 							}
-							if (type.toLowerCase().contains("appimage")) {
-								appimage(type, name, targetdir, cmd);
+							if (	type.toLowerCase().contains("appimage")||
+									type.toLowerCase().contains("exe")	||
+									type.toLowerCase().contains("msi")
+									) {
+								standaloneEXE(type, name, targetdir, cmd);
 							}
 							// extract7zArchive
 							if (type.toLowerCase().contains("7z")) {
@@ -411,15 +415,20 @@ public class DownloadManager {
 		return directoryToBeDeleted.delete();
 	}
 
-	private static void appimage(String type, String name, String targetdir, String cmd) throws InterruptedException {
+	private static void standaloneEXE(String type, String name, String targetdir, String cmd) throws InterruptedException {
 		File dir = new File(bindir + targetdir);
 		if (!dir.exists())
 			dir.mkdirs();
-		Thread t = run(null, new File("."), System.err, Arrays.asList("mv", bindir + name + "." + type, cmd));
-		t.join();
-
-		t = run(null, new File("."), System.err, Arrays.asList("chmod", "+x", cmd));
-		t.join();
+		try {
+			Files.move(
+					Paths.get(bindir + name + "." + type),
+					Paths.get(cmd), 
+					StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		new File(cmd).setExecutable(true); 
 	}
 
 	private static void dmgExtract(File jvmArchive, String string, String appDir) {
