@@ -67,11 +67,11 @@ public class DownloadManager {
 	private static String bindir = System.getProperty("user.home") + "/bin/BowlerStudioInstall/";
 	private static int ev = 0;
 	private static String cmd = "";
-	private static IApprovalForDownload approval= new IApprovalForDownload() {
-		
+	private static IApprovalForDownload approval = new IApprovalForDownload() {
+
 		@Override
-		public boolean get(String name, String url){
-			System.out.println("Command line mode, assuming yes to downloading \n"+name+" \nfrom \n"+url);
+		public boolean get(String name, String url) {
+			System.out.println("Command line mode, assuming yes to downloading \n" + name + " \nfrom \n" + url);
 			return true;
 		}
 	};
@@ -82,7 +82,7 @@ public class DownloadManager {
 
 	public static Thread run(Map<String, String> envincoming, IExternalEditor editor, File dir, PrintStream out,
 			List<String> finalCommand) {
-		if(dir==null) {
+		if (dir == null) {
 			throw new NullPointerException("Parent directory can not be mull");
 		}
 		Thread thread = new Thread(() -> {
@@ -208,7 +208,7 @@ public class DownloadManager {
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
 				String line;
 				while ((line = br.readLine()) != null) {
-					out.println( line);
+					out.println(line);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -290,10 +290,11 @@ public class DownloadManager {
 						} else
 							environment = new HashMap<>();
 						String targetdir = exeType;
-						File jvmArchive = download("", jvmURL, 400000000, bindir, name + "." + type, exeType);
 						File dest = new File(bindir + targetdir);
 						String cmd = bindir + targetdir + "/" + exeInZip;
 						if (!new File(cmd).exists()) {
+							File jvmArchive = download("", jvmURL, 400000000, bindir, name + "." + type, exeType);
+
 							if (dest.exists()) {
 								System.out.println("Erasing stale dir " + dest.getAbsolutePath());
 								deleteDirectory(dest);
@@ -311,10 +312,8 @@ public class DownloadManager {
 							if (type.toLowerCase().contains("dmg")) {
 								dmgExtract(jvmArchive, bindir + targetdir, exeInZip);
 							}
-							if (	type.toLowerCase().contains("appimage")||
-									type.toLowerCase().contains("exe")	||
-									type.toLowerCase().contains("msi")
-									) {
+							if (type.toLowerCase().contains("appimage") || type.toLowerCase().contains("exe")
+									|| type.toLowerCase().contains("msi")) {
 								standaloneEXE(type, name, targetdir, cmd);
 							}
 							// extract7zArchive
@@ -324,6 +323,11 @@ public class DownloadManager {
 								} else
 									extract7zArchive(jvmArchive.getAbsolutePath(), bindir + targetdir);
 							}
+							Object installer = vm.get("installer");
+							if (installer != null) {
+								runInstaller((List<String>) installer);
+							}
+
 							Object configurations = database.get("Meta-Configuration");
 							if (configurations != null) {
 								List<String> configs = (List<String>) configurations;
@@ -388,7 +392,9 @@ public class DownloadManager {
 												"Configuration failed for OS: " + key + " has no entry for " + exeType);
 									}
 								}
+
 							}
+
 						} else {
 							System.out.println("Not extraction, Application exists " + cmd);
 						}
@@ -405,6 +411,35 @@ public class DownloadManager {
 		throw new RuntimeException("Executable for OS: " + key + " has no entry for " + exeType);
 	}
 
+	private static void runInstaller(List<String> installerList) {
+		for (String installer : installerList) {
+			File installerFile = getRunExecutable(installer, null);
+			if(installerFile.getAbsolutePath().toLowerCase().endsWith("msi")) {
+				 List<String> command = new ArrayList<>();
+			        command.add("msiexec.exe");
+			        command.add("/i");  // Install
+			        command.add(installerFile.getAbsolutePath());
+			        command.add("/qn");  // Quiet mode, no UI
+			        
+			        Thread tcopy = run(null, new File("."), System.out, command);
+					try {
+						tcopy.join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+			}else {
+				Thread tcopy = run(null, new File("."), System.out, Arrays.asList(installerFile.getAbsolutePath()));
+				try {
+					tcopy.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	private static boolean deleteDirectory(File directoryToBeDeleted) {
 		File[] allContents = directoryToBeDeleted.listFiles();
 		if (allContents != null) {
@@ -415,20 +450,18 @@ public class DownloadManager {
 		return directoryToBeDeleted.delete();
 	}
 
-	private static void standaloneEXE(String type, String name, String targetdir, String cmd) throws InterruptedException {
+	private static void standaloneEXE(String type, String name, String targetdir, String cmd)
+			throws InterruptedException {
 		File dir = new File(bindir + targetdir);
 		if (!dir.exists())
 			dir.mkdirs();
 		try {
-			Files.move(
-					Paths.get(bindir + name + "." + type),
-					Paths.get(cmd), 
-					StandardCopyOption.REPLACE_EXISTING);
+			Files.move(Paths.get(bindir + name + "." + type), Paths.get(cmd), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		new File(cmd).setExecutable(true); 
+		new File(cmd).setExecutable(true);
 	}
 
 	private static void dmgExtract(File jvmArchive, String string, String appDir) {
@@ -631,19 +664,21 @@ public class DownloadManager {
 			}
 		}
 	}
+
 	private static boolean isPosixCompliantSystem() {
-	    return FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
+		return FileSystems.getDefault().supportedFileAttributeViews().contains("posix");
 	}
 
 	private static Set<PosixFilePermission> getPosixPermissions(int mode) {
-	    StringBuilder permissions = new StringBuilder("rwxrwxrwx");
-	    for (int i = 0; i < 9; i++) {
-	        if ((mode & (1 << (8 - i))) == 0) {
-	            permissions.setCharAt(i, '-');
-	        }
-	    }
-	    return java.nio.file.attribute.PosixFilePermissions.fromString(permissions.toString());
+		StringBuilder permissions = new StringBuilder("rwxrwxrwx");
+		for (int i = 0; i < 9; i++) {
+			if ((mode & (1 << (8 - i))) == 0) {
+				permissions.setCharAt(i, '-');
+			}
+		}
+		return java.nio.file.attribute.PosixFilePermissions.fromString(permissions.toString());
 	}
+
 	public static void extractTarXz(String inputFile, String outputDir) throws IOException {
 		Path outDir = Paths.get(outputDir);
 		if (!Files.exists(outDir)) {
@@ -659,20 +694,20 @@ public class DownloadManager {
 				Path outPath = outDir.resolve(entry.getName());
 
 				if (entry.isSymbolicLink()) {
-				    Path target = Paths.get(entry.getLinkName());
-				    try {
-				        Files.createSymbolicLink(outPath, target);
-				    } catch (IOException | UnsupportedOperationException e) {
-				        System.err.println("Failed to create symlink " + outPath + ". Copying target instead.");
-				        // Fallback: copy the target file instead
-				        Path resolvedTarget = outPath.getParent().resolve(target).normalize();
-				        if (Files.exists(resolvedTarget)) {
-				            Files.copy(resolvedTarget, outPath);
-				        } else {
-				            System.err.println("Symlink target does not exist: " + resolvedTarget);
-				        }
-				    }
-				}else if (entry.isDirectory()) {
+					Path target = Paths.get(entry.getLinkName());
+					try {
+						Files.createSymbolicLink(outPath, target);
+					} catch (IOException | UnsupportedOperationException e) {
+						System.err.println("Failed to create symlink " + outPath + ". Copying target instead.");
+						// Fallback: copy the target file instead
+						Path resolvedTarget = outPath.getParent().resolve(target).normalize();
+						if (Files.exists(resolvedTarget)) {
+							Files.copy(resolvedTarget, outPath);
+						} else {
+							System.err.println("Symlink target does not exist: " + resolvedTarget);
+						}
+					}
+				} else if (entry.isDirectory()) {
 					Files.createDirectories(outPath);
 				} else {
 					Files.createDirectories(outPath.getParent());
@@ -683,13 +718,13 @@ public class DownloadManager {
 						while ((len = tarIn.read(buffer)) != -1) {
 							out.write(buffer, 0, len);
 						}
-		                if (isPosixCompliantSystem()) {
-		                    Set<PosixFilePermission> permissions = getPosixPermissions(entry.getMode());
-		                    Files.setPosixFilePermissions(outPath, permissions);
-		                } else {
-		                    // For non-POSIX systems (e.g., Windows)
-		                    outPath.toFile().setExecutable((entry.getMode() & 0100) != 0);
-		                }
+						if (isPosixCompliantSystem()) {
+							Set<PosixFilePermission> permissions = getPosixPermissions(entry.getMode());
+							Files.setPosixFilePermissions(outPath, permissions);
+						} else {
+							// For non-POSIX systems (e.g., Windows)
+							outPath.toFile().setExecutable((entry.getMode() & 0100) != 0);
+						}
 					}
 				}
 			}
@@ -814,7 +849,6 @@ public class DownloadManager {
 		File exe = new File(bindir + version + "/" + filename);
 
 		if (!folder.exists() || !exe.exists()) {
-			
 
 			if (approval.get(downloadName, downloadJsonURL)) {
 				System.out.println("Start Downloading " + filename);
