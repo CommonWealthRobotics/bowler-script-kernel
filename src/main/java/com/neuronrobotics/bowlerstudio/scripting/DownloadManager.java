@@ -293,7 +293,7 @@ public class DownloadManager {
 						File dest = new File(bindir + targetdir);
 						String cmd = bindir + targetdir + "/" + exeInZip;
 						if (!new File(cmd).exists()) {
-							File jvmArchive = download("", jvmURL, 400000000, bindir, name + "." + type, exeType);
+							File jvmArchive = download("", jvmURL, 800000000, bindir, name + "." + type, exeType);
 
 							if (dest.exists()) {
 								System.out.println("Erasing stale dir " + dest.getAbsolutePath());
@@ -837,7 +837,7 @@ public class DownloadManager {
 			public void process(double percent) {
 				if (System.currentTimeMillis() - timeSinceePrint > 1000) {
 					timeSinceePrint = System.currentTimeMillis();
-					System.out.println("Download percent " + (int) (percent * 100));
+					System.out.println("Download "+filename+" percent " + (int) (percent * 100));
 				}
 //				if(progress!=null)
 //					Platform.runLater(() -> {
