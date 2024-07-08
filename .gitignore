@@ -30,6 +30,6 @@ html
 physicsTest
 /MUJOCO_LOG.TXT
 /test.blend
-/testBlender.stl
+/test*.stl
 /test.blend1
 /test.*

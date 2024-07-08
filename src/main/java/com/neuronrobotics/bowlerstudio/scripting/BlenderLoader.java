@@ -48,7 +48,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		toBlenderFile(stl, blenderfile);
 	}
 
-	private static File getTmpSTL(CSG stlIn) throws IOException {
+	public static File getTmpSTL(CSG stlIn) throws IOException {
 		String name = stlIn.getName();
 		if(name.length()==0)
 			name="CSG_EXPORT";
