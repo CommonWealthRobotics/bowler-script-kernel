@@ -96,17 +96,18 @@ public class FreecadLoader implements IScriptingLanguage {
 			name="CSG_TO_FREECAD";
 		}
 		int planes=1;
-		for(Transform pose:slicePlanes) {
-			List<Polygon> polygons = Slice.slice(toSlice, pose, 0);
-			String svgName = toSlice.getName();
-			if(svgName.length()==0)
-				svgName="SVG_EXPORT";
-			svgName+="_"+planes;
-			File svg = new File("/tmp/temp.svg");//File.createTempFile(svgName, ".svg");
-			SVGExporter.export(polygons, svg, false);
-			addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
-			planes++;
-		}
+		if(slicePlanes!=null)
+			for(Transform pose:slicePlanes) {
+				List<Polygon> polygons = Slice.slice(toSlice, pose, 0);
+				String svgName = toSlice.getName();
+				if(svgName.length()==0)
+					svgName="SVG_EXPORT";
+				svgName+="_"+planes;
+				File svg = new File("/tmp/temp.svg");//File.createTempFile(svgName, ".svg");
+				SVGExporter.export(polygons, svg, false);
+				addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
+				planes++;
+			}
 		addSTLToFreecad(freecadModel,tmp,name);
 	}
 	public static File simplifySVG(File incoming, double threshhold) {
