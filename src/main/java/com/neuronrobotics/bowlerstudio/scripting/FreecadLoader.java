@@ -116,7 +116,7 @@ public class FreecadLoader implements IScriptingLanguage {
 				if(svgName.length()==0)
 					svgName="SVG_EXPORT";
 				svgName+="_"+planes;
-				File svg = new File("/tmp/temp.svg");//File.createTempFile(svgName, ".svg");
+				File svg = File.createTempFile(svgName, ".svg");
 				SVGExporter.export(polygons, svg, false);
 				addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
 				planes++;
