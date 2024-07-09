@@ -8,6 +8,7 @@ import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.legacySy
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -94,7 +95,6 @@ public class FreecadLoader implements IScriptingLanguage {
 		if(name.length()==0) {
 			name="CSG_TO_FREECAD";
 		}
-		addSTLToFreecad(freecadModel,tmp,name);
 		int planes=1;
 		for(Transform pose:slicePlanes) {
 			List<Polygon> polygons = Slice.slice(toSlice, pose, 0);
@@ -103,16 +103,45 @@ public class FreecadLoader implements IScriptingLanguage {
 				svgName="SVG_EXPORT";
 			svgName+="_"+planes;
 			File svg = new File("/tmp/temp.svg");//File.createTempFile(svgName, ".svg");
-			//SVGExporter.export(polygons, svg, false);
-			addSVGToFreeCAD(freecadModel,svg,pose,svgName);
+			SVGExporter.export(polygons, svg, false);
+			addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
 			planes++;
 		}
-
+		addSTLToFreecad(freecadModel,tmp,name);
 	}
-	public static void addSVGToFreeCAD(File freecadModel,File SVG, Transform pose, String name) {
+	public static File simplifySVG(File incoming, double threshhold) {
+		try {
+			File inkscape = DownloadManager.getRunExecutable("inkscape", null);
+			File svg = File.createTempFile(incoming.getName(), ".svg");
+			List <String >args = Arrays.asList(
+					inkscape.getAbsolutePath(),
+		            "--actions",
+		            "\"select-all:all;path-simplify:threshold=" + threshhold+ ";;export-overwrite;export-do;quit-inkscape\"",
+		            incoming.getAbsolutePath()
+					);
+			legacySystemRun(null, inkscape.getAbsoluteFile().getParentFile(), System.out, args);
+			args = Arrays.asList(
+					inkscape.getAbsolutePath(),
+					"--export-plain-svg",
+		            "--export-type=svg",
+		            "--vacuum-defs",
+		            "--export-filename="+svg.getAbsolutePath(),
+		            incoming.getAbsolutePath()
+					);
+			legacySystemRun(null, inkscape.getAbsoluteFile().getParentFile(), System.out, args);
+			return svg;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return incoming;
+	}
+	public static void addSVGToFreeCAD(File freecadModel,File SVG, Transform pose, String name, String bodyName) {
 		TransformNR nr=TransformFactory.csgToNR(pose);
 		RotationNR r=nr.getRotation();
 		File freecad = DownloadManager.getRunExecutable("freecad", null);
+		//SVG=simplifySVG(SVG,0.002);
+		
 		try {
 			File export = ScriptingEngine.fileFromGit(
 					"https://github.com/CommonWealthRobotics/freecad-bowler-cli.git", 
@@ -126,11 +155,11 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadModel.getAbsolutePath());
 			args.add(SVG.getAbsolutePath());
 			args.add("\""+nr.getX()+","+nr.getY()+","+nr.getZ()+"\"");
-			args.add("\""+	r.getRotationMatrix2QuaturnionW()+","+
-							r.getRotationMatrix2QuaturnionX()+","+
-							r.getRotationMatrix2QuaturnionY()+","+
-							r.getRotationMatrix2QuaturnionZ()+"\"");
+			args.add("\""+	Math.toDegrees(r.getRotationAzimuth())+","+
+							Math.toDegrees(r.getRotationElevation())+","+
+							Math.toDegrees(r.getRotationTilt())+"\"");
 			args.add(name);
+			args.add(bodyName);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
 			t.printStackTrace();
@@ -212,19 +241,20 @@ public class FreecadLoader implements IScriptingLanguage {
 				, "STL/upper-arm.STL");
 		CSG toSlice = Vitamins.get(stlToImport,true);
 //		toSlice=toSlice.union(
-//					new Cube(50).toCSG()
+//					new Cube(20).toCSG()
 //						.toXMin()
 //						.toYMin()
 //						.toZMin()
 //					);
 		String name="upperArm";
 		toSlice.setName(name);
+		toSlice.addSlicePlane(new Transform().rotY(90).movex(30));
+		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ()));
+		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ()-0.51));
 		toSlice.addSlicePlane(new Transform());
 		FreecadLoader.addCSGToFreeCAD(test, toSlice);
 
 
-		//FreecadLoader.addSTLToFreecad(test,stlToImport,name);
-		//FreecadLoader.toSTLFile(test, new File("testFreecad.stl"));
 		FreecadLoader.open(test);
 		System.exit(0);
 	}
