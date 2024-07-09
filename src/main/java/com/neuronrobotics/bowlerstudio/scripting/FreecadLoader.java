@@ -20,6 +20,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Slice;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -83,23 +85,31 @@ public class FreecadLoader implements IScriptingLanguage {
 		}
 		
 	}
-	public static void addCSGToFreeccad(File freecadModel,CSG incoming) throws IOException {
-		addCSGToFreeccad(freecadModel,incoming,incoming.getSlicePlanes());
+	public static void addCSGToFreeCAD(File freecadModel,CSG incoming) throws IOException {
+		addCSGToFreeCAD(freecadModel,incoming,incoming.getSlicePlanes());
 	}
-	public static void addCSGToFreeccad(File freecadModel,CSG toSlice, List<Transform> slicePlanes) throws IOException {
+	public static void addCSGToFreeCAD(File freecadModel,CSG toSlice, List<Transform> slicePlanes) throws IOException {
+		File tmp = BlenderLoader.getTmpSTL(toSlice);
+		String name = toSlice.getName();
+		if(name.length()==0) {
+			name="CSG_TO_FREECAD";
+		}
+		addSTLToFreecad(freecadModel,tmp,name);
+		int planes=1;
 		for(Transform pose:slicePlanes) {
 			List<Polygon> polygons = Slice.slice(toSlice, pose, 0);
-			String name = toSlice.getName();
-			if(name.length()==0)
-				name="SVG_EXPORT";
-			File svg = new File("/tmp/temp.svg");//File.createTempFile(name, ".svg");
-			SVGExporter.export(polygons, svg, false);
-			addSVGToFreeccad(freecadModel,svg,pose);
+			String svgName = toSlice.getName();
+			if(svgName.length()==0)
+				svgName="SVG_EXPORT";
+			svgName+="_"+planes;
+			File svg = new File("/tmp/temp.svg");//File.createTempFile(svgName, ".svg");
+			//SVGExporter.export(polygons, svg, false);
+			addSVGToFreeCAD(freecadModel,svg,pose,svgName);
+			planes++;
 		}
-		File tmp = BlenderLoader.getTmpSTL(toSlice);
-		addSTLToFreecad(freecadModel,tmp,toSlice.getName());
+
 	}
-	public static void addSVGToFreeccad(File freecadModel,File SVG, Transform pose) {
+	public static void addSVGToFreeCAD(File freecadModel,File SVG, Transform pose, String name) {
 		TransformNR nr=TransformFactory.csgToNR(pose);
 		RotationNR r=nr.getRotation();
 		File freecad = DownloadManager.getRunExecutable("freecad", null);
@@ -120,7 +130,7 @@ public class FreecadLoader implements IScriptingLanguage {
 							r.getRotationMatrix2QuaturnionX()+","+
 							r.getRotationMatrix2QuaturnionY()+","+
 							r.getRotationMatrix2QuaturnionZ()+"\"");
-
+			args.add(name);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
 			t.printStackTrace();
@@ -190,24 +200,33 @@ public class FreecadLoader implements IScriptingLanguage {
 	 * @throws InvalidRemoteException 
 	 */
 	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		JavaFXInitializer.go();
+		PasswordManager.login();
 		FreecadLoader l = new FreecadLoader();
 		File test = new File("test.FCStd");
+		test.delete();
 		if(!test.exists())
 			l.getDefaultContents(test);
 		File stlToImport =ScriptingEngine.fileFromGit(
 				"https://github.com/NeuronRobotics/NASACurisoity.git"
 				, "STL/upper-arm.STL");
 		CSG toSlice = Vitamins.get(stlToImport,true);
+//		toSlice=toSlice.union(
+//					new Cube(50).toCSG()
+//						.toXMin()
+//						.toYMin()
+//						.toZMin()
+//					);
 		String name="upperArm";
 		toSlice.setName(name);
 		toSlice.addSlicePlane(new Transform());
-		FreecadLoader.addCSGToFreeccad(test, toSlice);
+		FreecadLoader.addCSGToFreeCAD(test, toSlice);
 
 
 		//FreecadLoader.addSTLToFreecad(test,stlToImport,name);
 		//FreecadLoader.toSTLFile(test, new File("testFreecad.stl"));
 		FreecadLoader.open(test);
-		
+		System.exit(0);
 	}
 
 }
