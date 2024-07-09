@@ -250,7 +250,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		String name="upperArm";
 		toSlice.setName(name);
 		toSlice.addSlicePlane(new Transform().rotY(90).movex(30));
-		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ()));
+		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ()-0.5));
 		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ()-0.51));
 		toSlice.addSlicePlane(new Transform());
 		FreecadLoader.addCSGToFreeCAD(test, toSlice);
