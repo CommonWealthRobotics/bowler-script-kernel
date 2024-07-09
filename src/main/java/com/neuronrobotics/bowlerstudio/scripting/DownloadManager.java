@@ -21,6 +21,7 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -46,6 +47,7 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 import com.google.gson.Gson;
@@ -276,6 +278,7 @@ public class DownloadManager {
 					HashMap<String, Object> database = gson.fromJson(jsonText, TT_mapStringString);
 					Map<String, Object> vm = (Map<String, Object>) database.get(key);
 					if (vm != null) {
+						String targetdir = exeType;
 						System.out.println("Configuration found for " + exeType + " on " + key);
 						String baseURL = vm.get("url").toString();
 						String type = vm.get("type").toString();
@@ -289,10 +292,26 @@ public class DownloadManager {
 							environment = (Map<String, String>) o;
 						} else
 							environment = new HashMap<>();
-						String targetdir = exeType;
 						File dest = new File(bindir + targetdir);
 						String cmd = bindir + targetdir + "/" + exeInZip;
 						if (!new File(cmd).exists()) {
+							if(exeType.toLowerCase().contentEquals("freecad")) {
+								FreecadLoader.update(vm);
+								baseURL = vm.get("url").toString();
+								name = vm.get("name").toString();
+								exeInZip = vm.get(executable).toString();
+								configexe = vm.get("configExecutable").toString();
+								jvmURL = baseURL + name + "." + type;
+								 o = vm.get("environment");
+								if (o != null) {
+									environment = (Map<String, String>) o;
+								} else
+									environment = new HashMap<>();
+								dest = new File(bindir + targetdir);
+								cmd = bindir + targetdir + "/" + exeInZip;
+								saveFile(file,gson.toJson(database));
+							}
+							
 							File jvmArchive = download("", jvmURL, 800000000, bindir, name + "." + type, exeType);
 
 							if (dest.exists()) {
@@ -409,6 +428,15 @@ public class DownloadManager {
 		}
 
 		throw new RuntimeException("Executable for OS: " + key + " has no entry for " + exeType);
+	}
+
+	private static void saveFile(File file, String json) {
+		try {
+			FileUtils.writeStringToFile(file, json, Charset.forName("UTF-8"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static void runInstaller(List<String> installerList) {

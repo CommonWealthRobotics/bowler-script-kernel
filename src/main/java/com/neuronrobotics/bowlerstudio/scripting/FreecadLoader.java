@@ -3,18 +3,31 @@
  */
 package com.neuronrobotics.bowlerstudio.scripting;
 
-import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.legacySystemRun;
+import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.lang.reflect.Type;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
@@ -258,6 +271,68 @@ public class FreecadLoader implements IScriptingLanguage {
 
 		FreecadLoader.open(test);
 		System.exit(0);
+	}
+	private static String readAll(Reader rd) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		int cp;
+		while ((cp = rd.read()) != -1) {
+			sb.append((char) cp);
+		}
+		return sb.toString();
+	}
+	public static void update(Map<String, Object> vm) throws MalformedURLException, IOException {
+		String url= "https://api.github.com/repos/FreeCAD/FreeCAD-Bundle/releases/tags/weekly-builds";
+		InputStream is = new URL(url).openStream();
+		String type = vm.get("type").toString();
+
+		try {
+			BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+			String jsonText = readAll(rd);
+			// Create the type, this tells GSON what datatypes to instantiate when parsing
+			// and saving the json
+			Type TT_mapStringString = new TypeToken<HashMap<String, Object>>() {
+			}.getType();
+			// chreat the gson object, this is the parsing factory
+			Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+			HashMap<String, Object> database = gson.fromJson(jsonText, TT_mapStringString);
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> assets = (List<Map<String, Object>>) database.get("assets");
+			for (Map<String, Object> key : assets) {
+				String assetName = key.get("name").toString();
+				if(!assetName.endsWith(type))
+					continue;
+				if(isLin()) {
+					if(!assetName.toLowerCase().contains("linux"))
+						continue;
+					if(isArm() && !assetName.toLowerCase().contains("aarch64"))
+						continue;
+					if(!isArm() && assetName.toLowerCase().contains("aarch64"))
+						continue;
+				}
+				if(isWin()) {
+					if(!assetName.toLowerCase().contains("windows"))
+						continue;
+				}
+				if(isMac()) {
+					if(!assetName.toLowerCase().contains("macos"))
+						continue;
+					
+					if(isArm() && !assetName.toLowerCase().contains("arm64"))
+						continue;
+					if(!isArm() && assetName.toLowerCase().contains("arm64"))
+						continue;
+				}
+				String name = assetName.replace("."+type, "");
+				System.out.println("Updating Freecad assets to "+name);
+				vm.put("name",name);
+				if(isMac())
+					continue;
+				vm.put("executable",name+"."+type);
+				vm.put("configExecutable",name+"."+type);
+			}
+		} finally {
+			is.close();
+		}
 	}
 
 }
