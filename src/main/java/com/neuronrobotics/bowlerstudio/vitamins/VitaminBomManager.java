@@ -17,6 +17,7 @@ import org.eclipse.jgit.api.errors.TransportException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
@@ -110,7 +111,7 @@ public class VitaminBomManager {
 			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
 
 		try {
-			CSG transformed = Vitamins.get(e.getType(), e.getSize()).transformed(TransformFactory.nrToCSG(e.getLocation()));
+			CSG transformed = MobileBaseCadManager.vitaminMakeCSG(e).transformed(TransformFactory.nrToCSG(e.getLocation()));
 			transformed.setManufacturing(incominng -> {
 				return null;
 			});
@@ -126,22 +127,33 @@ public class VitaminBomManager {
 
 	public TransformNR getCoMLocation(String name) {
 		VitaminLocation e = getElement(name);
-		double x = (double) getConfiguration(name).get("massCentroidX");
-		double y = (double) getConfiguration(name).get("massCentroidY");
+		try {
+			double x = (double) getConfiguration(name).get("massCentroidX");
+			double y = (double) getConfiguration(name).get("massCentroidY");
+	
+			double z = (double) getConfiguration(name).get("massCentroidZ");
 
-		double z = (double) getConfiguration(name).get("massCentroidZ");
-
-		return e.getLocation().copy().translateX(x).translateY(y).translateZ(z);
+			return e.getLocation().copy().translateX(x).translateY(y).translateZ(z);
+		}catch(Exception ex) {
+			return e.getLocation().copy();
+		}
 	}
 
 	public double getMassKg(String name) {
-		return (double) getConfiguration(name).get("massKg");
+		try {
+			return (double) getConfiguration(name).get("massKg");
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			return 0.001;
+		}
 	}
 
-	public Map<String, Object> getConfiguration(String name) {
+	public Map<String, Object> getConfiguration(String name) throws Exception{
 		VitaminLocation e = getElement(name);
 		if (e == null)
 			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
+		if(e.isScript())
+			throw new RuntimeException("Script Vitamins do not have configurations");
 
 		return Vitamins.getConfiguration(e.getType(), e.getSize());
 	}
@@ -178,12 +190,20 @@ public class VitaminBomManager {
 			if (list.size() > 0) {
 				VitaminLocation e = list.get(0);
 				String size = database.get(key).size() + "";
-				Map<String, Object> configuration = getConfiguration(e.getName());
-				String URL = (String) configuration.get("source");
+				String URL =null;
+				Object object =null;
+				if(!e.isScript())
+					try {
+						Map<String, Object> configuration = getConfiguration(e.getName());
+						URL=(String) configuration.get("source");
+						object= configuration.get("price");
+					}catch(Exception ex) {
+						ex.printStackTrace();
+					}
+
 				if(URL==null) {
 					URL="http://commonwealthrobotics.com";
 				}
-				Object object = configuration.get("price");
 				if(object==null)
 					object="0.01";
 	

@@ -51,6 +51,8 @@ import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.IDeviceConnectionEventListener;
 import com.neuronrobotics.sdk.pid.PIDLimitEvent;
 import com.neuronrobotics.sdk.util.ThreadUtil;
+import com.sun.javafx.collections.MappingChange.Map;
+
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -152,7 +154,7 @@ public class MobileBaseCadManager implements Runnable {
 		if(!vitaminCad.containsKey(vitamin)) {
 			CSG starting;
 			try {
-				CSG origin = Vitamins.get(vitamin.getType(), vitamin.getSize());
+				CSG origin = vitaminMakeCSG(vitamin);
 				starting=origin.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
 				if(offset!=null)
 					starting=starting.transformed(TransformFactory.nrToCSG(offset));
@@ -168,12 +170,31 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		return vitaminCad.get(vitamin);
 	}
+	private static void flatten(ArrayList<CSG> flat, Object o) {
+		if(CSG.class.isInstance(o))
+			flat.add((CSG)o);
+		if(List.class.isInstance(o)) {
+			for(Object ob:(List)o) {
+				flatten(flat,ob);
+			}
+		}
+		
+	}
+	public static CSG vitaminMakeCSG(VitaminLocation vitamin) throws Exception {
+		if(vitamin.isScript()) {
+			Object o =ScriptingEngine.gitScriptRun(vitamin.getType(), vitamin.getSize());
+			ArrayList<CSG> flat= new ArrayList<CSG>();
+			flatten(flat,o);
+			return  CSG.unionAll( flat);
+		}else
+			return Vitamins.get(vitamin.getType(), vitamin.getSize());
+	}
 	public CSG getVitaminDisplay(VitaminLocation vitamin,Affine manipulator, TransformNR offset){
 		if(!vitaminDisplay.containsKey(vitamin)) {
 			CSG starting;
 			Affine offsetDisplay = new Affine();
 			try {
-				starting = Vitamins.get(vitamin.getType(), vitamin.getSize());
+				starting = vitaminMakeCSG(vitamin);
 				if(offset!=null){
 					BowlerKernel.runLater(()->{
 						TransformFactory.nrToAffine(offset,offsetDisplay);
