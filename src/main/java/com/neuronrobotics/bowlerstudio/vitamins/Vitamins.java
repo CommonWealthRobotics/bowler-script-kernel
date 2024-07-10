@@ -156,9 +156,24 @@ public class Vitamins {
 		}
 		return true;
 	}
+	public static void flatten(ArrayList<CSG> flat, Object o) {
+		if(CSG.class.isInstance(o))
+			flat.add((CSG)o);
+		if(List.class.isInstance(o)) {
+			for(Object ob:(List)o) {
+				flatten(flat,ob);
+			}
+		}
+		
+	}
+	
 	public static CSG get(String type, String id) throws Exception {
-		if(isGitURL(type))
-			return (CSG)ScriptingEngine.gitScriptRun(type, id);
+		if(isGitURL(type)) {
+			Object o =ScriptingEngine.gitScriptRun(type, id);
+			ArrayList<CSG> flat= new ArrayList<CSG>();
+			Vitamins.flatten(flat,o);
+			return  CSG.unionAll( flat);
+		}
 		return get(type, id, 0);
 	}
 

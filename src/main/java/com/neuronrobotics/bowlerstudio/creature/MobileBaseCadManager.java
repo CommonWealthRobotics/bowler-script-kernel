@@ -170,21 +170,12 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		return vitaminCad.get(vitamin);
 	}
-	private static void flatten(ArrayList<CSG> flat, Object o) {
-		if(CSG.class.isInstance(o))
-			flat.add((CSG)o);
-		if(List.class.isInstance(o)) {
-			for(Object ob:(List)o) {
-				flatten(flat,ob);
-			}
-		}
-		
-	}
+
 	public static CSG vitaminMakeCSG(VitaminLocation vitamin) throws Exception {
 		if(vitamin.isScript()) {
 			Object o =ScriptingEngine.gitScriptRun(vitamin.getType(), vitamin.getSize());
 			ArrayList<CSG> flat= new ArrayList<CSG>();
-			flatten(flat,o);
+			Vitamins.flatten(flat,o);
 			return  CSG.unionAll( flat);
 		}else
 			return Vitamins.get(vitamin.getType(), vitamin.getSize());
