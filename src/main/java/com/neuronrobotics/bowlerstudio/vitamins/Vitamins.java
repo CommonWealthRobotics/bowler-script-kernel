@@ -141,9 +141,24 @@ public class Vitamins {
 		return vitToGet;
 	}
 
+	public static boolean isGitURL(String text2) {
+		if (!text2.endsWith(".git"))
+			return false;
+		if (text2.length() <= 5)
+			return false;
+		try {
+			new java.net.URL(text2);
+		} catch (Exception ex) {
+			if (!text2.startsWith("git@")) {
+				ex.printStackTrace();
+				return false ;
+			}
+		}
+		return true;
+	}
 	public static CSG get(String type, String id) throws Exception {
-		if(type.startsWith("https://"))
-			throw new Exception("Do not call vitamins on scripts");
+		if(isGitURL(type))
+			return (CSG)ScriptingEngine.gitScriptRun(type, id);
 		return get(type, id, 0);
 	}
 
