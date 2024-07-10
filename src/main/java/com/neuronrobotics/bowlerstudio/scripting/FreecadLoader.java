@@ -327,8 +327,11 @@ public class FreecadLoader implements IScriptingLanguage {
 				vm.put("name",name);
 				if(isMac())
 					continue;
-				if(isWin())
-					type="exe";
+				if(isWin()) {
+					vm.put("executable",name+delim()+"bin"+delim()+"freecad.exe");
+					vm.put("configExecutable",name+delim()+"bin"+delim()+"freecadcmd.exe");
+					continue;
+				}
 				vm.put("executable",name+"."+type);
 				vm.put("configExecutable",name+"."+type);
 			}
