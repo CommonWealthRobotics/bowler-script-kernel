@@ -66,7 +66,7 @@ import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 
 public class DownloadManager {
 	private static String editorsURL = "https://github.com/CommonWealthRobotics/ExternalEditorsBowlerStudio.git";
-	private static String bindir = System.getProperty("user.home") + "/bin/BowlerStudioInstall/";
+	private static String bindir = System.getProperty("user.home") + delim()+"bin"+delim()+"BowlerStudioInstall"+delim();
 	private static int ev = 0;
 	private static String cmd = "";
 	private static IApprovalForDownload approval = new IApprovalForDownload() {
