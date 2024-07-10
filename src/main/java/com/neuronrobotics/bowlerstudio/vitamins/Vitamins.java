@@ -142,6 +142,8 @@ public class Vitamins {
 	}
 
 	public static CSG get(String type, String id) throws Exception {
+		if(type.startsWith("https://"))
+			throw new Exception("Do not call vitamins on scripts");
 		return get(type, id, 0);
 	}
 
