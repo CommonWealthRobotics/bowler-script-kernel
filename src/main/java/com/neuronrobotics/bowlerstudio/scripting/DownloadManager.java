@@ -180,7 +180,8 @@ public class DownloadManager {
 		DefaultExecutor executor = new DefaultExecutor();
 		executor.setWorkingDirectory(dir);
 		Map<String, String> env = EnvironmentUtils.getProcEnvironment();
-		env.putAll(envincoming);
+		if(envincoming!=null)
+			env.putAll(envincoming);
 
 		PipedOutputStream outPipe = new PipedOutputStream();
 		PipedInputStream outPipeIn = new PipedInputStream(outPipe);
@@ -500,7 +501,7 @@ public class DownloadManager {
 		File[] listFiles = new File("/Volumes/").listFiles();
 		Set<String> before = Stream.of(listFiles).filter(file -> file.isDirectory()).map(File::getName)
 				.collect(Collectors.toSet());
-		Thread t = run(null, new File("."), System.err,
+		Thread t = run(null, new File("."), System.out,
 				Arrays.asList("hdiutil", "attach", jvmArchive.getAbsolutePath()));
 		try {
 			t.join();
@@ -520,7 +521,7 @@ public class DownloadManager {
 					Arrays.asList("rsync", "-avtP", "/Volumes/" + newMount + "/" + appDir, string + "/"));
 			tcopy.join();
 
-			Thread tdetach = run(null, new File("."), System.err,
+			Thread tdetach = run(null, new File("."), System.out,
 					Arrays.asList("hdiutil", "detach", "/Volumes/" + newMount));
 			tdetach.join();
 		} catch (Exception e) {

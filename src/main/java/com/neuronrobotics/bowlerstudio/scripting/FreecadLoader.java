@@ -79,7 +79,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	
 	@Override
 	public void getDefaultContents(File freecadGenFile) {
-		File freecad = DownloadManager.getRunExecutable("freecad", null);
+		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File newFile = ScriptingEngine.fileFromGit(
 					"https://github.com/CommonWealthRobotics/freecad-bowler-cli.git", 
@@ -125,7 +125,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 	public static File simplifySVG(File incoming, double threshhold) {
 		try {
-			File inkscape = DownloadManager.getRunExecutable("inkscape", null);
+			File inkscape = DownloadManager.getConfigExecutable("inkscape", null);
 			File svg = File.createTempFile(incoming.getName(), ".svg");
 			List <String >args = Arrays.asList(
 					inkscape.getAbsolutePath(),
@@ -153,7 +153,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	public static void addSVGToFreeCAD(File freecadModel,File SVG, Transform pose, String name, String bodyName) {
 		TransformNR nr=TransformFactory.csgToNR(pose);
 		RotationNR r=nr.getRotation();
-		File freecad = DownloadManager.getRunExecutable("freecad", null);
+		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		//SVG=simplifySVG(SVG,0.002);
 		
 		try {
@@ -180,7 +180,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		}
 	}
 	public static void addSTLToFreecad(File freecadModel, File stlToAdd,String meshName) {
-		File freecad = DownloadManager.getRunExecutable("freecad", null);
+		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File export = ScriptingEngine.fileFromGit(
 					"https://github.com/CommonWealthRobotics/freecad-bowler-cli.git", 
@@ -200,7 +200,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		}
 	}
 	public static void toSTLFile(File freecadModel,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
-		File freecad = DownloadManager.getRunExecutable("freecad", null);
+		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File export = ScriptingEngine.fileFromGit(
 					"https://github.com/CommonWealthRobotics/freecad-bowler-cli.git", 
@@ -225,11 +225,17 @@ public class FreecadLoader implements IScriptingLanguage {
 		try {
 
 			ArrayList<String> args = new ArrayList<>();
+			if(isMac()) {
+				args.add("open");
+				args.add("-a");
+			}
 
 			args.add(freecad.getAbsolutePath());
 			args.add(freecadModel.getAbsolutePath());
-
-			legacySystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
+			if(isMac())
+				advancedSystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
+			else
+				legacySystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
 			t.printStackTrace();
 		}
@@ -329,7 +335,7 @@ public class FreecadLoader implements IScriptingLanguage {
 					continue;
 				if(isWin()) {
 					vm.put("executable",name+delim()+"bin"+delim()+"freecad.exe");
-					vm.put("configExecutable",name+delim()+"bin"+delim()+"freecadcmd.exe");
+					vm.put("configExecutable",name+delim()+"bin"+delim()+"freecad.exe");
 					continue;
 				}
 				vm.put("executable",name+"."+type);
