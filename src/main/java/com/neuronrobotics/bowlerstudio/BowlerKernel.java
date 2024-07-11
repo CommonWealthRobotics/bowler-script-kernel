@@ -26,7 +26,8 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.stage.Stage;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
+
 //import org.springframework.boot.SpringApplication;
 //import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 //import org.springframework.context.annotation.ComponentScan;
@@ -431,8 +432,14 @@ public class BowlerKernel {
 				Stage newStage = new Stage();
 				// Set the title of the new window to the tab's text
 				newStage.setTitle(t.getText());
-				Pane root = new Pane();
+				AnchorPane root = new AnchorPane();
 				root.getChildren().add(content);
+				if (content != null) {
+					AnchorPane.setTopAnchor(content, 10.0);
+					AnchorPane.setRightAnchor(content, 10.0);
+					AnchorPane.setBottomAnchor(content, 10.0);
+					AnchorPane.setLeftAnchor(content, 10.0);
+				}
 				// Create a new scene with the parent container
 				Scene scene = new Scene(root);
 				// Set the scene on the new stage
