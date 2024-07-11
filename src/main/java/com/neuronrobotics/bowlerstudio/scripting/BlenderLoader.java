@@ -15,6 +15,7 @@ import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.STL;
+import javafx.scene.paint.Color;
 
 public class BlenderLoader implements IScriptingLanguage {
 
@@ -24,6 +25,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		stl.deleteOnExit();
 		toSTLFile(code,stl);
 		CSG back = Vitamins.get(stl,true);
+		back.setColor(Color.ORANGE);
 		return back;
 	}
 

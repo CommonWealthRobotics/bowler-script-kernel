@@ -40,6 +40,7 @@ import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Slice;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
+import javafx.scene.paint.Color;
 
 /**
  * 
@@ -52,6 +53,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		stl.deleteOnExit();
 		toSTLFile(code,stl);
 		CSG back = Vitamins.get(stl,true);
+		back.setColor(Color.BLUE);
 		return back;
 	}
 
