@@ -78,7 +78,6 @@ public class BlenderLoader implements IScriptingLanguage {
 			File importFile = ScriptingEngine.fileFromGit(
 					"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
 					"import.py");
-			if(!blenderfile.exists()) {
 				//blender --background --python import_stl_to_blend.py -- /path/to/input/file.stl /path/to/output/file.blend
 				ArrayList<String> args = new ArrayList<>();
 
@@ -92,7 +91,7 @@ public class BlenderLoader implements IScriptingLanguage {
 				args.add(blenderfile.getAbsolutePath());
 				Thread t=run(null, dir, System.out, args);
 				t.join();
-			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
