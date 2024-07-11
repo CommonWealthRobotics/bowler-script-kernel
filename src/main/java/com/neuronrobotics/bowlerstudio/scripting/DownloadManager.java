@@ -332,8 +332,11 @@ public class DownloadManager {
 							if (type.toLowerCase().contains("dmg")) {
 								dmgExtract(jvmArchive, bindir + targetdir, exeInZip);
 							}
-							if (type.toLowerCase().contains("appimage") || type.toLowerCase().contains("exe")
-									|| type.toLowerCase().contains("msi")) {
+							if (	type.toLowerCase().contains("appimage") ||
+									type.toLowerCase().contains("exe") ||
+									type.toLowerCase().contains("msi")||
+									type.toLowerCase().contains("jar")
+									) {
 								standaloneEXE(type, name, targetdir, cmd);
 							}
 							// extract7zArchive
