@@ -20,7 +20,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
+import javafx.application.Platform;
+import javafx.scene.Scene;
+import javafx.scene.control.Tab;
+import javafx.stage.Stage;
+import javafx.scene.layout.Pane;
 //import org.springframework.boot.SpringApplication;
 //import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 //import org.springframework.context.annotation.ComponentScan;
@@ -42,6 +48,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ICSGProgress;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import javafx.application.Platform;
+import javafx.scene.control.Tab;
 import javafx.scene.transform.Affine;
 import marytts.signalproc.effects.LpcWhisperiserEffect;
 import marytts.signalproc.effects.RobotiserEffect;
@@ -350,6 +357,7 @@ public class BowlerKernel {
 	}
 
 	private static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
+		processUIOpening(ret);
 		if(baseWorkspaceFile!=null)
 			System.out.println("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
 		CSG.setProgressMoniter(new ICSGProgress() {
@@ -409,7 +417,48 @@ public class BowlerKernel {
 			t.printStackTrace();
 			fail();
 		}
+	}
 
+	private static void processUIOpening(Object ret) {
+		if(Tab.class.isInstance(ret)) {
+			Tab t=(Tab)ret;
+			CompletableFuture<Boolean> future = new CompletableFuture<>();
+
+			BowlerKernel.runLater(()->{
+				// Get the content from the tab
+				javafx.scene.Node content = t.getContent();
+				// Create a new stage
+				Stage newStage = new Stage();
+				// Set the title of the new window to the tab's text
+				newStage.setTitle(t.getText());
+				Pane root = new Pane();
+				root.getChildren().add(content);
+				// Create a new scene with the parent container
+				Scene scene = new Scene(root);
+				// Set the scene on the new stage
+				newStage.setScene(scene);
+				scene.getRoot().setStyle("-fx-font-family: 'Arial';");
+				scene.getRoot().applyCss();
+				scene.getRoot().layout();
+				// Add a close request handler
+				newStage.setOnCloseRequest(event -> {
+					// Exit the JVM when the window is closed
+					future.complete(true);
+					Platform.exit();
+				});
+				// Show the new stage
+				newStage.show();
+				scene.getRoot().applyCss();
+				scene.getRoot().layout();
+			});
+			try {
+				 future.get();
+				System.exit(0);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 
 	private static void processReturnedObjects(Object ret, ArrayList<CSG> csgBits) {
