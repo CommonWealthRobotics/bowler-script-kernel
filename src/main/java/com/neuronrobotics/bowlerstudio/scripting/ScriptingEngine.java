@@ -53,6 +53,7 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -2368,6 +2369,33 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void setPrintProgress(boolean printProgress) {
 		ScriptingEngine.printProgress = printProgress;
+	}
+	
+	public static void ignore(String url,String filepattern) throws Exception {
+		File ignorefile = fileFromGit(url, ".gitignore");
+		String contents="";
+		if(ignorefile.exists()) {
+			BufferedReader reader;
+			try {
+				reader = new BufferedReader(new FileReader(ignorefile));
+				String line = reader.readLine();
+				while (line != null) {
+					if(line.contains(filepattern)) {
+						System.out.println(""+filepattern+" exists in "+ignorefile.getAbsolutePath());
+						reader.close();
+						return;
+					}
+					contents+=line+"\n";
+					// read next line
+					line = reader.readLine();
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		contents+=filepattern;
+		pushCodeToGit(url, null, ".gitignore", contents, "Adding ignore for "+filepattern);
 	}
 
 }
