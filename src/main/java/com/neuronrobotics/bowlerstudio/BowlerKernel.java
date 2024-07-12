@@ -22,7 +22,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
+import org.eclipse.jgit.api.errors.RefNotFoundException;
+import org.eclipse.jgit.api.errors.TransportException;
+
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.stage.Stage;
@@ -36,6 +44,7 @@ import javafx.scene.layout.*;
 import jline.ConsoleReader;
 import jline.Terminal;
 
+import com.neuronrobotics.bowlerstudio.assets.FontSizeManager;
 import com.neuronrobotics.bowlerstudio.creature.CadFileExporter;
 import com.neuronrobotics.bowlerstudio.creature.IMobileBaseUI;
 import com.neuronrobotics.bowlerstudio.creature.IgenerateBed;
@@ -62,7 +71,7 @@ public class BowlerKernel {
 	// private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 
-	static {
+	private static void loadHistoryLocal() {
 		historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 		ArrayList<String> history = new ArrayList<>();
 		if (!historyFile.exists()) {
@@ -107,18 +116,14 @@ public class BowlerKernel {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 		long startTime = System.currentTimeMillis();
-		try {
-			JavaFXInitializer.go();
-		} catch (Throwable t) {
-			t.printStackTrace();
-			System.err.println("ERROR No UI engine availible");
-		}
-		ScriptingEngine.waitForLogin();
-		if (args.length == 0) {
-			fail();
-		}
-		ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
-				null);
+		loadHistoryLocal();
+		startupProcedures(args);
+		runArgumentsAfterStartup(args, startTime);
+	}
+
+	public static void runArgumentsAfterStartup(String[] args, long startTime)
+			throws IOException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException,
+			InvalidRemoteException, TransportException, GitAPIException, Exception {
 		boolean gitRun = false;
 		String gitRepo = null;
 		String gitFile = null;
@@ -348,7 +353,22 @@ public class BowlerKernel {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
 
+	private static void startupProcedures(String[] args)
+			throws IOException, InvalidRemoteException, TransportException, GitAPIException, Exception {
+		try {
+			JavaFXInitializer.go();
+		} catch (Throwable t) {
+			t.printStackTrace();
+			System.err.println("ERROR No UI engine availible");
+		}
+		ScriptingEngine.waitForLogin();
+		if (args.length == 0) {
+			fail();
+		}
+		ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
+				null);
 	}
 
 	private static void finish(long startTime) {
@@ -452,6 +472,13 @@ public class BowlerKernel {
 					// Exit the JVM when the window is closed
 					future.complete(true);
 					Platform.exit();
+				});
+				FontSizeManager.addListener(fontNum -> {
+					int tmp = fontNum - 10;
+					if (tmp < 12)
+						tmp = 12;
+					root.setStyle("-fx-font-size: " + tmp + "pt");
+					newStage.sizeToScene();
 				});
 				// Show the new stage
 				newStage.show();
