@@ -4,21 +4,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
-
-import eu.mihosoft.vrl.v3d.CSG;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Tab;
-import javafx.scene.layout.Pane;
-
 public class FXMLBowlerLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(File xml, ArrayList<Object> args) throws Exception {
-		FXMLLoader loader = new FXMLLoader(xml.toURI().toURL());
-		Pane newLoadedPane =  loader.load();
+		javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(xml.toURI().toURL());
+		javafx.scene.layout.Pane newLoadedPane =  loader.load();
 		// Create a tab
-		Tab myTab = new Tab();
+		javafx.scene.control.Tab myTab = new javafx.scene.control.Tab();
 		//set the title of the new tab
 		myTab.setContent(newLoadedPane);
 		return myTab;
