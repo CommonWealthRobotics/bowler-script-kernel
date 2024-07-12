@@ -480,6 +480,13 @@ public class BowlerKernel {
 					root.setStyle("-fx-font-size: " + tmp + "pt");
 					newStage.sizeToScene();
 				});
+				if(IStageReceiver.class.isInstance(ret)) {
+					IStageReceiver r=(IStageReceiver)ret;
+					r.receiveStage(newStage, scene);
+				}
+				BowlerKernel.runLater(()->{
+					
+				});
 				// Show the new stage
 				newStage.show();
 				scene.getRoot().applyCss();
