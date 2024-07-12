@@ -442,6 +442,7 @@ public class BowlerKernel {
 
 	private static void processUIOpening(Object ret) {
 		if(Tab.class.isInstance(ret)) {
+			System.out.println("Launching User Defined UI");
 			Tab t=(Tab)ret;
 			CompletableFuture<Boolean> future = new CompletableFuture<>();
 
@@ -481,12 +482,13 @@ public class BowlerKernel {
 					newStage.sizeToScene();
 				});
 				if(IStageReceiver.class.isInstance(ret)) {
+					System.out.println("UI is a IStageReceiver");
 					IStageReceiver r=(IStageReceiver)ret;
-					r.receiveStage(newStage, scene);
+					BowlerKernel.runLater(()->{
+						r.receiveStage(newStage, scene);
+					});
 				}
-				BowlerKernel.runLater(()->{
-					
-				});
+
 				// Show the new stage
 				newStage.show();
 				scene.getRoot().applyCss();
