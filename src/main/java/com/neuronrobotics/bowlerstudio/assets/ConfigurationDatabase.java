@@ -118,21 +118,22 @@ public class ConfigurationDatabase {
 				throw new RuntimeException(e.getMessage());
 			}
 			String username = PasswordManager.getLoginID();
-		    try {
-				File file =ScriptingEngine.fileFromGit("https://github.com/"+username+"/BowlerStudioConfiguration.git", "database.json");
-				if(file.exists()) {
-					String contents= FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-					try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
-					    out.println(contents);
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+			if(username!=null)
+			    try {
+					File file =ScriptingEngine.fileFromGit("https://github.com/"+username+"/BowlerStudioConfiguration.git", "database.json");
+					if(file.exists()) {
+						String contents= FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+						try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
+						    out.println(contents);
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 		return f;
 	}
