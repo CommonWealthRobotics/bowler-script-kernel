@@ -302,7 +302,10 @@ api 'com.github.kurbatov:firmata4j:2.3.4.1'
 
 
 	testImplementation 'junit:junit:4.10'
-api fileTree (dir: 'libs', includes: ['*.jar'])
+//api fileTree (dir: 'libs', includes: ['*.jar'])
+	// https://mvnrepository.com/artifact/com.github.stephengold/jbullet
+	api group: 'com.github.stephengold', name: 'jbullet', version: '1.0.3'
+	
 	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1')
 	{
 		exclude group: 'commons-io', module: 'commons-io'
