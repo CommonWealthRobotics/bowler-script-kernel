@@ -110,7 +110,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"com.neuronrobotics.bowlerstudio.scripting", "com.neuronrobotics.bowlerstudio.tabs",
 			"com.neuronrobotics.bowlerstudio.physics", "com.neuronrobotics.bowlerstudio.physics",
 			"com.neuronrobotics.bowlerstudio.vitamins", "com.neuronrobotics.bowlerstudio.creature",
-			"com.neuronrobotics.bowlerstudio.threed" };
+			"com.neuronrobotics.bowlerstudio.threed","com.neuronrobotics.sdk.util.ThreadUtil",
+            "eu.mihosoft.vrl.v3d.Transform",
+            "com.neuronrobotics.bowlerstudio.vitamins.Vitamins" };
 
 	private static HashMap<String, File> filesRun = new HashMap<>();
 
