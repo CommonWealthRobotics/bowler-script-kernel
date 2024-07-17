@@ -131,8 +131,12 @@ public class StudioBuildInfo {
   }
 
   public static String getName() {
-    return "Bowler Studio "
+    return getAppName()
         + getProtocolVersion() + "." + getSDKVersion() + "("
         + getBuildVersion() + ")";
   }
+
+public static String getAppName() {
+	return getTag("app.name");
+}
 }
