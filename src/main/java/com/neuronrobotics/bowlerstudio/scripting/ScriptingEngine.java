@@ -149,6 +149,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new BlenderLoader());
 		addScriptingLanguage(new FreecadLoader());
 		addScriptingLanguage(new FXMLBowlerLoader());
+		addScriptingLanguage(new OpenSCADLoader());
 	}
 
 	public static void setWorkspace(File file) {
