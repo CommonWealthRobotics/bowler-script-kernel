@@ -3,6 +3,8 @@ package com.neuronrobotics.bowlerstudio.scripting;
 import org.apache.commons.exec.*;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 
+import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.sanitizeString;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,6 +57,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.video.OSUtil;
 
+import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.FileUtil;
 //import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 //import javafx.scene.control.ButtonType;
@@ -69,6 +73,20 @@ public class DownloadManager {
 	private static String bindir = System.getProperty("user.home") + delim()+"bin"+delim()+"BowlerStudioInstall"+delim();
 	private static int ev = 0;
 	private static String cmd = "";
+	public static String sanitizeString(String s) {
+		if(s.contains(" "))
+			s=s.replace(' ', '_');
+		return s;
+	}
+	public static File getTmpSTL(CSG stlIn) throws IOException {
+		String name = stlIn.getName();
+		if(name.length()==0)
+			name="CSG_EXPORT";
+		File stl = File.createTempFile(sanitizeString(name), ".stl");
+		stl.deleteOnExit();
+		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlIn.toStlString());
+		return stl;
+	}
 	private static IApprovalForDownload approval = new IApprovalForDownload() {
 
 		@Override

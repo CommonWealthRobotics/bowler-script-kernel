@@ -105,7 +105,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		addCSGToFreeCAD(freecadModel,incoming,incoming.getSlicePlanes());
 	}
 	public static void addCSGToFreeCAD(File freecadModel,CSG toSlice, List<Transform> slicePlanes) throws IOException {
-		File tmp = BlenderLoader.getTmpSTL(toSlice);
+		File tmp =getTmpSTL(toSlice);
 		String name = toSlice.getName();
 		if(name.length()==0) {
 			name="CSG_TO_FREECAD";
