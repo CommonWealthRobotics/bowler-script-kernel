@@ -36,7 +36,7 @@ public class OpenSCADLoader implements IScriptingLanguage {
 
 	@Override
 	public String getShellType() {
-		return "Blender";
+		return "OpenSCAD";
 	}
 
 	@Override
