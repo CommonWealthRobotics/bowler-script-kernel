@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.kohsuke.github.GHMyself;
@@ -30,50 +32,109 @@ public class ConfigurationDatabase {
 	//private static String gitSource = null; // madhephaestus
 	private static String dbFile = "database.json";
 	private static boolean checked;
-	private static HashMap<String, HashMap<String, Object>> database = null;
+	private static Map<String, HashMap<String, Object>> database = null;
 	private static final Type TT_mapStringString = new TypeToken<HashMap<String, HashMap<String, Object>>>() {
 	}.getType();
 	// chreat the gson object, this is the parsing factory
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	private static IssueReportingExceptionHandler reporter = new IssueReportingExceptionHandler();
 	//private static String loggedInAs = null;
-	static {
+
+	public static void clear(String key) {
+		getDatabase();
+		synchronized(database){
+			getParamMap(key).clear();
+		}
+	
+	}
+	public static Set<String> keySet(String name) {
+		Set<String> keySet ;
+		getDatabase();
+		synchronized(database){
+			keySet= ConfigurationDatabase.getParamMap(name).keySet();
+		}
+		return keySet;
+	}
+	public static boolean containsKey(String paramsKey, String string) {
+		boolean containsKey = false;
+		synchronized(database){
+			containsKey = ConfigurationDatabase.getParamMap(paramsKey).containsKey(string);
+		}
+		return containsKey;
 
 	}
-
-	public static synchronized Object getObject(String paramsKey, String objectKey, Object defaultValue) {
-		if (getParamMap(paramsKey).get(objectKey) == null) {
-			//System.err.println("Cant find: " + paramsKey + ":" + objectKey);
-			setObject(paramsKey, objectKey, defaultValue);
+	public static String getKeyFromValue(String controllerName, String mappedValue) {
+		String ret=null;
+		getDatabase();
+		synchronized(database){
+			HashMap<String, Object> paramMap = ConfigurationDatabase.getParamMap(controllerName);
+			for (String key : paramMap.keySet()) {
+				String string = (String) paramMap.get(key);
+				if (string.contentEquals(mappedValue)) {
+					ret= key;
+					break;
+				}
+			}
 		}
-		return getParamMap(paramsKey).get(objectKey);
+		return ret;
+	}
+	public static  Object get(String paramsKey, String objectKey) {
+		return getObject(paramsKey, objectKey, null);
+	}
+	public static  Object get(String paramsKey, String objectKey, Object defaultValue) {
+		return getObject(paramsKey, objectKey, defaultValue);
+	}
+	public static  Object getObject(String paramsKey, String objectKey, Object defaultValue) {
+		Object ret=null;
+		getDatabase();
+		synchronized(database){
+			if (getParamMap(paramsKey).get(objectKey) == null) {
+				//System.err.println("Cant find: " + paramsKey + ":" + objectKey);
+				setObject(paramsKey, objectKey, defaultValue);
+			}
+			ret= getParamMap(paramsKey).get(objectKey);
+		}
+		return ret;
 	}
 
 	public static HashMap<String, Object> getParamMap(String paramsKey) {
-		if (getDatabase().get(paramsKey) == null) {
-			getDatabase().put(paramsKey, new HashMap<String, Object>());
+		if (database.get(paramsKey) == null) {
+			database.put(paramsKey, new HashMap<String, Object>());
 		}
-		return getDatabase().get(paramsKey);
+		return database.get(paramsKey);
 	}
-
-	public static synchronized Object setObject(String paramsKey, String objectKey, Object value) {
-		Object put = getParamMap(paramsKey).put(objectKey, value);
+	public static Object put(String paramsKey, String objectKey, Object value) {
+		return setObject(paramsKey, objectKey, value);
+	}
+	
+	public static  Object setObject(String paramsKey, String objectKey, Object value) {
+		Object put =null;
+		getDatabase();
+		synchronized(database){
+			put=getParamMap(paramsKey).put(objectKey, value);
+		}
 		save();
 		return put;
 	}
-
-	public static synchronized Object removeObject(String paramsKey, String objectKey) {
-		Object remove = getParamMap(paramsKey).remove(objectKey);
+	public static Object remove(String paramsKey, String objectKey) {
+		return removeObject(paramsKey, objectKey);
+	}
+	public static  Object removeObject(String paramsKey, String objectKey) {
+		Object remove=null;
+		getDatabase();
+		synchronized(database){
+			remove= getParamMap(paramsKey).remove(objectKey);
+		}
 		save();
 		return remove;
 	}
 
-	public static synchronized void save() {
+	public static  void save() {
 		String writeOut = null;
 		getDatabase();
-		//synchronized(database){
+		synchronized(database){
 			writeOut = gson.toJson(database, TT_mapStringString);
-		//}
+		}
 		File f=loadFile();
 		
 
@@ -88,14 +149,15 @@ public class ConfigurationDatabase {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static HashMap<String, HashMap<String, Object>> getDatabase() {
+	public static void getDatabase() {
 		if (database != null) {
-			return database;
+			return ;
 		}
 		File loadFile = loadFile();
 		if(loadFile.exists())
 			try {
-				database = (HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile, null);
+				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile, null));
+				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -106,7 +168,7 @@ public class ConfigurationDatabase {
 			// new Exception().printStackTrace();
 		}
 
-		return database;
+		return ;
 	}
 
 	public static File loadFile() {
@@ -137,6 +199,7 @@ public class ConfigurationDatabase {
 		}
 		return f;
 	}
+
 
 
 

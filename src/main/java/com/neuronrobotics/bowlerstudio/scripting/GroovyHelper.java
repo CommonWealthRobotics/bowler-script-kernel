@@ -23,10 +23,7 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
     CompilerConfiguration cc = new CompilerConfiguration();
     cc.addCompilationCustomizers(new ImportCustomizer()
         .addStarImports(ScriptingEngine.getImports())
-        .addStaticStars(
-            "com.neuronrobotics.sdk.util.ThreadUtil",
-            "eu.mihosoft.vrl.v3d.Transform",
-            "com.neuronrobotics.bowlerstudio.vitamins.Vitamins")
+
     );
 
     Binding binding = new Binding();

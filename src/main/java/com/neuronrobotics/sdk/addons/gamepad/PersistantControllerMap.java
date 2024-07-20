@@ -25,11 +25,11 @@ public class PersistantControllerMap {
 		return true;
 	}
 	public static void clearMapping(String controllerName) {
-		ConfigurationDatabase.getParamMap(controllerName).clear();
+		ConfigurationDatabase.clear(controllerName);
 		
 	}
 	public static String getMappedAxisName(String controllerName, String incomingName) {
-		Object object = ConfigurationDatabase.getParamMap(controllerName).get(incomingName);
+		Object object = ConfigurationDatabase.getObject(controllerName,incomingName,incomingName);
 		if (object == null)
 			return incomingName;
 		return (String) object;
@@ -41,14 +41,7 @@ public class PersistantControllerMap {
 	
 
 	public static String getHardwareAxisFromMappedValue(String controllerName, String mappedValue) {
-		HashMap<String, Object> paramMap = ConfigurationDatabase.getParamMap(controllerName);
-		for (String key : paramMap.keySet()) {
-			String string = (String) paramMap.get(key);
-			if (string.contentEquals(mappedValue)) {
-				return key;
-			}
-		}
-		return null;
+		return ConfigurationDatabase.getKeyFromValue(controllerName, mappedValue);
 	}
 
 	public static void map(String name,String controllerVal, String persistantVal) {
@@ -57,8 +50,7 @@ public class PersistantControllerMap {
 	}
 
 	public static Set<String> getMappedAxis(String name) {
-		// TODO Auto-generated method stub
-		return ConfigurationDatabase.getParamMap(name).keySet();
+		return ConfigurationDatabase.keySet(name);
 	}
 
 	
