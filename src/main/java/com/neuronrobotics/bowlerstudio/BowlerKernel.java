@@ -472,7 +472,7 @@ public class BowlerKernel {
 				newStage.setOnCloseRequest(event -> {
 					// Exit the JVM when the window is closed
 					future.complete(true);
-					Platform.exit();
+					BowlerKernel.runLater(()->Platform.exit());
 				});
 				FontSizeManager.addListener(fontNum -> {
 					int tmp = fontNum - 10;
