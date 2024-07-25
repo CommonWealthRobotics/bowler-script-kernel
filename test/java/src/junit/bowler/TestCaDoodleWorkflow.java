@@ -84,6 +84,11 @@ public class TestCaDoodleWorkflow {
 				.setLocation(new TransformNR(distaance,distaance,0))
 				.setNames(Arrays.asList(nameOne))
 				;
+		MoveCenter move3 = new MoveCenter()
+				.setLocation(new TransformNR(0,0,0,new RotationNR(0,45,0)))
+				.setNames(Arrays.asList(nameOne))
+				;
+		back=loaded.addOpperation(move3);
 		back=loaded.addOpperation(move2);
 		System.out.println(loaded.toJson());
 		if(back.get(0).getCenterX()!=distaance)
