@@ -1,0 +1,41 @@
+{
+  "opperations": [
+    {
+      "type": "AddFromScript",
+      "data": {
+        "gitULR": "https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
+        "fileRel": "cube.groovy",
+        "name": "PlxM1JCvwFX1onkW6Akd"
+      }
+    },
+    {
+      "type": "AddFromScript",
+      "data": {
+        "gitULR": "https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
+        "fileRel": "cube.groovy",
+        "name": "mFGR3AvDwYLbzcrAHGWO"
+      }
+    },
+    {
+      "type": "MoveCenter",
+      "data": {
+        "location": {
+          "x": 100.0,
+          "y": 0.0,
+          "z": 0.0,
+          "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "names": [
+          "mFGR3AvDwYLbzcrAHGWO"
+        ]
+      }
+    }
+  ],
+  "currentIndex": 3,
+  "projectName": "A Test Project"
+}
