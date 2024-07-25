@@ -50,7 +50,9 @@ import com.neuronrobotics.bowlerstudio.creature.IMobileBaseUI;
 import com.neuronrobotics.bowlerstudio.creature.IgenerateBed;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
+import com.neuronrobotics.bowlerstudio.scripting.CaDoodleLoader;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
@@ -513,6 +515,10 @@ public class BowlerKernel {
 		}
 		if (CSG.class.isInstance(ret)) {
 			csgBits.add((CSG) ret);
+		}
+		if(CaDoodleFile.class.isInstance(ret)) {
+			processReturnedObjects(CaDoodleLoader.process((CaDoodleFile)ret), csgBits);
+			return;
 		}
 		if (MobileBase.class.isInstance(ret)) {
 			MobileBase ret2 = (MobileBase) ret;
