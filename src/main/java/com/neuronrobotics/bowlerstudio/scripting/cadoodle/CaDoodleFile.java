@@ -63,9 +63,12 @@ public class CaDoodleFile {
 		return currentState;
 	}
 	public void back() {
-		if(currentIndex>0)
+		if(isBackAvailible())
 			currentIndex-=1;
 		updateCurrentFromCache();
+	}
+	public boolean isBackAvailible() {
+		return currentIndex>1;
 	}
 	private void updateCurrentFromCache() {
 		ICaDoodleOpperation key = getOpperations().get(currentIndex-1);
@@ -73,9 +76,12 @@ public class CaDoodleFile {
 		setCurrentState(currentState2);
 	}
 	public void forward() {
-		if(currentIndex<getOpperations().size()-1)
+		if(isForwardAvailible())
 			currentIndex+=1;
 		updateCurrentFromCache();
+	}
+	public boolean isForwardAvailible() {
+		return currentIndex<getOpperations().size();
 	}
 	public File getSelf() {
 		return self;

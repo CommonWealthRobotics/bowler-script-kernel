@@ -20,17 +20,23 @@ public class ToSolid implements ICaDoodleOpperation {
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
+		ArrayList<CSG> replace = new ArrayList<CSG>();
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		back.addAll(incoming);
 		for(CSG c: incoming) {
 			for(String name:names) {
 				if(name.contentEquals(c.getName())) {
-					c.setIsHole(false);
-					if(color!=null) {
-						c.setColor(color);
-					}
+					replace.add(c);
+					CSG b=c.clone().syncProperties(c);
+					b.setIsHole(false);
+					back.add(b);
 				}
 			}
 		}
-		return incoming;
+		for(CSG c:replace) {
+			back.remove(c);
+		}
+		return back;
 	}
 
 	public List<String> getNames() {

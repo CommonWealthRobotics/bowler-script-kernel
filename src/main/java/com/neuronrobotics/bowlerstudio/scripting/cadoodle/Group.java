@@ -22,18 +22,25 @@ public class Group implements ICaDoodleOpperation {
 		ArrayList<CSG> holes = new ArrayList<CSG>();
 		ArrayList<CSG> solids = new ArrayList<CSG>();
 		ArrayList<CSG> back = new ArrayList<CSG>();
+		ArrayList<CSG> replace = new ArrayList<CSG>();
 		back.addAll(incoming);
-		for(CSG c: incoming) {
+		for(CSG csg: incoming) {
 			for(String name:names) {
-				if(name.contentEquals(c.getName())) {
-					if(c.isHole()) {
+				if(name.contentEquals(csg.getName())) {
+					replace.add(csg);
+					CSG c=csg.clone().syncProperties(csg).setName(name);
+					if(csg.isHole()) {
 						holes.add(c);
 					}else
 						solids.add(c);
 					c.setGroupMembership(getGroupID());
 					c.setIsGroupResult(false);
+					back.add(c);
 				}
 			}
+		}
+		for(CSG c:replace) {
+			back.remove(c);
 		}
 		CSG result =null;
 		if(holes.size()>0&&solids.size()==0) {
