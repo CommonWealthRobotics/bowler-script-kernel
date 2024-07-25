@@ -183,6 +183,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new FreecadLoader());
 		addScriptingLanguage(new FXMLBowlerLoader());
 		addScriptingLanguage(new OpenSCADLoader());
+		addScriptingLanguage(new CaDoodleLoader());
 	}
 
 	public static void setWorkspace(File file) {
