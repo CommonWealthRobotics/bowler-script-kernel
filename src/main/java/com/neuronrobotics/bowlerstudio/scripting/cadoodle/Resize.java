@@ -42,13 +42,13 @@ public class Resize implements ICaDoodleOpperation {
 	}
 
 	private CSG performResize(CSG starting, String name) {
-		CSG resizeUp = starting.scaleToMeasurmentZ(height.getZ())
+		CSG resizeUp = starting.scaleToMeasurmentZ(Math.abs(height.getZ()))
 				.toZMin()
 				.movez(starting.getMinZ());
 		double xdimen = rightFront.getX()-leftRear.getX();
 		double ydimen = rightFront.getY()-leftRear.getY();
-		resizeUp=resizeUp.scaleToMeasurmentX(xdimen)
-						 .scaleToMeasurmentY(ydimen);
+		resizeUp=resizeUp.scaleToMeasurmentX(Math.abs(xdimen))
+						 .scaleToMeasurmentY(Math.abs(ydimen));
 		resizeUp=resizeUp
 					.toXMin()
 					.toYMin()
