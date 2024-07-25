@@ -84,9 +84,12 @@ public class TestCaDoodleWorkflow {
 				.setLocation(new TransformNR(distaance,distaance,0))
 				.setNames(Arrays.asList(nameOne))
 				;
-		loaded.addOpperation(move2);
+		back=loaded.addOpperation(move2);
 		System.out.println(loaded.toJson());
-
+		if(back.get(0).getCenterX()!=distaance)
+			fail("Move failed ");
+		if(back.get(0).getCenterY()!=distaance)
+			fail("Move failed ");
 	}
 
 }

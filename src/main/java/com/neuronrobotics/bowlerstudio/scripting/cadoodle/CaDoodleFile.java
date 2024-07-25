@@ -68,7 +68,9 @@ public class CaDoodleFile {
 		updateCurrentFromCache();
 	}
 	private void updateCurrentFromCache() {
-		setCurrentState(cache.get(getOpperations().get(currentIndex-1)));
+		ICaDoodleOpperation key = getOpperations().get(currentIndex-1);
+		List<CSG> currentState2 = cache.get(key);
+		setCurrentState(currentState2);
 	}
 	public void forward() {
 		if(currentIndex<getOpperations().size()-1)
@@ -112,8 +114,8 @@ public class CaDoodleFile {
 	private void initialize() {
 		for(int i=0;i<opperations.size();i++) {
 			ICaDoodleOpperation op =opperations.get(i);
-			List<CSG> process = op.process(getCurrentState());
-			cache.put(op,process);
+			currentState= op.process(getCurrentState());
+			cache.put(op,currentState);
 		}
 		updateCurrentFromCache();
 	}
