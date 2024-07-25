@@ -19,7 +19,9 @@ import java.lang.reflect.Type;
 
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AddFromScript;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Group;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
@@ -54,7 +56,7 @@ public class TestCaDoodleWorkflow {
 			fail("Names must be unique!");
 		System.out.println("Name one : "+nameOne );
 		System.out.println("Name two : "+nameTwo );
-		double distaance =100;
+		double distaance =10;
 		MoveCenter move = new MoveCenter()
 				.setLocation(new TransformNR(distaance,0,0))
 				.setNames(Arrays.asList(nameTwo))
@@ -67,7 +69,7 @@ public class TestCaDoodleWorkflow {
 		if(back.get(0).getCenterX()!=0)
 			fail("Move misapplied ");
 		jsonContent = cf.toJson();
-		System.out.println(jsonContent);
+		//System.out.println(jsonContent);
 		cf.save();
 		CaDoodleFile loaded = CaDoodleFile.fromFile(cf.getSelf());
 		if(!MoveCenter.class.isInstance(loaded.getOpperations().get(2))) {
@@ -90,11 +92,23 @@ public class TestCaDoodleWorkflow {
 				;
 		back=loaded.addOpperation(move3);
 		back=loaded.addOpperation(move2);
-		System.out.println(loaded.toJson());
 		if(back.get(0).getCenterX()!=distaance)
 			fail("Move failed ");
 		if(back.get(0).getCenterY()!=distaance)
 			fail("Move failed ");
+		ToHole hole=  new ToHole().setNames(Arrays.asList(nameOne));
+		back=loaded.addOpperation(hole);
+		Group group = new Group().setNames(Arrays.asList(nameOne,nameTwo));
+		back=loaded.addOpperation(group);
+		if(back.size()!=3)
+			fail("Group Failed ");
+		String before = loaded.toJson();
+		loaded=CaDoodleFile.fromJsonString(before);
+		String after =loaded.toJson();
+		if(!before.contentEquals(after))
+			fail("Load and export mismatch");
+		System.out.println(after);
+	
 	}
 
 }

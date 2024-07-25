@@ -20,7 +20,7 @@ public class AddFromScript implements ICaDoodleOpperation {
 	@Expose (serialize = false, deserialize = false)
     private static final String CHAR_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	@Expose (serialize = false, deserialize = false)
-	private static final int STRING_LENGTH = 20;
+	private static final int STRING_LENGTH = 40;
 	private int nameIndex = 0;
 
     public static String generateRandomString() {

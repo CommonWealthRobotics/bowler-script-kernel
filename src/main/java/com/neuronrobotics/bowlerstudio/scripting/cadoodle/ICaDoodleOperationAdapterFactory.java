@@ -23,6 +23,11 @@ public class ICaDoodleOperationAdapterFactory implements TypeAdapterFactory {
     public ICaDoodleOperationAdapterFactory() {
         registerType("MoveCenter", MoveCenter.class);
         registerType("AddFromScript", AddFromScript.class);
+        registerType("ToSolid", ToSolid.class);
+        registerType("ToHole", ToHole.class);
+        registerType("Group", Group.class);
+        registerType("UnGroup", UnGroup.class);
+        
     }
 
     private void registerType(String typeName, Class<? extends ICaDoodleOpperation> clazz) {
