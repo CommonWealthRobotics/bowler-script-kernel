@@ -21,6 +21,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AddFromScript;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Group;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
@@ -102,6 +103,19 @@ public class TestCaDoodleWorkflow {
 		back=loaded.addOpperation(group);
 		if(back.size()!=3)
 			fail("Group Failed ");
+		String groupName = back.get(2).getName();
+		System.out.println("Group Name : "+groupName);
+		TransformNR height = new TransformNR(0,0,40);
+		TransformNR rightFront = new TransformNR(40,10,0);
+		TransformNR leftRear = new TransformNR(-10,80,0);
+		Resize resize = new Resize()
+					.setResize(height, rightFront, leftRear)
+					.setNames(Arrays.asList(groupName))
+				;
+		back = loaded.addOpperation(resize);
+		
+		
+		
 		String before = loaded.toJson();
 		loaded=CaDoodleFile.fromJsonString(before);
 		String after =loaded.toJson();

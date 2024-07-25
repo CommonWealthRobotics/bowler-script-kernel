@@ -6,13 +6,6 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +20,7 @@ public class ICaDoodleOperationAdapterFactory implements TypeAdapterFactory {
         registerType("ToHole", ToHole.class);
         registerType("Group", Group.class);
         registerType("UnGroup", UnGroup.class);
-        
+        registerType("Resize", Resize.class);
     }
 
     private void registerType(String typeName, Class<? extends ICaDoodleOpperation> clazz) {
