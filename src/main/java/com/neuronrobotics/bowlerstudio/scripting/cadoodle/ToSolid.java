@@ -29,6 +29,9 @@ public class ToSolid implements ICaDoodleOpperation {
 					replace.add(c);
 					CSG b=c.clone().syncProperties(c);
 					b.setIsHole(false);
+					if(color!=null) {
+						b.setColor(color);
+					}
 					back.add(b);
 				}
 			}
