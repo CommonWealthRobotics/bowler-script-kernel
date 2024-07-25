@@ -6,6 +6,7 @@ import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 import com.neuronrobotics.video.OSUtil;
 
+import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -92,7 +93,39 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 *
 	 */
-
+	public static void flatten(ArrayList<CSG> flat, Object o) {
+		if(CSG.class.isInstance(o))
+			flat.add((CSG)o);
+		if(List.class.isInstance(o)) {
+			for(Object ob:(List)o) {
+				flatten(flat,ob);
+			}
+		}
+		
+	}
+	private static <T> void flatenInterna(Object o, Class<T> type,ArrayList<T> flattened){
+		if(type.isInstance(o))
+			flattened.add((T)o);
+		if(List.class.isInstance(o)) {
+			for(Object ob:(List)o) {
+				flatenInterna(o,type,flattened);
+			}
+		}
+		if(Map.class.isInstance(o)) {
+			Map m=(Map)o;
+			for(Object key:m.keySet()) {
+				flatenInterna(m.get(key),type,flattened);
+				flatenInterna(key,type,flattened);
+			}
+		}
+	}
+	public static <T> List<T> flaten(String git,String file, Class<T> type) throws Exception{
+		ArrayList<T> flattened = new ArrayList<T>();
+		Object o =gitScriptRun(git, file);
+		flatenInterna(o,type,flattened);
+		return flattened;
+	}
+	
 	private static final ArrayList<GitLogProgressMonitor> logListeners = new ArrayList<>();
 
 	private static boolean printProgress = true;

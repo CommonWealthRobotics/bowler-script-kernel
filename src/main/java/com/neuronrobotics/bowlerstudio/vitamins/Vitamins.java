@@ -157,14 +157,7 @@ public class Vitamins {
 		return true;
 	}
 	public static void flatten(ArrayList<CSG> flat, Object o) {
-		if(CSG.class.isInstance(o))
-			flat.add((CSG)o);
-		if(List.class.isInstance(o)) {
-			for(Object ob:(List)o) {
-				flatten(flat,ob);
-			}
-		}
-		
+		ScriptingEngine.flatten(flat, o);
 	}
 	
 	public static CSG get(String type, String id) throws Exception {
