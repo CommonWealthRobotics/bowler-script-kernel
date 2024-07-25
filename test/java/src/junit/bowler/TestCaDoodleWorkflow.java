@@ -121,6 +121,7 @@ public class TestCaDoodleWorkflow {
 		String after =loaded.toJson();
 		if(!before.contentEquals(after))
 			fail("Load and export mismatch");
+		loaded.setSelf(cf.getSelf());
 		loaded.save();
 		System.out.println(after);
 	
