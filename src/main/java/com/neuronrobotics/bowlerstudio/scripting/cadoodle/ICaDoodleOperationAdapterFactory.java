@@ -14,13 +14,22 @@ public class ICaDoodleOperationAdapterFactory implements TypeAdapterFactory {
     private final Map<Class<? extends ICaDoodleOpperation>, String> classRegistry = new HashMap<>();
 
     public ICaDoodleOperationAdapterFactory() {
-        registerType("MoveCenter", MoveCenter.class);
         registerType("AddFromScript", AddFromScript.class);
-        registerType("ToSolid", ToSolid.class);
-        registerType("ToHole", ToHole.class);
+        registerType("Allign", Allign.class);
+        registerType("Delete", Delete.class);
         registerType("Group", Group.class);
-        registerType("UnGroup", UnGroup.class);
+        registerType("Hide", Hide.class);
+        registerType("Lock", Lock.class);
+        registerType("Mirror", Mirror.class);
+        registerType("MoveCenter", MoveCenter.class);
+        registerType("Paste", Paste.class);
         registerType("Resize", Resize.class);
+        registerType("Show", Show.class); 
+        registerType("ToHole", ToHole.class);       
+        registerType("ToSolid", ToSolid.class);
+        registerType("UnGroup", UnGroup.class);
+        registerType("UnLock", UnLock.class);
+        
     }
 
     private void registerType(String typeName, Class<? extends ICaDoodleOpperation> clazz) {
