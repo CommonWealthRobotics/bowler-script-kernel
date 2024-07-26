@@ -22,12 +22,13 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public class CaDoodleFile {
+	public static final String NO_NAME = "NoName";
 	@Expose (serialize = true, deserialize = true)
 	private ArrayList<ICaDoodleOpperation> opperations = new ArrayList<ICaDoodleOpperation>();
 	@Expose (serialize = true, deserialize = true)
 	private int currentIndex =0;
 	@Expose (serialize = true, deserialize = true)
-	private String projectName ="NoName";
+	private String projectName =NO_NAME;
 	@Expose (serialize = false, deserialize = false)
 	private File self;
 	@Expose (serialize = false, deserialize = false)
@@ -39,6 +40,22 @@ public class CaDoodleFile {
 			.excludeFieldsWithoutExposeAnnotation()
             .registerTypeAdapterFactory(new ICaDoodleOperationAdapterFactory())
 			.create();
+	private ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
+	
+	public CaDoodleFile clearListeners() {
+		listeners.clear();
+		return this;
+	}
+	public CaDoodleFile removeListener(ICaDoodleStateUpdate l) {
+		if(listeners.contains(l))
+			listeners.remove(l);
+		return this;
+	}
+	public CaDoodleFile addListener(ICaDoodleStateUpdate l) {
+		if(!listeners.contains(l))
+			listeners.add(l);
+		return this;
+	}
 	
 	public  List<CSG> addOpperation(ICaDoodleOpperation op) {
 		if(currentIndex != getOpperations().size()) {
@@ -71,9 +88,12 @@ public class CaDoodleFile {
 		return currentIndex>1;
 	}
 	private void updateCurrentFromCache() {
-		ICaDoodleOpperation key = getOpperations().get(currentIndex-1);
+		ICaDoodleOpperation key = currentOpperation();
 		List<CSG> currentState2 = cache.get(key);
 		setCurrentState(currentState2);
+	}
+	private ICaDoodleOpperation currentOpperation() {
+		return getOpperations().get(currentIndex-1);
 	}
 	public void forward() {
 		if(isForwardAvailible())
@@ -95,6 +115,13 @@ public class CaDoodleFile {
 	}
 	private void setCurrentState(List<CSG> currentState) {
 		this.currentState = currentState;
+		for(ICaDoodleStateUpdate l:listeners) {
+			try {
+				l.onUpdate(currentState, currentOpperation());
+			}catch(Throwable e){
+				e.printStackTrace();
+			}
+		}
 	}
 	public String getProjectName() {
 		return projectName;
@@ -112,11 +139,7 @@ public class CaDoodleFile {
 		FileUtils.write(ret, contents,StandardCharsets.UTF_8, false);
 		return ret;
 	}
-	public static CaDoodleFile fromJsonString(String content ) throws Exception {
-		CaDoodleFile file =gson.fromJson(content, TT_CaDoodleFile);
-		file.initialize();
-		return file;
-	}
+
 	private void initialize() {
 		for(int i=0;i<opperations.size();i++) {
 			ICaDoodleOpperation op =opperations.get(i);
@@ -125,10 +148,25 @@ public class CaDoodleFile {
 		}
 		updateCurrentFromCache();
 	}
-	public static CaDoodleFile fromFile(File f) throws Exception {
+	public static CaDoodleFile fromJsonString(String content ) throws Exception{
+		return fromJsonString(content, null);
+	}
+	public static CaDoodleFile fromJsonString(String content ,ICaDoodleStateUpdate listener) throws Exception {
+		CaDoodleFile file =gson.fromJson(content, TT_CaDoodleFile);
+		if(listener!=null) {
+			file.addListener(listener);
+		}
+		file.initialize();
+		return file;
+	}
+	public static CaDoodleFile fromFile(File f ) throws Exception{
+		return fromFile(f,null);
+	}
+	public static CaDoodleFile fromFile(File f,ICaDoodleStateUpdate listener ) throws Exception {
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-		CaDoodleFile file =fromJsonString(content);
+		CaDoodleFile file =fromJsonString(content,listener);
 		file.setSelf(f);
+		System.out.println("CaDoodle file loaded from "+f.getAbsolutePath());
 		return file;
 	}
 	public ArrayList<ICaDoodleOpperation> getOpperations() {
