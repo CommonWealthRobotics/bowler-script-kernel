@@ -56,13 +56,20 @@ public class Resize implements ICaDoodleOpperation {
 			}
 		}
 		double zScale = Math.abs(height.getZ());
-		CSG resizeUp = starting.scaleToMeasurmentZ(zScale);
+		Number scaleValue = zScale/ starting.getTotalZ();
+		
+		Transform scaleZ =new Transform().scaleZ(scaleValue.doubleValue());
+		CSG resizeUp = starting.transformed(scaleZ);
 		double zMove = -resizeUp.getMinZ()+starting.getMinZ();
 		resizeUp=resizeUp
 				.movez(zMove);
 		double xdimen = Math.abs(rightFront.getX()-leftRear.getX());
 		double ydimen = Math.abs(rightFront.getY()-leftRear.getY());
-		resizeUp=scaleToMeasurmentXY(resizeUp,xdimen,ydimen);
+		double scalex = xdimen/ resizeUp.getTotalX();
+		double scaley = ydimen/ resizeUp.getTotalY();
+
+		Transform scale = new Transform().scale(scalex,scaley,1);
+		resizeUp=resizeUp.transformed(scale);
 		double xMove=-resizeUp.getMinX()+leftRear.getX();
 		double yMove = -resizeUp.getMinY()+rightFront.getY();
 		resizeUp=resizeUp
@@ -70,10 +77,10 @@ public class Resize implements ICaDoodleOpperation {
 					.movey(yMove);
 		back.removeAll(groupConstituants);
 		for(CSG c:groupConstituants) {
-			CSG gc = c.scaleToMeasurmentZ(zScale);
+			CSG gc = c.transformed(scaleZ);
 			gc=gc
 					.movez(-gc.getMinZ()+c.getMinZ());
-			gc=scaleToMeasurmentXY(gc,xdimen,ydimen);
+			gc=gc.transformed(scale);
 			gc=gc
 						.movex(xMove)
 						.movey(yMove);
@@ -83,14 +90,11 @@ public class Resize implements ICaDoodleOpperation {
 		
 		back.add( resizeUp.syncProperties(starting).setName(name));
 	}
-	
-	private CSG scaleToMeasurmentXY(CSG inc,double x, double y) {
-		double scalex = x/ inc.getTotalX();
-		double scaley = y/ inc.getTotalY();
-
-		Transform scale = new Transform().scale(scalex,scaley,1);
-		return inc.moveToCenter().transformed(scale).move(inc.getCenter().transformed(scale));
-	}
+//	
+//	private CSG scaleToMeasurmentXY(CSG inc,double x, double y) {
+//
+//		return inc.moveToCenter().transformed(scale).move(inc.getCenter().transformed(scale));
+//	}
 
 	public Resize setResize(TransformNR h, TransformNR rf, TransformNR lr) {
 		height = h;
