@@ -12,7 +12,16 @@ public class ToSolid implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose (serialize = true, deserialize = true)
-	private Color color = null;
+	private double r=1.0;
+	@Expose (serialize = true, deserialize = true)
+	private double g=0;
+	@Expose (serialize = true, deserialize = true)
+	private double b=0;
+	@Expose (serialize = true, deserialize = true)
+	private double a=1.0;
+	@Expose (serialize = true, deserialize = true)
+	private boolean useColor=false;
+	
 	@Override
 	public String getType() {
 		return "To Solid";
@@ -27,12 +36,12 @@ public class ToSolid implements ICaDoodleOpperation {
 			for(String name:names) {
 				if(name.contentEquals(c.getName())) {
 					replace.add(c);
-					CSG b=c.clone().syncProperties(c);
-					b.setIsHole(false);
-					if(color!=null) {
-						b.setColor(color);
+					CSG t=c.clone().syncProperties(c);
+					t.setIsHole(false);
+					if(useColor) {
+						t.setColor(getColor());
 					}
-					back.add(b);
+					back.add(t);
 				}
 			}
 		}
@@ -52,11 +61,15 @@ public class ToSolid implements ICaDoodleOpperation {
 	}
 
 	public Color getColor() {
-		return color;
+		return new Color(r,g,b,a);
 	}
 
 	public ToSolid setColor(Color color) {
-		this.color = color;
+		r=color.getRed();
+		g=color.getGreen();
+		b=color.getBlue();
+		a=color.getOpacity();
+		useColor=true;
 		return this;
 	}
 

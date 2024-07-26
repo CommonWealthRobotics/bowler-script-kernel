@@ -23,10 +23,12 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Group;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToSolid;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import javafx.scene.paint.Color;
 
 public class TestCaDoodleWorkflow {
 
@@ -113,7 +115,10 @@ public class TestCaDoodleWorkflow {
 					.setNames(Arrays.asList(groupName))
 				;
 		back = loaded.addOpperation(resize);
-		
+		ToSolid solid = new ToSolid()
+						.setNames(Arrays.asList(groupName))
+						.setColor(Color.BLUE);
+		back = loaded.addOpperation(solid);
 		
 		
 		String before = loaded.toJson();
