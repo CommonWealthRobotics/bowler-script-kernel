@@ -71,7 +71,7 @@ public class CaDoodleFile {
 		try {
 			List<CSG> process = op.process(getCurrentState());
 			cache.put(op,process);
-			setCurrentState(process);
+			setCurrentState(process,op);
 			currentIndex++;
 			getOpperations().add(op);
 		}catch(Exception ex) {
@@ -90,7 +90,7 @@ public class CaDoodleFile {
 	private void updateCurrentFromCache() {
 		ICaDoodleOpperation key = currentOpperation();
 		List<CSG> currentState2 = cache.get(key);
-		setCurrentState(currentState2);
+		setCurrentState(currentState2,key);
 	}
 	private ICaDoodleOpperation currentOpperation() {
 		return getOpperations().get(currentIndex-1);
@@ -113,11 +113,11 @@ public class CaDoodleFile {
 	public List<CSG> getCurrentState() {
 		return currentState;
 	}
-	private void setCurrentState(List<CSG> currentState) {
+	private void setCurrentState(List<CSG> currentState, ICaDoodleOpperation op) {
 		this.currentState = currentState;
 		for(ICaDoodleStateUpdate l:listeners) {
 			try {
-				l.onUpdate(currentState, currentOpperation());
+				l.onUpdate(currentState,op,this);
 			}catch(Throwable e){
 				e.printStackTrace();
 			}
@@ -143,8 +143,8 @@ public class CaDoodleFile {
 	private void initialize() {
 		for(int i=0;i<opperations.size();i++) {
 			ICaDoodleOpperation op =opperations.get(i);
-			currentState= op.process(getCurrentState());
-			cache.put(op,currentState);
+			setCurrentState(op.process(getCurrentState()),op);
+			cache.put(op,getCurrentState());
 		}
 		updateCurrentFromCache();
 	}
