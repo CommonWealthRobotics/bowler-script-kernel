@@ -125,7 +125,9 @@ public class TestCaDoodleWorkflow {
 		
 		Group g = new Group().setNames(Arrays.asList(nameOne,nameTwo));
 		back = loaded.addOpperation(g);
-
+		
+		ToHole h=  new ToHole().setNames(Arrays.asList(back.get(2).getName()));
+		back=loaded.addOpperation(h);
 
 		String before = loaded.toJson();
 		loaded=CaDoodleFile.fromJsonString(before);
