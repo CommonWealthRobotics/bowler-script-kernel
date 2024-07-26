@@ -24,6 +24,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToSolid;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.UnGroup;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
@@ -119,8 +120,13 @@ public class TestCaDoodleWorkflow {
 						.setNames(Arrays.asList(groupName))
 						.setColor(Color.BLUE);
 		back = loaded.addOpperation(solid);
+		UnGroup ug = new UnGroup().setNames(Arrays.asList(groupName));
+		back = loaded.addOpperation(ug);
 		
-		
+		Group g = new Group().setNames(Arrays.asList(nameOne,nameTwo));
+		back = loaded.addOpperation(g);
+
+
 		String before = loaded.toJson();
 		loaded=CaDoodleFile.fromJsonString(before);
 		String after =loaded.toJson();

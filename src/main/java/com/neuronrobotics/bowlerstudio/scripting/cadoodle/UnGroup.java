@@ -20,26 +20,27 @@ public class UnGroup implements ICaDoodleOpperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		ArrayList<CSG> results = new ArrayList<CSG>();
-		for (CSG csg : back) {
-			if (csg.isGroupResult()) {
-				for (String name : names) {
+		
+		for (CSG csg : incoming) {
+			for (String name : names) {
+				if (csg.isGroupResult())
 					if (csg.getName().contentEquals(name)) {
-						results.add(csg);
+						back.remove(csg);
 					}
-					if (csg.isInGroup()) {
-						if (csg.getGroupMembership().contentEquals(name)) {
-							// release this object from the group
-							csg.setGroupMembership(null);
-						}
+				if (csg.isInGroup()) {
+					if (csg.getGroupMembership().contentEquals(name)) {
+						// release this object from the group
+						CSG readd= csg.clone().syncProperties(csg).setName(csg.getName());
+						
+						readd.setGroupMembership(null);
+						back.remove(csg);
+						back.add(readd);
 					}
 				}
+
 			}
 		}
-		for(CSG c:results) {
-			// remove the group results from the list of parts
-			back.remove(c);
-		}
+
 		return back;
 	}
 

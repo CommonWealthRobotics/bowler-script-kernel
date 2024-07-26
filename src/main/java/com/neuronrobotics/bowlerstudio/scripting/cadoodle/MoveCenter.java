@@ -27,7 +27,8 @@ public class MoveCenter implements ICaDoodleOpperation {
 				.stream()
 				.map(csg->{
 					for(String name:names) {
-						if(csg.getName().contentEquals(name))
+						if(csg.getName().contentEquals(name)||
+							(	csg.isInGroup() && csg.getGroupMembership().contentEquals(name) )	)
 							return csg
 									.transformed(TransformFactory.nrToCSG(location))
 									.setName(name)
