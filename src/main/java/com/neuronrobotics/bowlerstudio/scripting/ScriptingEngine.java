@@ -390,6 +390,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 
 	public static Git openGit(Repository localRepo) {
+		try {
 
 		Object[] keySet;
 		synchronized(gitOpenTimeout) {
@@ -424,6 +425,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		gitOpenTimeout.put(git, makeTimeoutThread(git));
 		return git;
+		}catch(Throwable t) {
+			new IssueReportingExceptionHandler().except(t);
+			throw new RuntimeException(t);
+
+		}
 	}
 
 	/**
@@ -1909,25 +1915,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static boolean checkOwner(File currentFile) {
+		Git git;
 		try {
-			Git git;
-			try {
-				git = locateGit(currentFile);
-			} catch (Exception e1) {
-
-				return false;
-			}
-			boolean owned;
-			try {
-				owned = checkOwner(git);
-			} catch (Throwable t) {
-				owned = false;
-			}
-			closeGit(git);
-			return owned;
-		} catch (Throwable t) {
+			git = locateGit(currentFile);
+		} catch (Throwable e1) {
 			return false;
 		}
+		boolean owned;
+		try {
+			owned = checkOwner(git);
+		} catch (Throwable t) {
+			owned = false;
+		}
+		closeGit(git);
+		return owned;
 	}
 
 	private static boolean checkOwner(Git git) {
