@@ -51,19 +51,19 @@ public class BlenderLoader implements IScriptingLanguage {
 	}
 
 
-	public static void toBlenderFile(File incoming,File blenderfile) {
+	public static void toBlenderFile(File stl,File blenderfile) {
 		System.out.println("Converting to Blender file before loading");
 		
 		File stlIn;
 		try {
-			stlIn = File.createTempFile(incoming.getName(), ".stl");
+			stlIn = File.createTempFile(stl.getName(), ".stl");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
 		stlIn.deleteOnExit();
-		scaleStl(incoming,stlIn,0.001);
+		scaleStl(stl,stlIn,0.001);
 		File dir = stlIn.getAbsoluteFile().getParentFile();
 
 		try {
@@ -98,6 +98,39 @@ public class BlenderLoader implements IScriptingLanguage {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	public static CSG remesh(CSG incoming, double MMVoxel) throws Exception {
+		File stl = DownloadManager.getTmpSTL(incoming);
+		remeshSTLFile(stl, MMVoxel);
+		CSG back = Vitamins.get(stl,true);
+		return back.syncProperties(incoming).setName(incoming.getName());
+	}
+	public static void remeshSTLFile(File stlout,double MMVoxel) throws Exception {
+		File blend = File.createTempFile(stlout.getName(), ".blend");
+		blend.deleteOnExit();
+		toBlenderFile(stlout, blend);
+		remeshToSTLFile(blend, stlout, MMVoxel);
+	}
+	public static void remeshToSTLFile(File blenderfile,File stlout,double MMVoxel) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		File exe = getConfigExecutable("blender", null);
+		File export = ScriptingEngine.fileFromGit(
+				"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
+				"remesh.py");
+		ArrayList<String> args = new ArrayList<>();
+
+		if(stlout.exists())
+			stlout.delete();
+		args.add(exe.getAbsolutePath());
+
+		args.add("--background");
+		args.add("--python");
+		args.add(export.getAbsolutePath());
+		args.add("--");
+		args.add(blenderfile.getAbsolutePath());
+		args.add(""+(MMVoxel/1000.0));
+		args.add(stlout.getAbsolutePath());
+		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
+		scaleStl(stlout,stlout,1000.0);
 	}
 	public static void toSTLFile(File blenderfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("blender", null);
