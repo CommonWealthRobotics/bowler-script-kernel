@@ -107,7 +107,7 @@ public class BlenderLoader implements IScriptingLanguage {
 	}
 	public static void remeshSTLFile(File stlout,double MMVoxel) throws Exception {
 		File blend = File.createTempFile(stlout.getName(), ".blend");
-		blend.deleteOnExit();
+		blend.delete();
 		toBlenderFile(stlout, blend);
 		remeshToSTLFile(blend, stlout, MMVoxel);
 	}
