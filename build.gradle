@@ -124,11 +124,11 @@ repositories {
 		url 'https://mlt.jfrog.io/artifactory/mlt-mvn-releases-local/'
 	}
 	maven { url 'https://repo.maven.apache.org/maven2/' }
-	
+
 	maven { url 'https://repo1.maven.org/maven2/'}
-//https://jcenter.bintray.com<
+	//https://jcenter.bintray.com<
 	maven { url 'https://jcenter.bintray.com/'}
-	
+
 	//jcenter()
 	maven { url 'https://oss.sonatype.org/content/repositories/snapshots/'  }
 	//maven { url 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'  }
@@ -136,235 +136,129 @@ repositories {
 	//com.neuronrobotics hosting point
 	maven { url 'https://oss.sonatype.org/content/repositories/staging/' }
 
-	    maven {
-	        url "https://repo.myrobotlab.org/artifactory/myrobotlab/"
-	        content {
-	            includeGroup("de.dfki.mary")
-	        }
-	    }
+	maven {
+		url "https://repo.myrobotlab.org/artifactory/myrobotlab/"
+		content {
+			includeGroup("de.dfki.mary")
+		}
+	}
 	maven { url 'https://maven-central.storage-download.googleapis.com/repos/central/data/'}
 	maven {url 'https://repo.jenkins-ci.org/public/'}
-	//	maven {
-	//		url "https://dl.bintray.com/ihmcrobotics/maven-release/"
-	//		content {
-	//			includeGroup("us.ihmc")
-	//		}
-	//	}
-	//	maven {
-	//		url "https://dl.bintray.com/ihmcrobotics/maven-vendor/"
-	//		content {
-	//			includeGroup("us.ihmc.thirdparty.jinput")
-	//		}
-	//	}
 }
 
 dependencies {
 
+	api 'com.neuronrobotics:JavaCad:1.4.1'
+	api project('java-bowler')
+	api project('GithubPasswordManager:GithubPasswordManager')
+
 	//compile group: "de.swirtz", name: "ktsRunner", version: "0.0.7"
-api 'us.ihmc:jinput:2.0.6-ihmc2'
-api group: 'us.ihmc', name: 'ihmc-native-library-loader', version: '1.3.1'
-//implementation 'net.java.jinput:jinput:2.0.10' // pegged to Java 17, no MacOS m1 support until java updated
-//implementation 'net.java.jinput:jinput:2.0.10:natives-all'
+	api 'us.ihmc:jinput:2.0.6-ihmc2'
+	api group: 'us.ihmc', name: 'ihmc-native-library-loader', version: '1.3.1'
 
-api 'com.google.crypto.tink:tink:1.3.0-rc1'
+	api 'com.google.crypto.tink:tink:1.3.0-rc1'
 
-api group: 'org.json', name: 'json', version: '20180813'
+	api group: 'org.json', name: 'json', version: '20180813'
 
-api 'gov.nist.math:jama:1.0.2'
+	api 'gov.nist.math:jama:1.0.2'
 
-api group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6'
+	api group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6'
 
-api group: 'org.reactfx', name: 'reactfx', version: '2.0-SNAPSHOT'
+	api group: 'org.reactfx', name: 'reactfx', version: '2.0-SNAPSHOT'
 
-// https://mvnrepository.com/artifact/org.apache.groovy/groovy
-api group: 'org.apache.groovy', name: 'groovy', version: '4.0.22'
-//make grapes work
-api group: 'org.apache.ivy', name: 'ivy', version: '2.5.1'
+	// https://mvnrepository.com/artifact/org.apache.groovy/groovy
+	api group: 'org.apache.groovy', name: 'groovy', version: '4.0.22'
+	//make grapes work
+	api group: 'org.apache.ivy', name: 'ivy', version: '2.5.1'
 
 	//compile group: 'org.controlsfx', name: 'controlsfx', version: '8.0.6'
-api group: 'commons-lang', name: 'commons-lang', version: '2.6'
-api group: 'commons-codec', name: 'commons-codec', version: '1.7'
-
-
+	api group: 'commons-lang', name: 'commons-lang', version: '2.6'
+	api group: 'commons-codec', name: 'commons-codec', version: '1.7'
 
 	// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
-	implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.13.1.202206130422-r'
+	api group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.13.1.202206130422-r'
 	// https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.ssh.apache
-	implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit.ssh.apache', version: '5.13.1.202206130422-r'
-
+	api group: 'org.eclipse.jgit', name: 'org.eclipse.jgit.ssh.apache', version: '5.13.1.202206130422-r'
 
 	// https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5
-api group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1'
+	api group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1'
 
+	api group: 'com.squareup.okhttp', name: 'okhttp-urlconnection', version: '2.0.0'
+	api group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+	api group: 'com.infradna.tool', name: 'bridge-method-injector', version: '1.14'
 
-
-api group: 'com.squareup.okhttp', name: 'okhttp-urlconnection', version: '2.0.0'
-api group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
-api group: 'com.infradna.tool', name: 'bridge-method-injector', version: '1.14'
-
-api 'com.miglayout:miglayout-swing:4.2'
-api 'commons-io:commons-io:2.6'
-api group:'org.python',name:'jython',version:'2.5.3'
-api group:'org.python',name:'jython-standalone',version:'2.5.2'
-api 'org.clojure:clojure:1.8.0'
+	api 'com.miglayout:miglayout-swing:4.2'
+	api 'commons-io:commons-io:2.6'
+	api group:'org.python',name:'jython',version:'2.5.3'
+	api group:'org.python',name:'jython-standalone',version:'2.5.2'
+	api 'org.clojure:clojure:1.8.0'
 	// jetty server
-api "org.eclipse.jetty:jetty-server:9.0.2.v20130417"
-api "org.eclipse.jetty:jetty-servlet:9.0.2.v20130417"
-api "org.eclipse.jetty:jetty-servlets:9.0.2.v20130417"
-api "org.eclipse.jetty:jetty-webapp:9.0.2.v20130417"
-api "javax.servlet:javax.servlet-api:3.1.0"
+	api "org.eclipse.jetty:jetty-server:9.0.2.v20130417"
+	api "org.eclipse.jetty:jetty-servlet:9.0.2.v20130417"
+	api "org.eclipse.jetty:jetty-servlets:9.0.2.v20130417"
+	api "org.eclipse.jetty:jetty-webapp:9.0.2.v20130417"
+	api "javax.servlet:javax.servlet-api:3.1.0"
+	api group: 'java3d', name: 'vecmath', version: '1.3.1'
+	api 'org.slf4j:slf4j-simple:1.6.1'
 
 
-	//compile 'org.clojure:tools.nrepl:0.2.10'
-	//compile "overtone:overtone:0.9.1"
-	//compile "edu.cmu.sphinx:sphinx4-core:5prealpha-SNAPSHOT"
-	//compile "edu.cmu.sphinx:sphinx4-data:5prealpha-SNAPSHOT"
-api group: 'java3d', name: 'vecmath', version: '1.3.1'
-api 'org.slf4j:slf4j-simple:1.6.1'
+	api group:'de.huxhorn.sulky', name:'de.huxhorn.sulky.3rdparty.jlayer', version:'1.0'
+	api 'com.google.code.gson:gson:2.5'
+	api 'org.jsoup:jsoup:1.8.3'
+	api 'org.apache.httpcomponents:httpclient:4.5.1'
 
-
-	//compile group: 'com.neuronrobotics', name:'GithubPasswordManager', version:'0.6.1'
-	//compile "com.neuronrobotics:JavaCad:0.14.0"
-	//compile project('JCSG')
-api 'com.neuronrobotics:JavaCad:1.4.0'
-	
-	//compile "com.neuronrobotics:CHDK-PTP-Java:0.5.3-SNAPSHOT"
-	//compile "com.neuronrobotics:java-bowler:3.25.4"
-api project('java-bowler')
-api project('GithubPasswordManager:GithubPasswordManager')
-	//compile fileTree (dir: ':java-bowler/libs/', includes: ['*.jar'])
-	//compile fileTree (dir: '../java-bowler/build/libs/', includes: ['nrsdk-3.23.3-jar-with-dependencies.jar'])
-	//compile fileTree (dir: '../JCSG/build/libs/', includes: ['JavaCad-0.8.2.jar'])
-	//compile "com.neuronroboticsp:WalnutiQ:2.3.3"
-
-
-	/*
-	 String basedir =System.getenv("OPENCV_DIR")+"/java/opencv-249.jar";
-	 if(isWindows()){
-	 basedir =System.getenv("OPENCV_DIR")+"\\..\\..\\java\\opencv-249.jar";
-	 println("OPENCV_DIR="+basedir);
-	 compile files(basedir)
-	 }
-	 if(isOSX()){
-	 basedir =System.getenv("OPENCV_DIR")+"../../java/opencv-249.jar";
-	 println("OPENCV_DIR="+basedir);
-	 if(System.getenv("OPENCV_DIR")!=null)
-	 compile files(basedir)
-	 else
-	 //If you set your OPENCV_DIR environment variable, then we wouldnt have to do hacky things
-	 compile files('/Applications/BowlerStudio.app/Contents/MacOS/opencv249build/bin/opencv-249.jar')
-	 }
-	 if(isLinux()){
-	 //compile files('/usr/share/java/opencv-249.jar')
-	 if(new File("/usr/share/OpenCV/java/").exists()){
-	 System.out.println("Using the legacy opencv dir ")
-	 compile fileTree (dir: '/usr/share/OpenCV/java/', includes: ['*opencv-24*.jar'])
-	 }else{
-	 compile fileTree (dir: '/usr/share/java/', includes: ['*opencv-24*.jar'])
-	 }
-	 }
-	 */
-	//compile group: 'jfree', name: 'jfreechart', version: '1.0.12'
-	//compile group: 'jexcelapi', name: 'jxl', version: '2.4.2'
-	//compile group: 'com.google.zxing', name: 'zxing-parent', version: '3.2.0'
-	//compile group:'com.github.ellzord', name:'JALSE', version:'1.0.9'
-
-api group:'de.huxhorn.sulky', name:'de.huxhorn.sulky.3rdparty.jlayer', version:'1.0'
-	//compile("org.springframework.boot:spring-boot-starter-web:1.2.7.RELEASE")
-
-api 'com.google.code.gson:gson:2.5'
-api 'org.jsoup:jsoup:1.8.3'
-api 'org.apache.httpcomponents:httpclient:4.5.1'
-	//compile 'cz.advel.jbullet:jbullet:20101010-1'
-	//compile 'org.bubblecloud.jbullet:jbullet:2.72.2.4'// jars local because mave repo for this went down
-	//compile "alda:alda:1.0.0-rc14"
-
-	//Deep Learning 4 j and dependancies
-	/*
-	 compile 'org.deeplearning4j:deeplearning4j-core:0.4-rc3.8'
-	 //compile 'org.nd4j:nd4j-x86:0.4-rc3.8'
-	 compile 'org.deeplearning4j:deeplearning4j-nlp:0.4-rc3.8'
-	 compile 'org.deeplearning4j:deeplearning4j-ui:0.4-rc3.8'
-	 //compile 'com.google.guava:guava:19.0'
-	 compile 'org.nd4j:canova-nd4j-image:0.0.0.14'
-	 compile 'org.nd4j:canova-nd4j-codec:0.0.0.14'
-	 compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.1'
-	 */
-	// JScience:
-	//compile 'org.jscience:jscience:4.3.1'
-
-	//compile 'javax.media:jmf:2.1.1e'
-
-	//Weka
-	//compile 'nz.ac.waikato.cms.weka:weka-stable:3.6.13'
-
-	//Firmata
-api 'com.github.kurbatov:firmata4j:2.3.4.1'
+	api 'com.github.kurbatov:firmata4j:2.3.4.1'
 
 
 	testImplementation 'junit:junit:4.10'
-//api fileTree (dir: 'libs', includes: ['*.jar'])
-	// https://mvnrepository.com/artifact/com.github.stephengold/jbullet
 	api group: 'com.github.stephengold', name: 'jbullet', version: '1.0.3'
-	
-	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1')
-	{
+
+	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
-	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2')
-	{
+	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
-//		implementation('de.dfki.mary:voice-cmu-awb-time:5.2')
-//		{
-//			exclude group: 'commons-io', module: 'commons-io'
-//		}
-	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2')
-	{
+
+	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
-	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2')
-	{
+	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
-		implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
-		{
-			exclude group: 'commons-io', module: 'commons-io'
-			
-			exclude group: 'com.twmacinta', module: 'fast-md5'
-			exclude group: 'gov.nist.math', module: 'Jampack'
-		}
-		implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2')
-		{
-			exclude group: 'commons-io', module: 'commons-io'
-			
-			exclude group: 'com.twmacinta', module: 'fast-md5'
-			exclude group: 'gov.nist.math', module: 'Jampack'
-		}
-		implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2')
-		{
-			exclude group: 'commons-io', module: 'commons-io'
-			
-			exclude group: 'com.twmacinta', module: 'fast-md5'
-			exclude group: 'gov.nist.math', module: 'Jampack'
-		}
-		implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2')
-		{
-			exclude group: 'commons-io', module: 'commons-io'
-			
-			exclude group: 'com.twmacinta', module: 'fast-md5'
-			exclude group: 'gov.nist.math', module: 'Jampack'
-		}
-	implementation('de.dfki.mary:marytts-lang-en:5.2.1')
-	{
+	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2') {
+		exclude group: 'commons-io', module: 'commons-io'
+
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
+	}
+	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2') {
+		exclude group: 'commons-io', module: 'commons-io'
+
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
+	}
+	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2') {
+		exclude group: 'commons-io', module: 'commons-io'
+
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
+	}
+	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2') {
+		exclude group: 'commons-io', module: 'commons-io'
+
+		exclude group: 'com.twmacinta', module: 'fast-md5'
+		exclude group: 'gov.nist.math', module: 'Jampack'
+	}
+	implementation('de.dfki.mary:marytts-lang-en:5.2.1') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
@@ -391,8 +285,7 @@ api 'com.github.kurbatov:firmata4j:2.3.4.1'
 	// https://mvnrepository.com/artifact/net.lingala.zip4j/zip4j
 	implementation group: 'net.lingala.zip4j', name: 'zip4j', version: '2.11.5'
 	// https://mvnrepository.com/artifact/com.alphacephei/vosk
-	implementation( 'com.alphacephei:vosk:0.3.38')
-	{
+	implementation( 'com.alphacephei:vosk:0.3.38') {
 		exclude group: 'net.java.dev.jna', module: 'jna'
 	}
 	// Add OpenCV
@@ -404,7 +297,7 @@ api 'com.github.kurbatov:firmata4j:2.3.4.1'
 	implementation 'org.apache.commons:commons-compress:1.26.2'
 	// Addiing advance system execution for advanced editors
 	implementation 'org.apache.commons:commons-exec:1.3'
-	
+
 	implementation 'org.tukaani:xz:1.9'
 	implementation 'org.brotli:dec:0.1.2'  // Add this for Brotli support
 	// Add 7z native bindings
@@ -412,8 +305,6 @@ api 'com.github.kurbatov:firmata4j:2.3.4.1'
 	implementation 'net.sf.sevenzipjbinding:sevenzipjbinding-all-platforms:16.02-2.01'
 	// inkscape loading
 	implementation group: 'org.apache.xmlgraphics', name: 'batik-all', version: '1.17'
-	
-
 }
 
 
@@ -457,13 +348,13 @@ archivesBaseName = "bowler-script-kernel"
 
 task javadocJar(type: Jar) {
 	if (project == rootProject)
-	classifier = 'javadoc'
+		classifier = 'javadoc'
 	from javadoc
 }
 
 task sourcesJar(type: Jar) {
 	if (project == rootProject)
-	classifier = 'sources'
+		classifier = 'sources'
 	from sourceSets.main.allSource
 }
 
