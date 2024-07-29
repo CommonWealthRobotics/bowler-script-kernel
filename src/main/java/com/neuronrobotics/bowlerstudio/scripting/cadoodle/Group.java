@@ -48,9 +48,13 @@ public class Group implements ICaDoodleOpperation {
 			result.setIsHole(true);
 
 		}else {
-			CSG holecutter = CSG.unionAll(holes);
-			CSG solid = CSG.unionAll(solids);
-			result=solid.difference(holecutter);
+			
+			CSG holecutter =null;
+			if(holes.size()>0)
+				holecutter=CSG.unionAll(holes);
+			result = CSG.unionAll(solids);
+			if(holecutter!=null)
+				result=result.difference(holecutter);
 			result.setIsHole(false);
 		}
 		result.setIsGroupResult(true);
