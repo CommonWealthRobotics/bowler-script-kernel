@@ -103,7 +103,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		
 	}
-	private static <T> void flatenInterna(Object o, Class<T> type,ArrayList<T> flattened){
+	public static <T> void flatenInterna(Object o, Class<T> type,ArrayList<T> flattened){
 		if(type.isInstance(o))
 			flattened.add((T)o);
 		if(List.class.isInstance(o)) {
@@ -125,7 +125,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		flatenInterna(o,type,flattened);
 		return flattened;
 	}
-	
+	public static <T> List<T> flaten(File f, Class<T> type) throws Exception{
+		ArrayList<T> flattened = new ArrayList<T>();
+		Object o =inlineFileScriptRun(f, null);
+		flatenInterna(o,type,flattened);
+		return flattened;
+	}
 	private static final ArrayList<GitLogProgressMonitor> logListeners = new ArrayList<>();
 
 	private static boolean printProgress = true;
