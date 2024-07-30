@@ -197,10 +197,10 @@ public class CaDoodleFile {
 		return fromFile(f,null);
 	}
 	public static CaDoodleFile fromFile(File f,ICaDoodleStateUpdate listener ) throws Exception {
+		System.out.println("CaDoodle file loading from "+f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 		CaDoodleFile file =fromJsonString(content,listener);
 		file.setSelf(f);
-		System.out.println("CaDoodle file loaded from "+f.getAbsolutePath());
 		return file;
 	}
 	public ArrayList<ICaDoodleOpperation> getOpperations() {
