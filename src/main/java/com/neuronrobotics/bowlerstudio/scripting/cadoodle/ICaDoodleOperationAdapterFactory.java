@@ -14,6 +14,7 @@ public class ICaDoodleOperationAdapterFactory implements TypeAdapterFactory {
     private final Map<Class<? extends ICaDoodleOpperation>, String> classRegistry = new HashMap<>();
 
     public ICaDoodleOperationAdapterFactory() {
+    	registerType("AddFromFile", AddFromFile.class);
         registerType("AddFromScript", AddFromScript.class);
         registerType("Allign", Allign.class);
         registerType("Delete", Delete.class);
