@@ -49,7 +49,7 @@ public class Resize implements ICaDoodleOpperation {
 		if(starting.isGroupResult()) {
 			for(CSG c:back) {
 				if(c.isInGroup()) {
-					if(c.getGroupMembership().contentEquals(name)) {
+					if(c.checkGroupMembership(name)) {
 						groupConstituants.add(c);
 					}
 				}

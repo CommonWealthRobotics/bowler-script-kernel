@@ -33,8 +33,7 @@ public class Group implements ICaDoodleOpperation {
 						holes.add(c);
 					}else
 						solids.add(c);
-					c.setGroupMembership(getGroupID());
-					c.setIsGroupResult(false);
+					c.addGroupMembership(getGroupID());
 					back.add(c);
 				}
 			}
@@ -56,7 +55,7 @@ public class Group implements ICaDoodleOpperation {
 				result=result.difference(holecutter);
 			result.setIsHole(false);
 		}
-		result.setIsGroupResult(true);
+		result.addIsGroupResult(getGroupID());
 		result.setName(getGroupID());
 		back.add(result);
 		return back;

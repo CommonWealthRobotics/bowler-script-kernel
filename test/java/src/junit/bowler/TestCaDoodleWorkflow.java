@@ -21,6 +21,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AddFromScript;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Group;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Paste;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToSolid;
@@ -44,10 +45,10 @@ public class TestCaDoodleWorkflow {
 		
 		AddFromScript cube1 = new AddFromScript()
 				.set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
-						"cube.groovy");
+						"sphere.groovy");
 		AddFromScript cube2 = new AddFromScript()
 				.set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
-						"cube.groovy");
+						"sphere.groovy");
 		List<CSG>back= cf.addOpperation(cube1);
 		if(back.size()!=1)
 			fail("Adding a cube should have added one!");
@@ -106,6 +107,18 @@ public class TestCaDoodleWorkflow {
 		back=loaded.addOpperation(group);
 		if(back.size()!=3)
 			fail("Group Failed ");
+		if(!back.get(0).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
+		if(!back.get(1).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
+		if(back.get(2).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
+		if(!back.get(2).isGroupResult()) {
+			fail("THis should not be in a group anymore");
+		}
 		String groupName = back.get(2).getName();
 		System.out.println("Group Name : "+groupName);
 		TransformNR height = new TransformNR(0,0,40);
@@ -122,10 +135,36 @@ public class TestCaDoodleWorkflow {
 		back = loaded.addOpperation(solid);
 		UnGroup ug = new UnGroup().setNames(Arrays.asList(groupName));
 		back = loaded.addOpperation(ug);
+		if(back.get(0).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
+		if(back.get(1).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
 		
 		Group g = new Group().setNames(Arrays.asList(nameOne,nameTwo));
 		back = loaded.addOpperation(g);
-		
+		String newGroupName = back.get(back.size()-1).getName();
+		Paste paste = new Paste().setNames(Arrays.asList(newGroupName));
+		back = loaded.addOpperation(paste);
+		ArrayList<String> selectAll = new  ArrayList<String>();
+		for(CSG c:back) {
+			if(c.isGroupResult())
+				selectAll.add(c.getName());
+		}
+		back = loaded.addOpperation(new UnGroup().setNames(selectAll));
+		if(back.get(0).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
+		if(back.get(1).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
+		if(back.get(2).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
+		if(back.get(3).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
 		ToHole h=  new ToHole().setNames(Arrays.asList(back.get(2).getName()));
 		back=loaded.addOpperation(h);
 

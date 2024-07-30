@@ -28,11 +28,11 @@ public class UnGroup implements ICaDoodleOpperation {
 						back.remove(csg);
 					}
 				if (csg.isInGroup()) {
-					if (csg.getGroupMembership().contentEquals(name)) {
+					if (csg.checkGroupMembership(name)) {
 						// release this object from the group
 						CSG readd= csg.clone().syncProperties(csg).setName(csg.getName());
 						
-						readd.setGroupMembership(null);
+						readd.removeGroupMembership(name);
 						back.remove(csg);
 						back.add(readd);
 					}

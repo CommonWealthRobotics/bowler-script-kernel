@@ -34,12 +34,18 @@ public class Paste implements ICaDoodleOpperation {
 					index = copyPasteMoved(back, index, c);
 					if(c.isGroupResult()) {
 						String groupName = c.getName();
+						CSG newGroupResult= back.get(back.size()-1);
+						newGroupResult.removeIsGroupResult(groupName);
+						newGroupResult.addIsGroupResult(newGroupResult.getName());
 						for(int j=0;j<incoming.size();j++) {
 							CSG jc=incoming.get(j);
 							if(jc.isInGroup()) {
-								if(jc.getGroupMembership().contentEquals(groupName)) {
+								if(jc.checkGroupMembership(groupName)) {
 									// this pasted gropups member found
 									index = copyPasteMoved(back, index, jc);
+									CSG newCopyInGroup = back.get(back.size()-1);
+									newCopyInGroup.removeGroupMembership(groupName);
+									newCopyInGroup.addGroupMembership(newGroupResult.getName());
 								}
 							}
 						}
