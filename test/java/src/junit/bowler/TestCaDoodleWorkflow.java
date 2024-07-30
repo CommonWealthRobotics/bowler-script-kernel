@@ -172,7 +172,7 @@ public class TestCaDoodleWorkflow {
 		if(back.get(3).isInGroup()) {
 			fail("THis should not be in a group anymore");
 		}
-		ToHole h=  new ToHole().setNames(Arrays.asList(back.get(2).getName()));
+		ToHole h=  new ToHole().setNames(Arrays.asList(nameTwo));
 		back=loaded.addOpperation(h);
 		loaded.save();
 		
@@ -196,6 +196,8 @@ public class TestCaDoodleWorkflow {
 		if(!back.get(1).isInGroup()) {
 			fail("This should be in a group");
 		}
+		
+		loaded.save();
 
 		String before = loaded.toJson();
 		loaded=CaDoodleFile.fromJsonString(before);
