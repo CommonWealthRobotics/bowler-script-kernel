@@ -105,6 +105,7 @@ public class TestCaDoodleWorkflow {
 		back=loaded.addOpperation(hole);
 		Group group = new Group().setNames(Arrays.asList(nameOne,nameTwo));
 		back=loaded.addOpperation(group);
+		List<CSG> cacheOfGroup = loaded.getCurrentState();
 		if(back.size()!=3)
 			fail("Group Failed ");
 		if(!back.get(0).isInGroup()) {
@@ -117,7 +118,7 @@ public class TestCaDoodleWorkflow {
 			fail("THis should not be in a group anymore");
 		}
 		if(!back.get(2).isGroupResult()) {
-			fail("THis should not be in a group anymore");
+			fail("THis should be aa group result");
 		}
 		String groupName = back.get(2).getName();
 		System.out.println("Group Name : "+groupName);
@@ -176,6 +177,26 @@ public class TestCaDoodleWorkflow {
 		loaded.setSelf(cf.getSelf());
 		loaded.save();
 		System.out.println(after);
+		
+		for(int i=0;i<3;i++) {
+			loaded.back();
+		}
+		List<CSG> goBackResult = loaded.getCurrentState();
+		if(goBackResult.size()!=3) {
+			fail(" Number of elements after back incorrect!");
+		}
+		if(!back.get(0).isInGroup()) {
+			fail("This should be in a group");
+		}
+		if(!back.get(1).isInGroup()) {
+			fail("This should be in a group");
+		}
+		if(back.get(2).isInGroup()) {
+			fail("THis should not be in a group anymore");
+		}
+		if(!back.get(2).isGroupResult()) {
+			fail("THis should be a group result");
+		}
 	
 	}
 
