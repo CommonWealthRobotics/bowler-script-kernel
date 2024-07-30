@@ -57,7 +57,21 @@ public class CaDoodleFile {
 			listeners.add(l);
 		return this;
 	}
-	
+	private void initialize() {
+		int indexStarting = currentIndex;
+		currentIndex=0;
+		for(int i=0;i<opperations.size();i++) {
+			ICaDoodleOpperation op =opperations.get(i);
+			process(op);
+		}
+		currentIndex=indexStarting;
+		updateCurrentFromCache();
+	}
+	private void process(ICaDoodleOpperation op) {
+		storeResultInCache(op, op.process(getCurrentState()));
+		currentIndex++;
+		setCurrentState(op);
+	}
 	public  List<CSG> addOpperation(ICaDoodleOpperation op) {
 		if(currentIndex != getOpperations().size()) {
 			for(int i=currentIndex;i<getOpperations().size();i++) {
@@ -70,11 +84,8 @@ public class CaDoodleFile {
 			setOpperations(newList);
 		}
 		try {
-			List<CSG> process = op.process(getCurrentState());
-			storeResultInCache(op, process);
-			setCurrentState(op);
-			currentIndex++;
 			getOpperations().add(op);
+			process(op);
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
@@ -150,18 +161,7 @@ public class CaDoodleFile {
 		return ret;
 	}
 
-	private void initialize() {
-		int indexStarting = currentIndex;
-		currentIndex=0;
-		for(int i=0;i<opperations.size();i++) {
-			ICaDoodleOpperation op =opperations.get(i);
-			storeResultInCache(op, op.process(getCurrentState()));
-			currentIndex++;
-			setCurrentState(op);
-		}
-		currentIndex=indexStarting;
-		updateCurrentFromCache();
-	}
+
 	public static CaDoodleFile fromJsonString(String content ) throws Exception{
 		return fromJsonString(content, null);
 	}
