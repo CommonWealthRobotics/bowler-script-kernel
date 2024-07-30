@@ -12,6 +12,8 @@ public class Group implements ICaDoodleOpperation {
 	private List<String> names = new ArrayList<String>();
 	@Expose (serialize = true, deserialize = true)
 	public String groupID=null;
+	@Expose (serialize = true, deserialize = true)
+	public boolean hull=false;
 	@Override
 	public String getType() {
 		return "Group";
@@ -51,6 +53,9 @@ public class Group implements ICaDoodleOpperation {
 			if(holes.size()>0)
 				holecutter=CSG.unionAll(holes);
 			result = CSG.unionAll(solids);
+			if(hull) {
+				result=result.hull();
+			}
 			if(holecutter!=null)
 				result=result.difference(holecutter);
 			result.setIsHole(false);
@@ -74,6 +79,11 @@ public class Group implements ICaDoodleOpperation {
 		if(groupID==null)
 			groupID=AddFromScript.generateRandomString();
 		return groupID;
+	}
+
+	public Group setHull(boolean hull) {
+		this.hull = hull;
+		return this;
 	}
 
 }
