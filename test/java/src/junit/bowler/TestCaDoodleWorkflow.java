@@ -105,7 +105,6 @@ public class TestCaDoodleWorkflow {
 		back=loaded.addOpperation(hole);
 		Group group = new Group().setNames(Arrays.asList(nameOne,nameTwo));
 		back=loaded.addOpperation(group);
-		List<CSG> cacheOfGroup = loaded.getCurrentState();
 		if(back.size()!=3)
 			fail("Group Failed ");
 		if(!back.get(0).isInGroup()) {
@@ -143,17 +142,24 @@ public class TestCaDoodleWorkflow {
 			fail("THis should not be in a group anymore");
 		}
 		
-		Group g = new Group().setNames(Arrays.asList(nameOne,nameTwo));
-		back = loaded.addOpperation(g);
-		String newGroupName = back.get(back.size()-1).getName();
-		Paste paste = new Paste().setNames(Arrays.asList(newGroupName));
-		back = loaded.addOpperation(paste);
+
+		back = loaded.addOpperation(
+				new Group()
+				.setNames(Arrays.asList(nameOne,nameTwo))
+				);
+		List<CSG> cacheOfGroup = loaded.getCurrentState();
+
+		String newGroupName = cacheOfGroup.get(cacheOfGroup.size()-1).getName();
+		
+		back = loaded.addOpperation(
+				new Paste().setNames(Arrays.asList(newGroupName)));
 		ArrayList<String> selectAll = new  ArrayList<String>();
 		for(CSG c:back) {
 			if(c.isGroupResult())
 				selectAll.add(c.getName());
 		}
-		back = loaded.addOpperation(new UnGroup().setNames(selectAll));
+		back = loaded.addOpperation(
+				new UnGroup().setNames(selectAll));
 		if(back.get(0).isInGroup()) {
 			fail("THis should not be in a group anymore");
 		}
@@ -168,28 +174,15 @@ public class TestCaDoodleWorkflow {
 		}
 		ToHole h=  new ToHole().setNames(Arrays.asList(back.get(2).getName()));
 		back=loaded.addOpperation(h);
-
-		String before = loaded.toJson();
-		loaded=CaDoodleFile.fromJsonString(before);
-		String after =loaded.toJson();
-		if(!before.contentEquals(after))
-			fail("Load and export mismatch");
-		loaded.setSelf(cf.getSelf());
 		loaded.save();
-		System.out.println(after);
 		
 		for(int i=0;i<3;i++) {
 			loaded.back();
 		}
 		List<CSG> goBackResult = loaded.getCurrentState();
+		back=goBackResult;
 		if(goBackResult.size()!=3) {
 			fail(" Number of elements after back incorrect!");
-		}
-		if(!back.get(0).isInGroup()) {
-			fail("This should be in a group");
-		}
-		if(!back.get(1).isInGroup()) {
-			fail("This should be in a group");
 		}
 		if(back.get(2).isInGroup()) {
 			fail("THis should not be in a group anymore");
@@ -197,6 +190,24 @@ public class TestCaDoodleWorkflow {
 		if(!back.get(2).isGroupResult()) {
 			fail("THis should be a group result");
 		}
+		if(!back.get(0).isInGroup()) {
+			fail("This should be in a group");
+		}
+		if(!back.get(1).isInGroup()) {
+			fail("This should be in a group");
+		}
+
+		String before = loaded.toJson();
+		loaded=CaDoodleFile.fromJsonString(before);
+		String after =loaded.toJson();
+		if(!before.contentEquals(after))
+			fail("Load and export mismatch");
+		loaded.setSelf(cf.getSelf());
+
+		System.out.println(after);
+		
+
+
 	
 	}
 

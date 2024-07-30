@@ -20,6 +20,7 @@ import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.PropertyStorage;
 
 public class CaDoodleFile {
 	public static final String NO_NAME = "NoName";
@@ -31,8 +32,8 @@ public class CaDoodleFile {
 	private String projectName =NO_NAME;
 	@Expose (serialize = false, deserialize = false)
 	private File self;
-	@Expose (serialize = false, deserialize = false)
-	private List<CSG> currentState = new ArrayList<CSG>();
+//	@Expose (serialize = false, deserialize = false)
+//	private List<CSG> currentState = new ArrayList<CSG>();
 	@Expose (serialize = false, deserialize = false)
 	private HashMap<ICaDoodleOpperation, List<CSG>> cache =new HashMap<ICaDoodleOpperation, List<CSG>>();
 	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {}.getType();
@@ -70,14 +71,21 @@ public class CaDoodleFile {
 		}
 		try {
 			List<CSG> process = op.process(getCurrentState());
-			cache.put(op,process);
-			setCurrentState(process,op);
+			storeResultInCache(op, process);
+			setCurrentState(op);
 			currentIndex++;
 			getOpperations().add(op);
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
-		return currentState;
+		return getCurrentState();
+	}
+	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
+		ArrayList<CSG> cachedCopy = new ArrayList<CSG>();
+		for(CSG c:process) {
+			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName()));
+		}
+		cache.put(op,cachedCopy);
 	}
 	public void back() {
 		if(isBackAvailible())
@@ -89,8 +97,8 @@ public class CaDoodleFile {
 	}
 	private void updateCurrentFromCache() {
 		ICaDoodleOpperation key = currentOpperation();
-		List<CSG> currentState2 = cache.get(key);
-		setCurrentState(currentState2,key);
+		System.out.println("Current opperation results: "+key.getType());
+		setCurrentState(key);
 	}
 	private ICaDoodleOpperation currentOpperation() {
 		return getOpperations().get(currentIndex-1);
@@ -111,13 +119,15 @@ public class CaDoodleFile {
 		return this;
 	}
 	public List<CSG> getCurrentState() {
-		return currentState;
+		if(currentIndex==0)
+			return new ArrayList<CSG>();
+		return cache.get(currentOpperation());
 	}
-	private void setCurrentState(List<CSG> currentState, ICaDoodleOpperation op) {
-		this.currentState = currentState;
+	private void setCurrentState(ICaDoodleOpperation op) {
+
 		for(ICaDoodleStateUpdate l:listeners) {
 			try {
-				l.onUpdate(currentState,op,this);
+				l.onUpdate(getCurrentState(),op,this);
 			}catch(Throwable e){
 				e.printStackTrace();
 			}
@@ -141,11 +151,15 @@ public class CaDoodleFile {
 	}
 
 	private void initialize() {
+		int indexStarting = currentIndex;
+		currentIndex=0;
 		for(int i=0;i<opperations.size();i++) {
 			ICaDoodleOpperation op =opperations.get(i);
-			setCurrentState(op.process(getCurrentState()),op);
-			cache.put(op,getCurrentState());
+			storeResultInCache(op, op.process(getCurrentState()));
+			currentIndex++;
+			setCurrentState(op);
 		}
+		currentIndex=indexStarting;
 		updateCurrentFromCache();
 	}
 	public static CaDoodleFile fromJsonString(String content ) throws Exception{
