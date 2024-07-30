@@ -11,10 +11,11 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public class MoveCenter implements ICaDoodleOpperation {
-	@Expose (serialize = true, deserialize = true)
-	private TransformNR location=new TransformNR();
-	@Expose (serialize = true, deserialize = true)
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR location = new TransformNR();
+	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
+
 	@Override
 	public String getType() {
 		return "Move Center";
@@ -23,22 +24,19 @@ public class MoveCenter implements ICaDoodleOpperation {
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
-		back.addAll(incoming
-				.stream()
-				.map(csg->{
-					for(String name:names) {
-						if(csg.getName().contentEquals(name)||
-							(	csg.isInGroup() && csg.checkGroupMembership(name) )	)
-							return csg
-									.transformed(TransformFactory.nrToCSG(location))
-									.setName(name)
-									.syncProperties(csg)
-									;
-					}
-					return csg;
-				})
-			    .collect(Collectors.toCollection(ArrayList::new))
-			);
+		for (CSG csg : incoming) {
+			CSG tmpToAdd = csg;
+			for (String name : names) {
+				if (	csg.getName().contentEquals(name) ||
+						(csg.isInGroup() && csg.checkGroupMembership(name))) {
+					tmpToAdd=csg
+							.transformed(TransformFactory.nrToCSG(location))
+							.syncProperties(csg)
+							.setName(csg.getName());
+				} 
+			}
+			back.add(tmpToAdd);
+		}
 		return back;
 	}
 

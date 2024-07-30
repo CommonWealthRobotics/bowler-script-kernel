@@ -159,11 +159,16 @@ public class CaDoodleFile {
 	public String toJson() {
 		return gson.toJson(this);
 	}
-	public synchronized File  save() throws IOException {
-		File ret = self==null?File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle"):self;
-		String contents =  toJson();
-		FileUtils.write(ret, contents,StandardCharsets.UTF_8, false);
-		return ret;
+	public File  save() throws IOException {
+		
+		if(self==null){
+			self=File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle");
+		}
+		synchronized(self) {
+			String contents =  toJson();
+			FileUtils.write(self, contents,StandardCharsets.UTF_8, false);
+		}
+		return self;
 	}
 
 
