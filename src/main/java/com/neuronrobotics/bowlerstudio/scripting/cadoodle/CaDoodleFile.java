@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -93,7 +94,11 @@ public class CaDoodleFile {
 	}
 	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
 		ArrayList<CSG> cachedCopy = new ArrayList<CSG>();
+		HashSet<String> names = new HashSet<>();
 		for(CSG c:process) {
+			if(names.contains(c.getName()))
+				throw new RuntimeException("There can not be 2 objects with the same name after an opperation!");
+			names.add(c.getName());
 			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName()));
 		}
 		cache.put(op,cachedCopy);
@@ -154,7 +159,7 @@ public class CaDoodleFile {
 	public String toJson() {
 		return gson.toJson(this);
 	}
-	public File save() throws IOException {
+	public synchronized File  save() throws IOException {
 		File ret = self==null?File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle"):self;
 		String contents =  toJson();
 		FileUtils.write(ret, contents,StandardCharsets.UTF_8, false);
