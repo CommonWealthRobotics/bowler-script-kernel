@@ -17,6 +17,8 @@ public class Paste implements ICaDoodleOpperation {
 	private List<String> names = new ArrayList<String>();
 	@Expose (serialize = true, deserialize = true)
 	public String paste=null;
+	@Expose (serialize = true, deserialize = true)
+	public double offset=10;
 	@Override
 	public String getType() {
 		return "Paste";
@@ -57,7 +59,7 @@ public class Paste implements ICaDoodleOpperation {
 	}
 
 	private int copyPasteMoved(ArrayList<CSG> back, int index, CSG c) {
-		CSG newOne = c.clone().movex(10);
+		CSG newOne = c.clone().movex(offset);
 		String name = getPaserID()+(index==0?"":"_"+index);
 		index++;
 		newOne.syncProperties(c).setName(name);
@@ -86,5 +88,10 @@ public class Paste implements ICaDoodleOpperation {
 		if(paste==null)
 			paste=AddFromScript.generateRandomString();
 		return paste;
+	}
+
+	public Paste setOffset(double offset) {
+		this.offset = offset;
+		return this;
 	}
 }
