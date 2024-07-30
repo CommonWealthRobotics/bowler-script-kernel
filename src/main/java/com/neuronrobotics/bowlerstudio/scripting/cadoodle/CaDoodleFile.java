@@ -68,6 +68,11 @@ public class CaDoodleFile {
 		currentIndex=indexStarting;
 		updateCurrentFromCache();
 	}
+	public void regenerateCurrent() {
+		ICaDoodleOpperation op =currentOpperation();
+		storeResultInCache(op, op.process(getPreviouState()));
+		setCurrentState(op);
+	}
 	private void process(ICaDoodleOpperation op) {
 		storeResultInCache(op, op.process(getCurrentState()));
 		currentIndex++;
@@ -116,7 +121,7 @@ public class CaDoodleFile {
 		System.out.println("Current opperation results: "+key.getType());
 		setCurrentState(key);
 	}
-	private ICaDoodleOpperation currentOpperation() {
+	public ICaDoodleOpperation currentOpperation() {
 		return getOpperations().get(currentIndex-1);
 	}
 	public void forward() {
@@ -138,6 +143,11 @@ public class CaDoodleFile {
 		if(currentIndex==0)
 			return new ArrayList<CSG>();
 		return cache.get(currentOpperation());
+	}
+	public List<CSG> getPreviouState() {
+		if(currentIndex<2)
+			return new ArrayList<CSG>();
+		return cache.get(getOpperations().get(currentIndex-2));
 	}
 	private void setCurrentState(ICaDoodleOpperation op) {
 
@@ -199,4 +209,5 @@ public class CaDoodleFile {
 	public void setOpperations(ArrayList<ICaDoodleOpperation> opperations) {
 		this.opperations = opperations;
 	}
+
 }
