@@ -27,17 +27,36 @@ public class Paste implements ICaDoodleOpperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		int index=0;
-		for(CSG c:incoming) {
+		for (int i = 0; i < incoming.size(); i++) {
+			CSG c = incoming.get(i);
 			for(String s:names) {
 				if(s.contentEquals(c.getName())) {
-					CSG newOne = c.clone().movex(10);
-					String name = getPaserID()+(index==0?"":"_"+index);
-					newOne.setName(name);
-					back.add(newOne);
+					index = copyPasteMoved(back, index, c);
+					if(c.isGroupResult()) {
+						String groupName = c.getName();
+						for(int j=0;j<incoming.size();j++) {
+							CSG jc=incoming.get(j);
+							if(jc.isInGroup()) {
+								if(jc.getGroupMembership().contentEquals(groupName)) {
+									// this pasted gropups member found
+									index = copyPasteMoved(back, index, jc);
+								}
+							}
+						}
+					}
 				}
 			}
 		}
 		return back;
+	}
+
+	private int copyPasteMoved(ArrayList<CSG> back, int index, CSG c) {
+		CSG newOne = c.clone().movex(10);
+		String name = getPaserID()+(index==0?"":"_"+index);
+		index++;
+		newOne.syncProperties(c).setName(name);
+		back.add(newOne);
+		return index;
 	}
 
 	public TransformNR getLocation() {
