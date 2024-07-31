@@ -181,6 +181,18 @@ public class CaDoodleFile {
 			return new ArrayList<CSG>();
 		return cache.get(currentOpperation());
 	}
+	public List<CSG> getSelect(List<String> selectedSnapshot) {
+		List<CSG> cur = getCurrentState();
+		 ArrayList<CSG> back =new ArrayList<CSG>();
+		 for(CSG c:cur) {
+			 for(String s:selectedSnapshot) {
+				 if(c.getName().contentEquals(s)) {
+					 back.add(c);
+				 }
+			 }
+		 }
+		return back;
+	}
 	public List<CSG> getPreviouState() {
 		if(currentIndex<2)
 			return new ArrayList<CSG>();
@@ -245,5 +257,6 @@ public class CaDoodleFile {
 	public void setOpperations(ArrayList<ICaDoodleOpperation> opperations) {
 		this.opperations = opperations;
 	}
+
 
 }
