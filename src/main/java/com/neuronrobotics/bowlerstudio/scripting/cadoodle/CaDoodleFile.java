@@ -32,7 +32,7 @@ public class CaDoodleFile {
 	@Expose (serialize = true, deserialize = true)
 	private String projectName =NO_NAME;
 	@Expose (serialize = false, deserialize = false)
-	private File self;
+	private File selfInternal;
 //	@Expose (serialize = false, deserialize = false)
 //	private List<CSG> currentState = new ArrayList<CSG>();
 	@Expose (serialize = false, deserialize = false)
@@ -43,7 +43,7 @@ public class CaDoodleFile {
             .registerTypeAdapterFactory(new ICaDoodleOperationAdapterFactory())
 			.create();
 	private ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
-	
+	private Thread opperationRunner=null;
 	public CaDoodleFile clearListeners() {
 		listeners.clear();
 		return this;
@@ -63,39 +63,68 @@ public class CaDoodleFile {
 		currentIndex=0;
 		for(int i=0;i<opperations.size();i++) {
 			ICaDoodleOpperation op =opperations.get(i);
-			process(op);
+			try {
+				process(op);
+			}catch(Throwable t) {
+				t.printStackTrace();
+				pruneForward();
+				return;
+			}
 		}
 		currentIndex=indexStarting;
 		updateCurrentFromCache();
 	}
-	public void regenerateCurrent() {
-		ICaDoodleOpperation op =currentOpperation();
-		storeResultInCache(op, op.process(getPreviouState()));
-		setCurrentState(op);
+
+	public Thread regenerateCurrent() {
+		if (isOperationRunning()) {
+			throw new CadoodleConcurrencyException("Do not add a new opperation while the previous one is processing");
+		}
+		opperationRunner = new Thread(() -> {
+			ICaDoodleOpperation op = currentOpperation();
+			storeResultInCache(op, op.process(getPreviouState()));
+			setCurrentState(op);
+			opperationRunner = null;
+		});
+		opperationRunner.start();
+		return opperationRunner;
+		
 	}
 	private void process(ICaDoodleOpperation op) {
 		storeResultInCache(op, op.process(getCurrentState()));
 		currentIndex++;
 		setCurrentState(op);
 	}
-	public  List<CSG> addOpperation(ICaDoodleOpperation op) {
-		if(currentIndex != getOpperations().size()) {
-			for(int i=currentIndex;i<getOpperations().size();i++) {
-				List<CSG> back = cache.remove(getOpperations().get(i));
-				back.clear();
+	public boolean isOperationRunning() {
+		return opperationRunner!=null;
+	}
+	public  Thread addOpperation(ICaDoodleOpperation op) throws CadoodleConcurrencyException {
+		if(isOperationRunning()){
+			throw new CadoodleConcurrencyException("Do not add a new opperation while the previous one is processing");
+		}
+		opperationRunner=new Thread(()->{
+			if(currentIndex != getOpperations().size()) {
+				pruneForward();
 			}
-			List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, currentIndex);
-			ArrayList<ICaDoodleOpperation> newList=new ArrayList<ICaDoodleOpperation>();
-			newList.addAll(subList);
-			setOpperations(newList);
+			try {
+				getOpperations().add(op);
+				process(op);
+			}catch(Exception ex) {
+				ex.printStackTrace();
+			}
+			opperationRunner=null;
+		});
+		opperationRunner.start();
+		return opperationRunner;
+	}
+	private void pruneForward() {
+		for(int i=currentIndex;i<getOpperations().size();i++) {
+			List<CSG> back = cache.remove(getOpperations().get(i));
+			back.clear();
 		}
-		try {
-			getOpperations().add(op);
-			process(op);
-		}catch(Exception ex) {
-			ex.printStackTrace();
-		}
-		return getCurrentState();
+		List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, currentIndex);
+		ArrayList<ICaDoodleOpperation> newList=new ArrayList<ICaDoodleOpperation>();
+		newList.addAll(subList);
+		setOpperations(newList);
 	}
 	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
 		ArrayList<CSG> cachedCopy = new ArrayList<CSG>();
@@ -133,10 +162,18 @@ public class CaDoodleFile {
 		return currentIndex<getOpperations().size();
 	}
 	public File getSelf() {
-		return self;
+		if(selfInternal==null){
+			try {
+				selfInternal=File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return selfInternal;
 	}
 	public CaDoodleFile setSelf(File self) {
-		this.self = self;
+		this.selfInternal = self;
 		return this;
 	}
 	public List<CSG> getCurrentState() {
@@ -171,24 +208,24 @@ public class CaDoodleFile {
 	}
 	public File  save() throws IOException {
 		
-		if(self==null){
-			self=File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle");
-		}
-		synchronized(self) {
+		synchronized(getSelf()) {
 			String contents =  toJson();
-			FileUtils.write(self, contents,StandardCharsets.UTF_8, false);
+			FileUtils.write(getSelf(), contents,StandardCharsets.UTF_8, false);
 		}
-		return self;
+		return getSelf();
 	}
 
 
 	public static CaDoodleFile fromJsonString(String content ) throws Exception{
-		return fromJsonString(content, null);
+		return fromJsonString(content, null, null);
 	}
-	public static CaDoodleFile fromJsonString(String content ,ICaDoodleStateUpdate listener) throws Exception {
+	public static CaDoodleFile fromJsonString(String content ,ICaDoodleStateUpdate listener, File self) throws Exception {
 		CaDoodleFile file =gson.fromJson(content, TT_CaDoodleFile);
 		if(listener!=null) {
 			file.addListener(listener);
+		}
+		if(self!=null) {
+			file.setSelf(self);
 		}
 		file.initialize();
 		return file;
@@ -199,8 +236,7 @@ public class CaDoodleFile {
 	public static CaDoodleFile fromFile(File f,ICaDoodleStateUpdate listener ) throws Exception {
 		System.out.println("CaDoodle file loading from "+f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-		CaDoodleFile file =fromJsonString(content,listener);
-		file.setSelf(f);
+		CaDoodleFile file =fromJsonString(content,listener,f);
 		return file;
 	}
 	public ArrayList<ICaDoodleOpperation> getOpperations() {

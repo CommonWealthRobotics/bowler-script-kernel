@@ -49,11 +49,13 @@ public class TestCaDoodleWorkflow {
 		AddFromScript cube2 = new AddFromScript()
 				.set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
 						"sphere.groovy");
-		List<CSG>back= cf.addOpperation(cube1);
+		cf.addOpperation(cube1).join();
+		List<CSG>back= cf.getCurrentState();
 		if(back.size()!=1)
 			fail("Adding a cube should have added one!");
 		String nameOne = back.get(0).getName();
-		back=cf.addOpperation(cube2);
+		cf.addOpperation(cube2).join();;
+		back=cf.getCurrentState();
 		if(back.size()!=2)
 			fail("Adding a cube should have added one more!");
 		String nameTwo = back.get(1).getName();
@@ -66,7 +68,8 @@ public class TestCaDoodleWorkflow {
 				.setLocation(new TransformNR(distaance,0,0))
 				.setNames(Arrays.asList(nameTwo))
 				;
-		back= cf.addOpperation(move);
+		cf.addOpperation(move).join();;
+		back=cf.getCurrentState();
 		if(back.size()!=2)
 			fail("Same number of objects after");
 		if(back.get(1).getCenterX()!=distaance)
@@ -95,16 +98,20 @@ public class TestCaDoodleWorkflow {
 				.setLocation(new TransformNR(0,0,0,new RotationNR(0,45,0)))
 				.setNames(Arrays.asList(nameOne))
 				;
-		back=loaded.addOpperation(move3);
-		back=loaded.addOpperation(move2);
+		loaded.addOpperation(move3).join();;
+		back=loaded.getCurrentState();
+		loaded.addOpperation(move2).join();;
+		back=loaded.getCurrentState();
 		if(back.get(0).getCenterX()!=distaance)
 			fail("Move failed ");
 		if(back.get(0).getCenterY()!=distaance)
 			fail("Move failed ");
 		ToHole hole=  new ToHole().setNames(Arrays.asList(nameOne));
-		back=loaded.addOpperation(hole);
+		loaded.addOpperation(hole).join();;
+		back=loaded.getCurrentState();
 		Group group = new Group().setNames(Arrays.asList(nameOne,nameTwo));
-		back=loaded.addOpperation(group);
+		loaded.addOpperation(group).join();;
+		back=loaded.getCurrentState();
 		if(back.size()!=3)
 			fail("Group Failed ");
 		if(!back.get(0).isInGroup()) {
@@ -128,13 +135,16 @@ public class TestCaDoodleWorkflow {
 					.setResize(height, rightFront, leftRear)
 					.setNames(Arrays.asList(groupName))
 				;
-		back = loaded.addOpperation(resize);
+		loaded.addOpperation(resize).join();;
+		back=loaded.getCurrentState();
 		ToSolid solid = new ToSolid()
 						.setNames(Arrays.asList(groupName))
 						.setColor(Color.BLUE);
-		back = loaded.addOpperation(solid);
+		loaded.addOpperation(solid).join();;
+		back=loaded.getCurrentState();
 		UnGroup ug = new UnGroup().setNames(Arrays.asList(groupName));
-		back = loaded.addOpperation(ug);
+		loaded.addOpperation(ug).join();;
+		back=loaded.getCurrentState();
 		if(back.get(0).isInGroup()) {
 			fail("THis should not be in a group anymore");
 		}
@@ -143,23 +153,26 @@ public class TestCaDoodleWorkflow {
 		}
 		
 
-		back = loaded.addOpperation(
+		loaded.addOpperation(
 				new Group()
 				.setNames(Arrays.asList(nameOne,nameTwo))
-				);
+				).join();;
+		back=loaded.getCurrentState();
 		List<CSG> cacheOfGroup = loaded.getCurrentState();
 
 		String newGroupName = cacheOfGroup.get(cacheOfGroup.size()-1).getName();
 		
-		back = loaded.addOpperation(
-				new Paste().setNames(Arrays.asList(newGroupName)));
+		loaded.addOpperation(
+				new Paste().setNames(Arrays.asList(newGroupName))).join();;
+		back=loaded.getCurrentState();
 		ArrayList<String> selectAll = new  ArrayList<String>();
 		for(CSG c:back) {
 			if(c.isGroupResult())
 				selectAll.add(c.getName());
 		}
-		back = loaded.addOpperation(
-				new UnGroup().setNames(selectAll));
+		loaded.addOpperation(
+				new UnGroup().setNames(selectAll)).join();;
+		back=loaded.getCurrentState();
 		if(back.get(0).isInGroup()) {
 			fail("THis should not be in a group anymore");
 		}
@@ -173,7 +186,8 @@ public class TestCaDoodleWorkflow {
 			fail("THis should not be in a group anymore");
 		}
 		ToHole h=  new ToHole().setNames(Arrays.asList(nameTwo));
-		back=loaded.addOpperation(h);
+		loaded.addOpperation(h).join();;
+		back=loaded.getCurrentState();
 		loaded.save();
 		
 		for(int i=0;i<3;i++) {
