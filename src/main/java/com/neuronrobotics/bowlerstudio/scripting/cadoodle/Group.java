@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import javafx.scene.paint.Color;
 
 public class Group implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
@@ -46,19 +47,26 @@ public class Group implements ICaDoodleOpperation {
 		CSG result =null;
 		if(holes.size()>0&&solids.size()==0) {
 			result = CSG.unionAll(holes);
+			if(hull)
+				result=result.hull();
 			result.setIsHole(true);
 
 		}else {
 			CSG holecutter =null;
-			if(holes.size()>0)
+			if(holes.size()>0) {
 				holecutter=CSG.unionAll(holes);
+				if(hull)
+					holecutter=holecutter.hull();
+			}
 			result = CSG.unionAll(solids);
+			Color c = result.getColor();
 			if(hull) {
 				result=result.hull();
 			}
 			if(holecutter!=null)
 				result=result.difference(holecutter);
 			result.setIsHole(false);
+			result.setColor(c);
 		}
 		result.addIsGroupResult(getGroupID());
 		result.setName(getGroupID());
