@@ -33,6 +33,10 @@ public class AssetFactory {
   
   private AssetFactory() {
   }
+  static {
+	  System.out.println("AssetFactory loaded");
+	  //new RuntimeException().printStackTrace();
+  }
 
   public static FXMLLoader loadLayout(String file, boolean refresh) throws Exception {
     File fxmlFIle = loadFile(file);
