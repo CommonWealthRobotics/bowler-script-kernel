@@ -125,33 +125,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			}
 		addSTLToFreecad(freecadModel,tmp,name);
 	}
-	public static File simplifySVG(File incoming, double threshhold) {
-		try {
-			File inkscape = DownloadManager.getConfigExecutable("inkscape", null);
-			File svg = File.createTempFile(incoming.getName(), ".svg");
-			List <String >args = Arrays.asList(
-					inkscape.getAbsolutePath(),
-		            "--actions",
-		            "\"select-all:all;path-simplify:threshold=" + threshhold+ ";;export-overwrite;export-do;quit-inkscape\"",
-		            incoming.getAbsolutePath()
-					);
-			legacySystemRun(null, inkscape.getAbsoluteFile().getParentFile(), System.out, args);
-			args = Arrays.asList(
-					inkscape.getAbsolutePath(),
-					"--export-plain-svg",
-		            "--export-type=svg",
-		            "--vacuum-defs",
-		            "--export-filename="+svg.getAbsolutePath(),
-		            incoming.getAbsolutePath()
-					);
-			legacySystemRun(null, inkscape.getAbsoluteFile().getParentFile(), System.out, args);
-			return svg;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return incoming;
-	}
+
 	public static void addSVGToFreeCAD(File freecadModel,File SVG, Transform pose, String name, String bodyName) {
 		TransformNR nr=TransformFactory.csgToNR(pose);
 		RotationNR r=nr.getRotation();
