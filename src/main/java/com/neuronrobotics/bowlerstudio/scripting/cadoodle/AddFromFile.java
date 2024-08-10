@@ -29,7 +29,7 @@ public class AddFromFile implements ICaDoodleOpperation {
 	
 	private String getOrderedName() {
 		if(name==null) {
-			name=AddFromScript.generateRandomString();
+			name=RandomStringFactory.generateRandomString();
 		}
 		if(nameIndex==0)
 			return name;

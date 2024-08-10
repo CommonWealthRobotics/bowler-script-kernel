@@ -86,7 +86,7 @@ public class Paste implements ICaDoodleOpperation {
 	}
 	public String getPaserID() {
 		if(paste==null)
-			paste=AddFromScript.generateRandomString();
+			paste=RandomStringFactory.generateRandomString();
 		return paste;
 	}
 

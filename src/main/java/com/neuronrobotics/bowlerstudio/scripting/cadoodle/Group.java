@@ -85,7 +85,7 @@ public class Group implements ICaDoodleOpperation {
 
 	public String getGroupID() {
 		if(groupID==null)
-			groupID=AddFromScript.generateRandomString();
+			groupID=RandomStringFactory.generateRandomString();
 		return groupID;
 	}
 

@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -17,23 +18,9 @@ public class AddFromScript implements ICaDoodleOpperation {
 	private String fileRel = "";
 	@Expose (serialize = true, deserialize = true)
 	private String name=null;
-	@Expose (serialize = false, deserialize = false)
-    private static final String CHAR_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	@Expose (serialize = false, deserialize = false)
-	private static final int STRING_LENGTH = 40;
+	@Expose (serialize = true, deserialize = true)
 	private int nameIndex = 0;
-
-    public static String generateRandomString() {
-        Random random = new Random();
-        StringBuilder stringBuilder = new StringBuilder(STRING_LENGTH);
-        
-        for (int i = 0; i < STRING_LENGTH; i++) {
-            int randomIndex = random.nextInt(CHAR_POOL.length());
-            stringBuilder.append(CHAR_POOL.charAt(randomIndex));
-        }
-        
-        return stringBuilder.toString();
-    }
+	
 	public AddFromScript set(String git, String f) {
 		gitULR = git;
 		fileRel = f;
@@ -47,7 +34,7 @@ public class AddFromScript implements ICaDoodleOpperation {
 	
 	private String getOrderedName() {
 		if(name==null) {
-			name=generateRandomString();
+			name=RandomStringFactory.generateRandomString();
 		}
 		if(nameIndex==0)
 			return name;

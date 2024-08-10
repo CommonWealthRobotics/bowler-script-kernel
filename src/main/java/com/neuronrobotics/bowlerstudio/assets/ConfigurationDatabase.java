@@ -57,6 +57,7 @@ public class ConfigurationDatabase {
 	}
 	public static boolean containsKey(String paramsKey, String string) {
 		boolean containsKey = false;
+		getDatabase();
 		synchronized(database){
 			containsKey = ConfigurationDatabase.getParamMap(paramsKey).containsKey(string);
 		}
