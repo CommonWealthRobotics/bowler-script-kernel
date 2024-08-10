@@ -51,7 +51,7 @@ public class MoveCenter implements ICaDoodleOpperation {
 						.syncProperties(csg)
 						.setName(csg.getName());
 				back.set(i, tmpToAdd);
-				}
+			}
 		}
 	}
 

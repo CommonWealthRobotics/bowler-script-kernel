@@ -107,7 +107,7 @@ public class Resize implements ICaDoodleOpperation {
 							.movey(ev.movey);
 				gc.syncProperties(c).setName(c.getName());
 				back.set(i, gc);
-				if(c.isInGroup() && c.isGroupResult()) {
+				if( c.isGroupResult()) {
 					groupsProcessed.put(c.getName(), ev);
 					processCompositMembers(c.getName(),back,groupsProcessed);
 				}
