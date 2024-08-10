@@ -1,6 +1,8 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,20 +29,90 @@ public class Resize implements ICaDoodleOpperation {
 	public String getType() {
 		return "Resize";
 	}
+	private class ResizeEvent{
+		Transform scaleZ;
+		Transform scale;
+		double movez;
+		double movey;
+		double movex;
+	}
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		for(CSG c:incoming) {
-			for(String name:names) {
-				if(c.getName().contentEquals(name)) {
-					performResize(c,  name,back);
+		HashMap<String,ResizeEvent> groupsProcessed = new HashMap<>();
+
+		for (String name : names) {
+			resizeByName(name,back,groupsProcessed);
+		}
+		return back;
+	}
+
+	private void resizeByName(String name, ArrayList<CSG> back, HashMap<String,ResizeEvent> groupsProcessed) {
+		for (int i = 0; i < back.size(); i++) {
+			CSG starting = back.get(i);
+			if (	starting.getName().contentEquals(name) ){
+				double zScale = Math.abs(height.getZ());
+				double scalez = zScale/ starting.getTotalZ();
+				
+				Transform scaleZ =new Transform().scaleZ(scalez);
+				CSG resizeUp = starting.transformed(scaleZ);
+				double zMove = -resizeUp.getMinZ()+starting.getMinZ();
+				resizeUp=resizeUp
+						.movez(zMove);
+				double xdimen = Math.abs(rightFront.getX()-leftRear.getX());
+				double ydimen = Math.abs(rightFront.getY()-leftRear.getY());
+				double scalex = xdimen/ resizeUp.getTotalX();
+				double scaley = ydimen/ resizeUp.getTotalY();
+
+				Transform scale = new Transform().scale(scalex,scaley,1);
+				resizeUp=resizeUp.transformed(scale);
+				double xMove=-resizeUp.getMinX()+leftRear.getX();
+				double yMove = -resizeUp.getMinY()+rightFront.getY();
+				resizeUp=resizeUp
+							.movex(xMove)
+							.movey(yMove);
+				resizeUp.syncProperties(starting).setName(name);
+				ResizeEvent ev = new ResizeEvent();
+				ev.movex=xMove;
+				ev.movey=yMove;
+				ev.movez=zMove;
+				ev.scale=scale;
+				ev.scaleZ=scaleZ;
+				back.set(i, resizeUp);
+				groupsProcessed.put(name, ev);
+				
+				if(starting.isGroupResult()) {
+					processCompositMembers(name,back,groupsProcessed);
 				}
 			}
 		}
-		
-		return back;
+	}
+	
+
+	private void processCompositMembers(String name, ArrayList<CSG> back,
+			HashMap<String, ResizeEvent> groupsProcessed) {
+		for (int i = 0; i < back.size(); i++) {
+			CSG c = back.get(i);
+			if(c.isInGroup() && c.checkGroupMembership(name) ) {
+				
+				ResizeEvent ev =groupsProcessed.get(name);
+				CSG gc = c.transformed(ev.scaleZ);
+				gc=gc
+						.movez(ev.movez);
+				gc=gc.transformed(ev.scale);
+				gc=gc
+							.movex(ev.movex)
+							.movey(ev.movey);
+				gc.syncProperties(c).setName(c.getName());
+				back.set(i, gc);
+				if(c.isInGroup() && c.isGroupResult()) {
+					groupsProcessed.put(c.getName(), ev);
+					processCompositMembers(c.getName(),back,groupsProcessed);
+				}
+			}
+		}
 	}
 
 	private void performResize(CSG starting, String name,ArrayList<CSG> back) {
@@ -75,6 +147,8 @@ public class Resize implements ICaDoodleOpperation {
 		resizeUp=resizeUp
 					.movex(xMove)
 					.movey(yMove);
+		resizeUp.syncProperties(starting).setName(name);
+		
 		back.removeAll(groupConstituants);
 		for(CSG c:groupConstituants) {
 			CSG gc = c.transformed(scaleZ);
@@ -88,7 +162,7 @@ public class Resize implements ICaDoodleOpperation {
 			back.add(gc);
 		}
 		
-		back.add( resizeUp.syncProperties(starting).setName(name));
+		back.add( resizeUp);
 	}
 //	
 //	private CSG scaleToMeasurmentXY(CSG inc,double x, double y) {

@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,20 +25,34 @@ public class MoveCenter implements ICaDoodleOpperation {
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
-		for (CSG csg : incoming) {
-			CSG tmpToAdd = csg;
-			for (String name : names) {
-				if (	csg.getName().contentEquals(name) ||
-						(csg.isInGroup() && csg.checkGroupMembership(name))) {
-					tmpToAdd=csg
-							.transformed(TransformFactory.nrToCSG(location))
-							.syncProperties(csg)
-							.setName(csg.getName());
-				} 
-			}
-			back.add(tmpToAdd);
+		HashSet<String> groupsProcessed = new HashSet<String>();
+		back.addAll(incoming);
+		for (String name : names) {
+			moveByName(name,back,groupsProcessed);
 		}
 		return back;
+	}
+
+	private void moveByName(String name, ArrayList<CSG> back, HashSet<String> groupsProcessed) {
+		
+		for (int i = 0; i < back.size(); i++) {
+			CSG csg = back.get(i);
+			if (	csg.getName().contentEquals(name) ||
+					(csg.isInGroup() && csg.checkGroupMembership(name))){
+				groupsProcessed.add(name);
+				if(csg.isInGroup() && csg.isGroupResult() && !groupsProcessed.contains(csg.getName())) {
+					// composite group
+					moveByName(csg.getName(), back,groupsProcessed);
+					
+				}
+				// move it
+				CSG tmpToAdd = csg
+						.transformed(TransformFactory.nrToCSG(location))
+						.syncProperties(csg)
+						.setName(csg.getName());
+				back.set(i, tmpToAdd);
+				}
+		}
 	}
 
 	public TransformNR getLocation() {
