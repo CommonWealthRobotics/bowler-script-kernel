@@ -25,6 +25,7 @@ public class Manipulation {
 	double newy = 0;
 	double newz = 0;
 	boolean dragging = false;
+	private double increment = 0.000001;
 	private static IInteractiveUIElementProvider ui = new IInteractiveUIElementProvider() {
 	};
 
@@ -54,6 +55,7 @@ public class Manipulation {
 		if (dependants.contains(r))
 			return;
 		dependants.add(r);
+
 	}
 
 	public void addSaveListener(Runnable r) {
@@ -215,9 +217,9 @@ public class Manipulation {
 			globalTMP.setY(0);
 			globalTMP.setZ(0);
 			TransformNR global = globalTMP.times(trans);
-			newx = (global.getX() * orintation.x + getGlobalPose().getX());
-			newy = (global.getY() * orintation.y + getGlobalPose().getY());
-			newz = (global.getZ() * orintation.z + getGlobalPose().getZ());
+			newx = round((global.getX() * orintation.x + getGlobalPose().getX()));
+			newy = round((global.getY() * orintation.y + getGlobalPose().getY()));
+			newz = round((global.getZ() * orintation.z + getGlobalPose().getZ()));
 			global.setX(newx);
 			global.setY(newy);
 			global.setZ(newz);
@@ -231,7 +233,10 @@ public class Manipulation {
 		// "+global.getZ()+" "+deltx+" "+delty);
 		fireMove(trans);
 	}
-
+	private double round(double in) {
+		return Math.round(in / increment) * increment;
+	}
+	
 	private void setGlobal(TransformNR global) {
 		currentPose.setX(newx);
 		currentPose.setY(newy);
@@ -274,6 +279,14 @@ public class Manipulation {
 
 	public void setGlobalPose(TransformNR globalPose) {
 		this.globalPose = globalPose;
+	}
+
+	public double getIncrement() {
+		return increment;
+	}
+
+	public void setIncrement(double increment) {
+		this.increment = increment;
 	}
 
 }
