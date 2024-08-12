@@ -35,7 +35,7 @@ public class Manipulation {
 	private Affine manipulationMatrix;
 	private Vector3d orintation;
 	private TransformNR globalPose= new TransformNR();
-	public TransformNR currentPose=new TransformNR();
+	private TransformNR currentPose=new TransformNR();
 	//private PhongMaterial color;// = new PhongMaterial(getColor());
 	//private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
 
@@ -95,7 +95,7 @@ public class Manipulation {
 		//this.manip = m;
 		//color = new PhongMaterial(m.getColor());
 		this.setGlobalPose(p);
-		currentPose = p.copy();
+		setCurrentPose(p.copy());
 		getUi().runLater(() -> {
 			try {
 				TransformFactory.nrToAffine(getGlobalPose(), manipulationMatrix);
@@ -226,11 +226,11 @@ public class Manipulation {
 	
 			global.setRotation(new RotationNR());
 			setGlobal(global);
+			System.out.println(" drag "+global.getX()+" , "+global.getY()+" ,"+global.getZ());
+
 		}catch(Throwable t) {
 			t.printStackTrace();
 		}
-		// System.out.println(" drag "+global.getX()+" , "+global.getY()+" ,
-		// "+global.getZ()+" "+deltx+" "+delty);
 		fireMove(trans);
 	}
 	private double round(double in) {
@@ -238,9 +238,9 @@ public class Manipulation {
 	}
 	
 	private void setGlobal(TransformNR global) {
-		currentPose.setX(newx);
-		currentPose.setY(newy);
-		currentPose.setZ(newz);
+		getCurrentPose().setX(newx);
+		getCurrentPose().setY(newy);
+		getCurrentPose().setZ(newz);
 		getUi().runLater(() -> {
 			TransformFactory.nrToAffine(global, manipulationMatrix);
 		});
@@ -287,6 +287,14 @@ public class Manipulation {
 
 	public void setIncrement(double increment) {
 		this.increment = increment;
+	}
+
+	public TransformNR getCurrentPose() {
+		return currentPose;
+	}
+
+	public void setCurrentPose(TransformNR currentPose) {
+		this.currentPose = currentPose;
 	}
 
 }
