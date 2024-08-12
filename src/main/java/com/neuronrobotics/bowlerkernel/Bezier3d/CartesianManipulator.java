@@ -50,15 +50,15 @@ public class CartesianManipulator {
 	}
 
 	public double getX() {
-		return manipulationList[2].currentPose.getX();
+		return manipulationList[2].getCurrentPose().getX();
 	}
 
 	public double getY() {
-		return manipulationList[1].currentPose.getY();
+		return manipulationList[1].getCurrentPose().getY();
 	}
 
 	public double getZ() {
-		return manipulationList[0].currentPose.getZ();
+		return manipulationList[0].getCurrentPose().getZ();
 	}
 
 	public void addDependant(CartesianManipulator r) {
