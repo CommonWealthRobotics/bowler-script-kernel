@@ -24,9 +24,7 @@ public class Manipulation {
 	double newx = 0;
 	double newy = 0;
 	double newz = 0;
-	TransformNR camFrame = null;
 	boolean dragging = false;
-	double depth = 0;
 	private static IInteractiveUIElementProvider ui = new IInteractiveUIElementProvider() {
 	};
 
@@ -35,9 +33,8 @@ public class Manipulation {
 	private ArrayList<Manipulation> dependants = new ArrayList<>();
 	private Affine manipulationMatrix;
 	private Vector3d orintation;
-	private List<CSG> manip;
-	private TransformNR globalPose;
-	public TransformNR currentPose;
+	private TransformNR globalPose= new TransformNR();
+	public TransformNR currentPose=new TransformNR();
 	//private PhongMaterial color;// = new PhongMaterial(getColor());
 	//private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
 
@@ -71,9 +68,9 @@ public class Manipulation {
 		eventListeners.clear();
 	}
 
-	private void fireMove(TransformNR trans, TransformNR camFrame2) {
+	private void fireMove(TransformNR trans) {
 		for (Manipulation R : dependants) {
-			R.performMove(trans, camFrame2);
+			R.performMove(trans);
 		}
 		for (Runnable R : eventListeners) {
 			R.run();
@@ -95,11 +92,11 @@ public class Manipulation {
 		this.orintation = o;
 		//this.manip = m;
 		//color = new PhongMaterial(m.getColor());
-		this.globalPose = p;
+		this.setGlobalPose(p);
 		currentPose = p.copy();
 		getUi().runLater(() -> {
 			try {
-				TransformFactory.nrToAffine(globalPose, manipulationMatrix);
+				TransformFactory.nrToAffine(getGlobalPose(), manipulationMatrix);
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
@@ -109,7 +106,7 @@ public class Manipulation {
 		
 	}
 
-	private EventHandler<MouseEvent> getMouseEvents() {
+	public EventHandler<MouseEvent> getMouseEvents() {
 		return new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -146,16 +143,17 @@ public class Manipulation {
 	private void pressed(MouseEvent event) {
 		state = DragState.Dragging;
 		new Thread(() -> {
-			camFrame = getUi().getCamerFrame();
-			depth = -1600 / getUi().getCamerDepth();
 			event.consume();
 			dragging = false;
 			for (Manipulation R : dependants) {
-				R.camFrame = getUi().getCamerFrame();
-				R.depth = -1600 / getUi().getCamerDepth();
+
 				R.dragging = false;
 			}
 		}).start();
+	}
+
+	private double getDepthNow() {
+		return -1600 / getUi().getCamerDepth();
 	}
 
 	private void release(MouseEvent event) {
@@ -171,9 +169,14 @@ public class Manipulation {
 			setDragging(event);
 			double deltx = (startx - event.getScreenX());
 			double delty = (starty - event.getScreenY());
-			TransformNR trans = new TransformNR(deltx / depth, delty / depth, 0, new RotationNR());
-
-			performMove(trans, camFrame);
+			double d = deltx/  getDepthNow() ;
+			double y = delty/  getDepthNow() ;
+			if(Double.isFinite(y) && Double.isFinite(d)) {
+				TransformNR trans = new TransformNR(d, y, 0, new RotationNR());
+				performMove(trans);
+			}else {
+				System.out.println("ERROR?");
+			}
 		});
 		event.consume();
 	}
@@ -185,9 +188,9 @@ public class Manipulation {
 	private void mouseRelease(MouseEvent event) {
 		if (dragging) {
 			dragging = false;
-			globalPose.setX(newx);
-			globalPose.setY(newy);
-			globalPose.setZ(newz);
+			getGlobalPose().setX(newx);
+			getGlobalPose().setY(newy);
+			getGlobalPose().setZ(newz);
 			event.consume();
 			fireSave();
 		}
@@ -204,24 +207,29 @@ public class Manipulation {
 		}
 	}
 
-	private void performMove(TransformNR trans, TransformNR camFrame2) {
-		TransformNR globalTMP = camFrame2.copy();
-		globalTMP.setX(0);
-		globalTMP.setY(0);
-		globalTMP.setZ(0);
-		TransformNR global = globalTMP.times(trans);
-		newx = (global.getX() * orintation.x + globalPose.getX());
-		newy = (global.getY() * orintation.y + globalPose.getY());
-		newz = (global.getZ() * orintation.z + globalPose.getZ());
-		global.setX(newx);
-		global.setY(newy);
-		global.setZ(newz);
-
-		global.setRotation(new RotationNR());
-		setGlobal(global);
+	private void performMove(TransformNR trans) {
+		TransformNR camerFrame = getUi().getCamerFrame();
+		TransformNR globalTMP = camerFrame.copy();
+		try {
+			globalTMP.setX(0);
+			globalTMP.setY(0);
+			globalTMP.setZ(0);
+			TransformNR global = globalTMP.times(trans);
+			newx = (global.getX() * orintation.x + getGlobalPose().getX());
+			newy = (global.getY() * orintation.y + getGlobalPose().getY());
+			newz = (global.getZ() * orintation.z + getGlobalPose().getZ());
+			global.setX(newx);
+			global.setY(newy);
+			global.setZ(newz);
+	
+			global.setRotation(new RotationNR());
+			setGlobal(global);
+		}catch(Throwable t) {
+			t.printStackTrace();
+		}
 		// System.out.println(" drag "+global.getX()+" , "+global.getY()+" ,
 		// "+global.getZ()+" "+deltx+" "+delty);
-		fireMove(trans, camFrame2);
+		fireMove(trans);
 	}
 
 	private void setGlobal(TransformNR global) {
@@ -245,14 +253,27 @@ public class Manipulation {
 		newx = newX;
 		newy = newY;
 		newz = newZ;
-		globalPose.setX(newX);
-		globalPose.setY(newY);
-		globalPose.setZ(newZ);
+		getGlobalPose().setX(newX);
+		getGlobalPose().setY(newY);
+		getGlobalPose().setZ(newZ);
 		setGlobal(new TransformNR(newX, newY, newZ, new RotationNR()));
 		for (Runnable R : eventListeners) {
 			R.run();
 		}
 
+	}
+
+	public void reset() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public TransformNR getGlobalPose() {
+		return globalPose;
+	}
+
+	public void setGlobalPose(TransformNR globalPose) {
+		this.globalPose = globalPose;
 	}
 
 }
