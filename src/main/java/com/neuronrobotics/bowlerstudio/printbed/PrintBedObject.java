@@ -47,15 +47,15 @@ public class PrintBedObject {
 	}
 
 	public double getX() {
-		return manip.currentPose.getX();
+		return manip.getCurrentPose().getX();
 	}
 
 	public double getY() {
-		return manip.currentPose.getY();
+		return manip.getCurrentPose().getY();
 	}
 
 	public double getZ() {
-		return manip.currentPose.getZ();
+		return manip.getCurrentPose().getZ();
 	}
 	public void checkBounds() {
 		double minYTest = part.getMinY()-yMin+globalPose.getY();
