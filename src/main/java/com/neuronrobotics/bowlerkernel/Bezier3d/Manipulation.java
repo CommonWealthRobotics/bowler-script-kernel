@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerkernel.Bezier3d;
 import java.util.ArrayList;
 import javafx.scene.paint.Color;
 import java.util.HashMap;
+import java.util.List;
 
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.*;
@@ -16,8 +17,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.paint.PhongMaterial;
 
-public class manipulation {
-	HashMap<EventType<MouseEvent>, EventHandler<MouseEvent>> map = new HashMap<>();
+public class Manipulation {
+	public HashMap<EventType<MouseEvent>, EventHandler<MouseEvent>> map = new HashMap<>();
 	double startx = 0;
 	double starty = 0;
 	double newx = 0;
@@ -31,14 +32,14 @@ public class manipulation {
 
 	private ArrayList<Runnable> eventListeners = new ArrayList<>();
 	private ArrayList<Runnable> saveListeners = new ArrayList<>();
-	private ArrayList<manipulation> dependants = new ArrayList<>();
+	private ArrayList<Manipulation> dependants = new ArrayList<>();
 	private Affine manipulationMatrix;
 	private Vector3d orintation;
-	private CSG manip;
+	private List<CSG> manip;
 	private TransformNR globalPose;
 	public TransformNR currentPose;
-	private PhongMaterial color;// = new PhongMaterial(getColor());
-	private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
+	//private PhongMaterial color;// = new PhongMaterial(getColor());
+	//private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
 
 	private enum DragState {
 		IDLE, Dragging
@@ -52,7 +53,7 @@ public class manipulation {
 		eventListeners.add(r);
 	}
 
-	public void addDependant(manipulation r) {
+	public void addDependant(Manipulation r) {
 		if (dependants.contains(r))
 			return;
 		dependants.add(r);
@@ -71,7 +72,7 @@ public class manipulation {
 	}
 
 	private void fireMove(TransformNR trans, TransformNR camFrame2) {
-		for (manipulation R : dependants) {
+		for (Manipulation R : dependants) {
 			R.performMove(trans, camFrame2);
 		}
 		for (Runnable R : eventListeners) {
@@ -86,12 +87,14 @@ public class manipulation {
 			}
 		}).start();
 	}
-
-	public manipulation(Affine mm, Vector3d o, CSG m, TransformNR p) {
+//	public manipulation(Affine mm, Vector3d o, CSG m, TransformNR p) {
+//		
+//	}
+	public Manipulation(Affine mm, Vector3d o, TransformNR p) {
 		this.manipulationMatrix = mm;
 		this.orintation = o;
-		this.manip = m;
-		color = new PhongMaterial(m.getColor());
+		//this.manip = m;
+		//color = new PhongMaterial(m.getColor());
 		this.globalPose = p;
 		currentPose = p.copy();
 		getUi().runLater(() -> {
@@ -102,7 +105,12 @@ public class manipulation {
 			}
 		});
 
-		map.put(MouseEvent.ANY, new EventHandler<MouseEvent>() {
+		map.put(MouseEvent.ANY, getMouseEvents());
+		
+	}
+
+	private EventHandler<MouseEvent> getMouseEvents() {
+		return new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
 				String name = event.getEventType().getName();
@@ -119,22 +127,20 @@ public class manipulation {
 				case "MOUSE_MOVED":
 					// ignore
 					break;
-				case "MOUSE_ENTERED":
-					m.getMesh().setMaterial(highlight);
-					break;
-				case "MOUSE_EXITED":
-					if (state == DragState.IDLE)
-						m.getMesh().setMaterial(color);
-					break;
+//				case "MOUSE_ENTERED":
+//					m.getMesh().setMaterial(highlight);
+//					break;
+//				case "MOUSE_EXITED":
+//					if (state == DragState.IDLE)
+//						m.getMesh().setMaterial(color);
+//					break;
 				default:
 					// System.out.println("UNKNOWN! Mouse event "+name);
 					break;
 				}
 
 			}
-		});
-		manip.getStorage().set("manipulator", map);
-		manip.setManipulator(manipulationMatrix);
+		};
 	}
 
 	private void pressed(MouseEvent event) {
@@ -144,7 +150,7 @@ public class manipulation {
 			depth = -1600 / getUi().getCamerDepth();
 			event.consume();
 			dragging = false;
-			for (manipulation R : dependants) {
+			for (Manipulation R : dependants) {
 				R.camFrame = getUi().getCamerFrame();
 				R.depth = -1600 / getUi().getCamerDepth();
 				R.dragging = false;
@@ -154,10 +160,10 @@ public class manipulation {
 
 	private void release(MouseEvent event) {
 		mouseRelease(event);
-		for (manipulation R : dependants)
+		for (Manipulation R : dependants)
 			R.mouseRelease(event);
 		state = DragState.IDLE;
-		manip.getMesh().setMaterial(color);
+		//manip.getMesh().setMaterial(color);
 	}
 
 	private void dragged(MouseEvent event) {
@@ -193,7 +199,7 @@ public class manipulation {
 			starty = event.getScreenY();
 		}
 		dragging = true;
-		for (manipulation R : dependants) {
+		for (Manipulation R : dependants) {
 			R.setDragging(event);
 		}
 	}
@@ -232,7 +238,7 @@ public class manipulation {
 	}
 
 	public static void setUi(IInteractiveUIElementProvider ui) {
-		manipulation.ui = ui;
+		Manipulation.ui = ui;
 	}
 
 	public void set(double newX, double newY, double newZ) {

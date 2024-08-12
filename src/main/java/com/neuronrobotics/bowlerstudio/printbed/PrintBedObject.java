@@ -3,7 +3,7 @@ package com.neuronrobotics.bowlerstudio.printbed;
 import java.util.Arrays;
 import java.util.List;
 
-import com.neuronrobotics.bowlerkernel.Bezier3d.manipulation;
+import com.neuronrobotics.bowlerkernel.Bezier3d.Manipulation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -17,7 +17,7 @@ public class PrintBedObject {
 	private double yMin;
 	private CSG part;
 	private String name;
-	private manipulation manip;
+	private Manipulation manip;
 	private Affine affine = new Affine();
 	private TransformNR globalPose;
 	public PrintBedObject(String name, CSG part, double xMax, double xMin, double yMax, double yMin, TransformNR startPose){
@@ -29,7 +29,9 @@ public class PrintBedObject {
 		this.yMin =  yMin;
 		this.globalPose = startPose;
 		
-		manip = new manipulation(affine, new Vector3d(1, 1, 0), part, startPose);
+		manip = new Manipulation(affine, new Vector3d(1, 1, 0), startPose);
+		part.getStorage().set("manipulator",manip.map);
+		part.setManipulator(affine);
 		manip.addSaveListener(() -> System.out.println("Saving PrintBedObject "+name));
 		checkBounds();
 	}
