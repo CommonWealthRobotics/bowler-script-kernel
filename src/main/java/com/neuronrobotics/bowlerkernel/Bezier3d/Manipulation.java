@@ -226,7 +226,7 @@ public class Manipulation {
 	
 			global.setRotation(new RotationNR());
 			setGlobal(global);
-			System.out.println(" drag "+global.getX()+" , "+global.getY()+" ,"+global.getZ());
+			//System.out.println(" drag "+global.getX()+" , "+global.getY()+" ,"+global.getZ());
 
 		}catch(Throwable t) {
 			t.printStackTrace();

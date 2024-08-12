@@ -120,7 +120,8 @@ String getOsArch() {
 repositories {
 	mavenCentral()
 	maven {
-		url 'https://mlt.jfrog.io/artifactory/mlt-mvn-releases-local/'
+		url 'https://commonwealthrobotics.com/jcenter-mirror/'
+		allowInsecureProtocol = true
 	}
 	maven { url 'https://repo.maven.apache.org/maven2/' }
 
@@ -140,6 +141,17 @@ repositories {
 	}
 	maven { url 'https://maven-central.storage-download.googleapis.com/repos/central/data/'}
 	maven {url 'https://repo.jenkins-ci.org/public/'}
+	maven {
+		url "https://repo.jenkins-ci.org/releases/"
+	}
+	
+	maven { url "https://jitpack.io" }
+	maven { url "https://repo.eclipse.org/content/groups/releases/" }
+	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+	maven { url "https://dl.bintray.com/dfki-lt/maven/" }
+	maven { url "https://raw.github.com/marytts/marytts/master/repository/" }
+	maven { url "https://repo.jenkins-ci.org/public/" }
+
 }
 
 dependencies {
@@ -147,6 +159,8 @@ dependencies {
 	api 'com.neuronrobotics:JavaCad:1.6.0'
 	api project('java-bowler')
 	api project('GithubPasswordManager:GithubPasswordManager')
+	
+
 
 	//compile group: "de.swirtz", name: "ktsRunner", version: "0.0.7"
 	api 'us.ihmc:jinput:2.0.6-ihmc2'
@@ -209,11 +223,11 @@ dependencies {
 	testImplementation 'junit:junit:4.10'
 	api group: 'com.github.stephengold', name: 'jbullet', version: '1.0.3'
 
-	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1') {
-		exclude group: 'commons-io', module: 'commons-io'
-		exclude group: 'com.twmacinta', module: 'fast-md5'
-		exclude group: 'gov.nist.math', module: 'Jampack'
-	}
+//	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1') {
+//		exclude group: 'commons-io', module: 'commons-io'
+//		exclude group: 'com.twmacinta', module: 'fast-md5'
+//		exclude group: 'gov.nist.math', module: 'Jampack'
+//	}
 	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
