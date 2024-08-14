@@ -10,8 +10,10 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
+import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.Vector3d;
 
 public class Resize implements ICaDoodleOpperation {
 
@@ -37,39 +39,73 @@ public class Resize implements ICaDoodleOpperation {
 		double movex;
 	}
 
+	public Bounds getSellectedBounds(List<CSG> incoming) {
+		Vector3d min = null;
+		Vector3d max = null;
+		for (CSG c : incoming) {
+			Vector3d min2 = c.getBounds().getMin().clone();
+			Vector3d max2 = c.getBounds().getMax().clone();
+			if (min == null)
+				min = min2;
+			if (max == null)
+				max = max2;
+			if (min2.x < min.x)
+				min.x = min2.x;
+			if (min2.y < min.y)
+				min.y = min2.y;
+			if (min2.z < min.z)
+				min.z = min2.z;
+			if (max.x < max2.x)
+				max.x = max2.x;
+			if (max.y < max2.y)
+				max.y = max2.y;
+			if (max.z < max2.z)
+				max.z = max2.z;
+		}
+
+		return new Bounds(min, max);
+	}
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		HashMap<String,ResizeEvent> groupsProcessed = new HashMap<>();
+		ArrayList<CSG> selected = new ArrayList<CSG>();
+		for(CSG c:incoming)
+			for (String name : names) {
+				if(c.getName().contentEquals(name)) {
+					selected.add(c);
+				}
+			}
+		Bounds b = getSellectedBounds(selected);
 
 		for (String name : names) {
-			resizeByName(name,back,groupsProcessed);
+			resizeByName(name,back,groupsProcessed,b);
 		}
 		return back;
 	}
 
-	private void resizeByName(String name, ArrayList<CSG> back, HashMap<String,ResizeEvent> groupsProcessed) {
+	private void resizeByName(String name, ArrayList<CSG> back, HashMap<String,ResizeEvent> groupsProcessed,Bounds bounds) {
 		for (int i = 0; i < back.size(); i++) {
 			CSG starting = back.get(i);
 			if (	starting.getName().contentEquals(name) ){
-				double zScale = Math.abs(height.getZ())-starting.getMinZ();
-				double scalez = zScale/ starting.getTotalZ();
+				double zScale = Math.abs(height.getZ())-bounds.getMin().z;
+				double scalez = zScale/ (bounds.getMax().z-bounds.getMin().z);
 				
 				Transform scaleZ =new Transform().scaleZ(scalez);
 				CSG resizeUp = starting.transformed(scaleZ);
-				double zMove = -resizeUp.getMinZ()+starting.getMinZ();
+				double zMove = -(bounds.getMin().z*scalez)+bounds.getMin().z;
 				resizeUp=resizeUp
 						.movez(zMove);
 				double xdimen = Math.abs(leftFront.getX()-rightRear.getX());
 				double ydimen = Math.abs(leftFront.getY()-rightRear.getY());
-				double scalex = xdimen/ resizeUp.getTotalX();
-				double scaley = ydimen/ resizeUp.getTotalY();
+				double scalex = xdimen/ (bounds.getMax().x-bounds.getMin().x);
+				double scaley = ydimen/ (bounds.getMax().y-bounds.getMin().y);
 
 				Transform scale = new Transform().scale(scalex,scaley,1);
 				resizeUp=resizeUp.transformed(scale);
-				double xMove=-resizeUp.getMinX()+rightRear.getX();
-				double yMove = -resizeUp.getMinY()+rightRear.getY();
+				double xMove=-(bounds.getMin().x*scalex)+rightRear.getX();
+				double yMove = -(bounds.getMin().y*scaley)+rightRear.getY();
 				resizeUp=resizeUp
 							.movex(xMove)
 							.movey(yMove);
