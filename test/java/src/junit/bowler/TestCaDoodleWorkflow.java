@@ -129,10 +129,10 @@ public class TestCaDoodleWorkflow {
 		String groupName = back.get(2).getName();
 		System.out.println("Group Name : "+groupName);
 		TransformNR height = new TransformNR(0,0,40);
-		TransformNR rightFront = new TransformNR(40,10,0);
-		TransformNR leftRear = new TransformNR(-10,80,0);
+		TransformNR leftFront = new TransformNR(40,80,0);
+		TransformNR rightRear = new TransformNR(-10,10,0);
 		Resize resize = new Resize()
-					.setResize(height, rightFront, leftRear)
+					.setResize(height, leftFront, rightRear)
 					.setNames(Arrays.asList(groupName))
 				;
 		loaded.addOpperation(resize).join();;

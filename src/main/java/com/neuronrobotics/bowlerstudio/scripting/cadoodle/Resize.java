@@ -21,9 +21,9 @@ public class Resize implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR height = null;
 	@Expose(serialize = true, deserialize = true)
-	private TransformNR rightFront = null;
+	private TransformNR leftFront = null;
 	@Expose(serialize = true, deserialize = true)
-	private TransformNR leftRear = null;
+	private TransformNR rightRear = null;
 
 	@Override
 	public String getType() {
@@ -61,15 +61,15 @@ public class Resize implements ICaDoodleOpperation {
 				double zMove = -resizeUp.getMinZ()+starting.getMinZ();
 				resizeUp=resizeUp
 						.movez(zMove);
-				double xdimen = Math.abs(rightFront.getX()-leftRear.getX());
-				double ydimen = Math.abs(rightFront.getY()-leftRear.getY());
+				double xdimen = Math.abs(leftFront.getX()-rightRear.getX());
+				double ydimen = Math.abs(leftFront.getY()-rightRear.getY());
 				double scalex = xdimen/ resizeUp.getTotalX();
 				double scaley = ydimen/ resizeUp.getTotalY();
 
 				Transform scale = new Transform().scale(scalex,scaley,1);
 				resizeUp=resizeUp.transformed(scale);
-				double xMove=-resizeUp.getMinX()+leftRear.getX();
-				double yMove = -resizeUp.getMinY()+leftRear.getY();
+				double xMove=-resizeUp.getMinX()+rightRear.getX();
+				double yMove = -resizeUp.getMinY()+rightRear.getY();
 				resizeUp=resizeUp
 							.movex(xMove)
 							.movey(yMove);
@@ -115,13 +115,13 @@ public class Resize implements ICaDoodleOpperation {
 		}
 	}
 
-	public Resize setResize(TransformNR h, TransformNR rf, TransformNR lr) {
+	public Resize setResize(TransformNR h, TransformNR lf, TransformNR rr) {
 		height = h;
-		rightFront = rf;
-		leftRear = lr;
-		if(lr.getY()>=rightFront.getY())
-			throw new RuntimeException("Scale must be positive!");
-		if(lr.getX()>=rightFront.getX())
+		leftFront = lf;
+		rightRear = rr;
+		if(rightRear.getY()>=leftFront.getY() && rightRear.getX()>=leftFront.getX())
+			return setResize(h,rr,lf);// they were swapped, just fix it and move along
+		if(rightRear.getY()>=leftFront.getY() || rightRear.getX()>=leftFront.getX())
 			throw new RuntimeException("Scale must be positive!");
 		return this;
 	}
