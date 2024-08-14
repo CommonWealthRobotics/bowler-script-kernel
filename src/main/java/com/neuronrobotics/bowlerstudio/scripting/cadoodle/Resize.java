@@ -89,8 +89,9 @@ public class Resize implements ICaDoodleOpperation {
 		for (int i = 0; i < back.size(); i++) {
 			CSG starting = back.get(i);
 			if (	starting.getName().contentEquals(name) ){
-				double zScale = Math.abs(height.getZ())-bounds.getMin().z;
+				double zScale = height.getZ()-bounds.getMin().z;
 				double scalez = zScale/ (bounds.getMax().z-bounds.getMin().z);
+				
 				
 				Transform scaleZ =new Transform().scaleZ(scalez);
 				CSG resizeUp = starting.transformed(scaleZ);
