@@ -53,7 +53,7 @@ public class Resize implements ICaDoodleOpperation {
 		for (int i = 0; i < back.size(); i++) {
 			CSG starting = back.get(i);
 			if (	starting.getName().contentEquals(name) ){
-				double zScale = Math.abs(height.getZ());
+				double zScale = Math.abs(height.getZ())-starting.getMinZ();
 				double scalez = zScale/ starting.getTotalZ();
 				
 				Transform scaleZ =new Transform().scaleZ(scalez);
@@ -69,7 +69,7 @@ public class Resize implements ICaDoodleOpperation {
 				Transform scale = new Transform().scale(scalex,scaley,1);
 				resizeUp=resizeUp.transformed(scale);
 				double xMove=-resizeUp.getMinX()+leftRear.getX();
-				double yMove = -resizeUp.getMinY()+rightFront.getY();
+				double yMove = -resizeUp.getMinY()+leftRear.getY();
 				resizeUp=resizeUp
 							.movex(xMove)
 							.movey(yMove);
@@ -119,6 +119,10 @@ public class Resize implements ICaDoodleOpperation {
 		height = h;
 		rightFront = rf;
 		leftRear = lr;
+		if(lr.getY()>=rightFront.getY())
+			throw new RuntimeException("Scale must be positive!");
+		if(lr.getX()>=rightFront.getX())
+			throw new RuntimeException("Scale must be positive!");
 		return this;
 	}
 
