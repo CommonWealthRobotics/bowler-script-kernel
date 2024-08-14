@@ -101,11 +101,23 @@ public class Resize implements ICaDoodleOpperation {
 				double ydimen = Math.abs(leftFront.getY()-rightRear.getY());
 				double scalex = xdimen/ (bounds.getMax().x-bounds.getMin().x);
 				double scaley = ydimen/ (bounds.getMax().y-bounds.getMin().y);
-
+				double x = rightRear.getX();
+				double y = rightRear.getY();
+				
+				if(leftFront.getX()<x) {
+					scalex=-scalex;
+				}
+				if(leftFront.getY()<y) {
+					scaley=-scaley;
+				}
 				Transform scale = new Transform().scale(scalex,scaley,1);
 				resizeUp=resizeUp.transformed(scale);
-				double xMove=-(bounds.getMin().x*scalex)+rightRear.getX();
-				double yMove = -(bounds.getMin().y*scaley)+rightRear.getY();
+				
+
+
+				
+				double xMove=-(bounds.getMin().x*scalex)+x;
+				double yMove = -(bounds.getMin().y*scaley)+y;
 				resizeUp=resizeUp
 							.movex(xMove)
 							.movey(yMove);
@@ -157,8 +169,8 @@ public class Resize implements ICaDoodleOpperation {
 		rightRear = rr;
 		if(rightRear.getY()>=leftFront.getY() && rightRear.getX()>=leftFront.getX())
 			return setResize(h,rr,lf);// they were swapped, just fix it and move along
-		if(rightRear.getY()>=leftFront.getY() || rightRear.getX()>=leftFront.getX())
-			throw new RuntimeException("Scale must be positive!");
+//		if(rightRear.getY()>=leftFront.getY() || rightRear.getX()>=leftFront.getX())
+//			throw new RuntimeException("Scale must be positive!");
 		return this;
 	}
 

@@ -167,20 +167,22 @@ public class Manipulation {
 	}
 
 	private void dragged(MouseEvent event) {
-		getUi().runLater(() -> {
-			setDragging(event);
-			double deltx = (startx - event.getScreenX());
-			double delty = (starty - event.getScreenY());
-			double d = deltx/  getDepthNow() ;
-			double y = delty/  getDepthNow() ;
-			if(Double.isFinite(y) && Double.isFinite(d)) {
-				TransformNR trans = new TransformNR(d, y, 0, new RotationNR());
-				performMove(trans);
-			}else {
-				System.out.println("ERROR?");
-			}
-		});
-		event.consume();
+		if(state==DragState.Dragging) {
+			getUi().runLater(() -> {
+				setDragging(event);
+				double deltx = (startx - event.getScreenX());
+				double delty = (starty - event.getScreenY());
+				double d = deltx/  getDepthNow() ;
+				double y = delty/  getDepthNow() ;
+				if(Double.isFinite(y) && Double.isFinite(d)) {
+					TransformNR trans = new TransformNR(d, y, 0, new RotationNR());
+					performMove(trans);
+				}else {
+					System.out.println("ERROR?");
+				}
+			});
+			event.consume();
+		}
 	}
 
 	public boolean isMoving() {
@@ -193,7 +195,8 @@ public class Manipulation {
 			getGlobalPose().setX(newx);
 			getGlobalPose().setY(newy);
 			getGlobalPose().setZ(newz);
-			event.consume();
+			if(event!=null)
+				event.consume();
 			fireSave();
 		}
 	}
@@ -295,6 +298,10 @@ public class Manipulation {
 
 	public void setCurrentPose(TransformNR currentPose) {
 		this.currentPose = currentPose;
+	}
+
+	public void cancel() {
+		release(null);
 	}
 
 }
