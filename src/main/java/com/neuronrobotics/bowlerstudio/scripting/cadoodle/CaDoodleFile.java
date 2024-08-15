@@ -184,6 +184,7 @@ public class CaDoodleFile {
 	public List<CSG> getSelect(List<String> selectedSnapshot) {
 		List<CSG> cur = getCurrentState();
 		 ArrayList<CSG> back =new ArrayList<CSG>();
+		 if(cur!=null)
 		 for(CSG c:cur) {
 			 for(String s:selectedSnapshot) {
 				 if(c.getName().contentEquals(s)) {
@@ -229,9 +230,9 @@ public class CaDoodleFile {
 
 
 	public static CaDoodleFile fromJsonString(String content ) throws Exception{
-		return fromJsonString(content, null, null);
+		return fromJsonString(content, null, null,true);
 	}
-	public static CaDoodleFile fromJsonString(String content ,ICaDoodleStateUpdate listener, File self) throws Exception {
+	public static CaDoodleFile fromJsonString(String content ,ICaDoodleStateUpdate listener, File self, boolean initialize) throws Exception {
 		CaDoodleFile file =gson.fromJson(content, TT_CaDoodleFile);
 		if(listener!=null) {
 			file.addListener(listener);
@@ -239,16 +240,23 @@ public class CaDoodleFile {
 		if(self!=null) {
 			file.setSelf(self);
 		}
-		file.initialize();
+		if(initialize)
+			file.initialize();
 		return file;
 	}
 	public static CaDoodleFile fromFile(File f ) throws Exception{
 		return fromFile(f,null);
 	}
+	public static String getProjectName(File f ) throws Exception{
+		System.out.println("CaDoodle file reading from "+f.getAbsolutePath());
+		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
+		CaDoodleFile file =fromJsonString(content,null,f,false);
+		return file.getProjectName();
+	}
 	public static CaDoodleFile fromFile(File f,ICaDoodleStateUpdate listener ) throws Exception {
 		System.out.println("CaDoodle file loading from "+f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-		CaDoodleFile file =fromJsonString(content,listener,f);
+		CaDoodleFile file =fromJsonString(content,listener,f,true);
 		return file;
 	}
 	public ArrayList<ICaDoodleOpperation> getOpperations() {
