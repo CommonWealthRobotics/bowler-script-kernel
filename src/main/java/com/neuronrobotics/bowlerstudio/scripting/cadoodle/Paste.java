@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,9 @@ public class Paste implements ICaDoodleOpperation {
 	public String paste=null;
 	@Expose (serialize = true, deserialize = true)
 	public double offset=10;
+	@Expose (serialize = false, deserialize = false)
+	public HashSet<String> newNames = new HashSet<String>();
+	
 	@Override
 	public String getType() {
 		return "Paste";
@@ -64,6 +68,7 @@ public class Paste implements ICaDoodleOpperation {
 		index++;
 		newOne.syncProperties(c).setName(name);
 		back.add(newOne);
+		getNewNames().add(name);
 		return index;
 	}
 
@@ -93,5 +98,9 @@ public class Paste implements ICaDoodleOpperation {
 	public Paste setOffset(double offset) {
 		this.offset = offset;
 		return this;
+	}
+
+	public HashSet<String> getNewNames() {
+		return newNames;
 	}
 }

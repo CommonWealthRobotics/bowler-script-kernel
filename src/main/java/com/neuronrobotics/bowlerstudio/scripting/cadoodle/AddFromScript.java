@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -18,8 +19,10 @@ public class AddFromScript implements ICaDoodleOpperation {
 	private String fileRel = "";
 	@Expose (serialize = true, deserialize = true)
 	private String name=null;
-	@Expose (serialize = true, deserialize = true)
+	@Expose (serialize = false, deserialize = false)
 	private int nameIndex = 0;
+	@Expose (serialize = false, deserialize = false)
+	private HashSet<String> namesAdded = new HashSet<>();
 	
 	public AddFromScript set(String git, String f) {
 		gitULR = git;
@@ -36,10 +39,15 @@ public class AddFromScript implements ICaDoodleOpperation {
 		if(name==null) {
 			name=RandomStringFactory.generateRandomString();
 		}
+		String result;
 		if(nameIndex==0)
-			return name;
+			result= name;
+		else {
+			result= name+"_"+nameIndex;
+		}
 		nameIndex++;
-		return name+"_"+nameIndex;
+		namesAdded.add(result);
+		return result;
 	}
 
 	@Override
@@ -65,6 +73,10 @@ public class AddFromScript implements ICaDoodleOpperation {
 			e.printStackTrace();
 		}
 		return back;
+	}
+
+	public HashSet<String> getNamesAdded() {
+		return namesAdded;
 	}
 
 }
