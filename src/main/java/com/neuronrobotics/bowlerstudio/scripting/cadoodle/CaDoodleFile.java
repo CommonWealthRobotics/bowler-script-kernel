@@ -19,6 +19,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
@@ -31,6 +32,8 @@ public class CaDoodleFile {
 	private int currentIndex =0;
 	@Expose (serialize = true, deserialize = true)
 	private String projectName =NO_NAME;
+	@Expose (serialize = true, deserialize = true)
+	private TransformNR workplane =new TransformNR();
 	@Expose (serialize = false, deserialize = false)
 	private File selfInternal;
 //	@Expose (serialize = false, deserialize = false)
@@ -264,6 +267,14 @@ public class CaDoodleFile {
 	}
 	public void setOpperations(ArrayList<ICaDoodleOpperation> opperations) {
 		this.opperations = opperations;
+	}
+	public TransformNR getWorkplane() {
+		if(workplane==null)
+			workplane=new TransformNR();
+		return workplane;
+	}
+	public void setWorkplane(TransformNR workplane) {
+		this.workplane = workplane;
 	}
 
 
