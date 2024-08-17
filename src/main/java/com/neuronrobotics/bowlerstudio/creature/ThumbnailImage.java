@@ -101,8 +101,9 @@ public class ThumbnailImage {
 //	            new Rotate(-45, Rotate.X_AXIS)
 //	    );
 		// Create a scene with the group and camera
-		Scene scene = new Scene(root, 1000, 1000, true, SceneAntialiasing.BALANCED);
-		scene.setFill(Color.RED);
+		int i = 1000;
+		Scene scene = new Scene(root, i, i, true, SceneAntialiasing.BALANCED);
+		scene.setFill(Color.TRANSPARENT);
 		scene.setCamera(camera);
 
 		// Set up snapshot parameters
@@ -113,7 +114,7 @@ public class ThumbnailImage {
 		params.setTransform(Transform.scale(1, 1));
 
 		   // Create the WritableImage first
-	    WritableImage snapshot = new WritableImage(1000, 1000);
+	    WritableImage snapshot = new WritableImage(i, i);
 	    
 
 	    root.snapshot(params,  snapshot);
