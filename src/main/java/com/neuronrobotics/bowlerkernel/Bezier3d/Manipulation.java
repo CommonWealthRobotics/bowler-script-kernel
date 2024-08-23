@@ -33,9 +33,10 @@ public class Manipulation {
 	private ArrayList<Runnable> saveListeners = new ArrayList<>();
 	private ArrayList<Manipulation> dependants = new ArrayList<>();
 	private Affine manipulationMatrix;
-	private Vector3d orintation;
+	private TransformNR orintation;
 	private TransformNR globalPose= new TransformNR();
 	private TransformNR currentPose=new TransformNR();
+	private IFrameProvider frameOfReference = ()->new TransformNR();
 	//private PhongMaterial color;// = new PhongMaterial(getColor());
 	//private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
 
@@ -91,7 +92,7 @@ public class Manipulation {
 //	}
 	public Manipulation(Affine mm, Vector3d o, TransformNR p) {
 		this.manipulationMatrix = mm;
-		this.orintation = o;
+		this.orintation = new TransformNR(o.x, o.y, o.z);
 		//this.manip = m;
 		//color = new PhongMaterial(m.getColor());
 		this.setGlobalPose(p);
@@ -172,10 +173,11 @@ public class Manipulation {
 				setDragging(event);
 				double deltx = (startx - event.getScreenX());
 				double delty = (starty - event.getScreenY());
-				double d = deltx/  getDepthNow() ;
+				double x = deltx/  getDepthNow() ;
 				double y = delty/  getDepthNow() ;
-				if(Double.isFinite(y) && Double.isFinite(d)) {
-					TransformNR trans = new TransformNR(d, y, 0, new RotationNR());
+				//System.out.println("Moved "+x+" "+y);
+				if(Double.isFinite(y) && Double.isFinite(x)) {			
+					TransformNR trans = new TransformNR(x, y, 0, new RotationNR());
 					performMove(trans);
 				}else {
 					System.out.println("ERROR?");
@@ -214,18 +216,28 @@ public class Manipulation {
 
 	private void performMove(TransformNR trans) {
 		TransformNR camerFrame = getUi().getCamerFrame();
-		TransformNR globalTMP = camerFrame.copy();
+		TransformNR globalTMP = new TransformNR(camerFrame.getRotation());
 		try {
-			globalTMP.setX(0);
-			globalTMP.setY(0);
-			globalTMP.setZ(0);
+			
 			TransformNR global = globalTMP.times(trans);
-			newx = round((global.getX() * orintation.x + getGlobalPose().getX()));
-			newy = round((global.getY() * orintation.y + getGlobalPose().getY()));
-			newz = round((global.getZ() * orintation.z + getGlobalPose().getZ()));
+			TransformNR wp = getFrameOfReference().copy();
+			wp.setX(0);
+			wp.setY(0);
+			wp.setZ(0);
+			global=wp.inverse().times(global);
+			
+			newx = round((global.getX() * orintation.getX() ));
+			newy = round((global.getY() * orintation.getY() ));
+			newz = round((global.getZ() * orintation.getZ() ));
+			
+			TransformNR globalTrans = globalPose.copy().setRotation(new RotationNR());
 			global.setX(newx);
 			global.setY(newy);
 			global.setZ(newz);
+			global.setRotation(new RotationNR());
+			TransformNR o =wp.times(global).times(wp.inverse()).setRotation(new RotationNR());
+			global=globalTrans.times(o);
+
 	
 			global.setRotation(new RotationNR());
 			setGlobal(global);
@@ -279,6 +291,13 @@ public class Manipulation {
 	public TransformNR getGlobalPose() {
 		return globalPose;
 	}
+	public TransformNR getGlobalPoseInReferenceFrame() {
+		TransformNR globalPose = getGlobalPose().copy();
+		TransformNR wp = new TransformNR( getFrameOfReference() .getRotation());
+		globalPose=wp.times(globalPose);
+		globalPose.setRotation(new RotationNR());
+		return globalPose;
+	}
 
 	public void setGlobalPose(TransformNR globalPose) {
 		this.globalPose = globalPose;
@@ -302,6 +321,14 @@ public class Manipulation {
 
 	public void cancel() {
 		release(null);
+	}
+
+	public  TransformNR getFrameOfReference() {
+		return frameOfReference.get();
+	}
+
+	public void setFrameOfReference(IFrameProvider frameOfReference) {
+		this.frameOfReference = frameOfReference;
 	}
 
 }
