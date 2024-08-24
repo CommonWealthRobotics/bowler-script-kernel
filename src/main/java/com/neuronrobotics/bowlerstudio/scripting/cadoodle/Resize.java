@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.creature.IMobileBaseUI;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
@@ -26,6 +27,10 @@ public class Resize implements ICaDoodleOpperation {
 	private TransformNR leftFront = null;
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR rightRear = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR workplane = new TransformNR();
+	@Expose(serialize = false, deserialize = false)
+	private IMobileBaseUI debug;
 
 	@Override
 	public String getType() {
@@ -42,7 +47,8 @@ public class Resize implements ICaDoodleOpperation {
 	public Bounds getSellectedBounds(List<CSG> incoming) {
 		Vector3d min = null;
 		Vector3d max = null;
-		for (CSG c : incoming) {
+		for (CSG i : incoming) {
+			CSG c=i.transformed(TransformFactory.nrToCSG(getWorkplane().inverse()));
 			Vector3d min2 = c.getBounds().getMin().clone();
 			Vector3d max2 = c.getBounds().getMax().clone();
 			if (min == null)
@@ -94,10 +100,21 @@ public class Resize implements ICaDoodleOpperation {
 				
 				
 				Transform scaleZ =new Transform().scaleZ(scalez);
-				CSG resizeUp = starting.transformed(scaleZ);
+				CSG transformed = starting.transformed(TransformFactory.nrToCSG(getWorkplane().inverse()));
+				if(debug!=null) {
+					debug.setCsg(transformed, null);
+				}
+				CSG resizeUp = transformed
+						.transformed(scaleZ);
+				if(debug!=null) {
+					debug.setCsg(resizeUp, null);
+				}
 				double zMove = -(bounds.getMin().z*scalez)+bounds.getMin().z;
 				resizeUp=resizeUp
 						.movez(zMove);
+				if(debug!=null) {
+					debug.setCsg(resizeUp, null);
+				}
 				double xdimen = Math.abs(leftFront.getX()-rightRear.getX());
 				double ydimen = Math.abs(leftFront.getY()-rightRear.getY());
 				double scalex = xdimen/ (bounds.getMax().x-bounds.getMin().x);
@@ -113,7 +130,9 @@ public class Resize implements ICaDoodleOpperation {
 				}
 				Transform scale = new Transform().scale(scalex,scaley,1);
 				resizeUp=resizeUp.transformed(scale);
-				
+				if(debug!=null) {
+					debug.setCsg(resizeUp, null);
+				}
 
 
 				
@@ -122,6 +141,13 @@ public class Resize implements ICaDoodleOpperation {
 				resizeUp=resizeUp
 							.movex(xMove)
 							.movey(yMove);
+				if(debug!=null) {
+					debug.setCsg(resizeUp, null);
+				}
+				resizeUp=resizeUp.transformed(TransformFactory.nrToCSG(getWorkplane()));
+				if(debug!=null) {
+					debug.setCsg(resizeUp, null);
+				}
 				resizeUp.syncProperties(starting).setName(name);
 				ResizeEvent ev = new ResizeEvent();
 				ev.movex=xMove;
@@ -147,13 +173,19 @@ public class Resize implements ICaDoodleOpperation {
 			if(c.isInGroup() && c.checkGroupMembership(name) ) {
 				
 				ResizeEvent ev =groupsProcessed.get(name);
-				CSG gc = c.transformed(ev.scaleZ);
+				CSG transformed = c.transformed(TransformFactory.nrToCSG(getWorkplane().inverse()));
+				if(debug!=null) {
+					debug.setCsg(transformed, null);
+				}
+				CSG gc = transformed
+							.transformed(ev.scaleZ);
 				gc=gc
 						.movez(ev.movez);
 				gc=gc.transformed(ev.scale);
 				gc=gc
 							.movex(ev.movex)
-							.movey(ev.movey);
+							.movey(ev.movey)
+							.transformed(TransformFactory.nrToCSG(getWorkplane()));
 				gc.syncProperties(c).setName(c.getName());
 				back.set(i, gc);
 				if( c.isGroupResult()) {
@@ -168,6 +200,9 @@ public class Resize implements ICaDoodleOpperation {
 		height = h;
 		leftFront = lf;
 		rightRear = rr;
+		if(Math.abs(lf.getZ()-rr.getZ())>0.00001) {
+			throw new RuntimeException("The control points of the corners must be at the same Z value \n"+lf.toSimpleString()+"\n"+rr.toSimpleString());
+		}
 		if(rightRear.getY()>=leftFront.getY() && rightRear.getX()>=leftFront.getX())
 			return setResize(h,rr,lf);// they were swapped, just fix it and move along
 //		if(rightRear.getY()>=leftFront.getY() || rightRear.getX()>=leftFront.getX())
@@ -181,6 +216,19 @@ public class Resize implements ICaDoodleOpperation {
 
 	public Resize setNames(List<String> names) {
 		this.names = names;
+		return this;
+	}
+	public TransformNR getWorkplane() {
+		if(workplane==null)
+			workplane=new TransformNR();
+		return workplane;
+	}
+	public Resize setWorkplane(TransformNR workplane) {
+		this.workplane = workplane;
+		return this;
+	}
+	public Resize setDebugger(IMobileBaseUI engine) {
+		this.debug = engine;
 		return this;
 	}
 
