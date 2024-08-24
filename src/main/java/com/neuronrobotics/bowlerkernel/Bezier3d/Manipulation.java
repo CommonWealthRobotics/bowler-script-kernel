@@ -282,7 +282,18 @@ public class Manipulation {
 		}
 
 	}
+	public void setInReferenceFrame(double newX, double newY, double newZ) {
+		TransformNR inLocal = new TransformNR(newX,  newY,  newZ);
+		TransformNR wp = new TransformNR( getFrameOfReference() .getRotation());
+		inLocal=wp.times(inLocal);
+		inLocal.setRotation(new RotationNR());
+		//System.out.println(inLocal.toSimpleString());
+		setGlobal(inLocal);
+		for (Runnable R : eventListeners) {
+			R.run();
+		}
 
+	}
 	public void reset() {
 		// TODO Auto-generated method stub
 		
@@ -298,7 +309,13 @@ public class Manipulation {
 		globalPose.setRotation(new RotationNR());
 		return globalPose;
 	}
-
+	public TransformNR getCurrentPoseInReferenceFrame() {
+		TransformNR globalPose = getCurrentPose().copy();
+		TransformNR wp = new TransformNR( getFrameOfReference() .getRotation());
+		globalPose=wp.times(globalPose);
+		globalPose.setRotation(new RotationNR());
+		return globalPose;
+	}
 	public void setGlobalPose(TransformNR globalPose) {
 		this.globalPose = globalPose;
 	}
