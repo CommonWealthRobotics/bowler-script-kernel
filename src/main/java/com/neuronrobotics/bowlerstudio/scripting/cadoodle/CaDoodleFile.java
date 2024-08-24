@@ -61,7 +61,7 @@ public class CaDoodleFile {
 			listeners.add(l);
 		return this;
 	}
-	private void initialize() {
+	public void initialize() {
 		int indexStarting = currentIndex;
 		currentIndex=0;
 		for(int i=0;i<opperations.size();i++) {
@@ -248,7 +248,7 @@ public class CaDoodleFile {
 		return file;
 	}
 	public static CaDoodleFile fromFile(File f ) throws Exception{
-		return fromFile(f,null);
+		return fromFile(f,null,true);
 	}
 	public static String getProjectName(File f ) throws Exception{
 		System.out.println("CaDoodle file reading from "+f.getAbsolutePath());
@@ -256,10 +256,10 @@ public class CaDoodleFile {
 		CaDoodleFile file =fromJsonString(content,null,f,false);
 		return file.getProjectName();
 	}
-	public static CaDoodleFile fromFile(File f,ICaDoodleStateUpdate listener ) throws Exception {
+	public static CaDoodleFile fromFile(File f,ICaDoodleStateUpdate listener,boolean initialize ) throws Exception {
 		System.out.println("CaDoodle file loading from "+f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-		CaDoodleFile file =fromJsonString(content,listener,f,true);
+		CaDoodleFile file =fromJsonString(content,listener,f,initialize);
 		return file;
 	}
 	public ArrayList<ICaDoodleOpperation> getOpperations() {
