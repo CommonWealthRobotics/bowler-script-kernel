@@ -61,8 +61,9 @@ public class ThumbnailImage {
 
 		double yOffset = (b.getMax().y-b.getMin().y)/2;
 		double xOffset =(b.getMax().x -b.getMin().x)/2;
+		double zCenter = (b.getMax().z -b.getMin().z)/2;
 		for (CSG csg : csgList) {
-			MeshView meshView = csg.getMesh();
+			MeshView meshView = csg.movez(-zCenter).getMesh();
 			if (csg.isHole()) {
 				PhongMaterial material = new PhongMaterial();
 				material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
@@ -83,11 +84,11 @@ public class ThumbnailImage {
 
 		// Calculate camera position to fit all objects in view
 		double maxDimension = Math.max(totalx, Math.max(totaly, totalz));
-		double cameraDistance = (maxDimension / Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))*0.9 ;
+		double cameraDistance = (maxDimension / Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))*0.8 ;
 
 		TransformNR camoffset = new TransformNR(xOffset, yOffset, 0);
 		TransformNR camDist = new TransformNR(0, 0, -cameraDistance);
-		TransformNR rot = new TransformNR(new RotationNR(-155, 45, 0));
+		TransformNR rot = new TransformNR(new RotationNR(-150, 45, 0));
 		
 		Affine af = TransformFactory.nrToAffine(camoffset.times(rot.times(camDist)));
 		camera.getTransforms().add(af);

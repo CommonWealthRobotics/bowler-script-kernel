@@ -23,6 +23,9 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+
+import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
 public class CaDoodleFile {
 	public static final String NO_NAME = "NoName";
@@ -62,6 +65,10 @@ public class CaDoodleFile {
 		return this;
 	}
 	public void initialize() {
+		if(selfInternal!=null) {
+			File db = new File(selfInternal.getAbsoluteFile().getParent()+delim()+"CSGdatabase.json");
+			CSGDatabase.setDbFile(db);
+		}
 		int indexStarting = currentIndex;
 		currentIndex=0;
 		for(int i=0;i<opperations.size();i++) {
