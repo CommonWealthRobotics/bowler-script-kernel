@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
@@ -20,6 +22,9 @@ public class AddFromScript implements ICaDoodleOpperation {
 	private String fileRel = "";
 	@Expose (serialize = true, deserialize = true)
 	private String name=null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR location =null;
+	
 	@Expose (serialize = false, deserialize = false)
 	private int nameIndex = 0;
 	@Expose (serialize = false, deserialize = false)
@@ -69,6 +74,7 @@ public class AddFromScript implements ICaDoodleOpperation {
 								.moveToCenterX()
 								.moveToCenterY()
 								.toZMin()
+								.transformed(TransformFactory.nrToCSG( getLocation() ))
 								.syncProperties(csg)
 								.setName(getOrderedName());
 					})
@@ -83,6 +89,17 @@ public class AddFromScript implements ICaDoodleOpperation {
 
 	public HashSet<String> getNamesAdded() {
 		return namesAdded;
+	}
+
+	public TransformNR getLocation() {
+		if(location==null)
+			location=new TransformNR();
+		return location;
+	}
+
+	public AddFromScript setLocation(TransformNR location) {
+		this.location = location;
+		return this;
 	}
 
 }

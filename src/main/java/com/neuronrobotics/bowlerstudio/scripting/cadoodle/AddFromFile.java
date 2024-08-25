@@ -8,7 +8,9 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
@@ -17,6 +19,9 @@ public class AddFromFile implements ICaDoodleOpperation {
 	private String fileLocation=null;
 	@Expose (serialize = true, deserialize = true)
 	private String name=null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR location = null;
+	
 	private int nameIndex = 0;
 	public AddFromFile set(File source) {
 		fileLocation=source.getAbsolutePath();
@@ -56,6 +61,7 @@ public class AddFromFile implements ICaDoodleOpperation {
 								.moveToCenterX()
 								.moveToCenterY()
 								.toZMin()
+								.transformed(TransformFactory.nrToCSG( getLocation() ))
 								.syncProperties(csg)
 								.setName(getOrderedName());
 					})
@@ -66,6 +72,17 @@ public class AddFromFile implements ICaDoodleOpperation {
 			e.printStackTrace();
 		}
 		return back;
+	}
+
+	public TransformNR getLocation() {
+		if(location==null)
+			location=new TransformNR();
+		return location;
+	}
+
+	public AddFromFile setLocation(TransformNR location) {
+		this.location = location;
+		return this;
 	}
 
 }
