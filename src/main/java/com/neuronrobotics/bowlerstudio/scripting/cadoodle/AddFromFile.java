@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -41,9 +42,14 @@ public class AddFromFile implements ICaDoodleOpperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
+		if(name==null) {
+			name=RandomStringFactory.generateRandomString();
+		}
 		try {
+			ArrayList<Object>args = new ArrayList<>();
+			args.addAll(Arrays.asList(name ));
 			back.addAll(ScriptingEngine
-					.flaten(new File(fileLocation), CSG.class)
+					.flaten(new File(fileLocation), CSG.class,args)
 					.stream()
 					.map(csg->{
 						return csg

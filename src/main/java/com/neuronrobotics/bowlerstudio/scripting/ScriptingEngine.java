@@ -119,15 +119,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		}
 	}
-	public static <T> List<T> flaten(String git,String file, Class<T> type) throws Exception{
+	public static <T> List<T> flaten(String git,String file, Class<T> type, ArrayList<Object> args) throws Exception{
 		ArrayList<T> flattened = new ArrayList<T>();
-		Object o =gitScriptRun(git, file);
+		Object o =gitScriptRun(git, file,args);
 		flatenInterna(o,type,flattened);
 		return flattened;
 	}
-	public static <T> List<T> flaten(File f, Class<T> type) throws Exception{
+	public static <T> List<T> flaten(File f, Class<T> type, ArrayList<Object> args) throws Exception{
 		ArrayList<T> flattened = new ArrayList<T>();
-		Object o =inlineFileScriptRun(f, null);
+		Object o =inlineFileScriptRun(f, args);
 		flatenInterna(o,type,flattened);
 		return flattened;
 	}
