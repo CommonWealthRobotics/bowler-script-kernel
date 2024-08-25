@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
@@ -16,6 +18,9 @@ public class Allign implements ICaDoodleOpperation {
 	public AllignmentY y=null;
 	@Expose (serialize = true, deserialize = true)
 	public AllignmentX x=null;
+	@Expose (serialize = true, deserialize = true)
+	private TransformNR workplane=null;
+	
 	@Override
 	public String getType() {
 		return "Allign";
@@ -31,7 +36,7 @@ public class Allign implements ICaDoodleOpperation {
 			String name = names.get(0);
 			if(name.contentEquals(c.getName())) {
 				back.remove(c);
-				reference=c;
+				reference=c.transformed(TransformFactory.nrToCSG(workplane).inverse());
 			}
 		}
 		for(CSG c: back) {
@@ -41,19 +46,21 @@ public class Allign implements ICaDoodleOpperation {
 				toMove.add(c);
 			}
 		}
-		for(CSG c:toMove) {
+		for(CSG tmp:toMove) {
+			CSG c = tmp.transformed(TransformFactory.nrToCSG(workplane).inverse());
 			if(z!=null) {
 				switch(z) {
 				case BottomAllign:
-					back.add( c.toZMin()
-						.movez(reference.getMinZ()));
+					c=( c.toZMin()
+						.movez(reference.getMinZ())
+						);
 					break;
 				case Center:
-					back.add( c.moveToCenterZ()
+					c=( c.moveToCenterZ()
 							.movez(reference.getCenterZ()));
 					break;
 				case TopAllign:
-					back.add( c.toZMax()
+					c=( c.toZMax()
 							.movez(reference.getMaxZ()));
 					break;
 				default:
@@ -63,15 +70,15 @@ public class Allign implements ICaDoodleOpperation {
 			if(x!=null) {
 				switch(x) {
 				case Back:
-					back.add( c.toXMin()
+					c=( c.toXMin()
 							.movex(reference.getMinX()));
 					break;
 				case Center:
-					back.add( c.moveToCenterX()
+					c=( c.moveToCenterX()
 							.movex(reference.getCenterX()));
 					break;
 				case Front:
-					back.add( c.toXMax()
+					c=( c.toXMax()
 							.movex(reference.getMaxX()));
 					break;
 				default:
@@ -82,22 +89,23 @@ public class Allign implements ICaDoodleOpperation {
 			if(y!=null) {
 				switch(y) {
 				case Center:
-					back.add( c.moveToCenterY()
+					c=( c.moveToCenterY()
 							.movey(reference.getCenterY()));
 					break;
 				case Left:
-					back.add( c.toYMax()
+					c=( c.toYMax()
 							.movey(reference.getMaxY()));
 					break;
 				case Right:
-					back.add( c.toYMin()
-							.movey(reference.getMinY()));
+					c= c.toYMin()
+							.movey(reference.getMinY());
 					break;
 				default:
 					break;
 				
 				}
 			}
+			back.add(c.transformed(TransformFactory.nrToCSG(workplane)));
 		}
 		return back;
 	}
@@ -114,6 +122,17 @@ public class Allign implements ICaDoodleOpperation {
 		x=X;
 		y=Y;
 		z=Z;
+		return this;
+	}
+
+	public TransformNR getWorkplane() {
+		if(workplane==null)
+			workplane= new TransformNR();
+		return workplane;
+	}
+
+	public Allign setWorkplane(TransformNR workplane) {
+		this.workplane = workplane;
 		return this;
 	}
 
