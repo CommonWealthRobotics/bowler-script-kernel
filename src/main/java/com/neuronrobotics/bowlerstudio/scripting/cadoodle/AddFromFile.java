@@ -14,7 +14,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class AddFromFile implements ICaDoodleOpperation {
+public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
 	private String fileLocation=null;
 	@Expose (serialize = true, deserialize = true)
@@ -22,7 +22,6 @@ public class AddFromFile implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
 	
-	private int nameIndex = 0;
 	public AddFromFile set(File source) {
 		fileLocation=source.getAbsolutePath();
 		return this;
@@ -33,26 +32,19 @@ public class AddFromFile implements ICaDoodleOpperation {
 		return "Add Object";
 	}
 	
-	private String getOrderedName() {
-		if(name==null) {
-			name=RandomStringFactory.generateRandomString();
-		}
-		if(nameIndex==0)
-			return name;
-		nameIndex++;
-		return name+"_"+nameIndex;
-	}
+
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
+		nameIndex=0;
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		if(name==null) {
-			name=RandomStringFactory.generateRandomString();
+		if(getName()==null) {
+			setName(RandomStringFactory.generateRandomString());
 		}
 		try {
 			ArrayList<Object>args = new ArrayList<>();
-			args.addAll(Arrays.asList(name ));
+			args.addAll(Arrays.asList(getName() ));
 			back.addAll(ScriptingEngine
 					.flaten(new File(fileLocation), CSG.class,args)
 					.stream()
@@ -83,6 +75,14 @@ public class AddFromFile implements ICaDoodleOpperation {
 	public AddFromFile setLocation(TransformNR location) {
 		this.location = location;
 		return this;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

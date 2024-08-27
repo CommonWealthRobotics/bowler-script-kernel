@@ -15,7 +15,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class AddFromScript implements ICaDoodleOpperation {
+public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
 	private String gitULR = "";
 	@Expose (serialize = true, deserialize = true)
@@ -25,10 +25,8 @@ public class AddFromScript implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location =null;
 	
-	@Expose (serialize = false, deserialize = false)
-	private int nameIndex = 0;
-	@Expose (serialize = false, deserialize = false)
-	private HashSet<String> namesAdded = new HashSet<>();
+
+
 	
 	public AddFromScript set(String git, String f) {
 		gitULR = git;
@@ -41,23 +39,10 @@ public class AddFromScript implements ICaDoodleOpperation {
 		return "Add Object";
 	}
 	
-	private String getOrderedName() {
-		if(name==null) {
-			name=RandomStringFactory.generateRandomString();
-		}
-		String result;
-		if(nameIndex==0)
-			result= name;
-		else {
-			result= name+"_"+nameIndex;
-		}
-		nameIndex++;
-		namesAdded.add(result);
-		return result;
-	}
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
+		nameIndex=0;
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		if(name==null) {
@@ -87,9 +72,7 @@ public class AddFromScript implements ICaDoodleOpperation {
 		return back;
 	}
 
-	public HashSet<String> getNamesAdded() {
-		return namesAdded;
-	}
+
 
 	public TransformNR getLocation() {
 		if(location==null)
@@ -100,6 +83,13 @@ public class AddFromScript implements ICaDoodleOpperation {
 	public AddFromScript setLocation(TransformNR location) {
 		this.location = location;
 		return this;
+	}
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

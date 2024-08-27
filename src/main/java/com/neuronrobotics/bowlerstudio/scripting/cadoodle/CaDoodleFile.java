@@ -50,6 +50,7 @@ public class CaDoodleFile {
 			.create();
 	private ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
 	private Thread opperationRunner=null;
+	private boolean regenerating;
 	public CaDoodleFile clearListeners() {
 		listeners.clear();
 		return this;
@@ -84,7 +85,30 @@ public class CaDoodleFile {
 		currentIndex=indexStarting;
 		updateCurrentFromCache();
 	}
-
+	public void regenerateFrom(ICaDoodleOpperation source) {
+		if(regenerating)
+			return;
+		regenerating = true;
+		System.out.println("Regenerating Object from "+source.getType());
+		int opIndex = 0;
+		int size = opperations.size();
+		for(int i=0;i<size;i++) {
+			ICaDoodleOpperation op =opperations.get(i);
+			if(source==op) {
+				opIndex=i;
+				break;
+			}
+		}
+		currentIndex = opIndex;
+		for(;currentIndex<size;) {
+			currentIndex++;
+			System.out.println("Regenerating "+currentIndex);
+			ICaDoodleOpperation op =opperations.get(currentIndex-1);
+			storeResultInCache(op, op.process(getPreviouState()));
+			setCurrentState(op);
+		}
+		regenerating = false;
+	}
 	public Thread regenerateCurrent() {
 		if (isOperationRunning()) {
 			throw new CadoodleConcurrencyException("Do not add a new opperation while the previous one is processing");
@@ -283,6 +307,7 @@ public class CaDoodleFile {
 	public void setWorkplane(TransformNR workplane) {
 		this.workplane = workplane;
 	}
+	
 
 
 }
