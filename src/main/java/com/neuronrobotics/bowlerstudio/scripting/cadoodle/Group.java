@@ -1,11 +1,13 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.IParametric;
 import javafx.scene.paint.Color;
 
 public class Group implements ICaDoodleOpperation {
@@ -68,6 +70,9 @@ public class Group implements ICaDoodleOpperation {
 			result.setIsHole(false);
 			result.setColor(c);
 		}
+		HashMap<String, IParametric> mapOfparametrics = result.getMapOfparametrics();
+		if(mapOfparametrics!=null)
+			mapOfparametrics.clear();
 		result.addIsGroupResult(getGroupID());
 		result.setName(getGroupID());
 		back.add(result);

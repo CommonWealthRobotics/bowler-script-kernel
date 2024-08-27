@@ -89,7 +89,7 @@ public class CaDoodleFile {
 		if(regenerating)
 			return;
 		regenerating = true;
-		System.out.println("Regenerating Object from "+source.getType());
+		//System.out.println("Regenerating Object from "+source.getType());
 		int opIndex = 0;
 		int size = opperations.size();
 		for(int i=0;i<size;i++) {
@@ -102,7 +102,7 @@ public class CaDoodleFile {
 		currentIndex = opIndex;
 		for(;currentIndex<size;) {
 			currentIndex++;
-			System.out.println("Regenerating "+currentIndex);
+			//System.out.println("Regenerating "+currentIndex);
 			ICaDoodleOpperation op =opperations.get(currentIndex-1);
 			storeResultInCache(op, op.process(getPreviouState()));
 			setCurrentState(op);
