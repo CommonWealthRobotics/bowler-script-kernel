@@ -29,89 +29,97 @@ import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
 public class CaDoodleFile {
 	public static final String NO_NAME = "NoName";
-	@Expose (serialize = true, deserialize = true)
+	@Expose(serialize = true, deserialize = true)
 	private ArrayList<ICaDoodleOpperation> opperations = new ArrayList<ICaDoodleOpperation>();
-	@Expose (serialize = true, deserialize = true)
-	private int currentIndex =0;
-	@Expose (serialize = true, deserialize = true)
-	private String projectName =NO_NAME;
-	@Expose (serialize = true, deserialize = true)
-	private TransformNR workplane =new TransformNR();
-	@Expose (serialize = false, deserialize = false)
+	@Expose(serialize = true, deserialize = true)
+	private int currentIndex = 0;
+	@Expose(serialize = true, deserialize = true)
+	private String projectName = NO_NAME;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR workplane = new TransformNR();
+	@Expose(serialize = false, deserialize = false)
 	private File selfInternal;
 //	@Expose (serialize = false, deserialize = false)
 //	private List<CSG> currentState = new ArrayList<CSG>();
-	@Expose (serialize = false, deserialize = false)
-	private HashMap<ICaDoodleOpperation, List<CSG>> cache =new HashMap<ICaDoodleOpperation, List<CSG>>();
-	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {}.getType();
-	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting()    
-			.excludeFieldsWithoutExposeAnnotation()
-            .registerTypeAdapterFactory(new ICaDoodleOperationAdapterFactory())
+	@Expose(serialize = false, deserialize = false)
+	private HashMap<ICaDoodleOpperation, List<CSG>> cache = new HashMap<ICaDoodleOpperation, List<CSG>>();
+	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {
+	}.getType();
+	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting()
+			.excludeFieldsWithoutExposeAnnotation().registerTypeAdapterFactory(new ICaDoodleOperationAdapterFactory())
 			.create();
 	private ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
-	private Thread opperationRunner=null;
+	private Thread opperationRunner = null;
 	private boolean regenerating;
+
 	public CaDoodleFile clearListeners() {
 		listeners.clear();
 		return this;
 	}
+
 	public CaDoodleFile removeListener(ICaDoodleStateUpdate l) {
-		if(listeners.contains(l))
+		if (listeners.contains(l))
 			listeners.remove(l);
 		return this;
 	}
+
 	public CaDoodleFile addListener(ICaDoodleStateUpdate l) {
-		if(!listeners.contains(l))
+		if (!listeners.contains(l))
 			listeners.add(l);
 		return this;
 	}
+
 	public void initialize() {
-		if(selfInternal!=null) {
-			File db = new File(selfInternal.getAbsoluteFile().getParent()+delim()+"CSGdatabase.json");
+		if (selfInternal != null) {
+			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			CSGDatabase.setDbFile(db);
 		}
 		int indexStarting = currentIndex;
-		currentIndex=0;
-		for(int i=0;i<opperations.size();i++) {
-			ICaDoodleOpperation op =opperations.get(i);
+		currentIndex = 0;
+		for (int i = 0; i < opperations.size(); i++) {
+			ICaDoodleOpperation op = opperations.get(i);
 			try {
 				process(op);
-			}catch(Throwable t) {
+			} catch (Throwable t) {
 				t.printStackTrace();
 				pruneForward();
 				return;
 			}
 		}
-		currentIndex=indexStarting;
+		currentIndex = indexStarting;
 		updateCurrentFromCache();
 	}
+
 	public void regenerateFrom(ICaDoodleOpperation source) {
-		if(regenerating)
+		if (regenerating)
 			return;
 		regenerating = true;
-		//System.out.println("Regenerating Object from "+source.getType());
+		// System.out.println("Regenerating Object from "+source.getType());
 		int opIndex = 0;
 		int endIndex = currentIndex;
 		int size = opperations.size();
-		for(int i=0;i<size;i++) {
-			ICaDoodleOpperation op =opperations.get(i);
-			if(source==op) {
-				opIndex=i;
+		for (int i = 0; i < size; i++) {
+			ICaDoodleOpperation op = opperations.get(i);
+			if (source == op) {
+				opIndex = i;
 				break;
 			}
 		}
 		currentIndex = opIndex;
-		for(;currentIndex<size;) {
+		for (; currentIndex < size;) {
 			currentIndex++;
-			//System.out.println("Regenerating "+currentIndex);
-			ICaDoodleOpperation op =opperations.get(currentIndex-1);
+			// System.out.println("Regenerating "+currentIndex);
+			ICaDoodleOpperation op = opperations.get(currentIndex - 1);
 			storeResultInCache(op, op.process(getPreviouState()));
 			setCurrentState(op);
 		}
-		currentIndex=endIndex;
-		updateCurrentFromCache();
+		if (currentIndex != endIndex) {
+			currentIndex = endIndex;
+			updateCurrentFromCache();
+		}
 		regenerating = false;
 	}
+
 	public Thread regenerateCurrent() {
 		if (isOperationRunning()) {
 			throw new CadoodleConcurrencyException("Do not add a new opperation while the previous one is processing");
@@ -124,84 +132,96 @@ public class CaDoodleFile {
 		});
 		opperationRunner.start();
 		return opperationRunner;
-		
+
 	}
+
 	private void process(ICaDoodleOpperation op) {
 		storeResultInCache(op, op.process(getCurrentState()));
 		currentIndex++;
 		setCurrentState(op);
 	}
+
 	public boolean isOperationRunning() {
-		return opperationRunner!=null;
+		return opperationRunner != null;
 	}
-	public  Thread addOpperation(ICaDoodleOpperation op) throws CadoodleConcurrencyException {
-		if(isOperationRunning()){
+
+	public Thread addOpperation(ICaDoodleOpperation op) throws CadoodleConcurrencyException {
+		if (isOperationRunning()) {
 			throw new CadoodleConcurrencyException("Do not add a new opperation while the previous one is processing");
 		}
-		opperationRunner=new Thread(()->{
-			if(currentIndex != getOpperations().size()) {
+		opperationRunner = new Thread(() -> {
+			if (currentIndex != getOpperations().size()) {
 				pruneForward();
 			}
 			try {
 				getOpperations().add(op);
 				process(op);
-			}catch(Exception ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
-			opperationRunner=null;
+			opperationRunner = null;
 		});
 		opperationRunner.start();
 		return opperationRunner;
 	}
+
 	private void pruneForward() {
-		for(int i=currentIndex;i<getOpperations().size();i++) {
+		for (int i = currentIndex; i < getOpperations().size(); i++) {
 			List<CSG> back = cache.remove(getOpperations().get(i));
 			back.clear();
 		}
 		List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, currentIndex);
-		ArrayList<ICaDoodleOpperation> newList=new ArrayList<ICaDoodleOpperation>();
+		ArrayList<ICaDoodleOpperation> newList = new ArrayList<ICaDoodleOpperation>();
 		newList.addAll(subList);
 		setOpperations(newList);
 	}
+
 	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
 		ArrayList<CSG> cachedCopy = new ArrayList<CSG>();
 		HashSet<String> names = new HashSet<>();
-		for(CSG c:process) {
-			if(names.contains(c.getName()))
+		for (CSG c : process) {
+			if (names.contains(c.getName()))
 				throw new RuntimeException("There can not be 2 objects with the same name after an opperation!");
 			names.add(c.getName());
 			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName()));
 		}
-		cache.put(op,cachedCopy);
+		cache.put(op, cachedCopy);
 	}
+
 	public void back() {
-		if(isBackAvailible())
-			currentIndex-=1;
+		if (isBackAvailible())
+			currentIndex -= 1;
 		updateCurrentFromCache();
 	}
+
 	public boolean isBackAvailible() {
-		return currentIndex>1;
+		return currentIndex > 1;
 	}
+
 	private void updateCurrentFromCache() {
 		ICaDoodleOpperation key = currentOpperation();
-		System.out.println("Current opperation results: "+key.getType());
+		System.out.println("Current opperation results: " + key.getType());
 		setCurrentState(key);
 	}
+
 	public ICaDoodleOpperation currentOpperation() {
-		return getOpperations().get(currentIndex-1);
+		return getOpperations().get(currentIndex - 1);
 	}
+
 	public void forward() {
-		if(isForwardAvailible())
-			currentIndex+=1;
+		if (isForwardAvailible())
+			currentIndex += 1;
 		updateCurrentFromCache();
 	}
+
 	public boolean isForwardAvailible() {
-		return currentIndex<getOpperations().size();
+		return currentIndex < getOpperations().size();
 	}
+
 	public File getSelf() {
-		if(selfInternal==null){
+		if (selfInternal == null) {
 			try {
-				selfInternal=File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle");
+				selfInternal = File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -209,108 +229,123 @@ public class CaDoodleFile {
 		}
 		return selfInternal;
 	}
+
 	public CaDoodleFile setSelf(File self) {
 		this.selfInternal = self;
 		return this;
 	}
+
 	public List<CSG> getCurrentState() {
-		if(currentIndex==0)
+		if (currentIndex == 0)
 			return new ArrayList<CSG>();
 		return cache.get(currentOpperation());
 	}
+
 	public List<CSG> getSelect(List<String> selectedSnapshot) {
 		List<CSG> cur = getCurrentState();
-		 ArrayList<CSG> back =new ArrayList<CSG>();
-		 if(cur!=null)
-		 for(CSG c:cur) {
-			 for(String s:selectedSnapshot) {
-				 if(c.getName().contentEquals(s)) {
-					 back.add(c);
-				 }
-			 }
-		 }
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		if (cur != null)
+			for (CSG c : cur) {
+				for (String s : selectedSnapshot) {
+					if (c.getName().contentEquals(s)) {
+						back.add(c);
+					}
+				}
+			}
 		return back;
 	}
+
 	public List<CSG> getPreviouState() {
-		if(currentIndex<2)
+		if (currentIndex < 2)
 			return new ArrayList<CSG>();
-		return cache.get(getOpperations().get(currentIndex-2));
+		return cache.get(getOpperations().get(currentIndex - 2));
 	}
+
 	private void setCurrentState(ICaDoodleOpperation op) {
 
-		for(ICaDoodleStateUpdate l:listeners) {
+		for (ICaDoodleStateUpdate l : listeners) {
 			try {
-				l.onUpdate(getCurrentState(),op,this);
-			}catch(Throwable e){
+				l.onUpdate(getCurrentState(), op, this);
+			} catch (Throwable e) {
 				e.printStackTrace();
 			}
 		}
 	}
+
 	public String getProjectName() {
 		return projectName;
 	}
+
 	public CaDoodleFile setProjectName(String projectName) {
 		this.projectName = projectName;
 		return this;
 	}
+
 	public String toJson() {
 		return gson.toJson(this);
 	}
-	public File  save() throws IOException {
-		
-		synchronized(getSelf()) {
-			String contents =  toJson();
-			FileUtils.write(getSelf(), contents,StandardCharsets.UTF_8, false);
+
+	public File save() throws IOException {
+
+		synchronized (getSelf()) {
+			String contents = toJson();
+			FileUtils.write(getSelf(), contents, StandardCharsets.UTF_8, false);
 		}
 		return getSelf();
 	}
 
-
-	public static CaDoodleFile fromJsonString(String content ) throws Exception{
-		return fromJsonString(content, null, null,true);
+	public static CaDoodleFile fromJsonString(String content) throws Exception {
+		return fromJsonString(content, null, null, true);
 	}
-	public static CaDoodleFile fromJsonString(String content ,ICaDoodleStateUpdate listener, File self, boolean initialize) throws Exception {
-		CaDoodleFile file =gson.fromJson(content, TT_CaDoodleFile);
-		if(listener!=null) {
+
+	public static CaDoodleFile fromJsonString(String content, ICaDoodleStateUpdate listener, File self,
+			boolean initialize) throws Exception {
+		CaDoodleFile file = gson.fromJson(content, TT_CaDoodleFile);
+		if (listener != null) {
 			file.addListener(listener);
 		}
-		if(self!=null) {
+		if (self != null) {
 			file.setSelf(self);
 		}
-		if(initialize)
+		if (initialize)
 			file.initialize();
 		return file;
 	}
-	public static CaDoodleFile fromFile(File f ) throws Exception{
-		return fromFile(f,null,true);
+
+	public static CaDoodleFile fromFile(File f) throws Exception {
+		return fromFile(f, null, true);
 	}
-	public static String getProjectName(File f ) throws Exception{
-		System.out.println("CaDoodle file reading from "+f.getAbsolutePath());
+
+	public static String getProjectName(File f) throws Exception {
+		System.out.println("CaDoodle file reading from " + f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-		CaDoodleFile file =fromJsonString(content,null,f,false);
+		CaDoodleFile file = fromJsonString(content, null, f, false);
 		return file.getProjectName();
 	}
-	public static CaDoodleFile fromFile(File f,ICaDoodleStateUpdate listener,boolean initialize ) throws Exception {
-		System.out.println("CaDoodle file loading from "+f.getAbsolutePath());
+
+	public static CaDoodleFile fromFile(File f, ICaDoodleStateUpdate listener, boolean initialize) throws Exception {
+		System.out.println("CaDoodle file loading from " + f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
-		CaDoodleFile file =fromJsonString(content,listener,f,initialize);
+		CaDoodleFile file = fromJsonString(content, listener, f, initialize);
 		return file;
 	}
+
 	public ArrayList<ICaDoodleOpperation> getOpperations() {
 		return opperations;
 	}
+
 	public void setOpperations(ArrayList<ICaDoodleOpperation> opperations) {
 		this.opperations = opperations;
 	}
+
 	public TransformNR getWorkplane() {
-		if(workplane==null)
-			workplane=new TransformNR();
+		if (workplane == null)
+			workplane = new TransformNR();
 		return workplane;
 	}
+
 	public void setWorkplane(TransformNR workplane) {
 		this.workplane = workplane;
 	}
-	
-
 
 }
