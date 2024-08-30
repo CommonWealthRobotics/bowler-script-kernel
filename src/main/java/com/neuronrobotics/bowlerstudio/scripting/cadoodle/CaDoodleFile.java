@@ -128,6 +128,7 @@ public class CaDoodleFile {
 				updateCurrentFromCache();
 			}
 			regenerating = false;
+			opperationRunner=null;
 		});
 		opperationRunner.start();
 		return opperationRunner;
