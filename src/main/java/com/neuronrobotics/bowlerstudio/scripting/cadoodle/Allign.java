@@ -13,11 +13,11 @@ public class Allign implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose (serialize = true, deserialize = true)
-	public AllignmentZ z=null;
+	public Allignment z=null;
 	@Expose (serialize = true, deserialize = true)
-	public AllignmentY y=null;
+	public Allignment y=null;
 	@Expose (serialize = true, deserialize = true)
-	public AllignmentX x=null;
+	public Allignment x=null;
 	@Expose (serialize = true, deserialize = true)
 	private TransformNR workplane=null;
 	
@@ -50,16 +50,16 @@ public class Allign implements ICaDoodleOpperation {
 			CSG c = tmp.transformed(TransformFactory.nrToCSG(workplane).inverse());
 			if(z!=null) {
 				switch(z) {
-				case BottomAllign:
+				case negative:
 					c=( c.toZMin()
 						.movez(reference.getMinZ())
 						);
 					break;
-				case Center:
+				case middle:
 					c=( c.moveToCenterZ()
 							.movez(reference.getCenterZ()));
 					break;
-				case TopAllign:
+				case positive:
 					c=( c.toZMax()
 							.movez(reference.getMaxZ()));
 					break;
@@ -69,15 +69,15 @@ public class Allign implements ICaDoodleOpperation {
 			}
 			if(x!=null) {
 				switch(x) {
-				case Back:
+				case negative:
 					c=( c.toXMin()
 							.movex(reference.getMinX()));
 					break;
-				case Center:
+				case middle:
 					c=( c.moveToCenterX()
 							.movex(reference.getCenterX()));
 					break;
-				case Front:
+				case positive:
 					c=( c.toXMax()
 							.movex(reference.getMaxX()));
 					break;
@@ -88,15 +88,15 @@ public class Allign implements ICaDoodleOpperation {
 			}
 			if(y!=null) {
 				switch(y) {
-				case Center:
+				case middle:
 					c=( c.moveToCenterY()
 							.movey(reference.getCenterY()));
 					break;
-				case Left:
+				case positive:
 					c=( c.toYMax()
 							.movey(reference.getMaxY()));
 					break;
-				case Right:
+				case negative:
 					c= c.toYMin()
 							.movey(reference.getMinY());
 					break;
@@ -118,7 +118,7 @@ public class Allign implements ICaDoodleOpperation {
 		this.names = names;
 		return this;
 	}
-	public Allign setAllignParams(AllignmentX X, AllignmentY Y,AllignmentZ Z) {
+	public Allign setAllignParams(Allignment X, Allignment Y,Allignment Z) {
 		x=X;
 		y=Y;
 		z=Z;
