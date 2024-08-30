@@ -76,8 +76,8 @@ public class CaDoodleFile {
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			CSGDatabase.setDbFile(db);
 		}
-		int indexStarting = currentIndex;
-		currentIndex = 0;
+		int indexStarting = getCurrentIndex();
+		setCurrentIndex(0);
 		for (int i = 0; i < opperations.size(); i++) {
 			ICaDoodleOpperation op = opperations.get(i);
 			try {
@@ -88,19 +88,26 @@ public class CaDoodleFile {
 				return;
 			}
 		}
-		currentIndex = indexStarting;
+		setCurrentIndex(indexStarting);
 		updateCurrentFromCache();
 	}
 
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
-		if (regenerating)
+		if (regenerating || isOperationRunning()) {
+			System.out.println("Opperation is running, ignoring regen");
 			return opperationRunner;
+		}
+		int endIndex = getCurrentIndex();
+		int size = opperations.size();
+		if (endIndex != size) {
+//			new Exception("Regenerationg from a position back in time " + endIndex + " but have " + size)
+//					.printStackTrace();
+		}
 		opperationRunner = new Thread(() -> {
+			opperationRunner.setName("Regeneration Thread");
 			regenerating = true;
 			// System.out.println("Regenerating Object from "+source.getType());
 			int opIndex = 0;
-			int endIndex = currentIndex;
-			int size = opperations.size();
 			for (int i = 0; i < size; i++) {
 				ICaDoodleOpperation op = opperations.get(i);
 				if (source == op) {
@@ -108,16 +115,16 @@ public class CaDoodleFile {
 					break;
 				}
 			}
-			currentIndex = opIndex;
-			for (; currentIndex < size;) {
-				currentIndex++;
+			setCurrentIndex(opIndex);
+			for (; getCurrentIndex() < size;) {
+				setCurrentIndex(getCurrentIndex() + 1);
 				// System.out.println("Regenerating "+currentIndex);
-				ICaDoodleOpperation op = opperations.get(currentIndex - 1);
+				ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
 				storeResultInCache(op, op.process(getPreviouState()));
 				setCurrentState(op);
 			}
-			if (currentIndex != endIndex) {
-				currentIndex = endIndex;
+			if (getCurrentIndex() != endIndex) {
+				setCurrentIndex(endIndex);
 				updateCurrentFromCache();
 			}
 			regenerating = false;
@@ -131,6 +138,8 @@ public class CaDoodleFile {
 			return opperationRunner;
 		}
 		opperationRunner = new Thread(() -> {
+			opperationRunner.setName("regenerateCurrent Thread");
+
 			ICaDoodleOpperation op = currentOpperation();
 			storeResultInCache(op, op.process(getPreviouState()));
 			setCurrentState(op);
@@ -143,23 +152,29 @@ public class CaDoodleFile {
 
 	private void process(ICaDoodleOpperation op) {
 		storeResultInCache(op, op.process(getCurrentState()));
-		currentIndex++;
+		setCurrentIndex(getCurrentIndex() + 1);
 		setCurrentState(op);
 	}
 
 	public boolean isOperationRunning() {
+		if (opperationRunner != null)
+			if (!opperationRunner.isAlive())
+				opperationRunner = null;
 		return opperationRunner != null;
 	}
 
 	public Thread addOpperation(ICaDoodleOpperation o) throws CadoodleConcurrencyException {
 		toProcess.add(o);
 		if (isOperationRunning()) {
+
 			return opperationRunner;
 		}
 		opperationRunner = new Thread(() -> {
-			while(toProcess.size()>0) {
-				ICaDoodleOpperation op=toProcess.remove(0);
-				if (currentIndex != getOpperations().size()) {
+
+			while (toProcess.size() > 0) {
+				opperationRunner.setName("addOpperation Thread " + toProcess.size());
+				ICaDoodleOpperation op = toProcess.remove(0);
+				if (getCurrentIndex() != getOpperations().size()) {
 					pruneForward();
 				}
 				try {
@@ -176,14 +191,15 @@ public class CaDoodleFile {
 	}
 
 	private void pruneForward() {
-		for (int i = currentIndex; i < getOpperations().size(); i++) {
+		for (int i = getCurrentIndex(); i < getOpperations().size(); i++) {
 			List<CSG> back = cache.remove(getOpperations().get(i));
 			back.clear();
 		}
-		List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, currentIndex);
+		List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, getCurrentIndex());
 		ArrayList<ICaDoodleOpperation> newList = new ArrayList<ICaDoodleOpperation>();
 		newList.addAll(subList);
 		setOpperations(newList);
+		System.err.println("Pruning forward here!");
 	}
 
 	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
@@ -200,12 +216,12 @@ public class CaDoodleFile {
 
 	public void back() {
 		if (isBackAvailible())
-			currentIndex -= 1;
+			setCurrentIndex(getCurrentIndex() - 1);
 		updateCurrentFromCache();
 	}
 
 	public boolean isBackAvailible() {
-		return currentIndex > 1;
+		return getCurrentIndex() > 1;
 	}
 
 	private void updateCurrentFromCache() {
@@ -215,17 +231,17 @@ public class CaDoodleFile {
 	}
 
 	public ICaDoodleOpperation currentOpperation() {
-		return getOpperations().get(currentIndex - 1);
+		return getOpperations().get(getCurrentIndex() - 1);
 	}
 
 	public void forward() {
 		if (isForwardAvailible())
-			currentIndex += 1;
+			setCurrentIndex(getCurrentIndex() + 1);
 		updateCurrentFromCache();
 	}
 
 	public boolean isForwardAvailible() {
-		return currentIndex < getOpperations().size();
+		return getCurrentIndex() < getOpperations().size();
 	}
 
 	public File getSelf() {
@@ -246,7 +262,7 @@ public class CaDoodleFile {
 	}
 
 	public List<CSG> getCurrentState() {
-		if (currentIndex == 0)
+		if (getCurrentIndex() == 0)
 			return new ArrayList<CSG>();
 		return cache.get(currentOpperation());
 	}
@@ -266,9 +282,9 @@ public class CaDoodleFile {
 	}
 
 	public List<CSG> getPreviouState() {
-		if (currentIndex < 2)
+		if (getCurrentIndex() < 2)
 			return new ArrayList<CSG>();
-		return cache.get(getOpperations().get(currentIndex - 2));
+		return cache.get(getOpperations().get(getCurrentIndex() - 2));
 	}
 
 	private void setCurrentState(ICaDoodleOpperation op) {
@@ -356,6 +372,15 @@ public class CaDoodleFile {
 
 	public void setWorkplane(TransformNR workplane) {
 		this.workplane = workplane;
+	}
+
+	public int getCurrentIndex() {
+		return currentIndex;
+	}
+
+	public void setCurrentIndex(int currentIndex) {
+		//new Exception("Current Index set to " + currentIndex).printStackTrace();
+		this.currentIndex = currentIndex;
 	}
 
 }
