@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.io.FileUtils;
 
@@ -51,6 +52,7 @@ public class CaDoodleFile {
 	private ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
 	private Thread opperationRunner = null;
 	private boolean regenerating;
+	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
 
 	public CaDoodleFile clearListeners() {
 		listeners.clear();
@@ -90,39 +92,43 @@ public class CaDoodleFile {
 		updateCurrentFromCache();
 	}
 
-	public void regenerateFrom(ICaDoodleOpperation source) {
+	public Thread regenerateFrom(ICaDoodleOpperation source) {
 		if (regenerating)
-			return;
-		regenerating = true;
-		// System.out.println("Regenerating Object from "+source.getType());
-		int opIndex = 0;
-		int endIndex = currentIndex;
-		int size = opperations.size();
-		for (int i = 0; i < size; i++) {
-			ICaDoodleOpperation op = opperations.get(i);
-			if (source == op) {
-				opIndex = i;
-				break;
+			return opperationRunner;
+		opperationRunner = new Thread(() -> {
+			regenerating = true;
+			// System.out.println("Regenerating Object from "+source.getType());
+			int opIndex = 0;
+			int endIndex = currentIndex;
+			int size = opperations.size();
+			for (int i = 0; i < size; i++) {
+				ICaDoodleOpperation op = opperations.get(i);
+				if (source == op) {
+					opIndex = i;
+					break;
+				}
 			}
-		}
-		currentIndex = opIndex;
-		for (; currentIndex < size;) {
-			currentIndex++;
-			// System.out.println("Regenerating "+currentIndex);
-			ICaDoodleOpperation op = opperations.get(currentIndex - 1);
-			storeResultInCache(op, op.process(getPreviouState()));
-			setCurrentState(op);
-		}
-		if (currentIndex != endIndex) {
-			currentIndex = endIndex;
-			updateCurrentFromCache();
-		}
-		regenerating = false;
+			currentIndex = opIndex;
+			for (; currentIndex < size;) {
+				currentIndex++;
+				// System.out.println("Regenerating "+currentIndex);
+				ICaDoodleOpperation op = opperations.get(currentIndex - 1);
+				storeResultInCache(op, op.process(getPreviouState()));
+				setCurrentState(op);
+			}
+			if (currentIndex != endIndex) {
+				currentIndex = endIndex;
+				updateCurrentFromCache();
+			}
+			regenerating = false;
+		});
+		opperationRunner.start();
+		return opperationRunner;
 	}
 
 	public Thread regenerateCurrent() {
 		if (isOperationRunning()) {
-			throw new CadoodleConcurrencyException("Do not add a new opperation while the previous one is processing");
+			return opperationRunner;
 		}
 		opperationRunner = new Thread(() -> {
 			ICaDoodleOpperation op = currentOpperation();
@@ -145,19 +151,23 @@ public class CaDoodleFile {
 		return opperationRunner != null;
 	}
 
-	public Thread addOpperation(ICaDoodleOpperation op) throws CadoodleConcurrencyException {
+	public Thread addOpperation(ICaDoodleOpperation o) throws CadoodleConcurrencyException {
+		toProcess.add(o);
 		if (isOperationRunning()) {
-			throw new CadoodleConcurrencyException("Do not add a new opperation while the previous one is processing");
+			return opperationRunner;
 		}
 		opperationRunner = new Thread(() -> {
-			if (currentIndex != getOpperations().size()) {
-				pruneForward();
-			}
-			try {
-				getOpperations().add(op);
-				process(op);
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			while(toProcess.size()>0) {
+				ICaDoodleOpperation op=toProcess.remove(0);
+				if (currentIndex != getOpperations().size()) {
+					pruneForward();
+				}
+				try {
+					getOpperations().add(op);
+					process(op);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 			opperationRunner = null;
 		});
