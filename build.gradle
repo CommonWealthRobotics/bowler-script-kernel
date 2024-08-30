@@ -156,7 +156,7 @@ repositories {
 
 dependencies {
 
-	api 'com.neuronrobotics:JavaCad:1.6.6'
+	api 'com.neuronrobotics:JavaCad:1.6.7'
 	api project('java-bowler')
 	api project('GithubPasswordManager:GithubPasswordManager')
 	
