@@ -45,10 +45,11 @@ public class Allign implements ICaDoodleOpperation {
 			String name = names.get(0);
 			if(name.contentEquals(c.getName())) {
 				back.remove(c);
-				reference=c.transformed(TransformFactory.nrToCSG(workplane).inverse());
+				reference=c.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
 			}
 		}
-		for(CSG c: back) {
+		for (int i = 0; i < back.size(); i++) {
+			CSG c = back.get(i);
 			for(String name:names)
 			if(name.contentEquals(c.getName())) {
 				back.remove(c);
@@ -56,7 +57,7 @@ public class Allign implements ICaDoodleOpperation {
 			}
 		}
 		for(CSG tmp:toMove) {
-			CSG c = tmp.transformed(TransformFactory.nrToCSG(workplane).inverse());
+			CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
 			if(z!=null) {
 				switch(z) {
 				case negative:
@@ -114,7 +115,7 @@ public class Allign implements ICaDoodleOpperation {
 				
 				}
 			}
-			back.add(c.transformed(TransformFactory.nrToCSG(workplane)));
+			back.add(c.transformed(TransformFactory.nrToCSG(getWorkplane())));
 		}
 		return back;
 	}
