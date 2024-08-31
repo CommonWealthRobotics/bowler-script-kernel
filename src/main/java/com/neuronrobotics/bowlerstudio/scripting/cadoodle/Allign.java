@@ -7,6 +7,7 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
+import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public class Allign implements ICaDoodleOpperation {
@@ -20,6 +21,8 @@ public class Allign implements ICaDoodleOpperation {
 	public Allignment x=null;
 	@Expose (serialize = true, deserialize = true)
 	private TransformNR workplane=null;
+	@Expose (serialize = true, deserialize = true)
+	private Bounds bounds=null;
 	
 	@Override
 	public String getType() {
@@ -172,6 +175,15 @@ public class Allign implements ICaDoodleOpperation {
 
 	public Allign setWorkplane(TransformNR workplane) {
 		this.workplane = workplane;
+		return this;
+	}
+
+	public Bounds getBounds() {
+		return bounds;
+	}
+
+	public Allign setBounds(Bounds bounds) {
+		this.bounds = bounds;
 		return this;
 	}
 
