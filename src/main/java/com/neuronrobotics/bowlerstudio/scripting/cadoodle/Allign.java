@@ -41,83 +41,112 @@ public class Allign implements ICaDoodleOpperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		CSG reference=null;
+		CSG refProps =null;
 		for(CSG c: incoming) {
 			String name = names.get(0);
 			if(name.contentEquals(c.getName())) {
 				back.remove(c);
+				refProps=c;
 				reference=c.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
 			}
 		}
-		for (int i = 0; i < back.size(); i++) {
-			CSG c = back.get(i);
-			for(String name:names)
+		for(String name:names)
+			collectToMove(toMove, back, name);
+		for(CSG tmp:toMove) {
+			CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
+			c = performTransform(reference, c);
+			back.add(sync(c,c.transformed(TransformFactory.nrToCSG(getWorkplane()))));
+		}
+		CSG transformed = reference.transformed(TransformFactory.nrToCSG(getWorkplane()));
+		back.add(sync(refProps,transformed));
+		return back;
+	}
+
+	private void collectToMove(ArrayList<CSG> toMove, ArrayList<CSG> back, String name) {
+		ArrayList<CSG> toSearch = new ArrayList<CSG>();
+		toSearch.addAll(back);
+		for (int i = 0; i < toSearch.size(); i++) {
+			CSG c = toSearch.get(i);
 			if(name.contentEquals(c.getName())) {
 				back.remove(c);
 				toMove.add(c);
+				if(c.isGroupResult()) {
+					for(int j=0;j<back.size();j++) {
+						CSG mem = back.get(j);
+						if(mem.isInGroup() && mem.checkGroupMembership(name)) {
+							String newObjName = mem.getName();
+							collectToMove(toMove, back, newObjName);
+						}
+					}
+				}
 			}
 		}
-		for(CSG tmp:toMove) {
-			CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
-			if(z!=null) {
-				switch(z) {
-				case negative:
-					c=( c.toZMin()
-						.movez(reference.getMinZ())
-						);
-					break;
-				case middle:
-					c=( c.moveToCenterZ()
-							.movez(reference.getCenterZ()));
-					break;
-				case positive:
-					c=( c.toZMax()
-							.movez(reference.getMaxZ()));
-					break;
-				default:
-					break;
-				}
+	}
+
+	private CSG performTransform(CSG reference, CSG incoming) {
+		CSG c = incoming;
+		if(z!=null) {
+			switch(z) {
+			case negative:
+				c=( c.toZMin()
+					.movez(reference.getMinZ())
+					);
+				break;
+			case middle:
+				c=( c.moveToCenterZ()
+						.movez(reference.getCenterZ()));
+				break;
+			case positive:
+				c=( c.toZMax()
+						.movez(reference.getMaxZ()));
+				break;
+			default:
+				break;
 			}
-			if(x!=null) {
-				switch(x) {
-				case negative:
-					c=( c.toXMin()
-							.movex(reference.getMinX()));
-					break;
-				case middle:
-					c=( c.moveToCenterX()
-							.movex(reference.getCenterX()));
-					break;
-				case positive:
-					c=( c.toXMax()
-							.movex(reference.getMaxX()));
-					break;
-				default:
-					break;
-				
-				}
-			}
-			if(y!=null) {
-				switch(y) {
-				case middle:
-					c=( c.moveToCenterY()
-							.movey(reference.getCenterY()));
-					break;
-				case positive:
-					c=( c.toYMax()
-							.movey(reference.getMaxY()));
-					break;
-				case negative:
-					c= c.toYMin()
-							.movey(reference.getMinY());
-					break;
-				default:
-					break;
-				
-				}
-			}
-			back.add(c.transformed(TransformFactory.nrToCSG(getWorkplane())));
 		}
-		return back;
+		if(x!=null) {
+			switch(x) {
+			case negative:
+				c=( c.toXMin()
+						.movex(reference.getMinX()));
+				break;
+			case middle:
+				c=( c.moveToCenterX()
+						.movex(reference.getCenterX()));
+				break;
+			case positive:
+				c=( c.toXMax()
+						.movex(reference.getMaxX()));
+				break;
+			default:
+				break;
+			
+			}
+		}
+		if(y!=null) {
+			switch(y) {
+			case middle:
+				c=( c.moveToCenterY()
+						.movey(reference.getCenterY()));
+				break;
+			case positive:
+				c=( c.toYMax()
+						.movey(reference.getMaxY()));
+				break;
+			case negative:
+				c= c.toYMin()
+						.movey(reference.getMinY());
+				break;
+			default:
+				break;
+			
+			}
+		}
+		return sync(incoming, c);
+	}
+
+	private CSG sync(CSG incoming, CSG c) {
+		return c.syncProperties(incoming).setName(incoming.getName()).setColor(incoming.getColor());
 	}
 
 	public List<String> getNames() {
