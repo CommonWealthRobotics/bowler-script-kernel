@@ -25,6 +25,15 @@ public class Allign implements ICaDoodleOpperation {
 	public String getType() {
 		return "Allign";
 	}
+	
+	@Override
+	public String toString(){
+		String string = getType()+" "+x+" "+y+" "+z;
+		for(String n:getNames()) {
+			string+=" "+n;
+		}
+		return string;
+	}
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {

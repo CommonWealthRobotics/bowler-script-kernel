@@ -128,6 +128,7 @@ public class CaDoodleFile {
 				updateCurrentFromCache();
 			}
 			regenerating = false;
+			fireSaveSuggestion();
 			opperationRunner=null;
 		});
 		opperationRunner.start();
@@ -144,6 +145,7 @@ public class CaDoodleFile {
 			ICaDoodleOpperation op = currentOpperation();
 			storeResultInCache(op, op.process(getPreviouState()));
 			setCurrentState(op);
+			fireSaveSuggestion();
 			opperationRunner = null;
 		});
 		opperationRunner.start();
@@ -185,6 +187,7 @@ public class CaDoodleFile {
 					ex.printStackTrace();
 				}
 			}
+			fireSaveSuggestion();
 			opperationRunner = null;
 		});
 		opperationRunner.start();
@@ -219,6 +222,7 @@ public class CaDoodleFile {
 		if (isBackAvailible())
 			setCurrentIndex(getCurrentIndex() - 1);
 		updateCurrentFromCache();
+		fireSaveSuggestion();
 	}
 
 	public boolean isBackAvailible() {
@@ -239,6 +243,7 @@ public class CaDoodleFile {
 		if (isForwardAvailible())
 			setCurrentIndex(getCurrentIndex() + 1);
 		updateCurrentFromCache();
+		fireSaveSuggestion();
 	}
 
 	public boolean isForwardAvailible() {
@@ -293,6 +298,16 @@ public class CaDoodleFile {
 		for (ICaDoodleStateUpdate l : listeners) {
 			try {
 				l.onUpdate(getCurrentState(), op, this);
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	private void fireSaveSuggestion() {
+
+		for (ICaDoodleStateUpdate l : listeners) {
+			try {
+				l.onSaveSuggestion();
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
@@ -373,6 +388,7 @@ public class CaDoodleFile {
 
 	public void setWorkplane(TransformNR workplane) {
 		this.workplane = workplane;
+		fireSaveSuggestion();
 	}
 
 	public int getCurrentIndex() {
