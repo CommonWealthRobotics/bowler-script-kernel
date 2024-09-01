@@ -197,7 +197,8 @@ public class CaDoodleFile {
 	private void pruneForward() {
 		for (int i = getCurrentIndex(); i < getOpperations().size(); i++) {
 			List<CSG> back = cache.remove(getOpperations().get(i));
-			back.clear();
+			if(back!=null)
+				back.clear();
 		}
 		List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, getCurrentIndex());
 		ArrayList<ICaDoodleOpperation> newList = new ArrayList<ICaDoodleOpperation>();
