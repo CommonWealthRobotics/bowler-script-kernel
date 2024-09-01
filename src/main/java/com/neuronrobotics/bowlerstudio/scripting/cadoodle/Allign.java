@@ -22,7 +22,7 @@ public class Allign implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
 	private TransformNR workplane=null;
 	@Expose (serialize = true, deserialize = true)
-	private StoragbeBounds bounds=null;
+	public StoragbeBounds bounds=null;
 	
 	@Override
 	public String getType() {
@@ -55,13 +55,20 @@ public class Allign implements ICaDoodleOpperation {
 		}
 		for(String name:names)
 			collectToMove(toMove, back, name);
+		Bounds bounds2 ;//
+		if(bounds!=null) {
+			bounds2=bounds.getBounds();
+			toMove.add(refProps);
+		}else {
+			CSG transformed = reference.transformed(TransformFactory.nrToCSG(getWorkplane()));
+			back.add(sync(refProps,transformed));
+			bounds2 = reference.getBounds();
+		}
 		for(CSG tmp:toMove) {
 			CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
-			c = performTransform(reference, c);
-			back.add(sync(c,c.transformed(TransformFactory.nrToCSG(getWorkplane()))));
+			c = performTransform(bounds2, c);
+			back.add(sync(tmp,c.transformed(TransformFactory.nrToCSG(getWorkplane()))));
 		}
-		CSG transformed = reference.transformed(TransformFactory.nrToCSG(getWorkplane()));
-		back.add(sync(refProps,transformed));
 		return back;
 	}
 
@@ -86,7 +93,7 @@ public class Allign implements ICaDoodleOpperation {
 		}
 	}
 
-	private CSG performTransform(CSG reference, CSG incoming) {
+	private CSG performTransform(Bounds reference, CSG incoming) {
 		CSG c = incoming;
 		if(z!=null) {
 			switch(z) {
