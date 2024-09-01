@@ -22,7 +22,7 @@ public class Allign implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
 	private TransformNR workplane=null;
 	@Expose (serialize = true, deserialize = true)
-	private Bounds bounds=null;
+	private StoragbeBounds bounds=null;
 	
 	@Override
 	public String getType() {
@@ -179,11 +179,11 @@ public class Allign implements ICaDoodleOpperation {
 	}
 
 	public Bounds getBounds() {
-		return bounds;
+		return bounds.getBounds();
 	}
 
 	public Allign setBounds(Bounds bounds) {
-		this.bounds = bounds;
+		this.bounds = new StoragbeBounds(bounds);
 		return this;
 	}
 
