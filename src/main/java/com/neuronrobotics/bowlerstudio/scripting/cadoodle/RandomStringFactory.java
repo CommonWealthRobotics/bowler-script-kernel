@@ -9,7 +9,7 @@ public class RandomStringFactory {
 	@Expose (serialize = false, deserialize = false)
     private static final String CHAR_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	@Expose (serialize = false, deserialize = false)
-	private static final int STRING_LENGTH = 40;
+	private static final int STRING_LENGTH = 10;
 
 	public static String[] adjectives = {
 		    "Effervescent", "Zestful", "Vivacious", "Ebullient", "Sprightly",
