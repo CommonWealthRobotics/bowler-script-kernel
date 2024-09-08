@@ -80,7 +80,7 @@ public class Manipulation {
 		}
 	}
 
-	private void fireSave() {
+	public void fireSave() {
 		new Thread(() -> {
 			for (Runnable R : saveListeners) {
 				R.run();
@@ -287,7 +287,7 @@ public class Manipulation {
 		TransformNR wp = new TransformNR( getFrameOfReference() .getRotation());
 		inLocal=wp.times(inLocal);
 		inLocal.setRotation(new RotationNR());
-		//System.out.println(inLocal.toSimpleString());
+		//System.out.println("Setting in reference frame:"+inLocal.toSimpleString());
 		setGlobal(inLocal);
 		for (Runnable R : eventListeners) {
 			R.run();

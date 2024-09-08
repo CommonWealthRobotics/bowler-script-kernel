@@ -142,7 +142,7 @@ public class CaDoodleFile {
 		opperationRunner = new Thread(() -> {
 			opperationRunner.setName("regenerateCurrent Thread");
 
-			ICaDoodleOpperation op = currentOpperation();
+			ICaDoodleOpperation op = getCurrentOpperation();
 			storeResultInCache(op, op.process(getPreviouState()));
 			setCurrentState(op);
 			fireSaveSuggestion();
@@ -231,12 +231,12 @@ public class CaDoodleFile {
 	}
 
 	private void updateCurrentFromCache() {
-		ICaDoodleOpperation key = currentOpperation();
+		ICaDoodleOpperation key = getCurrentOpperation();
 		System.out.println("Current opperation results: " + key.getType());
 		setCurrentState(key);
 	}
 
-	public ICaDoodleOpperation currentOpperation() {
+	public ICaDoodleOpperation getCurrentOpperation() {
 		return getOpperations().get(getCurrentIndex() - 1);
 	}
 
@@ -271,7 +271,7 @@ public class CaDoodleFile {
 	public List<CSG> getCurrentState() {
 		if (getCurrentIndex() == 0)
 			return new ArrayList<CSG>();
-		return cache.get(currentOpperation());
+		return cache.get(getCurrentOpperation());
 	}
 
 	public List<CSG> getSelect(List<String> selectedSnapshot) {
