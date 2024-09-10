@@ -1749,7 +1749,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				checkout(remoteURI, branch);
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				try {
+					// try the checkout with no branch specified
+					return cloneRepo(remoteURI,null);
+				} catch (Exception ex) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 
