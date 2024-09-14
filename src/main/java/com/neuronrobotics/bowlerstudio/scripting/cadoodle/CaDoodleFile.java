@@ -345,16 +345,7 @@ public class CaDoodleFile {
 			File parent = selfInternal.getAbsoluteFile().getParentFile();
 			File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
 			setImage(null);
-			BowlerKernel.runLater(() -> setImage(ThumbnailImage.get(getCurrentState())));
-			while (getImage() == null)
-				try {
-					Thread.sleep(16);
-					// System.out.println("Waiting for image to write");
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					break;
-				}
+			loadingImageFromUIThread();
 			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(getImage(), null);
 			try {
 				ImageIO.write(bufferedImage, "png", image);
@@ -373,15 +364,32 @@ public class CaDoodleFile {
 		try {
 			File parent = selfInternal.getAbsoluteFile().getParentFile();
 			File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
-			BufferedImage bufferedImage = ImageIO.read(image);
-			if (bufferedImage != null) {
-				img = SwingFXUtils.toFXImage(bufferedImage, null);
+			if(image.exists()) {
+				BufferedImage bufferedImage = ImageIO.read(image);
+				if (bufferedImage != null) {
+					img = SwingFXUtils.toFXImage(bufferedImage, null);
+				}
+			}else {
+				loadingImageFromUIThread();
 			}
 		} catch (IOException e) {
 			System.err.println("Error loading image: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return img;
+	}
+
+	private void loadingImageFromUIThread() {
+		BowlerKernel.runLater(() -> setImage(ThumbnailImage.get(getCurrentState())));
+		while (getImage() == null)
+			try {
+				Thread.sleep(16);
+				// System.out.println("Waiting for image to write");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				break;
+			}
 	}
 
 	public static CaDoodleFile fromJsonString(String content) throws Exception {
@@ -396,8 +404,9 @@ public class CaDoodleFile {
 		}
 		if (self != null) {
 			file.setSelf(self);
+			file.loadImageFromFile();
 		}
-		if (initialize)
+		if (initialize) 
 			file.initialize();
 		return file;
 	}
