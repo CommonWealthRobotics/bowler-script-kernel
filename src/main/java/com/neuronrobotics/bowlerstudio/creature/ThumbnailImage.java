@@ -63,7 +63,7 @@ public class ThumbnailImage {
 		for(CSG cs:c) {
 			if(cs.getManipulator()!=null) {
 				TransformNR nr = TransformFactory.affineToNr(cs.getManipulator());
-				csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)));
+				csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(cs));
 			}else
 				csgList.add(cs);
 		}
