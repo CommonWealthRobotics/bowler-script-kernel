@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -12,12 +13,16 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.imageio.ImageIO;
+import javafx.scene.image.WritableImage;
 import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
+import com.neuronrobotics.bowlerstudio.creature.ThumbnailImage;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
@@ -25,6 +30,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import javafx.embed.swing.SwingFXUtils;
 
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
@@ -53,6 +59,7 @@ public class CaDoodleFile {
 	private Thread opperationRunner = null;
 	private boolean regenerating;
 	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
+	private javafx.scene.image.WritableImage img;
 
 	public CaDoodleFile clearListeners() {
 		listeners.clear();
@@ -90,6 +97,7 @@ public class CaDoodleFile {
 		}
 		setCurrentIndex(indexStarting);
 		updateCurrentFromCache();
+		
 	}
 
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
@@ -129,7 +137,7 @@ public class CaDoodleFile {
 			}
 			regenerating = false;
 			fireSaveSuggestion();
-			opperationRunner=null;
+			opperationRunner = null;
 		});
 		opperationRunner.start();
 		return opperationRunner;
@@ -197,7 +205,7 @@ public class CaDoodleFile {
 	private void pruneForward() {
 		for (int i = getCurrentIndex(); i < getOpperations().size(); i++) {
 			List<CSG> back = cache.remove(getOpperations().get(i));
-			if(back!=null)
+			if (back != null)
 				back.clear();
 		}
 		List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, getCurrentIndex());
@@ -304,6 +312,7 @@ public class CaDoodleFile {
 			}
 		}
 	}
+
 	private void fireSaveSuggestion() {
 
 		for (ICaDoodleStateUpdate l : listeners) {
@@ -330,11 +339,49 @@ public class CaDoodleFile {
 
 	public File save() throws IOException {
 
-		synchronized (getSelf()) {
+		synchronized (selfInternal) {
 			String contents = toJson();
-			FileUtils.write(getSelf(), contents, StandardCharsets.UTF_8, false);
+			FileUtils.write(selfInternal, contents, StandardCharsets.UTF_8, false);
+			File parent = selfInternal.getAbsoluteFile().getParentFile();
+			File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
+			setImage(null);
+			BowlerKernel.runLater(() -> setImage(ThumbnailImage.get(getCurrentState())));
+			while (getImage() == null)
+				try {
+					Thread.sleep(16);
+					// System.out.println("Waiting for image to write");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					break;
+				}
+			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(getImage(), null);
+			try {
+				ImageIO.write(bufferedImage, "png", image);
+				// System.out.println("Thumbnail saved successfully to " +
+				// image.getAbsolutePath());
+			} catch (IOException e) {
+				// System.err.println("Error saving image: " + e.getMessage());
+				e.printStackTrace();
+			}
 		}
+
 		return getSelf();
+	}
+
+	public WritableImage loadImageFromFile() {
+		try {
+			File parent = selfInternal.getAbsoluteFile().getParentFile();
+			File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
+			BufferedImage bufferedImage = ImageIO.read(image);
+			if (bufferedImage != null) {
+				img = SwingFXUtils.toFXImage(bufferedImage, null);
+			}
+		} catch (IOException e) {
+			System.err.println("Error loading image: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return img;
 	}
 
 	public static CaDoodleFile fromJsonString(String content) throws Exception {
@@ -397,8 +444,17 @@ public class CaDoodleFile {
 	}
 
 	public void setCurrentIndex(int currentIndex) {
-		//new Exception("Current Index set to " + currentIndex).printStackTrace();
+		// new Exception("Current Index set to " + currentIndex).printStackTrace();
 		this.currentIndex = currentIndex;
+	}
+
+	public javafx.scene.image.WritableImage getImage() {
+		return img;
+	}
+
+	public javafx.scene.image.WritableImage setImage(javafx.scene.image.WritableImage img) {
+		this.img = img;
+		return img;
 	}
 
 }

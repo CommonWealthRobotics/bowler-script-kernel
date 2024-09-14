@@ -54,7 +54,10 @@ public class ThumbnailImage {
 			if (max.z < max2.z)
 				max.z = max2.z;
 		}
-
+		if(max==null)
+			max=new Vector3d(0,0,0);
+		if(min==null)
+			min=new Vector3d(0,0,0);
 		return new Bounds(min, max);
 	}
 
