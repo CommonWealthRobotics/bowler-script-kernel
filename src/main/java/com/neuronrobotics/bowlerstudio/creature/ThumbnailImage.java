@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio.creature;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
@@ -57,7 +58,15 @@ public class ThumbnailImage {
 		return new Bounds(min, max);
 	}
 
-	public static WritableImage get(List<CSG> csgList) {
+	public static WritableImage get(List<CSG> c) {
+		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
+		for(CSG cs:c) {
+			if(cs.getManipulator()!=null) {
+				TransformNR nr = TransformFactory.affineToNr(cs.getManipulator());
+				csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)));
+			}else
+				csgList.add(cs);
+		}
 		// Create a group to hold all the meshes
 		Group root = new Group();
 
