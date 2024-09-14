@@ -29,6 +29,10 @@ public class ThumbnailImage {
 		Vector3d min = null;
 		Vector3d max = null;
 		for (CSG c : incoming) {
+			if(c.isHide())
+				continue;
+			if(c.isInGroup())
+				continue;
 			Vector3d min2 = c.getBounds().getMin().clone();
 			Vector3d max2 = c.getBounds().getMax().clone();
 			if (min == null)
@@ -63,6 +67,10 @@ public class ThumbnailImage {
 		double xOffset =(b.getMax().x -b.getMin().x)/2;
 		double zCenter = (b.getMax().z -b.getMin().z)/2;
 		for (CSG csg : csgList) {
+			if(csg.isHide())
+				continue;
+			if(csg.isInGroup())
+				continue;
 			MeshView meshView = csg.movez(-zCenter).getMesh();
 			if (csg.isHole()) {
 				PhongMaterial material = new PhongMaterial();
@@ -71,6 +79,7 @@ public class ThumbnailImage {
 				meshView.setMaterial(material);
 				meshView.setOpacity(0.25);
 			}
+			
 			root.getChildren().add(meshView);
 		}
 
