@@ -16,6 +16,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.CullFace;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Transform;
 import javafx.scene.PerspectiveCamera;
@@ -79,7 +80,7 @@ public class ThumbnailImage {
 				meshView.setMaterial(material);
 				meshView.setOpacity(0.25);
 			}
-			
+			meshView.setCullFace(CullFace.BACK);
 			root.getChildren().add(meshView);
 		}
 
