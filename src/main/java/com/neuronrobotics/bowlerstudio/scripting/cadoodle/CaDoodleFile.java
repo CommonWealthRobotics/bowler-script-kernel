@@ -97,7 +97,8 @@ public class CaDoodleFile {
 		}
 		setCurrentIndex(indexStarting);
 		updateCurrentFromCache();
-		
+		loadImageFromFile();
+
 	}
 
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
@@ -404,10 +405,10 @@ public class CaDoodleFile {
 		}
 		if (self != null) {
 			file.setSelf(self);
-			file.loadImageFromFile();
 		}
-		if (initialize) 
+		if (initialize) {
 			file.initialize();
+		}
 		return file;
 	}
 
