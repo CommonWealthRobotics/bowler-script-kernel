@@ -49,6 +49,9 @@ public class CaDoodleFile {
 //	@Expose (serialize = false, deserialize = false)
 //	private List<CSG> currentState = new ArrayList<CSG>();
 	@Expose(serialize = false, deserialize = false)
+	private
+	double percentInitialized=0;
+	@Expose(serialize = false, deserialize = false)
 	private HashMap<ICaDoodleOpperation, List<CSG>> cache = new HashMap<ICaDoodleOpperation, List<CSG>>();
 	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {
 	}.getType();
@@ -85,8 +88,10 @@ public class CaDoodleFile {
 		}
 		int indexStarting = getCurrentIndex();
 		setCurrentIndex(0);
+		setPercentInitialized(0);
 		for (int i = 0; i < opperations.size(); i++) {
 			ICaDoodleOpperation op = opperations.get(i);
+			setPercentInitialized(((double)i)/(double)opperations.size());
 			try {
 				process(op);
 			} catch (Throwable t) {
@@ -98,6 +103,7 @@ public class CaDoodleFile {
 		setCurrentIndex(indexStarting);
 		updateCurrentFromCache();
 		loadImageFromFile();
+		setPercentInitialized(1);
 
 	}
 
@@ -465,6 +471,14 @@ public class CaDoodleFile {
 	public javafx.scene.image.WritableImage setImage(javafx.scene.image.WritableImage img) {
 		this.img = img;
 		return img;
+	}
+
+	public double getPercentInitialized() {
+		return percentInitialized;
+	}
+
+	public void setPercentInitialized(double percentInitialized) {
+		this.percentInitialized = percentInitialized;
 	}
 
 }
