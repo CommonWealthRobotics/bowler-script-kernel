@@ -63,6 +63,22 @@ public class CaDoodleFile {
 	private boolean regenerating;
 	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
 	private javafx.scene.image.WritableImage img;
+	
+	public void close() {
+		for(ICaDoodleOpperation op:cache.keySet()) {
+			cache.get(op).clear();
+		}
+		cache.clear();
+		cache=null;
+		clearListeners();
+		listeners=null;
+		toProcess.clear();
+		toProcess=null;
+		img=null;
+		if(opperationRunner!=null)
+			opperationRunner.interrupt();
+		opperationRunner=null;
+	}
 
 	public CaDoodleFile clearListeners() {
 		listeners.clear();
