@@ -104,7 +104,13 @@ public class CaDoodleFile {
 		updateCurrentFromCache();
 		loadImageFromFile();
 		setPercentInitialized(1);
-
+		for (ICaDoodleStateUpdate l : listeners) {
+			try {
+				l.onInitializationDone();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
