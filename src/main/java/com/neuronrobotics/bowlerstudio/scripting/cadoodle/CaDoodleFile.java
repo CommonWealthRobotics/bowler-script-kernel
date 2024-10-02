@@ -274,6 +274,8 @@ public class CaDoodleFile {
 	}
 
 	public ICaDoodleOpperation getCurrentOpperation() {
+		if(getCurrentIndex()==0)
+			return getOpperations().get(0);
 		return getOpperations().get(getCurrentIndex() - 1);
 	}
 
