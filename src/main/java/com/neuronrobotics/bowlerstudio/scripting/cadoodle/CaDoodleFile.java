@@ -41,6 +41,8 @@ public class CaDoodleFile {
 	@Expose(serialize = true, deserialize = true)
 	private int currentIndex = 0;
 	@Expose(serialize = true, deserialize = true)
+	private long timeCreated = -1;
+	@Expose(serialize = true, deserialize = true)
 	private String projectName = NO_NAME;
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR workplane = new TransformNR();
@@ -504,5 +506,15 @@ public class CaDoodleFile {
 	public void setPercentInitialized(double percentInitialized) {
 		this.percentInitialized = percentInitialized;
 	}
+
+	public long getTimeCreated() throws IOException {
+		if(timeCreated<0) {
+			timeCreated=System.currentTimeMillis();
+			save();
+		}
+		return timeCreated;
+	}
+
+
 
 }
