@@ -271,13 +271,15 @@ public class CaDoodleFile {
 
 	private void updateCurrentFromCache() {
 		ICaDoodleOpperation key = getCurrentOpperation();
+		if(key==null)
+			return;
 		System.out.println("Current opperation results: " + key.getType());
 		setCurrentState(key);
 	}
 
 	public ICaDoodleOpperation getCurrentOpperation() {
 		if(getCurrentIndex()==0)
-			return getOpperations().get(0);
+			return null;
 		return getOpperations().get(getCurrentIndex() - 1);
 	}
 
@@ -432,6 +434,10 @@ public class CaDoodleFile {
 	public static CaDoodleFile fromJsonString(String content, ICaDoodleStateUpdate listener, File self,
 			boolean initialize) throws Exception {
 		CaDoodleFile file = gson.fromJson(content, TT_CaDoodleFile);
+		if(file==null) {
+			file=new CaDoodleFile();
+			file.setProjectName(RandomStringFactory.getNextRandomName());
+		}
 		if (listener != null) {
 			file.addListener(listener);
 		}
