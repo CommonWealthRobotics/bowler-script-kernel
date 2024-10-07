@@ -159,8 +159,9 @@ public class CaDoodleFile {
 				setCurrentIndex(getCurrentIndex() + 1);
 				// System.out.println("Regenerating "+currentIndex);
 				ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
-				storeResultInCache(op, op.process(getPreviouState()));
-				setCurrentState(op);
+				List<CSG> process = op.process(getPreviouState());
+				storeResultInCache(op, process);
+				setCurrentState(op,process);
 			}
 			if (getCurrentIndex() != endIndex) {
 				setCurrentIndex(endIndex);
@@ -182,8 +183,9 @@ public class CaDoodleFile {
 			opperationRunner.setName("regenerateCurrent Thread");
 
 			ICaDoodleOpperation op = getCurrentOpperation();
-			storeResultInCache(op, op.process(getPreviouState()));
-			setCurrentState(op);
+			List<CSG> process = op.process(getPreviouState());
+			storeResultInCache(op, process);
+			setCurrentState(op,process);
 			fireSaveSuggestion();
 			opperationRunner = null;
 		});
@@ -193,9 +195,10 @@ public class CaDoodleFile {
 	}
 
 	private void process(ICaDoodleOpperation op) {
-		storeResultInCache(op, op.process(getCurrentState()));
+		List<CSG> process = op.process(getCurrentState());
+		storeResultInCache(op, process);
 		setCurrentIndex(getCurrentIndex() + 1);
-		setCurrentState(op);
+		setCurrentState(op,process);
 	}
 
 	public boolean isOperationRunning() {
@@ -274,7 +277,7 @@ public class CaDoodleFile {
 		if(key==null)
 			return;
 		System.out.println("Current opperation results: " + key.getType());
-		setCurrentState(key);
+		setCurrentState(key,getCurrentState());
 	}
 
 	public ICaDoodleOpperation getCurrentOpperation() {
@@ -314,7 +317,10 @@ public class CaDoodleFile {
 	public List<CSG> getCurrentState() {
 		if (getCurrentIndex() == 0)
 			return new ArrayList<CSG>();
-		return cache.get(getCurrentOpperation());
+		List<CSG> list = cache.get(getCurrentOpperation());
+		if(list==null)
+			list= new ArrayList<CSG>();
+		return list;
 	}
 
 	public List<CSG> getSelect(List<String> selectedSnapshot) {
@@ -337,11 +343,10 @@ public class CaDoodleFile {
 		return cache.get(getOpperations().get(getCurrentIndex() - 2));
 	}
 
-	private void setCurrentState(ICaDoodleOpperation op) {
-
+	private void setCurrentState(ICaDoodleOpperation op,List<CSG> currentState) {
 		for (ICaDoodleStateUpdate l : listeners) {
 			try {
-				l.onUpdate(getCurrentState(), op, this);
+				l.onUpdate(currentState, op, this);
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
@@ -437,6 +442,7 @@ public class CaDoodleFile {
 		if(file==null) {
 			file=new CaDoodleFile();
 			file.setProjectName(RandomStringFactory.getNextRandomName());
+			file.getTimeCreated();
 		}
 		if (listener != null) {
 			file.addListener(listener);
@@ -513,10 +519,9 @@ public class CaDoodleFile {
 		this.percentInitialized = percentInitialized;
 	}
 
-	public long getTimeCreated() throws IOException {
+	public long getTimeCreated()  {
 		if(timeCreated<0) {
 			timeCreated=System.currentTimeMillis();
-			save();
 		}
 		return timeCreated;
 	}
