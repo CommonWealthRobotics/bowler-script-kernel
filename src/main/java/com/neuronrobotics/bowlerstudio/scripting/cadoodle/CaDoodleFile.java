@@ -65,6 +65,7 @@ public class CaDoodleFile {
 	private boolean regenerating;
 	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
 	private javafx.scene.image.WritableImage img;
+	private boolean initializing;
 	
 	public void close() {
 		for(ICaDoodleOpperation op:cache.keySet()) {
@@ -100,6 +101,9 @@ public class CaDoodleFile {
 	}
 
 	public void initialize() {
+		if(initializing)
+			throw new RuntimeException("Can not initialize while initializing.");
+		initializing=true;
 		if (selfInternal != null) {
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			CSGDatabase.setDbFile(db);
@@ -129,9 +133,12 @@ public class CaDoodleFile {
 				e.printStackTrace();
 			}
 		}
+		initializing=false;
 	}
 
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
+		if(initializing)
+			return null;
 		if (regenerating || isOperationRunning()) {
 			System.out.println("Opperation is running, ignoring regen");
 			return opperationRunner;
@@ -155,8 +162,9 @@ public class CaDoodleFile {
 				}
 			}
 			setCurrentIndex(opIndex);
+			
 			for (; getCurrentIndex() < size;) {
-				setCurrentIndex(getCurrentIndex() + 1);
+				//setCurrentIndex(getCurrentIndex() + 1);
 				// System.out.println("Regenerating "+currentIndex);
 				ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
 				List<CSG> process = op.process(getPreviouState());
