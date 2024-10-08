@@ -164,7 +164,7 @@ public class CaDoodleFile {
 			setCurrentIndex(opIndex);
 			
 			for (; getCurrentIndex() < size;) {
-				//setCurrentIndex(getCurrentIndex() + 1);
+				setCurrentIndex(getCurrentIndex() + 1);
 				// System.out.println("Regenerating "+currentIndex);
 				ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
 				List<CSG> process = op.process(getPreviouState());
