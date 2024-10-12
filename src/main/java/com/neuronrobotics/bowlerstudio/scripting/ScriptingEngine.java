@@ -90,47 +90,51 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// sake, because multiple inheritance is TOO
 	// hard for java...
 	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 100000;
+
 	/**
 	 *
 	 */
 	public static void flatten(ArrayList<CSG> flat, Object o) {
-		if(CSG.class.isInstance(o))
-			flat.add((CSG)o);
-		if(List.class.isInstance(o)) {
-			for(Object ob:(List)o) {
-				flatten(flat,ob);
+		if (CSG.class.isInstance(o))
+			flat.add((CSG) o);
+		if (List.class.isInstance(o)) {
+			for (Object ob : (List) o) {
+				flatten(flat, ob);
 			}
 		}
-		
+
 	}
-	public static <T> void flatenInterna(Object o, Class<T> type,ArrayList<T> flattened){
-		if(type.isInstance(o))
-			flattened.add((T)o);
-		if(List.class.isInstance(o)) {
-			for(Object ob:(List)o) {
-				flatenInterna(o,type,flattened);
+
+	public static <T> void flatenInterna(Object o, Class<T> type, ArrayList<T> flattened) {
+		if (type.isInstance(o))
+			flattened.add((T) o);
+		else if (List.class.isInstance(o)) {
+			for (Object ob : (List) o) {
+				flatenInterna(ob, type, flattened);
 			}
-		}
-		if(Map.class.isInstance(o)) {
-			Map m=(Map)o;
-			for(Object key:m.keySet()) {
-				flatenInterna(m.get(key),type,flattened);
-				flatenInterna(key,type,flattened);
+		} else if (Map.class.isInstance(o)) {
+			Map m = (Map) o;
+			for (Object key : m.keySet()) {
+				flatenInterna(m.get(key), type, flattened);
+				flatenInterna(key, type, flattened);
 			}
 		}
 	}
-	public static <T> List<T> flaten(String git,String file, Class<T> type, ArrayList<Object> args) throws Exception{
+
+	public static <T> List<T> flaten(String git, String file, Class<T> type, ArrayList<Object> args) throws Exception {
 		ArrayList<T> flattened = new ArrayList<T>();
-		Object o =gitScriptRun(git, file,args);
-		flatenInterna(o,type,flattened);
+		Object o = gitScriptRun(git, file, args);
+		flatenInterna(o, type, flattened);
 		return flattened;
 	}
-	public static <T> List<T> flaten(File f, Class<T> type, ArrayList<Object> args) throws Exception{
+
+	public static <T> List<T> flaten(File f, Class<T> type, ArrayList<Object> args) throws Exception {
 		ArrayList<T> flattened = new ArrayList<T>();
-		Object o =inlineFileScriptRun(f, args);
-		flatenInterna(o,type,flattened);
+		Object o = inlineFileScriptRun(f, args);
+		flatenInterna(o, type, flattened);
 		return flattened;
 	}
+
 	private static final ArrayList<GitLogProgressMonitor> logListeners = new ArrayList<>();
 
 	private static boolean printProgress = true;
@@ -148,9 +152,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"com.neuronrobotics.bowlerstudio.scripting", "com.neuronrobotics.bowlerstudio.tabs",
 			"com.neuronrobotics.bowlerstudio.physics", "com.neuronrobotics.bowlerstudio.physics",
 			"com.neuronrobotics.bowlerstudio.vitamins", "com.neuronrobotics.bowlerstudio.creature",
-			"com.neuronrobotics.bowlerstudio.threed","com.neuronrobotics.sdk.util.ThreadUtil",
-            "eu.mihosoft.vrl.v3d.Transform",
-            "com.neuronrobotics.bowlerstudio.vitamins.Vitamins" };
+			"com.neuronrobotics.bowlerstudio.threed", "com.neuronrobotics.sdk.util.ThreadUtil",
+			"eu.mihosoft.vrl.v3d.Transform", "com.neuronrobotics.bowlerstudio.vitamins.Vitamins" };
 
 	private static HashMap<String, File> filesRun = new HashMap<>();
 
@@ -173,7 +176,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	static {
 
 		PasswordManager.hasNetwork();
-
+		addScriptingLanguage(new StlLoader());
 		addScriptingLanguage(new ClojureHelper());
 		addScriptingLanguage(new GroovyHelper());
 		addScriptingLanguage(new JythonHelper());
@@ -310,7 +313,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 				String str = format + "% " + stage + " " + reponame + "  " + tasks + " of task " + type;
 				if (timeofLastUpdate + 500 < System.currentTimeMillis()) {
-					if(printProgress)System.out.println(str);
+					if (printProgress)
+						System.out.println(str);
 					timeofLastUpdate = System.currentTimeMillis();
 				}
 				// System.err.println(str);
@@ -333,7 +337,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			@Override
 			public void endTask() {
 				String string = "100%  " + stage + " " + reponame + "  " + type;
-				if(printProgress)System.out.println(string);
+				if (printProgress)
+					System.out.println(string);
 				for (GitLogProgressMonitor l : logListeners) {
 					l.onUpdate(string, e);
 				}
@@ -373,11 +378,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (URL == null)
 			return false;
 		Object[] keySet;
-		synchronized(gitOpenTimeout) {
-		 keySet =  gitOpenTimeout.keySet().toArray();
+		synchronized (gitOpenTimeout) {
+			keySet = gitOpenTimeout.keySet().toArray();
 		}
 		for (int i = 0; i < keySet.length; i++) {
-			Git g = (Git)keySet[i];
+			Git g = (Git) keySet[i];
 			GitTimeoutThread t = gitOpenTimeout.get(g);
 			if (t.ref.toLowerCase().contentEquals(URL.toLowerCase())) {
 				// t.getException().printStackTrace(System.err);
@@ -397,40 +402,40 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static Git openGit(Repository localRepo) {
 		try {
 
-		Object[] keySet;
-		synchronized(gitOpenTimeout) {
-		 keySet =  gitOpenTimeout.keySet().toArray();
-		}
-		for (int j = 0; j < keySet.length; j++) {
-			Object gO = keySet[j];
-			Git g=(Git)gO;
-			if (g.getRepository().getDirectory().getAbsolutePath()
-					.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
-				GitTimeoutThread t = gitOpenTimeout.get(g);
-				int i = 0;
-				while (gitOpenTimeout.containsKey(g)) {
-
-					System.out.println(
-							"Git is locked by other process, blocking " + localRepo.getDirectory().getAbsolutePath());
-					System.out.println("Git locked " + t.ref);
-					if (i > 3) {
-						t.getException().printStackTrace(System.out);
-						System.out.println("Blocking process: ");
-
-						new Exception().printStackTrace(System.out);
-					}
-					i++;
-					ThreadUtil.wait(1000);
-				}
-				break;
+			Object[] keySet;
+			synchronized (gitOpenTimeout) {
+				keySet = gitOpenTimeout.keySet().toArray();
 			}
-		}
+			for (int j = 0; j < keySet.length; j++) {
+				Object gO = keySet[j];
+				Git g = (Git) gO;
+				if (g.getRepository().getDirectory().getAbsolutePath()
+						.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
+					GitTimeoutThread t = gitOpenTimeout.get(g);
+					int i = 0;
+					while (gitOpenTimeout.containsKey(g)) {
 
-		Git git = new Git(localRepo);
+						System.out.println("Git is locked by other process, blocking "
+								+ localRepo.getDirectory().getAbsolutePath());
+						System.out.println("Git locked " + t.ref);
+						if (i > 3) {
+							t.getException().printStackTrace(System.out);
+							System.out.println("Blocking process: ");
 
-		gitOpenTimeout.put(git, makeTimeoutThread(git));
-		return git;
-		}catch(Throwable t) {
+							new Exception().printStackTrace(System.out);
+						}
+						i++;
+						ThreadUtil.wait(1000);
+					}
+					break;
+				}
+			}
+
+			Git git = new Git(localRepo);
+
+			gitOpenTimeout.put(git, makeTimeoutThread(git));
+			return git;
+		} catch (Throwable t) {
 			new IssueReportingExceptionHandler().except(t);
 			throw new RuntimeException(t);
 
@@ -594,7 +599,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static GitHub setupAnyonmous() throws IOException {
-		//ScriptingEngine.setAutoupdate(false);
+		// ScriptingEngine.setAutoupdate(false);
 		return PasswordManager.setupAnyonmous();
 	}
 
@@ -885,10 +890,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	@SuppressWarnings("deprecation")
 	public static void commit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile, Git gitRef) throws Exception {
-		if(content !=null)
-		if("Binary File".contentEquals(content)){
-			content=null;
-		}
+		if (content != null)
+			if ("Binary File".contentEquals(content)) {
+				content = null;
+			}
 		if (PasswordManager.getUsername() == null)
 			login();
 		if (!hasNetwork())
@@ -961,9 +966,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void pushCodeToGit(String remoteURI, String branch, String FileName, String content,
 			String commitMessage, boolean flagNewFile) throws Exception {
 		waitForRepo(remoteURI, "push");
-		if(content!=null)
-			if("Binary File".contentEquals(content)){
-				content=null;
+		if (content != null)
+			if ("Binary File".contentEquals(content)) {
+				content = null;
 			}
 		commit(remoteURI, branch, FileName, content, commitMessage, flagNewFile);
 		if (PasswordManager.getUsername() == null)
@@ -1751,7 +1756,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			} catch (Exception e) {
 				try {
 					// try the checkout with no branch specified
-					return cloneRepo(remoteURI,null);
+					return cloneRepo(remoteURI, null);
 				} catch (Exception ex) {
 					throw new RuntimeException(e);
 				}
@@ -1801,7 +1806,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 		}
 
-		throw new RuntimeException("File "+f+" is not in a git repository");
+		throw new RuntimeException("File " + f + " is not in a git repository");
 	}
 
 	public static String getText(URL website) throws Exception {
@@ -2419,22 +2424,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void setPrintProgress(boolean printProgress) {
 		ScriptingEngine.printProgress = printProgress;
 	}
-	
-	public static void ignore(String url,String filepattern) throws Exception {
+
+	public static void ignore(String url, String filepattern) throws Exception {
 		File ignorefile = fileFromGit(url, ".gitignore");
-		String contents="";
-		if(ignorefile.exists()) {
+		String contents = "";
+		if (ignorefile.exists()) {
 			BufferedReader reader;
 			try {
 				reader = new BufferedReader(new FileReader(ignorefile));
 				String line = reader.readLine();
 				while (line != null) {
-					if(line.contains(filepattern)) {
-						System.out.println(""+filepattern+" exists in "+ignorefile.getAbsolutePath());
+					if (line.contains(filepattern)) {
+						System.out.println("" + filepattern + " exists in " + ignorefile.getAbsolutePath());
 						reader.close();
 						return;
 					}
-					contents+=line+"\n";
+					contents += line + "\n";
 					// read next line
 					line = reader.readLine();
 				}
@@ -2443,8 +2448,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				e.printStackTrace();
 			}
 		}
-		contents+=filepattern;
-		pushCodeToGit(url, null, ".gitignore", contents, "Adding ignore for "+filepattern);
+		contents += filepattern;
+		pushCodeToGit(url, null, ".gitignore", contents, "Adding ignore for " + filepattern);
 	}
 
 }

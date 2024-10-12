@@ -16,15 +16,15 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
-	@Expose (serialize = true, deserialize = true)
-	private String fileLocation=null;
+
 	@Expose (serialize = true, deserialize = true)
 	private String name=null;
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
-	
+	private ArrayList<String> options = new ArrayList<String>();
+	private StringParameter parameter=null;
 	public AddFromFile set(File source) {
-		fileLocation=source.getAbsolutePath();
+		getParameter().setStrValue(source.getAbsolutePath());
 		return this;
 	}
 
@@ -41,19 +41,17 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		if(getName()==null) {
-			setName(RandomStringFactory.generateRandomString());
+			
 		}
 		try {
 //			ArrayList<Object>args = new ArrayList<>();
 //			args.addAll(Arrays.asList(getName() ));
-			ArrayList<String> options = new ArrayList<String>();
-			StringParameter parameter = new StringParameter(name+"_CaDoodle_FileName", fileLocation, options);
 			ArrayList<CSG> collect = new ArrayList<>();
-			List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(parameter.getStrValue()), CSG.class, null);
-
+			List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(getParameter().getStrValue()), CSG.class, null);
+			System.out.println("Initial Loading "+getParameter().getStrValue());
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 			    CSG csg = flattenedCSGs.get(i);
-			    CSG processedCSG = processGiven(csg,i,parameter,getOrderedName());
+			    CSG processedCSG = processGiven(csg,i,getParameter(),getOrderedName());
 			    
 			    collect.add(processedCSG);
 			}
@@ -68,14 +66,16 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 
 	private CSG processGiven(CSG csg,int i,StringParameter parameter,String name) {
 		CSG processedCSG = csg
-		    .moveToCenterX()
-		    .moveToCenterY()
-		    .toZMin()
+//		    .moveToCenterX()
+//		    .moveToCenterY()
+//		    .toZMin()
 		    .transformed(TransformFactory.nrToCSG(getLocation()))
 		    .syncProperties(csg)
 		    .setRegenerate(previous -> {
 				try {
-					List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(parameter.getStrValue()), CSG.class, null);
+					String fileLocation=parameter.getStrValue();
+					System.out.println("Regenerating "+fileLocation);
+					List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(fileLocation), CSG.class, null);
 					 CSG csg1 = flattenedCSGs.get(i);
 					 return processGiven(csg1,i,parameter,name);
 				} catch (Exception e) {
@@ -99,11 +99,24 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	}
 
 	public String getName() {
+		if(name==null) {
+			setName(RandomStringFactory.generateRandomString());
+		}
 		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public StringParameter getParameter() {
+		if(parameter==null)
+			setParameter(new StringParameter(getName()+"_CaDoodle_File_Location", "UnKnown", options));
+		return parameter;
+	}
+
+	public void setParameter(StringParameter parameter) {
+		this.parameter = parameter;
 	}
 
 }

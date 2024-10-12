@@ -42,7 +42,7 @@ public class StlLoader implements IScriptingLanguage {
 	@Override
 	public ArrayList<String> getFileExtenetion() {
 		// TODO Auto-generated method stub
-		return new ArrayList<>(Arrays.asList("stl"));
+		return new ArrayList<>(Arrays.asList("stl","STL","Stl"));
 	}
 
 }
