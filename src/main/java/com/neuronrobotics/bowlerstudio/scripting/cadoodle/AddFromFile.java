@@ -13,6 +13,8 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.IRegenerate;
+import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
@@ -43,27 +45,52 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			setName(RandomStringFactory.generateRandomString());
 		}
 		try {
-			ArrayList<Object>args = new ArrayList<>();
-			args.addAll(Arrays.asList(getName() ));
-			back.addAll(ScriptingEngine
-					.flaten(new File(fileLocation), CSG.class,args)
-					.stream()
-					.map(csg->{
-						return csg
-								.moveToCenterX()
-								.moveToCenterY()
-								.toZMin()
-								.transformed(TransformFactory.nrToCSG( getLocation() ))
-								.syncProperties(csg)
-								.setName(getOrderedName());
-					})
-				    .collect(Collectors.toCollection(ArrayList::new))
+//			ArrayList<Object>args = new ArrayList<>();
+//			args.addAll(Arrays.asList(getName() ));
+			ArrayList<String> options = new ArrayList<String>();
+			StringParameter parameter = new StringParameter(name+"_CaDoodle_FileName", fileLocation, options);
+			ArrayList<CSG> collect = new ArrayList<>();
+			List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(parameter.getStrValue()), CSG.class, null);
+
+			for (int i = 0; i < flattenedCSGs.size(); i++) {
+			    CSG csg = flattenedCSGs.get(i);
+			    CSG processedCSG = processGiven(csg,i,parameter,getOrderedName());
+			    
+			    collect.add(processedCSG);
+			}
+			back.addAll(collect
 					);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return back;
+	}
+
+	private CSG processGiven(CSG csg,int i,StringParameter parameter,String name) {
+		CSG processedCSG = csg
+		    .moveToCenterX()
+		    .moveToCenterY()
+		    .toZMin()
+		    .transformed(TransformFactory.nrToCSG(getLocation()))
+		    .syncProperties(csg)
+		    .setRegenerate(new IRegenerate() {
+		        @Override
+		        public CSG regenerate(CSG previous) {
+					try {
+						List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(parameter.getStrValue()), CSG.class, null);
+						 CSG csg = flattenedCSGs.get(i);
+						 return processGiven(csg,i,parameter,name);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+		        	return null;
+		        }
+		    })
+		    .setName(name);
+		return processedCSG;
 	}
 
 	public TransformNR getLocation() {
