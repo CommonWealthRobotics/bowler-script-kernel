@@ -13,7 +13,6 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.parametrics.IRegenerate;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
@@ -74,21 +73,16 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		    .toZMin()
 		    .transformed(TransformFactory.nrToCSG(getLocation()))
 		    .syncProperties(csg)
-		    .setRegenerate(new IRegenerate() {
-		        @Override
-		        public CSG regenerate(CSG previous) {
-					try {
-						List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(parameter.getStrValue()), CSG.class, null);
-						 CSG csg = flattenedCSGs.get(i);
-						 return processGiven(csg,i,parameter,name);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-
-		        	return null;
-		        }
-		    })
+		    .setRegenerate(previous -> {
+				try {
+					List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(parameter.getStrValue()), CSG.class, null);
+					 CSG csg1 = flattenedCSGs.get(i);
+					 return processGiven(csg1,i,parameter,name);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return previous;
+			})
 		    .setName(name);
 		return processedCSG;
 	}
