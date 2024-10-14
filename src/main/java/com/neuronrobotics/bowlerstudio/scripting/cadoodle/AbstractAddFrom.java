@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import java.io.File;
 import java.util.HashSet;
 
 import com.google.gson.annotations.Expose;
@@ -29,4 +30,5 @@ public abstract class AbstractAddFrom {
 		namesAdded.add(result);
 		return result;
 	}
+	public abstract File getFile();
 }

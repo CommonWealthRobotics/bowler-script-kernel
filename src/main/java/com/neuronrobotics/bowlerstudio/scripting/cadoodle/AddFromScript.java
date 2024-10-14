@@ -1,11 +1,15 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+
+import org.eclipse.jgit.api.errors.GitAPIException;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
@@ -90,6 +94,18 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public File getFile() {
+		// TODO Auto-generated method stub
+		try {
+			return ScriptingEngine.fileFromGit(gitULR, fileRel);
+		} catch (GitAPIException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }
