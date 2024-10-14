@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.neuronrobotics.bowlerstudio.util.GeometrySimplification;
+
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
@@ -16,8 +18,15 @@ public class SvgLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-		SVGLoad s = new SVGLoad(code.toURI());
-		return run(s);
+		try {
+			SVGLoad s = new SVGLoad(code.toURI());
+			return run(s);
+		}catch(Exception e) {
+			System.err.println("SVG had error, attempting to fix "+code.getAbsolutePath());
+			File tmp=GeometrySimplification.simplifySVG(code);
+			SVGLoad s = new SVGLoad(tmp.toURI());
+			return run(s);
+		}
 	}
 
 	@Override

@@ -71,6 +71,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //		    .toZMin()
 		    .transformed(TransformFactory.nrToCSG(getLocation()))
 		    .syncProperties(csg)
+		    .setParameter(parameter)
 		    .setRegenerate(previous -> {
 				try {
 					String fileLocation=parameter.getStrValue();
@@ -111,7 +112,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 
 	public StringParameter getParameter() {
 		if(parameter==null)
-			setParameter(new StringParameter(getName()+"_CaDoodle_File_Location", "UnKnown", options));
+			setParameter(new StringParameter(getName()+"_CaDoodle_File", "UnKnown", options));
 		return parameter;
 	}
 
