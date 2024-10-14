@@ -47,7 +47,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //			ArrayList<Object>args = new ArrayList<>();
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
-			List<CSG> flattenedCSGs = ScriptingEngine.flaten(new File(getParameter().getStrValue()), CSG.class, null);
+			List<CSG> flattenedCSGs = ScriptingEngine.flaten(getFile(), CSG.class, null);
 			System.out.println("Initial Loading "+getParameter().getStrValue());
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 			    CSG csg = flattenedCSGs.get(i);
@@ -62,6 +62,10 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			e.printStackTrace();
 		}
 		return back;
+	}
+
+	public File getFile() {
+		return new File(getParameter().getStrValue());
 	}
 
 	private CSG processGiven(CSG csg,int i,StringParameter parameter,String name) {
