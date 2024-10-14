@@ -139,7 +139,7 @@ public class CaDoodleFile {
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
 		if(initializing)
 			return null;
-		if (regenerating || isOperationRunning()) {
+		if (isRegenerating() || isOperationRunning()) {
 			System.out.println("Opperation is running, ignoring regen");
 			return opperationRunner;
 		}
@@ -151,7 +151,7 @@ public class CaDoodleFile {
 		}
 		opperationRunner = new Thread(() -> {
 			opperationRunner.setName("Regeneration Thread");
-			regenerating = true;
+			setRegenerating(true);
 			// System.out.println("Regenerating Object from "+source.getType());
 			int opIndex = 0;
 			for (int i = 0; i < size; i++) {
@@ -175,7 +175,7 @@ public class CaDoodleFile {
 				setCurrentIndex(endIndex);
 				updateCurrentFromCache();
 			}
-			regenerating = false;
+			setRegenerating(false);
 			fireSaveSuggestion();
 			opperationRunner = null;
 		});
@@ -532,6 +532,14 @@ public class CaDoodleFile {
 			timeCreated=System.currentTimeMillis();
 		}
 		return timeCreated;
+	}
+
+	public boolean isRegenerating() {
+		return regenerating;
+	}
+
+	private void setRegenerating(boolean regenerating) {
+		this.regenerating = regenerating;
 	}
 
 
