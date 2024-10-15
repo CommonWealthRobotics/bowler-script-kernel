@@ -243,7 +243,7 @@ public class BowlerKernel {
 			}
 		}
 		if (startLoadingScripts) {
-			processReturnedObjectsStart(ret, null);
+			processReturnedObjectsStart(ret, new File("."));
 			finish(startTime);
 			return;
 		}
@@ -391,8 +391,10 @@ public class BowlerKernel {
 			}
 
 		});
+		
 		if (baseWorkspaceFile != null) {
-			File baseDirForFiles = new File("./manufacturing/");
+			
+			File baseDirForFiles = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/");
 			if (baseDirForFiles.exists()) {
 				// baseDirForFiles.mkdir();
 				File bomCSV = new File(
@@ -422,6 +424,8 @@ public class BowlerKernel {
 						e.printStackTrace();
 					}
 				}
+			}else {
+				baseDirForFiles.mkdirs();
 			}
 		}
 		ArrayList<CSG> csgBits = new ArrayList<>();
@@ -435,7 +439,7 @@ public class BowlerKernel {
 			else {
 				System.out.println("Exporting files without print bed");
 			}
-			new CadFileExporter().generateManufacturingParts(csgBits, new File("."));
+			new CadFileExporter().generateManufacturingParts(csgBits, baseWorkspaceFile);
 		} catch (Throwable t) {
 			t.printStackTrace();
 			fail();
