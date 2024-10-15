@@ -379,7 +379,7 @@ public class BowlerKernel {
 		System.exit(0);
 	}
 
-	private static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
+	public static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
 		processUIOpening(ret);
 		if(baseWorkspaceFile!=null)
 			System.out.println("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
