@@ -157,7 +157,7 @@ public class CadFileExporter {
 		return allCadStl;
 	}
 	private File makeFreecad(String nameBase,List<CSG>  current ) throws IOException{
-		File blend = new File(nameBase + ".blend");
+		File blend = new File(nameBase + ".FCStd");
 		System.out.println("Writing "+blend.getAbsolutePath());
 		for(CSG tmp:current)
 			FreecadLoader.addCSGToFreeCAD( blend,tmp);
