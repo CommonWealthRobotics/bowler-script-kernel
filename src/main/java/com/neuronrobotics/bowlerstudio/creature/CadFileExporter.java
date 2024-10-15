@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 
 import com.neuronrobotics.bowlerstudio.scripting.BlenderLoader;
+import com.neuronrobotics.bowlerstudio.scripting.FreecadLoader;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
@@ -82,7 +83,11 @@ public class CadFileExporter {
 		}
 		int index=0;
 		ArrayList<CSG> svgParts = new ArrayList<>();
+		ArrayList<CSG> blendParts = new ArrayList<>();
+		ArrayList<CSG> freecadParts = new ArrayList<>();
 		String svgName =null;
+		String blendName=null;
+		String freecadName=null;
 		String nameBase ="";
 		for(CSG part: totalAssembly){
 			String name = part.getName();
@@ -109,10 +114,6 @@ public class CadFileExporter {
 						allCadStl.add(makeObj(nameBase,manufactured));//
 						ui.setCsg(manufactured , null);
 					}
-					if(format.toLowerCase().contains("blend")){
-						allCadStl.add(makeBlender(nameBase,manufactured));// 
-						ui.setCsg(manufactured , null);
-					}
 					if(format.toLowerCase().contains("stl")){
 						allCadStl.add(makeStl(nameBase,manufactured));// default to stl
 						ui.setCsg(manufactured , null);
@@ -124,7 +125,22 @@ public class CadFileExporter {
 						svgParts.add(manufactured);
 						ui.setAllCSG(svgParts , null);
 					}
-					
+					if(format.toLowerCase().contains("blend")){
+						//allCadStl.add(makeBlender(nameBase,manufactured));// 
+						ui.setCsg(manufactured , null);
+						if(blendName==null){
+							blendName =part.toString();
+						}
+						blendParts.add(manufactured);
+					}
+					if(format.toLowerCase().contains("freecad")){
+						//allCadStl.add(makeBlender(nameBase,manufactured));// 
+						ui.setCsg(manufactured , null);
+						if(freecadName==null){
+							freecadName =part.toString();
+						}
+						freecadParts.add(manufactured);
+					}
 				}
 
 			}
@@ -132,9 +148,22 @@ public class CadFileExporter {
 		if(svgParts.size()>0){
 			allCadStl.add(makeSvg(nameBase,svgParts));// default to stl
 		}
-		
+		if(blendParts.size()>0){
+			allCadStl.add(makeBlender(nameBase,blendParts));// default to stl
+		}
+		if(freecadParts.size()>0){
+			allCadStl.add(makeFreecad(nameBase,freecadParts));// default to stl
+		}
 		return allCadStl;
 	}
+	private File makeFreecad(String nameBase,List<CSG>  current ) throws IOException{
+		File blend = new File(nameBase + ".blend");
+		System.out.println("Writing "+blend.getAbsolutePath());
+		for(CSG tmp:current)
+			FreecadLoader.addCSGToFreeCAD( blend,tmp);
+		return blend;
+	}
+	
 	private File makeStl(String nameBase,CSG tmp ) throws IOException{
 		File stl = new File(nameBase + ".stl");
 		
@@ -150,10 +179,11 @@ public class CadFileExporter {
 		return stl;
 	}
 	
-	private File makeBlender(String nameBase,CSG tmp ) throws IOException{
+	private File makeBlender(String nameBase,List<CSG>  current ) throws IOException{
 		File blend = new File(nameBase + ".blend");
 		System.out.println("Writing "+blend.getAbsolutePath());
-		BlenderLoader.toBlenderFile(tmp, blend);
+		for(CSG tmp:current)
+			BlenderLoader.toBlenderFile(tmp, blend);
 		return blend;
 	}
 	
