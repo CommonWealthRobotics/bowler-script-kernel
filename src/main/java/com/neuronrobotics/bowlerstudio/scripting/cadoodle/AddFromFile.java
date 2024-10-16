@@ -106,7 +106,6 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			File copied;
 			try {
 				copied = copyFileToNewDirectory(file,parentFile,getName());
-				getParameter().setStrValue(copied.getAbsolutePath());
 				file= copied;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -114,6 +113,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			}
 		}
 		file = new File(source+DownloadManager.delim()+file.getName());
+		getParameter().setStrValue(file.getAbsolutePath());
 		return file;
 	}
 
