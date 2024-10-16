@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
@@ -101,17 +102,18 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		String parentIncoming = file.getParentFile().getAbsolutePath();
 		File parentFile = new File(loc.getStrValue()).getParentFile();
 		String source = parentFile.getAbsolutePath();
-		if (!parentIncoming.toLowerCase().contentEquals(source.toLowerCase())) {
+		if (!parentIncoming.toLowerCase().contentEquals(source.toLowerCase()) && file.exists()) {
 			File copied;
 			try {
 				copied = copyFileToNewDirectory(file,parentFile,getName());
 				getParameter().setStrValue(copied.getAbsolutePath());
-				return copied;
+				file= copied;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		file = new File(source+DownloadManager.delim()+file.getName());
 		return file;
 	}
 
