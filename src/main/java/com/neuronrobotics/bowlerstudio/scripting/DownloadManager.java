@@ -95,6 +95,7 @@ public class DownloadManager {
 			return true;
 		}
 	};
+	private static GitLogProgressMonitor psudoSplash;
 
 	public static Thread run(IExternalEditor editor, File dir, PrintStream out, List<String> finalCommand) {
 		return run(new HashMap<String, String>(), editor, dir, out, finalCommand);
@@ -275,10 +276,16 @@ public class DownloadManager {
 	}
 
 	public static File getRunExecutable(String exeType, IExternalEditor editor) {
+		while(!getExecutable(exeType, editor, "executable").exists()) {
+			new RuntimeException("Download or extraction failed, retrying").printStackTrace();
+		}
 		return getExecutable(exeType, editor, "executable");
 	}
 
 	public static File getConfigExecutable(String exeType, IExternalEditor editor) {
+		while(!getExecutable(exeType, editor, "configExecutable").exists()) {
+			new RuntimeException("Download or extraction failed, retrying").printStackTrace();
+		}
 		return getExecutable(exeType, editor, "configExecutable");
 	}
 
@@ -629,7 +636,7 @@ public class DownloadManager {
 			result = inArchive.extractSlow(index, new ISequentialOutStream() {
 				public int write(byte[] data) throws SevenZipException {
 					try {
-						System.out.println("Inflate 7z .. " + outputFile.getAbsolutePath());
+						psudoSplash.onUpdate("Inflate 7z .. " + outputFile.getName(),null);
 						fos.write(data);
 					} catch (IOException e) {
 						throw new SevenZipException("Error writing to file: " + e.getMessage());
@@ -735,12 +742,12 @@ public class DownloadManager {
 			Files.createDirectories(outDir);
 		}
 
-		try (FileInputStream fis = new FileInputStream(inputFile);
-				XZCompressorInputStream xzIn = new XZCompressorInputStream(fis);
-				TarArchiveInputStream tarIn = new TarArchiveInputStream(xzIn)) {
-
+		try  {
+			FileInputStream fis = new FileInputStream(inputFile);
+			XZCompressorInputStream xzIn = new XZCompressorInputStream(fis);
+			TarArchiveInputStream tarIn = new TarArchiveInputStream(xzIn);
 			TarArchiveEntry entry;
-			while ((entry = tarIn.getNextTarEntry()) != null) {
+			while ((entry = tarIn.getNextEntry()) != null) {
 				Path outPath = outDir.resolve(entry.getName());
 
 				if (entry.isSymbolicLink()) {
@@ -764,7 +771,7 @@ public class DownloadManager {
 					try (OutputStream out = Files.newOutputStream(outPath)) {
 						byte[] buffer = new byte[1024];
 						int len;
-						System.out.println("Inflate Tar XZ " + outPath.toAbsolutePath());
+						psudoSplash.onUpdate("Inflate Tar XZ " + outPath.getFileName(),null);
 						while ((len = tarIn.read(buffer)) != -1) {
 							out.write(buffer, 0, len);
 						}
@@ -778,6 +785,9 @@ public class DownloadManager {
 					}
 				}
 			}
+		}catch(Throwable ex) {
+			ex.printStackTrace();
+			//new File(inputFile).delete();
 		}
 	}
 
@@ -887,7 +897,7 @@ public class DownloadManager {
 			public void process(double percent) {
 				if (System.currentTimeMillis() - timeSinceePrint > 1000) {
 					timeSinceePrint = System.currentTimeMillis();
-					System.out.println("Download "+filename+" percent " + (int) (percent * 100));
+					psudoSplash.onUpdate((int) (percent * 100)+" % "+filename ,null);
 				}
 //				if(progress!=null)
 //					Platform.runLater(() -> {
@@ -910,16 +920,19 @@ public class DownloadManager {
 
 			folder.mkdirs();
 			exe.createNewFile();
-			byte dataBuffer[] = new byte[1024];
+			byte dataBuffer[] = new byte[1024*1000];
 			int bytesRead;
 			FileOutputStream fileOutputStream = new FileOutputStream(exe.getAbsoluteFile());
-			while ((bytesRead = pis.read(dataBuffer, 0, 1024)) != -1) {
+			int chunks =0;
+			while ((bytesRead = pis.read(dataBuffer, 0, dataBuffer.length)) != -1) {
 				fileOutputStream.write(dataBuffer, 0, bytesRead);
+				//psudoSplash.onUpdate((int) (chunks++)+" Kb  " +filename , null);
+
 			}
 			fileOutputStream.close();
 			pis.close();
 			System.out.println("Finished downloading " + filename);
-			System.out.println("Download percent " + (int) (1 * 100));
+			psudoSplash.onUpdate((int) (1 * 100)+" %  " +filename , null);
 		} else {
 			System.out.println("Not downloading, it existst " + filename);
 		}
@@ -968,6 +981,9 @@ public class DownloadManager {
 
 	public static void setApproval(IApprovalForDownload approval) {
 		DownloadManager.approval = approval;
+	}
+	public static void addLogListener(GitLogProgressMonitor psudoSplash) {
+		DownloadManager.psudoSplash = psudoSplash;
 	}
 
 }

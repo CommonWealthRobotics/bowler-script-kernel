@@ -99,20 +99,24 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	public File getFile() {
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
 		File file = new File(getParameter().getStrValue());
-		String parentIncoming = file.getParentFile().getAbsolutePath();
+		File parentFileIncoming = file.getParentFile();
 		File parentFile = new File(loc.getStrValue()).getParentFile();
 		String source = parentFile.getAbsolutePath();
-		if (!parentIncoming.toLowerCase().contentEquals(source.toLowerCase()) && file.exists()) {
-			File copied;
-			try {
-				copied = copyFileToNewDirectory(file,parentFile,getName());
-				file= copied;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if (parentFileIncoming != null) {
+			String parentIncoming = parentFileIncoming.getAbsolutePath();
+
+			if (!parentIncoming.toLowerCase().contentEquals(source.toLowerCase()) && file.exists()) {
+				File copied;
+				try {
+					copied = copyFileToNewDirectory(file, parentFile, getName());
+					file = copied;
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
-		file = new File(source+DownloadManager.delim()+file.getName());
+		file = new File(source + DownloadManager.delim() + file.getName());
 		getParameter().setStrValue(file.getAbsolutePath());
 		return file;
 	}
