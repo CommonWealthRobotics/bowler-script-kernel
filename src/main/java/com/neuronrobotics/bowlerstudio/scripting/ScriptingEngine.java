@@ -64,6 +64,7 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -173,6 +174,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// static IssueReportingExceptionHandler exp = new
 	// IssueReportingExceptionHandler();
 	static HashMap<Git, GitTimeoutThread> gitOpenTimeout = new HashMap<>();
+
+	private static String delim;
+
+	private static String appName="BowlerLauncher";
 	static {
 
 		PasswordManager.hasNetwork();
@@ -552,23 +557,59 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static File getWorkspace() {
 		if (workspace == null) {
-			String relative = FileSystemView.getFileSystemView().getDefaultDirectory().getPath();
-			// https://github.com/CommonWealthRobotics/BowlerStudio/issues/378
-			if (OSUtil.isOSX() || OSUtil.isLinux())
-				if (!relative.endsWith("Documents")) {
-					relative = relative + "/Documents";
-				}
-			if (OSUtil.isWindows()) {
-				if (!relative.endsWith("Documents")) {
-					relative = relative + "\\Documents";
-				}
-			}
-
-			File file = new File(relative + "/bowler-workspace/");
+			File relative = getWorkingDirectory();
+			File file = new File(relative.getAbsolutePath() + delim+ "bowler-workspace"+delim);
 			file.mkdirs();
 			setWorkspace(file);
 		}
 		return workspace;
+	}
+    public static void createSymlinkInDocuments(File appDataDir) throws IOException {
+        String userHome = System.getProperty("user.home");
+        Path documentsDir = Paths.get(userHome, "Documents");
+        Path symlinkPath = documentsDir.resolve(appDataDir.getName());
+        
+        // Delete existing symlink if it exists
+        if (Files.exists(symlinkPath)) {
+            Files.delete(symlinkPath);
+        }
+        
+        // Create the symlink
+        Files.createSymbolicLink(symlinkPath, appDataDir.toPath());
+        System.out.println("Symlink created: " + symlinkPath);
+    }
+	public static File getWorkingDirectory() {
+		String relative = Paths.get(System.getProperty("user.home"), "Documents").toString();
+		if(OSUtil.isOSX()) {
+			File appDataDir = new File(System.getProperty("user.home") + "/Library/Application Support/" + appName);
+	        
+	        if (!appDataDir.exists()) {
+	            if (!appDataDir.mkdirs()) {
+	                throw new RuntimeException("Failed to create app data directory");
+	            }
+	        }
+	        relative=appDataDir.getAbsolutePath();
+	        try {
+				createSymlinkInDocuments(appDataDir);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		delim = "/";
+		if (OSUtil.isLinux())
+			if (!relative.endsWith("Documents")) {
+				relative = relative+ delim+ "Documents";
+			}
+		if (OSUtil.isWindows()) {
+			delim="\\";
+			if (!relative.endsWith("Documents")) {
+				relative = relative +delim+ "Documents";
+			}
+		}
+		File file = new File(relative + delim);
+		file.mkdirs();
+		return file;
 	}
 
 	public static String getShellType(String name) {
@@ -2450,6 +2491,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		contents += filepattern;
 		pushCodeToGit(url, null, ".gitignore", contents, "Adding ignore for " + filepattern);
+	}
+
+	public static String getAppName() {
+		return appName;
+	}
+
+	public static void setAppName(String appName) {
+		ScriptingEngine.appName = appName;
 	}
 
 }
