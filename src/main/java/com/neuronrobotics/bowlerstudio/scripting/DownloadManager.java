@@ -336,7 +336,10 @@ public class DownloadManager {
 						String baseURL = vm.get("url").toString();
 						String type = vm.get("type").toString();
 						String name = vm.get("name").toString();
-						String ospath = vm.get("ospath").toString();
+						String ospath =null;
+						try {
+							ospath=vm.get("ospath").toString();
+						}catch(Throwable t) {}
 						String exeInZip = vm.get(executable).toString();
 						String configexe = vm.get("configExecutable").toString();
 						jvmURL = baseURL + name + "." + type;
