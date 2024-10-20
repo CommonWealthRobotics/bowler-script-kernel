@@ -571,7 +571,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
         
         // Delete existing symlink if it exists
         if (Files.exists(symlinkPath)) {
-            Files.delete(symlinkPath);
+            return;
         }
         
         // Create the symlink

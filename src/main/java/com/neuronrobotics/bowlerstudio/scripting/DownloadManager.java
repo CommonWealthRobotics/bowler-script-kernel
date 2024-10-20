@@ -73,6 +73,20 @@ public class DownloadManager {
 	private static String bindir = System.getProperty("user.home") + delim()+"bin"+delim()+"BowlerStudioInstall"+delim();
 	private static int ev = 0;
 	private static String cmd = "";
+	private static IDownloadManagerEvents downloadEvents = new IDownloadManagerEvents() {
+		
+		@Override
+		public void startDownload() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		@Override
+		public void finishDownload() {
+			// TODO Auto-generated method stub
+			
+		}
+	};
 	public static String sanitizeString(String s) {
 		if(s.contains(" "))
 			s=s.replace(' ', '_');
@@ -631,7 +645,7 @@ public class DownloadManager {
 		}
 
 		ExtractOperationResult result;
-
+		downloadEvents.startDownload();
 		try (FileOutputStream fos = new FileOutputStream(outputFile)) {
 			result = inArchive.extractSlow(index, new ISequentialOutStream() {
 				public int write(byte[] data) throws SevenZipException {
@@ -645,7 +659,7 @@ public class DownloadManager {
 				}
 			});
 		}
-
+		downloadEvents.finishDownload();
 		if (result == ExtractOperationResult.OK) {
 			System.out.println("Extracted: " + path);
 		} else {
@@ -747,6 +761,7 @@ public class DownloadManager {
 			XZCompressorInputStream xzIn = new XZCompressorInputStream(fis);
 			TarArchiveInputStream tarIn = new TarArchiveInputStream(xzIn);
 			TarArchiveEntry entry;
+			downloadEvents.startDownload();
 			while ((entry = tarIn.getNextEntry()) != null) {
 				Path outPath = outDir.resolve(entry.getName());
 
@@ -786,9 +801,12 @@ public class DownloadManager {
 				}
 			}
 		}catch(Throwable ex) {
+			downloadEvents.finishDownload();
 			ex.printStackTrace();
+			throw ex;
 			//new File(inputFile).delete();
 		}
+		downloadEvents.finishDownload();
 	}
 
 	public static void untar(File tarFile, String dir) throws Exception {
@@ -917,7 +935,7 @@ public class DownloadManager {
 				pis.close();
 				throw new RuntimeException("No Application insalled");
 			}
-
+			downloadEvents.startDownload();
 			folder.mkdirs();
 			exe.createNewFile();
 			byte dataBuffer[] = new byte[1024*1000];
@@ -933,6 +951,7 @@ public class DownloadManager {
 			pis.close();
 			System.out.println("Finished downloading " + filename);
 			psudoSplash.onUpdate((int) (1 * 100)+" %  " +filename , null);
+			downloadEvents.finishDownload();
 		} else {
 			System.out.println("Not downloading, it existst " + filename);
 		}
@@ -984,6 +1003,13 @@ public class DownloadManager {
 	}
 	public static void addLogListener(GitLogProgressMonitor psudoSplash) {
 		DownloadManager.psudoSplash = psudoSplash;
+	}
+	public static IDownloadManagerEvents getDownloadEvents() {
+		return downloadEvents;
+	}
+	public static void setDownloadEvents(IDownloadManagerEvents de) {
+		if(downloadEvents!=null)
+			downloadEvents = de;
 	}
 
 }
