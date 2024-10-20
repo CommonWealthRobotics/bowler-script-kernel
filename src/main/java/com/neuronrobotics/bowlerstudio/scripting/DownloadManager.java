@@ -349,7 +349,9 @@ public class DownloadManager {
 						File dest = new File(bindir + targetdir);
 						String cmd = bindir + targetdir + delim() + exeInZip;
 						if(ospath!=null) {
-							cmd=ospath+delim()+exeInZip;
+							String string = ospath+delim()+exeInZip;
+							if(new File(string).exists())
+								cmd=string;
 						}
 						if (!new File(cmd).exists()) {
 							if(exeType.toLowerCase().contentEquals("freecad")) {
