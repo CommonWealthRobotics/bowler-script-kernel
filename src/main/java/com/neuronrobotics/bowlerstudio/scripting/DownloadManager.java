@@ -108,8 +108,14 @@ public class DownloadManager {
 			System.out.println("Command line mode, assuming yes to downloading \n" + name + " \nfrom \n" + url);
 			return true;
 		}
+
+		@Override
+		public void onInstallFail(String url) {
+			System.out.println("Plugin needs to be installed from "+url);
+		}
 	};
 	private static GitLogProgressMonitor psudoSplash;
+	private static String jvmURL;
 
 	public static Thread run(IExternalEditor editor, File dir, PrintStream out, List<String> finalCommand) {
 		return run(new HashMap<String, String>(), editor, dir, out, finalCommand);
@@ -301,10 +307,13 @@ public class DownloadManager {
 		return getExecutable(exeType, editor, executable);
 	}
 	private static void retryLoop(String exeType, IExternalEditor editor, String executable) {
-		
-		for(int i=0;i<3&&!getExecutable(exeType, editor, executable).exists();i++) {
+		for(int i=0;i<3;i++) {
+			if(getExecutable(exeType, editor, executable).exists()) {
+				return;
+			}
 			new RuntimeException("Download or extraction failed, retrying").printStackTrace();
 		}
+		approval.onInstallFail(jvmURL);
 	}
 
 	private static File getExecutable(String exeType, IExternalEditor editor, String executable) {
@@ -330,7 +339,7 @@ public class DownloadManager {
 						String ospath = vm.get("ospath").toString();
 						String exeInZip = vm.get(executable).toString();
 						String configexe = vm.get("configExecutable").toString();
-						String jvmURL = baseURL + name + "." + type;
+						jvmURL = baseURL + name + "." + type;
 						Map<String, String> environment;
 						Object o = vm.get("environment");
 						if (o != null) {
