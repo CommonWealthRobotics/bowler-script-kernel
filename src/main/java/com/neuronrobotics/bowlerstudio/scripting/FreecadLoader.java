@@ -263,7 +263,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		return sb.toString();
 	}
 	public static void update(Map<String, Object> vm) throws MalformedURLException, IOException {
-		String url= "https://api.github.com/repos/FreeCAD/FreeCAD-Bundle/releases/tags/weekly-builds";
+		String url= "https://api.github.com/repos/FreeCAD/FreeCAD-Bundle/releases/tags/1.0rc2";
 		InputStream is = new URL(url).openStream();
 		String type = vm.get("type").toString();
 

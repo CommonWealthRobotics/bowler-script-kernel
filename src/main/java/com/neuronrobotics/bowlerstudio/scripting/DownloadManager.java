@@ -290,17 +290,21 @@ public class DownloadManager {
 	}
 
 	public static File getRunExecutable(String exeType, IExternalEditor editor) {
-		while(!getExecutable(exeType, editor, "executable").exists()) {
-			new RuntimeException("Download or extraction failed, retrying").printStackTrace();
-		}
-		return getExecutable(exeType, editor, "executable");
+		String executable = "executable";
+		retryLoop(exeType, editor, executable);
+		return getExecutable(exeType, editor, executable);
 	}
 
 	public static File getConfigExecutable(String exeType, IExternalEditor editor) {
-		while(!getExecutable(exeType, editor, "configExecutable").exists()) {
+		String executable = "configExecutable";
+		retryLoop(exeType, editor, executable);
+		return getExecutable(exeType, editor, executable);
+	}
+	private static void retryLoop(String exeType, IExternalEditor editor, String executable) {
+		
+		for(int i=0;i<3&&!getExecutable(exeType, editor, executable).exists();i++) {
 			new RuntimeException("Download or extraction failed, retrying").printStackTrace();
 		}
-		return getExecutable(exeType, editor, "configExecutable");
 	}
 
 	private static File getExecutable(String exeType, IExternalEditor editor, String executable) {
@@ -323,6 +327,7 @@ public class DownloadManager {
 						String baseURL = vm.get("url").toString();
 						String type = vm.get("type").toString();
 						String name = vm.get("name").toString();
+						String ospath = vm.get("ospath").toString();
 						String exeInZip = vm.get(executable).toString();
 						String configexe = vm.get("configExecutable").toString();
 						String jvmURL = baseURL + name + "." + type;
@@ -333,7 +338,10 @@ public class DownloadManager {
 						} else
 							environment = new HashMap<>();
 						File dest = new File(bindir + targetdir);
-						String cmd = bindir + targetdir + "/" + exeInZip;
+						String cmd = bindir + targetdir + delim() + exeInZip;
+						if(ospath!=null) {
+							cmd=ospath+delim()+exeInZip;
+						}
 						if (!new File(cmd).exists()) {
 							if(exeType.toLowerCase().contentEquals("freecad")) {
 								FreecadLoader.update(vm);
@@ -803,8 +811,8 @@ public class DownloadManager {
 		}catch(Throwable ex) {
 			downloadEvents.finishDownload();
 			ex.printStackTrace();
+			new File(inputFile).delete();
 			throw ex;
-			//new File(inputFile).delete();
 		}
 		downloadEvents.finishDownload();
 	}
