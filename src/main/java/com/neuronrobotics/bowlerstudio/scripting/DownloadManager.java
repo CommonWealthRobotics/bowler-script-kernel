@@ -930,6 +930,7 @@ public class DownloadManager {
 
 			if (approval.get(downloadName, downloadJsonURL)) {
 				System.out.println("Start Downloading " + filename);
+				System.out.println("From "+downloadJsonURL);
 
 			} else {
 				pis.close();
