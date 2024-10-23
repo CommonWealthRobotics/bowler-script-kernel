@@ -146,7 +146,7 @@ public class CaDoodleFile {
 			return null;
 		if (isRegenerating() || isOperationRunning()) {
 			System.out.println("Opperation is running, ignoring regen");
-			return opperationRunner;
+			return null;
 		}
 		int endIndex = getCurrentIndex();
 		int size = opperations.size();
