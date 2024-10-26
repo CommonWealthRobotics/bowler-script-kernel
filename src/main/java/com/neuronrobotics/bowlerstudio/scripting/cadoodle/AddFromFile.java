@@ -18,6 +18,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
@@ -32,6 +33,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	public AddFromFile set(File source) {
 		String absolutePath = toLocal(source).getAbsolutePath();
 		getParameter(absolutePath).setStrValue(absolutePath);
+		CSGDatabase.saveDatabase();
 		return this;
 	}
 
@@ -53,7 +55,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			List<CSG> flattenedCSGs = ScriptingEngine.flaten(getFile(), CSG.class, null);
-			System.out.println("Initial Loading " + parameter.getStrValue());
+			System.out.println("Initial Loading " + getStrValue());
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
 				CSG processedCSG = processGiven(csg, i,parameter, getOrderedName());
@@ -120,7 +122,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		return file;
 	}
 	public File getFile() {
-		return toLocal(new File(parameter.getStrValue()));
+		return new File(getStrValue());
+	}
+
+	private String getStrValue() {
+		
+		return getParameter("UnKnown").getStrValue();
 	}
 
 	private CSG processGiven(CSG csg, int i, StringParameter parameter, String name) {
