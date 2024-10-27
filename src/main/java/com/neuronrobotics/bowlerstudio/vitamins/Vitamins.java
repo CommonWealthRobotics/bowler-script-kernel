@@ -177,10 +177,10 @@ public class Vitamins {
 
 	private static CSG get(String type, String id, int depthGauge) throws Exception {
 		String key = type + id;
+		Map<String, Object> script = getMeta(type);
 
 		try {
 			CSG newVitamin = null;
-			Map<String, Object> script = getMeta(type);
 			StringParameter size = new StringParameter(type + " Default", id, Vitamins.listVitaminSizes(type));
 			size.setStrValue(id);
 			Object file = script.get("scriptGit");
@@ -217,6 +217,7 @@ public class Vitamins {
 		} catch (Exception e) {
 			e.printStackTrace();
 			gitRpoDatabase = defaultgitRpoDatabase;
+			ScriptingEngine.deleteRepo(script.get("scriptGit").toString());
 			clear();
 			if (depthGauge < 2) {
 				return get(type, id, depthGauge + 1);
