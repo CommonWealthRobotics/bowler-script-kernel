@@ -17,6 +17,7 @@ import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
+import javafx.scene.paint.Color;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
@@ -223,7 +224,7 @@ public class Vitamins {
 			if (depthGauge < 2) {
 				return get(type, id, depthGauge + 1);
 			} else {
-				return new Cube(20).toCSG();
+				return new Cube(20).toCSG().setColor(Color.RED);
 			}
 		}
 	}
