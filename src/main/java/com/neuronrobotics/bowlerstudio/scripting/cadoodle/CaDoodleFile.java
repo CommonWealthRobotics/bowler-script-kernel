@@ -149,7 +149,7 @@ public class CaDoodleFile {
 			return null;
 		}
 		int endIndex = getCurrentIndex();
-		int size = opperations.size();
+		double size = opperations.size();
 		if (endIndex != size) {
 //			new Exception("Regenerationg from a position back in time " + endIndex + " but have " + size)
 //					.printStackTrace();
@@ -170,6 +170,7 @@ public class CaDoodleFile {
 
 			for (; getCurrentIndex() < size;) {
 				setCurrentIndex(getCurrentIndex() + 1);
+				setPercentInitialized(((double)getCurrentIndex())/size);
 				// System.out.println("Regenerating "+currentIndex);
 				ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
 				List<CSG> process = op.process(getPreviouState());
