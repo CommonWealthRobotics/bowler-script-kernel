@@ -227,6 +227,11 @@ public class Vitamins {
 		return script.get("scriptGit").toString();
 
 	}
+	public static void loadAllScriptFiles() {
+		for(String type:listVitaminTypes()) {
+			getScriptFile(type);
+		}
+	}
 	public static File getScriptFile(String type) {
 		Map<String, Object> script = getMeta(type);
 		
