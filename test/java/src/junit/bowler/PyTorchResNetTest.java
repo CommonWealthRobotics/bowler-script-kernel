@@ -20,13 +20,13 @@ public class PyTorchResNetTest {
 
 //	@Test
 //	public void testResNet() throws Exception {
-//		System.err.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+//		com.neuronrobotics.sdk.common.Log.error(Thread.currentThread().getStackTrace()[1].getMethodName());
 //
 //	}
 //
 //	@Test
 //	public void testretinaface() throws Exception {
-//		System.err.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+//		com.neuronrobotics.sdk.common.Log.error(Thread.currentThread().getStackTrace()[1].getMethodName());
 //
 //		BufferedImage bimg = ImageIO.read(new URL(imageUrl));
 //
@@ -43,7 +43,7 @@ public class PyTorchResNetTest {
 //
 //	@Test
 //	public void testUltraNet() throws Exception {
-//		System.err.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+//		com.neuronrobotics.sdk.common.Log.error(Thread.currentThread().getStackTrace()[1].getMethodName());
 //
 //		BufferedImage bimg = ImageIO.read(new URL(imageUrl));
 //
@@ -82,12 +82,12 @@ public class PyTorchResNetTest {
 
 		Path imagePath = outputDir.resolve(type + ".png").toAbsolutePath();
 		img.save(Files.newOutputStream(imagePath), "png");
-		System.out.println("Face detection result image has been saved in: {} " + imagePath);
+		com.neuronrobotics.sdk.common.Log.error("Face detection result image has been saved in: {} " + imagePath);
 	}
 //
 	@Test
 	public void testYolo() throws Exception {
-		System.err.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		com.neuronrobotics.sdk.common.Log.error(Thread.currentThread().getStackTrace()[1].getMethodName());
 
 		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5);
 		for (int i = 0; i < 3; i++) {
@@ -101,7 +101,7 @@ public class PyTorchResNetTest {
 //
 //	@Test
 //	public void testFeatures() throws Exception {
-//		System.err.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+//		com.neuronrobotics.sdk.common.Log.error(Thread.currentThread().getStackTrace()[1].getMethodName());
 //		BufferedImage img = ImageIO.read(new URL(imageUrl));
 //		BufferedImage img2 = ImageIO.read(new URL(image2URL));
 //		BufferedImage img3 = ImageIO.read(new URL(image3URL));
@@ -112,12 +112,12 @@ public class PyTorchResNetTest {
 //		float[] back3 = predictor.predict(ImageFactory.getInstance().fromImage(img3));
 //		float[] back4 = predictor.predict(ImageFactory.getInstance().fromImage(ImageIO.read(new URL(notme))));
 //
-//		System.out.println(" Comprair 1 to 2 " + PredictorFactory.calculSimilarFaceFeature(back, back2));
-//		System.out.println(" Comprair 1 to 3 " + PredictorFactory.calculSimilarFaceFeature(back, back3));
-//		System.out.println(" Comprair 2 to 3 " + PredictorFactory.calculSimilarFaceFeature(back2, back3));
-//		System.out.println(" Comprair 1 to 4 " + PredictorFactory.calculSimilarFaceFeature(back, back4));
+//		com.neuronrobotics.sdk.common.Log.error(" Comprair 1 to 2 " + PredictorFactory.calculSimilarFaceFeature(back, back2));
+//		com.neuronrobotics.sdk.common.Log.error(" Comprair 1 to 3 " + PredictorFactory.calculSimilarFaceFeature(back, back3));
+//		com.neuronrobotics.sdk.common.Log.error(" Comprair 2 to 3 " + PredictorFactory.calculSimilarFaceFeature(back2, back3));
+//		com.neuronrobotics.sdk.common.Log.error(" Comprair 1 to 4 " + PredictorFactory.calculSimilarFaceFeature(back, back4));
 //
-//		System.out.println(Arrays.toString(back));
+//		com.neuronrobotics.sdk.common.Log.error(Arrays.toString(back));
 //
 //	}
 

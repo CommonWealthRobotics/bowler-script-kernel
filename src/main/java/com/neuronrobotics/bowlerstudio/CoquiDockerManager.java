@@ -81,7 +81,7 @@ public class CoquiDockerManager implements ITTSEngine {
 		}
 		managers.clear();
 		managers.put(voice, this);
-		System.out.println("Coqui Voice " + voice);
+		com.neuronrobotics.sdk.common.Log.error("Coqui Voice " + voice);
 		String[] parts = voice.split("/");
 		String voiceSlug = "-" + parts[parts.length - 1];
 		ScriptingEngine.cloneRepo("https://github.com/Halloween2020TheChild/CoquiDocker.git", null);
@@ -107,13 +107,13 @@ public class CoquiDockerManager implements ITTSEngine {
 		for (Container c : allCOntainers) {
 			if (forMe != null)
 				continue;
-			System.out.println("Container: " + c);
+			com.neuronrobotics.sdk.common.Log.error("Container: " + c);
 			String[] names = c.getNames();
 			for (String n : names) {
 
 				String cs = "/" + imageName + voiceSlug;
 
-				System.out.println("Checking " + n + " to " + cs);
+				com.neuronrobotics.sdk.common.Log.error("Checking " + n + " to " + cs);
 				boolean PortMatch=false;
 				ContainerPort[] conPorts = c.getPorts();
 				for(ContainerPort cp:conPorts) {
@@ -143,11 +143,11 @@ public class CoquiDockerManager implements ITTSEngine {
 						@Override
 						public void onNext(BuildResponseItem item) {
 							// Handle build output (optional)
-							System.out.println(item.getStream());
+							com.neuronrobotics.sdk.common.Log.error(item.getStream());
 							super.onNext(item);
 						}
 					}).awaitImageId();
-			System.out.println("Docker image built successfully.");
+			com.neuronrobotics.sdk.common.Log.error("Docker image built successfully.");
 			try {
 				ExposedPort port = ExposedPort.tcp(hostPort);
 				Ports portBindings = new Ports();
@@ -161,7 +161,7 @@ public class CoquiDockerManager implements ITTSEngine {
 					@Override
 					public void onNext(WaitResponse item) {
 						// Handle build output (optional)
-						System.out.println(item.toString());
+						com.neuronrobotics.sdk.common.Log.error(item.toString());
 						super.onNext(item);
 					}
 				}).awaitCompletion();
@@ -170,7 +170,7 @@ public class CoquiDockerManager implements ITTSEngine {
 				    @Override
 				    public void onNext(Frame item) {
 				        String string = item.toString();
-						System.out.println(string);
+						com.neuronrobotics.sdk.common.Log.error(string);
 						if(string.contains("Press CTRL+C to quit")) {
 							started=true;
 						}
@@ -187,7 +187,7 @@ public class CoquiDockerManager implements ITTSEngine {
 		}
 		while(!started) {
 			Thread.sleep(1000);
-			System.out.println("Waiting for server to start");
+			com.neuronrobotics.sdk.common.Log.error("Waiting for server to start");
 		}
 
 

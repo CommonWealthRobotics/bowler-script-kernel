@@ -25,20 +25,20 @@ public class JsonTester {
 			ScriptingEngine.setupAnyonmous();
 			//ScriptingEngine.setAutoupdate(true);
 		}catch (Exception ex){
-			System.out.println("User not logged in, test can not run");
+			com.neuronrobotics.sdk.common.Log.error("User not logged in, test can not run");
 		}
 		File f = ScriptingEngine
 				.fileFromGit(
 						"https://github.com/madhephaestus/BowlerStudioExampleRobots.git",// git repo, change this if you fork this demo
 					"exampleRobots.json"// File from within the Git repo
 				);
-		System.out.println("File: "+f);
+		com.neuronrobotics.sdk.common.Log.error("File: "+f);
 		HashMap<String,HashMap<String,Object>> map = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
 																	.inlineFileScriptRun(f, null);
 		for(String menuTitle:map.keySet()){
 			HashMap<String,Object> script = map.get(menuTitle);
-			System.out.println((String)script.get("scriptGit"));
-			System.out.println((String)script.get("scriptFile"));						;
+			com.neuronrobotics.sdk.common.Log.error((String)script.get("scriptGit"));
+			com.neuronrobotics.sdk.common.Log.error((String)script.get("scriptFile"));						;
 			
 		}
 		*/

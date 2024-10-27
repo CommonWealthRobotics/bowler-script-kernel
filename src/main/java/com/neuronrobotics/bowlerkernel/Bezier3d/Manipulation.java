@@ -135,7 +135,7 @@ public class Manipulation {
 //						m.getMesh().setMaterial(color);
 //					break;
 				default:
-					// System.out.println("UNKNOWN! Mouse event "+name);
+					// com.neuronrobotics.sdk.common.Log.error("UNKNOWN! Mouse event "+name);
 					break;
 				}
 
@@ -175,12 +175,12 @@ public class Manipulation {
 				double delty = (starty - event.getScreenY());
 				double x = deltx/  getDepthNow() ;
 				double y = delty/  getDepthNow() ;
-				//System.out.println("Moved "+x+" "+y);
+				//com.neuronrobotics.sdk.common.Log.error("Moved "+x+" "+y);
 				if(Double.isFinite(y) && Double.isFinite(x)) {			
 					TransformNR trans = new TransformNR(x, y, 0, new RotationNR());
 					performMove(trans);
 				}else {
-					System.out.println("ERROR?");
+					com.neuronrobotics.sdk.common.Log.error("ERROR?");
 				}
 			});
 			event.consume();
@@ -241,7 +241,7 @@ public class Manipulation {
 	
 			global.setRotation(new RotationNR());
 			setGlobal(global);
-			//System.out.println(" drag "+global.getX()+" , "+global.getY()+" ,"+global.getZ());
+			//com.neuronrobotics.sdk.common.Log.error(" drag "+global.getX()+" , "+global.getY()+" ,"+global.getZ());
 
 		}catch(Throwable t) {
 			t.printStackTrace();
@@ -287,7 +287,7 @@ public class Manipulation {
 		TransformNR wp = new TransformNR( getFrameOfReference() .getRotation());
 		inLocal=wp.times(inLocal);
 		inLocal.setRotation(new RotationNR());
-		//System.out.println("Setting in reference frame:"+inLocal.toSimpleString());
+		//com.neuronrobotics.sdk.common.Log.error("Setting in reference frame:"+inLocal.toSimpleString());
 		setGlobal(inLocal);
 		for (Runnable R : eventListeners) {
 			R.run();

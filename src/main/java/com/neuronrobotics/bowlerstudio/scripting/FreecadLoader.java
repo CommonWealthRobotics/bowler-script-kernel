@@ -305,7 +305,7 @@ public class FreecadLoader implements IScriptingLanguage {
 						continue;
 				}
 				String name = assetName.replace("."+type, "");
-				System.out.println("Updating Freecad assets to "+name);
+				com.neuronrobotics.sdk.common.Log.error("Updating Freecad assets to "+name);
 				vm.put("name",name);
 				if(isMac())
 					continue;

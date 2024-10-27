@@ -96,7 +96,7 @@ public abstract class ControllerEnvironment {
 		File test = new File(absolutePathToDirectory);
 		if (!test.isDirectory())
 			absolutePathToDirectory = test.getParentFile().getAbsolutePath();
-		// System.out.println("Setting net.java.games.input.librarypath :
+		// com.neuronrobotics.sdk.common.Log.error("Setting net.java.games.input.librarypath :
 		// "+absolutePathToDirectory);
 		System.setProperty("net.java.games.input.librarypath", absolutePathToDirectory);
 	}

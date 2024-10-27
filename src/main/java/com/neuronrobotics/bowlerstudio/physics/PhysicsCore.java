@@ -170,7 +170,7 @@ public class PhysicsCore {
             if (took < msTime) {
               ThreadUtil.wait((int) (msTime - took));
             } else {
-              System.out.println("Real time physics broken: " + took);
+              com.neuronrobotics.sdk.common.Log.error("Real time physics broken: " + took);
             }
           } catch (Exception E) {
             E.printStackTrace();
@@ -201,7 +201,7 @@ public class PhysicsCore {
 
     getDynamicsWorld().stepSimulation(timeStep, getSimulationSubSteps());
     if ((((float) (System.currentTimeMillis() - startTime)) / 1000.0f) > timeStep) {
-      // System.out.println(" Compute took too long "+timeStep);
+      // com.neuronrobotics.sdk.common.Log.error(" Compute took too long "+timeStep);
     }
     for (IPhysicsManager o : getPhysicsObjects()) {
       o.update(timeStep);

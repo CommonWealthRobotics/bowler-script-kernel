@@ -67,7 +67,7 @@ public class Vitamins {
 	private static ConcurrentHashMap<String, Runnable> changeListeners = new ConcurrentHashMap<String, Runnable>();
 
 	public static void clear() {
-		System.out.println("Vitamins Database Cleraing, reloading files");
+		com.neuronrobotics.sdk.common.Log.error("Vitamins Database Cleraing, reloading files");
 		for (String keys : databaseSet.keySet()) {
 			ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> data = databaseSet.get(keys);
 			for (String key2 : data.keySet()) {
@@ -143,7 +143,7 @@ public class Vitamins {
 		}
 
 		CSG vitToGet = fileLastLoaded.get(type + id);
-		// System.err.println("Loading "+vitToGet);
+		// com.neuronrobotics.sdk.common.Log.error("Loading "+vitToGet);
 		return vitToGet;
 	}
 
@@ -208,7 +208,7 @@ public class Vitamins {
 
 					return newVitamin;
 				} catch (Exception ex) {
-					// System.err.println(type +"-"+ id+" Failed");
+					// com.neuronrobotics.sdk.common.Log.error(type +"-"+ id+" Failed");
 					// ex.printStackTrace();
 					return newVitamin;
 				}
@@ -317,11 +317,11 @@ public class Vitamins {
 					"Making changes to " + type + " by " + PasswordManager.getUsername()
 							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
 																																		// message
-			// System.err.println(jsonString);
-			System.out.println("Database saved " + getVitaminFile(type, null, false).getAbsolutePath());
+			// com.neuronrobotics.sdk.common.Log.error(jsonString);
+			com.neuronrobotics.sdk.common.Log.error("Database saved " + getVitaminFile(type, null, false).getAbsolutePath());
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
-			System.out.println("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
-			System.out.println(
+			com.neuronrobotics.sdk.common.Log.error("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
+			com.neuronrobotics.sdk.common.Log.error(
 					"You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
 			throw ex;
 		}
@@ -335,7 +335,7 @@ public class Vitamins {
 		try {
 			saveDatabase(type);
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
-			System.err.println("Forked repo is missing!");
+			com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			GHRepository newRepo = repo.fork();
 			Thread.sleep(6000);
@@ -367,7 +367,7 @@ public class Vitamins {
 			String head = PasswordManager.getUsername() + ":master";
 			List<GHPullRequest> asList = repo.queryPullRequests().state(GHIssueState.OPEN).head(head).list().asList();
 			if (asList.size() == 0) {
-				System.err.println("Creating PR for " + head);
+				com.neuronrobotics.sdk.common.Log.error("Creating PR for " + head);
 				GHPullRequest request = repo.createPullRequest("User Added vitamins to " + type, head, "master",
 						"## User added vitamins", true, true);
 				try {
@@ -392,7 +392,7 @@ public class Vitamins {
 			if (request.getMergeable()) {
 				request.merge("Auto Merging Master");
 				reLoadDatabaseFromFiles();
-				System.out.println("Merged Hardware-Dimensions madhephaestus:master into "
+				com.neuronrobotics.sdk.common.Log.error("Merged Hardware-Dimensions madhephaestus:master into "
 						+ PasswordManager.getUsername() + ":master");
 			} else {
 				try {
@@ -466,7 +466,7 @@ public class Vitamins {
 				if (changeListeners.get(type) == null) {
 					changeListeners.put(type, () -> {
 						// If the file changes, clear the database and load the new data
-						System.out.println("Re-loading " + type);
+						com.neuronrobotics.sdk.common.Log.error("Re-loading " + type);
 						databaseSet.put(type, null);
 						new RuntimeException().printStackTrace();
 					});
@@ -482,7 +482,7 @@ public class Vitamins {
 
 					jsonString = IOUtils.toString(inPut);
 					inPut.close();
-					System.out.println("JSON loading Loading " + type + " " + jsonString.length());
+					com.neuronrobotics.sdk.common.Log.error("JSON loading Loading " + type + " " + jsonString.length());
 					// perfoem the GSON parse
 					database = gson.fromJson(jsonString, TT_mapStringString);
 					if (database == null)
@@ -628,7 +628,7 @@ public class Vitamins {
 						GHRepository repo = github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions");
 						if (repo != null) {
 							String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
-							// System.out.println("Using my version of Viamins: "+myAssets);
+							// com.neuronrobotics.sdk.common.Log.error("Using my version of Viamins: "+myAssets);
 							setGitRepoDatabase(myAssets);
 						} else {
 							throw new org.kohsuke.github.GHFileNotFoundException();

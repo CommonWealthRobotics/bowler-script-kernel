@@ -21,7 +21,7 @@ public class TTSTest {
 			@Override
 			public void update(double percentage, AudioStatus status) {
 				// TODO Auto-generated method stub
-				System.out.println(percentage+" "+status.toString());
+				com.neuronrobotics.sdk.common.Log.error(percentage+" "+status.toString());
 			}
 		};
 		//BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
@@ -34,7 +34,7 @@ public class TTSTest {
 		
 //		for(int i=800;i<(800+CoquiDockerManager.getNummberOfOptions());i++) {
 //			BowlerKernel.speak("Coqui " + i + " text to speech", 200, 0, i, 1.0, 1.0,null);
-//			System.out.println("\n\nVoice finished");
+//			com.neuronrobotics.sdk.common.Log.error("\n\nVoice finished");
 //		}
 	}
 

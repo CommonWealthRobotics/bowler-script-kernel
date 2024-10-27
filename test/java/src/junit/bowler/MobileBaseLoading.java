@@ -25,13 +25,13 @@ public class MobileBaseLoading {
     IMobileBaseUI mobileBaseUI = new IMobileBaseUI() {
       @Override
       public void setAllCSG(Collection<CSG> collection, File file) {
-        System.out.println("Setting CSG's # " +collection.size());
+        com.neuronrobotics.sdk.common.Log.error("Setting CSG's # " +collection.size());
         numCSG=collection.size();
       }
 
       @Override
       public void addCSG(Collection<CSG> collection, File file) {
-        System.out.println("Adding CSG's # " +collection.size());
+        com.neuronrobotics.sdk.common.Log.error("Adding CSG's # " +collection.size());
 
       }
 
@@ -68,10 +68,10 @@ public class MobileBaseLoading {
    // MobileBaseCadManager.get(mobileBase).getUi().
     DeviceManager.addConnection(mobileBase, mobileBase.getScriptingName());
     mobileBaseCadManager.generateCad();
-    System.out.println("Waiting for cad to generate");
+    com.neuronrobotics.sdk.common.Log.error("Waiting for cad to generate");
     ThreadUtil.wait(1000);
     while (MobileBaseCadManager.get(mobileBase).getProcesIndictor().get() < 1 ) {
-      //System.out.println("Waiting: " + MobileBaseCadManager.get(mobileBase).getProcesIndictor().get());
+      //com.neuronrobotics.sdk.common.Log.error("Waiting: " + MobileBaseCadManager.get(mobileBase).getProcesIndictor().get());
       ThreadUtil.wait(1000);
     }
     if(numCSG==0)

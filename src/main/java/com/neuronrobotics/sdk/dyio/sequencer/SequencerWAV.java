@@ -30,7 +30,7 @@ public class SequencerWAV {
 
         }
         catch (Exception e) {
-            System.out.println("Problem playing file " + filename+"\r\n");
+            com.neuronrobotics.sdk.common.Log.error("Problem playing file " + filename+"\r\n");
             //e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -139,12 +139,12 @@ public class SequencerWAV {
     	SequencerWAV mp3 = new SequencerWAV("track.mp3");
     	
 		mp3.play();
-		System.out.println("Track length= "+mp3.getTrackLength());
+		com.neuronrobotics.sdk.common.Log.error("Track length= "+mp3.getTrackLength());
 		while(mp3.isPlaying() ){
-			System.out.println("Current "+mp3.getCurrentTime() +" Percent = "+mp3.getPercent());
+			com.neuronrobotics.sdk.common.Log.error("Current "+mp3.getCurrentTime() +" Percent = "+mp3.getPercent());
 			ThreadUtil.wait(100);
 		}
-		System.out.println("Finished "+mp3.getCurrentTime()+" of "+mp3.getTrackLength());
+		com.neuronrobotics.sdk.common.Log.error("Finished "+mp3.getCurrentTime()+" of "+mp3.getTrackLength());
 		System.exit(0);
 		//mediaPlayer.
 

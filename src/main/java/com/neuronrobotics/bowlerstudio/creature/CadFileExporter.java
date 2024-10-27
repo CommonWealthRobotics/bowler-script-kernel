@@ -104,7 +104,7 @@ public class CadFileExporter {
 				try {
 					allCadStl.add(makeStl(nameBase,manufactured));// default to stl
 				}catch(Throwable t) {
-					System.err.println("Failed to generate "+part.getName());
+					com.neuronrobotics.sdk.common.Log.error("Failed to generate "+part.getName());
 					t.printStackTrace();
 				}
 			}else{
@@ -158,7 +158,7 @@ public class CadFileExporter {
 	}
 	private File makeFreecad(String nameBase,List<CSG>  current ) throws IOException{
 		File blend = new File(nameBase + ".FCStd");
-		System.out.println("Writing "+blend.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.error("Writing "+blend.getAbsolutePath());
 		for(CSG tmp:current)
 			FreecadLoader.addCSGToFreeCAD( blend,tmp);
 		return blend;
@@ -168,20 +168,20 @@ public class CadFileExporter {
 		File stl = new File(nameBase + ".stl");
 		
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
-		System.out.println("Writing "+stl.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.error("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
 	private File makeObj(String nameBase,CSG tmp ) throws IOException{
 		File stl = new File(nameBase + ".obj");
 		
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toObjString());
-		System.out.println("Writing "+stl.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.error("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
 	
 	private File makeBlender(String nameBase,List<CSG>  current ) throws IOException{
 		File blend = new File(nameBase + ".blend");
-		System.out.println("Writing "+blend.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.error("Writing "+blend.getAbsolutePath());
 		for(CSG tmp:current)
 			BlenderLoader.toBlenderFile(tmp, blend);
 		return blend;
@@ -212,9 +212,9 @@ public class CadFileExporter {
 
 				}
 
-				System.out.println("Writing " + stl.getAbsolutePath());
+				com.neuronrobotics.sdk.common.Log.error("Writing " + stl.getAbsolutePath());
 			} catch (Throwable t) {
-				System.err.println("ERROR, NO pixelization engine availible for slicing");
+				com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine availible for slicing");
 				t.printStackTrace();
 			}
 		

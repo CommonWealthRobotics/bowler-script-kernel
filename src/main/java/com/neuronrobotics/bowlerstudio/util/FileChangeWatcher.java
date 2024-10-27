@@ -114,7 +114,7 @@ public class FileChangeWatcher {
 		String path = fileToWatch.getAbsolutePath();
 		if (activeListener.get(path) == null) {
 			activeListener.put(path, new FileChangeWatcher(fileToWatch));
-			System.err.println("Adding file to listening " + fileToWatch.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Adding file to listening " + fileToWatch.getAbsolutePath());
 		}
 		return activeListener.get(path);
 	}
@@ -130,14 +130,14 @@ public class FileChangeWatcher {
 	private FileChangeWatcher(File fileToWatch) throws IOException {
 
 		this.setFileToWatch(fileToWatch);
-		//System.err.println("\n\n\n\tWatching "+fileToWatch.getAbsolutePath()+"\n\n\n");
+		//com.neuronrobotics.sdk.common.Log.error("\n\n\n\tWatching "+fileToWatch.getAbsolutePath()+"\n\n\n");
 		this.watcher = FileSystems.getDefault().newWatchService();
 		this.keys = new HashMap<WatchKey, Path>();
 		Path dir = Paths.get(fileToWatch.getParent());
 		if (recursive) {
 			System.out.format("Scanning %s ...\n", dir);
 			registerAll(dir);
-			System.out.println("Done.");
+			com.neuronrobotics.sdk.common.Log.error("Done.");
 		} else {
 			register(dir);
 		}
@@ -149,7 +149,7 @@ public class FileChangeWatcher {
 
 				while (run) {
 					try {
-						//System.err.println("Checking File: " + getFileToWatch().getAbsolutePath());
+						//com.neuronrobotics.sdk.common.Log.error("Checking File: " + getFileToWatch().getAbsolutePath());
 						watch();
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -270,7 +270,7 @@ public class FileChangeWatcher {
 
 		Path dir = keys.get(key);
 		if (dir == null) {
-			System.err.println("WatchKey not recognized!!");
+			com.neuronrobotics.sdk.common.Log.error("WatchKey not recognized!!");
 			return;
 		}
 
@@ -292,7 +292,7 @@ public class FileChangeWatcher {
 				}
 				// print out event
 				// System.out.format("%s: %s\n", event.kind().name(), child);
-				System.err.println("File Changed: " + getFileToWatch().getAbsolutePath());
+				com.neuronrobotics.sdk.common.Log.error("File Changed: " + getFileToWatch().getAbsolutePath());
 				for (int i = 0; i < listeners.size(); i++) {
 
 					listeners.get(i).onFileChange(child.toFile(), event);
@@ -354,7 +354,7 @@ public class FileChangeWatcher {
 		//new Exception("File watcher closed " + fileToWatch.getAbsolutePath()).printStackTrace();
 		this.run = false;
 		try {
-			System.err.println("Closing watcher for "+fileToWatch.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Closing watcher for "+fileToWatch.getAbsolutePath());
 			watcher.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

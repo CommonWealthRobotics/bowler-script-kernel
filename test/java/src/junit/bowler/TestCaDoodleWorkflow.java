@@ -41,7 +41,7 @@ public class TestCaDoodleWorkflow {
 					.setProjectName("A Test Project");
 		
 		String jsonContent = cf.toJson();
-		System.out.println(jsonContent);
+		com.neuronrobotics.sdk.common.Log.error(jsonContent);
 		
 		AddFromScript cube1 = new AddFromScript()
 				.set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
@@ -61,8 +61,8 @@ public class TestCaDoodleWorkflow {
 		String nameTwo = back.get(1).getName();
 		if(nameOne.contentEquals(nameTwo))
 			fail("Names must be unique!");
-		System.out.println("Name one : "+nameOne );
-		System.out.println("Name two : "+nameTwo );
+		com.neuronrobotics.sdk.common.Log.error("Name one : "+nameOne );
+		com.neuronrobotics.sdk.common.Log.error("Name two : "+nameTwo );
 		double distaance =10;
 		MoveCenter move = new MoveCenter()
 				.setLocation(new TransformNR(distaance,0,0))
@@ -77,7 +77,7 @@ public class TestCaDoodleWorkflow {
 		if(back.get(0).getCenterX()!=0)
 			fail("Move misapplied ");
 		jsonContent = cf.toJson();
-		//System.out.println(jsonContent);
+		//com.neuronrobotics.sdk.common.Log.error(jsonContent);
 		cf.save();
 		CaDoodleFile loaded = CaDoodleFile.fromFile(cf.getSelf());
 		if(!MoveCenter.class.isInstance(loaded.getOpperations().get(2))) {
@@ -127,7 +127,7 @@ public class TestCaDoodleWorkflow {
 			fail("THis should be aa group result");
 		}
 		String groupName = back.get(2).getName();
-		System.out.println("Group Name : "+groupName);
+		com.neuronrobotics.sdk.common.Log.error("Group Name : "+groupName);
 		TransformNR height = new TransformNR(0,0,40);
 		TransformNR leftFront = new TransformNR(40,80,0);
 		TransformNR rightRear = new TransformNR(-10,10,0);
@@ -220,7 +220,7 @@ public class TestCaDoodleWorkflow {
 			fail("Load and export mismatch");
 		loaded.setSelf(cf.getSelf());
 
-		System.out.println(after);
+		com.neuronrobotics.sdk.common.Log.error(after);
 		
 
 

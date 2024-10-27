@@ -81,7 +81,7 @@ public class TextToSpeech implements ITTSEngine{
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "IO Exception", ex);
 		} catch (InterruptedException ex) {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Interrupted ", ex);
-			System.out.println("Speaking clean exit");
+			com.neuronrobotics.sdk.common.Log.error("Speaking clean exit");
 			tts.cancel();
 			tts.interrupt();
 			return 1;

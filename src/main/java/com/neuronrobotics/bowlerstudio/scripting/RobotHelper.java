@@ -39,7 +39,7 @@ public class RobotHelper implements IScriptingLanguage {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		// System.out.println("Clojure returned of type="+ret.getClass()+" value="+ret);
+		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of type="+ret.getClass()+" value="+ret);
 		return null;
 	}
 

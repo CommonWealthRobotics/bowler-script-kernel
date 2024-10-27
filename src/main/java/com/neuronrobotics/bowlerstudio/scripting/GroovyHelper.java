@@ -39,14 +39,14 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 //      } catch (Throwable e) {
 //        //throw e;
 //      }
-////			System.err.println("Device " + bad.getScriptingName() + " is "
+////			com.neuronrobotics.sdk.common.Log.error("Device " + bad.getScriptingName() + " is "
 ////					+ bad);
 //    }
     binding.setVariable("args", args);
 
     GroovyShell shell = new GroovyShell(GroovyHelper.class
         .getClassLoader(), binding, cc);
-    //System.out.println(code + "\n\nStart\n\n");
+    //com.neuronrobotics.sdk.common.Log.error(code + "\n\nStart\n\n");
     Script script;
     if (String.class.isInstance(code)) {
       script = shell.parse((String) code);

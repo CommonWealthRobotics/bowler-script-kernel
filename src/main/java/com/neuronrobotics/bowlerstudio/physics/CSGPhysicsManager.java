@@ -106,7 +106,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		this.setCore(core);
 
 		// setup the motion state for the ball
-		System.out.println("Starting Object at " + TransformFactory.bulletToNr(pose));
+		com.neuronrobotics.sdk.common.Log.error("Starting Object at " + TransformFactory.bulletToNr(pose));
 		DefaultMotionState fallMotionState = new DefaultMotionState(pose);
 		// This we're going to give mass so it responds to gravity
 		Vector3f fallInertia = new Vector3f(0, 0, 0);

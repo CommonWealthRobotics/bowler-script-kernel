@@ -52,7 +52,7 @@ public class BlenderLoader implements IScriptingLanguage {
 
 
 	public static void toBlenderFile(File stl,File blenderfile) {
-		System.out.println("Converting to Blender file before loading");
+		com.neuronrobotics.sdk.common.Log.error("Converting to Blender file before loading");
 		
 		File stlIn;
 		try {
@@ -158,7 +158,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		String absolutePath = source.getAbsolutePath();
 		File parent = new File(absolutePath).getParentFile();
 		if(source.exists()) {
-			System.out.println("Blender file exists, being overwritten to blank "+absolutePath);
+			com.neuronrobotics.sdk.common.Log.error("Blender file exists, being overwritten to blank "+absolutePath);
 			source.delete();
 		}
 		ArrayList<String> args = new ArrayList<>();

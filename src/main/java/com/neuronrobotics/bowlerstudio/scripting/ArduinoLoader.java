@@ -38,14 +38,14 @@ public class ArduinoLoader implements IScriptingLanguage {
     }
     File ino = findIno(code);
     if (ino == null) {
-      //System.out.println("Error: no .ino file found!");
+      //com.neuronrobotics.sdk.common.Log.error("Error: no .ino file found!");
       return null;
     }
     
     commands.add("upload");
     commands.add(ino.getAbsolutePath());
 
-    //System.out.println("Arduino Load: \n"+execString);
+    //com.neuronrobotics.sdk.common.Log.error("Arduino Load: \n"+execString);
     Thread ret = DownloadManager.run(null, ino.getParentFile(), System.out, commands);
     ret.join();
 

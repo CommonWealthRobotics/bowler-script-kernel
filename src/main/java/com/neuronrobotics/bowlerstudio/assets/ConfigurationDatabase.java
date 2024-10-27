@@ -90,7 +90,7 @@ public class ConfigurationDatabase {
 		getDatabase();
 		synchronized(database){
 			if (getParamMap(paramsKey).get(objectKey) == null) {
-				//System.err.println("Cant find: " + paramsKey + ":" + objectKey);
+				//com.neuronrobotics.sdk.common.Log.error("Cant find: " + paramsKey + ":" + objectKey);
 				setObject(paramsKey, objectKey, defaultValue);
 			}
 			ret= getParamMap(paramsKey).get(objectKey);
@@ -146,7 +146,7 @@ public class ConfigurationDatabase {
 			e.printStackTrace();
 			return;
 		}
-		System.out.println("Saved "+f.getName());
+		com.neuronrobotics.sdk.common.Log.error("Saved "+f.getName());
 	}
 
 	@SuppressWarnings("unchecked")

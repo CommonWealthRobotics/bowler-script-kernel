@@ -101,13 +101,13 @@ public class BowlerKernel {
 	}
 
 	private static void fail() {
-		System.err.println(
+		com.neuronrobotics.sdk.common.Log.error(
 				"Usage: \r\njava -jar BowlerScriptKernel.jar -s <file 1> .. <file n> # This will load one script after the next ");
-		System.err.println(
+		com.neuronrobotics.sdk.common.Log.error(
 				"java -jar BowlerScriptKernel.jar -p <file 1> .. <file n> # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable ");
-		System.err.println(
+		com.neuronrobotics.sdk.common.Log.error(
 				"java -jar BowlerScriptKernel.jar -r <Groovy Jython or Clojure> (Optional)(-s or -p)<file 1> .. <file n> # This will start a shell in the requested langauge and run the files provided. ");
-		System.err.println("java -jar BowlerScriptKernel.jar -g <Git repo> <Git file> # this will run a file from git");
+		com.neuronrobotics.sdk.common.Log.error("java -jar BowlerScriptKernel.jar -g <Git repo> <Git file> # this will run a file from git");
 
 		System.exit(1);
 	}
@@ -161,7 +161,7 @@ public class BowlerKernel {
 				}
 			}
 			if (!fileExists) {
-				System.err.println("\n\nERROR file does not exist: " + gitFile);
+				com.neuronrobotics.sdk.common.Log.error("\n\nERROR file does not exist: " + gitFile);
 				gitFile = null;
 			}
 			if (gitFile != null)
@@ -176,9 +176,9 @@ public class BowlerKernel {
 					fail();
 				}
 			else {
-				System.out.println("Files in git:");
+				com.neuronrobotics.sdk.common.Log.error("Files in git:");
 				for (String f : files) {
-					System.out.println("\t" + f);
+					com.neuronrobotics.sdk.common.Log.error("\t" + f);
 				}
 			}
 			finish(startTime);
@@ -187,7 +187,7 @@ public class BowlerKernel {
 //							"BowlerStudioVitamins/stl/servo/smallservo.stl");
 //		
 //		ArrayList<CSG>  cad = (ArrayList<CSG> )ScriptingEngine.inlineGistScriptRun("4814b39ee72e9f590757", "javaCad.groovy" , null);
-//		System.out.println(servo.exists()+" exists: "+servo);
+//		com.neuronrobotics.sdk.common.Log.error(servo.exists()+" exists: "+servo);
 
 		boolean startLoadingScripts = false;
 		for (String s : args) {
@@ -208,9 +208,9 @@ public class BowlerKernel {
 					}
 					baseWorkspaceFile = new File(location);
 					
-					System.out.println("Using working directory  "+baseWorkspaceFile.getAbsolutePath());
+					com.neuronrobotics.sdk.common.Log.error("Using working directory  "+baseWorkspaceFile.getAbsolutePath());
 					f=new File(baseWorkspaceFile.getAbsolutePath()+"/"+f.getName());
-					System.out.println("File   "+f.getName());
+					com.neuronrobotics.sdk.common.Log.error("File   "+f.getName());
 					ret = ScriptingEngine.inlineFileScriptRun(f, null);
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -268,12 +268,12 @@ public class BowlerKernel {
 		if (!runShell) {
 			finish(startTime);
 		}
-		System.out.println("Starting Bowler REPL in langauge: " + shellTypeStorage);
+		com.neuronrobotics.sdk.common.Log.error("Starting Bowler REPL in langauge: " + shellTypeStorage);
 		// sample from
 		// http://jline.sourceforge.net/testapidocs/src-html/jline/example/Example.html
 
 		if (!Terminal.getTerminal().isSupported()) {
-			System.out.println("Terminal not supported " + Terminal.getTerminal());
+			com.neuronrobotics.sdk.common.Log.error("Terminal not supported " + Terminal.getTerminal());
 		}
 		// Terminal.getTerminal().initializeTerminal();
 
@@ -328,7 +328,7 @@ public class BowlerKernel {
 				if (line.equalsIgnoreCase("history") || line.equalsIgnoreCase("h")) {
 					List<String> h = reader.getHistory().getHistoryList();
 					for (String s : h) {
-						System.out.println(s);
+						com.neuronrobotics.sdk.common.Log.error(s);
 					}
 					continue;
 				}
@@ -343,7 +343,7 @@ public class BowlerKernel {
 				try {
 					ret = ScriptingEngine.inlineScriptStringRun(line, null, shellTypeStorage);
 					if (ret != null) {
-						System.out.println(ret);
+						com.neuronrobotics.sdk.common.Log.error(ret);
 					}
 					processReturnedObjectsStart(ret, null);
 				} catch (Error e) {
@@ -363,7 +363,7 @@ public class BowlerKernel {
 			JavaFXInitializer.go();
 		} catch (Throwable t) {
 			t.printStackTrace();
-			System.err.println("ERROR No UI engine availible");
+			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine availible");
 		}
 		ScriptingEngine.waitForLogin();
 		if (args.length == 0) {
@@ -374,7 +374,7 @@ public class BowlerKernel {
 	}
 
 	private static void finish(long startTime) {
-		System.out.println(
+		com.neuronrobotics.sdk.common.Log.error(
 				"Process took " + (((double) (System.currentTimeMillis() - startTime))) / 60000.0 + " minutes");
 		System.exit(0);
 	}
@@ -382,7 +382,7 @@ public class BowlerKernel {
 	public static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
 		processUIOpening(ret);
 		if(baseWorkspaceFile!=null)
-			System.out.println("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
 		CSG.setProgressMoniter(new ICSGProgress() {
 			@Override
 			public void progressUpdate(int currentIndex, int finalIndex, String type,
@@ -432,12 +432,12 @@ public class BowlerKernel {
 		try {
 			processReturnedObjects(ret, csgBits);
 			String url = ScriptingEngine.locateGitUrl(baseWorkspaceFile);
-			System.out.println("Loading printbed URL  "+url);
+			com.neuronrobotics.sdk.common.Log.error("Loading printbed URL  "+url);
 			PrintBedManager printBedManager = new PrintBedManager(baseWorkspaceFile, csgBits);
 			if(printBedManager.hasPrintBed())
 				csgBits = printBedManager.makePrintBeds();
 			else {
-				System.out.println("Exporting files without print bed");
+				com.neuronrobotics.sdk.common.Log.error("Exporting files without print bed");
 			}
 			new CadFileExporter().generateManufacturingParts(csgBits, baseWorkspaceFile);
 		} catch (Throwable t) {
@@ -448,7 +448,7 @@ public class BowlerKernel {
 
 	private static void processUIOpening(Object ret) {
 		if(Tab.class.isInstance(ret)) {
-			System.out.println("Launching User Defined UI");
+			com.neuronrobotics.sdk.common.Log.error("Launching User Defined UI");
 			Tab t=(Tab)ret;
 			CompletableFuture<Boolean> future = new CompletableFuture<>();
 
@@ -488,7 +488,7 @@ public class BowlerKernel {
 					newStage.sizeToScene();
 				});
 				if(IStageReceiver.class.isInstance(ret)) {
-					System.out.println("UI is a IStageReceiver");
+					com.neuronrobotics.sdk.common.Log.error("UI is a IStageReceiver");
 					IStageReceiver r=(IStageReceiver)ret;
 					BowlerKernel.runLater(()->{
 						r.receiveStage(newStage, scene);
@@ -588,7 +588,7 @@ public class BowlerKernel {
 					m._generateStls(ret2, dir, false);
 					return;
 				}
-				System.out.println("Found arrangeBed API in CAD engine");
+				com.neuronrobotics.sdk.common.Log.error("Found arrangeBed API in CAD engine");
 				List<CSG> totalAssembly = bed.arrangeBed(ret2);
 				ret2.disconnect();
 				Thread.sleep(1000);
@@ -599,19 +599,19 @@ public class BowlerKernel {
 				// Get maximum size of heap in bytes. The heap cannot grow beyond this size.//
 				// Any attempt will result in an OutOfMemoryException.
 				long heapMaxSize = Runtime.getRuntime().maxMemory();
-				// System.out.println("Heap remaining
+				// com.neuronrobotics.sdk.common.Log.error("Heap remaining
 				// "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
-				// System.out.println("Of Heap "+(heapMaxSize));
+				// com.neuronrobotics.sdk.common.Log.error("Of Heap "+(heapMaxSize));
 				for (int i = 0; i < totalAssembly.size(); i++) {
 					List<CSG> tmp = Arrays.asList(totalAssembly.get(i));
 					totalAssembly.set(i, null);
-					// System.out.println("Before Heap remaining
+					// com.neuronrobotics.sdk.common.Log.error("Before Heap remaining
 					// "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 
 					new CadFileExporter(m.getUi()).generateManufacturingParts(tmp, dir);
 					tmp = null;
 					System.gc();
-					// System.out.println("After Heap remaining
+					// com.neuronrobotics.sdk.common.Log.error("After Heap remaining
 					// "+(heapMaxSize-Runtime.getRuntime().totalMemory()));
 
 				}
@@ -637,7 +637,7 @@ public class BowlerKernel {
 	}
 
 	public static void writeHistory(List<String> history) {
-		System.out.println("Saving history");
+		com.neuronrobotics.sdk.common.Log.error("Saving history");
 		FileOutputStream fos;
 		try {
 			fos = new FileOutputStream(historyFile);
@@ -690,7 +690,7 @@ public class BowlerKernel {
 		}
 		TextToSpeech tts = new TextToSpeech();
 		// cd ..
-		tts.getAvailableVoices().stream().forEach(voice -> System.out.println("Voice: " + voice));
+		tts.getAvailableVoices().stream().forEach(voice -> com.neuronrobotics.sdk.common.Log.error("Voice: " + voice));
 		// Setting the Current Voice
 		// voice =(tts.getAvailableVoices().toArray()[0].toString());
 		String voice = "dfki-poppy-hsmm";
@@ -709,7 +709,7 @@ public class BowlerKernel {
 
 		tts.setVoice(voice);
 
-		System.out.println("Using voice " + voice);
+		com.neuronrobotics.sdk.common.Log.error("Using voice " + voice);
 
 		RobotiserEffect vocalTractLSE = new RobotiserEffect(); // russian drunk effect
 		vocalTractLSE.setParams("amount:" + pitch.intValue());
@@ -717,12 +717,12 @@ public class BowlerKernel {
 		// TTS say something that we actually are typing into the first variable
 //	tts.getAudioEffects().stream().forEach(audioEffect -> {
 //		if(audioEffect.getName().contains("Rate")) {
-//		System.out.println("-----Name-----");
-//		System.out.println(audioEffect.getName());
-//		System.out.println("-----Examples-----");
-//		System.out.println(audioEffect.getExampleParameters());
-//		System.out.println("-----Help Text------");
-//		System.out.println(audioEffect.getHelpText() + "\n\n");
+//		com.neuronrobotics.sdk.common.Log.error("-----Name-----");
+//		com.neuronrobotics.sdk.common.Log.error(audioEffect.getName());
+//		com.neuronrobotics.sdk.common.Log.error("-----Examples-----");
+//		com.neuronrobotics.sdk.common.Log.error(audioEffect.getExampleParameters());
+//		com.neuronrobotics.sdk.common.Log.error("-----Help Text------");
+//		com.neuronrobotics.sdk.common.Log.error(audioEffect.getHelpText() + "\n\n");
 //		}
 //	});
 		String effect = "";
@@ -754,7 +754,7 @@ public class BowlerKernel {
 		effect += "+" + volumeEffect.getFullEffectAsString();
 		if (pitch.intValue() > 0)
 			effect += "+" + vocalTractLSE.getFullEffectAsString();
-		System.out.println(msg + "-->" + effect);
+		com.neuronrobotics.sdk.common.Log.error(msg + "-->" + effect);
 		tts.getMarytts().setAudioEffects(effect);
 
 		tts.speak(msg, 2.0f, false, true, progress);
@@ -764,7 +764,7 @@ public class BowlerKernel {
 
 	public static void upenURL(String string) {
 
-		System.err.println("Opening " + string);
+		com.neuronrobotics.sdk.common.Log.error("Opening " + string);
 		try {
 			upenURL(new URI(string));
 

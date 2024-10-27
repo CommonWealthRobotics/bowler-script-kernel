@@ -32,7 +32,7 @@ public class PrintBedObject {
 		manip = new Manipulation(affine, new Vector3d(1, 1, 0), startPose);
 		part.getStorage().set("manipulator",manip.map);
 		part.setManipulator(affine);
-		manip.addSaveListener(() -> System.out.println("Saving PrintBedObject "+name));
+		manip.addSaveListener(() -> com.neuronrobotics.sdk.common.Log.error("Saving PrintBedObject "+name));
 		checkBounds();
 	}
 	public void addEventListener(Runnable r) {

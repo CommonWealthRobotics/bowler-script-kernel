@@ -25,7 +25,7 @@ public class GitHub {
   public void test() throws Exception {
 		//ScriptingEngine.login();
 //		String remoteURI = "https://github.com/madhephaestusdemo/WalkTest_madhephaestusdemo.git";
-//		System.out.println(ScriptingEngine.getRepositoryCloneDirectory(remoteURI));
+//		com.neuronrobotics.sdk.common.Log.error(ScriptingEngine.getRepositoryCloneDirectory(remoteURI));
 //		ScriptingEngine.pull(remoteURI);
 		//ScriptingEngine.fork("https://github.com/madhephaestus/6dofServoArm.git", "forktest6dof", "testing yo!");	
 		
@@ -37,46 +37,46 @@ public class GitHub {
 			}
 			ScriptingEngine.setAutoupdate(true);
 		} catch (Exception ex) {
-			System.out.println("User not logged in, test can not run");
+			com.neuronrobotics.sdk.common.Log.error("User not logged in, test can not run");
 		}
 		org.kohsuke.github.GitHub github = ScriptingEngine.getGithub();
 		while (github == null) {
 			github = ScriptingEngine.getGithub();
 			ThreadUtil.wait(2000);
-			System.out.println("Waiting for github");
+			com.neuronrobotics.sdk.common.Log.error("Waiting for github");
 		}
 		Map<String, GHOrganization> orgs = github.getMyOrganizations();
 		for (String org : orgs.keySet()) {
-			System.out.println("Org: " + org);
+			com.neuronrobotics.sdk.common.Log.error("Org: " + org);
 			GHOrganization ghorg = orgs.get(org);
 			Map<String, GHRepository> repos = ghorg.getRepositories();
 			for (String orgRepo : repos.keySet()) {
-				System.out.println("\tRepo " + org + " " + orgRepo);
+				com.neuronrobotics.sdk.common.Log.error("\tRepo " + org + " " + orgRepo);
 			}
 		}
 		Map<String, Set<GHTeam>> teams = github.getMyTeams();
 		for (String team : teams.keySet()) {
-			System.out.println("Team " + team);
+			com.neuronrobotics.sdk.common.Log.error("Team " + team);
 			Set<GHTeam> ghteam = teams.get(team);
 			for (GHTeam ghT : ghteam) {
-				System.out.println("\tGHTeam " + ghT.getName());
+				com.neuronrobotics.sdk.common.Log.error("\tGHTeam " + ghT.getName());
 				Map<String, GHRepository> repos = ghT.getRepositories();
 				for (String repoName : repos.keySet()) {
-					System.out.println("\t\tGHTeam " + ghT.getName() + " repo " + repoName);
+					com.neuronrobotics.sdk.common.Log.error("\t\tGHTeam " + ghT.getName() + " repo " + repoName);
 				}
 			}
 		}
 		GHMyself self = github.getMyself();
 		Map<String, GHRepository> myPublic = self.getAllRepositories();
 		for (String myRepo : myPublic.keySet()) {
-			System.out.println("Repo " + myRepo);
+			com.neuronrobotics.sdk.common.Log.error("Repo " + myRepo);
 			GHRepository ghrepo = myPublic.get(myRepo);
 			// if(ghrepo.getOwnerName().contains("demo"))
-			System.out.println("\tOwner: " + ghrepo.getOwnerName() + " " + myRepo);
+			com.neuronrobotics.sdk.common.Log.error("\tOwner: " + ghrepo.getOwnerName() + " " + myRepo);
 		}
 		PagedIterable<GHRepository> watching = self.listSubscriptions();
 		for (GHRepository g : watching) {
-			System.out.println("Watching " + g.getOwnerName() + " " + g.getFullName());
+			com.neuronrobotics.sdk.common.Log.error("Watching " + g.getOwnerName() + " " + g.getFullName());
 		}
 		String gitURL ="https://github.com/madhephaestus/clojure-utils.git";
 		ArrayList<String> listofFiles = ScriptingEngine.filesInGit(gitURL,
@@ -84,39 +84,39 @@ public class GitHub {
 		if (listofFiles.size() == 0)
 			fail();
 		for (String s : listofFiles) {
-			System.out.println("Files " + s);
+			com.neuronrobotics.sdk.common.Log.error("Files " + s);
 		}
 		String asstsRepo="https://github.com/madhephaestus/BowlerStudioImageAssets.git";
 		
 		// https://github.com/madhephaestus/BowlerStudioImageAssets.git
 		ScriptingEngine.deleteRepo(asstsRepo);
 		List<Ref> call = ScriptingEngine.listBranches(asstsRepo);
-		System.out.println("Branches # " + call.size());
+		com.neuronrobotics.sdk.common.Log.error("Branches # " + call.size());
 		if (call.size() > 0) {
 			for (Ref ref : call) {
-				System.out.println("Branch: Ref= " + ref + " name= " + ref.getName() + " ID = " + ref.getObjectId().getName());			}
+				com.neuronrobotics.sdk.common.Log.error("Branch: Ref= " + ref + " name= " + ref.getName() + " ID = " + ref.getObjectId().getName());			}
 		} else {
 			fail();
 		}
 		
 		ScriptingEngine.checkout(asstsRepo, call.get(0).getName());
 		call = ScriptingEngine.listLocalBranches(asstsRepo);
-		System.out.println("Local Branches # " + call.size());
+		com.neuronrobotics.sdk.common.Log.error("Local Branches # " + call.size());
 		if (call.size() > 0) {
 			for (Ref ref : call) {
-				System.out.println("Branch: Ref= " + ref + " name= " + ref.getName() + " ID = " + ref.getObjectId().getName());
+				com.neuronrobotics.sdk.common.Log.error("Branch: Ref= " + ref + " name= " + ref.getName() + " ID = " + ref.getObjectId().getName());
 			}
 		} else {
 			fail();
 		}
-		//System.out.println("Creating branch # " );
+		//com.neuronrobotics.sdk.common.Log.error("Creating branch # " );
 //		ScriptingEngine.newBranch(asstsRepo, "0.20.0");
 //		try{
 //			ScriptingEngine.deleteBranch(asstsRepo, "0.20.0");
 //		}catch(Exception e){
 //			e.printStackTrace();
 //		}		
-		System.out.println("Current Branch # " +  ScriptingEngine.getFullBranch(asstsRepo));
+		com.neuronrobotics.sdk.common.Log.error("Current Branch # " +  ScriptingEngine.getFullBranch(asstsRepo));
 		*/
   }
 

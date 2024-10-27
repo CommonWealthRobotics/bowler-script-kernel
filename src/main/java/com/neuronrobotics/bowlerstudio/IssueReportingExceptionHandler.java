@@ -69,7 +69,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 	}
 
 	public void except(Throwable e, String stacktraceFromCatch) {
-		System.out.println(stacktraceFromCatch);
+		com.neuronrobotics.sdk.common.Log.error(stacktraceFromCatch);
 		new Thread(() -> {
 			String stacktrace = org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e);
 			StackTraceElement[] element = e.getStackTrace();
@@ -133,10 +133,10 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 					+ "```\n" + stacktrace + "\n```" + "\n\nCaught and reported at: \n" + "```\n" + stacktraceFromCatch
 					+ "\n```\n" + "\nIssueReportingExceptionHandler Created at:\n" + "\n```\n"
 					+ stacktraceFromHandlerInstantiation + "\n```\n";
-			System.err.println(body);
-			System.err.println("\r\n\r\nBug Reported!\r\n\r\n");
-			System.out.println(body);
-			System.out.println("\r\n\r\nBug Reported!\r\n\r\n");
+			com.neuronrobotics.sdk.common.Log.error(body);
+			com.neuronrobotics.sdk.common.Log.error("\r\n\r\nBug Reported!\r\n\r\n");
+			com.neuronrobotics.sdk.common.Log.error(body);
+			com.neuronrobotics.sdk.common.Log.error("\r\n\r\nBug Reported!\r\n\r\n");
 			GitHub github = PasswordManager.getGithub();
 
 			if (github == null || github.isAnonymous())
@@ -171,7 +171,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				String source = getTitle(element);
 
 				for (GHIssue i : issues) {
-					System.err.println("Issues are :" + i.getTitle());
+					com.neuronrobotics.sdk.common.Log.error("Issues are :" + i.getTitle());
 					if (i.getTitle().contains(source)) {
 						List<GHIssueComment> comments = i.getComments();
 						// Check to see if i created this issue
@@ -240,7 +240,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			return;
 		}
 		if (Platform.isFxApplicationThread()) {
-			System.err.println("Exception in Javafx thread! \n"
+			com.neuronrobotics.sdk.common.Log.error("Exception in Javafx thread! \n"
 						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
 			//throw new RuntimeException(t);
 			return;
