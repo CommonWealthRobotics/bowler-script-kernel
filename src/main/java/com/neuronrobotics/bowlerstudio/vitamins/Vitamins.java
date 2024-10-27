@@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
@@ -222,7 +223,7 @@ public class Vitamins {
 			if (depthGauge < 2) {
 				return get(type, id, depthGauge + 1);
 			} else {
-				return null;
+				return new Cube(20).toCSG();
 			}
 		}
 	}
