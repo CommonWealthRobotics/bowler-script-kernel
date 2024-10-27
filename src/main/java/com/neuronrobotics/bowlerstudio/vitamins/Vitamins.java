@@ -2,11 +2,12 @@ package com.neuronrobotics.bowlerstudio.vitamins;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.neuronrobotics.sdk.common.Log;
 
@@ -50,24 +51,25 @@ import com.google.gson.reflect.TypeToken;
 public class Vitamins {
 
 	private static String jsonRootDir = "json/";
-	private static final Map<String, CSG> fileLastLoaded = new HashMap<String, CSG>();
-	private static final Map<String, HashMap<String, HashMap<String, Object>>> databaseSet = new HashMap<String, HashMap<String, HashMap<String, Object>>>();
+	private static final Map<String, CSG> fileLastLoaded = new ConcurrentHashMap<String, CSG>();
+	private static final Map<String, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>> databaseSet = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>>();
 	private static final String defaultgitRpoDatabase = "https://github.com/madhephaestus/Hardware-Dimensions.git";
 	private static String gitRpoDatabase = defaultgitRpoDatabase;
 	// Create the type, this tells GSON what datatypes to instantiate when parsing
 	// and saving the json
-	private static Type TT_mapStringString = new TypeToken<HashMap<String, HashMap<String, Object>>>() {
+	private static Type TT_mapStringString = new TypeToken<ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>>() {
 	}.getType();
 	// chreat the gson object, this is the parsing factory
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	private static boolean checked;
-	private static HashMap<String,Runnable> changeListeners = new HashMap<String, Runnable>();
+	private static ConcurrentHashMap<String, Runnable> changeListeners = new ConcurrentHashMap<String, Runnable>();
+
 	public static void clear() {
 		System.out.println("Vitamins Database Cleraing, reloading files");
-		for(String keys:databaseSet.keySet()) {
-			HashMap<String, HashMap<String, Object>> data = databaseSet.get(keys);
-			for(String key2:data.keySet()) {
-				HashMap<String, Object> data2 = data.get(key2);
+		for (String keys : databaseSet.keySet()) {
+			ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> data = databaseSet.get(keys);
+			for (String key2 : data.keySet()) {
+				ConcurrentHashMap<String, Object> data2 = data.get(key2);
 				data2.clear();
 			}
 			data.clear();
@@ -75,12 +77,14 @@ public class Vitamins {
 		databaseSet.clear();
 		fileLastLoaded.clear();
 	}
+
 	public static CSG get(File resource) {
-		return get(resource,false);
+		return get(resource, false);
 	}
+
 	public static CSG get(File resource, boolean forceRefresh) {
 
-		if (fileLastLoaded.get(resource.getAbsolutePath()) == null||forceRefresh) {
+		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
 			try {
@@ -151,21 +155,22 @@ public class Vitamins {
 		} catch (Exception ex) {
 			if (!text2.startsWith("git@")) {
 				ex.printStackTrace();
-				return false ;
+				return false;
 			}
 		}
 		return true;
 	}
+
 	public static void flatten(ArrayList<CSG> flat, Object o) {
 		ScriptingEngine.flatten(flat, o);
 	}
-	
+
 	public static CSG get(String type, String id) throws Exception {
-		if(isGitURL(type)) {
-			Object o =ScriptingEngine.gitScriptRun(type, id);
-			ArrayList<CSG> flat= new ArrayList<CSG>();
-			Vitamins.flatten(flat,o);
-			return  CSG.unionAll( flat);
+		if (isGitURL(type)) {
+			Object o = ScriptingEngine.gitScriptRun(type, id);
+			ArrayList<CSG> flat = new ArrayList<CSG>();
+			Vitamins.flatten(flat, o);
+			return CSG.unionAll(flat);
 		}
 		return get(type, id, 0);
 	}
@@ -189,20 +194,20 @@ public class Vitamins {
 						repostring.toString(), // file to load
 						servoMeasurments);
 				Map<String, Object> configuration = Vitamins.getConfiguration(type, id);
-				newVitamin.setName(type +"-"+ id);
+				newVitamin.setName(type + "-" + id);
 				newVitamin.setManufacturing(incoming -> null);
 				try {
 					Transform com = new Transform()
-										.movex(Double.parseDouble(configuration.get("massCentroidX").toString()))
-										.movey(Double.parseDouble(configuration.get("massCentroidY").toString()))
-										.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
+							.movex(Double.parseDouble(configuration.get("massCentroidX").toString()))
+							.movey(Double.parseDouble(configuration.get("massCentroidY").toString()))
+							.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
 					newVitamin.getStorage().set("massKg", configuration.get("massKg"));
 					newVitamin.getStorage().set("massCentroid", com);
-					
+
 					return newVitamin;
-				}catch(Exception ex) {
-					//System.err.println(type +"-"+ id+" Failed");
-					//ex.printStackTrace();
+				} catch (Exception ex) {
+					// System.err.println(type +"-"+ id+" Failed");
+					// ex.printStackTrace();
 					return newVitamin;
 				}
 			} else {
@@ -220,21 +225,23 @@ public class Vitamins {
 			}
 		}
 	}
+
 	public static String getScriptGitURL(String type) {
 		Map<String, Object> script = getMeta(type);
-		
-	
+
 		return script.get("scriptGit").toString();
 
 	}
+
 	public static void loadAllScriptFiles() {
-		for(String type:listVitaminTypes()) {
+		for (String type : listVitaminTypes()) {
 			getScriptFile(type);
 		}
 	}
+
 	public static File getScriptFile(String type) {
 		Map<String, Object> script = getMeta(type);
-		
+
 		try {
 			return ScriptingEngine.fileFromGit(script.get("scriptGit").toString(), script.get("scriptFile").toString());
 		} catch (InvalidRemoteException e) {
@@ -261,44 +268,33 @@ public class Vitamins {
 		setParameter(type, "meta", "scriptGit", git);
 		setParameter(type, "meta", "scriptFile", file);
 	}
-	
-	public static Map<String, Object> getConfiguration(String type, String id){
-		return Collections.unmodifiableMap(getConfigurationRW( type,  id));
+
+	public static Map<String, Object> getConfiguration(String type, String id) {
+		return Collections.unmodifiableMap(getConfigurationRW(type, id));
 	}
-	public static void putMeasurment(String type, String size,String measurementName, Object measurmentValue) {
-		getConfigurationRW(type,size).put(measurementName, measurmentValue);
+
+	public static void putMeasurment(String type, String size, String measurementName, Object measurmentValue) {
+		getConfigurationRW(type, size).put(measurementName, measurmentValue);
 	}
-	public static Object getMeasurement(String type, String size,String measurementName) {
-		return getConfigurationRW(type,size).get(measurementName);
+
+	public static Object getMeasurement(String type, String size, String measurementName) {
+		return getConfigurationRW(type, size).get(measurementName);
 	}
-	public static HashMap<String, Object> getConfigurationRW(String type, String id) {
-		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
+
+	public static ConcurrentHashMap<String, Object> getConfigurationRW(String type, String id) {
+		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
 		if (database.get(id) == null) {
-			database.put(id, new HashMap<String, Object>());
+			database.put(id, new ConcurrentHashMap<String, Object>());
 		}
-		for(int j=0;j<5;j++) {
-			try {
-				HashMap<String, Object> hashMap = database.get(id);
-				Object[] array = hashMap.keySet().toArray();
-				for (int i=0;i<array.length;i++) {
-					String key = (String)array[i];
-					sanatize(key,  hashMap);
-				}
-				return hashMap;
-			}catch (java.util.ConcurrentModificationException ex) {
-				if(j==4) {
-					new IssueReportingExceptionHandler().except(ex);
-				}else {
-					try {
-						Thread.sleep(5);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
+
+		ConcurrentHashMap<String, Object> ConcurrentHashMap = database.get(id);
+		Object[] array = ConcurrentHashMap.keySet().toArray();
+		for (int i = 0; i < array.length; i++) {
+			String key = (String) array[i];
+			sanatize(key, ConcurrentHashMap);
 		}
-		return new HashMap<String, Object>();
+		return ConcurrentHashMap;
+
 	}
 
 	public static String makeJson(String type) {
@@ -310,14 +306,16 @@ public class Vitamins {
 		// Save contents and publish them
 		String jsonString = makeJson(type);
 		try {
-			//new Exception().printStackTrace();
+			// new Exception().printStackTrace();
 			ScriptingEngine.pushCodeToGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
 					ScriptingEngine.getFullBranch(getGitRepoDatabase()), // branch or tag
 					getRootFolder() + type + ".json", // local path to the file in git
 					jsonString, // content of the file
-					"Making changes to "+type+" by "+PasswordManager.getUsername()+"\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit message
-			//System.err.println(jsonString);
-			System.out.println("Database saved "+getVitaminFile(type,null,false).getAbsolutePath());
+					"Making changes to " + type + " by " + PasswordManager.getUsername()
+							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
+																																		// message
+			// System.err.println(jsonString);
+			System.out.println("Database saved " + getVitaminFile(type, null, false).getAbsolutePath());
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
 			System.out.println("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
 			System.out.println(
@@ -326,6 +324,7 @@ public class Vitamins {
 		}
 
 	}
+
 	public static void saveDatabaseForkIfMissing(String type) throws Exception {
 
 		org.kohsuke.github.GitHub github = PasswordManager.getGithub();
@@ -334,73 +333,64 @@ public class Vitamins {
 			saveDatabase(type);
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
 			System.err.println("Forked repo is missing!");
-			
+
 			GHRepository newRepo = repo.fork();
 			Thread.sleep(6000);
 			Vitamins.gitRpoDatabase = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
 			saveDatabase(type);
-			
+
 		}
-		if(PasswordManager.getUsername().contentEquals("madhephaestus"))
+		if (PasswordManager.getUsername().contentEquals("madhephaestus"))
 			return;
 		try {
-			GHRepository myrepo = github.getRepository(PasswordManager.getUsername()+"/Hardware-Dimensions");
-			List<GHPullRequest> asList1 = myrepo.queryPullRequests().state(GHIssueState.OPEN).head("madhephaestus:master")
-			            .list().asList();
+			GHRepository myrepo = github.getRepository(PasswordManager.getUsername() + "/Hardware-Dimensions");
+			List<GHPullRequest> asList1 = myrepo.queryPullRequests().state(GHIssueState.OPEN)
+					.head("madhephaestus:master").list().asList();
 			Thread.sleep(200);// Some asynchronus delay here, not sure why...
-			if(asList1.size()==0) {
+			if (asList1.size() == 0) {
 				try {
-					GHPullRequest request = myrepo.createPullRequest("Update from source", 
-							"madhephaestus:master", 
-							"master", 
-							"## Upstream add vitamins", 
-							false, false);
-					if(request!=null) {
+					GHPullRequest request = myrepo.createPullRequest("Update from source", "madhephaestus:master",
+							"master", "## Upstream add vitamins", false, false);
+					if (request != null) {
 						processSelfPR(request);
 					}
-				}catch(org.kohsuke.github.HttpException ex) {
+				} catch (org.kohsuke.github.HttpException ex) {
 					// no commits have been made to master
 				}
-				
-			}else {
+
+			} else {
 				processSelfPR(asList1.get(0));
 			}
-			String head = PasswordManager.getUsername()+":master";
-			List<GHPullRequest> asList = repo.queryPullRequests()
-		            .state(GHIssueState.OPEN)
-		            .head(head)
-		            .list().asList();
-			if(asList.size()==0) {
-				System.err.println("Creating PR for "+head);
-				GHPullRequest request = repo.createPullRequest("User Added vitamins to "+type, 
-					head, 
-					"master", 
-					"## User added vitamins", 
-					true, true);
+			String head = PasswordManager.getUsername() + ":master";
+			List<GHPullRequest> asList = repo.queryPullRequests().state(GHIssueState.OPEN).head(head).list().asList();
+			if (asList.size() == 0) {
+				System.err.println("Creating PR for " + head);
+				GHPullRequest request = repo.createPullRequest("User Added vitamins to " + type, head, "master",
+						"## User added vitamins", true, true);
 				try {
 					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
 				} catch (URISyntaxException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}else {
-				
+			} else {
+
 			}
-		}catch(Exception ex) {
-			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),ex);
+		} catch (Exception ex) {
+			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 		}
-	
 
 	}
 
 	private static void processSelfPR(GHPullRequest request) throws IOException {
-		if(request== null)
+		if (request == null)
 			return;
 		try {
 			if (request.getMergeable()) {
 				request.merge("Auto Merging Master");
 				reLoadDatabaseFromFiles();
-				System.out.println("Merged Hardware-Dimensions madhephaestus:master into "+PasswordManager.getUsername()+":master");
+				System.out.println("Merged Hardware-Dimensions madhephaestus:master into "
+						+ PasswordManager.getUsername() + ":master");
 			} else {
 				try {
 					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
@@ -409,12 +399,13 @@ public class Vitamins {
 					e.printStackTrace();
 				}
 			}
-		}catch(java.lang.NullPointerException ex) {
+		} catch (java.lang.NullPointerException ex) {
 			ex.printStackTrace();
 		}
 	}
+
 	public static void newVitamin(String type, String id) throws Exception {
-		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
+		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
 		if (database.keySet().size() > 0) {
 			String exampleKey = null;
 			for (String key : database.keySet()) {
@@ -439,15 +430,15 @@ public class Vitamins {
 
 	public static void setParameter(String type, String id, String parameterName, Object parameter) throws Exception {
 
-		HashMap<String, Object> config = getConfigurationRW(type, id);
+		ConcurrentHashMap<String, Object> config = getConfigurationRW(type, id);
 		config.put(parameterName, parameter);
-		sanatize(parameterName,  config);
+		sanatize(parameterName, config);
 
 		// saveDatabase(type);
 	}
 
-	private static void sanatize(String parameterName,  HashMap<String, Object> config) {
-		Object parameter=config.get(parameterName);
+	private static void sanatize(String parameterName, ConcurrentHashMap<String, Object> config) {
+		Object parameter = config.get(parameterName);
 		try {
 			config.put(parameterName, Double.parseDouble(parameter.toString()));
 		} catch (NumberFormatException ex) {
@@ -455,7 +446,7 @@ public class Vitamins {
 		}
 	}
 
-	public static HashMap<String, HashMap<String, Object>> getDatabase(String type) {
+	public static ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> getDatabase(String type) {
 		if (databaseSet.get(type) == null) {
 			// we are using the default vitamins configuration
 			// https://github.com/madhephaestus/Hardware-Dimensions.git
@@ -467,40 +458,39 @@ public class Vitamins {
 			// attempt to load the JSON file from the GIt Repo and pars the JSON string
 			File f;
 			try {
-				
-				Runnable onChange=null;
-				if(changeListeners.get(type)==null) {
-					changeListeners.put(type,() -> {
+
+				Runnable onChange = null;
+				if (changeListeners.get(type) == null) {
+					changeListeners.put(type, () -> {
 						// If the file changes, clear the database and load the new data
-						System.out.println("Re-loading "+type);
-						databaseSet.put(type,null);
+						System.out.println("Re-loading " + type);
+						databaseSet.put(type, null);
 						new RuntimeException().printStackTrace();
 					});
-					onChange=changeListeners.get(type);
+					onChange = changeListeners.get(type);
 				}
-				
-				
-				f = getVitaminFile(type,onChange,true);
 
-				HashMap<String, HashMap<String, Object>> database;
-				if(f.exists()) {
-				
+				f = getVitaminFile(type, onChange, true);
+
+				ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database;
+				if (f.exists()) {
+
 					inPut = FileUtils.openInputStream(f);
-	
+
 					jsonString = IOUtils.toString(inPut);
 					inPut.close();
-					System.out.println("JSON loading Loading "+type+" "+jsonString.length());
+					System.out.println("JSON loading Loading " + type + " " + jsonString.length());
 					// perfoem the GSON parse
 					database = gson.fromJson(jsonString, TT_mapStringString);
-					if(database==null)
+					if (database == null)
 						throw new RuntimeException("Database failed to read");
-				}else {
-					database=new HashMap<String, HashMap<String,Object>>();
+				} else {
+					database = new ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>();
 				}
 				databaseSet.put(type, database);
 
 				for (String key : databaseSet.get(type).keySet()) {
-					HashMap<String, Object> conf = database.get(key);
+					ConcurrentHashMap<String, Object> conf = database.get(key);
 					for (String confKey : conf.keySet()) {
 						try {
 							double num = Double.parseDouble(conf.get(confKey).toString());
@@ -515,7 +505,7 @@ public class Vitamins {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-				databaseSet.put(type, new HashMap<String, HashMap<String, Object>>());
+				databaseSet.put(type, new ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>());
 			}
 		}
 		return databaseSet.get(type);
@@ -524,12 +514,11 @@ public class Vitamins {
 
 	public static File getVitaminFile(String type, Runnable onChange, boolean oneShot)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-		
-		
-		File f= ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
+
+		File f = ScriptingEngine.fileFromGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
 				getRootFolder() + type + ".json"// File from within the Git repo
 		);
-		if(onChange!=null) {
+		if (onChange != null) {
 //			FileChangeWatcher watcher = FileChangeWatcher.watch(f);
 //			watcher.addIFileChangeListener((fileThatChanged, event) -> {
 //				onChange.run();
@@ -541,36 +530,40 @@ public class Vitamins {
 	private static String getRootFolder() {
 		return getJsonRootDir();
 	}
-	public static ArrayList<String> listVitaminActuators() {
-		ArrayList<String> actuators = new  ArrayList<String>();
-		
+
+	public static CopyOnWriteArrayList<String> listVitaminActuators() {
+		CopyOnWriteArrayList<String> actuators = new CopyOnWriteArrayList<String>();
+
 		for (String vitaminsType : Vitamins.listVitaminTypes()) {
-			if (isActuator( vitaminsType))
+			if (isActuator(vitaminsType))
 				actuators.add(vitaminsType);
 		}
 		return actuators;
 	}
-	public static ArrayList<String> listVitaminShafts() {
-		ArrayList<String> actuators = new  ArrayList<String>();
+
+	public static CopyOnWriteArrayList<String> listVitaminShafts() {
+		CopyOnWriteArrayList<String> actuators = new CopyOnWriteArrayList<String>();
 		for (String vitaminsType : Vitamins.listVitaminTypes()) {
-			if (isShaft( vitaminsType))
+			if (isShaft(vitaminsType))
 				actuators.add(vitaminsType);
 		}
 		return actuators;
 	}
-	
+
 	public static boolean isShaft(String vitaminsType) {
 		Map<String, Object> meta = Vitamins.getMeta(vitaminsType);
 		if (meta != null && meta.containsKey("shaft"))
 			return true;
 		return false;
 	}
+
 	public static boolean isActuator(String vitaminsType) {
 		Map<String, Object> meta = Vitamins.getMeta(vitaminsType);
 		if (meta != null && meta.containsKey("actuator"))
 			return true;
 		return false;
 	}
+
 	public static void setIsShaft(String type) {
 		Vitamins.getMeta(type).remove("motor");
 		Vitamins.getMeta(type).put("shaft", "true");
@@ -580,12 +573,14 @@ public class Vitamins {
 		Vitamins.getMeta(type).remove("shaft");
 		Vitamins.getMeta(type).put("actuator", "true");
 	}
-	public static ArrayList<String> listVitaminTypes() {
 
-		ArrayList<String> types = new ArrayList<String>();
+	public static CopyOnWriteArrayList<String> listVitaminTypes() {
+
+		CopyOnWriteArrayList<String> types = new CopyOnWriteArrayList<String>();
 		File folder;
-		try {		
-			folder = new File(ScriptingEngine.getRepositoryCloneDirectory(getGitRepoDatabase()).getAbsoluteFile()+"/"+getRootFolder());
+		try {
+			folder = new File(ScriptingEngine.getRepositoryCloneDirectory(getGitRepoDatabase()).getAbsoluteFile() + "/"
+					+ getRootFolder());
 			File[] listOfFiles = folder.listFiles();
 
 			for (File f : listOfFiles) {
@@ -605,7 +600,7 @@ public class Vitamins {
 	public static ArrayList<String> listVitaminSizes(String type) {
 
 		ArrayList<String> types = new ArrayList<String>();
-		HashMap<String, HashMap<String, Object>> database = getDatabase(type);
+		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
 		Set<String> keys = database.keySet();
 		for (Iterator<String> iterator = keys.iterator(); iterator.hasNext();) {
 			String s = iterator.next();
@@ -619,23 +614,23 @@ public class Vitamins {
 		return types;
 	}
 
-	public static String getGitRepoDatabase()  {
+	public static String getGitRepoDatabase() {
 		if (!checked) {
 			checked = true;
 			try {
 				if (PasswordManager.getUsername() != null) {
-					//ScriptingEngine.setAutoupdate(true);
+					// ScriptingEngine.setAutoupdate(true);
 					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
 					try {
-						GHRepository repo =github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions" ); 
-						if(repo!=null) {
+						GHRepository repo = github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions");
+						if (repo != null) {
 							String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
 							// System.out.println("Using my version of Viamins: "+myAssets);
 							setGitRepoDatabase(myAssets);
-						}else {
+						} else {
 							throw new org.kohsuke.github.GHFileNotFoundException();
 						}
-					}catch(Exception ex) {
+					} catch (Exception ex) {
 						setGitRepoDatabase(defaultgitRpoDatabase);
 					}
 				}
@@ -655,11 +650,11 @@ public class Vitamins {
 	}
 
 	public static void reLoadDatabaseFromFiles() {
-		
+
 		setGitRepoDatabase(getGitRepoDatabase());
 		try {
 			ScriptingEngine.pull(getGitRepoDatabase());
-		}catch (CheckoutConflictException|NoHeadException e) {
+		} catch (CheckoutConflictException | NoHeadException e) {
 			ScriptingEngine.deleteRepo(getGitRepoDatabase());
 			try {
 				ScriptingEngine.pull(getGitRepoDatabase());
@@ -667,12 +662,13 @@ public class Vitamins {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), e);
 		}
 		listVitaminTypes();
-		
+
 	}
+
 	public static void setGitRepoDatabase(String gitRpoDatabase) {
 		Vitamins.gitRpoDatabase = gitRpoDatabase;
 		databaseSet.clear();
@@ -688,7 +684,5 @@ public class Vitamins {
 		Vitamins.jsonRootDir = jsonRootDir;
 		setGitRepoDatabase(getGitRepoDatabase());
 	}
-
-
 
 }
