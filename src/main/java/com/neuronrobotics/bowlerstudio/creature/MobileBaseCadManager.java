@@ -635,7 +635,7 @@ public class MobileBaseCadManager implements Runnable {
 							}
 						} catch (Throwable t) {
 							// rendering not availible
-							System.err.println("Exception for render engine " + base.getScriptingName());
+							com.neuronrobotics.sdk.common.Log.error("Exception for render engine " + base.getScriptingName());
 							t.printStackTrace();
 							try {
 								Thread.sleep(100);
@@ -778,7 +778,7 @@ public class MobileBaseCadManager implements Runnable {
 						if(cadGenerating)
 							return;
 						try {
-							System.err.println("Clearing the compiled CAD script for " + key);
+							com.neuronrobotics.sdk.common.Log.error("Clearing the compiled CAD script for " + key);
 							cadScriptCache.remove(key);
 							try {
 								build(key, f);
@@ -823,7 +823,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 	private void build(String key, File f) throws Throwable {
 		try {
-			System.err.println(
+			com.neuronrobotics.sdk.common.Log.error(
 					"Building the compiled CAD script for " + key + " " + base + " " + base.getScriptingName());
 			cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
 		} catch (Throwable e) {
@@ -991,11 +991,11 @@ public class MobileBaseCadManager implements Runnable {
 		} catch (Throwable e) {
 			getUi().highlightException(getCadScriptFromMobileBase(device), e);
 		}
-		System.out.println("Displaying Body");
+		com.neuronrobotics.sdk.common.Log.error("Displaying Body");
 		setProgress(0.35);
 		// clears old robot and places base
 		getUi().setAllCSG(getBasetoCadMap().get(device), getCadScriptFromMobileBase(device));
-		System.out.println("Rendering limbs");
+		com.neuronrobotics.sdk.common.Log.error("Rendering limbs");
 		setProgress(0.4);
 		ArrayList<DHParameterKinematics> limbs = base.getAllDHChains();
 		double numLimbs = limbs.size();
@@ -1078,7 +1078,7 @@ public class MobileBaseCadManager implements Runnable {
 		DHParameterKinematics dh = limbs.get(limb);
 		double partsTotal = numLimbs * dh.getNumberOfLinks();
 		double progress = ((double) ((limb * dh.getNumberOfLinks()) + link)) / partsTotal;
-		// System.out.println("Cad progress " + progress + " limb " + limb + " link " +
+		// com.neuronrobotics.sdk.common.Log.error("Cad progress " + progress + " limb " + limb + " link " +
 		// link + " total parts " + partsTotal);
 		setProgress(0.333 + (2 * (progress / 3)));
 	}
@@ -1107,7 +1107,7 @@ public class MobileBaseCadManager implements Runnable {
 			return _generateStls(base, dir, kinematic);
 		}
 		
-		System.out.println("Found arrangeBed API in CAD engine");
+		com.neuronrobotics.sdk.common.Log.error("Found arrangeBed API in CAD engine");
 		List<CSG> totalAssembly = bed.arrangeBed(base);
 		getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
 
@@ -1188,14 +1188,14 @@ public class MobileBaseCadManager implements Runnable {
 							
 							File stl = new File(
 									dir.getAbsolutePath() + "/" + linkNum + name + "_limb_" + i + "_Part_" + j + ".stl");
-							System.out.println("Writing STL for " + name+" to "+stl.getAbsolutePath());
+							com.neuronrobotics.sdk.common.Log.error("Writing STL for " + name+" to "+stl.getAbsolutePath());
 							FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
 							allCadStl.add(stl);
 							// totalAssembly.add(tmp);
 							getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
 							set(base, i, j);
 						}else {
-							System.err.println("ERROR "+parts.get(j).getName()+" has no link associated ");
+							com.neuronrobotics.sdk.common.Log.error("ERROR "+parts.get(j).getName()+" has no link associated ");
 						}
 					}
 				} catch (Exception ex) {
@@ -1395,7 +1395,7 @@ public class MobileBaseCadManager implements Runnable {
 			getUi().setSelectedCsg(csg);
 		} catch (Exception ex) {
 			// getUi().highlightException(null, ex);
-			System.err.println("Base not loaded yet");
+			com.neuronrobotics.sdk.common.Log.error("Base not loaded yet");
 		}
 
 	}
@@ -1408,7 +1408,7 @@ public class MobileBaseCadManager implements Runnable {
 			getUi().setSelected((Affine) limb.getRootListener());
 		} catch (Exception ex) {
 			// getUi().highlightException(null, ex);
-			System.err.println("Limb not loaded yet");
+			com.neuronrobotics.sdk.common.Log.error("Limb not loaded yet");
 		}
 	}
 
@@ -1418,7 +1418,7 @@ public class MobileBaseCadManager implements Runnable {
 			ArrayList<CSG> limCad = MobileBaseCadManager.get(base).getLinktoCadMap().get(limb);
 			getUi().setSelectedCsg(limCad);
 		} catch (Exception ex) {
-			System.err.println("Limb not loaded yet");
+			com.neuronrobotics.sdk.common.Log.error("Limb not loaded yet");
 		}
 	}
 	public void generateCad() {
@@ -1634,7 +1634,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public void setConfigurationViewerMode(boolean b) {
-		System.out.println("Setting config mode " + b);
+		com.neuronrobotics.sdk.common.Log.error("Setting config mode " + b);
 		setConfigMode(b);
 		for (MobileBaseCadManager m : slaves) {
 			m.setConfigurationViewerMode(b);

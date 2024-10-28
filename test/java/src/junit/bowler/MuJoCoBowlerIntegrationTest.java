@@ -26,7 +26,7 @@ public class MuJoCoBowlerIntegrationTest {
 //			JavaFXInitializer.go();
 //		} catch (Throwable t) {
 //			t.printStackTrace();
-//			System.err.println("ERROR No UI engine availible");
+//			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine availible");
 //		}
 //		ArrayList<MobileBase> bases = new ArrayList<>();
 //		ArrayList<CSG> free =new ArrayList<>();
@@ -39,7 +39,7 @@ public class MuJoCoBowlerIntegrationTest {
 //		terrain= (ArrayList<CSG>) ScriptingEngine.gitScriptRun(
 //				"https://github.com/madhephaestus/VexHighStakes2024.git",
 //				"field.groovy");
-//		System.out.println("Parts size = "+parts.size());
+//		com.neuronrobotics.sdk.common.Log.error("Parts size = "+parts.size());
 //		//terrain.add(new Cube(10000,10000,100).toCSG().toZMax());
 //		free.addAll(parts);
 //		MuJoCoPhysicsManager manager = new MuJoCoPhysicsManager("javaCadTest", bases, free, terrain, new File("./physicsTest"));
@@ -58,7 +58,7 @@ public class MuJoCoBowlerIntegrationTest {
 //				}
 //				fail("Real time broken! "+took+" instead of expected "+manager.getCurrentSimulationTimeSeconds());
 //			}else {
-//				System.out.println("Time "+now);
+//				com.neuronrobotics.sdk.common.Log.error("Time "+now);
 //			}
 //			long timeSinceStart = System.currentTimeMillis()-start;
 //			double sec = ((double)timeSinceStart)/1000.0;
@@ -67,7 +67,7 @@ public class MuJoCoBowlerIntegrationTest {
 //			}
 //		}
 //		manager.close();
-//		System.out.println("Success!");
+//		com.neuronrobotics.sdk.common.Log.error("Success!");
 
 	}
 

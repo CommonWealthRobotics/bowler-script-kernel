@@ -38,7 +38,7 @@ public class JettyTest {
       ScriptingEngine.setupAnyonmous();
       // ScriptingEngine.setAutoupdate(true);
     } catch (Exception ex) {
-      System.out.println("User not logged in, test can not run");
+      com.neuronrobotics.sdk.common.Log.error("User not logged in, test can not run");
     }
     File indexOfTutorial = ScriptingEngine
         .fileFromGit("https://github.com/CommonWealthRobotics/CommonWealthRobotics.github.io.git",
@@ -55,7 +55,7 @@ public class JettyTest {
     ResourceHandler resource_handler = new ResourceHandler();
     resource_handler.setDirectoriesListed(true);
     resource_handler.setWelcomeFiles(new String[]{"index.html"});
-    System.out.println("Serving " + indexOfTutorial.getParent());
+    com.neuronrobotics.sdk.common.Log.error("Serving " + indexOfTutorial.getParent());
     resource_handler.setResourceBase(indexOfTutorial.getParent());
 
     HandlerList handlers = new HandlerList();
@@ -75,7 +75,7 @@ public class JettyTest {
     try {
       java.io.InputStream url = new URL(HOME_Local_URL).openStream();
       try {
-        System.out.println(org.apache.commons.io.IOUtils.toString(url));
+        com.neuronrobotics.sdk.common.Log.error(org.apache.commons.io.IOUtils.toString(url));
       } finally {
         org.apache.commons.io.IOUtils.closeQuietly(url);
       }

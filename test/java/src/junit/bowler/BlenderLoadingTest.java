@@ -19,12 +19,12 @@ public class BlenderLoadingTest {
 				"TestRepo4.blend");
 		if(loaded.getPolygons().size()!=12)
 			fail("Failed to load polygon!");
-		System.out.println("Blender file loaded num polys: "+loaded.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("Blender file loaded num polys: "+loaded.getPolygons().size());
 		CSG cube = new Cube(100).toCSG();
 		CSG remeshed = GeometrySimplification.remesh(cube, 10.0);
 		if(remeshed.getPolygons().size()!=1452)
 			fail("Blender failed to remesh");
-		System.out.println("Remeshing produced: "+remeshed.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("Remeshing produced: "+remeshed.getPolygons().size());
 	}
 
 }

@@ -81,8 +81,8 @@ public class Purchasing {
           "Pushing changed Database");//commit message
 
     } catch (org.eclipse.jgit.api.errors.TransportException ex) {
-      System.out.println("You need to fork " + getGitRpoDatabase() + " to have permission to save");
-      System.out.println(
+      com.neuronrobotics.sdk.common.Log.error("You need to fork " + getGitRpoDatabase() + " to have permission to save");
+      com.neuronrobotics.sdk.common.Log.error(
           "You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
       throw ex;
     }

@@ -43,14 +43,14 @@ public class HingeCSGPhysicsManager extends CSGPhysicsManager {
         getCore().remove(this);
         setConstraint(null);
         getCore().add(this);
-        System.out.println(
+        com.neuronrobotics.sdk.common.Log.error(
             "ERROR Link Broken, Strength: " + getMuscleStrength() + " applied impluse " + constraint
                 .getAppliedImpulse());
       }
     } else if (constraint != null && flagBroken) {
       constraint.enableAngularMotor(false, 0, 0);
     }
-    //System.out.println("Constraint = "+constraint+" controller= "+getController()+" broken= "+flagBroken);
+    //com.neuronrobotics.sdk.common.Log.error("Constraint = "+constraint+" controller= "+getController()+" broken= "+flagBroken);
   }
 
 

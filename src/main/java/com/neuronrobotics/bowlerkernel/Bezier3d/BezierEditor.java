@@ -232,7 +232,7 @@ public class BezierEditor {
 
 		TransformNR az = new TransformNR(0, 0, 0, new RotationNR(0, -xyRot, 0));
 		TransformNR reorented = az.times(vect);
-		// System.out.println("CP1 "+reorented.getX()+" "+reorented.getY()+"
+		// com.neuronrobotics.sdk.common.Log.error("CP1 "+reorented.getX()+" "+reorented.getY()+"
 		// "+reorented.getZ());
 		double xzRot = Math.toDegrees(Math.atan2(reorented.getZ(), reorented.getY()));
 
@@ -325,7 +325,7 @@ public class BezierEditor {
 		database.put("bezier", bezData);
 
 		new Thread(() -> {
-			System.out.println("Saving to file " + cachejson.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Saving to file " + cachejson.getAbsolutePath());
 			String writeOut = gson.toJson(database, TT_mapStringString);
 			if (url != null) {
 				try {

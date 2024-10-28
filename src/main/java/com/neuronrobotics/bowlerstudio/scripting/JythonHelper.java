@@ -45,7 +45,7 @@ public class JythonHelper implements IScriptingLanguage {
 //        // TODO Auto-generated catch block
 //        e.printStackTrace();
 //      }
-//      System.err.println("Device " + bad.getScriptingName() + " is "
+//      com.neuronrobotics.sdk.common.Log.error("Device " + bad.getScriptingName() + " is "
 //          + bad);
 //    }
     interp.set("args", args);

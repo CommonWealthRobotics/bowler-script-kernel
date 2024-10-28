@@ -105,13 +105,13 @@ public class DownloadManager {
 
 		@Override
 		public boolean get(String name, String url) {
-			System.out.println("Command line mode, assuming yes to downloading \n" + name + " \nfrom \n" + url);
+			com.neuronrobotics.sdk.common.Log.error("Command line mode, assuming yes to downloading \n" + name + " \nfrom \n" + url);
 			return true;
 		}
 
 		@Override
 		public void onInstallFail(String url) {
-			System.out.println("Plugin needs to be installed from "+url);
+			com.neuronrobotics.sdk.common.Log.error("Plugin needs to be installed from "+url);
 		}
 	};
 	private static GitLogProgressMonitor psudoSplash = new GitLogProgressMonitor() {
@@ -166,7 +166,7 @@ public class DownloadManager {
 		if (envincoming != null) {
 			envir.putAll(envincoming);
 			for (String s : envincoming.keySet()) {
-				System.out.println("Environment var set: " + s + " to " + envir.get(s));
+				com.neuronrobotics.sdk.common.Log.error("Environment var set: " + s + " to " + envir.get(s));
 			}
 		}
 		// setting the directory
@@ -198,7 +198,7 @@ public class DownloadManager {
 		int ev = process.exitValue();
 		// out.println("Running "+commands);
 		if (ev != 0) {
-			System.out.println("ERROR PROCESS Process exited with " + ev);
+			com.neuronrobotics.sdk.common.Log.error("ERROR PROCESS Process exited with " + ev);
 		}
 		while (process.isAlive()) {
 			Thread.sleep(100);
@@ -289,7 +289,7 @@ public class DownloadManager {
 						Map<String, String> environment;
 						Object o = vm.get("environment");
 						if (o != null) {
-							System.out.println("Environment found for " + exeType + " on " + key);
+							com.neuronrobotics.sdk.common.Log.error("Environment found for " + exeType + " on " + key);
 
 							return (Map<String, String>) o;
 						}
@@ -340,7 +340,7 @@ public class DownloadManager {
 					Map<String, Object> vm = (Map<String, Object>) database.get(key);
 					if (vm != null) {
 						String targetdir = exeType;
-						System.out.println("Configuration found for " + exeType + " on " + key);
+						com.neuronrobotics.sdk.common.Log.error("Configuration found for " + exeType + " on " + key);
 						String baseURL = vm.get("url").toString();
 						String type = vm.get("type").toString();
 						String name = vm.get("name").toString();
@@ -385,7 +385,7 @@ public class DownloadManager {
 							File jvmArchive = download("", jvmURL, 800000000, bindir, name + "." + type, exeType);
 
 							if (dest.exists()) {
-								System.out.println("Erasing stale dir " + dest.getAbsolutePath());
+								com.neuronrobotics.sdk.common.Log.error("Erasing stale dir " + dest.getAbsolutePath());
 								deleteDirectory(dest);
 							}
 							if (type.toLowerCase().contains("zip")) {
@@ -423,7 +423,7 @@ public class DownloadManager {
 							Object configurations = database.get("Meta-Configuration");
 							if (configurations != null) {
 								List<String> configs = (List<String>) configurations;
-								System.out.println("Got Configurations " + configs.size());
+								com.neuronrobotics.sdk.common.Log.error("Got Configurations " + configs.size());
 								ev = -1;
 								IExternalEditor errorcheckerEditor = new IExternalEditor() {
 
@@ -465,7 +465,7 @@ public class DownloadManager {
 									}
 								};
 								for (int i = 0; i < configs.size(); i++) {
-									System.out.println("Running " + exeType + " Configuration " + (i + 1) + " of "
+									com.neuronrobotics.sdk.common.Log.error("Running " + exeType + " Configuration " + (i + 1) + " of "
 											+ configs.size());
 									ArrayList<String> toRun = new ArrayList<>();
 									toRun.add(bindir + targetdir + "/" + configexe);
@@ -475,7 +475,7 @@ public class DownloadManager {
 									}
 									// = +" "+configs.get(i);
 
-									// System.out.println(toRun);
+									// com.neuronrobotics.sdk.common.Log.error(toRun);
 
 									Thread thread = run(errorcheckerEditor, new File(bindir), System.out, toRun);
 									thread.join();
@@ -488,7 +488,7 @@ public class DownloadManager {
 							}
 
 						} else {
-							System.out.println("Not extraction, Application exists " + cmd);
+							com.neuronrobotics.sdk.common.Log.error("Not extraction, Application exists " + cmd);
 						}
 
 						return new File(cmd);
@@ -584,7 +584,7 @@ public class DownloadManager {
 			after.removeAll(before);
 			Object[] array = after.toArray();
 			String newMount = (String) array[0];
-			System.out.println("Extracted " + jvmArchive.getAbsolutePath() + " is mounted at " + newMount);
+			com.neuronrobotics.sdk.common.Log.error("Extracted " + jvmArchive.getAbsolutePath() + " is mounted at " + newMount);
 			// asr restore --source "$MOUNT_POINT" --target "$DEST_PATH" --erase --noprompt
 			if (!location.exists()) {
 				location.mkdirs();
@@ -602,7 +602,7 @@ public class DownloadManager {
 			return;
 		} // wait for the mount to finish
 
-		System.out.println("Extracted " + jvmArchive.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.error("Extracted " + jvmArchive.getAbsolutePath());
 
 	}
 
@@ -617,7 +617,7 @@ public class DownloadManager {
 	private static void extract7zSystemCall(String archivePath, String outputPath) {
 		File outputDir = new File(outputPath);
 		if (outputDir.exists()) {
-			System.err.println("Deleting partial extraction, using system 7z");
+			com.neuronrobotics.sdk.common.Log.error("Deleting partial extraction, using system 7z");
 			deleteDirectory(outputDir);
 		}
 		outputDir.mkdirs();
@@ -645,8 +645,8 @@ public class DownloadManager {
 		try (RandomAccessFile randomAccessFile = new RandomAccessFile(archivePath, "r");
 				IInArchive inArchive = SevenZip.openInArchive(null, new RandomAccessFileInStream(randomAccessFile))) {
 
-			System.out.println("Archive size: " + randomAccessFile.length() + " bytes");
-			System.out.println("Items in archive: " + inArchive.getNumberOfItems());
+			com.neuronrobotics.sdk.common.Log.error("Archive size: " + randomAccessFile.length() + " bytes");
+			com.neuronrobotics.sdk.common.Log.error("Items in archive: " + inArchive.getNumberOfItems());
 
 			for (int i = 0; i < inArchive.getNumberOfItems(); i++) {
 				Boolean isFolder = (Boolean) inArchive.getProperty(i, PropID.IS_FOLDER);
@@ -655,10 +655,10 @@ public class DownloadManager {
 				}
 			}
 
-			System.out.println("Extraction completed successfully.");
+			com.neuronrobotics.sdk.common.Log.error("Extraction completed successfully.");
 
 		} catch (Exception e) {
-			System.err.println("Error extracting archive: " + e.getMessage());
+			com.neuronrobotics.sdk.common.Log.error("Error extracting archive: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -691,9 +691,9 @@ public class DownloadManager {
 		}
 		downloadEvents.finishDownload();
 		if (result == ExtractOperationResult.OK) {
-			System.out.println("Extracted: " + path);
+			com.neuronrobotics.sdk.common.Log.error("Extracted: " + path);
 		} else {
-			System.err.println("Error extracting " + path + ": " + result);
+			com.neuronrobotics.sdk.common.Log.error("Error extracting " + path + ": " + result);
 		}
 	}
 
@@ -712,17 +712,17 @@ public class DownloadManager {
 	 * (entry.isDirectory()) { continue; } File outputFile = new File(outputDir,
 	 * entry.getName()); File parent = outputFile.getParentFile(); if
 	 * (!parent.exists()) { parent.mkdirs(); }
-	 * System.out.println("Inflating 7z "+outputFile.getAbsolutePath()); try
+	 * com.neuronrobotics.sdk.common.Log.error("Inflating 7z "+outputFile.getAbsolutePath()); try
 	 * (FileOutputStream out = new FileOutputStream(outputFile)) { byte[] content =
 	 * new byte[(int) entry.getSize()]; sevenZFile.read(content, 0, content.length);
 	 * out.write(content); } }
-	 * System.out.println("Extraction completed successfully."); } catch
+	 * com.neuronrobotics.sdk.common.Log.error("Extraction completed successfully."); } catch
 	 * (IOException e) { e.printStackTrace(System.out); } }
 	 * 
 	 * }
 	 */
 	public static void unzip(File path, String dir) throws Exception {
-		System.out.println("Unzipping " + path.getName() + " into " + dir);
+		com.neuronrobotics.sdk.common.Log.error("Unzipping " + path.getName() + " into " + dir);
 		String fileBaseName = FilenameUtils.getBaseName(path.getName().toString());
 		Path destFolderPath = new File(dir).toPath();
 
@@ -743,7 +743,7 @@ public class DownloadManager {
 									String text = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))
 											.lines().collect(Collectors.joining("\n"));
 									Path target = Paths.get(".", text);
-									System.out.println("Creating symlink " + entryPath + " with " + target);
+									com.neuronrobotics.sdk.common.Log.error("Creating symlink " + entryPath + " with " + target);
 
 									Files.createSymbolicLink(entryPath, target);
 									continue;
@@ -753,7 +753,7 @@ public class DownloadManager {
 							}
 							try (OutputStream out = new FileOutputStream(entryPath.toFile())) {
 								IOUtils.copy(in, out);
-								System.out.println("Inflating " + entryPath);
+								com.neuronrobotics.sdk.common.Log.error("Inflating " + entryPath);
 
 							}
 							if (isExecutable(entry)) {
@@ -800,13 +800,13 @@ public class DownloadManager {
 					try {
 						Files.createSymbolicLink(outPath, target);
 					} catch (IOException | UnsupportedOperationException e) {
-						System.err.println("Failed to create symlink " + outPath + ". Copying target instead.");
+						com.neuronrobotics.sdk.common.Log.error("Failed to create symlink " + outPath + ". Copying target instead.");
 						// Fallback: copy the target file instead
 						Path resolvedTarget = outPath.getParent().resolve(target).normalize();
 						if (Files.exists(resolvedTarget)) {
 							Files.copy(resolvedTarget, outPath);
 						} else {
-							System.err.println("Symlink target does not exist: " + resolvedTarget);
+							com.neuronrobotics.sdk.common.Log.error("Symlink target does not exist: " + resolvedTarget);
 						}
 					}
 				} else if (entry.isDirectory()) {
@@ -840,7 +840,7 @@ public class DownloadManager {
 	}
 
 	public static void untar(File tarFile, String dir) throws Exception {
-		System.out.println("Untaring " + tarFile.getName() + " into " + dir);
+		com.neuronrobotics.sdk.common.Log.error("Untaring " + tarFile.getName() + " into " + dir);
 
 		File dest = new File(dir);
 		dest.mkdir();
@@ -856,7 +856,7 @@ public class DownloadManager {
 		// tarIn is a TarArchiveInputStream
 		while (tarEntry != null) {// create a file with the same name as the tarEntry
 			File destPath = new File(dest.toString() + System.getProperty("file.separator") + tarEntry.getName());
-			System.out.println("Inflating: " + destPath.getCanonicalPath());
+			com.neuronrobotics.sdk.common.Log.error("Inflating: " + destPath.getCanonicalPath());
 			if (tarEntry.isDirectory()) {
 				destPath.mkdirs();
 			} else {
@@ -959,8 +959,8 @@ public class DownloadManager {
 		if (!folder.exists() || !exe.exists()) {
 
 			if (approval.get(downloadName, downloadJsonURL)) {
-				System.out.println("Start Downloading " + filename);
-				System.out.println("From "+downloadJsonURL);
+				com.neuronrobotics.sdk.common.Log.error("Start Downloading " + filename);
+				com.neuronrobotics.sdk.common.Log.error("From "+downloadJsonURL);
 
 			} else {
 				pis.close();
@@ -980,11 +980,11 @@ public class DownloadManager {
 			}
 			fileOutputStream.close();
 			pis.close();
-			System.out.println("Finished downloading " + filename);
+			com.neuronrobotics.sdk.common.Log.error("Finished downloading " + filename);
 			psudoSplash.onUpdate((int) (1 * 100)+" %  " +filename , null);
 			downloadEvents.finishDownload();
 		} else {
-			System.out.println("Not downloading, it existst " + filename);
+			com.neuronrobotics.sdk.common.Log.error("Not downloading, it existst " + filename);
 		}
 		return exe;
 	}
@@ -1018,11 +1018,11 @@ public class DownloadManager {
 //		File f = getRunExecutable("eclipse",null);
 //		String ws = EclipseExternalEditor.getEclipseWorkspace();
 //		if(f.exists()) {
-//			System.out.println("Executable retrived:\n"+f.getAbsolutePath());
+//			com.neuronrobotics.sdk.common.Log.error("Executable retrived:\n"+f.getAbsolutePath());
 //			run(getEnvironment("eclipse"),null,f.getParentFile(), System.err,Arrays.asList(f.getAbsolutePath(),"-data", ws));
 //		}
 //		else
-//			System.out.println("Failed to load file!\n"+f.getAbsolutePath());
+//			com.neuronrobotics.sdk.common.Log.error("Failed to load file!\n"+f.getAbsolutePath());
 //	}
 
 	public static IApprovalForDownload getApproval() {

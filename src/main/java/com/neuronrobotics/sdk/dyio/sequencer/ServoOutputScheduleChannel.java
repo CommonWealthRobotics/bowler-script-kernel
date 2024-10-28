@@ -79,7 +79,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 	 * Pause recording.
 	 */
 	public void pauseRecording(){
-		System.out.println("pausing recording");
+		com.neuronrobotics.sdk.common.Log.error("pausing recording");
 		if(input != null)
 			input.removeAnalogInputListener(this);
 		setRecording(false);
@@ -91,7 +91,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 	public void resumeRecording(){
 		if(input==null)
 			initInput();
-		System.out.println("resuming recording");
+		com.neuronrobotics.sdk.common.Log.error("resuming recording");
 		setRecording(true);
 	}
 	
@@ -117,7 +117,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 		}
 
 		if(input.getChannel().getChannelNumber() != analogInputChannelNumber) {
-			System.out.println("Re-Setting analog input channel: "+analogInputChannelNumber);
+			com.neuronrobotics.sdk.common.Log.error("Re-Setting analog input channel: "+analogInputChannelNumber);
 			input.removeAllAnalogInputListeners();
 			input=new AnalogInputChannel(output.getChannel().getDevice().getChannel(analogInputChannelNumber),true);
 		}
@@ -149,7 +149,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 		
 	
 		//output.SetPosition(data.get(index).input);
-		//System.out.println("Setting servo "+getChannelNumber()+" value="+getCurrentValue());
+		//com.neuronrobotics.sdk.common.Log.error("Setting servo "+getChannelNumber()+" value="+getCurrentValue());
 	}
 
 
@@ -161,7 +161,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 		setInterval(msInterval);
 		int slices = totalTime/msInterval;
 		if(data.size()==0){
-			System.out.println("Setting up sample data: "+msInterval+"ms for: "+totalTime);
+			com.neuronrobotics.sdk.common.Log.error("Setting up sample data: "+msInterval+"ms for: "+totalTime);
 			data = new ArrayList<MapData>();
 			setCurrentTargetValue(getCurrentValue());
 			if(getCurrentTargetValue()>getOutputMax()){
@@ -186,14 +186,14 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 	public void onAnalogValueChange(AnalogInputChannel chan, double value) {
 
 		double centerOffset =getInputCenter()-(512*getInputScale());
-		//System.out.println("Center Offset="+centerOffset);
+		//com.neuronrobotics.sdk.common.Log.error("Center Offset="+centerOffset);
 		
 		double scaled  = (value*getInputScale());
 		double recentered =  (scaled+centerOffset);
 		
 		
 		setCurrentTargetValue((int) recentered );
-		//System.out.println("Analog value="+(int)value+" scaled="+(int)scaled +" recentered="+(int)recentered);
+		//com.neuronrobotics.sdk.common.Log.error("Analog value="+(int)value+" scaled="+(int)scaled +" recentered="+(int)recentered);
 		if(getCurrentTargetValue()>getOutputMax()){
 			setCurrentTargetValue(getOutputMax());
 		}
@@ -383,7 +383,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 	 * Start test.
 	 */
 	public void startTest() {
-		System.out.println("Starting test for output: "+getChannelNumber());
+		com.neuronrobotics.sdk.common.Log.error("Starting test for output: "+getChannelNumber());
 		initInput();
 		directTester = new Tester();
 		directTester.start();
@@ -463,7 +463,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 	 * @param analogInputChannelNumber the new analog input channel number
 	 */
 	public void setAnalogInputChannelNumber(int analogInputChannelNumber) {
-		//System.out.println("Setting analog input number: "+analogInputChannelNumber);
+		//com.neuronrobotics.sdk.common.Log.error("Setting analog input number: "+analogInputChannelNumber);
 		this.analogInputChannelNumber = analogInputChannelNumber;
 	}
 	
@@ -499,12 +499,12 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 		 * @see java.lang.Thread#run()
 		 */
 		public void run() {
-			//System.out.println("Starting Test");
+			//com.neuronrobotics.sdk.common.Log.error("Starting Test");
 			while(running) {
 				flush();
 				try {Thread.sleep((long) getInterval());} catch (InterruptedException e) {}
 			}
-			//System.out.println("Test Done");
+			//com.neuronrobotics.sdk.common.Log.error("Test Done");
 		}
 		
 		/**

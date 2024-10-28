@@ -209,7 +209,7 @@ public class VitaminBomManager {
 	
 				csv += key + "," + size + "," + URL +","+object+ "\n";
 			} else {
-				System.out.println("Failure on " + key);
+				com.neuronrobotics.sdk.common.Log.error("Failure on " + key);
 			}
 		}
 
@@ -217,7 +217,7 @@ public class VitaminBomManager {
 			String current = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_CSV)[0];
 			String currentJ = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_JSON)[0];
 			if (current.contentEquals(csv) && currentJ.contentEquals(content)) {
-				//System.out.println("No update, BoM current");
+				//com.neuronrobotics.sdk.common.Log.error("No update, BoM current");
 				saving = false;
 				return;
 			}

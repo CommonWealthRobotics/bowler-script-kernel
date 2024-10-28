@@ -145,11 +145,11 @@ public class CaDoodleFile {
 		if (initializing)
 			return null;
 		if (isRegenerating() || isOperationRunning()) {
-			System.out.println("Opperation is running, ignoring regen");
+			com.neuronrobotics.sdk.common.Log.error("Opperation is running, ignoring regen");
 			return null;
 		}
 		int endIndex = getCurrentIndex();
-		int size = opperations.size();
+		double size = opperations.size();
 		if (endIndex != size) {
 //			new Exception("Regenerationg from a position back in time " + endIndex + " but have " + size)
 //					.printStackTrace();
@@ -157,7 +157,7 @@ public class CaDoodleFile {
 		opperationRunner = new Thread(() -> {
 			opperationRunner.setName("Regeneration Thread");
 			setRegenerating(true);
-			// System.out.println("Regenerating Object from "+source.getType());
+			// com.neuronrobotics.sdk.common.Log.error("Regenerating Object from "+source.getType());
 			int opIndex = 0;
 			for (int i = 0; i < size; i++) {
 				ICaDoodleOpperation op = opperations.get(i);
@@ -170,7 +170,8 @@ public class CaDoodleFile {
 
 			for (; getCurrentIndex() < size;) {
 				setCurrentIndex(getCurrentIndex() + 1);
-				// System.out.println("Regenerating "+currentIndex);
+				setPercentInitialized(((double)getCurrentIndex())/size);
+				// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
 				ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
 				List<CSG> process = op.process(getPreviouState());
 				storeResultInCache(op, process);
@@ -259,7 +260,7 @@ public class CaDoodleFile {
 		ArrayList<ICaDoodleOpperation> newList = new ArrayList<ICaDoodleOpperation>();
 		newList.addAll(subList);
 		setOpperations(newList);
-		System.err.println("Pruning forward here!");
+		com.neuronrobotics.sdk.common.Log.error("Pruning forward here!");
 	}
 
 	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
@@ -289,7 +290,7 @@ public class CaDoodleFile {
 		ICaDoodleOpperation key = getCurrentOpperation();
 		if (key == null)
 			return;
-		System.out.println("Current opperation results: " + key.getType());
+		com.neuronrobotics.sdk.common.Log.error("Current opperation results: " + key.getType());
 		setCurrentState(key, getCurrentState());
 	}
 
@@ -402,10 +403,10 @@ public class CaDoodleFile {
 			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(getImage(), null);
 			try {
 				ImageIO.write(bufferedImage, "png", image);
-				// System.out.println("Thumbnail saved successfully to " +
+				// com.neuronrobotics.sdk.common.Log.error("Thumbnail saved successfully to " +
 				// image.getAbsolutePath());
 			} catch (IOException e) {
-				// System.err.println("Error saving image: " + e.getMessage());
+				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -426,7 +427,7 @@ public class CaDoodleFile {
 				loadingImageFromUIThread();
 			}
 		} catch (IOException e) {
-			System.err.println("Error loading image: " + e.getMessage());
+			com.neuronrobotics.sdk.common.Log.error("Error loading image: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return img;
@@ -437,7 +438,7 @@ public class CaDoodleFile {
 		while (getImage() == null)
 			try {
 				Thread.sleep(16);
-				// System.out.println("Waiting for image to write");
+				// com.neuronrobotics.sdk.common.Log.error("Waiting for image to write");
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -474,14 +475,14 @@ public class CaDoodleFile {
 	}
 
 	public static String getProjectName(File f) throws Exception {
-		System.out.println("CaDoodle file reading from " + f.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.error("CaDoodle file reading from " + f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 		CaDoodleFile file = fromJsonString(content, null, f, false);
 		return file.getProjectName();
 	}
 
 	public static CaDoodleFile fromFile(File f, ICaDoodleStateUpdate listener, boolean initialize) throws Exception {
-		System.out.println("CaDoodle file loading from " + f.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.error("CaDoodle file loading from " + f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 		CaDoodleFile file = fromJsonString(content, listener, f, initialize);
 		return file;

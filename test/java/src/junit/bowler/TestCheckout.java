@@ -25,7 +25,7 @@ public class TestCheckout {
 			try {
 				String []name = select.getName().split("/");
 				String myName = name[name.length-1];
-				System.out.println("Selecting Branch\r\n"+url+" \t\t"+myName);
+				com.neuronrobotics.sdk.common.Log.error("Selecting Branch\r\n"+url+" \t\t"+myName);
 				String was = ScriptingEngine.getBranch(url);
 				ScriptingEngine.checkout(url, myName);
 				String s = ScriptingEngine.getBranch(url);

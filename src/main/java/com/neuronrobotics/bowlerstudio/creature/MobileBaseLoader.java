@@ -56,7 +56,7 @@ public class MobileBaseLoader {
 				public void onFileChange(File fileThatChanged, WatchEvent event)  {
 
 					try {
-						System.out.println("D-H Solver changed, updating " + device.getScriptingName());
+						com.neuronrobotics.sdk.common.Log.error("D-H Solver changed, updating " + device.getScriptingName());
 						DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(c, null);
 						device.setInverseSolver(d);
 					} catch (Exception ex) {
@@ -113,7 +113,7 @@ public class MobileBaseLoader {
 			public void onFileChange(File fileThatChanged, WatchEvent event){
 
 				try {
-					System.out.println("Walking Gait Script changed, updating " + device.getScriptingName());
+					com.neuronrobotics.sdk.common.Log.error("Walking Gait Script changed, updating " + device.getScriptingName());
 					defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
 					device.setWalkingDriveEngine(defaultDriveEngine);
 				} catch (Exception ex) {

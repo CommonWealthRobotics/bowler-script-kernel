@@ -22,7 +22,8 @@ public class SvgLoader implements IScriptingLanguage {
 			SVGLoad s = new SVGLoad(code.toURI());
 			return run(s);
 		}catch(Exception e) {
-			System.err.println("SVG had error, attempting to fix "+code.getAbsolutePath());
+			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error("SVG had error, attempting to fix "+code.getAbsolutePath());
 			File tmp=GeometrySimplification.simplifySVG(code);
 			SVGLoad s = new SVGLoad(tmp.toURI());
 			return run(s);
@@ -49,6 +50,8 @@ public class SvgLoader implements IScriptingLanguage {
 		double depth =5+(layers.size()*5);
 		for(int i=0;i<layers.size();i++) {
 			String layerName=layers.get(i);
+			if(layerName==null)
+				layerName="TopLayer";
 			CSG extrudeLayerToCSG = s.extrudeLayerToCSG(depth,layerName);
 			//extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
 			polys.add(extrudeLayerToCSG);

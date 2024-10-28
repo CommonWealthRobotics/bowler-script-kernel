@@ -98,7 +98,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 
 		List<String> maps = PersistantControllerMap.getDefaultMaps();
 		int i = 0;
-		System.out.println("There are "+maps.size()+" rows");
+		com.neuronrobotics.sdk.common.Log.error("There are "+maps.size()+" rows");
 		for (i = 0; i < maps.size(); i++) {
 			String map = maps.get(i);
 
@@ -194,10 +194,10 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 			values.put(name,value);
 			timeOfLastAxisSet.put(name, System.currentTimeMillis());
 			if(abs>0.2)
-				System.out.println("value for "+name+" seems noisy "+value+" most recent was "+values.get(name));
+				com.neuronrobotics.sdk.common.Log.error("value for "+name+" seems noisy "+value+" most recent was "+values.get(name));
 			return;
 		}else {
-			System.out.println("Value changed! "+name+" "+float1+" to "+value);
+			com.neuronrobotics.sdk.common.Log.error("Value changed! "+name+" "+float1+" to "+value);
 			values.put(name, value);
 			timeOfLastAxisSet.put(name, System.currentTimeMillis());
 		}
@@ -205,8 +205,8 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		
 		for(String s:listOfMappedAxis) {
 			if(s.contentEquals(name)) {
-				System.out.println("mapping skipped for "+name);
-				System.out.println(gameController);
+				com.neuronrobotics.sdk.common.Log.error("mapping skipped for "+name);
+				com.neuronrobotics.sdk.common.Log.error(gameController);
 				return;// This axis name is already mapped and will not be mapped again
 			}
 		}
@@ -216,7 +216,7 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		}
 
 		axisWaiting=name;
-		System.out.println("Adding Axis "+name);
+		com.neuronrobotics.sdk.common.Log.error("Adding Axis "+name);
 		
 		listOfMappedAxis.add(name);
 		timeOfLastAxisSet.put(name,System.currentTimeMillis());
@@ -236,17 +236,17 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 	}
 
 	public static void run(BowlerJInputDevice c) {
-		//System.out.println("Launching Controller mapping");
+		//com.neuronrobotics.sdk.common.Log.error("Launching Controller mapping");
 		BowlerKernel.runLater(new Runnable() {
 			@Override
 			public void run() {
-				//System.out.println("Creating stage");
+				//com.neuronrobotics.sdk.common.Log.error("Creating stage");
 				Stage s = new Stage();
 				new Thread() {
 					public void run() {
 						JogTrainerWidget controller = new JogTrainerWidget(c);
 						try {
-							//System.out.println("Loading FXML");
+							//com.neuronrobotics.sdk.common.Log.error("Loading FXML");
 							controller.start(s);
 						} catch (Exception e) {
 							e.printStackTrace();

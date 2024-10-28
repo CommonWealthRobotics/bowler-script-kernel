@@ -34,7 +34,7 @@ public class AssetFactory {
   private AssetFactory() {
   }
   static {
-	  System.out.println("AssetFactory loaded");
+	  com.neuronrobotics.sdk.common.Log.error("AssetFactory loaded");
 	  //new RuntimeException().printStackTrace();
   }
 
@@ -105,7 +105,7 @@ public class AssetFactory {
         }
 
         cache.put(file, obj_img);
-        System.out.println("No image at " + file);
+        com.neuronrobotics.sdk.common.Log.error("No image at " + file);
 
         try {
         	new RuntimeException().printStackTrace();
@@ -153,7 +153,7 @@ public class AssetFactory {
   }
 
   public static void setGitSource(String gitSource, String assetRepoBranch) throws Exception {
-    System.err.println("Assets from: " + gitSource + "#" + assetRepoBranch);
+    com.neuronrobotics.sdk.common.Log.error("Assets from: " + gitSource + "#" + assetRepoBranch);
     //new Exception().printStackTrace();
     setAssetRepoBranch(assetRepoBranch);
     AssetFactory.gitSource = gitSource;
@@ -162,7 +162,7 @@ public class AssetFactory {
   }
 
   public static void loadAllAssets() throws Exception {
-	  System.err.println("Loading assets");
+	  com.neuronrobotics.sdk.common.Log.error("Loading assets");
     List<String> files;
     try {
     	files = ScriptingEngine.filesInGit(gitSource, StudioBuildInfo.getVersion(), null);
@@ -170,7 +170,7 @@ public class AssetFactory {
     	files = ScriptingEngine.filesInGit(gitSource);
     }
     for (String file : files) {
-    	System.err.println("Loading asset file: "+file);
+    	com.neuronrobotics.sdk.common.Log.error("Loading asset file: "+file);
       loadAsset(file);
     }
   }

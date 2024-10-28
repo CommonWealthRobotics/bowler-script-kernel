@@ -39,10 +39,10 @@ public class BashLoader implements IScriptingLanguage {
 		while ((s = stdInput.readLine()) != null || (e = errInput.readLine()) != null) {
 			if (s != null) {
 				back.add(s);
-				System.out.println(s);
+				com.neuronrobotics.sdk.common.Log.error(s);
 			}
 			if (e != null)
-				System.out.println(e);
+				com.neuronrobotics.sdk.common.Log.error(e);
 			//
 		}
 		process.waitFor();

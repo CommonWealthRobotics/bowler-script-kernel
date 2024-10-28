@@ -73,7 +73,7 @@ public class ICaDoodleOperationAdapterFactory implements TypeAdapterFactory {
                     throw new JsonParseException("Unknown type: " + typeName);
                 }
                 TypeAdapter<? extends ICaDoodleOpperation> delegateAdapter = gson.getDelegateAdapter(ICaDoodleOperationAdapterFactory.this, TypeToken.get(clazz));
-                System.out.println("JSON Parsing "+typeName);
+                com.neuronrobotics.sdk.common.Log.error("JSON Parsing "+typeName);
                 return (T) delegateAdapter.fromJsonTree(dataElement);
             }
         }.nullSafe();

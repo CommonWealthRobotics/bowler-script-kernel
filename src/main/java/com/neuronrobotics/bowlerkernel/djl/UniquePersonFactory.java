@@ -262,7 +262,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					if (up.features.size() >= numberOfTrainingHashes) {
 						if (!longTermMemory.contains(up)) {
 							longTermMemory.add(up);
-							System.out.println("Saving new Face to database " + up.name);
+							com.neuronrobotics.sdk.common.Log.error("Saving new Face to database " + up.name);
 							save();
 						}
 					}
@@ -280,7 +280,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					try {
 						id = features.predict(cmp);
 					} catch (Throwable ex) {
-						System.out.println("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
+						com.neuronrobotics.sdk.common.Log.error("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
 						// ex.printStackTrace();
 						continue;
 					}
@@ -344,7 +344,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	private EventHandler<ActionEvent> setAction(UniquePerson p) {
 		return event -> {
 			String newName = getUI(p).name.getText();
-			System.out.println("Renaming " + p.name + " to " + newName);
+			com.neuronrobotics.sdk.common.Log.error("Renaming " + p.name + " to " + newName);
 			p.name = newName;
 			new Thread(() -> save()).start();
 		};
