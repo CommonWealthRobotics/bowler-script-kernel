@@ -125,7 +125,10 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		return file;
 	}
 	public File getFile() {
-		return new File(getStrValue());
+		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
+		File parentFile = new File(loc.getStrValue()).getParentFile();
+		File file = new File(getStrValue());
+		return new File(parentFile.getAbsolutePath()+DownloadManager.delim()+file.getName());
 	}
 
 	private String getStrValue() {
