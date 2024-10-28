@@ -114,7 +114,15 @@ public class DownloadManager {
 			System.out.println("Plugin needs to be installed from "+url);
 		}
 	};
-	private static GitLogProgressMonitor psudoSplash;
+	private static GitLogProgressMonitor psudoSplash = new GitLogProgressMonitor() {
+
+		@Override
+		public void onUpdate(String update, Exception e) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	};
 	private static String jvmURL;
 
 	public static Thread run(IExternalEditor editor, File dir, PrintStream out, List<String> finalCommand) {
