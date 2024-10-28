@@ -58,9 +58,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			com.neuronrobotics.sdk.common.Log.error("Initial Loading " + getStrValue());
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
-				CSG processedCSG = processGiven(csg, i,parameter, getOrderedName());
-
-				collect.add(processedCSG);
+				try {
+					CSG processedCSG = processGiven(csg, i,parameter, getOrderedName());
+					collect.add(processedCSG);
+				}catch(Exception ex) {
+					ex.printStackTrace();
+				}
 			}
 			back.addAll(collect);
 		} catch (Exception e) {
