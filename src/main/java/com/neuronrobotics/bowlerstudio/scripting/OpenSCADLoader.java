@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -23,7 +24,15 @@ public class OpenSCADLoader implements IScriptingLanguage {
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
 		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl");
 		stl.deleteOnExit();
-		toSTLFile(code,stl);
+		HashMap<String,Double> params=new HashMap<String, Double>();
+		if(args!=null) {
+			Object o = args.get(0);
+			if(HashMap.class.isInstance(o)) {
+				params=(HashMap<String,Double>)o;
+			}
+		}
+		
+		toSTLFile(code,stl,params);
 		CSG back = Vitamins.get(stl,true);
 		back.setColor(Color.YELLOW);
 		return back;
@@ -51,14 +60,19 @@ public class OpenSCADLoader implements IScriptingLanguage {
 
 
 
-	public static void toSTLFile(File openscadfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void toSTLFile(File openscadfile,File stlout, HashMap<String,Double> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("openscad", null);
-
+		if(params==null)
+			params=new HashMap<String, Double>();
 		ArrayList<String> args = new ArrayList<>();
 
 		if(stlout.exists())
 			stlout.delete();
 		args.add(exe.getAbsolutePath());
+		for(String key:params.keySet()) {
+			args.add("-D");
+			args.add(key+"="+params.get(key));
+		}
 		args.add("-o");
 		args.add(stlout.getAbsolutePath());
 		args.add(openscadfile.getAbsolutePath());
@@ -66,7 +80,7 @@ public class OpenSCADLoader implements IScriptingLanguage {
 	}
 	@Override
 	public String getDefaultContents() {
-		return "cube([3, 2, 1]);";
+		return "cube([30, 20, 10]);";
 	}
 
 	@Override
@@ -81,7 +95,8 @@ public class OpenSCADLoader implements IScriptingLanguage {
 		File testblend = new File("test.scad");
 		if(!testblend.exists())
 			loader.getDefaultContents(testblend);
-		toSTLFile(testblend, new File("testscad.stl"));
+		HashMap<String,Double> params = new HashMap<String, Double>();
+		toSTLFile(testblend, new File("testscad.stl"),params);
 	}
 
 }
