@@ -54,7 +54,10 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //			ArrayList<Object>args = new ArrayList<>();
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
-			List<CSG> flattenedCSGs = ScriptingEngine.flaten(getFile(), CSG.class, null);
+			File file = getFile();
+			String pathname = file.getAbsolutePath();
+			getParameter(pathname).setStrValue(pathname);
+			List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, null);
 			com.neuronrobotics.sdk.common.Log.error("Initial Loading " + getStrValue());
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
@@ -128,7 +131,8 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
 		File parentFile = new File(loc.getStrValue()).getParentFile();
 		File file = new File(getStrValue());
-		return new File(parentFile.getAbsolutePath()+DownloadManager.delim()+file.getName());
+		String pathname = parentFile.getAbsolutePath()+DownloadManager.delim()+file.getName();
+		return new File(pathname);
 	}
 
 	private String getStrValue() {
