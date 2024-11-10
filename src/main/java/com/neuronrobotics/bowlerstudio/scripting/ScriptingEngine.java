@@ -1067,7 +1067,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider())
 						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 			closeGit(git);
-			com.neuronrobotics.sdk.common.Log.error("PUSH OK! file: " + desired + " on branch " + getBranch(remoteURI));
+			System.out.println("PUSH OK! file: " + desired + " on branch " + getBranch(remoteURI));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			closeGit(git);

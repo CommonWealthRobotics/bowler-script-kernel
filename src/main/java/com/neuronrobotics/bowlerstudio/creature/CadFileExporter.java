@@ -154,11 +154,12 @@ public class CadFileExporter {
 		if(freecadParts.size()>0){
 			allCadStl.add(makeFreecad(nameBase,freecadParts));// default to stl
 		}
+		System.out.println("Finished Export!");
 		return allCadStl;
 	}
 	private File makeFreecad(String nameBase,List<CSG>  current ) throws IOException{
 		File blend = new File(nameBase + ".FCStd");
-		com.neuronrobotics.sdk.common.Log.error("Writing "+blend.getAbsolutePath());
+		System.out.println("Writing "+blend.getAbsolutePath());
 		for(CSG tmp:current)
 			FreecadLoader.addCSGToFreeCAD( blend,tmp);
 		return blend;
@@ -168,20 +169,20 @@ public class CadFileExporter {
 		File stl = new File(nameBase + ".stl");
 		
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
-		com.neuronrobotics.sdk.common.Log.error("Writing "+stl.getAbsolutePath());
+		System.out.println("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
 	private File makeObj(String nameBase,CSG tmp ) throws IOException{
 		File stl = new File(nameBase + ".obj");
 		
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toObjString());
-		com.neuronrobotics.sdk.common.Log.error("Writing "+stl.getAbsolutePath());
+		System.out.println("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
 	
 	private File makeBlender(String nameBase,List<CSG>  current ) throws IOException{
 		File blend = new File(nameBase + ".blend");
-		com.neuronrobotics.sdk.common.Log.error("Writing "+blend.getAbsolutePath());
+		System.out.println("Writing "+blend.getAbsolutePath());
 		for(CSG tmp:current)
 			BlenderLoader.toBlenderFile(tmp, blend);
 		return blend;
@@ -212,7 +213,7 @@ public class CadFileExporter {
 
 				}
 
-				com.neuronrobotics.sdk.common.Log.error("Writing " + stl.getAbsolutePath());
+				System.out.println("Writing " + stl.getAbsolutePath());
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine availible for slicing");
 				t.printStackTrace();
