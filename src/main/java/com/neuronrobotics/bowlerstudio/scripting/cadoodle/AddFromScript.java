@@ -60,9 +60,9 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 					.stream()
 					.map(csg->{
 						return csg
-								.moveToCenterX()
-								.moveToCenterY()
-								.toZMin()
+//								.moveToCenterX()
+//								.moveToCenterY()
+//								.toZMin()
 								.transformed(TransformFactory.nrToCSG( getLocation() ))
 								.syncProperties(csg)
 								.setName(getOrderedName());
