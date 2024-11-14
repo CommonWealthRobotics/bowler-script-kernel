@@ -143,7 +143,7 @@ public class CoquiDockerManager implements ITTSEngine {
 						@Override
 						public void onNext(BuildResponseItem item) {
 							// Handle build output (optional)
-							com.neuronrobotics.sdk.common.Log.error(item.getStream());
+							System.out.println(item.getStream());
 							super.onNext(item);
 						}
 					}).awaitImageId();
