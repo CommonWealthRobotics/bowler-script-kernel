@@ -377,6 +377,16 @@ public class CaDoodleFile {
 			}
 		}
 	}
+	private void fireWorkplaneChange() {
+
+		for (ICaDoodleStateUpdate l : listeners) {
+			try {
+				l.onWorkplaneChange(workplane);
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public String getProjectName() {
 		return projectName;
@@ -504,6 +514,7 @@ public class CaDoodleFile {
 
 	public void setWorkplane(TransformNR workplane) {
 		this.workplane = workplane;
+		fireWorkplaneChange();
 		fireSaveSuggestion();
 	}
 
