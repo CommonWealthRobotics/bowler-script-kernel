@@ -371,6 +371,7 @@ public class BowlerKernel {
 		}
 		ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
 				null);
+		CSG.setPreventNonManifoldTriangles(true);
 	}
 
 	private static void finish(long startTime) {
