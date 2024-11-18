@@ -372,6 +372,14 @@ public class BowlerKernel {
 		ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
 				null);
 		CSG.setPreventNonManifoldTriangles(true);
+		CSG.setProgressMoniter(new ICSGProgress() {
+			@Override
+			public void progressUpdate(int currentIndex, int finalIndex, String type,
+					eu.mihosoft.vrl.v3d.CSG intermediateShape) {
+
+			}
+
+		});
 	}
 
 	private static void finish(long startTime) {
@@ -384,14 +392,7 @@ public class BowlerKernel {
 		processUIOpening(ret);
 		if(baseWorkspaceFile!=null)
 			com.neuronrobotics.sdk.common.Log.error("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
-		CSG.setProgressMoniter(new ICSGProgress() {
-			@Override
-			public void progressUpdate(int currentIndex, int finalIndex, String type,
-					eu.mihosoft.vrl.v3d.CSG intermediateShape) {
 
-			}
-
-		});
 		
 		if (baseWorkspaceFile != null) {
 			
