@@ -9,6 +9,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cylinder;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 
@@ -35,7 +37,7 @@ public class CartesianManipulator {
 		}
 	}
 
-	public void addEventListener(Runnable r) {
+	public void addEventListener(EventHandler<MouseEvent> r) {
 		for (int i = 0; i < 3; i++)
 			manipulationList[i].addEventListener(r);
 	}

@@ -8,6 +8,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Affine;
 
 public class PrintBedObject {
@@ -35,7 +37,7 @@ public class PrintBedObject {
 		manip.addSaveListener(() -> com.neuronrobotics.sdk.common.Log.error("Saving PrintBedObject "+name));
 		checkBounds();
 	}
-	public void addEventListener(Runnable r) {
+	public void addEventListener(EventHandler<MouseEvent> r) {
 		manip.addEventListener(r);
 	}
 

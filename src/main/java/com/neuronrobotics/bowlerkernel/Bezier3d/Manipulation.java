@@ -29,7 +29,7 @@ public class Manipulation {
 	private static IInteractiveUIElementProvider ui = new IInteractiveUIElementProvider() {
 	};
 
-	private ArrayList<Runnable> eventListeners = new ArrayList<>();
+	private ArrayList<EventHandler<MouseEvent>> eventListeners = new ArrayList<>();
 	private ArrayList<Runnable> saveListeners = new ArrayList<>();
 	private ArrayList<Manipulation> dependants = new ArrayList<>();
 	private Affine manipulationMatrix;
@@ -46,7 +46,7 @@ public class Manipulation {
 
 	private DragState state = DragState.IDLE;
 
-	public void addEventListener(Runnable r) {
+	public void addEventListener(EventHandler<MouseEvent> r) {
 		if (eventListeners.contains(r))
 			return;
 		eventListeners.add(r);
@@ -71,12 +71,12 @@ public class Manipulation {
 		eventListeners.clear();
 	}
 
-	private void fireMove(TransformNR trans) {
+	private void fireMove(TransformNR trans, MouseEvent event2) {
 		for (Manipulation R : dependants) {
-			R.performMove(trans);
+			R.performMove(trans,event2);
 		}
-		for (Runnable R : eventListeners) {
-			R.run();
+		for (EventHandler<MouseEvent> R : eventListeners) {
+			R.handle(event2);
 		}
 	}
 
@@ -119,7 +119,7 @@ public class Manipulation {
 					pressed(event);
 					break;
 				case "MOUSE_DRAGGED":
-					dragged(event);
+					dragged(event,event);
 					break;
 				case "MOUSE_RELEASED":
 					release(event);
@@ -167,7 +167,7 @@ public class Manipulation {
 		//manip.getMesh().setMaterial(color);
 	}
 
-	private void dragged(MouseEvent event) {
+	private void dragged(MouseEvent event, MouseEvent event2) {
 		if(state==DragState.Dragging) {
 			getUi().runLater(() -> {
 				setDragging(event);
@@ -178,7 +178,7 @@ public class Manipulation {
 				//com.neuronrobotics.sdk.common.Log.error("Moved "+x+" "+y);
 				if(Double.isFinite(y) && Double.isFinite(x)) {			
 					TransformNR trans = new TransformNR(x, y, 0, new RotationNR());
-					performMove(trans);
+					performMove(trans,event2);
 				}else {
 					com.neuronrobotics.sdk.common.Log.error("ERROR?");
 				}
@@ -214,7 +214,7 @@ public class Manipulation {
 		}
 	}
 
-	private void performMove(TransformNR trans) {
+	private void performMove(TransformNR trans, MouseEvent event2) {
 		TransformNR camerFrame = getUi().getCamerFrame();
 		TransformNR globalTMP = new TransformNR(camerFrame.getRotation());
 		try {
@@ -246,7 +246,7 @@ public class Manipulation {
 		}catch(Throwable t) {
 			t.printStackTrace();
 		}
-		fireMove(trans);
+		fireMove(trans,event2);
 	}
 	private double round(double in) {
 		return Math.round(in / increment) * increment;
@@ -277,8 +277,8 @@ public class Manipulation {
 		getGlobalPose().setY(newY);
 		getGlobalPose().setZ(newZ);
 		setGlobal(new TransformNR(newX, newY, newZ, new RotationNR()));
-		for (Runnable R : eventListeners) {
-			R.run();
+		for (EventHandler<MouseEvent> R : eventListeners) {
+			R.handle(null);
 		}
 
 	}
@@ -289,8 +289,8 @@ public class Manipulation {
 		inLocal.setRotation(new RotationNR());
 		//com.neuronrobotics.sdk.common.Log.error("Setting in reference frame:"+inLocal.toSimpleString());
 		setGlobal(inLocal);
-		for (Runnable R : eventListeners) {
-			R.run();
+		for (EventHandler<MouseEvent> R : eventListeners) {
+			R.handle(null);
 		}
 
 	}

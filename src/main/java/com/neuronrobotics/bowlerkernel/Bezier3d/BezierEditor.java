@@ -133,21 +133,21 @@ public class BezierEditor {
 		endManip.addSaveListener(() -> {
 			save();
 		});
-		endManip.addEventListener(() -> {
+		endManip.addEventListener(e -> {
 			update();
 		});
 
 		cp1Manip.addSaveListener(() -> {
 			save();
 		});
-		cp1Manip.addEventListener(() -> {
+		cp1Manip.addEventListener(e -> {
 			update();
 		});
 
 		cp2Manip.addSaveListener(() -> {
 			save();
 		});
-		cp2Manip.addEventListener(() -> {
+		cp2Manip.addEventListener(e -> {
 			update();
 		});
 		ArrayList<CSG> parts = new ArrayList<>();
@@ -381,7 +381,7 @@ public class BezierEditor {
 		start.addSaveListener(() -> {
 			save();
 		});
-		start.addEventListener(() -> {
+		start.addEventListener(e -> {
 			update();
 		});
 		start.addDependant(cp1Manip);
