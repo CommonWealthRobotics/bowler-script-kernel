@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.vitamins;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +16,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.ext.openjfx.importers.obj.ObjImporter;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import javafx.scene.paint.Color;
@@ -90,7 +92,10 @@ public class Vitamins {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
 			try {
-				fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
+				if(resource.getName().toLowerCase().endsWith(".stl"))
+					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
+				if(resource.getName().toLowerCase().endsWith(".obj"))
+					fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new FileInputStream(resource)).);
 //				try {
 //					FileChangeWatcher f = FileChangeWatcher.watch(resource);
 //					f.addIFileChangeListener(new IFileChangeListener() {
