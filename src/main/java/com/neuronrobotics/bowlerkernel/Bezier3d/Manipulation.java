@@ -253,6 +253,9 @@ public class Manipulation {
 	}
 	
 	private void setGlobal(TransformNR global) {
+//		newx = global.getX();
+//		newy = global.getY();
+//		newz = global.getZ();
 		getCurrentPose().setX(newx);
 		getCurrentPose().setY(newy);
 		getCurrentPose().setZ(newz);
