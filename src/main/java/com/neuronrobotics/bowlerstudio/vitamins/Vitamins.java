@@ -94,8 +94,8 @@ public class Vitamins {
 			try {
 				if(resource.getName().toLowerCase().endsWith(".stl"))
 					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
-				if(resource.getName().toLowerCase().endsWith(".obj"))
-					fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new FileInputStream(resource)).);
+//				if(resource.getName().toLowerCase().endsWith(".obj"))
+//					fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new FileInputStream(resource)).);
 //				try {
 //					FileChangeWatcher f = FileChangeWatcher.watch(resource);
 //					f.addIFileChangeListener(new IFileChangeListener() {
