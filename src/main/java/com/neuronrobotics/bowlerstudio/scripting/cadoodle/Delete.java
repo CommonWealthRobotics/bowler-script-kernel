@@ -26,6 +26,8 @@ public class Delete implements ICaDoodleOpperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		for(CSG c:incoming) {
+			if(c.isLock())
+				continue;
 			for(String s:names) {
 				if(s.contentEquals(c.getName())) {
 					back.remove(c);

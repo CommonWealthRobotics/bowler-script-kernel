@@ -30,6 +30,8 @@ public class Group implements ICaDoodleOpperation {
 		ArrayList<CSG> replace = new ArrayList<CSG>();
 		back.addAll(incoming);
 		for(CSG csg: incoming) {
+			if(csg.isLock())
+				continue;
 			for(String name:names) {
 				if(name.contentEquals(csg.getName())) {
 					replace.add(csg);

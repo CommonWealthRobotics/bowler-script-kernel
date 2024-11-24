@@ -37,6 +37,8 @@ public class MoveCenter implements ICaDoodleOpperation {
 		
 		for (int i = 0; i < back.size(); i++) {
 			CSG csg = back.get(i);
+			if(csg.isLock())
+				continue;
 			if (	csg.getName().contentEquals(name) ||
 					(csg.isInGroup() && csg.checkGroupMembership(name))){
 				groupsProcessed.add(name);

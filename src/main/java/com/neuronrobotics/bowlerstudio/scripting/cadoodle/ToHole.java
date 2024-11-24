@@ -21,6 +21,8 @@ public class ToHole implements ICaDoodleOpperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		for(CSG c: incoming) {
+			if(c.isLock())
+				continue;
 			for(String name:names) {
 				if(name.contentEquals(c.getName())) {
 					replace.add(c);

@@ -77,12 +77,15 @@ public class Resize implements ICaDoodleOpperation {
 		back.addAll(incoming);
 		HashMap<String,ResizeEvent> groupsProcessed = new HashMap<>();
 		ArrayList<CSG> selected = new ArrayList<CSG>();
-		for(CSG c:incoming)
+		for(CSG c:incoming) {
+			if(c.isLock())
+				continue;
 			for (String name : names) {
 				if(c.getName().contentEquals(name)) {
 					selected.add(c);
 				}
 			}
+		}
 		Bounds b = getSellectedBounds(selected);
 
 		for (String name : names) {

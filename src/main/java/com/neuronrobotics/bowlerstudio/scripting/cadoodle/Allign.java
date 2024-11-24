@@ -46,6 +46,8 @@ public class Allign implements ICaDoodleOpperation {
 		CSG reference=null;
 		CSG refProps =null;
 		for(CSG c: incoming) {
+			if(c.isLock())
+				continue;
 			String name = names.get(0);
 			if(name.contentEquals(c.getName())) {
 				back.remove(c);

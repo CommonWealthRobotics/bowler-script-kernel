@@ -27,7 +27,10 @@ public class Mirror implements ICaDoodleOpperation {
 		back.addAll(incoming
 				.stream()
 				.map(csg->{
+					
 					for(String name:names) {
+						if(csg.isLock())
+							continue;
 						if(csg.getName().contentEquals(name))
 							return mirror(csg, name)
 									;
