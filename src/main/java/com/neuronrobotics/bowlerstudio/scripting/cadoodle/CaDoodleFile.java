@@ -157,7 +157,8 @@ public class CaDoodleFile {
 		opperationRunner = new Thread(() -> {
 			opperationRunner.setName("Regeneration Thread");
 			setRegenerating(true);
-			// com.neuronrobotics.sdk.common.Log.error("Regenerating Object from "+source.getType());
+			// com.neuronrobotics.sdk.common.Log.error("Regenerating Object from
+			// "+source.getType());
 			int opIndex = 0;
 			for (int i = 0; i < size; i++) {
 				ICaDoodleOpperation op = opperations.get(i);
@@ -170,7 +171,7 @@ public class CaDoodleFile {
 
 			for (; getCurrentIndex() < size;) {
 				setCurrentIndex(getCurrentIndex() + 1);
-				setPercentInitialized(((double)getCurrentIndex())/size);
+				setPercentInitialized(((double) getCurrentIndex()) / size);
 				// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
 				ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
 				List<CSG> process = op.process(getPreviouState());
@@ -377,6 +378,7 @@ public class CaDoodleFile {
 			}
 		}
 	}
+
 	private void fireWorkplaneChange() {
 
 		for (ICaDoodleStateUpdate l : listeners) {
@@ -398,7 +400,11 @@ public class CaDoodleFile {
 	}
 
 	public String toJson() {
-		return gson.toJson(this);
+		String ret = null;
+		synchronized (this) {
+			ret = gson.toJson(this);
+		}
+		return ret;
 	}
 
 	public File save() throws IOException {
@@ -416,7 +422,8 @@ public class CaDoodleFile {
 				// com.neuronrobotics.sdk.common.Log.error("Thumbnail saved successfully to " +
 				// image.getAbsolutePath());
 			} catch (IOException e) {
-				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " + e.getMessage());
+				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
+				// e.getMessage());
 				e.printStackTrace();
 			}
 		}
