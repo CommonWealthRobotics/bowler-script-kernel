@@ -410,7 +410,7 @@ public class CaDoodleFile {
 
 		for (ICaDoodleStateUpdate l : listeners) {
 			try {
-				l.onSaveSuggestion();
+				l.onRegenerateStart();
 			} catch (Throwable e) {
 				e.printStackTrace();
 			}
