@@ -103,6 +103,7 @@ public class CaDoodleFile {
 	public void initialize() {
 		if (initializing)
 			throw new RuntimeException("Can not initialize while initializing.");
+		fireInitializationStart();
 		initializing = true;
 		if (selfInternal != null) {
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
@@ -148,6 +149,7 @@ public class CaDoodleFile {
 			com.neuronrobotics.sdk.common.Log.error("Opperation is running, ignoring regen");
 			return null;
 		}
+		fireRegenerateStart();
 		int endIndex = getCurrentIndex();
 		double size = opperations.size();
 		if (endIndex != size) {
@@ -185,6 +187,7 @@ public class CaDoodleFile {
 			setRegenerating(false);
 			fireSaveSuggestion();
 			opperationRunner = null;
+			fireRegenerateDone();
 		});
 		opperationRunner.start();
 		return opperationRunner;
@@ -194,6 +197,7 @@ public class CaDoodleFile {
 		if (isOperationRunning()) {
 			return opperationRunner;
 		}
+		fireRegenerateStart();
 		opperationRunner = new Thread(() -> {
 			opperationRunner.setName("regenerateCurrent Thread");
 
@@ -203,6 +207,7 @@ public class CaDoodleFile {
 			setCurrentState(op, process);
 			fireSaveSuggestion();
 			opperationRunner = null;
+			fireRegenerateDone();
 		});
 		opperationRunner.start();
 		return opperationRunner;
@@ -369,6 +374,39 @@ public class CaDoodleFile {
 	}
 
 	private void fireSaveSuggestion() {
+
+		for (ICaDoodleStateUpdate l : listeners) {
+			try {
+				l.onSaveSuggestion();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void fireInitializationStart() {
+
+		for (ICaDoodleStateUpdate l : listeners) {
+			try {
+				l.onInitializationStart();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void fireRegenerateDone() {
+
+		for (ICaDoodleStateUpdate l : listeners) {
+			try {
+				l.onRegenerateDone();
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void fireRegenerateStart() {
 
 		for (ICaDoodleStateUpdate l : listeners) {
 			try {

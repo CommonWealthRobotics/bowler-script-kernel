@@ -10,5 +10,8 @@ public interface ICaDoodleStateUpdate {
 	public void onUpdate(List<CSG>  currentState, ICaDoodleOpperation source,CaDoodleFile file );
 	public void onSaveSuggestion();
 	public void onInitializationDone();
+	public void onInitializationStart();
+	public void onRegenerateDone();
+	public void onRegenerateStart();
 	public void onWorkplaneChange(TransformNR newWP);
 }
