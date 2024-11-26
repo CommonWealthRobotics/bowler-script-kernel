@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import com.google.gson.annotations.Expose;
 
-public abstract class AbstractAddFrom {
+public abstract class AbstractAddFrom  implements ICaDoodleOpperation {
 	@Expose (serialize = false, deserialize = false)
 	protected HashSet<String> namesAdded = new HashSet<>();
 	@Expose (serialize = false, deserialize = false)
@@ -31,4 +31,8 @@ public abstract class AbstractAddFrom {
 		return result;
 	}
 	public abstract File getFile();
+	@Override 
+	public String toString() {
+		return getType()+" with name "+getName();
+	}
 }
