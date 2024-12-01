@@ -29,28 +29,27 @@ import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
 
 public class VitaminBomManager {
-	public static final String MANUFACTURING_BOM_BASE = "manufacturing/bom";
+	public static final String MANUFACTURING_BOM_BASE = "manufacturing/BillOfMaterials";
 	public static final String MANUFACTURING_BOM_JSON = MANUFACTURING_BOM_BASE + ".json";
 	public static final String MANUFACTURING_BOM_CSV = MANUFACTURING_BOM_BASE + ".csv";
 	private static boolean saving = false;
 
-//	private class VitaminLocation {
-//		String name;
-//		String type;
-//		String size;
-//		TransformNR pose;
-//	}
-
 	Type type = new TypeToken<HashMap<String, ArrayList<VitaminLocation>>>() {
 	}.getType();
-	Gson gson = new GsonBuilder().disableHtmlEscaping()
-			.excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
+	Gson gson = new GsonBuilder().disableHtmlEscaping().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting()
+			.create();
 	private HashMap<String, ArrayList<VitaminLocation>> database = null;//
-	private String baseURL;
+	private String baseURL = null;
+	private File baseWorkspaceFile;
 
 	public VitaminBomManager(String url) throws IOException {
+		this(ScriptingEngine.getRepositoryCloneDirectory(url));
 		baseURL = url;
-		File baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(baseURL);
+	
+	}
+
+	public VitaminBomManager(File parentFile) {
+		baseWorkspaceFile = parentFile;
 		File bom = new File(baseWorkspaceFile.getAbsolutePath() + "/" + MANUFACTURING_BOM_JSON);
 		if (!bom.exists()) {
 			if (!bom.getParentFile().exists()) {
@@ -68,29 +67,17 @@ public class VitaminBomManager {
 			try {
 				bytes = Files.readAllBytes(bom.toPath());
 				source = new String(bytes, "UTF-8");
-				if(source.length()>0)
+				if (source.length() > 0)
 					database = gson.fromJson(source, type);
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		}
-		if(database==null) {
-			database=new HashMap<String, ArrayList<VitaminLocation>>();
+		if (database == null) {
+			database = new HashMap<String, ArrayList<VitaminLocation>>();
 			save();
 		}
 	}
-
-//	public void set(String name, String type, String size, TransformNR location) {
-//		VitaminLocation newElement = getElement(name);
-//		if (newElement == null) {
-//			newElement = new VitaminLocation(name,type,size,location);
-//		}
-//		newElement.setLocation(location);
-//		newElement.setSize(size);
-//		newElement.setType(type);
-//		addVitamin(newElement);
-//		// newElement.url=(String) getConfiguration(name).get("source");
-//	}
 
 	public void addVitamin(VitaminLocation newElement) {
 		String key = newElement.getType() + ":" + newElement.getSize();
@@ -98,7 +85,7 @@ public class VitaminBomManager {
 		if (database.get(key) == null) {
 			database.put(key, new ArrayList<VitaminLocation>());
 		}
-		boolean toAdd=!database.get(key).contains(newElement);
+		boolean toAdd = !database.get(key).contains(newElement);
 		if (toAdd)
 			database.get(key).add(newElement);
 		// }
@@ -111,7 +98,8 @@ public class VitaminBomManager {
 			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
 
 		try {
-			CSG transformed = MobileBaseCadManager.vitaminMakeCSG(e).transformed(TransformFactory.nrToCSG(e.getLocation()));
+			CSG transformed = MobileBaseCadManager.vitaminMakeCSG(e)
+					.transformed(TransformFactory.nrToCSG(e.getLocation()));
 			transformed.setManufacturing(incominng -> {
 				return null;
 			});
@@ -130,11 +118,11 @@ public class VitaminBomManager {
 		try {
 			double x = (double) getConfiguration(name).get("massCentroidX");
 			double y = (double) getConfiguration(name).get("massCentroidY");
-	
+
 			double z = (double) getConfiguration(name).get("massCentroidZ");
 
 			return e.getLocation().copy().translateX(x).translateY(y).translateZ(z);
-		}catch(Exception ex) {
+		} catch (Exception ex) {
 			return e.getLocation().copy();
 		}
 	}
@@ -142,17 +130,17 @@ public class VitaminBomManager {
 	public double getMassKg(String name) {
 		try {
 			return (double) getConfiguration(name).get("massKg");
-		}catch(Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 			return 0.001;
 		}
 	}
 
-	public Map<String, Object> getConfiguration(String name) throws Exception{
+	public Map<String, Object> getConfiguration(String name) throws Exception {
 		VitaminLocation e = getElement(name);
 		if (e == null)
 			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
-		if(e.isScript())
+		if (e.isScript())
 			throw new RuntimeException("Script Vitamins do not have configurations");
 
 		return Vitamins.getConfiguration(e.getType(), e.getSize());
@@ -190,47 +178,43 @@ public class VitaminBomManager {
 			if (list.size() > 0) {
 				VitaminLocation e = list.get(0);
 				String size = database.get(key).size() + "";
-				String URL =null;
-				Object object =null;
-				if(!e.isScript())
+				String URL = null;
+				Object object = null;
+				if (!e.isScript())
 					try {
 						Map<String, Object> configuration = getConfiguration(e.getName());
-						URL=(String) configuration.get("source");
-						object= configuration.get("price");
-					}catch(Exception ex) {
+						URL = (String) configuration.get("source");
+						object = configuration.get("price");
+					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
 
-				if(URL==null) {
-					URL="http://commonwealthrobotics.com";
+				if (URL == null) {
+					URL = "http://commonwealthrobotics.com";
 				}
-				if(object==null)
-					object="0.01";
-	
-				csv += key + "," + size + "," + URL +","+object+ "\n";
+				if (object == null)
+					object = "0.01";
+
+				csv += key + "," + size + "," + URL + "," + object + "\n";
 			} else {
 				com.neuronrobotics.sdk.common.Log.error("Failure on " + key);
 			}
 		}
-
-		try {
-			String current = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_CSV)[0];
-			String currentJ = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_JSON)[0];
-			if (current.contentEquals(csv) && currentJ.contentEquals(content)) {
-				//com.neuronrobotics.sdk.common.Log.error("No update, BoM current");
-				saving = false;
-				return;
+		if (baseURL != null)
+			try {
+				String current = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_CSV)[0];
+				String currentJ = ScriptingEngine.codeFromGit(baseURL, MANUFACTURING_BOM_JSON)[0];
+				if (current.contentEquals(csv) && currentJ.contentEquals(content)) {
+					// com.neuronrobotics.sdk.common.Log.error("No update, BoM current");
+					saving = false;
+					return;
+				}
+			} catch (Exception e1) {
+				// file doesnt exist
 			}
-		} catch (Exception e1) {
-			// file doesnt exist
-		}
 		try {
 			write(MANUFACTURING_BOM_JSON, content);
 			write(MANUFACTURING_BOM_CSV, csv);
-//			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL), MANUFACTURING_BOM_JSON, content,
-//					"Save Bill Of Material", true);
-//			ScriptingEngine.commit(baseURL, ScriptingEngine.getBranch(baseURL), MANUFACTURING_BOM_CSV, csv,
-//					"Save Bill Of Material", true);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -241,7 +225,7 @@ public class VitaminBomManager {
 
 	private void write(String file, String content)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-		File f = ScriptingEngine.fileFromGit(baseURL, file);
+		File f = new File(baseWorkspaceFile.getAbsolutePath() + "/" + file);
 		if (!f.getParentFile().exists())
 			f.getParentFile().mkdir();
 		if (!f.exists()) {
@@ -257,16 +241,16 @@ public class VitaminBomManager {
 	}
 
 	public void loadBaseVitamins(MobileBase base) {
-		for(VitaminLocation v:base.getVitamins()) {
+		for (VitaminLocation v : base.getVitamins()) {
 			addVitamin(v);
 		}
-		for(DHParameterKinematics k:base.getAllDHChains()) {
-			for(int i=0;i<k.getNumberOfLinks();i++) {
-				for(VitaminLocation v:k.getVitamins(i)) {
+		for (DHParameterKinematics k : base.getAllDHChains()) {
+			for (int i = 0; i < k.getNumberOfLinks(); i++) {
+				for (VitaminLocation v : k.getVitamins(i)) {
 					addVitamin(v);
 				}
 				MobileBase b = k.getFollowerMobileBase(i);
-				if(b!=null) {
+				if (b != null) {
 					loadBaseVitamins(b);
 				}
 			}

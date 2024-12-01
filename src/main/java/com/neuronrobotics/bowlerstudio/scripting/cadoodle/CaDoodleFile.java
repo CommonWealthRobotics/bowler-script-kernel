@@ -25,6 +25,7 @@ import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.ThumbnailImage;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -66,6 +67,7 @@ public class CaDoodleFile {
 	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
 	private javafx.scene.image.WritableImage img;
 	private boolean initializing;
+	private VitaminBomManager bom;
 
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
@@ -108,11 +110,18 @@ public class CaDoodleFile {
 		if (selfInternal != null) {
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			CSGDatabase.setDbFile(db);
-			if (selfInternal != null) {
-				StringParameter loc = new StringParameter("CaDoodle_File_Location", selfInternal.getAbsolutePath(),
-						new ArrayList<String>());
-				loc.setStrValue(selfInternal.getAbsolutePath());
-			}
+
+			StringParameter loc = new StringParameter("CaDoodle_File_Location", selfInternal.getAbsolutePath(),
+					new ArrayList<String>());
+			loc.setStrValue(selfInternal.getAbsolutePath());
+
+			File bomF = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "BillOfMaterials.json");
+			StringParameter bomLocation = new StringParameter("CaDoodle_BoM_Location", bomF.getAbsolutePath(),
+					new ArrayList<String>());
+			bomLocation.setStrValue(bomF.getAbsolutePath());
+
+			bom = new VitaminBomManager(selfInternal.getAbsoluteFile().getParentFile());
+			bom.save();
 		}
 		int indexStarting = getCurrentIndex();
 		setCurrentIndex(0);
@@ -602,6 +611,10 @@ public class CaDoodleFile {
 
 	private void setRegenerating(boolean regenerating) {
 		this.regenerating = regenerating;
+	}
+
+	public VitaminBomManager getBillOfMaterials() {
+		return bom;
 	}
 
 }
