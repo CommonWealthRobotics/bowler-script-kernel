@@ -574,7 +574,7 @@ public class DownloadManager {
 		Set<String> before = Stream.of(listFiles).filter(file -> file.isDirectory()).map(File::getName)
 				.collect(Collectors.toSet());
 		Thread t = run(null, new File("."), System.out,
-				Arrays.asList("hdiutil", "attach", jvmArchive.getAbsolutePath()));
+				Arrays.asList("hdiutil", "attach","-verbose", jvmArchive.getAbsolutePath()));
 		try {
 			t.join();
 			Thread.sleep(2000);// wait for mount to settle
