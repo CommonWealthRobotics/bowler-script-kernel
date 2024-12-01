@@ -1115,7 +1115,7 @@ public class MobileBaseCadManager implements Runnable {
 		return new CadFileExporter(getUi()).generateManufacturingParts(totalAssembly, dir);
 	}
 	public IgenerateBed getPrintBed(File baseDirForFiles, IgenerateBed bed, File baseWorkspaceFile) throws IOException {
-		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_CSV);
+		File bomCSV = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.getManufacturingBomCsv());
 		if(bomCSV.exists()) {
 			
 			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.csv");
@@ -1123,7 +1123,7 @@ public class MobileBaseCadManager implements Runnable {
 				file.delete();
 			Files.copy(bomCSV.toPath(),file.toPath());
 		}
-		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.MANUFACTURING_BOM_JSON);
+		File bom = new File(baseWorkspaceFile.getAbsolutePath()+"/"+VitaminBomManager.getManufacturingBomJson());
 		if(bom.exists()) {
 			File file = new File(baseDirForFiles.getAbsolutePath()+"/bom.json");
 			if(file.exists())

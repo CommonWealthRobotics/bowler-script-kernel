@@ -400,10 +400,10 @@ public class BowlerKernel {
 			if (baseDirForFiles.exists()) {
 				// baseDirForFiles.mkdir();
 				File bomCSV = new File(
-						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.MANUFACTURING_BOM_CSV);
+						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
 				if (bomCSV.exists()) {
 
-					File file = new File(baseWorkspaceFile.getAbsolutePath() + "/"+ VitaminBomManager.MANUFACTURING_BOM_CSV);
+					File file = new File(baseWorkspaceFile.getAbsolutePath() + "/"+ VitaminBomManager.getManufacturingBomCsv());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -414,9 +414,9 @@ public class BowlerKernel {
 					}
 				}
 				File bom = new File(
-						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.MANUFACTURING_BOM_JSON);
+						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 				if (bom.exists()) {
-					File file = new File(baseWorkspaceFile.getAbsolutePath() + "/"+ VitaminBomManager.MANUFACTURING_BOM_JSON);
+					File file = new File(baseWorkspaceFile.getAbsolutePath() + "/"+ VitaminBomManager.getManufacturingBomJson());
 //					if (file.exists())
 //						file.delete();
 					try {

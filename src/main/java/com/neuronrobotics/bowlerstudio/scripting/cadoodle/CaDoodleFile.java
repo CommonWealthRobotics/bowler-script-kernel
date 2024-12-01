@@ -67,7 +67,6 @@ public class CaDoodleFile {
 	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
 	private javafx.scene.image.WritableImage img;
 	private boolean initializing;
-	private VitaminBomManager bom;
 
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
@@ -110,18 +109,11 @@ public class CaDoodleFile {
 		if (selfInternal != null) {
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			CSGDatabase.setDbFile(db);
-
 			StringParameter loc = new StringParameter("CaDoodle_File_Location", selfInternal.getAbsolutePath(),
 					new ArrayList<String>());
 			loc.setStrValue(selfInternal.getAbsolutePath());
+			CaDoodleFile.getBoM().save();
 
-			File bomF = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "BillOfMaterials.json");
-			StringParameter bomLocation = new StringParameter("CaDoodle_BoM_Location", bomF.getAbsolutePath(),
-					new ArrayList<String>());
-			bomLocation.setStrValue(bomF.getAbsolutePath());
-
-			bom = new VitaminBomManager(selfInternal.getAbsoluteFile().getParentFile());
-			bom.save();
 		}
 		int indexStarting = getCurrentIndex();
 		setCurrentIndex(0);
@@ -149,6 +141,12 @@ public class CaDoodleFile {
 			}
 		}
 		initializing = false;
+	}
+	public static VitaminBomManager getBoM() {
+		StringParameter loc = new StringParameter("CaDoodle_File_Location", "",
+				new ArrayList<String>());
+		String strValue = loc.getStrValue();
+		return new VitaminBomManager(new File(strValue).getParentFile());
 	}
 
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
@@ -613,8 +611,5 @@ public class CaDoodleFile {
 		this.regenerating = regenerating;
 	}
 
-	public VitaminBomManager getBillOfMaterials() {
-		return bom;
-	}
 
 }
