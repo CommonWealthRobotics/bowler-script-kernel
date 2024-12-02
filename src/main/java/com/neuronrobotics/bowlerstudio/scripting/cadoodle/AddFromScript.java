@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -15,6 +16,8 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -28,7 +31,8 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 	private String name=null;
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location =null;
-	
+	@Expose(serialize = true, deserialize = true)
+	private Boolean preventBoM =false;
 
 
 	
@@ -46,6 +50,7 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
+
 		nameIndex=0;
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
@@ -55,20 +60,27 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 		try {
 			ArrayList<Object>args = new ArrayList<>();
 			args.addAll(Arrays.asList(name ));
-			back.addAll(ScriptingEngine
+			HashMap<String, Object> configs =new HashMap<String, Object>();
+			configs.put("name", name);
+			configs.put("PreventBomAdd", preventBoM);
+			args.add(configs);
+			ArrayList<CSG> collect = ScriptingEngine
 					.flaten(gitULR, fileRel, CSG.class,args)
 					.stream()
 					.map(csg->{
 						return csg
-//								.moveToCenterX()
-//								.moveToCenterY()
-//								.toZMin()
 								.transformed(TransformFactory.nrToCSG( getLocation() ))
 								.syncProperties(csg)
 								.setName(getOrderedName());
 					})
-				    .collect(Collectors.toCollection(ArrayList::new))
-					);
+				    .collect(Collectors.toCollection(ArrayList::new));
+			back.addAll(collect);
+			VitaminBomManager boM = CaDoodleFile.getBoM();
+			VitaminLocation loc = boM.getByName(name);
+			if(loc!=null) {
+				loc.setLocation(location);
+				boM.save();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -106,6 +118,15 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public Boolean getPreventBoM() {
+		return preventBoM;
+	}
+
+	public AddFromScript setPreventBoM(Boolean preventBoM) {
+		this.preventBoM = preventBoM;
+		return this;
 	}
 
 }

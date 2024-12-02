@@ -78,8 +78,32 @@ public class VitaminBomManager {
 			save();
 		}
 	}
-
+	public VitaminLocation getByName(String name) {
+		for(String keys:database.keySet()) {
+			ArrayList<VitaminLocation> arrayList = database.get(keys);
+			for (int i = 0; i < arrayList.size(); i++) {
+				VitaminLocation vl = arrayList.get(i);
+				if(vl.getName().contentEquals(name)) {
+					return vl;
+				}
+			}
+		}
+		return null;
+	}
 	public VitaminBomManager addVitamin(VitaminLocation newElement) {
+		return addVitamin(newElement,true);
+	}
+	public VitaminBomManager addVitamin(VitaminLocation newElement, boolean save) {
+		for(String keys:database.keySet()) {
+			ArrayList<VitaminLocation> arrayList = database.get(keys);
+			for (int i = 0; i < arrayList.size(); i++) {
+				VitaminLocation vl = arrayList.get(i);
+				if(vl.getName().contentEquals(newElement.getName())) {
+					arrayList.remove(vl);
+					break;
+				}
+			}
+		}
 		String key = newElement.getType() + ":" + newElement.getSize();
 		// synchronized (database) {
 		if (database.get(key) == null) {
@@ -98,7 +122,7 @@ public class VitaminBomManager {
 		if (toAdd)
 			arrayList.add(newElement);
 		// }
-		save();
+		if(save)save();
 		return this;
 	}
 
@@ -156,12 +180,13 @@ public class VitaminBomManager {
 		return Vitamins.getConfiguration(e.getType(), e.getSize());
 	}
 
-	private VitaminLocation getElement(String name) {
+	public VitaminLocation getElement(String name) {
 		// synchronized (database) {
 		for (String testName : database.keySet()) {
 			ArrayList<VitaminLocation> list = database.get(testName);
 			for (VitaminLocation el : list) {
-				if (el.getName().contentEquals(name))
+				String name2 = el.getName();
+				if (name2.contentEquals(name))
 					return el;
 			}
 		}
@@ -176,7 +201,7 @@ public class VitaminBomManager {
 		return this;
 	}
 
-	private void saveLocal() {
+	private synchronized void saveLocal() {
 		saving = true;
 		String csv = "name,qty,source,unit price (USD)\n";
 		String content = null;
