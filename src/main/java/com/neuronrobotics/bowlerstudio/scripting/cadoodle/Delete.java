@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -31,6 +33,12 @@ public class Delete implements ICaDoodleOpperation {
 			for(String s:names) {
 				if(s.contentEquals(c.getName())) {
 					back.remove(c);
+					VitaminBomManager boM = CaDoodleFile.getBoM();
+					VitaminLocation loc = boM.getByName(s);
+					if(loc!=null) {
+						boM.remove(loc);
+						boM.save();
+					}
 				}
 			}
 		}

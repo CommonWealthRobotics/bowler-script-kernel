@@ -307,4 +307,17 @@ public class VitaminBomManager {
 		return MANUFACTURING_BOM_BASE;
 	}
 
+	public void remove(VitaminLocation loc) {
+		for(String keys:database.keySet()) {
+			ArrayList<VitaminLocation> arrayList = database.get(keys);
+			for (int i = 0; i < arrayList.size(); i++) {
+				VitaminLocation vl = arrayList.get(i);
+				if(vl.getName().contentEquals(loc.getName())) {
+					arrayList.remove(vl);
+					return;
+				}
+			}
+		}
+	}
+
 }

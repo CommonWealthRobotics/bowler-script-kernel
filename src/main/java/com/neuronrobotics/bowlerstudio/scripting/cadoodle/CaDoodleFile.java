@@ -67,6 +67,8 @@ public class CaDoodleFile {
 	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
 	private javafx.scene.image.WritableImage img;
 	private boolean initializing;
+	private static HashMap<String,VitaminBomManager> bomManagers = new HashMap<>();
+	private VitaminBomManager boM;
 
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
@@ -112,7 +114,8 @@ public class CaDoodleFile {
 			StringParameter loc = new StringParameter("CaDoodle_File_Location", selfInternal.getAbsolutePath(),
 					new ArrayList<String>());
 			loc.setStrValue(selfInternal.getAbsolutePath());
-			CaDoodleFile.getBoM().save();
+			boM = CaDoodleFile.getBoM();
+			boM.save();
 
 		}
 		int indexStarting = getCurrentIndex();
@@ -143,10 +146,13 @@ public class CaDoodleFile {
 		initializing = false;
 	}
 	public static VitaminBomManager getBoM() {
+		
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "",
 				new ArrayList<String>());
 		String strValue = loc.getStrValue();
-		return new VitaminBomManager(new File(strValue).getParentFile());
+		if(bomManagers.get(strValue)==null)
+			bomManagers.put(strValue, new VitaminBomManager(new File(strValue).getParentFile()));
+		return bomManagers.get(strValue);
 	}
 
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
@@ -471,6 +477,7 @@ public class CaDoodleFile {
 				// e.getMessage());
 				e.printStackTrace();
 			}
+			boM.save();
 		}
 
 		return getSelf();

@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -52,6 +54,12 @@ public class MoveCenter implements ICaDoodleOpperation {
 						.transformed(TransformFactory.nrToCSG(location))
 						.syncProperties(csg)
 						.setName(csg.getName());
+				VitaminBomManager boM = CaDoodleFile.getBoM();
+				VitaminLocation loc = boM.getByName(name);
+				if(loc!=null) {
+					loc.setLocation(loc.getLocation().times(location));
+					boM.save();
+				}
 				back.set(i, tmpToAdd);
 			}
 		}

@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -15,6 +16,8 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -29,7 +32,8 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	private TransformNR location = null;
 	private ArrayList<String> options = new ArrayList<String>();
 	private StringParameter parameter = null;
-
+	@Expose(serialize = true, deserialize = true)
+	private Boolean preventBoM =false;
 	public AddFromFile set(File source) {
 		String absolutePath = toLocal(source).getAbsolutePath();
 		getParameter(absolutePath).setStrValue(absolutePath);
@@ -57,7 +61,13 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			File file = getFile();
 			String pathname = file.getAbsolutePath();
 			getParameter(pathname).setStrValue(pathname);
-			List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, null);
+			ArrayList<Object>args = new ArrayList<>();
+			args.addAll(Arrays.asList(name ));
+			HashMap<String, Object> configs =new HashMap<String, Object>();
+			configs.put("name", name);
+			configs.put("PreventBomAdd", preventBoM);
+			args.add(configs);
+			List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
 			com.neuronrobotics.sdk.common.Log.error("Initial Loading " + getStrValue());
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
@@ -69,6 +79,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 				}
 			}
 			back.addAll(collect);
+			VitaminBomManager boM = CaDoodleFile.getBoM();
+			VitaminLocation loc = boM.getByName(name);
+			if(loc!=null) {
+				loc.setLocation(location);
+				boM.save();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -193,5 +209,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	public void setParameter(StringParameter parameter) {
 		this.parameter = parameter;
 	}
+	public Boolean getPreventBoM() {
+		return preventBoM;
+	}
 
+	public AddFromFile setPreventBoM(Boolean preventBoM) {
+		this.preventBoM = preventBoM;
+		return this;
+	}
 }

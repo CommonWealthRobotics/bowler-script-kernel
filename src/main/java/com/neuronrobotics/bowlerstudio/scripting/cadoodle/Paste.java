@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -63,8 +65,17 @@ public class Paste implements ICaDoodleOpperation {
 	}
 
 	private int copyPasteMoved(ArrayList<CSG> back, int index, CSG c) {
+	
 		CSG newOne = c.clone().movex(offset);
 		String name = getPaserID()+(index==0?"":"_"+index);
+		VitaminBomManager boM = CaDoodleFile.getBoM();
+		VitaminLocation loc = boM.getByName(c.getName());
+		if(loc!=null) {
+			VitaminLocation newElement = new VitaminLocation(loc, name);
+			newElement.setLocation(newElement.getLocation().times(new TransformNR(offset,0,0)));
+			boM.addVitamin(newElement);
+			boM.save();
+		}
 		index++;
 		newOne.syncProperties(c).setName(name);
 		back.add(newOne);
