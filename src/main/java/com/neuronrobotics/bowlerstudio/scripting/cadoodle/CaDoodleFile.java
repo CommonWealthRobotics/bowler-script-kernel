@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,9 +24,11 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.ThumbnailImage;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -226,7 +229,26 @@ public class CaDoodleFile {
 		return opperationRunner;
 
 	}
-
+	public static void getAllConstituantElements(String name, ArrayList<CSG> back, HashSet<String> groupsProcessed ,ICadoodleRecursiveEvent p) {
+		for (int i = 0; i < back.size(); i++) {
+			CSG csg = back.get(i);
+			if(csg.isLock())
+				continue;
+			if (	csg.getName().contentEquals(name) ||
+					(csg.isInGroup() && csg.checkGroupMembership(name))){
+				groupsProcessed.add(name);
+				if(csg.isInGroup() && csg.isGroupResult() && !groupsProcessed.contains(csg.getName())) {
+					// composite group
+					getAllConstituantElements(csg.getName(), back,groupsProcessed,p);
+					
+				}
+				// move it
+				CSG tmpToAdd = p.process(csg);
+				back.set(i, tmpToAdd);
+			}
+		}
+		back.removeAll(Collections.singleton(null));
+	}
 	private void process(ICaDoodleOpperation op) {
 		List<CSG> process = op.process(getCurrentState());
 		storeResultInCache(op, process);

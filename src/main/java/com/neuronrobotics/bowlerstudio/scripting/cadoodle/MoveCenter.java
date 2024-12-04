@@ -30,40 +30,53 @@ public class MoveCenter implements ICaDoodleOpperation {
 		HashSet<String> groupsProcessed = new HashSet<String>();
 		back.addAll(incoming);
 		for (String name : names) {
-			moveByName(name,back,groupsProcessed);
+			CaDoodleFile.getAllConstituantElements(name, back, groupsProcessed, new ICadoodleRecursiveEvent() {
+				@Override
+				public CSG process(CSG incoming) {
+					CSG tmpToAdd = incoming.transformed(TransformFactory.nrToCSG(location)).syncProperties(incoming)
+							.setName(incoming.getName());
+					VitaminBomManager boM = CaDoodleFile.getBoM();
+					VitaminLocation loc = boM.getByName(name);
+					if (loc != null) {
+						loc.setLocation(loc.getLocation().times(location));
+						boM.save();
+					}
+					return tmpToAdd;
+				}
+			});
 		}
 		return back;
 	}
 
-	private void moveByName(String name, ArrayList<CSG> back, HashSet<String> groupsProcessed) {
-		
-		for (int i = 0; i < back.size(); i++) {
-			CSG csg = back.get(i);
-			if(csg.isLock())
-				continue;
-			if (	csg.getName().contentEquals(name) ||
-					(csg.isInGroup() && csg.checkGroupMembership(name))){
-				groupsProcessed.add(name);
-				if(csg.isInGroup() && csg.isGroupResult() && !groupsProcessed.contains(csg.getName())) {
-					// composite group
-					moveByName(csg.getName(), back,groupsProcessed);
-					
-				}
-				// move it
-				CSG tmpToAdd = csg
-						.transformed(TransformFactory.nrToCSG(location))
-						.syncProperties(csg)
-						.setName(csg.getName());
-				VitaminBomManager boM = CaDoodleFile.getBoM();
-				VitaminLocation loc = boM.getByName(name);
-				if(loc!=null) {
-					loc.setLocation(loc.getLocation().times(location));
-					boM.save();
-				}
-				back.set(i, tmpToAdd);
-			}
-		}
-	}
+//	private void moveByName(String name, ArrayList<CSG> back, HashSet<String> groupsProcessed) {
+//		
+//		for (int i = 0; i < back.size(); i++) {
+//			CSG csg = back.get(i);
+//			if(csg.isLock())
+//				continue;
+//			if (	csg.getName().contentEquals(name) ||
+//					(csg.isInGroup() && csg.checkGroupMembership(name))){
+//				groupsProcessed.add(name);
+//				if(csg.isInGroup() && csg.isGroupResult() && !groupsProcessed.contains(csg.getName())) {
+//					// composite group
+//					moveByName(csg.getName(), back,groupsProcessed);
+//					
+//				}
+//				// move it
+//				CSG tmpToAdd = csg
+//						.transformed(TransformFactory.nrToCSG(location))
+//						.syncProperties(csg)
+//						.setName(csg.getName());
+//				VitaminBomManager boM = CaDoodleFile.getBoM();
+//				VitaminLocation loc = boM.getByName(name);
+//				if(loc!=null) {
+//					loc.setLocation(loc.getLocation().times(location));
+//					boM.save();
+//				}
+//				back.set(i, tmpToAdd);
+//			}
+//		}
+//	}
 
 	public TransformNR getLocation() {
 		return location;

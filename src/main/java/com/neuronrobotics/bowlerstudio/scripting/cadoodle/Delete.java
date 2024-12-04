@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,19 +28,25 @@ public class Delete implements ICaDoodleOpperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
+		HashSet<String> groupsProcessed = new HashSet<String>();
+
 		for(CSG c:incoming) {
 			if(c.isLock())
 				continue;
 			for(String s:names) {
-				if(s.contentEquals(c.getName())) {
-					back.remove(c);
-					VitaminBomManager boM = CaDoodleFile.getBoM();
-					VitaminLocation loc = boM.getByName(s);
-					if(loc!=null) {
-						boM.remove(loc);
-						boM.save();
+				CaDoodleFile.getAllConstituantElements(s, back, groupsProcessed, new ICadoodleRecursiveEvent() {
+					@Override
+					public CSG process(CSG incoming) {
+						//back.remove(c);
+						VitaminBomManager boM = CaDoodleFile.getBoM();
+						VitaminLocation loc = boM.getByName(s);
+						if(loc!=null) {
+							boM.remove(loc);
+							boM.save();
+						}
+						return null;
 					}
-				}
+				});
 			}
 		}
 		return back;
