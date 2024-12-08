@@ -34,6 +34,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.IParametric;
+import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import javafx.embed.swing.SwingFXUtils;
 
@@ -118,6 +120,7 @@ public class CaDoodleFile {
 					new ArrayList<String>());
 			loc.setStrValue(selfInternal.getAbsolutePath());
 			boM = CaDoodleFile.getBoM();
+			boM.clear();
 			boM.save();
 
 		}
@@ -150,12 +153,19 @@ public class CaDoodleFile {
 	}
 	public static VitaminBomManager getBoM() {
 		
+		String strValue = getCadoodleFileLocation();
+		File file = new File(strValue).getParentFile();
+		if(bomManagers.get(strValue)==null) {
+			bomManagers.put(strValue, new VitaminBomManager(file));
+		}
+		return bomManagers.get(strValue);
+	}
+
+	private static String getCadoodleFileLocation() {
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "",
 				new ArrayList<String>());
 		String strValue = loc.getStrValue();
-		if(bomManagers.get(strValue)==null)
-			bomManagers.put(strValue, new VitaminBomManager(new File(strValue).getParentFile()));
-		return bomManagers.get(strValue);
+		return strValue;
 	}
 
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
@@ -293,7 +303,43 @@ public class CaDoodleFile {
 
 	private void pruneForward() {
 		for (int i = getCurrentIndex(); i < getOpperations().size(); i++) {
-			List<CSG> back = cache.remove(getOpperations().get(i));
+			ICaDoodleOpperation key = getOpperations().get(i);
+			List<CSG> back = cache.remove(key);
+			VitaminBomManager boM = CaDoodleFile.getBoM();
+			if(AbstractAddFrom.class.isInstance(key)) {
+				AbstractAddFrom aaf=(AbstractAddFrom)key;
+				for(String name:aaf.getNamesAdded()) {
+					VitaminLocation loc = boM.getByName(name);
+					if(loc!=null) {
+						boM.remove(loc);
+						boM.save();
+					}
+				}
+			}
+			if(Delete.class.isInstance(key)) {
+				Delete d =(Delete)key;
+				for(String s:d.getNames()) {
+					for(CSG c:back) {
+						String type =null;
+						String size=null;
+						if(c.getName().contentEquals(s)) {
+							for(String param:c.getParameters()) {
+								if(param.contains("_CaDoodle_Vitamin_Type")) {
+									Parameter p = CSGDatabase.get(param);
+									type=p.getStrValue();
+								}
+								if(param.contains("_CaDoodle_Vitamin_Size")) {
+									Parameter p = CSGDatabase.get(param);
+									size=p.getStrValue();
+								}
+							}
+							if(type!=null&&size!=null) {
+								boM.addVitamin(new VitaminLocation(false,c.getName(), type, size, new TransformNR()));
+							}
+						}
+					}
+				}
+			}
 			if (back != null)
 				back.clear();
 		}
