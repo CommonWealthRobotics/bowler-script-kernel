@@ -14,16 +14,36 @@ import eu.mihosoft.vrl.v3d.parametrics.IRegenerate;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class CaDoodleVitamin {
-	public static CSG get(String type, ArrayList<Object> args) {
-		ArrayList<String> listVitaminSizes = Vitamins.listVitaminSizes(type);
+	public static CSG get(String typencoming, ArrayList<Object> args) {
 		String name = args.get(0).toString();
+
+		ArrayList<String>types=new ArrayList<>();
+		types.addAll(Vitamins.listVitaminTypes());
+		StringParameter typeParam = new StringParameter(name + "_CaDoodle_Vitamin_Type", typencoming,
+				types);
+		String type=typeParam.getStrValue();
+		ArrayList<String> listVitaminSizes = Vitamins.listVitaminSizes(type);
 		
 		StringParameter size = new StringParameter(type + " Default", listVitaminSizes.get(0), listVitaminSizes);
-		if (size.getStrValue().length() == 0)
+		
+		String strValue = size.getStrValue();
+		if(strValue.length() == 0) {
 			size.setStrValue(listVitaminSizes.get(0));
+		}
 		String string = "_CaDoodle_Vitamin_Size";
-		StringParameter word = new StringParameter(name + string, size.getStrValue(),
+		StringParameter word = new StringParameter(name + string, strValue,
 				listVitaminSizes);
+		boolean sizeExists=false;
+		for(String s:Vitamins.listVitaminSizes(type)) {
+			if(s.contentEquals(word.getStrValue())) {
+				sizeExists=true;
+				break;
+			}
+		}
+		if(!sizeExists) {
+			
+			word.setStrValue(strValue);
+		}
 		size.setStrValue(word.getStrValue());
 		if (args.size() > 1) {
 			HashMap<String, Object> object = (HashMap<String, Object>) args.get(1);
@@ -40,14 +60,9 @@ public class CaDoodleVitamin {
 			part = Vitamins.get(type, word.getStrValue()).setIsHole(true);
 			CSGDatabase.saveDatabase();
 			Set<String> params = part.getParameters();
-			for(String s:params) {
-				if(s.contains(string)) {
-					System.out.println("Removing stale parameter "+s);
-					part.getMapOfparametrics().remove(s);
-					CSGDatabase.delete(s);
-				}
-			}
+
 			part.setParameter(word);
+			part.setParameter(typeParam);
 			params = part.getParameters();
 
 			System.out.println("Parameters on Vitamin: "+name);
