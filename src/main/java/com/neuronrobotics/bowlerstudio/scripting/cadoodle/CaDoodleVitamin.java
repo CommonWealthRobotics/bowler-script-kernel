@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
@@ -19,7 +20,8 @@ public class CaDoodleVitamin {
 		StringParameter size = new StringParameter(type + " Default", listVitaminSizes.get(0), listVitaminSizes);
 		if (size.getStrValue().length() == 0)
 			size.setStrValue(listVitaminSizes.get(0));
-		StringParameter word = new StringParameter(name + "_CaDoodle_Vitamin_Size", size.getStrValue(),
+		String string = "_CaDoodle_Vitamin_Size";
+		StringParameter word = new StringParameter(name + string, size.getStrValue(),
 				listVitaminSizes);
 		size.setStrValue(word.getStrValue());
 		if (args.size() > 1) {
@@ -33,12 +35,20 @@ public class CaDoodleVitamin {
 		try {
 			part = Vitamins.get(type, word.getStrValue()).setIsHole(true);
 			CSGDatabase.saveDatabase();
+			Set<String> params = part.getParameters();
+			for(String s:params) {
+				if(s.contains(string)) {
+					part.getMapOfparametrics().remove(s);
+				}
+			}
 			return part.setParameter(word).setRegenerate(new IRegenerate() {
 				@Override
 				public CSG regenerate(CSG previous) {
+					String name2 = previous.getName();
+					System.out.println("Regenerating source \n\t"+name+" on part \n\t"+name2);
 					ArrayList<Object> ar = new ArrayList<>();
 					ar.addAll(args);
-					ar.set(0, previous.getName());
+					ar.set(0, name2);
  					return CaDoodleVitamin.get(type, ar);
 				}
 			});

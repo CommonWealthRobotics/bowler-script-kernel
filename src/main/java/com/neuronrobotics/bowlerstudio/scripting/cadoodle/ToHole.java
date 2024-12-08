@@ -26,7 +26,7 @@ public class ToHole implements ICaDoodleOpperation {
 			for(String name:names) {
 				if(name.contentEquals(c.getName())) {
 					replace.add(c);
-					CSG b=c.clone().syncProperties(c);
+					CSG b=c.clone().setRegenerate(c.getRegenerate()).syncProperties(c);
 					b.setIsHole(true);
 					back.add(b);
 				}

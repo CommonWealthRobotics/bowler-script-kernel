@@ -35,7 +35,7 @@ public class Group implements ICaDoodleOpperation {
 			for(String name:names) {
 				if(name.contentEquals(csg.getName())) {
 					replace.add(csg);
-					CSG c=csg.clone().syncProperties(csg).setName(name);
+					CSG c=csg.clone().syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(name);
 					if(csg.isHole()) {
 						holes.add(c);
 					}else

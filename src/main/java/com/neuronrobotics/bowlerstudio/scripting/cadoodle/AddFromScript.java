@@ -64,16 +64,19 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			configs.put("name", name);
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
-			ArrayList<CSG> collect = ScriptingEngine
-					.flaten(gitULR, fileRel, CSG.class,args)
-					.stream()
-					.map(csg->{
-						return csg
-								.transformed(TransformFactory.nrToCSG( getLocation() ))
-								.syncProperties(csg)
-								.setName(getOrderedName());
-					})
-				    .collect(Collectors.toCollection(ArrayList::new));
+			List<CSG> flaten = ScriptingEngine
+					.flaten(gitULR, fileRel, CSG.class,args);
+			ArrayList<CSG> collect = new ArrayList<>();
+			collect.addAll(flaten);
+			for(int i=0;i<collect.size();i++) {
+				CSG csg=collect.get(i);
+				CSG tmp=csg
+						.transformed(TransformFactory.nrToCSG( getLocation() ))
+						.syncProperties(csg)
+						.setRegenerate(csg.getRegenerate())
+						.setName(getOrderedName());
+				collect.set(i, tmp);
+			}
 			back.addAll(collect);
 			VitaminBomManager boM = CaDoodleFile.getBoM();
 			VitaminLocation loc = boM.getByName(name);
@@ -82,8 +85,13 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 				boM.save();
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if(!fileRel.contains("generated"))
+			try {
+				fileRel="generated/"+fileRel;
+				return process(incoming);
+			}catch(Exception e2) {
+				e2.printStackTrace();
+			}
 		}
 		return back;
 	}

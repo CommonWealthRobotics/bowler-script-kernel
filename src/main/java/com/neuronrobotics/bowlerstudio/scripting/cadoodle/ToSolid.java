@@ -38,7 +38,7 @@ public class ToSolid implements ICaDoodleOpperation {
 			for(String name:names) {
 				if(name.contentEquals(c.getName())) {
 					replace.add(c);
-					CSG t=c.clone().syncProperties(c);
+					CSG t=c.clone().setRegenerate(c.getRegenerate()).syncProperties(c);
 					t.setIsHole(false);
 					if(useColor) {
 						t.setColor(getColor());

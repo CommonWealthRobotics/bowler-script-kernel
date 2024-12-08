@@ -14,17 +14,17 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public class Paste implements ICaDoodleOpperation {
-	@Expose (serialize = true, deserialize = true)
-	private TransformNR location=new TransformNR();
-	@Expose (serialize = true, deserialize = true)
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR location = new TransformNR();
+	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
-	@Expose (serialize = true, deserialize = true)
-	public String paste=null;
-	@Expose (serialize = true, deserialize = true)
-	public double offset=10;
-	@Expose (serialize = false, deserialize = false)
+	@Expose(serialize = true, deserialize = true)
+	public String paste = null;
+	@Expose(serialize = true, deserialize = true)
+	public double offset = 10;
+	@Expose(serialize = false, deserialize = false)
 	public HashSet<String> newNames = new HashSet<String>();
-	
+
 	@Override
 	public String getType() {
 		return "Paste";
@@ -34,24 +34,24 @@ public class Paste implements ICaDoodleOpperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		int index=0;
+		int index = 1;
 		for (int i = 0; i < incoming.size(); i++) {
 			CSG c = incoming.get(i);
-			for(String s:names) {
-				if(s.contentEquals(c.getName())) {
+			for (String s : names) {
+				if (s.contentEquals(c.getName())) {
 					index = copyPasteMoved(back, index, c);
-					if(c.isGroupResult()) {
+					if (c.isGroupResult()) {
 						String groupName = c.getName();
-						CSG newGroupResult= back.get(back.size()-1);
+						CSG newGroupResult = back.get(back.size() - 1);
 						newGroupResult.removeIsGroupResult(groupName);
 						newGroupResult.addIsGroupResult(newGroupResult.getName());
-						for(int j=0;j<incoming.size();j++) {
-							CSG jc=incoming.get(j);
-							if(jc.isInGroup()) {
-								if(jc.checkGroupMembership(groupName)) {
+						for (int j = 0; j < incoming.size(); j++) {
+							CSG jc = incoming.get(j);
+							if (jc.isInGroup()) {
+								if (jc.checkGroupMembership(groupName)) {
 									// this pasted gropups member found
 									index = copyPasteMoved(back, index, jc);
-									CSG newCopyInGroup = back.get(back.size()-1);
+									CSG newCopyInGroup = back.get(back.size() - 1);
 									newCopyInGroup.removeGroupMembership(groupName);
 									newCopyInGroup.addGroupMembership(newGroupResult.getName());
 								}
@@ -65,14 +65,15 @@ public class Paste implements ICaDoodleOpperation {
 	}
 
 	private int copyPasteMoved(ArrayList<CSG> back, int index, CSG c) {
-	
-		CSG newOne = c.clone().movex(offset);
-		String name = getPaserID()+(index==0?"":"_"+index);
+		String name = getPaserID() + (index == 0 ? "" : "_" + index);
+		CSG clone = c.clone();
+		clone.setRegenerate(c.getRegenerate()).setName(name);
+		CSG newOne = clone.regenerate().movex(offset);
 		VitaminBomManager boM = CaDoodleFile.getBoM();
-		VitaminLocation loc = boM.getByName(c.getName());
-		if(loc!=null) {
+		VitaminLocation loc = boM.getByName(name);
+		if (loc != null) {
 			VitaminLocation newElement = new VitaminLocation(loc, name);
-			newElement.setLocation(newElement.getLocation().times(new TransformNR(offset,0,0)));
+			newElement.setLocation(newElement.getLocation().times(new TransformNR(offset, 0, 0)));
 			boM.addVitamin(newElement);
 			boM.save();
 		}
@@ -100,9 +101,10 @@ public class Paste implements ICaDoodleOpperation {
 		this.names = names;
 		return this;
 	}
+
 	public String getPaserID() {
-		if(paste==null)
-			paste=RandomStringFactory.generateRandomString();
+		if (paste == null)
+			paste = RandomStringFactory.generateRandomString();
 		return paste;
 	}
 

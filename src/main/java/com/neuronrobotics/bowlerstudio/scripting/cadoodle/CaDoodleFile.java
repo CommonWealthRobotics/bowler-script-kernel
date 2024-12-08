@@ -311,7 +311,7 @@ public class CaDoodleFile {
 			if (names.contains(c.getName()))
 				throw new RuntimeException("There can not be 2 objects with the same name after an opperation!");
 			names.add(c.getName());
-			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName()));
+			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName()).setRegenerate(c.getRegenerate()));
 		}
 		cache.put(op, cachedCopy);
 	}
