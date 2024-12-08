@@ -1,5 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import java.io.File;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +9,7 @@ import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class UnGroup implements ICaDoodleOpperation {
+public class UnGroup extends AbstractAddFrom  implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 
@@ -15,7 +17,10 @@ public class UnGroup implements ICaDoodleOpperation {
 	public String getType() {
 		return "Un-Group";
 	}
-
+	@Override
+	public File getFile() throws NoSuchFileException {
+		throw new NoSuchFileException(null);
+	}
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
@@ -35,6 +40,7 @@ public class UnGroup implements ICaDoodleOpperation {
 						readd.removeGroupMembership(name);
 						back.remove(csg);
 						back.add(readd);
+						namesAdded.add(readd.getName());
 					}
 				}
 

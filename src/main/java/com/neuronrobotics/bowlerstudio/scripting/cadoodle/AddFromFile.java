@@ -25,9 +25,6 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
-
-	@Expose(serialize = true, deserialize = true)
-	private String name = null;
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
 	private ArrayList<String> options = new ArrayList<String>();
@@ -189,16 +186,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		return this;
 	}
 
-	public String getName() {
-		if (name == null) {
-			setName(RandomStringFactory.generateRandomString());
-		}
-		return name;
-	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public StringParameter getParameter(String defaultVal) {
 		if (parameter == null)

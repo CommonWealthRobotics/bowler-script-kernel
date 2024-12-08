@@ -27,8 +27,7 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 	private String gitULR = "";
 	@Expose (serialize = true, deserialize = true)
 	private String fileRel = "";
-	@Expose (serialize = true, deserialize = true)
-	private String name=null;
+
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location =null;
 	@Expose(serialize = true, deserialize = true)
@@ -54,14 +53,12 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 		nameIndex=0;
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		if(name==null) {
-			name=RandomStringFactory.generateRandomString();
-		}
+
 		try {
 			ArrayList<Object>args = new ArrayList<>();
-			args.addAll(Arrays.asList(name ));
+			args.addAll(Arrays.asList(getName() ));
 			HashMap<String, Object> configs =new HashMap<String, Object>();
-			configs.put("name", name);
+			configs.put("name", getName());
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
 			List<CSG> flaten = ScriptingEngine
@@ -79,7 +76,7 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			}
 			back.addAll(collect);
 			VitaminBomManager boM = CaDoodleFile.getBoM();
-			VitaminLocation loc = boM.getByName(name);
+			VitaminLocation loc = boM.getByName(getName());
 			if(loc!=null) {
 				loc.setLocation(location);
 				boM.save();
@@ -107,13 +104,6 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 	public AddFromScript setLocation(TransformNR location) {
 		this.location = location;
 		return this;
-	}
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	@Override

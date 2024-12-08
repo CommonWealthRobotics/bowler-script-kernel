@@ -1,5 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import java.io.File;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +12,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.IParametric;
 import javafx.scene.paint.Color;
 
-public class Group implements ICaDoodleOpperation {
+public class Group extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose (serialize = true, deserialize = true)
@@ -77,6 +79,7 @@ public class Group implements ICaDoodleOpperation {
 			mapOfparametrics.clear();
 		result.addIsGroupResult(getGroupID());
 		result.setName(getGroupID());
+		namesAdded.add(result.getName());
 		back.add(result);
 		return back;
 	}
@@ -100,5 +103,8 @@ public class Group implements ICaDoodleOpperation {
 		this.hull = hull;
 		return this;
 	}
-
+	@Override
+	public File getFile() throws NoSuchFileException {
+		throw new NoSuchFileException(null);
+	}
 }

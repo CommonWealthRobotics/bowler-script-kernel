@@ -1,5 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import java.io.File;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +15,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class Paste implements ICaDoodleOpperation {
+public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = new TransformNR();
 	@Expose(serialize = true, deserialize = true)
@@ -22,8 +24,6 @@ public class Paste implements ICaDoodleOpperation {
 	public String paste = null;
 	@Expose(serialize = true, deserialize = true)
 	public double offset = 10;
-	@Expose(serialize = false, deserialize = false)
-	public HashSet<String> newNames = new HashSet<String>();
 
 	@Override
 	public String getType() {
@@ -80,7 +80,7 @@ public class Paste implements ICaDoodleOpperation {
 		index++;
 		newOne.syncProperties(c).setName(name);
 		back.add(newOne);
-		getNewNames().add(name);
+		getNamesAdded().add(name);
 		return index;
 	}
 
@@ -113,7 +113,10 @@ public class Paste implements ICaDoodleOpperation {
 		return this;
 	}
 
-	public HashSet<String> getNewNames() {
-		return newNames;
+
+
+	@Override
+	public File getFile() throws NoSuchFileException {
+		throw new NoSuchFileException(null);
 	}
 }

@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.io.File;
+import java.nio.file.NoSuchFileException;
 import java.util.HashSet;
 
 import com.google.gson.annotations.Expose;
@@ -10,13 +11,21 @@ public abstract class AbstractAddFrom  implements ICaDoodleOpperation {
 	protected HashSet<String> namesAdded = new HashSet<>();
 	@Expose (serialize = false, deserialize = false)
 	protected int nameIndex = 0;
-	
+	@Expose(serialize = true, deserialize = true)
+	protected String name = null;
 	public HashSet<String> getNamesAdded() {
 		return namesAdded;
 	}
-	public abstract String getName();
+	public String getName() {
+		if (name == null) {
+			setName(RandomStringFactory.generateRandomString());
+		}
+		return name;
+	}
 
-	public abstract void setName(String name);
+	public void setName(String name) {
+		this.name = name;
+	}
 	
 	public String getOrderedName() {
 		if(getName()==null) {
@@ -30,7 +39,8 @@ public abstract class AbstractAddFrom  implements ICaDoodleOpperation {
 		namesAdded.add(result);
 		return result;
 	}
-	public abstract File getFile();
+	
+	public abstract File getFile()throws NoSuchFileException;
 	@Override 
 	public String toString() {
 		return getType()+" with name "+getName();
