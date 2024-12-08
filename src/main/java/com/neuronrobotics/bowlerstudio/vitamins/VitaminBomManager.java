@@ -232,9 +232,7 @@ public class VitaminBomManager {
 					object = "0.01";
 
 				csv += key + "," + size + "," + URL + "," + object + "\n";
-			} else {
-				com.neuronrobotics.sdk.common.Log.error("Failure on " + key);
-			}
+			} 
 		}
 		if (baseURL != null)
 			try {
