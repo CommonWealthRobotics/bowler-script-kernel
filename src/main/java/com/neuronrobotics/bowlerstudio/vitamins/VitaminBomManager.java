@@ -50,7 +50,7 @@ public class VitaminBomManager {
 
 	public VitaminBomManager(File parentFile) {
 		baseWorkspaceFile = parentFile;
-		File bom = new File(baseWorkspaceFile.getAbsolutePath() + "/" + getManufacturingBomJson());
+		File bom = getBomFile();
 		if (!bom.exists()) {
 			if (!bom.getParentFile().exists()) {
 				bom.getParentFile().mkdir();
@@ -77,6 +77,12 @@ public class VitaminBomManager {
 			database = new HashMap<String, ArrayList<VitaminLocation>>();
 			save();
 		}
+	}
+	public File getBomCsv() {
+		return new File(baseWorkspaceFile.getAbsolutePath() + "/" + getManufacturingBomCsv());
+	}
+	public File getBomFile() {
+		return new File(baseWorkspaceFile.getAbsolutePath() + "/" + getManufacturingBomJson());
 	}
 	public VitaminLocation getByName(String name) {
 		for(String keys:database.keySet()) {
