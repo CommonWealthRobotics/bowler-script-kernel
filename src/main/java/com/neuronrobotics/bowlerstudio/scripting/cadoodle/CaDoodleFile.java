@@ -378,7 +378,7 @@ public class CaDoodleFile {
 		HashSet<String> names = new HashSet<>();
 		for (CSG c : process) {
 			if (names.contains(c.getName()))
-				throw new RuntimeException("There can not be 2 objects with the same name after an opperation!");
+				throw new RuntimeException("There can not be 2 objects with the same name after an opperation! "+c.getName());
 			names.add(c.getName());
 			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
 					.setRegenerate(c.getRegenerate()));
