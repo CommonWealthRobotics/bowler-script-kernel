@@ -30,13 +30,13 @@ public class Delete implements ICaDoodleOpperation {
 		back.addAll(incoming);
 		HashSet<String> groupsProcessed = new HashSet<String>();
 
-		for(CSG c:incoming) {
-			if(c.isLock())
-				continue;
+		//for(CSG c:incoming) {
+//			if(c.isLock())
+//				continue;
 			for(String s:names) {
-				CaDoodleFile.getAllConstituantElements(s, back, groupsProcessed, new ICadoodleRecursiveEvent() {
+				CaDoodleFile.applyToAllConstituantElements(false,s, back, groupsProcessed, new ICadoodleRecursiveEvent() {
 					@Override
-					public CSG process(CSG incoming) {
+					public ArrayList<CSG> process(CSG incoming) {
 						//back.remove(c);
 						VitaminBomManager boM = CaDoodleFile.getBoM();
 						VitaminLocation loc = boM.getByName(s);
@@ -44,10 +44,12 @@ public class Delete implements ICaDoodleOpperation {
 							boM.remove(loc);
 							boM.save();
 						}
-						return null;
+						ArrayList<CSG> b = new ArrayList<>();
+						b.add(null);
+						return b;
 					}
 				});
-			}
+			//}
 		}
 		return back;
 	}

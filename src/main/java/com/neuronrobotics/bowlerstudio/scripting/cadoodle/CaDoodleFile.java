@@ -72,7 +72,7 @@ public class CaDoodleFile {
 	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
 	private javafx.scene.image.WritableImage img;
 	private boolean initializing;
-	private static HashMap<String,VitaminBomManager> bomManagers = new HashMap<>();
+	private static HashMap<String, VitaminBomManager> bomManagers = new HashMap<>();
 	private VitaminBomManager boM;
 
 	public void close() {
@@ -151,19 +151,19 @@ public class CaDoodleFile {
 		}
 		initializing = false;
 	}
+
 	public static VitaminBomManager getBoM() {
-		
+
 		String strValue = getCadoodleFileLocation();
 		File file = new File(strValue).getParentFile();
-		if(bomManagers.get(strValue)==null) {
+		if (bomManagers.get(strValue) == null) {
 			bomManagers.put(strValue, new VitaminBomManager(file));
 		}
 		return bomManagers.get(strValue);
 	}
 
 	private static String getCadoodleFileLocation() {
-		StringParameter loc = new StringParameter("CaDoodle_File_Location", "",
-				new ArrayList<String>());
+		StringParameter loc = new StringParameter("CaDoodle_File_Location", "", new ArrayList<String>());
 		String strValue = loc.getStrValue();
 		return strValue;
 	}
@@ -239,26 +239,49 @@ public class CaDoodleFile {
 		return opperationRunner;
 
 	}
-	public static void getAllConstituantElements(String name, ArrayList<CSG> back, HashSet<String> groupsProcessed ,ICadoodleRecursiveEvent p) {
-		for (int i = 0; i < back.size(); i++) {
-			CSG csg = back.get(i);
-			if(csg.isLock())
+
+	public static int applyToAllConstituantElements(boolean addRet, String targetName, ArrayList<CSG> back,
+			HashSet<String> groupsProcessed, ICadoodleRecursiveEvent p) {
+		ArrayList<CSG> immutable = new ArrayList<>();
+		immutable.addAll(back);
+		for (int i = 0; i < immutable.size(); i++) {
+			CSG csg = immutable.get(i);
+			if (csg.isLock())
 				continue;
-			if (	csg.getName().contentEquals(name) ||
-					(csg.isInGroup() && csg.checkGroupMembership(name))){
-				groupsProcessed.add(name);
-				if(csg.isInGroup() && csg.isGroupResult() && !groupsProcessed.contains(csg.getName())) {
-					// composite group
-					getAllConstituantElements(csg.getName(), back,groupsProcessed,p);
-					
-				}
+			boolean inGroup = csg.isInGroup();
+			boolean thisCSGIsInGroupNamedAfterTarget = csg.checkGroupMembership(targetName);
+			String thisCSGName = csg.getName();
+			boolean thisCSGIsTheTarget = thisCSGName.contentEquals(targetName);
+			boolean groupResult = csg.isGroupResult();
+			
+			if (thisCSGIsTheTarget ) {
+				groupsProcessed.add(targetName);
 				// move it
-				CSG tmpToAdd = p.process(csg);
-				back.set(i, tmpToAdd);
+				ArrayList<CSG> tmpToAdd = p.process(csg);
+				if (addRet) {
+					back.addAll(tmpToAdd);
+				} else {
+					for (int j = 0; j < back.size(); j++) {
+						if (back.get(j).getName().contentEquals(csg.getName())) {
+							back.remove(j);
+							break;
+						}
+					}
+					back.addAll(tmpToAdd);
+				}
+				continue;
+			}
+			boolean contains = groupsProcessed.contains(thisCSGName);
+			boolean isContinue = (groupResult && thisCSGIsInGroupNamedAfterTarget) ;
+			if (isContinue) {
+				// composite group
+				applyToAllConstituantElements(addRet, thisCSGName, back, groupsProcessed, p);
 			}
 		}
 		back.removeAll(Collections.singleton(null));
+		return back.size();
 	}
+
 	private void process(ICaDoodleOpperation op) {
 		List<CSG> process = op.process(getCurrentState());
 		storeResultInCache(op, process);
@@ -306,35 +329,35 @@ public class CaDoodleFile {
 			ICaDoodleOpperation key = getOpperations().get(i);
 			List<CSG> back = cache.remove(key);
 			VitaminBomManager boM = CaDoodleFile.getBoM();
-			if(AbstractAddFrom.class.isInstance(key)) {
-				AbstractAddFrom aaf=(AbstractAddFrom)key;
-				for(String name:aaf.getNamesAdded()) {
+			if (AbstractAddFrom.class.isInstance(key)) {
+				AbstractAddFrom aaf = (AbstractAddFrom) key;
+				for (String name : aaf.getNamesAdded()) {
 					VitaminLocation loc = boM.getByName(name);
-					if(loc!=null) {
+					if (loc != null) {
 						boM.remove(loc);
 						boM.save();
 					}
 				}
 			}
-			if(Delete.class.isInstance(key)) {
-				Delete d =(Delete)key;
-				for(String s:d.getNames()) {
-					for(CSG c:back) {
-						String type =null;
-						String size=null;
-						if(c.getName().contentEquals(s)) {
-							for(String param:c.getParameters()) {
-								if(param.contains("_CaDoodle_Vitamin_Type")) {
+			if (Delete.class.isInstance(key)) {
+				Delete d = (Delete) key;
+				for (String s : d.getNames()) {
+					for (CSG c : back) {
+						String type = null;
+						String size = null;
+						if (c.getName().contentEquals(s)) {
+							for (String param : c.getParameters()) {
+								if (param.contains("_CaDoodle_Vitamin_Type")) {
 									Parameter p = CSGDatabase.get(param);
-									type=p.getStrValue();
+									type = p.getStrValue();
 								}
-								if(param.contains("_CaDoodle_Vitamin_Size")) {
+								if (param.contains("_CaDoodle_Vitamin_Size")) {
 									Parameter p = CSGDatabase.get(param);
-									size=p.getStrValue();
+									size = p.getStrValue();
 								}
 							}
-							if(type!=null&&size!=null) {
-								boM.addVitamin(new VitaminLocation(false,c.getName(), type, size, new TransformNR()));
+							if (type != null && size != null) {
+								boM.addVitamin(new VitaminLocation(false, c.getName(), type, size, new TransformNR()));
 							}
 						}
 					}
@@ -357,7 +380,8 @@ public class CaDoodleFile {
 			if (names.contains(c.getName()))
 				throw new RuntimeException("There can not be 2 objects with the same name after an opperation!");
 			names.add(c.getName());
-			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName()).setRegenerate(c.getRegenerate()));
+			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
+					.setRegenerate(c.getRegenerate()));
 		}
 		cache.put(op, cachedCopy);
 	}
@@ -685,6 +709,5 @@ public class CaDoodleFile {
 	private void setRegenerating(boolean regenerating) {
 		this.regenerating = regenerating;
 	}
-
 
 }

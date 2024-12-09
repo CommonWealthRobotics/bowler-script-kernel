@@ -73,10 +73,12 @@ public class CaDoodleVitamin {
 				@Override
 				public CSG regenerate(CSG previous) {
 					String name2 = previous.getName();
+					
 					System.out.println("Regenerating source \n\t"+name+" on part \n\t"+name2);
 					ArrayList<Object> ar = new ArrayList<>();
 					ar.addAll(args);
 					ar.set(0, name2);
+					
  					return CaDoodleVitamin.get(type, ar);
 				}
 			});

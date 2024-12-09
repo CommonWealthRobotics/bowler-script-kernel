@@ -30,9 +30,9 @@ public class MoveCenter implements ICaDoodleOpperation {
 		HashSet<String> groupsProcessed = new HashSet<String>();
 		back.addAll(incoming);
 		for (String name : names) {
-			CaDoodleFile.getAllConstituantElements(name, back, groupsProcessed, new ICadoodleRecursiveEvent() {
+			CaDoodleFile.applyToAllConstituantElements(false,name, back, groupsProcessed, new ICadoodleRecursiveEvent() {
 				@Override
-				public CSG process(CSG incoming) {
+				public ArrayList<CSG> process(CSG incoming) {
 					CSG tmpToAdd = incoming.transformed(TransformFactory.nrToCSG(location)).syncProperties(incoming)
 							.setName(incoming.getName());
 					VitaminBomManager boM = CaDoodleFile.getBoM();
@@ -41,7 +41,9 @@ public class MoveCenter implements ICaDoodleOpperation {
 						loc.setLocation(loc.getLocation().times(location));
 						boM.save();
 					}
-					return tmpToAdd;
+					ArrayList<CSG> b = new ArrayList<>();
+					b.add(tmpToAdd);
+					return b;
 				}
 			});
 		}

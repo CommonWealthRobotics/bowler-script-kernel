@@ -24,6 +24,7 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	public String paste = null;
 	@Expose(serialize = true, deserialize = true)
 	public double offset = 10;
+	private int index;
 
 	@Override
 	public String getType() {
@@ -34,43 +35,35 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		int index = 1;
-		for (int i = 0; i < incoming.size(); i++) {
-			CSG c = incoming.get(i);
-			for (String s : names) {
-				if (s.contentEquals(c.getName())) {
-					index = copyPasteMoved(back, index, c);
-					if (c.isGroupResult()) {
-						String groupName = c.getName();
-						CSG newGroupResult = back.get(back.size() - 1);
-						newGroupResult.removeIsGroupResult(groupName);
-						newGroupResult.addIsGroupResult(newGroupResult.getName());
-						for (int j = 0; j < incoming.size(); j++) {
-							CSG jc = incoming.get(j);
-							if (jc.isInGroup()) {
-								if (jc.checkGroupMembership(groupName)) {
-									// this pasted gropups member found
-									index = copyPasteMoved(back, index, jc);
-									CSG newCopyInGroup = back.get(back.size() - 1);
-									newCopyInGroup.removeGroupMembership(groupName);
-									newCopyInGroup.addGroupMembership(newGroupResult.getName());
-								}
-							}
-						}
-					}
+		index = 1;
+		HashSet<String> groupsProcessed = new HashSet<String>();
+
+		for (int j = 0; j < names.size(); j++) {
+			String s = names.get(j);
+			CaDoodleFile.applyToAllConstituantElements(false, s, back, groupsProcessed, new ICadoodleRecursiveEvent() {
+				@Override
+				public ArrayList<CSG> process(CSG ic) {
+					ArrayList<CSG> copyPasteMoved = copyPasteMoved(back, ic);
+					return copyPasteMoved;
 				}
-			}
+			});
 		}
+
 		return back;
 	}
 
-	private int copyPasteMoved(ArrayList<CSG> back, int index, CSG c) {
+	private ArrayList<CSG> copyPasteMoved(ArrayList<CSG> back, CSG c) {
 		String name = getPaserID() + (index == 0 ? "" : "_" + index);
 		CSG clone = c.clone();
 		clone.setRegenerate(c.getRegenerate()).setName(name);
-		CSG newOne = clone.regenerate().movex(offset);
+
+		CSG newOne = clone.regenerate().moveToCenter().movex(c.getCenterX()).movey(c.getCenterY()).movez(c.getCenterZ())
+				.movex(offset);
+		newOne.setRegenerate(c.getRegenerate()).setName(name);
 		VitaminBomManager boM = CaDoodleFile.getBoM();
-		VitaminLocation loc = boM.getByName(name);
+		String name2 = c.getName();
+		VitaminLocation loc = boM.getByName(name2);
+		VitaminLocation locNew = boM.getByName(name);
 		if (loc != null) {
 			VitaminLocation newElement = new VitaminLocation(loc, name);
 			newElement.setLocation(newElement.getLocation().times(new TransformNR(offset, 0, 0)));
@@ -79,9 +72,11 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		}
 		index++;
 		newOne.syncProperties(c).setName(name);
-		back.add(newOne);
 		getNamesAdded().add(name);
-		return index;
+		ArrayList<CSG> b = new ArrayList<>();
+		b.add(c);
+		b.add(newOne);
+		return b;
 	}
 
 	public TransformNR getLocation() {
@@ -112,8 +107,6 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		this.offset = offset;
 		return this;
 	}
-
-
 
 	@Override
 	public File getFile() throws NoSuchFileException {
