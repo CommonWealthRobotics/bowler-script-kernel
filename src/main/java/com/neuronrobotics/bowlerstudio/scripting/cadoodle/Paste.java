@@ -53,10 +53,11 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	}
 
 	private ArrayList<CSG> copyPasteMoved(ArrayList<CSG> back, CSG c) {
+		String prevName = c.getName();
 		String name = getPaserID() + (index == 0 ? "" : "_" + index);
 		CSG clone = c.clone();
 		clone.setRegenerate(c.getRegenerate()).setName(name);
-
+		clone.getStorage().set("PreviousName", prevName);
 		CSG newOne = clone.regenerate().moveToCenter().movex(c.getCenterX()).movey(c.getCenterY()).movez(c.getCenterZ())
 				.movex(offset);
 		newOne.setRegenerate(c.getRegenerate()).setName(name);

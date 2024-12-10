@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Set;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
@@ -83,8 +84,12 @@ public class CaDoodleVitamin {
 			CSG back = part.setRegenerate(new IRegenerate() {
 				@Override
 				public CSG regenerate(CSG previous) {
-					String name2 = previous.getName();
-					
+					Optional<Object> pv = previous.getStorage().getValue("PreviousName");
+					String name2 = null;
+					if(pv.isPresent())
+						name2=pv.get().toString();
+					else
+						name2=name;
 					System.out.println("Regenerating source \n\t"+name+" on part \n\t"+name2);
 					ArrayList<Object> ar = new ArrayList<>();
 					ar.addAll(args);
@@ -92,12 +97,12 @@ public class CaDoodleVitamin {
 					Parameter s = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Size");
 					Parameter t = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Type");
 					if(t==null) {
-						System.out.println("Error, type is null, previous "+name2+" has no parameters somehow??");
+						System.out.println(" Error, type is null, previous "+name2+" has no parameters somehow??");
 					}
  					return CaDoodleVitamin.get(t.getStrValue(),s.getStrValue(), ar);
 				}
 			});
-			
+			//back.getStorage().set("PreviousName", name);
 			return back;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
