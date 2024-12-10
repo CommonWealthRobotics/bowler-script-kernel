@@ -11,10 +11,21 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.IRegenerate;
+import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class CaDoodleVitamin {
 	public static CSG get(String typencoming, ArrayList<Object> args) {
+		String name = args.get(0).toString();
+		ArrayList<String>types=new ArrayList<>();
+		types.addAll(Vitamins.listVitaminTypes());
+		StringParameter typeParam = new StringParameter(name + "_CaDoodle_Vitamin_Type", typencoming,
+				types);
+		String type=typeParam.getStrValue();
+		ArrayList<String> listVitaminSizes = Vitamins.listVitaminSizes(type);
+		return get( type, listVitaminSizes.get(0),  args);
+	}
+	public static CSG get(String typencoming,String defaultValue, ArrayList<Object> args) {
 		String name = args.get(0).toString();
 
 		ArrayList<String>types=new ArrayList<>();
@@ -24,7 +35,7 @@ public class CaDoodleVitamin {
 		String type=typeParam.getStrValue();
 		ArrayList<String> listVitaminSizes = Vitamins.listVitaminSizes(type);
 		
-		StringParameter size = new StringParameter(type + " Default", listVitaminSizes.get(0), listVitaminSizes);
+		StringParameter size = new StringParameter(type + " Default", defaultValue, listVitaminSizes);
 		
 		String strValue = size.getStrValue();
 		if(strValue.length() == 0) {
@@ -78,8 +89,12 @@ public class CaDoodleVitamin {
 					ArrayList<Object> ar = new ArrayList<>();
 					ar.addAll(args);
 					ar.set(0, name2);
-					
- 					return CaDoodleVitamin.get(type, ar);
+					Parameter s = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Size");
+					Parameter t = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Type");
+					if(t==null) {
+						System.out.println("Error, type is null, previous "+name2+" has no parameters somehow??");
+					}
+ 					return CaDoodleVitamin.get(t.getStrValue(),s.getStrValue(), ar);
 				}
 			});
 			
