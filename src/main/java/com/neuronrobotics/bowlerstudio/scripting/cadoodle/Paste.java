@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
 	public double offset = 10;
 	private int index;
+	private HashMap<String, String> cpMap = new HashMap<String, String>();
 
 	@Override
 	public String getType() {
@@ -36,11 +38,9 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		index = 1;
-		HashSet<String> groupsProcessed = new HashSet<String>();
-
 		for (int j = 0; j < names.size(); j++) {
 			String s = names.get(j);
-			CaDoodleFile.applyToAllConstituantElements(false, s, back, groupsProcessed, new ICadoodleRecursiveEvent() {
+			CaDoodleFile.applyToAllConstituantElements(false, s, back, new ICadoodleRecursiveEvent() {
 				@Override
 				public ArrayList<CSG> process(CSG ic) {
 					ArrayList<CSG> copyPasteMoved = copyPasteMoved(back, ic);
@@ -77,6 +77,7 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		ArrayList<CSG> b = new ArrayList<>();
 		b.add(c);
 		b.add(newOne);
+		cpMap.put(c.getName(), newOne.getName());
 		return b;
 	}
 

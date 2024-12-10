@@ -239,49 +239,6 @@ public class CaDoodleFile {
 		return opperationRunner;
 
 	}
-
-	public static int applyToAllConstituantElements(boolean addRet, String targetName, ArrayList<CSG> back,
-			HashSet<String> groupsProcessed, ICadoodleRecursiveEvent p) {
-		ArrayList<CSG> immutable = new ArrayList<>();
-		immutable.addAll(back);
-		for (int i = 0; i < immutable.size(); i++) {
-			CSG csg = immutable.get(i);
-			if (csg.isLock())
-				continue;
-			boolean inGroup = csg.isInGroup();
-			boolean thisCSGIsInGroupNamedAfterTarget = csg.checkGroupMembership(targetName);
-			String thisCSGName = csg.getName();
-			boolean thisCSGIsTheTarget = thisCSGName.contentEquals(targetName);
-			boolean groupResult = csg.isGroupResult();
-			
-			if (thisCSGIsTheTarget ) {
-				groupsProcessed.add(targetName);
-				// move it
-				ArrayList<CSG> tmpToAdd = p.process(csg);
-				if (addRet) {
-					back.addAll(tmpToAdd);
-				} else {
-					for (int j = 0; j < back.size(); j++) {
-						if (back.get(j).getName().contentEquals(csg.getName())) {
-							back.remove(j);
-							break;
-						}
-					}
-					back.addAll(tmpToAdd);
-				}
-				continue;
-			}
-			boolean contains = groupsProcessed.contains(thisCSGName);
-			boolean isContinue = (groupResult && thisCSGIsInGroupNamedAfterTarget) ;
-			if (isContinue) {
-				// composite group
-				applyToAllConstituantElements(addRet, thisCSGName, back, groupsProcessed, p);
-			}
-		}
-		back.removeAll(Collections.singleton(null));
-		return back.size();
-	}
-
 	private void process(ICaDoodleOpperation op) {
 		List<CSG> process = op.process(getCurrentState());
 		storeResultInCache(op, process);
@@ -323,6 +280,47 @@ public class CaDoodleFile {
 		opperationRunner.start();
 		return opperationRunner;
 	}
+	public static int applyToAllConstituantElements(boolean addRet, String targetName, ArrayList<CSG> back,
+			 ICadoodleRecursiveEvent p) {
+		ArrayList<CSG> immutable = new ArrayList<>();
+		immutable.addAll(back);
+		for (int i = 0; i < immutable.size(); i++) {
+			CSG csg = immutable.get(i);
+			if (csg.isLock())
+				continue;
+			boolean inGroup = csg.isInGroup();
+			boolean thisCSGIsInGroupNamedAfterTarget = csg.checkGroupMembership(targetName);
+			String thisCSGName = csg.getName();
+			boolean thisCSGIsTheTarget = thisCSGName.contentEquals(targetName);
+			boolean groupResult = csg.isGroupResult();
+			
+			if (thisCSGIsTheTarget || thisCSGIsInGroupNamedAfterTarget ) {
+				// move it
+				ArrayList<CSG> tmpToAdd = p.process(csg);
+				if (addRet) {
+					back.addAll(tmpToAdd);
+				} else {
+					for (int j = 0; j < back.size(); j++) {
+						if (back.get(j).getName().contentEquals(csg.getName())) {
+							back.remove(j);
+							break;
+						}
+					}
+					back.addAll(tmpToAdd);
+				}
+				continue;
+			}
+			boolean isContinue = (groupResult) ;
+			if (isContinue && thisCSGIsInGroupNamedAfterTarget) {
+				// composite group
+				applyToAllConstituantElements(addRet, thisCSGName, back, p);
+			}
+		}
+		back.removeAll(Collections.singleton(null));
+		return back.size();
+	}
+
+
 
 	private void pruneForward() {
 		for (int i = getCurrentIndex(); i < getOpperations().size(); i++) {

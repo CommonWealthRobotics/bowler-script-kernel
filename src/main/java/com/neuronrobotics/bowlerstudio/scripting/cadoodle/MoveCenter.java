@@ -27,10 +27,9 @@ public class MoveCenter implements ICaDoodleOpperation {
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
-		HashSet<String> groupsProcessed = new HashSet<String>();
 		back.addAll(incoming);
 		for (String name : names) {
-			CaDoodleFile.applyToAllConstituantElements(false,name, back, groupsProcessed, new ICadoodleRecursiveEvent() {
+			CaDoodleFile.applyToAllConstituantElements(false,name, back, new ICadoodleRecursiveEvent() {
 				@Override
 				public ArrayList<CSG> process(CSG incoming) {
 					CSG tmpToAdd = incoming.transformed(TransformFactory.nrToCSG(location)).syncProperties(incoming)

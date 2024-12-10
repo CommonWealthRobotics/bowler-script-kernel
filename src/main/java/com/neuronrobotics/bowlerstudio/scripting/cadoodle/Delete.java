@@ -28,13 +28,12 @@ public class Delete implements ICaDoodleOpperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		HashSet<String> groupsProcessed = new HashSet<String>();
 
 		//for(CSG c:incoming) {
 //			if(c.isLock())
 //				continue;
 			for(String s:names) {
-				CaDoodleFile.applyToAllConstituantElements(false,s, back, groupsProcessed, new ICadoodleRecursiveEvent() {
+				CaDoodleFile.applyToAllConstituantElements(false,s, back, new ICadoodleRecursiveEvent() {
 					@Override
 					public ArrayList<CSG> process(CSG incoming) {
 						//back.remove(c);
