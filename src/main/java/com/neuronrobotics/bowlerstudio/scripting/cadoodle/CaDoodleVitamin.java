@@ -93,7 +93,7 @@ public class CaDoodleVitamin {
 					System.out.println("Regenerating source \n\t"+name+" on part \n\t"+name2);
 					ArrayList<Object> ar = new ArrayList<>();
 					ar.addAll(args);
-					ar.set(0, name2);
+					ar.set(0, previous.getName());
 					Parameter s = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Size");
 					Parameter t = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Type");
 					if(t==null) {
