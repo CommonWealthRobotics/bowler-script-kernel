@@ -22,7 +22,7 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
-	public String paste = null;
+	public String myName = null;
 	@Expose(serialize = true, deserialize = true)
 	public double offset = 10;
 	private int index;
@@ -38,6 +38,7 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		index = 1;
+		cpMap.clear();
 		for (int j = 0; j < names.size(); j++) {
 			String s = names.get(j);
 			CaDoodleFile.applyToAllConstituantElements(false, s, back, new ICadoodleRecursiveEvent() {
@@ -48,9 +49,36 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 				}
 			});
 		}
-
+		for(String from:cpMap.keySet()) {
+			CSG source = getByName(back, from);
+			if(source.isGroupResult()) {
+				ArrayList<String> c =constituants(back,from);
+				String newGroupName = getByName(back,cpMap.get(from)).getName();
+				for(String s:c) {
+					CSG dest = getByName(back,cpMap.get(s));
+					//dest.removeGroupMembership(from);
+					//dest.addGroupMembership(newGroupName);
+				}
+			}
+		}
 		return back;
 	}
+	private ArrayList<String> constituants(ArrayList<CSG> back,String name){
+		ArrayList<String> c = new ArrayList<String>();
+		for(CSG csg:back) {
+			if(csg.checkGroupMembership(name))
+				c.add(csg.getName());
+		}
+		return c;
+	}
+	private CSG getByName(ArrayList<CSG> back, String name) {
+		for(CSG c:back) {
+			if (c.getName().contentEquals(name))
+					return c;
+		}
+		throw new RuntimeException("Fail! there was no object named "+name);
+	}
+	
 
 	private ArrayList<CSG> copyPasteMoved(ArrayList<CSG> back, CSG c) {
 		String prevName = c.getName();
@@ -100,9 +128,9 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	}
 
 	public String getPaserID() {
-		if (paste == null)
-			paste = RandomStringFactory.generateRandomString();
-		return paste;
+		if (myName == null)
+			myName = RandomStringFactory.generateRandomString();
+		return myName;
 	}
 
 	public Paste setOffset(double offset) {
