@@ -225,7 +225,7 @@ public class Vitamins {
 		} catch (Exception e) {
 			e.printStackTrace();
 			gitRpoDatabase = defaultgitRpoDatabase;
-			ScriptingEngine.deleteRepo(script.get("scriptGit").toString());
+			//ScriptingEngine.deleteRepo(script.get("scriptGit").toString());
 			clear();
 			if (depthGauge < 2) {
 				return get(type, id, depthGauge + 1);
@@ -293,7 +293,7 @@ public class Vitamins {
 	public static ConcurrentHashMap<String, Object> getConfigurationRW(String type, String id) {
 		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
 		if (database.get(id) == null) {
-			database.put(id, new ConcurrentHashMap<String, Object>());
+			id=Vitamins.listVitaminSizes(type).get(0);
 		}
 
 		ConcurrentHashMap<String, Object> ConcurrentHashMap = database.get(id);
