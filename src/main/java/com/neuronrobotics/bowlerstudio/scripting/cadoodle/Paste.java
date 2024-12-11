@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
@@ -15,6 +16,7 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Transform;
 
 public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
@@ -65,6 +67,7 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		ArrayList<String> c = new ArrayList<String>();
 		for(CSG csg:back) {
 			if(csg.checkGroupMembership(name)) {
+				// only add objects that were created by this operation
 				if(csg.getName().contains(getName()))
 					c.add(csg.getName());
 			}
@@ -86,7 +89,11 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		CSG clone = c.clone();
 		clone.setRegenerate(c.getRegenerate()).setName(name);
 		clone.getStorage().set("PreviousName", prevName);
-		CSG newOne = clone.regenerate().moveToCenter().movex(c.getCenterX()).movey(c.getCenterY()).movez(c.getCenterZ())
+		Transform nrToCSG = new Transform();
+		Optional<Object> o=c.getStorage().getValue("StartingTransform");
+		if(o.isPresent())
+			nrToCSG=(Transform) o.get();
+		CSG newOne = clone.regenerate().transformed(nrToCSG).moveToCenter().movex(c.getCenterX()).movey(c.getCenterY()).movez(c.getCenterZ())
 				.movex(offset);
 		newOne.setRegenerate(c.getRegenerate()).setName(name);
 		VitaminBomManager boM = CaDoodleFile.getBoM();

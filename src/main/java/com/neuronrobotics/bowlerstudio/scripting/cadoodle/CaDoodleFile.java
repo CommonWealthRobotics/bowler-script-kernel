@@ -260,7 +260,6 @@ public class CaDoodleFile {
 			return opperationRunner;
 		}
 		opperationRunner = new Thread(() -> {
-
 			while (toProcess.size() > 0) {
 				opperationRunner.setName("addOpperation Thread " + toProcess.size());
 				ICaDoodleOpperation op = toProcess.remove(0);
@@ -288,7 +287,7 @@ public class CaDoodleFile {
 			CSG csg = immutable.get(i);
 			if (csg.isLock())
 				continue;
-			boolean inGroup = csg.isInGroup();
+			//boolean inGroup = csg.isInGroup();
 			boolean thisCSGIsInGroupNamedAfterTarget = csg.checkGroupMembership(targetName);
 			String thisCSGName = csg.getName();
 			boolean thisCSGIsTheTarget = thisCSGName.contentEquals(targetName);
@@ -310,8 +309,7 @@ public class CaDoodleFile {
 				}
 				continue;
 			}
-			boolean isContinue = (groupResult) ;
-			if (isContinue && thisCSGIsInGroupNamedAfterTarget) {
+			if (groupResult && thisCSGIsInGroupNamedAfterTarget) {
 				// composite group
 				applyToAllConstituantElements(addRet, thisCSGName, back, p);
 			}

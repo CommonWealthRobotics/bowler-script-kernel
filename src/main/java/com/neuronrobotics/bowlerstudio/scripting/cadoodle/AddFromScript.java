@@ -21,6 +21,7 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Transform;
 
 public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
@@ -67,12 +68,14 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			collect.addAll(flaten);
 			for(int i=0;i<collect.size();i++) {
 				CSG csg=collect.get(i);
+				Transform nrToCSG = TransformFactory.nrToCSG( getLocation() );
 				CSG tmp=csg
-						.transformed(TransformFactory.nrToCSG( getLocation() ))
+						.transformed(nrToCSG)
 						.syncProperties(csg)
 						.setRegenerate(csg.getRegenerate())
 						.setName(getOrderedName());
 				collect.set(i, tmp);
+				tmp.getStorage().set("StartingTransform", nrToCSG);
 			}
 			back.addAll(collect);
 			VitaminBomManager boM = CaDoodleFile.getBoM();

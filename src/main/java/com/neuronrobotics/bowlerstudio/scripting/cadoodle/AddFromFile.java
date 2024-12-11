@@ -21,6 +21,7 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
@@ -154,11 +155,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	}
 
 	private CSG processGiven(CSG csg, int i, StringParameter parameter, String name) {
+		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
 		CSG processedCSG = csg
 //		    .moveToCenterX()
 //		    .moveToCenterY()
 //		    .toZMin()
-				.transformed(TransformFactory.nrToCSG(getLocation())).syncProperties(csg).setParameter(parameter)
+				.transformed(nrToCSG).syncProperties(csg).setParameter(parameter)
 				.setRegenerate(previous -> {
 					try {
 						File file = getFile();
@@ -172,6 +174,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 					}
 					return previous;
 				}).setName(name);
+		processedCSG.getStorage().set("StartingTransform", nrToCSG);
 		return processedCSG;
 	}
 
