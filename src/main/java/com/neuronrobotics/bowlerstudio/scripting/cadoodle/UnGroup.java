@@ -4,10 +4,12 @@ import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Transform;
 
 public class UnGroup extends AbstractAddFrom  implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
@@ -35,7 +37,11 @@ public class UnGroup extends AbstractAddFrom  implements ICaDoodleOpperation {
 				if (csg.isInGroup()) {
 					if (csg.checkGroupMembership(name)) {
 						// release this object from the group
-						CSG readd= csg.clone().setRegenerate(csg.getRegenerate()).syncProperties(csg).setName(csg.getName());
+						Transform nrToCSG = new Transform();
+						Optional<Object> o=csg.getStorage().getValue("StartingTransform");
+						if(o.isPresent())
+							nrToCSG=(Transform) o.get();
+						CSG readd= csg.regenerate().transformed(nrToCSG).setRegenerate(csg.getRegenerate()).syncProperties(csg).setName(csg.getName());
 						
 						readd.removeGroupMembership(name);
 						back.remove(csg);
