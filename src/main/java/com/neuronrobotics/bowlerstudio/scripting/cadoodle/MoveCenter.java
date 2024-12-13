@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
@@ -12,6 +13,7 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Transform;
 
 public class MoveCenter implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
@@ -32,7 +34,14 @@ public class MoveCenter implements ICaDoodleOpperation {
 			CaDoodleFile.applyToAllConstituantElements(false,name, back, new ICadoodleRecursiveEvent() {
 				@Override
 				public ArrayList<CSG> process(CSG incoming) {
-					CSG tmpToAdd = incoming.transformed(TransformFactory.nrToCSG(location)).syncProperties(incoming)
+					Transform nrToCSG2 = TransformFactory.nrToCSG(location);
+					Optional<Object> o=incoming.getStorage().getValue("StartingTransform");
+					if(o.isPresent()) {
+						TransformNR nrToCSG=TransformFactory.csgToNR((Transform) o.get());
+						nrToCSG=location.times(nrToCSG);
+						incoming.getStorage().set("StartingTransform", TransformFactory.nrToCSG(nrToCSG));
+					}
+					CSG tmpToAdd = incoming.transformed(nrToCSG2).syncProperties(incoming)
 							.setName(incoming.getName());
 //					VitaminBomManager boM = CaDoodleFile.getBoM();
 //					VitaminLocation loc = boM.getByName(name);
