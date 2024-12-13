@@ -93,8 +93,9 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		Optional<Object> o=c.getStorage().getValue("StartingTransform");
 		if(o.isPresent())
 			nrToCSG=(Transform) o.get();
-		CSG newOne = clone.regenerate().transformed(nrToCSG)
-				.movex(offset);
+		nrToCSG=nrToCSG.movex(offset);
+		c.getStorage().set("StartingTransform", nrToCSG);
+		CSG newOne = clone.regenerate().transformed(nrToCSG);
 		newOne.setRegenerate(c.getRegenerate()).setName(name);
 //		VitaminBomManager boM = CaDoodleFile.getBoM();
 		String name2 = c.getName();
