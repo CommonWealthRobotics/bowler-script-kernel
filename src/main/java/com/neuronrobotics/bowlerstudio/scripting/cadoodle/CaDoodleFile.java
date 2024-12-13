@@ -73,7 +73,7 @@ public class CaDoodleFile {
 	private javafx.scene.image.WritableImage img;
 	private boolean initializing;
 	private static HashMap<String, VitaminBomManager> bomManagers = new HashMap<>();
-	private VitaminBomManager boM;
+	private VitaminBomManager bom;
 
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
@@ -119,9 +119,9 @@ public class CaDoodleFile {
 			StringParameter loc = new StringParameter("CaDoodle_File_Location", selfInternal.getAbsolutePath(),
 					new ArrayList<String>());
 			loc.setStrValue(selfInternal.getAbsolutePath());
-			boM = CaDoodleFile.getBoM();
-			boM.clear();
-			boM.save();
+			bom = CaDoodleFile.getBillOfMaterials();
+			bom.clear();
+			bom.save();
 
 		}
 		int indexStarting = getCurrentIndex();
@@ -149,10 +149,37 @@ public class CaDoodleFile {
 				e.printStackTrace();
 			}
 		}
+		updateBoM();
 		initializing = false;
 	}
 
-	public static VitaminBomManager getBoM() {
+	private void updateBoM() {
+		bom.clear();
+		bom.save();
+		for (CSG c : getCurrentState()) {
+			String type = null;
+			String size = null;
+			for (String param : c.getParameters()) {
+				if(!param.contains(c.getName()))
+					continue;
+				if (param.contains("_CaDoodle_Vitamin_Type")) {
+					Parameter p = CSGDatabase.get(param);
+					type = p.getStrValue();
+				}
+				if (param.contains("_CaDoodle_Vitamin_Size")) {
+					Parameter p = CSGDatabase.get(param);
+					size = p.getStrValue();
+				}
+				if (type != null && size != null) {
+					bom.addVitamin(new VitaminLocation(false, c.getName(), type, size, new TransformNR()));
+					break;
+				}
+			}
+		}
+		bom.save();
+	}
+
+	public static VitaminBomManager getBillOfMaterials() {
 
 		String strValue = getCadoodleFileLocation();
 		File file = new File(strValue).getParentFile();
@@ -210,6 +237,7 @@ public class CaDoodleFile {
 				setCurrentIndex(endIndex);
 				updateCurrentFromCache();
 			}
+			updateBoM();
 			setRegenerating(false);
 			fireSaveSuggestion();
 			opperationRunner = null;
@@ -239,6 +267,7 @@ public class CaDoodleFile {
 		return opperationRunner;
 
 	}
+
 	private void process(ICaDoodleOpperation op) {
 		List<CSG> process = op.process(getCurrentState());
 		storeResultInCache(op, process);
@@ -273,27 +302,29 @@ public class CaDoodleFile {
 					ex.printStackTrace();
 				}
 			}
+			updateBoM();
 			fireSaveSuggestion();
 			opperationRunner = null;
 		});
 		opperationRunner.start();
 		return opperationRunner;
 	}
+
 	public static int applyToAllConstituantElements(boolean addRet, String targetName, ArrayList<CSG> back,
-			 ICadoodleRecursiveEvent p) {
+			ICadoodleRecursiveEvent p) {
 		ArrayList<CSG> immutable = new ArrayList<>();
 		immutable.addAll(back);
 		for (int i = 0; i < immutable.size(); i++) {
 			CSG csg = immutable.get(i);
 			if (csg.isLock())
 				continue;
-			//boolean inGroup = csg.isInGroup();
+			// boolean inGroup = csg.isInGroup();
 			boolean thisCSGIsInGroupNamedAfterTarget = csg.checkGroupMembership(targetName);
 			String thisCSGName = csg.getName();
 			boolean thisCSGIsTheTarget = thisCSGName.contentEquals(targetName);
 			boolean groupResult = csg.isGroupResult();
-			
-			if (thisCSGIsTheTarget || thisCSGIsInGroupNamedAfterTarget ) {
+
+			if (thisCSGIsTheTarget || thisCSGIsInGroupNamedAfterTarget) {
 				// move it
 				ArrayList<CSG> tmpToAdd = p.process(csg);
 				if (addRet) {
@@ -318,47 +349,45 @@ public class CaDoodleFile {
 		return back.size();
 	}
 
-
-
 	private void pruneForward() {
 		for (int i = getCurrentIndex(); i < getOpperations().size(); i++) {
 			ICaDoodleOpperation key = getOpperations().get(i);
 			List<CSG> back = cache.remove(key);
-			VitaminBomManager boM = CaDoodleFile.getBoM();
-			if (AbstractAddFrom.class.isInstance(key)) {
-				AbstractAddFrom aaf = (AbstractAddFrom) key;
-				for (String name : aaf.getNamesAdded()) {
-					VitaminLocation loc = boM.getByName(name);
-					if (loc != null) {
-						boM.remove(loc);
-						boM.save();
-					}
-				}
-			}
-			if (Delete.class.isInstance(key)) {
-				Delete d = (Delete) key;
-				for (String s : d.getNames()) {
-					for (CSG c : back) {
-						String type = null;
-						String size = null;
-						if (c.getName().contentEquals(s)) {
-							for (String param : c.getParameters()) {
-								if (param.contains("_CaDoodle_Vitamin_Type")) {
-									Parameter p = CSGDatabase.get(param);
-									type = p.getStrValue();
-								}
-								if (param.contains("_CaDoodle_Vitamin_Size")) {
-									Parameter p = CSGDatabase.get(param);
-									size = p.getStrValue();
-								}
-							}
-							if (type != null && size != null) {
-								boM.addVitamin(new VitaminLocation(false, c.getName(), type, size, new TransformNR()));
-							}
-						}
-					}
-				}
-			}
+			VitaminBomManager boM = CaDoodleFile.getBillOfMaterials();
+//			if (AbstractAddFrom.class.isInstance(key)) {
+//				AbstractAddFrom aaf = (AbstractAddFrom) key;
+//				for (String name : aaf.getNamesAdded()) {
+//					VitaminLocation loc = boM.getByName(name);
+//					if (loc != null) {
+//						boM.remove(loc);
+//						boM.save();
+//					}
+//				}
+//			}
+//			if (Delete.class.isInstance(key)) {
+//				Delete d = (Delete) key;
+//				for (String s : d.getNames()) {
+//					for (CSG c : back) {
+//						String type = null;
+//						String size = null;
+//						if (c.getName().contentEquals(s)) {
+//							for (String param : c.getParameters()) {
+//								if (param.contains("_CaDoodle_Vitamin_Type")) {
+//									Parameter p = CSGDatabase.get(param);
+//									type = p.getStrValue();
+//								}
+//								if (param.contains("_CaDoodle_Vitamin_Size")) {
+//									Parameter p = CSGDatabase.get(param);
+//									size = p.getStrValue();
+//								}
+//							}
+//							if (type != null && size != null) {
+//								boM.addVitamin(new VitaminLocation(false, c.getName(), type, size, new TransformNR()));
+//							}
+//						}
+//					}
+//				}
+//			}
 			if (back != null)
 				back.clear();
 		}
@@ -374,7 +403,8 @@ public class CaDoodleFile {
 		HashSet<String> names = new HashSet<>();
 		for (CSG c : process) {
 			if (names.contains(c.getName()))
-				throw new RuntimeException("There can not be 2 objects with the same name after an opperation! "+c.getName());
+				throw new RuntimeException(
+						"There can not be 2 objects with the same name after an opperation! " + c.getName());
 			names.add(c.getName());
 			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
 					.setRegenerate(c.getRegenerate()));
@@ -565,7 +595,7 @@ public class CaDoodleFile {
 				// e.getMessage());
 				e.printStackTrace();
 			}
-			boM.save();
+			bom.save();
 		}
 
 		return getSelf();

@@ -34,12 +34,12 @@ public class MoveCenter implements ICaDoodleOpperation {
 				public ArrayList<CSG> process(CSG incoming) {
 					CSG tmpToAdd = incoming.transformed(TransformFactory.nrToCSG(location)).syncProperties(incoming)
 							.setName(incoming.getName());
-					VitaminBomManager boM = CaDoodleFile.getBoM();
-					VitaminLocation loc = boM.getByName(name);
-					if (loc != null) {
-						loc.setLocation(loc.getLocation().times(location));
-						boM.save();
-					}
+//					VitaminBomManager boM = CaDoodleFile.getBoM();
+//					VitaminLocation loc = boM.getByName(name);
+//					if (loc != null) {
+//						loc.setLocation(loc.getLocation().times(location));
+//						boM.save();
+//					}
 					ArrayList<CSG> b = new ArrayList<>();
 					b.add(tmpToAdd);
 					return b;

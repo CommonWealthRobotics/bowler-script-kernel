@@ -37,12 +37,12 @@ public class Delete implements ICaDoodleOpperation {
 					@Override
 					public ArrayList<CSG> process(CSG incoming) {
 						//back.remove(c);
-						VitaminBomManager boM = CaDoodleFile.getBoM();
-						VitaminLocation loc = boM.getByName(s);
-						if(loc!=null) {
-							boM.remove(loc);
-							boM.save();
-						}
+//						VitaminBomManager boM = CaDoodleFile.getBoM();
+//						VitaminLocation loc = boM.getByName(s);
+//						if(loc!=null) {
+//							boM.remove(loc);
+//							boM.save();
+//						}
 						ArrayList<CSG> b = new ArrayList<>();
 						b.add(null);
 						return b;

@@ -77,12 +77,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 				}
 			}
 			back.addAll(collect);
-			VitaminBomManager boM = CaDoodleFile.getBoM();
-			VitaminLocation loc = boM.getByName(name);
-			if(loc!=null) {
-				loc.setLocation(location);
-				boM.save();
-			}
+//			VitaminBomManager boM = CaDoodleFile.getBoM();
+//			VitaminLocation loc = boM.getByName(name);
+//			if(loc!=null) {
+//				loc.setLocation(location);
+//				boM.save();
+//			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

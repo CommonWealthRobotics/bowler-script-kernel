@@ -61,9 +61,9 @@ public class CaDoodleVitamin {
 			HashMap<String, Object> object = (HashMap<String, Object>) args.get(1);
 			if (!(Boolean) object.get("PreventBomAdd")) {
 				
-				VitaminLocation vl = new VitaminLocation(false, name, type, word.getStrValue(), new TransformNR());
-				System.out.println("BoM update "+vl);
-				CaDoodleFile.getBoM().addVitamin(vl, true);
+//				VitaminLocation vl = new VitaminLocation(false, name, type, word.getStrValue(), new TransformNR());
+//				//System.out.println("BoM update "+vl);
+//				CaDoodleFile.getBoM().addVitamin(vl, true);
 			}
 		}
 		CSG part;

@@ -96,16 +96,16 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		CSG newOne = clone.regenerate().transformed(nrToCSG).moveToCenter().movex(c.getCenterX()).movey(c.getCenterY()).movez(c.getCenterZ())
 				.movex(offset);
 		newOne.setRegenerate(c.getRegenerate()).setName(name);
-		VitaminBomManager boM = CaDoodleFile.getBoM();
+//		VitaminBomManager boM = CaDoodleFile.getBoM();
 		String name2 = c.getName();
-		VitaminLocation loc = boM.getByName(name2);
-		VitaminLocation locNew = boM.getByName(name);
-		if (loc != null) {
-			VitaminLocation newElement = new VitaminLocation(loc, name);
-			newElement.setLocation(newElement.getLocation().times(new TransformNR(offset, 0, 0)));
-			boM.addVitamin(newElement);
-			boM.save();
-		}
+//		VitaminLocation loc = boM.getByName(name2);
+//		VitaminLocation locNew = boM.getByName(name);
+//		if (loc != null) {
+//			VitaminLocation newElement = new VitaminLocation(loc, name);
+//			newElement.setLocation(newElement.getLocation().times(new TransformNR(offset, 0, 0)));
+//			boM.addVitamin(newElement);
+//			boM.save();
+//		}
 		index++;
 		newOne.syncProperties(c).setName(name);
 		getNamesAdded().add(name);
