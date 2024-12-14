@@ -23,8 +23,8 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	private TransformNR location = new TransformNR();
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
-	@Expose(serialize = true, deserialize = true)
-	public double offset = 10;
+//	@Expose(serialize = true, deserialize = true)
+//	public double offset = 10;
 	private int index;
 	private HashMap<String, String> cpMap = new HashMap<String, String>();
 
@@ -93,8 +93,8 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		Optional<Object> o=c.getStorage().getValue("StartingTransform");
 		if(o.isPresent())
 			nrToCSG=(Transform) o.get();
-		nrToCSG=nrToCSG.movex(offset);
-		c.getStorage().set("StartingTransform", nrToCSG);
+		//nrToCSG=nrToCSG.movex(offset);
+		//c.getStorage().set("StartingTransform", nrToCSG);
 		CSG newOne = clone.regenerate().transformed(nrToCSG);
 		newOne.setRegenerate(c.getRegenerate()).setName(name);
 //		VitaminBomManager boM = CaDoodleFile.getBoM();
@@ -136,10 +136,10 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	}
 
 
-	public Paste setOffset(double offset) {
-		this.offset = offset;
-		return this;
-	}
+//	public Paste setOffset(double offset) {
+//		this.offset = offset;
+//		return this;
+//	}
 
 	@Override
 	public File getFile() throws NoSuchFileException {

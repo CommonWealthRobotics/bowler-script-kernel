@@ -11,7 +11,7 @@ import com.google.gson.annotations.Expose;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 
-public class UnGroup extends AbstractAddFrom  implements ICaDoodleOpperation {
+public class UnGroup   implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 
@@ -19,10 +19,10 @@ public class UnGroup extends AbstractAddFrom  implements ICaDoodleOpperation {
 	public String getType() {
 		return "Un-Group";
 	}
-	@Override
-	public File getFile() throws NoSuchFileException {
-		throw new NoSuchFileException(null);
-	}
+//	@Override
+//	public File getFile() throws NoSuchFileException {
+//		throw new NoSuchFileException(null);
+//	}
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
@@ -46,7 +46,7 @@ public class UnGroup extends AbstractAddFrom  implements ICaDoodleOpperation {
 						readd.removeGroupMembership(name);
 						back.remove(csg);
 						back.add(readd);
-						namesAdded.add(readd.getName());
+						//namesAdded.add(readd.getName());
 					}
 				}
 

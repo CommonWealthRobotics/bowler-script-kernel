@@ -68,8 +68,11 @@ public class Resize implements ICaDoodleOpperation {
 			if (max.z < max2.z)
 				max.z = max2.z;
 		}
-		if(min==null||max==null)
+		if(min==null||max==null) {
+			System.out.println("Found bounds to be null ");
+
 			throw new RuntimeException("Min and max can not be null");
+		}
 		return new Bounds(min, max);
 	}
 	@Override
