@@ -19,10 +19,6 @@ public class UnGroup   implements ICaDoodleOpperation {
 	public String getType() {
 		return "Un-Group";
 	}
-//	@Override
-//	public File getFile() throws NoSuchFileException {
-//		throw new NoSuchFileException(null);
-//	}
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
@@ -37,16 +33,12 @@ public class UnGroup   implements ICaDoodleOpperation {
 				if (csg.isInGroup()) {
 					if (csg.checkGroupMembership(name)) {
 						// release this object from the group
-						Transform nrToCSG = new Transform();
-						Optional<Object> o=csg.getStorage().getValue("StartingTransform");
-						if(o.isPresent())
-							nrToCSG=(Transform) o.get();
+						Transform nrToCSG = MoveCenter.getTotalOffset(csg);
 						CSG readd= csg.regenerate().transformed(nrToCSG).setRegenerate(csg.getRegenerate()).syncProperties(csg).setName(csg.getName());
 						
 						readd.removeGroupMembership(name);
 						back.remove(csg);
 						back.add(readd);
-						//namesAdded.add(readd.getName());
 					}
 				}
 

@@ -29,8 +29,8 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 	@Expose (serialize = true, deserialize = true)
 	private String fileRel = "";
 
-	@Expose(serialize = true, deserialize = true)
-	private TransformNR location =null;
+//	@Expose(serialize = true, deserialize = true)
+//	private TransformNR location =null;
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM =false;
 
@@ -68,14 +68,13 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			collect.addAll(flaten);
 			for(int i=0;i<collect.size();i++) {
 				CSG csg=collect.get(i);
-				Transform nrToCSG = TransformFactory.nrToCSG( getLocation() );
+				Transform nrToCSG =new Transform();// TransformFactory.nrToCSG( getLocation() );
 				CSG tmp=csg
 						.transformed(nrToCSG)
 						.syncProperties(csg)
 						.setRegenerate(csg.getRegenerate())
 						.setName(getOrderedName());
 				collect.set(i, tmp);
-				tmp.getStorage().set("StartingTransform", nrToCSG);
 			}
 			back.addAll(collect);
 //			VitaminBomManager boM = CaDoodleFile.getBoM();
@@ -98,16 +97,16 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 
 
 
-	public TransformNR getLocation() {
-		if(location==null)
-			location=new TransformNR();
-		return location;
-	}
+//	public TransformNR getLocation() {
+//		if(location==null)
+//			location=new TransformNR();
+//		return location;
+//	}
 
-	public AddFromScript setLocation(TransformNR location) {
-		this.location = location;
-		return this;
-	}
+//	public AddFromScript setLocation(TransformNR location) {
+//		this.location = location;
+//		return this;
+//	}
 
 	@Override
 	public File getFile() {

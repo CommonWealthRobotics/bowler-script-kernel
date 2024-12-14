@@ -13,6 +13,7 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
 
 public class MoveCenter implements ICaDoodleOpperation {
@@ -20,12 +21,71 @@ public class MoveCenter implements ICaDoodleOpperation {
 	private TransformNR location = new TransformNR();
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
+	@Expose(serialize = true, deserialize = true)
+	protected String name = null;
+	
+	public String getName() {
+		if (name == null) {
+			setName(RandomStringFactory.generateRandomString());
+		}
+		return name;
+	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	@Override
 	public String getType() {
 		return "Move Center";
 	}
-
+	public static void set(String name,CSG c, TransformNR tf) {
+		if(tf==null)
+			throw new NullPointerException();
+		if(name==null)
+			throw new NullPointerException();
+		if(c==null)
+			throw new NullPointerException();
+		PropertyStorage storage = c.getStorage();
+		Optional<Object> o= storage.getValue("TFSet");
+		ArrayList<String> tfs = null;
+		if(!o.isPresent()) {
+			tfs=new ArrayList<String>();
+			storage.set("TFSet", tfs);
+		}else {
+			tfs=(ArrayList<String>) o.get();
+		}
+		boolean contains = false;
+		for(String s:tfs) {
+			if(s.contentEquals(name)) {
+				contains=true;
+				break;
+			}
+		}
+		storage.set(name, tf);
+		if(!contains)
+			tfs.add(name);
+	}
+	public static Transform getTotalOffset(CSG c) {
+		Transform nrToCSG = new Transform();
+		PropertyStorage storage = c.getStorage();
+		Optional<Object> o= storage.getValue("TFSet");
+		if(o.isPresent()) {
+			TransformNR start = new TransformNR();
+			ArrayList<String> tfs=(ArrayList<String>) o.get();
+			for(String s:tfs) {
+				try {
+					TransformNR transTmp = (TransformNR) storage.getValue(s).get();
+					start=start.times(transTmp);
+				}catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			nrToCSG=TransformFactory.nrToCSG(start);
+		}			
+		return nrToCSG;
+	}
+	
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
@@ -35,58 +95,17 @@ public class MoveCenter implements ICaDoodleOpperation {
 				@Override
 				public ArrayList<CSG> process(CSG incoming) {
 					Transform nrToCSG2 = TransformFactory.nrToCSG(location);
-					Optional<Object> o=incoming.getStorage().getValue("StartingTransform");
-					if(o.isPresent()) {
-						TransformNR nrToCSG=TransformFactory.csgToNR((Transform) o.get());
-						nrToCSG=location.times(nrToCSG);
-						incoming.getStorage().set("StartingTransform", TransformFactory.nrToCSG(nrToCSG));
-					}
 					CSG tmpToAdd = incoming.transformed(nrToCSG2).syncProperties(incoming)
 							.setName(incoming.getName());
-//					VitaminBomManager boM = CaDoodleFile.getBoM();
-//					VitaminLocation loc = boM.getByName(name);
-//					if (loc != null) {
-//						loc.setLocation(loc.getLocation().times(location));
-//						boM.save();
-//					}
 					ArrayList<CSG> b = new ArrayList<>();
 					b.add(tmpToAdd);
+					set(getName(),tmpToAdd,location);
 					return b;
 				}
 			});
 		}
 		return back;
 	}
-
-//	private void moveByName(String name, ArrayList<CSG> back, HashSet<String> groupsProcessed) {
-//		
-//		for (int i = 0; i < back.size(); i++) {
-//			CSG csg = back.get(i);
-//			if(csg.isLock())
-//				continue;
-//			if (	csg.getName().contentEquals(name) ||
-//					(csg.isInGroup() && csg.checkGroupMembership(name))){
-//				groupsProcessed.add(name);
-//				if(csg.isInGroup() && csg.isGroupResult() && !groupsProcessed.contains(csg.getName())) {
-//					// composite group
-//					moveByName(csg.getName(), back,groupsProcessed);
-//					
-//				}
-//				// move it
-//				CSG tmpToAdd = csg
-//						.transformed(TransformFactory.nrToCSG(location))
-//						.syncProperties(csg)
-//						.setName(csg.getName());
-//				VitaminBomManager boM = CaDoodleFile.getBoM();
-//				VitaminLocation loc = boM.getByName(name);
-//				if(loc!=null) {
-//					loc.setLocation(loc.getLocation().times(location));
-//					boM.save();
-//				}
-//				back.set(i, tmpToAdd);
-//			}
-//		}
-//	}
 
 	public TransformNR getLocation() {
 		return location;
