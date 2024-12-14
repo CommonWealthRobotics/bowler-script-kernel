@@ -76,7 +76,7 @@ public class MoveCenter implements ICaDoodleOpperation {
 			for(String s:tfs) {
 				try {
 					TransformNR transTmp = (TransformNR) storage.getValue(s).get();
-					start=start.times(transTmp);
+					start=transTmp.times(start);
 				}catch(Exception ex) {
 					ex.printStackTrace();
 				}
