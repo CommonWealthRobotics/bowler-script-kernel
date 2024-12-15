@@ -26,6 +26,14 @@ public class CaDoodleVitamin {
 		ArrayList<String> listVitaminSizes = Vitamins.listVitaminSizes(type);
 		return get( type, listVitaminSizes.get(0),  args);
 	}
+	public static boolean isVitamin(CSG c) {
+		for(String s:c.getParameters()) {
+			if(s.contains("_CaDoodle_Vitamin_") && s.contains(c.getName())) {
+				return true;
+			}
+		}
+		return false;
+	}
 	public static CSG get(String typencoming,String defaultValue, ArrayList<Object> args) {
 		String name = args.get(0).toString();
 

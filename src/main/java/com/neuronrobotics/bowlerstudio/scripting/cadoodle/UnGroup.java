@@ -34,7 +34,12 @@ public class UnGroup   implements ICaDoodleOpperation {
 					if (csg.checkGroupMembership(name)) {
 						// release this object from the group
 						Transform nrToCSG = MoveCenter.getTotalOffset(csg);
-						CSG readd= csg.regenerate().transformed(nrToCSG).setRegenerate(csg.getRegenerate()).syncProperties(csg).setName(csg.getName());
+						CSG transformed=null;
+						if(CaDoodleVitamin.isVitamin(csg))
+							transformed= csg.regenerate().transformed(nrToCSG);
+						else
+							transformed=csg;
+						CSG readd= transformed.setRegenerate(csg.getRegenerate()).syncProperties(csg).setName(csg.getName());
 						
 						readd.removeGroupMembership(name);
 						back.remove(csg);

@@ -83,6 +83,7 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	}
 	
 
+
 	private ArrayList<CSG> copyPasteMoved(ArrayList<CSG> back, CSG c) {
 		String prevName = c.getName();
 		String name = getName() + (index == 0 ? "" : "_" + index);
@@ -90,7 +91,11 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		clone.setRegenerate(c.getRegenerate()).setName(name);
 		clone.getStorage().set("PreviousName", prevName);
 		Transform nrToCSG = MoveCenter.getTotalOffset(c);
-		CSG newOne = clone.regenerate().transformed(nrToCSG);
+		CSG newOne =null;
+		if(CaDoodleVitamin.isVitamin(c))
+			newOne=clone.regenerate().transformed(nrToCSG);
+		else
+			newOne=clone;
 		newOne.setRegenerate(c.getRegenerate()).setName(name);
 		index++;
 		newOne.syncProperties(c).setName(name);
