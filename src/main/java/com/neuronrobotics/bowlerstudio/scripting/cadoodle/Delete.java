@@ -14,9 +14,9 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public class Delete implements ICaDoodleOpperation {
-	@Expose (serialize = true, deserialize = true)
-	private TransformNR location=new TransformNR();
-	@Expose (serialize = true, deserialize = true)
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR location = new TransformNR();
+	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 
 	@Override
@@ -29,26 +29,16 @@ public class Delete implements ICaDoodleOpperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 
-		//for(CSG c:incoming) {
-//			if(c.isLock())
-//				continue;
-			for(String s:names) {
-				CaDoodleFile.applyToAllConstituantElements(false,s, back, new ICadoodleRecursiveEvent() {
-					@Override
-					public ArrayList<CSG> process(CSG incoming) {
-						//back.remove(c);
-//						VitaminBomManager boM = CaDoodleFile.getBoM();
-//						VitaminLocation loc = boM.getByName(s);
-//						if(loc!=null) {
-//							boM.remove(loc);
-//							boM.save();
-//						}
-						ArrayList<CSG> b = new ArrayList<>();
-						b.add(null);
-						return b;
-					}
-				});
-			//}
+		for (String s : names) {
+			CaDoodleFile.applyToAllConstituantElements(false, s, back, new ICadoodleRecursiveEvent() {
+				@Override
+				public ArrayList<CSG> process(CSG incoming) {
+
+					ArrayList<CSG> b = new ArrayList<>();
+					b.add(null);
+					return b;
+				}
+			});
 		}
 		return back;
 	}
