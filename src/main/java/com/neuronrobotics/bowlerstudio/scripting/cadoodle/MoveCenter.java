@@ -23,7 +23,7 @@ public class MoveCenter implements ICaDoodleOpperation {
 	private List<String> names = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
-	
+
 	public String getName() {
 		if (name == null) {
 			setName(RandomStringFactory.generateRandomString());
@@ -34,76 +34,77 @@ public class MoveCenter implements ICaDoodleOpperation {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	@Override
 	public String getType() {
 		return "Move Center";
 	}
-	public static void set(String name,CSG c, TransformNR tf) {
-		if(tf==null)
+
+	public static void set(String name, CSG c, TransformNR tf) {
+		if (tf == null)
 			throw new NullPointerException();
-		if(name==null)
+		if (name == null)
 			throw new NullPointerException();
-		if(c==null)
+		if (c == null)
 			throw new NullPointerException();
 		PropertyStorage storage = c.getStorage();
-		Optional<Object> o= storage.getValue("TFSet");
+		Optional<Object> o = storage.getValue("TFSet");
 		ArrayList<String> tfs = null;
-		if(!o.isPresent()) {
-			tfs=new ArrayList<String>();
+		if (!o.isPresent()) {
+			tfs = new ArrayList<String>();
 			storage.set("TFSet", tfs);
-		}else {
-			tfs=(ArrayList<String>) o.get();
+		} else {
+			tfs = (ArrayList<String>) o.get();
 		}
 		boolean contains = false;
-		for(String s:tfs) {
-			if(s.contentEquals(name)) {
-				contains=true;
+		for (String s : tfs) {
+			if (s.contentEquals(name)) {
+				contains = true;
 				break;
 			}
 		}
 		storage.set(name, tf);
-		if(!contains)
+		if (!contains)
 			tfs.add(name);
 	}
+
 	public static Transform getTotalOffset(CSG c) {
 		Transform nrToCSG = new Transform();
 		PropertyStorage storage = c.getStorage();
-		Optional<Object> o= storage.getValue("TFSet");
-		if(o.isPresent()) {
+		Optional<Object> o = storage.getValue("TFSet");
+		if (o.isPresent()) {
 			TransformNR start = new TransformNR();
-			ArrayList<String> tfs=(ArrayList<String>) o.get();
-			for(String s:tfs) {
+			ArrayList<String> tfs = (ArrayList<String>) o.get();
+			for (String s : tfs) {
 				try {
 					TransformNR transTmp = (TransformNR) storage.getValue(s).get();
-					start=transTmp.times(start);
-				}catch(Exception ex) {
+					start = transTmp.times(start);
+				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
-			nrToCSG=TransformFactory.nrToCSG(start);
-		}			
+			nrToCSG = TransformFactory.nrToCSG(start);
+		}
 		return nrToCSG;
 	}
-	
+
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		for (String name : names) {
-			CaDoodleFile.applyToAllConstituantElements(false,name, back, new ICadoodleRecursiveEvent() {
-				@Override
-				public ArrayList<CSG> process(CSG incoming) {
-					Transform nrToCSG2 = TransformFactory.nrToCSG(location);
-					CSG tmpToAdd = incoming.transformed(nrToCSG2).syncProperties(incoming)
-							.setName(incoming.getName());
-					ArrayList<CSG> b = new ArrayList<>();
-					b.add(tmpToAdd);
-					set(getName(),tmpToAdd,location);
-					return b;
-				}
-			});
-		}
+
+		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
+			@Override
+			public ArrayList<CSG> process(CSG incoming) {
+				Transform nrToCSG2 = TransformFactory.nrToCSG(location);
+				CSG tmpToAdd = incoming.transformed(nrToCSG2).syncProperties(incoming).setName(incoming.getName());
+				ArrayList<CSG> b = new ArrayList<>();
+				b.add(tmpToAdd);
+				set(getName(), tmpToAdd, location);
+				return b;
+			}
+		});
+
 		return back;
 	}
 

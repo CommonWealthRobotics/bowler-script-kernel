@@ -29,17 +29,16 @@ public class Delete implements ICaDoodleOpperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 
-		for (String s : names) {
-			CaDoodleFile.applyToAllConstituantElements(false, s, back, new ICadoodleRecursiveEvent() {
-				@Override
-				public ArrayList<CSG> process(CSG incoming) {
+		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
+			@Override
+			public ArrayList<CSG> process(CSG incoming) {
 
-					ArrayList<CSG> b = new ArrayList<>();
-					b.add(null);
-					return b;
-				}
-			});
-		}
+				ArrayList<CSG> b = new ArrayList<>();
+				b.add(null);
+				return b;
+			}
+		});
+
 		return back;
 	}
 

@@ -309,7 +309,14 @@ public class CaDoodleFile {
 		opperationRunner.start();
 		return opperationRunner;
 	}
-
+	public static int applyToAllConstituantElements(boolean addRet, List<String> targetNames, ArrayList<CSG> back,
+			ICadoodleRecursiveEvent p) {
+		for (int i = 0; i < targetNames.size(); i++) {
+			String s = targetNames.get(i);
+			applyToAllConstituantElements(addRet, s, back, p);
+		}
+		return back.size();
+	}
 	public static int applyToAllConstituantElements(boolean addRet, String targetName, ArrayList<CSG> back,
 			ICadoodleRecursiveEvent p) {
 		ArrayList<CSG> immutable = new ArrayList<>();

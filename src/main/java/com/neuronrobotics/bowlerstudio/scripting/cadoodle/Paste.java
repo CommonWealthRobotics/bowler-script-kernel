@@ -39,23 +39,22 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		back.addAll(incoming);
 		index = 1;
 		cpMap.clear();
-		for (int j = 0; j < names.size(); j++) {
-			String s = names.get(j);
-			CaDoodleFile.applyToAllConstituantElements(false, s, back, new ICadoodleRecursiveEvent() {
-				@Override
-				public ArrayList<CSG> process(CSG ic) {
-					ArrayList<CSG> copyPasteMoved = copyPasteMoved(back, ic);
-					return copyPasteMoved;
-				}
-			});
-		}
-		for(String from:cpMap.keySet()) {
+
+		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
+			@Override
+			public ArrayList<CSG> process(CSG ic) {
+				ArrayList<CSG> copyPasteMoved = copyPasteMoved(back, ic);
+				return copyPasteMoved;
+			}
+		});
+
+		for (String from : cpMap.keySet()) {
 			CSG source = getByName(back, from);
-			if(source.isGroupResult()) {
-				ArrayList<String> c =constituants(back,from);
-				String newGroupName = getByName(back,cpMap.get(from)).getName();
-				for(String s:c) {
-					CSG dest = getByName(back,s);
+			if (source.isGroupResult()) {
+				ArrayList<String> c = constituants(back, from);
+				String newGroupName = getByName(back, cpMap.get(from)).getName();
+				for (String s : c) {
+					CSG dest = getByName(back, s);
 					dest.removeGroupMembership(from);
 					dest.addGroupMembership(newGroupName);
 				}
@@ -63,26 +62,26 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		}
 		return back;
 	}
-	private ArrayList<String> constituants(ArrayList<CSG> back,String name){
+
+	private ArrayList<String> constituants(ArrayList<CSG> back, String name) {
 		ArrayList<String> c = new ArrayList<String>();
-		for(CSG csg:back) {
-			if(csg.checkGroupMembership(name)) {
+		for (CSG csg : back) {
+			if (csg.checkGroupMembership(name)) {
 				// only add objects that were created by this operation
-				if(csg.getName().contains(getName()))
+				if (csg.getName().contains(getName()))
 					c.add(csg.getName());
 			}
 		}
 		return c;
 	}
-	private CSG getByName(ArrayList<CSG> back, String name) {
-		for(CSG c:back) {
-			if (c.getName().contentEquals(name))
-					return c;
-		}
-		throw new RuntimeException("Fail! there was no object named "+name);
-	}
-	
 
+	private CSG getByName(ArrayList<CSG> back, String name) {
+		for (CSG c : back) {
+			if (c.getName().contentEquals(name))
+				return c;
+		}
+		throw new RuntimeException("Fail! there was no object named " + name);
+	}
 
 	private ArrayList<CSG> copyPasteMoved(ArrayList<CSG> back, CSG c) {
 		String prevName = c.getName();
@@ -91,11 +90,11 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		clone.setRegenerate(c.getRegenerate()).setName(name);
 		clone.getStorage().set("PreviousName", prevName);
 		Transform nrToCSG = MoveCenter.getTotalOffset(c);
-		CSG newOne =null;
-		if(CaDoodleVitamin.isVitamin(c))
-			newOne=clone.regenerate().transformed(nrToCSG);
+		CSG newOne = null;
+		if (CaDoodleVitamin.isVitamin(c))
+			newOne = clone.regenerate().transformed(nrToCSG);
 		else
-			newOne=clone;
+			newOne = clone;
 		newOne.setRegenerate(c.getRegenerate()).setName(name);
 		index++;
 		newOne.syncProperties(c).setName(name);
@@ -124,7 +123,6 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		this.names = names;
 		return this;
 	}
-
 
 //	public Paste setOffset(double offset) {
 //		this.offset = offset;
