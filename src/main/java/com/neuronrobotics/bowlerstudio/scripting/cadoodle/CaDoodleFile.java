@@ -361,40 +361,6 @@ public class CaDoodleFile {
 			ICaDoodleOpperation key = getOpperations().get(i);
 			List<CSG> back = cache.remove(key);
 			VitaminBomManager boM = CaDoodleFile.getBillOfMaterials();
-//			if (AbstractAddFrom.class.isInstance(key)) {
-//				AbstractAddFrom aaf = (AbstractAddFrom) key;
-//				for (String name : aaf.getNamesAdded()) {
-//					VitaminLocation loc = boM.getByName(name);
-//					if (loc != null) {
-//						boM.remove(loc);
-//						boM.save();
-//					}
-//				}
-//			}
-//			if (Delete.class.isInstance(key)) {
-//				Delete d = (Delete) key;
-//				for (String s : d.getNames()) {
-//					for (CSG c : back) {
-//						String type = null;
-//						String size = null;
-//						if (c.getName().contentEquals(s)) {
-//							for (String param : c.getParameters()) {
-//								if (param.contains("_CaDoodle_Vitamin_Type")) {
-//									Parameter p = CSGDatabase.get(param);
-//									type = p.getStrValue();
-//								}
-//								if (param.contains("_CaDoodle_Vitamin_Size")) {
-//									Parameter p = CSGDatabase.get(param);
-//									size = p.getStrValue();
-//								}
-//							}
-//							if (type != null && size != null) {
-//								boM.addVitamin(new VitaminLocation(false, c.getName(), type, size, new TransformNR()));
-//							}
-//						}
-//					}
-//				}
-//			}
 			if (back != null)
 				back.clear();
 		}
