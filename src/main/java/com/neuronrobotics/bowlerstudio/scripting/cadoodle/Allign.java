@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
@@ -9,6 +10,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Transform;
 
 public class Allign implements ICaDoodleOpperation {
 	@Expose (serialize = true, deserialize = true)
@@ -40,77 +42,62 @@ public class Allign implements ICaDoodleOpperation {
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
-		ArrayList<CSG> toMove = new ArrayList<CSG>();
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		CSG reference=null;
-		CSG refProps =null;
-		for(CSG c: incoming) {
-			if(c.isLock())
-				continue;
-			String name = names.get(0);
-			if(name.contentEquals(c.getName())) {
-				back.remove(c);
-				refProps=c;
-				reference=c.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
-			}
-		}
-		for(String name:names)
-			collectToMove(toMove, back, name);
+
 		Bounds bounds2 ;//
 		if(bounds!=null) {
 			bounds2=bounds.getBounds();
-			toMove.add(refProps);
 		}else {
-			CSG transformed = reference.transformed(TransformFactory.nrToCSG(getWorkplane()));
-			back.add(sync(refProps,transformed));
-			bounds2 = reference.getBounds();
+			throw new RuntimeException("Allign can not be initialized without bounds!");
 		}
-		for(CSG tmp:toMove) {
-			CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
-			c = performTransform(bounds2, c);
-			back.add(sync(tmp,c.transformed(TransformFactory.nrToCSG(getWorkplane()))));
+		HashMap<String,TransformNR> moves= new HashMap<>();
+		for(String name :names) {
+			for(CSG tmp:back) {
+				if(!tmp.getName().contentEquals(name))
+					continue;
+				CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
+				TransformNR tf = performTransform(bounds2, c);
+				moves.put(c.getName(),tf);
+			}
+		}
+		for(String name:moves.keySet()) {
+			Transform tf =  TransformFactory.nrToCSG(moves.get(name));
+			CaDoodleFile.applyToAllConstituantElements(false, name, back, (incoming1, depth) ->{
+				ArrayList<CSG> b = new ArrayList<>();
+				CSG c = incoming1.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
+				c=c.transformed(tf);
+				b.add(sync(incoming1,c.transformed(TransformFactory.nrToCSG(getWorkplane()))));
+				return b;
+			}, 1);
 		}
 		return back;
 	}
 
-	private void collectToMove(ArrayList<CSG> toMove, ArrayList<CSG> back, String name) {
-		ArrayList<CSG> toSearch = new ArrayList<CSG>();
-		toSearch.addAll(back);
-		for (int i = 0; i < toSearch.size(); i++) {
-			CSG c = toSearch.get(i);
-			if(name.contentEquals(c.getName())) {
-				back.remove(c);
-				toMove.add(c);
-				if(c.isGroupResult()) {
-					for(int j=0;j<back.size();j++) {
-						CSG mem = back.get(j);
-						if(mem.isInGroup() && mem.checkGroupMembership(name)) {
-							String newObjName = mem.getName();
-							collectToMove(toMove, back, newObjName);
-						}
-					}
-				}
-			}
-		}
-	}
+//	private void collectToMove(ArrayList<CSG> toMove, ArrayList<CSG> back, String name) {
+//		ArrayList<CSG> toSearch = new ArrayList<CSG>();
+//		toSearch.addAll(back);
+//		for (int i = 0; i < toSearch.size(); i++) {
+//			CSG c = toSearch.get(i);
+//			if(name.contentEquals(c.getName())) {
+//				toMove.add(c);
+//			}
+//		}
+//	}
 
-	private CSG performTransform(Bounds reference, CSG incoming) {
-		CSG c = incoming;
+	private TransformNR performTransform(Bounds reference, CSG incoming) {
+		//CSG c = incoming;
+		double tx=0,ty=0,tz=0;
 		if(z!=null) {
 			switch(z) {
 			case negative:
-				c=( c.toZMin()
-					.movez(reference.getMinZ())
-					);
+				tz=-incoming.getMinZ()+reference.getMinZ();
 				break;
 			case middle:
-				c=( c.moveToCenterZ()
-						.movez(reference.getCenterZ()));
+				tz=-incoming.getCenterZ()+reference.getCenterZ();
 				break;
 			case positive:
-				c=( c.toZMax()
-						.movez(reference.getMaxZ()));
+				tz=-incoming.getMaxZ()+reference.getMaxZ();
 				break;
 			default:
 				break;
@@ -119,16 +106,13 @@ public class Allign implements ICaDoodleOpperation {
 		if(x!=null) {
 			switch(x) {
 			case negative:
-				c=( c.toXMin()
-						.movex(reference.getMinX()));
+				tx=-incoming.getMinX()+reference.getMinX();
 				break;
 			case middle:
-				c=( c.moveToCenterX()
-						.movex(reference.getCenterX()));
+				tx=-incoming.getCenterX()+reference.getCenterX();
 				break;
 			case positive:
-				c=( c.toXMax()
-						.movex(reference.getMaxX()));
+				tx=-incoming.getMaxX()+reference.getMaxX();
 				break;
 			default:
 				break;
@@ -137,24 +121,21 @@ public class Allign implements ICaDoodleOpperation {
 		}
 		if(y!=null) {
 			switch(y) {
+			case negative:
+				ty=-incoming.getMinY()+reference.getMinY();
+				break;
 			case middle:
-				c=( c.moveToCenterY()
-						.movey(reference.getCenterY()));
+				ty=-incoming.getCenterY()+reference.getCenterY();
 				break;
 			case positive:
-				c=( c.toYMax()
-						.movey(reference.getMaxY()));
-				break;
-			case negative:
-				c= c.toYMin()
-						.movey(reference.getMinY());
+				ty=-incoming.getMaxY()+reference.getMaxY();
 				break;
 			default:
 				break;
 			
 			}
 		}
-		return sync(incoming, c);
+		return new TransformNR(tx,ty,tz);
 	}
 
 	private CSG sync(CSG incoming, CSG c) {

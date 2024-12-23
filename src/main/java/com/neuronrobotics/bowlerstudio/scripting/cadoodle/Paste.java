@@ -50,14 +50,14 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		},1);
 
 		for (String from : cpMap.keySet()) {
-			CSG source = getByName(back, from);
+			CSG source =  CaDoodleFile.getByName(back, from);
 			if (source.isGroupResult()) {
 				ArrayList<String> c = constituants(back, from);
 				if(c.size()<2)
 					throw new RuntimeException("A group result must have at least 2 constituants!");
-				String newGroupName = getByName(back, cpMap.get(from)).getName();
+				String newGroupName =  CaDoodleFile.getByName(back, cpMap.get(from)).getName();
 				for (String s : c) {
-					CSG dest = getByName(back, s);
+					CSG dest =  CaDoodleFile.getByName(back, s);
 					dest.removeGroupMembership(from);
 					dest.addGroupMembership(newGroupName);
 				}
@@ -69,9 +69,9 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	private ArrayList<String> constituants(ArrayList<CSG> b, String name) {
 		ArrayList<String> c = new ArrayList<String>();
 		for (String ky:cpMap.keySet()) {
-			CSG byName = getByName(b,ky);
+			CSG byName = CaDoodleFile.getByName(b,ky);
 			String name2 = cpMap.get(ky);
-			CSG byName2 = getByName(b,name2);
+			CSG byName2 =  CaDoodleFile.getByName(b,name2);
 			for(CSG csg:Arrays.asList(byName,byName2)){
 			if (csg.checkGroupMembership(name)) {
 				// only add objects that were created by this operation
@@ -83,13 +83,7 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		return c;
 	}
 
-	private CSG getByName(ArrayList<CSG> back, String name) {
-		for (CSG c : back) {
-			if (c.getName().contentEquals(name))
-				return c;
-		}
-		throw new RuntimeException("Fail! there was no object named " + name);
-	}
+
 
 	private ArrayList<CSG> copyPasteMoved(ArrayList<CSG> back, CSG c, int depth) {
 		String prevName = c.getName();
@@ -106,7 +100,8 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		newOne.setRegenerate(c.getRegenerate()).setName(name);
 		index++;
 		newOne.syncProperties(c).setName(name);
-		getNamesAdded().add(name);
+		if(!c.isInGroup())
+			getNamesAdded().add(name);
 		ArrayList<CSG> b = new ArrayList<>();
 		b.add(c);
 		b.add(newOne);
