@@ -109,8 +109,8 @@ public class CaDoodleFile {
 	}
 
 	public void initialize() {
-		if (initializing)
-			throw new RuntimeException("Can not initialize while initializing.");
+//		if (initializing)
+//			throw new RuntimeException("Can not initialize while initializing.");
 		fireInitializationStart();
 		initializing = true;
 		if (selfInternal != null) {
@@ -134,8 +134,9 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				t.printStackTrace();
-				pruneForward();
-				return;
+				//pruneForward();
+				indexStarting = i;
+				break;
 			}
 		}
 		setCurrentIndex(indexStarting);
@@ -331,7 +332,7 @@ public class CaDoodleFile {
 			boolean thisCSGIsTheTarget = thisCSGName.contentEquals(targetName);
 			boolean groupResult = csg.isGroupResult();
 
-			if (thisCSGIsTheTarget || thisCSGIsInGroupNamedAfterTarget) {
+			if (thisCSGIsTheTarget ) {
 				// move it
 				ArrayList<CSG> tmpToAdd = p.process(csg,depth);
 				if (addRet) {
@@ -347,7 +348,7 @@ public class CaDoodleFile {
 				}
 				continue;
 			}
-			if (groupResult && thisCSGIsInGroupNamedAfterTarget) {
+			if (thisCSGIsInGroupNamedAfterTarget) {
 				// composite group
 				applyToAllConstituantElements(addRet, thisCSGName, back, p,depth+1);
 			}
