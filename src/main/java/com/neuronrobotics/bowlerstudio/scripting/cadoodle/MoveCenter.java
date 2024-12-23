@@ -95,7 +95,7 @@ public class MoveCenter implements ICaDoodleOpperation {
 
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
-			public ArrayList<CSG> process(CSG incoming) {
+			public ArrayList<CSG> process(CSG incoming, int depth) {
 				Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 				CSG tmpToAdd = incoming.transformed(nrToCSG2).syncProperties(incoming).setName(incoming.getName());
 				ArrayList<CSG> b = new ArrayList<>();
@@ -103,7 +103,7 @@ public class MoveCenter implements ICaDoodleOpperation {
 				set(getName(), tmpToAdd, location);
 				return b;
 			}
-		});
+		},1);
 
 		return back;
 	}

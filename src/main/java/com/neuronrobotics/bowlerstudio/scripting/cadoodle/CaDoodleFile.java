@@ -310,15 +310,15 @@ public class CaDoodleFile {
 		return opperationRunner;
 	}
 	public static int applyToAllConstituantElements(boolean addRet, List<String> targetNames, ArrayList<CSG> back,
-			ICadoodleRecursiveEvent p) {
+			ICadoodleRecursiveEvent p, int depth) {
 		for (int i = 0; i < targetNames.size(); i++) {
 			String s = targetNames.get(i);
-			applyToAllConstituantElements(addRet, s, back, p);
+			applyToAllConstituantElements(addRet, s, back, p,depth);
 		}
 		return back.size();
 	}
 	public static int applyToAllConstituantElements(boolean addRet, String targetName, ArrayList<CSG> back,
-			ICadoodleRecursiveEvent p) {
+			ICadoodleRecursiveEvent p, int depth) {
 		ArrayList<CSG> immutable = new ArrayList<>();
 		immutable.addAll(back);
 		for (int i = 0; i < immutable.size(); i++) {
@@ -333,7 +333,7 @@ public class CaDoodleFile {
 
 			if (thisCSGIsTheTarget || thisCSGIsInGroupNamedAfterTarget) {
 				// move it
-				ArrayList<CSG> tmpToAdd = p.process(csg);
+				ArrayList<CSG> tmpToAdd = p.process(csg,depth);
 				if (addRet) {
 					back.addAll(tmpToAdd);
 				} else {
@@ -349,7 +349,7 @@ public class CaDoodleFile {
 			}
 			if (groupResult && thisCSGIsInGroupNamedAfterTarget) {
 				// composite group
-				applyToAllConstituantElements(addRet, thisCSGName, back, p);
+				applyToAllConstituantElements(addRet, thisCSGName, back, p,depth+1);
 			}
 		}
 		back.removeAll(Collections.singleton(null));

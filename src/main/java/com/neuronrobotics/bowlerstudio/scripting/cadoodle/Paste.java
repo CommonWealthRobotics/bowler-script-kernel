@@ -42,11 +42,11 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
-			public ArrayList<CSG> process(CSG ic) {
+			public ArrayList<CSG> process(CSG ic, int depth) {
 				ArrayList<CSG> copyPasteMoved = copyPasteMoved(back, ic);
 				return copyPasteMoved;
 			}
-		});
+		},1);
 
 		for (String from : cpMap.keySet()) {
 			CSG source = getByName(back, from);

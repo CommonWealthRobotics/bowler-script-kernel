@@ -31,13 +31,13 @@ public class Delete implements ICaDoodleOpperation {
 
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
-			public ArrayList<CSG> process(CSG incoming) {
+			public ArrayList<CSG> process(CSG incoming, int depth) {
 
 				ArrayList<CSG> b = new ArrayList<>();
 				b.add(null);
 				return b;
 			}
-		});
+		},1);
 
 		return back;
 	}
