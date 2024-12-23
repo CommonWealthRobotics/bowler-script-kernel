@@ -366,7 +366,7 @@ public class DownloadManager {
 						}
 						if (!new File(cmd).exists()) {
 							if(exeType.toLowerCase().contentEquals("freecad")) {
-								FreecadLoader.update(vm);
+								//FreecadLoader.update(vm);
 								baseURL = vm.get("url").toString();
 								name = vm.get("name").toString();
 								exeInZip = vm.get(executable).toString();

@@ -72,6 +72,7 @@ public class BowlerKernel {
 
 	// private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
+	private static boolean kernelMode=true;
 
 	private static void loadHistoryLocal() {
 		historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
@@ -108,8 +109,8 @@ public class BowlerKernel {
 		com.neuronrobotics.sdk.common.Log.error(
 				"java -jar BowlerScriptKernel.jar -r <Groovy Jython or Clojure> (Optional)(-s or -p)<file 1> .. <file n> # This will start a shell in the requested langauge and run the files provided. ");
 		com.neuronrobotics.sdk.common.Log.error("java -jar BowlerScriptKernel.jar -g <Git repo> <Git file> # this will run a file from git");
-
-		System.exit(1);
+		if(isKernelMode())
+			System.exit(1);
 	}
 
 	/**
@@ -819,6 +820,14 @@ public class BowlerKernel {
 				}
 
 			});
+	}
+
+	public static boolean isKernelMode() {
+		return kernelMode;
+	}
+
+	public static void setKernelMode(boolean kernelMode) {
+		BowlerKernel.kernelMode = kernelMode;
 	}
 
 
