@@ -134,7 +134,7 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				t.printStackTrace();
-				//pruneForward();
+				// pruneForward();
 				indexStarting = i;
 				break;
 			}
@@ -161,7 +161,7 @@ public class CaDoodleFile {
 			String type = null;
 			String size = null;
 			for (String param : c.getParameters()) {
-				if(!param.contains(c.getName()))
+				if (!param.contains(c.getName()))
 					continue;
 				if (param.contains("_CaDoodle_Vitamin_Type")) {
 					Parameter p = CSGDatabase.get(param);
@@ -224,20 +224,24 @@ public class CaDoodleFile {
 				}
 			}
 			setCurrentIndex(opIndex);
-
-			for (; getCurrentIndex() < size;) {
-				setCurrentIndex(getCurrentIndex() + 1);
-				setPercentInitialized(((double) getCurrentIndex()) / size);
-				// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
-				ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
-				List<CSG> process = op.process(getPreviouState());
-				storeResultInCache(op, process);
-				setCurrentState(op, process);
+			try {
+				for (; getCurrentIndex() < size;) {
+					setCurrentIndex(getCurrentIndex() + 1);
+					setPercentInitialized(((double) getCurrentIndex()) / size);
+					// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
+					ICaDoodleOpperation op = opperations.get(getCurrentIndex() - 1);
+					List<CSG> process = op.process(getPreviouState());
+					storeResultInCache(op, process);
+					setCurrentState(op, process);
+				}
+				if (getCurrentIndex() != endIndex) {
+					setCurrentIndex(endIndex);
+					updateCurrentFromCache();
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
-			if (getCurrentIndex() != endIndex) {
-				setCurrentIndex(endIndex);
-				updateCurrentFromCache();
-			}
+			setPercentInitialized(1);
 			updateBoM();
 			setRegenerating(false);
 			fireSaveSuggestion();
@@ -310,6 +314,7 @@ public class CaDoodleFile {
 		opperationRunner.start();
 		return opperationRunner;
 	}
+
 	public static CSG getByName(ArrayList<CSG> back, String name) {
 		for (CSG c : back) {
 			if (c.getName().contentEquals(name))
@@ -322,13 +327,14 @@ public class CaDoodleFile {
 			ICadoodleRecursiveEvent p, int depth) {
 		for (int i = 0; i < targetNames.size(); i++) {
 			String s = targetNames.get(i);
-			CSG c=getByName(back, s);
-			if(c.isInGroup())
+			CSG c = getByName(back, s);
+			if (c.isInGroup())
 				continue;
-			applyToAllConstituantElements(addRet, s, back, p,depth);
+			applyToAllConstituantElements(addRet, s, back, p, depth);
 		}
 		return back.size();
 	}
+
 	public static int applyToAllConstituantElements(boolean addRet, String targetName, ArrayList<CSG> back,
 			ICadoodleRecursiveEvent p, int depth) {
 		ArrayList<CSG> immutable = new ArrayList<>();
@@ -343,9 +349,9 @@ public class CaDoodleFile {
 			boolean thisCSGIsTheTarget = thisCSGName.contentEquals(targetName);
 			boolean groupResult = csg.isGroupResult();
 
-			if (thisCSGIsTheTarget ) {
+			if (thisCSGIsTheTarget) {
 				// move it
-				ArrayList<CSG> tmpToAdd = p.process(csg,depth);
+				ArrayList<CSG> tmpToAdd = p.process(csg, depth);
 				if (addRet) {
 					back.addAll(tmpToAdd);
 				} else {
@@ -361,7 +367,7 @@ public class CaDoodleFile {
 			}
 			if (thisCSGIsInGroupNamedAfterTarget) {
 				// composite group
-				applyToAllConstituantElements(addRet, thisCSGName, back, p,depth+1);
+				applyToAllConstituantElements(addRet, thisCSGName, back, p, depth + 1);
 			}
 		}
 		back.removeAll(Collections.singleton(null));
