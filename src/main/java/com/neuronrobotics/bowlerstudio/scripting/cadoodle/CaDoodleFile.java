@@ -253,8 +253,13 @@ public class CaDoodleFile {
 	}
 
 	public Thread regenerateCurrent() {
-		if (isOperationRunning()) {
+		if (isOperationRunning() ) {
 			return opperationRunner;
+		}
+		if(initializing) {
+			Thread t = new Thread();
+			t.start();
+			return t;
 		}
 		fireRegenerateStart();
 		opperationRunner = new Thread(() -> {

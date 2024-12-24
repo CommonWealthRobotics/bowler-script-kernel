@@ -24,18 +24,16 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 
 public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperation {
-	@Expose (serialize = true, deserialize = true)
+	@Expose(serialize = true, deserialize = true)
 	private String gitULR = "";
-	@Expose (serialize = true, deserialize = true)
+	@Expose(serialize = true, deserialize = true)
 	private String fileRel = "";
 
 //	@Expose(serialize = true, deserialize = true)
 //	private TransformNR location =null;
 	@Expose(serialize = true, deserialize = true)
-	private Boolean preventBoM =false;
+	private Boolean preventBoM = false;
 
-
-	
 	public AddFromScript set(String git, String f) {
 		gitULR = git;
 		fileRel = f;
@@ -46,32 +44,42 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 	public String getType() {
 		return "Add Object";
 	}
-	
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
+		return process(incoming, fileRel);
+	}
 
-		nameIndex=0;
+	public List<CSG> process(List<CSG> incoming, String fileName) {
+
+		nameIndex = 0;
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 
 		try {
-			ArrayList<Object>args = new ArrayList<>();
-			args.addAll(Arrays.asList(getName() ));
-			HashMap<String, Object> configs =new HashMap<String, Object>();
+			ArrayList<Object> args = new ArrayList<>();
+			args.addAll(Arrays.asList(getName()));
+			HashMap<String, Object> configs = new HashMap<String, Object>();
 			configs.put("name", getName());
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
-			List<CSG> flaten = ScriptingEngine
-					.flaten(gitULR, fileRel, CSG.class,args);
+			List<CSG> flaten = ScriptingEngine.flaten(gitULR, fileName, CSG.class, args);
 			ArrayList<CSG> collect = new ArrayList<>();
 			collect.addAll(flaten);
-			for(int i=0;i<collect.size();i++) {
-				CSG csg=collect.get(i);
-				CSG tmp=csg
-						.syncProperties(csg)
-						.setRegenerate(csg.getRegenerate())
-						.setName(getOrderedName());
+//			for(int i=0;i<collect.size();i++) {
+//				CSG csg=collect.get(i);
+//				CSG tmp=csg
+//						.syncProperties(csg)
+//						.setRegenerate(csg.getRegenerate())
+//						.setName(getName()+(i>0?("_"+i):""));
+//				collect.set(i, tmp);
+//				namesAdded.add(tmp.getName());
+//				System.out.println("AddFromScript: "+fileRel+" "+tmp.getName());
+//				new RuntimeException().printStackTrace();
+//			}
+			for (int i = 0; i < collect.size(); i++) {
+				CSG csg = collect.get(i);
+				CSG tmp = csg.syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(getOrderedName());
 				collect.set(i, tmp);
 			}
 			back.addAll(collect);
@@ -82,18 +90,20 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 //				boM.save();
 //			}
 		} catch (Exception e) {
-			if(!fileRel.contains("generated"))
-			try {
-				fileRel="generated/"+fileRel;
-				return process(incoming);
-			}catch(Exception e2) {
-				e2.printStackTrace();
+			e.printStackTrace();
+			if (!fileName.contains("generated")) {
+				try {
+					return process(incoming, "generated/" + fileRel);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
 			}
 		}
+
+		if (back.size() == 0)
+			throw new RuntimeException("AddFromScript must return at least one CSG! " + getName());
 		return back;
 	}
-
-
 
 //	public TransformNR getLocation() {
 //		if(location==null)
