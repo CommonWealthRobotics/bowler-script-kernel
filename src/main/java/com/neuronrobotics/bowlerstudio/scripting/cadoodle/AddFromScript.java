@@ -68,9 +68,7 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			collect.addAll(flaten);
 			for(int i=0;i<collect.size();i++) {
 				CSG csg=collect.get(i);
-				Transform nrToCSG =new Transform();// TransformFactory.nrToCSG( getLocation() );
 				CSG tmp=csg
-						.transformed(nrToCSG)
 						.syncProperties(csg)
 						.setRegenerate(csg.getRegenerate())
 						.setName(getOrderedName());
