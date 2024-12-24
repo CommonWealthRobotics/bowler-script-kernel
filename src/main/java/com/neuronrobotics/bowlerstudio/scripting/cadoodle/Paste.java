@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
@@ -18,6 +19,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
 public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
@@ -87,25 +90,27 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 
 	private ArrayList<CSG> copyPasteMoved(ArrayList<CSG> back, CSG c, int depth) {
 		String prevName = c.getName();
-		String name = getName() +(index == 0 ? "" : "_" + index);
+		String name = getName() +( index == 0 ? "" : "_" + index);
 		CSG clone = c.clone();
 		clone.setRegenerate(c.getRegenerate()).setName(name);
 		clone.getStorage().set("PreviousName", prevName);
 		Transform nrToCSG = MoveCenter.getTotalOffset(c);
 		CSG newOne = null;
-		if (CaDoodleVitamin.isVitamin(c))
-			newOne = clone.regenerate().transformed(nrToCSG);
-		else
+		if (CaDoodleVitamin.isVitamin(c)) {
+			CSG regenerate = clone.getRegenerate().regenerate(clone);
+			newOne = regenerate.transformed(nrToCSG);
+			newOne.setRegenerate(regenerate.getRegenerate());
+		}else {
 			newOne = clone;
-		newOne.setRegenerate(c.getRegenerate()).setName(name);
-		index++;
+			newOne.setRegenerate(c.getRegenerate());
+		}
 		newOne.syncProperties(c).setName(name);
-		if(!c.isInGroup())
-			getNamesAdded().add(name);
+		index++;
+		getNamesAdded().add(name);
 		ArrayList<CSG> b = new ArrayList<>();
 		b.add(c);
 		b.add(newOne);
-		System.out.println("Copy "+c.getName()+" to "+newOne.getName());
+		//System.out.println("Copy "+c.getName()+" to "+newOne.getName());
 		cpMap.put(c.getName(), newOne.getName());
 		return b;
 	}

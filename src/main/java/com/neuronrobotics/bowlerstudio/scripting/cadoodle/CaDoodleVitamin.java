@@ -76,7 +76,7 @@ public class CaDoodleVitamin {
 		}
 		CSG part;
 		try {
-			System.out.println("Generating Vitamin "+type+" "+word.getStrValue()+" for vitamin named "+name);
+//			System.out.println("Generating Vitamin "+type+" "+word.getStrValue()+" for vitamin named "+name);
 			part = Vitamins.get(type, word.getStrValue()).setIsHole(true);
 			CSGDatabase.saveDatabase();
 			Set<String> params = part.getParameters();
@@ -84,11 +84,11 @@ public class CaDoodleVitamin {
 			part.setParameter(word);
 			part.setParameter(typeParam);
 			params = part.getParameters();
-
-			System.out.println("Parameters on Vitamin: "+name);
-			for(String s:params) {
-				System.out.println("\t"+s);
-			}
+			part.setName(name);
+//			System.out.println("Parameters on Vitamin: "+name);
+//			for(String s:params) {
+//				System.out.println("\t"+s);
+//			}
 			CSG back = part.setRegenerate(new IRegenerate() {
 				@Override
 				public CSG regenerate(CSG previous) {
@@ -98,7 +98,7 @@ public class CaDoodleVitamin {
 						name2=pv.get().toString();
 					else
 						name2=name;
-					System.out.println("Regenerating source \n\t"+name+" on part \n\t"+name2);
+					//System.out.println("Regenerating source \n\t"+name+" on part \n\t"+name2);
 					ArrayList<Object> ar = new ArrayList<>();
 					ar.addAll(args);
 					ar.set(0, previous.getName());

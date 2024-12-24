@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
@@ -25,7 +26,18 @@ public class Allign implements ICaDoodleOpperation {
 	private TransformNR workplane=null;
 	@Expose (serialize = true, deserialize = true)
 	public StoragbeBounds bounds=null;
-	
+	@Expose(serialize = true, deserialize = true)
+	protected String name = null;
+	public String getName() {
+		if (name == null) {
+			setName(RandomStringFactory.generateRandomString());
+		}
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 	@Override
 	public String getType() {
 		return "Allign";
@@ -62,12 +74,18 @@ public class Allign implements ICaDoodleOpperation {
 			}
 		}
 		for(String name:moves.keySet()) {
-			Transform tf =  TransformFactory.nrToCSG(moves.get(name));
+			TransformNR wpinv = getWorkplane().inverse();
+			TransformNR nr = moves.get(name);
+			TransformNR wp = getWorkplane();
+			
+			TransformNR times = wp.times(nr.times(wpinv));
+			Transform tf =  TransformFactory.nrToCSG(times);
 			CaDoodleFile.applyToAllConstituantElements(false, name, back, (incoming1, depth) ->{
 				ArrayList<CSG> b = new ArrayList<>();
-				CSG c = incoming1.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
-				c=c.transformed(tf);
-				b.add(sync(incoming1,c.transformed(TransformFactory.nrToCSG(getWorkplane()))));
+				CSG c=incoming1.transformed(tf);
+				sync(incoming1,c);
+				MoveCenter.set(getName() , c, times);
+				b.add(c);
 				return b;
 			}, 1);
 		}
