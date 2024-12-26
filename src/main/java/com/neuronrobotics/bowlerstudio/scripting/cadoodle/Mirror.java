@@ -18,7 +18,19 @@ public class Mirror implements ICaDoodleOpperation {
 	private List<String> names = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR workplane = null;
+	@Expose(serialize = true, deserialize = true)
+	protected String name = null;
+	private int index;
+	public String getName() {
+		if (name == null) {
+			setName(RandomStringFactory.generateRandomString());
+		}
+		return name;
+	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
 	@Override
 	public String getType() {
 		return "Move Center";
@@ -32,6 +44,7 @@ public class Mirror implements ICaDoodleOpperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
+		index = 0;
 		for (String name : names) {
 			for (CSG csg : incoming) {
 				if(!csg.getName().contentEquals(name))
@@ -39,23 +52,34 @@ public class Mirror implements ICaDoodleOpperation {
 				CSG base = csg.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
 				Transform mirroringCenter = new Transform().movex(base.getCenterX()).movey(base.getCenterY())
 						.movez(base.getCenterZ());
+				Transform sc = new Transform();
+				if (location == MirrorOrentation.x) {
+					sc=new Transform().scaleX(-1);
+				}
+				if (location == MirrorOrentation.y) {
+					sc=new Transform().scaleY(-1);
+				}
+				if (location == MirrorOrentation.z) {
+					sc=new Transform().scaleZ(-1);
+				}
+				Transform scale=sc;
+				
 				CaDoodleFile.applyToAllConstituantElements(false, name, back, (incoming1, depth) -> {
 					ArrayList<CSG> b = new ArrayList<>();
-					CSG t = incoming1.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
+					Transform inverse = TransformFactory.nrToCSG(getWorkplane()).inverse();
+					CSG t = incoming1.transformed(inverse);
 					CSG centered = t.transformed(mirroringCenter.inverse());
-					if (location == MirrorOrentation.x) {
-						centered = centered.mirrorx();
-					}
-					if (location == MirrorOrentation.y) {
-						centered = centered.mirrory();
-					}
-					if (location == MirrorOrentation.z) {
-						centered = centered.mirrorz();
-					}
+					centered = centered.transformed(scale);
 					centered = centered.transformed(mirroringCenter);
-					centered = centered.transformed(TransformFactory.nrToCSG(getWorkplane()));
+					Transform wp = TransformFactory.nrToCSG(getWorkplane());
+					centered = centered.transformed(wp);					
 					CSG tf = centered.setName(name).syncProperties(incoming1);
 					sync(incoming1, tf);
+					MoveCenter.set(getName()+(index++) , tf, inverse);
+					MoveCenter.set(getName()+(index++) , tf, mirroringCenter.inverse());
+					MoveCenter.set(getName()+(index++) , tf, scale);
+					MoveCenter.set(getName()+(index++) , tf, mirroringCenter);
+					MoveCenter.set(getName()+(index++) , tf, wp);
 					b.add(tf);
 					return b;
 				}, 1);

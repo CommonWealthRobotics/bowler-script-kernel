@@ -39,8 +39,10 @@ public class MoveCenter implements ICaDoodleOpperation {
 	public String getType() {
 		return "Move Center";
 	}
-
 	public static void set(String name, CSG c, TransformNR tf) {
+		set(name,c,TransformFactory.nrToCSG(tf));
+	}
+	public static void set(String name, CSG c, Transform tf) {
 		if (tf == null)
 			throw new NullPointerException();
 		if (name == null)
@@ -73,17 +75,17 @@ public class MoveCenter implements ICaDoodleOpperation {
 		PropertyStorage storage = c.getStorage();
 		Optional<Object> o = storage.getValue("TFSet");
 		if (o.isPresent()) {
-			TransformNR start = new TransformNR();
+			Transform start = new Transform();
 			ArrayList<String> tfs = (ArrayList<String>) o.get();
 			for (String s : tfs) {
 				try {
-					TransformNR transTmp = (TransformNR) storage.getValue(s).get();
-					start = transTmp.times(start);
+					Transform transTmp = new Transform().apply((Transform) storage.getValue(s).get());
+					start = transTmp.apply(start);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
-			nrToCSG = TransformFactory.nrToCSG(start);
+			nrToCSG = start;
 		}
 		return nrToCSG;
 	}
