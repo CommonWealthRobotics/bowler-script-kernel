@@ -1092,7 +1092,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			return new String[] { text, FileName, targetFile.getAbsolutePath() };
 		}
 
-		return null;
+		throw new RuntimeException("File missing! "+targetFile.getAbsolutePath());
 	}
 
 	private static String[] codeFromGistID(String id, String FileName) throws Exception {
