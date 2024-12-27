@@ -115,6 +115,7 @@ public class CaDoodleFile {
 		initializing = true;
 		if (selfInternal != null) {
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
+			CSGDatabase.clear();
 			CSGDatabase.setDbFile(db);
 			StringParameter loc = new StringParameter("CaDoodle_File_Location", selfInternal.getAbsolutePath(),
 					new ArrayList<String>());
