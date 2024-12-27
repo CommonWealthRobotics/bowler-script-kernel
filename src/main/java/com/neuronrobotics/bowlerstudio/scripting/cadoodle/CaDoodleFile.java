@@ -591,7 +591,8 @@ public class CaDoodleFile {
 				// e.getMessage());
 				e.printStackTrace();
 			}
-			bom.save();
+			if(bom!=null)
+				bom.save();
 		}
 
 		return getSelf();
