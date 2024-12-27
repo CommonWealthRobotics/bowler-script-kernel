@@ -29,12 +29,11 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
 	private ArrayList<String> options = new ArrayList<String>();
-	private StringParameter parameter = null;
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM =false;
 	public AddFromFile set(File source) {
 		String absolutePath = toLocal(source).getAbsolutePath();
-		getParameter(absolutePath).setStrValue(absolutePath);
+		getFileParameter().setStrValue(absolutePath);
 		CSGDatabase.saveDatabase();
 		return this;
 	}
@@ -57,8 +56,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
-			String pathname = file.getAbsolutePath();
-			getParameter(pathname).setStrValue(pathname);
+			
 			ArrayList<Object>args = new ArrayList<>();
 			args.addAll(Arrays.asList(name ));
 			HashMap<String, Object> configs =new HashMap<String, Object>();
@@ -66,11 +64,10 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
 			List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
-			com.neuronrobotics.sdk.common.Log.error("Initial Loading " + getStrValue());
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
 				try {
-					CSG processedCSG = processGiven(csg, i,parameter, getOrderedName());
+					CSG processedCSG = processGiven(csg, i, getOrderedName());
 					collect.add(processedCSG);
 				}catch(Exception ex) {
 					ex.printStackTrace();
@@ -138,24 +135,32 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			}
 		}
 		file = new File(source + DownloadManager.delim() + file.getName());
-		getParameter(file.getAbsolutePath()).setStrValue(file.getAbsolutePath());
 		return file;
 	}
 	public File getFile() {
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
 		File parentFile = new File(loc.getStrValue()).getParentFile();
-		File file = new File(getStrValue());
+		StringParameter stringParameter = getFileParameter();
+		File file = new File(stringParameter.getStrValue());
 		String pathname = parentFile.getAbsolutePath()+DownloadManager.delim()+file.getName();
 		return new File(pathname);
 	}
+//
+//	private String getStrValue() {
+//		
+//		return getParameter("UnKnown").getStrValue();
+//	}
 
-	private String getStrValue() {
-		
-		return getParameter("UnKnown").getStrValue();
+	private StringParameter getFileParameter() {
+		return new StringParameter(getName() + "_CaDoodle_File", "NotSet", options);
 	}
 
-	private CSG processGiven(CSG csg, int i, StringParameter parameter, String name) {
+	private CSG processGiven(CSG csg, int i,  String name) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
+		String pathname = getFile().getAbsolutePath();
+
+		StringParameter parameter=new StringParameter(name + "_CaDoodle_File", pathname, options);
+		parameter.setStrValue(pathname);
 		CSG processedCSG = csg
 //		    .moveToCenterX()
 //		    .moveToCenterY()
@@ -168,7 +173,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 						com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
 						List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, null);
 						CSG csg1 = flattenedCSGs.get(i);
-						return processGiven(csg1, i, parameter, name);
+						return processGiven(csg1, i, name);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -191,15 +196,6 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 
 
 
-	public StringParameter getParameter(String defaultVal) {
-		if (parameter == null)
-			setParameter(new StringParameter(getName() + "_CaDoodle_File", defaultVal, options));
-		return parameter;
-	}
-
-	public void setParameter(StringParameter parameter) {
-		this.parameter = parameter;
-	}
 	public Boolean getPreventBoM() {
 		return preventBoM;
 	}
