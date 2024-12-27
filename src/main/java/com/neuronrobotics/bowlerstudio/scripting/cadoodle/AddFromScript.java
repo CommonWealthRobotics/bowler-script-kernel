@@ -29,8 +29,8 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 	@Expose(serialize = true, deserialize = true)
 	private String fileRel = "";
 
-//	@Expose(serialize = true, deserialize = true)
-//	private TransformNR location =null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR location =null;
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM = false;
 
@@ -66,29 +66,18 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			List<CSG> flaten = ScriptingEngine.flaten(gitULR, fileName, CSG.class, args);
 			ArrayList<CSG> collect = new ArrayList<>();
 			collect.addAll(flaten);
-//			for(int i=0;i<collect.size();i++) {
-//				CSG csg=collect.get(i);
-//				CSG tmp=csg
-//						.syncProperties(csg)
-//						.setRegenerate(csg.getRegenerate())
-//						.setName(getName()+(i>0?("_"+i):""));
-//				collect.set(i, tmp);
-//				namesAdded.add(tmp.getName());
-//				System.out.println("AddFromScript: "+fileRel+" "+tmp.getName());
-//				new RuntimeException().printStackTrace();
-//			}
-			for (int i = 0; i < collect.size(); i++) {
-				CSG csg = collect.get(i);
-				CSG tmp = csg.syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(getOrderedName());
+			for(int i=0;i<collect.size();i++) {
+				CSG csg=collect.get(i);
+				Transform nrToCSG = TransformFactory.nrToCSG( getLocation() );
+				CSG tmp=csg
+						.transformed(nrToCSG)
+						.syncProperties(csg)
+						.setRegenerate(csg.getRegenerate())
+						.setName(getOrderedName());
 				collect.set(i, tmp);
+				MoveCenter.set(getName(), tmp, nrToCSG);
 			}
 			back.addAll(collect);
-//			VitaminBomManager boM = CaDoodleFile.getBoM();
-//			VitaminLocation loc = boM.getByName(getName());
-//			if(loc!=null) {
-//				loc.setLocation(location);
-//				boM.save();
-//			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (!fileName.contains("generated")) {
@@ -98,6 +87,7 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 					e2.printStackTrace();
 				}
 			}
+			throw new RuntimeException(e);
 		}
 
 		if (back.size() == 0)
@@ -105,16 +95,16 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 		return back;
 	}
 
-//	public TransformNR getLocation() {
-//		if(location==null)
-//			location=new TransformNR();
-//		return location;
-//	}
+	public TransformNR getLocation() {
+		if(location==null)
+			location=new TransformNR();
+		return location;
+	}
 
-//	public AddFromScript setLocation(TransformNR location) {
-//		this.location = location;
-//		return this;
-//	}
+	public AddFromScript setLocation(TransformNR location) {
+		this.location = location;
+		return this;
+	}
 
 	@Override
 	public File getFile() {

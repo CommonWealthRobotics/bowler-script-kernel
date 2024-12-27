@@ -26,8 +26,8 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
-//	@Expose(serialize = true, deserialize = true)
-//	private TransformNR location = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR location = null;
 	private ArrayList<String> options = new ArrayList<String>();
 	private StringParameter parameter = null;
 	@Expose(serialize = true, deserialize = true)
@@ -155,7 +155,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	}
 
 	private CSG processGiven(CSG csg, int i, StringParameter parameter, String name) {
-		Transform nrToCSG = new Transform();//TransformFactory.nrToCSG(getLocation());
+		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
 		CSG processedCSG = csg
 //		    .moveToCenterX()
 //		    .moveToCenterY()
@@ -174,19 +174,20 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 					}
 					return previous;
 				}).setName(name);
+		MoveCenter.set(getName(), processedCSG, nrToCSG);
 		return processedCSG;
 	}
 
-//	public TransformNR getLocation() {
-//		if (location == null)
-//			location = new TransformNR();
-//		return location;
-//	}
-//
-//	public AddFromFile setLocation(TransformNR location) {
-//		this.location = location;
-//		return this;
-//	}
+	public TransformNR getLocation() {
+		if (location == null)
+			location = new TransformNR();
+		return location;
+	}
+
+	public AddFromFile setLocation(TransformNR location) {
+		this.location = location;
+		return this;
+	}
 
 
 
