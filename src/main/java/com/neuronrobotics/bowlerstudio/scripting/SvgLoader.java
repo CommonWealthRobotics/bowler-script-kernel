@@ -52,9 +52,9 @@ public class SvgLoader implements IScriptingLanguage {
 			String layerName=layers.get(i);
 			if(layerName==null)
 				layerName="TopLayer";
-			CSG extrudeLayerToCSG = s.extrudeLayerToCSG(depth,layerName);
+			 ArrayList<CSG> extrudeLayerToCSG = s.extrudeLayer(depth,layerName);
 			//extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
-			polys.add(extrudeLayerToCSG);
+			polys.addAll(extrudeLayerToCSG);
 			depth-=5;
 		}
 		
