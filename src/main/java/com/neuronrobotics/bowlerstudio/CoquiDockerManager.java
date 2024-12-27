@@ -194,7 +194,7 @@ public class CoquiDockerManager implements ITTSEngine {
 	}
 
 	public void disconnect() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		dockerClient.killContainerCmd(id).exec();
 	}
 

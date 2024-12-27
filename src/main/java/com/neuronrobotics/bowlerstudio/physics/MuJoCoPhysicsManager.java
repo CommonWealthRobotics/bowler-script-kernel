@@ -309,7 +309,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			try {
 				Thread.sleep(diff);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				throw new RuntimeException(e);
 			}
 		} else if (diff == 0) {
@@ -778,7 +778,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 							}
 						}
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else {
@@ -994,7 +994,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}

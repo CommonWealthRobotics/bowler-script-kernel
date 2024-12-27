@@ -127,7 +127,7 @@ public class MobileBaseCadManager implements Runnable {
 				vitamin = getVitamin(vi,manipulator,offset);
 				parts.add(vitamin);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -160,7 +160,7 @@ public class MobileBaseCadManager implements Runnable {
 				starting.setIsWireFrame(true);
 				starting.syncProperties(origin);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				return null;
 			}
@@ -191,7 +191,7 @@ public class MobileBaseCadManager implements Runnable {
 					});
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				return null;
 			}
@@ -256,7 +256,7 @@ public class MobileBaseCadManager implements Runnable {
 				vitamin = getVitaminDisplay(vi,manipulator,  offset);
 				parts.add(vitamin);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -462,34 +462,34 @@ public class MobileBaseCadManager implements Runnable {
 
 		@Override
 		public void setAllCSG(Collection<CSG> toAdd, File source) {
-			// TODO Auto-generated method stub
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
+			// Auto-generated method stub
 			list.clear();
 			list.addAll(toAdd);
 		}
 
 		@Override
 		public void addCSG(Collection<CSG> toAdd, File source) {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 			list.addAll(toAdd);
 
 		}
 
 		@Override
 		public Set<CSG> getVisibleCSGs() {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 			return new HashSet<CSG>(list);
 		}
 
 		@Override
 		public void setSelectedCsg(Collection<CSG> selectedCsg) {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 
 		}
 
 		@Override
 		public void setSelected(Affine rootListener) {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 
 		}
 	};
@@ -783,7 +783,7 @@ public class MobileBaseCadManager implements Runnable {
 							try {
 								build(key, f);
 							} catch (Throwable e) {
-								// TODO Auto-generated catch block
+								// Auto-generated catch block
 								e.printStackTrace();
 							}
 							//ex.printStackTrace();
@@ -808,14 +808,14 @@ public class MobileBaseCadManager implements Runnable {
 					
 					@Override
 					public void onConnect(BowlerAbstractDevice source) {
-						// TODO Auto-generated method stub
+						// Auto-generated method stub
 						
 					}
 				});
 			}
 			return cadScriptCache.get(key);
 		} catch (GitAPIException | IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		throw new RuntimeException("File Missing!");
@@ -840,16 +840,16 @@ public class MobileBaseCadManager implements Runnable {
 			FileChangeWatcher.close(f);
 
 		} catch (InvalidRemoteException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (TransportException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (GitAPIException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -900,7 +900,7 @@ public class MobileBaseCadManager implements Runnable {
 				try {
 					getConfigurationDisplay();
 				} catch (Throwable e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 				MobileBaseCadManager mobileBaseCadManager = null;
@@ -1053,7 +1053,7 @@ public class MobileBaseCadManager implements Runnable {
 		try {
 			return ScriptingEngine.fileFromGit(l.getGitCadEngine()[0], l.getGitCadEngine()[1]);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -1063,7 +1063,7 @@ public class MobileBaseCadManager implements Runnable {
 		try {
 			return ScriptingEngine.fileFromGit(device.getGitCadEngine()[0], device.getGitCadEngine()[1]);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -1299,7 +1299,7 @@ public class MobileBaseCadManager implements Runnable {
 
 			@Override
 			public void onConnect(BowlerAbstractDevice arg0) {
-				// TODO Auto-generated method stub
+				// Auto-generated method stub
 
 			}
 		});
@@ -1361,7 +1361,7 @@ public class MobileBaseCadManager implements Runnable {
 
 						@Override
 						public void onLinkPositionUpdate(AbstractLink arg0, double arg1) {
-							// TODO Auto-generated method stub
+							// Auto-generated method stub
 
 						}
 
@@ -1464,7 +1464,7 @@ public class MobileBaseCadManager implements Runnable {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 				setProgress(1);
@@ -1552,14 +1552,14 @@ public class MobileBaseCadManager implements Runnable {
 
 				@Override
 				public void onDisconnect(BowlerAbstractDevice source) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 					ui2.list.clear();
 
 				}
 
 				@Override
 				public void onConnect(BowlerAbstractDevice source) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 
 				}
 			});
@@ -1641,7 +1641,7 @@ public class MobileBaseCadManager implements Runnable {
 		}
 	}
 	public void invalidateModelCache() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 	/**
@@ -1657,7 +1657,7 @@ public class MobileBaseCadManager implements Runnable {
 		this.configMode = configMode;
 	}
 	public boolean isCADstarted() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return cadGenerating;
 	}
 

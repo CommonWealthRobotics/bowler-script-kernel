@@ -66,7 +66,7 @@ public class Manipulation {
 	}
 
 	public void clearListeners() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		saveListeners.clear();
 		eventListeners.clear();
 	}
@@ -298,7 +298,7 @@ public class Manipulation {
 
 	}
 	public void reset() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 

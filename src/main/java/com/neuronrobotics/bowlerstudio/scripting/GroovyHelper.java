@@ -87,24 +87,24 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 
   @Override
   public boolean getIsTextFile() {
-    // TODO Auto-generated method stub
+    // Auto-generated method stub
     return true;
   }
 
   @Override
   public ArrayList<String> getFileExtenetion() {
-    // TODO Auto-generated method stub
+    // Auto-generated method stub
     return new ArrayList<>(Arrays.asList( "groovy","java"));
   }
 
   @Override
   public IDebugScriptRunner compileDebug(File f) {
-    // TODO Auto-generated method stub
+    // Auto-generated method stub
     return new IDebugScriptRunner() {
 
       @Override
       public String[] step() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return new String[]{"fileame.groovy", "345"};
       }
     };

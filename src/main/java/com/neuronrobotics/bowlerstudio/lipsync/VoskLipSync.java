@@ -415,7 +415,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 			processRaw(audio, text.getAbsolutePath());
 			com.neuronrobotics.sdk.common.Log.error("Vosk Lip Sync Done writing! took " + (System.currentTimeMillis() - start));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 

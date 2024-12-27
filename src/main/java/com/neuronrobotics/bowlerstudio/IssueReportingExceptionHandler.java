@@ -96,7 +96,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 								try {
 									Thread.sleep(5000);
 								} catch (InterruptedException e1) {
-									// TODO Auto-generated catch block
+									// Auto-generated catch block
 									e1.printStackTrace();
 								} // wait for the Issue to be reported
 								System.exit(-5);
@@ -107,7 +107,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 								try {
 									Thread.sleep(5000);
 								} catch (InterruptedException e1) {
-									// TODO Auto-generated catch block
+									// Auto-generated catch block
 									e1.printStackTrace();
 								} // wait for the Issue to be reported
 								System.exit(-5);
@@ -217,7 +217,7 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 				BowlerKernel.upenURL(i.getHtmlUrl().toURI());
 
 			} catch (Throwable e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			processing = false;

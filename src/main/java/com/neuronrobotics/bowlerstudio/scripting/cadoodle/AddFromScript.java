@@ -118,11 +118,11 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 
 	@Override
 	public File getFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		try {
 			return ScriptingEngine.fileFromGit(gitULR, fileRel);
 		} catch (GitAPIException | IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}

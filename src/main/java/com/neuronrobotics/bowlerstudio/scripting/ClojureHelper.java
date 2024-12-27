@@ -69,7 +69,7 @@ public class ClojureHelper implements IScriptingLanguage {
 			String s = new String(bytes, "UTF-8");
 			return inlineScriptRun(s, args);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e1.printStackTrace();
 		}
 		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of type="+ret.getClass()+" value="+ret);
@@ -89,7 +89,7 @@ public class ClojureHelper implements IScriptingLanguage {
 
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return true;
 	}
 
@@ -104,7 +104,7 @@ public class ClojureHelper implements IScriptingLanguage {
 
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("clj", "cljs", "cljc"));
 	}
 

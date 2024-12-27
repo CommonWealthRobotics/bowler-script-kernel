@@ -75,7 +75,7 @@ public class CartesianManipulator {
 	}
 
 	public void clearListeners() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		for (int i = 0; i < 3; i++)
 			manipulationList[i].clearListeners();
 	}

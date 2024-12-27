@@ -374,7 +374,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			localRepo = getRepository(url);
 			return openGit(localRepo);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		throw new RuntimeException("IOException making repo");
@@ -593,7 +593,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	        try {
 				createSymlinkInDocuments(appDataDir);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1714,11 +1714,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 							commit(remoteURI, getBranch(remoteURI), p, content,
 									"auto-save in ScriptingEngine.resolveConflict", false, git);
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
+							// Auto-generated catch block
 							e.printStackTrace();
 						}
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e1.printStackTrace();
 					}
 
@@ -1736,7 +1736,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				return resolveConflict(remoteURI, con, git);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return true;
@@ -2100,7 +2100,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -2125,7 +2125,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				commit(url, "main", "firstCommit");
 				newBranch(url, "main");
 			} catch (IOException | GitAPIException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		} catch (org.kohsuke.github.HttpException ex) {
@@ -2147,7 +2147,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			return string;
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -2408,7 +2408,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				tags.add(string);
 			}
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 
 		}
@@ -2453,7 +2453,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				git.push().setPushTags().setCredentialsProvider(PasswordManager.getCredentialProvider())
 						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 		} catch (GitAPIException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		closeGit(git);

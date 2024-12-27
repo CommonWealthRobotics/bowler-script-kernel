@@ -129,7 +129,7 @@ public class RhubarbManager implements IAudioProcessingLambda {
 			processRaw(audio, text.getAbsolutePath());
 			com.neuronrobotics.sdk.common.Log.error("Done writing!");
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 

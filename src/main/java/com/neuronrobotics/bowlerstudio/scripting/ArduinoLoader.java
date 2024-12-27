@@ -83,7 +83,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 
   @Override
   public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
-    // TODO Auto-generated method stub
+    // Auto-generated method stub
     return null;
   }
 
@@ -164,7 +164,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 
   @Override
   public ArrayList<String> getFileExtenetion() {
-    // TODO Auto-generated method stub
+    // Auto-generated method stub
     return new ArrayList<>(Arrays.asList( ".ino",".c", ".h", ".cpp", ".hpp"));
   }
 

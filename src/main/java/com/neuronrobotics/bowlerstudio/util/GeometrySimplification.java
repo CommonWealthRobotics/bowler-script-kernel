@@ -69,7 +69,7 @@ public class GeometrySimplification {
 			legacySystemRun(null, inkscape.getAbsoluteFile().getParentFile(), System.out, args);
 			return svg;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return incoming;

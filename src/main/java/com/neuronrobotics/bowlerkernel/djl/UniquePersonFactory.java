@@ -105,13 +105,13 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		try {
 			features = PredictorFactory.faceFeatureFactory();
 		} catch (ModelNotFoundException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (MalformedModelException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		factory = ImageFactory.getInstance();
@@ -144,7 +144,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		try {
 			Files.write(path, strToBytes);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (workingMemory != null)
@@ -415,7 +415,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 	@Override
 	public ArrayList<String> getNamespacesImp() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
 	}
 
@@ -480,7 +480,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				database.createNewFile();
 				save();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e1.printStackTrace();
 			}
 		else {
@@ -490,7 +490,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				longTermMemory = gson.fromJson(jsonString, TT_mapStringString);
 				resetHash();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

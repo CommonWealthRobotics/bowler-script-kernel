@@ -82,7 +82,7 @@ public class BashLoader implements IScriptingLanguage {
 
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return true;
 	}
 

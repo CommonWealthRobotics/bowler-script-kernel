@@ -142,7 +142,7 @@ public class ConfigurationDatabase {
 		try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
 		    out.println(writeOut);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
@@ -189,12 +189,12 @@ public class ConfigurationDatabase {
 							try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
 							    out.println(contents);
 							} catch (FileNotFoundException e) {
-								// TODO Auto-generated catch block
+								// Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 			}

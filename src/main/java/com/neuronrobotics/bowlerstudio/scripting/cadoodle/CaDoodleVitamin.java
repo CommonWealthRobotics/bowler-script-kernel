@@ -113,7 +113,7 @@ public class CaDoodleVitamin {
 			//back.getStorage().set("PreviousName", name);
 			return back;
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		throw new RuntimeException("Failed to load vitamin of type " + type);

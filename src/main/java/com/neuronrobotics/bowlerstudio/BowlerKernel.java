@@ -81,7 +81,7 @@ public class BowlerKernel {
 			try {
 				historyFile.createNewFile();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			history.add("println SDKBuildInfo.getVersion()");
@@ -410,7 +410,7 @@ public class BowlerKernel {
 					try {
 						Files.copy(bomCSV.toPath(), file.toPath());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -423,7 +423,7 @@ public class BowlerKernel {
 					try {
 						Files.copy(bom.toPath(), file.toPath());
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -534,19 +534,19 @@ public class BowlerKernel {
 
 				@Override
 				public void setSelectedCsg(Collection<CSG> selectedCsg) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 
 				}
 
 				@Override
 				public void setSelected(Affine rootListener) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 
 				}
 
 				@Override
 				public void setAllCSG(Collection<CSG> toAdd, File source) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 
 				}
 
@@ -558,13 +558,13 @@ public class BowlerKernel {
 
 				@Override
 				public Set<CSG> getVisibleCSGs() {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 					return null;
 				}
 
 				@Override
 				public void addCSG(Collection<CSG> toAdd, File source) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 
 				}
 			});
@@ -619,7 +619,7 @@ public class BowlerKernel {
 
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				fail();
 			}
@@ -652,10 +652,10 @@ public class BowlerKernel {
 
 			bw.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -772,10 +772,10 @@ public class BowlerKernel {
 			upenURL(new URI(string));
 
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -785,7 +785,7 @@ public class BowlerKernel {
 			try {
 				Desktop.getDesktop().browse(htmlUrl);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 	}

@@ -17,7 +17,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 
-// TODO: Auto-generated Javadoc
+//  Auto-generated Javadoc
 /**
  * The Class BowlerJInputDevice.
  */
@@ -154,7 +154,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 										try {
 											Thread.sleep(1000);
 										} catch (InterruptedException e) {
-											// TODO Auto-generated catch block
+											// Auto-generated catch block
 											e.printStackTrace();
 										}
 									}
@@ -277,7 +277,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	 */
 	@Override
 	public ArrayList<String> getNamespacesImp() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<String>();
 	}
 

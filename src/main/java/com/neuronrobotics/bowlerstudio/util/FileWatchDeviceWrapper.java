@@ -16,19 +16,19 @@ public class FileWatchDeviceWrapper {
 				
 				@Override
 				public void onDisconnect(BowlerAbstractDevice arg0) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 					watcher.removeIFileChangeListener(cadWatcher);
 				}
 				
 				@Override
 				public void onConnect(BowlerAbstractDevice arg0) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 					
 				}
 			});
 			return watcher;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			//BowlerStudioController.highlightException(code, e);
 		}
 		return null;

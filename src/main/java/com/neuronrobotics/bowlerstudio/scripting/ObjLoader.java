@@ -27,7 +27,7 @@ public class ObjLoader implements IScriptingLanguage {
 	}
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return false;
 	}
 	/**
@@ -40,7 +40,7 @@ public class ObjLoader implements IScriptingLanguage {
 	}
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("obj","OBJ","Obj"));
 	}
 

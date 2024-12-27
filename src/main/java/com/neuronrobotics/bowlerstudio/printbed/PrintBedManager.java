@@ -55,7 +55,7 @@ public class PrintBedManager {
 		try {
 			this.url=ScriptingEngine.locateGitUrl(dir);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		setHasPrintBed(init(dir,  parts));
@@ -201,7 +201,7 @@ public class PrintBedManager {
 //			ScriptingEngine.commit(url, ScriptingEngine.getBranch(url), file, content, "Save Print Bed Locations",
 //					true);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -8,11 +8,11 @@ public class VirtualCameraFactory {
 		
 		@Override
 		public AbstractImageProvider getVirtualCamera() {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 			try {
 				return new URLImageProvider(new URL("http://commonwealthrobotics.com/img/AndrewHarrington/2014-09-15-86.jpg"));
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				throw new RuntimeException(e);			
 			}
 		}

@@ -32,7 +32,7 @@ public class TestCheckout {
 				assertTrue("Changing from "+was+" to "+myName+" got "+s,myName.contains(s));
 				
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				fail();
 			}

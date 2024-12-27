@@ -7,7 +7,7 @@ import com.neuronrobotics.sdk.dyio.peripherals.IAnalogInputListener;
 import com.neuronrobotics.sdk.dyio.peripherals.IServoPositionUpdateListener;
 import com.neuronrobotics.sdk.dyio.peripherals.ServoChannel;
 
-// TODO: Auto-generated Javadoc
+//  Auto-generated Javadoc
 /**
  * The Class ServoOutputScheduleChannel.
  */
@@ -520,7 +520,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 	 */
 	@Override
 	public void onReset() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 	
@@ -529,7 +529,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 	 */
 	@Override
 	public void onPlay() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 	
@@ -538,7 +538,7 @@ public class ServoOutputScheduleChannel implements ISchedulerListener, IAnalogIn
 	 */
 	@Override
 	public void onPause() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 	

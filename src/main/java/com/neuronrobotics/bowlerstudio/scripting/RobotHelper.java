@@ -31,12 +31,12 @@ public class RobotHelper implements IScriptingLanguage {
 				mb.setGitSelfSource(ScriptingEngine.findGitTagFromFile(code));
 				return MobileBaseLoader.get(mb).getBase();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				return null;
 			}
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e1.printStackTrace();
 		}
 		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of type="+ret.getClass()+" value="+ret);
@@ -50,7 +50,7 @@ public class RobotHelper implements IScriptingLanguage {
 		try {
 			mb = new MobileBase(IOUtils.toInputStream(code, "UTF-8"));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
@@ -65,7 +65,7 @@ public class RobotHelper implements IScriptingLanguage {
 
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return true;
 	}
 
@@ -134,7 +134,7 @@ public class RobotHelper implements IScriptingLanguage {
 
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("xml"));
 	}
 

@@ -55,7 +55,7 @@ public class MobileBaseLoading {
       
       @Override
       public void progressUpdate(int currentIndex, int finalIndex, String type, CSG intermediateShape) {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         
       }
     });

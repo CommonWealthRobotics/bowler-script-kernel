@@ -104,7 +104,7 @@ public interface IScriptingLanguage {
 	 * @return
 	 */
 	default String getDefaultContents() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		throw new RuntimeException("This shell " + getShellType() + " has binary files ");
 	}
 
@@ -118,7 +118,7 @@ public interface IScriptingLanguage {
 		try {
 			getDefaultContents(ScriptingEngine.fileFromGit(gitURL, fileSlug));
 		} catch (GitAPIException | IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -332,7 +332,7 @@ public class BezierEditor {
 					ScriptingEngine.pushCodeToGit(url, ScriptingEngine.getFullBranch(url), gitfile, writeOut,
 							"Saving Bezier");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else {
@@ -340,7 +340,7 @@ public class BezierEditor {
 					try {
 						cachejson.createNewFile();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				OutputStream out = null;
@@ -351,7 +351,7 @@ public class BezierEditor {
 					// completes
 					// normally
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				} finally {
 					IOUtils.closeQuietly(out);

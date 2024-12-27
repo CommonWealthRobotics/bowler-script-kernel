@@ -112,11 +112,11 @@ public class Vitamins {
 //						}
 //					});
 //				} catch (IOException e) {
-//					// TODO Auto-generated catch block
+//					// Auto-generated catch block
 //					e.printStackTrace();
 //				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -254,16 +254,16 @@ public class Vitamins {
 		try {
 			return ScriptingEngine.fileFromGit(script.get("scriptGit").toString(), script.get("scriptFile").toString());
 		} catch (InvalidRemoteException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (TransportException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (GitAPIException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -379,7 +379,7 @@ public class Vitamins {
 				try {
 					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else {
@@ -404,7 +404,7 @@ public class Vitamins {
 				try {
 					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -599,7 +599,7 @@ public class Vitamins {
 			}
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		Collections.sort(types);
@@ -668,7 +668,7 @@ public class Vitamins {
 			try {
 				ScriptingEngine.pull(getGitRepoDatabase());
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e1.printStackTrace();
 			}
 		} catch (Exception e) {

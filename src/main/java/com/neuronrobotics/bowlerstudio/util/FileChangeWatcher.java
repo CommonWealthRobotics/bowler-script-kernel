@@ -41,7 +41,7 @@ import java.util.*;
 
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 
-// TODO: Auto-generated Javadoc
+//  Auto-generated Javadoc
 /**
  * The Class FileChangeWatcher.
  */
@@ -158,7 +158,7 @@ public class FileChangeWatcher {
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -300,7 +300,7 @@ public class FileChangeWatcher {
 										// overwrites
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -357,7 +357,7 @@ public class FileChangeWatcher {
 			com.neuronrobotics.sdk.common.Log.error("Closing watcher for "+fileToWatch.getAbsolutePath());
 			watcher.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		activeListener.remove(fileToWatch.getAbsolutePath());

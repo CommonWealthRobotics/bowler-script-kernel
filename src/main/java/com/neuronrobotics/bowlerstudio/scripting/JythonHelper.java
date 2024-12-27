@@ -42,7 +42,7 @@ public class JythonHelper implements IScriptingLanguage {
 //            Class.forName(bad.getClass().getName())
 //                .cast(bad));
 //      } catch (ClassNotFoundException e) {
-//        // TODO Auto-generated catch block
+//        // Auto-generated catch block
 //        e.printStackTrace();
 //      }
 //      com.neuronrobotics.sdk.common.Log.error("Device " + bad.getScriptingName() + " is "
@@ -82,7 +82,7 @@ public class JythonHelper implements IScriptingLanguage {
       String s = new String(bytes, "UTF-8");
       return inlineScriptRun(s, args);
     } catch (IOException e1) {
-      // TODO Auto-generated catch block
+      // Auto-generated catch block
       e1.printStackTrace();
     }
     return null;
@@ -103,13 +103,13 @@ public class JythonHelper implements IScriptingLanguage {
 	}
   @Override
   public boolean getIsTextFile() {
-    // TODO Auto-generated method stub
+    // Auto-generated method stub
     return true;
   }
 
   @Override
   public ArrayList<String> getFileExtenetion() {
-    // TODO Auto-generated method stub
+    // Auto-generated method stub
     return new ArrayList<>(Arrays.asList("py", "jy"));
   }
 

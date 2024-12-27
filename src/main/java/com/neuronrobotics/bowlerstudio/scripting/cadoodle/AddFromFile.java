@@ -84,7 +84,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //				boM.save();
 //			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		return back;
@@ -132,7 +132,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 					copied = copyFileToNewDirectory(file, parentFile, getName());
 					file = copied;
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

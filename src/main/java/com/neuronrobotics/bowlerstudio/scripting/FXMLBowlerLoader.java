@@ -24,12 +24,12 @@ public class FXMLBowlerLoader implements IScriptingLanguage {
 
 	@Override
 	public String getShellType() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return "fxml";
 	}
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return true;
 	}
 	/**
@@ -42,7 +42,7 @@ public class FXMLBowlerLoader implements IScriptingLanguage {
 	}
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("fxml","FXML","FxML"));
 	}
 

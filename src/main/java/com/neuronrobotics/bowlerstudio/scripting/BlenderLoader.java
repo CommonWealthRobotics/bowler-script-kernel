@@ -58,7 +58,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		try {
 			stlIn = File.createTempFile(stl.getName(), ".stl");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
@@ -85,7 +85,7 @@ public class BlenderLoader implements IScriptingLanguage {
 				t.join();
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
@@ -95,7 +95,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		try {
 			FileUtil.write(Paths.get(outgoing.getAbsolutePath()), back.toStlString());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
@@ -173,10 +173,10 @@ public class BlenderLoader implements IScriptingLanguage {
 		try {
 			DownloadManager.legacySystemRun(null, parent, System.out, args);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -184,7 +184,7 @@ public class BlenderLoader implements IScriptingLanguage {
 
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return false;
 	}
 

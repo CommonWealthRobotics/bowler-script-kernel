@@ -77,13 +77,13 @@ public class DownloadManager {
 		
 		@Override
 		public void startDownload() {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 			
 		}
 		
 		@Override
 		public void finishDownload() {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 			
 		}
 	};
@@ -118,7 +118,7 @@ public class DownloadManager {
 
 		@Override
 		public void onUpdate(String update, Exception e) {
-			// TODO Auto-generated method stub
+			// Auto-generated method stub
 			
 		}
 		
@@ -430,37 +430,37 @@ public class DownloadManager {
 									@Override
 									public void onProcessExit(int e) {
 										ev = e;
-										// TODO Auto-generated method stub
+										// Auto-generated method stub
 
 									}
 
 									@Override
 									public String nameOfEditor() {
-										// TODO Auto-generated method stub
+										// Auto-generated method stub
 										return null;
 									}
 
 									@Override
 									public void launch(File file, Button advanced) {
-										// TODO Auto-generated method stub
+										// Auto-generated method stub
 
 									}
 
 									@Override
 									public Class getSupportedLangauge() {
-										// TODO Auto-generated method stub
+										// Auto-generated method stub
 										return null;
 									}
 
 									@Override
 									public URL getInstallURL() throws MalformedURLException {
-										// TODO Auto-generated method stub
+										// Auto-generated method stub
 										return null;
 									}
 
 									@Override
 									public Image getImage() {
-										// TODO Auto-generated method stub
+										// Auto-generated method stub
 										return null;
 									}
 								};
@@ -496,7 +496,7 @@ public class DownloadManager {
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -507,7 +507,7 @@ public class DownloadManager {
 		try {
 			FileUtils.writeStringToFile(file, json, Charset.forName("UTF-8"));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -526,7 +526,7 @@ public class DownloadManager {
 					try {
 						tcopy.join();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 			}else {
@@ -534,7 +534,7 @@ public class DownloadManager {
 				try {
 					tcopy.join();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					// Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -559,7 +559,7 @@ public class DownloadManager {
 		try {
 			Files.move(Paths.get(bindir + name + "." + type), Paths.get(cmd), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		new File(cmd).setExecutable(true);
@@ -597,7 +597,7 @@ public class DownloadManager {
 					Arrays.asList("hdiutil", "detach", "/Volumes/" + newMount));
 			tdetach.join();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 			return;
 		} // wait for the mount to finish
@@ -633,10 +633,10 @@ public class DownloadManager {
 		try {
 			legacySystemRun(null, outputDir, System.out, args);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -1012,7 +1012,7 @@ public class DownloadManager {
 //		try {
 //			PasswordManager.login();
 //		} catch (IOException e) {
-//			// TODO Auto-generated catch block
+//			// Auto-generated catch block
 //			e.printStackTrace();
 //		}
 //		File f = getRunExecutable("eclipse",null);

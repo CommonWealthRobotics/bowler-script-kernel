@@ -23,12 +23,12 @@ public class StlLoader implements IScriptingLanguage {
 
 	@Override
 	public String getShellType() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return "Stl";
 	}
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return false;
 	}
 	/**
@@ -41,7 +41,7 @@ public class StlLoader implements IScriptingLanguage {
 	}
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("stl","STL","Stl"));
 	}
 

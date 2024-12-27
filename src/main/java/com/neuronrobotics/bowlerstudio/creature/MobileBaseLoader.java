@@ -48,7 +48,7 @@ public class MobileBaseLoader {
 				
 				@Override
 				public void onFileDelete(File fileThatIsDeleted) {
-					// TODO Auto-generated method stub
+					// Auto-generated method stub
 					
 				}
 				
@@ -105,7 +105,7 @@ public class MobileBaseLoader {
 			
 			@Override
 			public void onFileDelete(File fileThatIsDeleted) {
-				// TODO Auto-generated method stub
+				// Auto-generated method stub
 				
 			}
 			

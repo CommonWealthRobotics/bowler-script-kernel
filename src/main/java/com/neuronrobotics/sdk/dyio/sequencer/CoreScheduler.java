@@ -19,7 +19,7 @@ import org.xml.sax.SAXException;
 import com.neuronrobotics.sdk.dyio.DyIO;
 import com.neuronrobotics.sdk.dyio.peripherals.ServoChannel;
 import com.neuronrobotics.sdk.util.ThreadUtil;
-// TODO: Auto-generated Javadoc
+//  Auto-generated Javadoc
 
 /**
  * The Class CoreScheduler.
@@ -482,7 +482,7 @@ public class CoreScheduler {
 					try {
 						Thread.sleep(10);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				}

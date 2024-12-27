@@ -29,19 +29,19 @@ public class URLImageProvider extends AbstractImageProvider {
 
 	@Override
 	public void disconnectDeviceImp() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 
 	@Override
 	public boolean connectDeviceImp() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public ArrayList<String> getNamespacesImp() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
 	}
 

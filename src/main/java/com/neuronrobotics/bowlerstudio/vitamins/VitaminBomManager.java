@@ -58,7 +58,7 @@ public class VitaminBomManager {
 			try {
 				bom.createNewFile();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
@@ -147,7 +147,7 @@ public class VitaminBomManager {
 			return transformed;
 
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e1.printStackTrace();
 		}
 		return null;
@@ -256,7 +256,7 @@ public class VitaminBomManager {
 			write(getManufacturingBomJson(), content);
 			write(getManufacturingBomCsv(), csv);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		saving = false;

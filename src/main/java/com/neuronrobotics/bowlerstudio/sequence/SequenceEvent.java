@@ -77,7 +77,7 @@ public class SequenceEvent implements IOnInterpolationDone{
 
 	@Override
 	public void done(InterpolationMoveState state) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 }
