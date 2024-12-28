@@ -265,7 +265,7 @@ public class DownloadManager {
 			}
 		}).start();
 	}
-
+	@SuppressWarnings("unchecked")
 	public static Map<String, String> getEnvironment(String exeType) {
 		String key = discoverKey();
 
