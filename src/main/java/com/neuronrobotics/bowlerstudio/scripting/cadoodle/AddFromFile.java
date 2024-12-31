@@ -32,9 +32,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM =false;
 	public AddFromFile set(File source) {
-		String absolutePath = toLocal(source).getAbsolutePath();
-		getFileParameter().setStrValue(absolutePath);
-		CSGDatabase.saveDatabase();
+		toLocal(source);
 		return this;
 	}
 
@@ -56,6 +54,9 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
+			if(!file.exists()) {
+				throw new RuntimeException("Failed to find file");
+			}
 			
 			ArrayList<Object>args = new ArrayList<>();
 			args.addAll(Arrays.asList(name ));
@@ -140,20 +141,19 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	public File getFile() {
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
 		File parentFile = new File(loc.getStrValue()).getParentFile();
-		StringParameter stringParameter = getFileParameter();
-		File file = new File(stringParameter.getStrValue());
-		String pathname = parentFile.getAbsolutePath()+DownloadManager.delim()+file.getName();
-		return new File(pathname);
+		for(String f:parentFile.list()) {
+			if(f.contains(name)) {
+				String pathname = parentFile.getAbsolutePath() + DownloadManager.delim() + f;
+				return  new File(pathname);
+			}
+		}
+		throw new RuntimeException("File not found! "+name);
 	}
 //
 //	private String getStrValue() {
 //		
 //		return getParameter("UnKnown").getStrValue();
 //	}
-
-	private StringParameter getFileParameter() {
-		return new StringParameter(getName() + "_CaDoodle_File", "NotSet", options);
-	}
 
 	private CSG processGiven(CSG csg, int i,  String name) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
