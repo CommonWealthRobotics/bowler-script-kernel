@@ -116,7 +116,8 @@ public class Manipulation {
 				String name = event.getEventType().getName();
 				switch (name) {
 				case "MOUSE_PRESSED":
-					pressed(event);
+					if(event.isPrimaryButtonDown())
+						pressed(event);
 					break;
 				case "MOUSE_DRAGGED":
 					dragged(event,event);
