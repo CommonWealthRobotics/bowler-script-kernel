@@ -173,8 +173,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static HashMap<String, ArrayList<Runnable>> onCommitEventListeners = new HashMap<>();
 	// static IssueReportingExceptionHandler exp = new
 	// IssueReportingExceptionHandler();
-	static HashMap<Git, GitTimeoutThread> gitOpenTimeout = new HashMap<>();
-
+	//static HashMap<Git, GitTimeoutThread> gitOpenTimeout = new HashMap<>();
+	static HashMap<String,Git> open = new HashMap<String, Git>();
+	
 	private static String delim;
 
 	private static String appName = "BowlerLauncher";
@@ -252,7 +253,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 
 		Git git = setURI.call();
-		gitOpenTimeout.put(git, makeTimeoutThread(git));
+		open.put(dir.getAbsolutePath(), git);
 		try {
 			accessor.run(git);
 		} catch (Exception e) {
@@ -307,14 +308,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			@Override
 			public void update(int completed) {
-				for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-					Git g = iterator.next();
-					GitTimeoutThread t = gitOpenTimeout.get(g);
-					if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
-						t.resetTimer();
-						break;
-					}
-				}
+//				for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
+//					Git g = iterator.next();
+//					GitTimeoutThread t = gitOpenTimeout.get(g);
+//					if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
+//						t.resetTimer();
+//						break;
+//					}
+//				}
 
 				sum += completed;
 				DecimalFormat df = new DecimalFormat("###.#");
@@ -389,23 +390,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		throw new RuntimeException("IOException making repo");
 	}
 
-	public static boolean isUrlAlreadyOpen(String URL) {
-		if (URL == null)
-			return false;
-		Object[] keySet;
-		synchronized (gitOpenTimeout) {
-			keySet = gitOpenTimeout.keySet().toArray();
-		}
-		for (int i = 0; i < keySet.length; i++) {
-			Git g = (Git) keySet[i];
-			GitTimeoutThread t = gitOpenTimeout.get(g);
-			if (t.ref.toLowerCase().contentEquals(URL.toLowerCase())) {
-				// t.getException().printStackTrace(System.err);
-				return true;
-			}
-		}
-		return false;
-	}
+//	public static boolean isUrlAlreadyOpen(String URL) {
+//		if (URL == null)
+//			return false;
+//		Set<String> keySet = open.keySet();
+//
+//		for (String s:keySet) {
+//			if (s.toLowerCase().contentEquals(URL.toLowerCase())) {
+//				// t.getException().printStackTrace(System.err);
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 	/**
 	 * Open a git object and start a timeout timer for closing it
@@ -417,45 +414,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void openGit(Repository localRepo, IGitAccessor accessor) {
 		Git git = null;
 		try {
-
-			Object[] keySet;
-			synchronized (gitOpenTimeout) {
-				keySet = gitOpenTimeout.keySet().toArray();
-			}
-			for (int j = 0; j < keySet.length; j++) {
-				Object gO = keySet[j];
-				Git g = (Git) gO;
+			for (String s:open.keySet()) {
+				Git g= open.get(s);
 				if (g.getRepository().getDirectory().getAbsolutePath()
 						.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
-					GitTimeoutThread t = gitOpenTimeout.get(g);
-					int i = 0;
-					while (gitOpenTimeout.containsKey(g)) {
-
-						com.neuronrobotics.sdk.common.Log.error("Git is locked by other process, blocking "
-								+ localRepo.getDirectory().getAbsolutePath());
-						com.neuronrobotics.sdk.common.Log.error("Git locked " + t.ref);
-						if (i > 3) {
-							t.getException().printStackTrace(System.out);
-							com.neuronrobotics.sdk.common.Log.error("Blocking process: ");
-
-							new Exception().printStackTrace(System.out);
-						}
-						i++;
-						ThreadUtil.wait(1000);
-					}
-					break;
+					throw new RuntimeException("Fail! This Git is already open! "+localRepo.getDirectory().getAbsolutePath());
 				}
 			}
-
 			git = new Git(localRepo);
-
-			gitOpenTimeout.put(git, makeTimeoutThread(git));
+			open.put(localRepo.getDirectory().getAbsolutePath(), git);
 			if (accessor != null) {
 				try {
 					accessor.run(git);
 				} catch (Throwable t) {
 					new IssueReportingExceptionHandler().except(t);
-					throw new RuntimeException(t);
 				}
 			}
 			gitclose(git);
@@ -476,37 +448,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static void gitclose(Git git) {
 		if (git == null)
 			return;
-		if (gitOpenTimeout.containsKey(git)) {
-			GitTimeoutThread thread = gitOpenTimeout.remove(git);
-			if (thread != null) {
-				thread.close();
-				try {
-					thread.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else {
-				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),
-						new RuntimeException("Closing a git object that was not opened with a timeout!"));
-			}
-		}
+		open.remove(git.getRepository().getDirectory().getAbsolutePath());
 		git.getRepository().close();
 		git.close();
 	}
 
-	/**
-	 * Make a timeout thread for printing an exception whenever a git object is
-	 * opened and not closed within 5 seconds
-	 * 
-	 * @return
-	 */
-	private static GitTimeoutThread makeTimeoutThread(Git git) {
-
-		GitTimeoutThread thread = new GitTimeoutThread(git);
-		thread.start();
-		return thread;
-	}
 
 	public static void addOnCommitEventListeners(String url, Runnable event) {
 		synchronized (onCommitEventListeners) {
@@ -782,23 +728,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void waitForRepo(String remoteURI, String reason) {
-		while (ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(500);
-			for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-				Git g = iterator.next();
-				GitTimeoutThread t = gitOpenTimeout.get(g);
-				if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
-
-					com.neuronrobotics.sdk.common.Log
-							.error("\n\n\nPaused " + reason + " by another thread, waiting for repo " + remoteURI);
-					new Exception().printStackTrace(System.err);
-					com.neuronrobotics.sdk.common.Log.error("Paused by:");
-					t.getException().printStackTrace(System.err);
-					com.neuronrobotics.sdk.common.Log.error("\n\n\n");
-
-				}
-			}
-		}
+//		while (ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
+//			ThreadUtil.wait(500);
+//			System.err.println("Waiting...");
+//		}
 	}
 
 	public static void deleteRepo(String remoteURI) {
