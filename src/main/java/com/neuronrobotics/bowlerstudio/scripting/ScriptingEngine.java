@@ -381,6 +381,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		try {
 			localRepo = getRepository(url);
 			openGit(localRepo, accessor);
+			return;
 		} catch (IOException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
