@@ -477,9 +477,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (git == null)
 			return;
 		if (gitOpenTimeout.containsKey(git)) {
-			Thread thread = gitOpenTimeout.remove(git);
+			GitTimeoutThread thread = gitOpenTimeout.remove(git);
 			if (thread != null) {
-				thread.interrupt();
+				thread.close();
+				try {
+					thread.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
 				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),
 						new RuntimeException("Closing a git object that was not opened with a timeout!"));
