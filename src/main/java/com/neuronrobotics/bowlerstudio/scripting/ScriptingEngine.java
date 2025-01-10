@@ -413,22 +413,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void openGit(Repository localRepo, IGitAccessor accessor) {
 		Git git = null;
+		boolean alreadyOpen= false;
 		try {
 			String absolutePath = localRepo.getDirectory().getAbsolutePath();
 			for (String s : open.keySet()) {
 				Git g = open.get(s);
-				
-				while (g.getRepository().getDirectory().getAbsolutePath()
+				if(g!=null)
+				if (g.getRepository().getDirectory().getAbsolutePath()
 						.contentEquals(absolutePath)) {
-					Thread.sleep(500);
-					System.out.println("Waiting for git to close "+absolutePath);
-					g = open.get(s);
-					if(g==null)
-						break;
+					git=g;
+					alreadyOpen=true;
+					break;
 				}
 			}
-			git = new Git(localRepo);
-			open.put(absolutePath, git);
+			if(!alreadyOpen) {
+				git = new Git(localRepo);
+				open.put(absolutePath, git);
+			}
 			if (accessor != null) {
 				try {
 					accessor.run(git);
@@ -436,7 +437,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					new IssueReportingExceptionHandler().except(t);
 				}
 			}
-			gitclose(git);
+			if(!alreadyOpen)
+				gitclose(git);
 		} catch (Throwable t) {
 			new IssueReportingExceptionHandler().except(t);
 			if (git != null) {
