@@ -173,9 +173,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static HashMap<String, ArrayList<Runnable>> onCommitEventListeners = new HashMap<>();
 	// static IssueReportingExceptionHandler exp = new
 	// IssueReportingExceptionHandler();
-	//static HashMap<Git, GitTimeoutThread> gitOpenTimeout = new HashMap<>();
-	static HashMap<String,Git> open = new HashMap<String, Git>();
-	
+	// static HashMap<Git, GitTimeoutThread> gitOpenTimeout = new HashMap<>();
+	static HashMap<String, Git> open = new HashMap<String, Git>();
+
 	private static String delim;
 
 	private static String appName = "BowlerLauncher";
@@ -390,19 +390,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		throw new RuntimeException("IOException making repo");
 	}
 
-//	public static boolean isUrlAlreadyOpen(String URL) {
-//		if (URL == null)
-//			return false;
-//		Set<String> keySet = open.keySet();
-//
-//		for (String s:keySet) {
-//			if (s.toLowerCase().contentEquals(URL.toLowerCase())) {
-//				// t.getException().printStackTrace(System.err);
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
+	public static boolean isUrlAlreadyOpen(File URL) {
+		if (URL == null)
+			return false;
+		Set<String> keySet = open.keySet();
+
+		for (String s : keySet) {
+			if (s.toLowerCase().contentEquals(URL.getAbsolutePath())) {
+				// t.getException().printStackTrace(System.err);
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Open a git object and start a timeout timer for closing it
@@ -414,11 +414,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void openGit(Repository localRepo, IGitAccessor accessor) {
 		Git git = null;
 		try {
-			for (String s:open.keySet()) {
-				Git g= open.get(s);
-				if (g.getRepository().getDirectory().getAbsolutePath()
+			for (String s : open.keySet()) {
+				Git g = open.get(s);
+				
+				while (g.getRepository().getDirectory().getAbsolutePath()
 						.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
-					throw new RuntimeException("Fail! This Git is already open! "+localRepo.getDirectory().getAbsolutePath());
+					Thread.sleep(500);
+					g = open.get(s);
+					if(g==null)
+						break;
 				}
 			}
 			git = new Git(localRepo);
@@ -452,7 +456,6 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		git.getRepository().close();
 		git.close();
 	}
-
 
 	public static void addOnCommitEventListeners(String url, Runnable event) {
 		synchronized (onCommitEventListeners) {
@@ -728,10 +731,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void waitForRepo(String remoteURI, String reason) {
-//		while (ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-//			ThreadUtil.wait(500);
-//			System.err.println("Waiting...");
-//		}
+		try {
+			File f = getRepository(remoteURI).getDirectory();
+			while (ScriptingEngine.isUrlAlreadyOpen(f)) {
+				ThreadUtil.wait(500);
+				System.err.println("Waiting...");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	public static void deleteRepo(String remoteURI) {
@@ -1871,7 +1881,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static boolean checkOwner(String url) {
 		ArrayList<Boolean> owners = new ArrayList<Boolean>();
-		openGit(url,git->{
+		openGit(url, git -> {
 			owners.add(checkOwner(git));
 		});
 		return owners.get(0);
@@ -1880,7 +1890,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static boolean checkOwner(File currentFile) {
 		ArrayList<Boolean> owners = new ArrayList<Boolean>();
 		try {
-			locateGit(currentFile,git->{
+			locateGit(currentFile, git -> {
 				owners.add(checkOwner(git));
 			});
 		} catch (Throwable e1) {
@@ -1956,7 +1966,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		ArrayList<String> files = filesInGit(sourceURL);
 		ArrayList<String> back = new ArrayList<String>();
-		locateGit(fileFromGit(sourceURL, files.get(0)),git->{
+		locateGit(fileFromGit(sourceURL, files.get(0)), git -> {
 			Repository sourceRepoObject = git.getRepository();
 			try {
 				sourceRepoObject.getConfig().setString("remote", "origin", "url", gitRepo);
@@ -1972,15 +1982,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				back.add(gitRepo);
 			} catch (org.kohsuke.github.HttpException ex) {
 				if (ex.getMessage().contains("name already exists on this account")) {
-					back.add(
-					 PasswordManager.getGithub().getRepository(PasswordManager.getLoginID() + "/" + newRepoName)
+					back.add(PasswordManager.getGithub().getRepository(PasswordManager.getLoginID() + "/" + newRepoName)
 							.getHttpTransportUrl());
 				}
 				ex.printStackTrace();
 			} catch (Throwable ex) {
 				ex.printStackTrace();
 			}
-			if(back.size()==0)
+			if (back.size() == 0)
 				throw new RuntimeException("Repo could not be forked and does not exist");
 		});
 		return back.get(0);
@@ -2044,7 +2053,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		try {
 			ArrayList<String> back = new ArrayList<String>();
-			locateGit(f,locateGit->{
+			locateGit(f, locateGit -> {
 				Repository repository = locateGit.getRepository();
 				String string = repository.getConfig().getString("remote", "origin", "url");
 				back.add(string);
@@ -2171,8 +2180,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static Collection<Ref> getAllBranches(String remoteURI) throws IOException, GitAPIException {
 		cloneRepo(remoteURI, null);
-		ArrayList<String> refs=new ArrayList<String>();
-		openGit(getRepository(remoteURI),git->{
+		ArrayList<String> refs = new ArrayList<String>();
+		openGit(getRepository(remoteURI), git -> {
 			refs.add(git.getRepository().getConfig().getString("remote", "origin", "url"));
 		});
 		String ref = refs.get(0);
@@ -2239,7 +2248,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			ConcurrentRefUpdateException, WrongRepositoryStateException, AbortedByHookException {
 
 		if (passedRef == null) {
-			openGit(getRepository(url),git->{
+			openGit(getRepository(url), git -> {
 				commit(url, branch, message, git);
 			});
 			return;
@@ -2305,7 +2314,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static List<String> getAllTags(String gitRepo) {
 		ArrayList<String> tags = new ArrayList<>();
-		openGit(gitRepo,jGit->{
+		openGit(gitRepo, jGit -> {
 			List<Ref> call;
 			try {
 				call = jGit.tagList().call();
@@ -2343,7 +2352,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			com.neuronrobotics.sdk.common.Log.error("ERROR! Tag exists " + remoteURI + "@" + newTag);
 			return;
 		}
-		openGit(remoteURI,git->{
+		openGit(remoteURI, git -> {
 			try {
 				git.tag().setName(newTag).setForceUpdate(true).call();
 			} catch (Throwable t) {
