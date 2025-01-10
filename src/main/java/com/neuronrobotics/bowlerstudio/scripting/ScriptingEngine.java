@@ -457,7 +457,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (git == null)
 			return;
 		open.remove(git.getRepository().getDirectory().getAbsolutePath());
-		git.getRepository().close();
+		//git.getRepository().close();
 		git.close();
 	}
 
