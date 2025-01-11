@@ -77,7 +77,10 @@ public class Sweep extends AbstractAddFrom{
 		
 		int steps=(int)new LengthParameter(name + "_CaDoodle_Step", 30.0, nopt).getMM();
 		double angle=new LengthParameter(name + "_CaDoodle_Angle", 360.0, nopt).getMM()/steps;
-		double z=new LengthParameter(name + "_CaDoodle_Z", 0.0, nopt).getMM();
+		double d = new LengthParameter(name + "_CaDoodle_Z", 0.0, nopt).getMM()-b.getTotalY();
+		if(d<0)
+			d=0;
+		double z=d/steps;
 		double radius=new LengthParameter(name + "_CaDoodle_Rad", 10.0, nopt).getMM();
 		if(angle<0)
 			angle=-angle;
