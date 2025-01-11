@@ -30,6 +30,7 @@ public class ICaDoodleOperationAdapterFactory implements TypeAdapterFactory {
         registerType("ToSolid", ToSolid.class);
         registerType("UnGroup", UnGroup.class);
         registerType("UnLock", UnLock.class);
+        registerType("Sweep", Sweep.class);
         
     }
 

@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -138,7 +139,8 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		file = new File(source + DownloadManager.delim() + file.getName());
 		return file;
 	}
-	public File getFile() {
+	
+	public static File getFile(String name) {
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
 		File parentFile = new File(loc.getStrValue()).getParentFile();
 		for(String f:parentFile.list()) {
@@ -157,7 +159,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 
 	private CSG processGiven(CSG csg, int i,  String name) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
-		String pathname = getFile().getAbsolutePath();
+		String pathname = getFile(name).getAbsolutePath();
 
 		StringParameter parameter=new StringParameter(name + "_CaDoodle_File", pathname, options);
 		parameter.setStrValue(pathname);
@@ -203,5 +205,10 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	public AddFromFile setPreventBoM(Boolean preventBoM) {
 		this.preventBoM = preventBoM;
 		return this;
+	}
+
+	@Override
+	public File getFile() throws NoSuchFileException {
+		return AddFromFile.getFile(name);
 	}
 }
