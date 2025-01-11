@@ -77,13 +77,13 @@ public class Sweep extends AbstractAddFrom{
 		
 		int steps=(int)new LengthParameter(name + "_CaDoodle_Step", 30.0, nopt).getMM();
 		double angle=new LengthParameter(name + "_CaDoodle_Angle", 360.0, nopt).getMM()/steps;
-		LengthParameter zp = new LengthParameter(name + "_CaDoodle_Z", 0.0, nopt);
-		double d = zp.getMM()-b.getTotalY();
-		if(d<0) {
-			d=0;
-			zp.setMM(b.getTotalY());
-		}
-		double z=d/steps;
+		LengthParameter zp = new LengthParameter(name + "_CaDoodle_Z-per", 0.0, nopt);
+//		double d = zp.getMM()-b.getTotalY();
+//		if(d<0) {
+//			d=0;
+//			zp.setMM(b.getTotalY());
+//		}
+		double z=zp.getMM();
 		double radius=new LengthParameter(name + "_CaDoodle_Rad", 10.0, nopt).getMM();
 		if(angle<0)
 			angle=-angle;
@@ -235,7 +235,7 @@ public class Sweep extends AbstractAddFrom{
 		StringParameter parameter=new StringParameter(name + "_CaDoodle_File", pathname, options);
 		LengthParameter steps=new LengthParameter(name + "_CaDoodle_Step", 30.0, nopt);
 		LengthParameter angle=new LengthParameter(name + "_CaDoodle_Angle", 360.0, nopt);
-		LengthParameter z=new LengthParameter(name + "_CaDoodle_Z", 0.0, nopt);
+		LengthParameter z=new LengthParameter(name + "_CaDoodle_Z-per", 0.0, nopt);
 		LengthParameter radius=new LengthParameter(name + "_CaDoodle_Rad", 10.0, nopt);
 		parameter.setStrValue(pathname);
 		CSG processedCSG = csg
