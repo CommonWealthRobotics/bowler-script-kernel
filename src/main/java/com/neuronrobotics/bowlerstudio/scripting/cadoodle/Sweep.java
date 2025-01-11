@@ -28,6 +28,7 @@ import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import eu.mihosoft.vrl.v3d.svg.SVGLoad;
+import javafx.scene.paint.Color;
 
 public class Sweep extends AbstractAddFrom{
 	@Expose(serialize = true, deserialize = true)
@@ -211,7 +212,12 @@ public class Sweep extends AbstractAddFrom{
 
 
 	private CSG processGiven( Polygon p, Bounds b, int j,  String name) {
+		Color c=p.getColor();
+		if(c==null)
+			c=Color.ROSYBROWN;
+		boolean hole = p.isHole();
 		CSG csg = sweep(p,name,b);
+		
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
 		String pathname;
 		try {
@@ -233,6 +239,8 @@ public class Sweep extends AbstractAddFrom{
 				.setParameter(angle)
 				.setParameter(z)
 				.setParameter(radius)
+				.setColor(c)
+				.setIsHole(hole)
 				.setRegenerate(previous -> {
 					try {
 						File file = getFile();
