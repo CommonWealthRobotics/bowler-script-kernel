@@ -157,11 +157,11 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //		return getParameter("UnKnown").getStrValue();
 //	}
 
-	private CSG processGiven(CSG csg, int i,  String name) {
+	private CSG processGiven(CSG csg, int i,  String n) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
-		String pathname = getFile(name).getAbsolutePath();
+		String pathname = getFile(this.name).getAbsolutePath();
 
-		StringParameter parameter=new StringParameter(name + "_CaDoodle_File", pathname, options);
+		StringParameter parameter=new StringParameter(n + "_CaDoodle_File", pathname, options);
 		parameter.setStrValue(pathname);
 		CSG processedCSG = csg
 //		    .moveToCenterX()
@@ -175,12 +175,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 						com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
 						List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, null);
 						CSG csg1 = flattenedCSGs.get(i);
-						return processGiven(csg1, i, name);
+						return processGiven(csg1, i, n);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 					return previous;
-				}).setName(name);
+				}).setName(n);
 		MoveCenter.set(getName(), processedCSG, nrToCSG);
 		return processedCSG;
 	}
