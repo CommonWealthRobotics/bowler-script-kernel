@@ -74,16 +74,17 @@ public class Sweep extends AbstractAddFrom{
 		return sweep(p,new Transform().rotX(angle).movex(z),new Transform().movey(radius),steps);
 	}
 	public static CSG sweep(Polygon p, String name, Bounds b) {
-		
-		int steps=(int)new LengthParameter(name + "_CaDoodle_Step", 30.0, nopt).getMM();
-		double angle=new LengthParameter(name + "_CaDoodle_Angle", 360.0, nopt).getMM()/steps;
+		double sweepTot = new LengthParameter(name + "_CaDoodle_Angle", 360.0, nopt).getMM();
+		double d = sweepTot/360;
+		int steps=(int)(new LengthParameter(name + "_CaDoodle_Step", 30.0, nopt).getMM()*d);
+		double angle=sweepTot/steps;
 		LengthParameter zp = new LengthParameter(name + "_CaDoodle_Z-per", 0.0, nopt);
 //		double d = zp.getMM()-b.getTotalY();
 //		if(d<0) {
 //			d=0;
 //			zp.setMM(b.getTotalY());
 //		}
-		double z=zp.getMM();
+		double z=zp.getMM()*d/steps;
 		double radius=new LengthParameter(name + "_CaDoodle_Rad", 10.0, nopt).getMM();
 		if(angle<0)
 			angle=-angle;
