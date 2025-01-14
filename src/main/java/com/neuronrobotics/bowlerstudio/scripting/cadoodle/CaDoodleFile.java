@@ -115,7 +115,17 @@ public class CaDoodleFile {
 		initializing = true;
 		if (selfInternal != null) {
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
-			CSGDatabase.clear();
+			try {
+				// set a temp file for the database to clear
+				// this ensures that parameters are not cleared from another project :/
+				File createTempFile = File.createTempFile(projectName, ".json");
+				CSGDatabase.setDbFile(createTempFile);
+				CSGDatabase.clear();
+				createTempFile.delete();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			CSGDatabase.setDbFile(db);
 			StringParameter loc = new StringParameter("CaDoodle_File_Location", selfInternal.getAbsolutePath(),
 					new ArrayList<String>());
@@ -700,6 +710,8 @@ public class CaDoodleFile {
 
 	public void setCurrentIndex(int currentIndex) {
 		// new Exception("Current Index set to " + currentIndex).printStackTrace();
+		if((currentIndex-1)>=opperations.size())
+			throw new RuntimeException("Fail! Can not set an index greater than the availible operations");
 		this.currentIndex = currentIndex;
 	}
 
