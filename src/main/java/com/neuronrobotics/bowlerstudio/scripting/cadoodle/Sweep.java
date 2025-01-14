@@ -116,9 +116,9 @@ public class Sweep extends AbstractAddFrom{
 				//com.neuronrobotics.sdk.common.Log.error("Skipping invalid polygon "+i+" to "+nexti);
 				continue;
 			}
-			List<Vector3d> pPoints = Arrays.asList(bottomV2, topV2, topV1, bottomV1);
 			try {
-				newPolygons.add(Polygon.fromPoints(pPoints, polygon1.getStorage()));
+				newPolygons.add(Polygon.fromPoints(Arrays.asList(bottomV2, topV2, topV1), polygon1.getStorage()));
+				newPolygons.add(Polygon.fromPoints(Arrays.asList(bottomV2, topV1, bottomV1), polygon1.getStorage()));
 			}catch(Exception ex) {
 				//com.neuronrobotics.sdk.common.Log.error("Polygon has problems: ");
 				ex.printStackTrace();
