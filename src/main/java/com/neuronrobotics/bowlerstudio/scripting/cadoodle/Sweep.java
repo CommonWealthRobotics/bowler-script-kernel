@@ -25,7 +25,9 @@ import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
+import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import eu.mihosoft.vrl.v3d.svg.SVGLoad;
 import javafx.scene.paint.Color;
@@ -37,6 +39,12 @@ public class Sweep extends AbstractAddFrom{
 	private static ArrayList<Double> nopt=new ArrayList<Double>();
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM =false;
+	
+	private LengthParameter z=null;
+	private LengthParameter rad=null;
+	private LengthParameter step=null;
+	private LengthParameter angle=null;
+	
 	
 	public Sweep set(File source) throws Exception {
 		if(!source.getName().toLowerCase().endsWith(".svg"))
@@ -73,19 +81,19 @@ public class Sweep extends AbstractAddFrom{
 	public static CSG sweep(Polygon p, double angle, double z, double radius, int steps) {
 		return sweep(p,new Transform().rotX(angle).movex(z),new Transform().movey(radius),steps);
 	}
-	public static CSG sweep(Polygon p, String name, Bounds b) {
-		double sweepTot = new LengthParameter(name + "_CaDoodle_Angle", 360.0, nopt).getMM();
+	public CSG sweep(Polygon p, String name, Bounds b) {
+		double sweepTot = angle(name).getMM();
 		double d = sweepTot/360;
-		int steps=(int)(new LengthParameter(name + "_CaDoodle_Step", 30.0, nopt).getMM()*d);
+		int steps=(int)(steps(name).getMM()*d);
 		double angle=sweepTot/steps;
-		LengthParameter zp = new LengthParameter(name + "_CaDoodle_Z-per", 0.0, nopt);
+		Parameter zp = zoffset(name);
 //		double d = zp.getMM()-b.getTotalY();
 //		if(d<0) {
 //			d=0;
 //			zp.setMM(b.getTotalY());
 //		}
 		double z=zp.getMM()*d/steps;
-		double radius=new LengthParameter(name + "_CaDoodle_Rad", 10.0, nopt).getMM();
+		double radius=radius(name).getMM();
 		if(angle<0)
 			angle=-angle;
 		Transform centerandAllignedPolygon = new Transform().movex(-b.getMinX()).movey(-b.getMinY());
@@ -93,6 +101,30 @@ public class Sweep extends AbstractAddFrom{
 		Transform radiusT = new Transform().movex(radius);
 		Polygon transformedP = p.transformed(centerandAllignedPolygon);
 		return sweep(transformedP,increment,radiusT,steps).rotx(-90).setName(name);
+	}
+	private LengthParameter radius(String name) {
+		String key = name + "_CaDoodle_Rad";
+		if(rad==null)
+			rad= new LengthParameter(key, 10.0, nopt);
+		return  rad;
+	}
+	private LengthParameter zoffset(String name) {
+		String key = name + "_CaDoodle_Z-per";
+		if(z==null)
+			z= new LengthParameter(key, 0.0, nopt);
+		return  z;
+	}
+	private LengthParameter steps(String name) {
+		String key = name + "_CaDoodle_Step";
+		if(step==null)
+			step= new LengthParameter(key, 30.0, nopt);
+		return  step;
+	}
+	private LengthParameter angle(String name) {
+		String key = name + "_CaDoodle_Angle";
+		if(angle==null)
+			angle= new LengthParameter(key, 360.0, nopt);
+		return  angle;
 	}
 	public static List<Polygon> monotoneExtrude(Polygon polygon2, Polygon polygon1) {
 		List<Polygon> newPolygons = new ArrayList<>();
@@ -234,10 +266,10 @@ public class Sweep extends AbstractAddFrom{
 		}
 
 		StringParameter parameter=new StringParameter(name + "_CaDoodle_File", pathname, options);
-		LengthParameter steps=new LengthParameter(name + "_CaDoodle_Step", 30.0, nopt);
-		LengthParameter angle=new LengthParameter(name + "_CaDoodle_Angle", 360.0, nopt);
-		LengthParameter z=new LengthParameter(name + "_CaDoodle_Z-per", 0.0, nopt);
-		LengthParameter radius=new LengthParameter(name + "_CaDoodle_Rad", 10.0, nopt);
+		Parameter steps=steps(name);
+		Parameter angle=angle(name);
+		Parameter z=zoffset(name);
+		Parameter radius=radius(name);
 		parameter.setStrValue(pathname);
 		CSG processedCSG = csg
 				.transformed(nrToCSG).syncProperties(csg)
