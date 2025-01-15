@@ -32,109 +32,122 @@ import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import eu.mihosoft.vrl.v3d.svg.SVGLoad;
 import javafx.scene.paint.Color;
 
-public class Sweep extends AbstractAddFrom{
+public class Sweep extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
 	private static ArrayList<String> options = new ArrayList<String>();
-	private static ArrayList<Double> nopt=new ArrayList<Double>();
+	private static ArrayList<Double> nopt = new ArrayList<Double>();
 	@Expose(serialize = true, deserialize = true)
-	private Boolean preventBoM =false;
-	
-	private LengthParameter z=null;
-	private LengthParameter rad=null;
-	private LengthParameter step=null;
-	private LengthParameter angle=null;
-	
-	
+	private Boolean preventBoM = false;
+
+	private LengthParameter z = null;
+	private LengthParameter rad = null;
+	private LengthParameter step = null;
+	private LengthParameter angle = null;
+
 	public Sweep set(File source) throws Exception {
-		if(!source.getName().toLowerCase().endsWith(".svg"))
+		if (!source.getName().toLowerCase().endsWith(".svg"))
 			throw new Exception("Sweep can only take files with the .svg extention");
-		AddFromFile.toLocal(source,getName());
+		System.out.println("Saving Local Copy of "+source.getAbsolutePath());
+		AddFromFile.toLocal(source, getName());
+		try {
+			getFile();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		return this;
 	}
+
 	@Override
 	public String getType() {
 		// TODO Auto-generated method stub
 		return "Sweep";
 	}
-	
+
 	public static CSG sweep(Polygon p, Transform increment, Transform offset, int steps) {
-		Polygon offsetP =p.transformed(offset);
+		Polygon offsetP = p.transformed(offset);
 		List<Polygon> newPolygons = new ArrayList<>();
 		newPolygons.addAll(PolygonUtil.concaveToConvex(offsetP));
 		Transform running = new Transform();
-		Polygon prev=offsetP;
-		for(int i=0;i<steps;i++) {
+		Polygon prev = offsetP;
+		for (int i = 0; i < steps; i++) {
 			running.apply(increment);
 			Polygon step = offsetP.transformed(running);
-			List<Polygon> parts = monotoneExtrude(prev,step);
-			prev=step;
+			List<Polygon> parts = monotoneExtrude(prev, step);
+			prev = step;
 			newPolygons.addAll(parts);
 		}
 		Polygon polygon2 = offsetP.transformed(running);
 		List<Polygon> topPolygons = PolygonUtil.concaveToConvex(polygon2.flipped());
 		newPolygons.addAll(topPolygons);
-		
+
 		return CSG.fromPolygons(newPolygons);
 	}
-	
+
 	public static CSG sweep(Polygon p, double angle, double z, double radius, int steps) {
-		return sweep(p,new Transform().rotX(angle).movex(z),new Transform().movey(radius),steps);
+		return sweep(p, new Transform().rotX(angle).movex(z), new Transform().movey(radius), steps);
 	}
+
 	public CSG sweep(Polygon p, String name, Bounds b) {
 		double sweepTot = angle(name).getMM();
-		double d = sweepTot/360;
-		int steps=(int)(steps(name).getMM()*d);
-		double angle=sweepTot/steps;
+		double d = sweepTot / 360;
+		int steps = (int) (steps(name).getMM() * d);
+		double angle = sweepTot / steps;
 		Parameter zp = zoffset(name);
 //		double d = zp.getMM()-b.getTotalY();
 //		if(d<0) {
 //			d=0;
 //			zp.setMM(b.getTotalY());
 //		}
-		double z=zp.getMM()*d/steps;
-		double radius=radius(name).getMM();
-		if(angle<0)
-			angle=-angle;
+		double z = zp.getMM() * d / steps;
+		double radius = radius(name).getMM();
+		if (angle < 0)
+			angle = -angle;
 		Transform centerandAllignedPolygon = new Transform().movex(-b.getMinX()).movey(-b.getMinY());
 		Transform increment = new Transform().rotY(-angle).movey(z);
 		Transform radiusT = new Transform().movex(radius);
 		Polygon transformedP = p.transformed(centerandAllignedPolygon);
-		return sweep(transformedP,increment,radiusT,steps).rotx(-90).setName(name);
+		return sweep(transformedP, increment, radiusT, steps).rotx(-90).setName(name);
 	}
+
 	private LengthParameter radius(String name) {
 		String key = name + "_CaDoodle_Rad";
-		if(rad==null)
-			rad= new LengthParameter(key, 10.0, nopt);
-		return  rad;
+		if (rad == null)
+			rad = new LengthParameter(key, 10.0, nopt);
+		return rad;
 	}
+
 	private LengthParameter zoffset(String name) {
 		String key = name + "_CaDoodle_Z-per";
-		if(z==null)
-			z= new LengthParameter(key, 0.0, nopt);
-		return  z;
+		if (z == null)
+			z = new LengthParameter(key, 0.0, nopt);
+		return z;
 	}
+
 	private LengthParameter steps(String name) {
 		String key = name + "_CaDoodle_Step";
-		if(step==null)
-			step= new LengthParameter(key, 30.0, nopt);
-		return  step;
+		if (step == null)
+			step = new LengthParameter(key, 30.0, nopt);
+		return step;
 	}
+
 	private LengthParameter angle(String name) {
 		String key = name + "_CaDoodle_Angle";
-		if(angle==null)
-			angle= new LengthParameter(key, 360.0, nopt);
-		return  angle;
+		if (angle == null)
+			angle = new LengthParameter(key, 360.0, nopt);
+		return angle;
 	}
+
 	public static List<Polygon> monotoneExtrude(Polygon polygon2, Polygon polygon1) {
 		List<Polygon> newPolygons = new ArrayList<>();
 //		CSG extrude;
-		//polygon1=polygon1.flipped();
-		//newPolygons.addAll(PolygonUtil.concaveToConvex(polygon1.flipped()));
-		//Polygon polygon2 = polygon1.translated(dir);
+		// polygon1=polygon1.flipped();
+		// newPolygons.addAll(PolygonUtil.concaveToConvex(polygon1.flipped()));
+		// Polygon polygon2 = polygon1.translated(dir);
 
 		int numvertices = polygon1.vertices.size();
-		//com.neuronrobotics.sdk.common.Log.error("Building Polygon "+polygon1.getPoints().size());
+		// com.neuronrobotics.sdk.common.Log.error("Building Polygon
+		// "+polygon1.getPoints().size());
 		for (int i = 0; i < numvertices; i++) {
 
 			int nexti = (i + 1) % numvertices;
@@ -144,15 +157,16 @@ public class Sweep extends AbstractAddFrom{
 			Vector3d bottomV2 = polygon1.vertices.get(nexti).pos;
 			Vector3d topV2 = polygon2.vertices.get(nexti).pos;
 			double distance = bottomV1.minus(bottomV2).magnitude();
-			if(Math.abs(distance)<Plane.getEPSILON()) {
-				//com.neuronrobotics.sdk.common.Log.error("Skipping invalid polygon "+i+" to "+nexti);
+			if (Math.abs(distance) < Plane.getEPSILON()) {
+				// com.neuronrobotics.sdk.common.Log.error("Skipping invalid polygon "+i+" to
+				// "+nexti);
 				continue;
 			}
 			try {
 				newPolygons.add(Polygon.fromPoints(Arrays.asList(bottomV2, topV2, topV1), polygon1.getStorage()));
 				newPolygons.add(Polygon.fromPoints(Arrays.asList(bottomV2, topV1, bottomV1), polygon1.getStorage()));
-			}catch(Exception ex) {
-				//com.neuronrobotics.sdk.common.Log.error("Polygon has problems: ");
+			} catch (Exception ex) {
+				// com.neuronrobotics.sdk.common.Log.error("Polygon has problems: ");
 				ex.printStackTrace();
 			}
 		}
@@ -179,32 +193,32 @@ public class Sweep extends AbstractAddFrom{
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
-			if(!file.exists()) {
+			if (!file.exists()) {
 				throw new RuntimeException("Failed to find file");
 			}
-			
-			ArrayList<Object>args = new ArrayList<>();
-			args.addAll(Arrays.asList(name ));
-			HashMap<String, Object> configs =new HashMap<String, Object>();
+
+			ArrayList<Object> args = new ArrayList<>();
+			args.addAll(Arrays.asList(name));
+			HashMap<String, Object> configs = new HashMap<String, Object>();
 			configs.put("name", name);
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
-			//List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
+			// List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
 			SVGLoad s = new SVGLoad(file.toURI());
 			HashMap<String, List<Polygon>> polygons = s.toPolygons();
 			Object[] array = polygons.keySet().toArray();
-			int j =0;
-			Bounds b=getBounds(polygons);
+			int j = 0;
+			Bounds b = getBounds(polygons);
 			for (int i = 0; i < array.length; i++) {
-				String key = (String)array[i];
-				for(Polygon P:polygons.get(key)) {
-					
+				String key = (String) array[i];
+				for (Polygon P : polygons.get(key)) {
+
 					String orderedName = getOrderedName();
-					CSG processedCSG = processGiven(P,b,j++, orderedName);
+					CSG processedCSG = processGiven(P, b, j++, orderedName);
 					collect.add(processedCSG);
 				}
 			}
-			
+
 			back.addAll(collect);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -216,30 +230,30 @@ public class Sweep extends AbstractAddFrom{
 		Vector3d min = null;
 		Vector3d max = null;
 		// TickToc.tic("getSellectedBounds "+incoming.size());
-		for(String s:polygons.keySet())
-		for (Polygon csg : polygons.get(s)) {
+		for (String s : polygons.keySet())
+			for (Polygon csg : polygons.get(s)) {
 
-			Bounds b = csg.getBounds();
-			Vector3d min2 = b.getMin().clone();
-			Vector3d max2 = b.getMax().clone();
-			if (min == null)
-				min = min2;
-			if (max == null)
-				max = max2;
-			if (min2.x < min.x)
-				min.x = min2.x;
-			if (min2.y < min.y)
-				min.y = min2.y;
-			if (min2.z < min.z)
-				min.z = min2.z;
-			if (max.x < max2.x)
-				max.x = max2.x;
-			if (max.y < max2.y)
-				max.y = max2.y;
-			if (max.z < max2.z)
-				max.z = max2.z;
-			// TickToc.tic("Bounds for "+c.getName());
-		}
+				Bounds b = csg.getBounds();
+				Vector3d min2 = b.getMin().clone();
+				Vector3d max2 = b.getMax().clone();
+				if (min == null)
+					min = min2;
+				if (max == null)
+					max = max2;
+				if (min2.x < min.x)
+					min.x = min2.x;
+				if (min2.y < min.y)
+					min.y = min2.y;
+				if (min2.z < min.z)
+					min.z = min2.z;
+				if (max.x < max2.x)
+					max.x = max2.x;
+				if (max.y < max2.y)
+					max.y = max2.y;
+				if (max.z < max2.z)
+					max.z = max2.z;
+				// TickToc.tic("Bounds for "+c.getName());
+			}
 
 		return new Bounds(min, max);
 	}
@@ -249,14 +263,13 @@ public class Sweep extends AbstractAddFrom{
 		return AddFromFile.getFile(name);
 	}
 
-
-	private CSG processGiven( Polygon p, Bounds b, int j,  String name) {
-		Color c=p.getColor();
-		if(c==null)
-			c=Color.ROSYBROWN;
+	private CSG processGiven(Polygon p, Bounds b, int j, String name) {
+		Color c = p.getColor();
+		if (c == null)
+			c = Color.ROSYBROWN;
 		boolean hole = p.isHole();
-		CSG csg = sweep(p,name,b);
-		
+		CSG csg = sweep(p, name, b);
+
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
 		String pathname;
 		try {
@@ -265,27 +278,20 @@ public class Sweep extends AbstractAddFrom{
 			throw new RuntimeException(e);
 		}
 
-		StringParameter parameter=new StringParameter(name + "_CaDoodle_File", pathname, options);
-		Parameter steps=steps(name);
-		Parameter angle=angle(name);
-		Parameter z=zoffset(name);
-		Parameter radius=radius(name);
+		StringParameter parameter = new StringParameter(name + "_CaDoodle_File", pathname, options);
+		Parameter steps = steps(name);
+		Parameter angle = angle(name);
+		Parameter z = zoffset(name);
+		Parameter radius = radius(name);
 		parameter.setStrValue(pathname);
-		CSG processedCSG = csg
-				.transformed(nrToCSG).syncProperties(csg)
-				.setParameter(parameter)
-				.setParameter(steps)
-				.setParameter(angle)
-				.setParameter(z)
-				.setParameter(radius)
-				.setColor(c)
-				.setIsHole(hole)
+		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(csg).setParameter(parameter).setParameter(steps)
+				.setParameter(angle).setParameter(z).setParameter(radius).setColor(c).setIsHole(hole)
 				.setRegenerate(previous -> {
 					try {
 						File file = getFile();
 						String fileLocation = file.getAbsolutePath();
 						com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
-						return processGiven(p,b, j, name);
+						return processGiven(p, b, j, name);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -306,8 +312,6 @@ public class Sweep extends AbstractAddFrom{
 		return this;
 	}
 
-
-
 	public Boolean getPreventBoM() {
 		return preventBoM;
 	}
@@ -316,6 +320,5 @@ public class Sweep extends AbstractAddFrom{
 		this.preventBoM = preventBoM;
 		return this;
 	}
-
 
 }

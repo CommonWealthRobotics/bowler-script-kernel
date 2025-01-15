@@ -132,7 +132,11 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		if (parentFileIncoming != null) {
 			String parentIncoming = parentFileIncoming.getAbsolutePath();
 
-			if (!parentIncoming.toLowerCase().contentEquals(source.toLowerCase()) && file.exists()) {
+			String lowerCase = parentIncoming.toLowerCase();
+			String lowerCase2 = source.toLowerCase();
+			boolean b = !lowerCase.contentEquals(lowerCase2);
+			boolean exists = file.exists();
+			if (b && exists) {
 				File copied;
 				try {
 					copied = copyFileToNewDirectory(file, parentFile, name);
