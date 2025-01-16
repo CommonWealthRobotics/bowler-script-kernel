@@ -114,6 +114,8 @@ public class Sweep extends AbstractAddFrom {
 		String key = name + "_CaDoodle_Rad";
 		if (rad == null)
 			rad = new LengthParameter(key, 10.0, nopt);
+		if(rad.getMM()<0)
+			rad.setMM(0);
 		return rad;
 	}
 
@@ -128,6 +130,8 @@ public class Sweep extends AbstractAddFrom {
 		String key = name + "_CaDoodle_Step";
 		if (step == null)
 			step = new LengthParameter(key, 30.0, nopt);
+		if(step.getMM()<3)
+			step.setMM(3);
 		return step;
 	}
 
@@ -135,6 +139,8 @@ public class Sweep extends AbstractAddFrom {
 		String key = name + "_CaDoodle_Angle";
 		if (angle == null)
 			angle = new LengthParameter(key, 360.0, nopt);
+		if (angle.getMM()<0.001)
+			angle.setMM(0.001);
 		return angle;
 	}
 
