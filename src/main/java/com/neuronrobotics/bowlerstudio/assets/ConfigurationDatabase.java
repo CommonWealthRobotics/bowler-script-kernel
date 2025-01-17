@@ -179,25 +179,6 @@ public class ConfigurationDatabase {
 			} catch (IOException e) {
 				throw new RuntimeException(e.getMessage());
 			}
-			if(!PasswordManager.isAnonMode()) {
-				String username = PasswordManager.getLoginID();
-				if(username!=null)
-				    try {
-						File file =ScriptingEngine.fileFromGit("https://github.com/"+username+"/BowlerStudioConfiguration.git", "database.json");
-						if(file.exists()) {
-							String contents= FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-							try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
-							    out.println(contents);
-							} catch (FileNotFoundException e) {
-								// Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					} catch (Exception e) {
-						// Auto-generated catch block
-						e.printStackTrace();
-					}
-			}
 		}
 		return f;
 	}
