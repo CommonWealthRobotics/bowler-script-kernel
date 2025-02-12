@@ -167,8 +167,10 @@ public class CadFileExporter {
 	
 	private File makeStl(String nameBase,CSG tmp ) throws IOException{
 		File stl = new File(nameBase + ".stl");
-		
+		boolean manifold=CSG.isPreventNonManifoldTriangles();
+		CSG.setPreventNonManifoldTriangles(false);
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
+		CSG.setPreventNonManifoldTriangles(manifold);
 		System.out.println("Writing "+stl.getAbsolutePath());
 		return stl;
 	}

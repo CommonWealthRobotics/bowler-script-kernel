@@ -98,7 +98,10 @@ public class DownloadManager {
 			name="CSG_EXPORT";
 		File stl = File.createTempFile(sanitizeString(name), ".stl");
 		stl.deleteOnExit();
+		boolean manifold=CSG.isPreventNonManifoldTriangles();
+		CSG.setPreventNonManifoldTriangles(false);
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlIn.toStlString());
+		CSG.setPreventNonManifoldTriangles(manifold);
 		return stl;
 	}
 	private static IApprovalForDownload approval = new IApprovalForDownload() {

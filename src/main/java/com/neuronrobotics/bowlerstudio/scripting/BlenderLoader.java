@@ -93,7 +93,11 @@ public class BlenderLoader implements IScriptingLanguage {
 	public static void scaleStl(File incoming, File outgoing, double scale) {
 		CSG back = Vitamins.get(incoming,true).scale(scale);
 		try {
+			boolean manifold=CSG.isPreventNonManifoldTriangles();
+			CSG.setPreventNonManifoldTriangles(false);
 			FileUtil.write(Paths.get(outgoing.getAbsolutePath()), back.toStlString());
+
+			CSG.setPreventNonManifoldTriangles(manifold);
 		} catch (IOException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
