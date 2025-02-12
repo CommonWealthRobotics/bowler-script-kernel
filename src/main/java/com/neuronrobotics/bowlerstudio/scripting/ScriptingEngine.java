@@ -2087,7 +2087,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		return langs;
 	}
-
+	public static List<String> getAllExtentions() {
+		ArrayList<String> langs = new ArrayList<>();
+		for (String L : getLangaugesMap().keySet()) {
+			IScriptingLanguage lang = getLangaugesMap().get(L);
+			for(String s:lang.getFileExtenetion()) {
+				langs.add(s);
+			}
+		}
+		return langs;
+	}
 	public static HashMap<String, IScriptingLanguage> getLangaugesMap() {
 		return langauges;
 	}

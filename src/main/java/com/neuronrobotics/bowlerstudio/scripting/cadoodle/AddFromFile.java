@@ -33,8 +33,13 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM =false;
 	public AddFromFile set(File source) {
-		toLocal(source,getName());
-		return this;
+		for(String s:ScriptingEngine.getAllExtentions()) {
+			if(source.getName().toLowerCase().endsWith(s.toLowerCase())) {
+				toLocal(source,getName());
+				return this;
+			}
+		}
+		throw new RuntimeException("File Extention not supported: "+source.getName());
 	}
 
 	@Override
@@ -156,8 +161,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		File parentFile = new File(loc.getStrValue()).getParentFile();
 		for(String f:parentFile.list()) {
 			if(f.contains(name)) {
-				String pathname = parentFile.getAbsolutePath() + DownloadManager.delim() + f;
-				return  new File(pathname);
+				for(String s:ScriptingEngine.getAllExtentions()) {
+					if(f.toLowerCase().endsWith(s.toLowerCase())) {
+						String pathname = parentFile.getAbsolutePath() + DownloadManager.delim() + f;
+						return  new File(pathname);
+					}
+				}
 			}
 		}
 		throw new RuntimeException("File not found! "+name);
