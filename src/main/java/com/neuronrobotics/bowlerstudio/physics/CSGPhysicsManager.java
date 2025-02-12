@@ -83,7 +83,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		//if(polygons.size()>1000)
 		//	 polygons = getBoundingBox(finalCSG).getPolygons();
 		for (Polygon p : polygons) {
-			for (Vertex v : p.vertices) {
+			for (Vertex v : p.getVertices()) {
 				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
 			}
 		}
