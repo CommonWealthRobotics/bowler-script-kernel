@@ -310,7 +310,7 @@ public class Vitamins {
 		return gson.toJson(getDatabase(type), TT_mapStringString);
 	}
 
-	public static void saveDatabase(String type) throws Exception {
+	public static boolean saveDatabase(String type) throws Exception {
 
 		// Save contents and publish them
 		String jsonString = makeJson(type);
@@ -325,13 +325,13 @@ public class Vitamins {
 																																		// message
 			// com.neuronrobotics.sdk.common.Log.error(jsonString);
 			com.neuronrobotics.sdk.common.Log.error("Database saved " + getVitaminFile(type, null, false).getAbsolutePath());
-		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
+		} catch (Exception ex) {
 			com.neuronrobotics.sdk.common.Log.error("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
 			com.neuronrobotics.sdk.common.Log.error(
 					"You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
 			throw ex;
 		}
-
+		return true;
 	}
 
 	public static void saveDatabaseForkIfMissing(String type) throws Exception {
@@ -340,7 +340,7 @@ public class Vitamins {
 		GHRepository repo = github.getRepository("madhephaestus/Hardware-Dimensions");
 		try {
 			saveDatabase(type);
-		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
+		} catch (Exception ex) {
 			com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			GHRepository newRepo = repo.fork();
