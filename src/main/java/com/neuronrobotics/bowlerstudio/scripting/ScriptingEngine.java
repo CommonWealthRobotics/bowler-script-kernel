@@ -440,7 +440,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if(!alreadyOpen)
 				gitclose(git);
 		} catch (Throwable t) {
-			new IssueReportingExceptionHandler().except(t);
+			//new IssueReportingExceptionHandler().except(t);
 			if (git != null) {
 				gitclose(git);
 			}
