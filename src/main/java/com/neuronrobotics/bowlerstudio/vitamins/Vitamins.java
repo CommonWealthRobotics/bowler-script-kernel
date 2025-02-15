@@ -646,16 +646,16 @@ public class Vitamins {
 			} catch (Exception ex) {
 				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 			}
-			ScriptingEngine.cloneRepo(getGitRpoDatabase(), "master");
+			ScriptingEngine.cloneRepo(getGitRepoDatabase(), "master");
 			try {
-				ScriptingEngine.pull(getGitRpoDatabase());
+				ScriptingEngine.pull(getGitRepoDatabase());
 			} catch (IOException | GitAPIException e) {
-				ScriptingEngine.deleteRepo(getGitRpoDatabase());
-				ScriptingEngine.cloneRepo(getGitRpoDatabase(), "master");
+				ScriptingEngine.deleteRepo(getGitRepoDatabase());
+				ScriptingEngine.cloneRepo(getGitRepoDatabase(), "master");
 			}
 
 		}
-		return getGitRpoDatabase();
+		return getGitRepoDatabase();
 	}
 
 	public static void reLoadDatabaseFromFiles() {
@@ -693,10 +693,5 @@ public class Vitamins {
 		Vitamins.jsonRootDir = jsonRootDir;
 		setGitRepoDatabase(getGitRepoDatabase());
 	}
-
-	public static String getGitRpoDatabase() {
-		return gitRpoDatabase;
-	}
-
 
 }
