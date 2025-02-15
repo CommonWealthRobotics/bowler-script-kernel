@@ -434,16 +434,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				try {
 					accessor.run(git);
 				} catch (Throwable t) {
-					new IssueReportingExceptionHandler().except(t);
+					//new IssueReportingExceptionHandler().except(t);
+					throw new RuntimeException(t);
 				}
 			}
 			if(!alreadyOpen)
 				gitclose(git);
 		} catch (Throwable t) {
 			//new IssueReportingExceptionHandler().except(t);
-			if (git != null) {
-				gitclose(git);
-			}
+			if(!alreadyOpen)
+				if (git != null) {
+					gitclose(git);
+				}
 			throw new RuntimeException(t);
 		}
 	}
