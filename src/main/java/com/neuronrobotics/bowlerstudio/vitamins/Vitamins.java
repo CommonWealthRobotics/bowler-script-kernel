@@ -646,16 +646,16 @@ public class Vitamins {
 			} catch (Exception ex) {
 				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 			}
-			ScriptingEngine.cloneRepo(getGitRepoDatabase(), "master");
+			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
 			try {
-				ScriptingEngine.pull(getGitRepoDatabase());
+				ScriptingEngine.pull(gitRpoDatabase);
 			} catch (IOException | GitAPIException e) {
-				ScriptingEngine.deleteRepo(getGitRepoDatabase());
-				ScriptingEngine.cloneRepo(getGitRepoDatabase(), "master");
+				ScriptingEngine.deleteRepo(gitRpoDatabase);
+				ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
 			}
 
 		}
-		return getGitRepoDatabase();
+		return gitRpoDatabase;
 	}
 
 	public static void reLoadDatabaseFromFiles() {
