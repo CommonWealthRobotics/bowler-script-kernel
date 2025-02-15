@@ -141,7 +141,7 @@ public class Vitamins {
 			} catch (Exception e) {
 				e.printStackTrace();
 
-				gitRpoDatabase = defaultgitRpoDatabase;
+				setGitRepoDatabase(defaultgitRpoDatabase);
 				clear();
 				return get(type, id);
 			}
@@ -224,7 +224,7 @@ public class Vitamins {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			gitRpoDatabase = defaultgitRpoDatabase;
+			setGitRepoDatabase(defaultgitRpoDatabase);
 			//ScriptingEngine.deleteRepo(script.get("scriptGit").toString());
 			clear();
 			if (depthGauge < 2) {
@@ -345,7 +345,7 @@ public class Vitamins {
 
 			GHRepository newRepo = repo.fork();
 			Thread.sleep(6000);
-			Vitamins.gitRpoDatabase = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
+			Vitamins.setGitRepoDatabase(newRepo.getGitTransportUrl().replaceAll("git://", "https://"));
 			saveDatabase(type);
 
 		}
@@ -646,16 +646,16 @@ public class Vitamins {
 			} catch (Exception ex) {
 				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 			}
-			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
+			ScriptingEngine.cloneRepo(getGitRpoDatabase(), "master");
 			try {
-				ScriptingEngine.pull(gitRpoDatabase);
+				ScriptingEngine.pull(getGitRpoDatabase());
 			} catch (IOException | GitAPIException e) {
-				ScriptingEngine.deleteRepo(gitRpoDatabase);
-				ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
+				ScriptingEngine.deleteRepo(getGitRpoDatabase());
+				ScriptingEngine.cloneRepo(getGitRpoDatabase(), "master");
 			}
 
 		}
-		return gitRpoDatabase;
+		return getGitRpoDatabase();
 	}
 
 	public static void reLoadDatabaseFromFiles() {
@@ -679,7 +679,7 @@ public class Vitamins {
 	}
 
 	public static void setGitRepoDatabase(String gitRpoDatabase) {
-		Vitamins.gitRpoDatabase = gitRpoDatabase;
+		Vitamins.gitRpoDatabase=gitRpoDatabase;
 		databaseSet.clear();
 		fileLastLoaded.clear();
 
@@ -693,5 +693,10 @@ public class Vitamins {
 		Vitamins.jsonRootDir = jsonRootDir;
 		setGitRepoDatabase(getGitRepoDatabase());
 	}
+
+	public static String getGitRpoDatabase() {
+		return gitRpoDatabase;
+	}
+
 
 }
