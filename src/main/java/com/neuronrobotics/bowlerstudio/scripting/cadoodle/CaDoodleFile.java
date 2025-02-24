@@ -145,7 +145,7 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				t.printStackTrace();
-				// pruneForward();
+				pruneForward();
 				indexStarting = i;
 				break;
 			}
@@ -567,7 +567,7 @@ public class CaDoodleFile {
 		}
 	}
 
-	public String getProjectName() {
+	public String getMyProjectName() {
 		return projectName;
 	}
 
@@ -674,7 +674,7 @@ public class CaDoodleFile {
 		com.neuronrobotics.sdk.common.Log.error("CaDoodle file reading from " + f.getAbsolutePath());
 		String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 		CaDoodleFile file = fromJsonString(content, null, f, false);
-		return file.getProjectName();
+		return file.getMyProjectName();
 	}
 
 	public static CaDoodleFile fromFile(File f, ICaDoodleStateUpdate listener, boolean initialize) throws Exception {
