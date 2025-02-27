@@ -157,7 +157,8 @@ public class ConfigurationDatabase {
 		File loadFile = loadFile();
 		if(loadFile.exists())
 			try {
-				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile, null));
+				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(loadFile, null);
+				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) inlineFileScriptRun);
 				
 			} catch (Exception e) {
 				// databse is empty

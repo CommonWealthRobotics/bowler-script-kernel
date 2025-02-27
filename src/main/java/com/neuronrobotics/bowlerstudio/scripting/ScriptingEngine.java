@@ -499,8 +499,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			// com.neuronrobotics.sdk.common.Log.error("Loading "+code.getAbsolutePath());
 		}
 
-		if (langauges.get(shellTypeStorage) != null) {
-			return langauges.get(shellTypeStorage).inlineScriptRun(code, args);
+		IScriptingLanguage iScriptingLanguage = langauges.get(shellTypeStorage);
+		if (iScriptingLanguage != null) {
+			return iScriptingLanguage.inlineScriptRun(code, args);
 		}
 		return null;
 	}
