@@ -2164,6 +2164,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 			String[] newFileCode;
 			try {
+				System.out.println("Opening "+targetFilename+" from "+targetGit);
 				newFileCode = ScriptingEngine.codeFromGit(targetGit, targetFilename);
 				if (newFileCode == null)
 					newFileCode = new String[] { "" };
@@ -2173,7 +2174,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 							WalkingEngine[0], "copy file content");
 				}
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename,
+						WalkingEngine[0], "copy file content");
 			}
 		} catch (Exception e1) {
 			throw new RuntimeException(e1);
