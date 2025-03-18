@@ -991,6 +991,11 @@ public class MobileBaseCadManager implements Runnable {
 				} else
 					getUi().highlightException(null, new Exception());
 				ArrayList<CSG> arrayList = getBasetoCadMap().get(device);
+				if (arrayList== null) {
+					arrayList=new ArrayList<CSG>();
+					getBasetoCadMap().put(device, arrayList);
+				}
+
 				if (clear) {
 					arrayList.clear();
 					// System.gc();
