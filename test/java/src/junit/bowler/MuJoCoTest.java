@@ -10,7 +10,6 @@ public class MuJoCoTest {
 	@Test
 	public void test() {
 		com.neuronrobotics.sdk.common.Log.error("mujocoJNILoadTest");
-		com.neuronrobotics.sdk.common.Log.error(System.getProperty("org.bytedeco.javacpp.logger.debug"));
 		System.setProperty("org.bytedeco.javacpp.logger.debug", "true");
 		MuJoCoLib lib = new MuJoCoLib();
 

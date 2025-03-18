@@ -32,6 +32,7 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.IParametric;
@@ -166,6 +167,8 @@ public class CaDoodleFile {
 	}
 
 	private void updateBoM() {
+		if (bom == null)
+			return;
 		bom.clear();
 		bom.save();
 		for (CSG c : getCurrentState()) {
@@ -264,10 +267,10 @@ public class CaDoodleFile {
 	}
 
 	public Thread regenerateCurrent() {
-		if (isOperationRunning() ) {
+		if (isOperationRunning()) {
 			return opperationRunner;
 		}
-		if(initializing) {
+		if (initializing) {
 			Thread t = new Thread();
 			t.start();
 			return t;
@@ -413,13 +416,27 @@ public class CaDoodleFile {
 				throw new RuntimeException(
 						"There can not be 2 objects with the same name after an opperation! " + c.getName());
 			names.add(c.getName());
-//			cachedCopy.add(c.clone().setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
-//					.setRegenerate(c.getRegenerate()));
-			cachedCopy.add(c);
+			cachedCopy.add(cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
+					.setRegenerate(c.getRegenerate()));
+			//cachedCopy.add(c);
 		}
 		cache.put(op, cachedCopy);
 	}
-
+	private CSG cloneCSG(CSG in) {
+		CSG csg = new CSG();
+		ArrayList<Polygon> collect = new ArrayList<Polygon>();
+		for (Polygon p : in.getPolygons()) {
+			if (p == null)
+				continue;
+			try {
+				collect.add(p);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+		csg.setPolygons(collect);
+		return csg;
+	}
 	public void back() {
 		if (isBackAvailible())
 			setCurrentIndex(getCurrentIndex() - 1);
@@ -593,17 +610,21 @@ public class CaDoodleFile {
 			File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
 			setImage(null);
 			loadingImageFromUIThread();
-			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(getImage(), null);
-			try {
-				ImageIO.write(bufferedImage, "png", image);
-				// com.neuronrobotics.sdk.common.Log.error("Thumbnail saved successfully to " +
-				// image.getAbsolutePath());
-			} catch (IOException e) {
-				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
-				// e.getMessage());
-				e.printStackTrace();
+
+			WritableImage image2 = getImage();
+			if (image2 != null) {
+				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image2, null);
+				try {
+					ImageIO.write(bufferedImage, "png", image);
+					// com.neuronrobotics.sdk.common.Log.error("Thumbnail saved successfully to " +
+					// image.getAbsolutePath());
+				} catch (IOException e) {
+					// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
+					// e.getMessage());
+					e.printStackTrace();
+				}
 			}
-			if(bom!=null)
+			if (bom != null)
 				bom.save();
 		}
 
@@ -622,7 +643,7 @@ public class CaDoodleFile {
 			} else {
 				loadingImageFromUIThread();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error("Error loading image: " + e.getMessage());
 			e.printStackTrace();
 		}
@@ -630,7 +651,12 @@ public class CaDoodleFile {
 	}
 
 	private void loadingImageFromUIThread() {
-		BowlerKernel.runLater(() -> setImage(ThumbnailImage.get(getCurrentState())));
+		try {
+			BowlerKernel.runLater(() -> setImage(ThumbnailImage.get(getCurrentState())));
+		} catch (Throwable ex) {
+			ex.printStackTrace();
+			return;
+		}
 		while (getImage() == null)
 			try {
 				Thread.sleep(16);
@@ -710,7 +736,7 @@ public class CaDoodleFile {
 
 	public void setCurrentIndex(int currentIndex) {
 		// new Exception("Current Index set to " + currentIndex).printStackTrace();
-		if((currentIndex-1)>=opperations.size())
+		if ((currentIndex - 1) >= opperations.size())
 			throw new RuntimeException("Fail! Can not set an index greater than the availible operations");
 		this.currentIndex = currentIndex;
 	}

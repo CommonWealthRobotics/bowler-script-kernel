@@ -72,7 +72,8 @@ public class TestCaDoodleWorkflow {
 		back=cf.getCurrentState();
 		if(back.size()!=2)
 			fail("Same number of objects after");
-		if(back.get(1).getCenterX()!=distaance)
+		double centerX = back.get(1).getCenterX();
+		if(centerX!=distaance)
 			fail("Move failed ");
 		if(back.get(0).getCenterX()!=0)
 			fail("Move misapplied ");
@@ -102,9 +103,10 @@ public class TestCaDoodleWorkflow {
 		back=loaded.getCurrentState();
 		loaded.addOpperation(move2).join();;
 		back=loaded.getCurrentState();
-		if(back.get(0).getCenterX()!=distaance)
+		double centerX2 = back.get(1).getCenterX();
+		if(centerX2!=distaance)
 			fail("Move failed ");
-		if(back.get(0).getCenterY()!=distaance)
+		if(back.get(1).getCenterY()!=distaance)
 			fail("Move failed ");
 		ToHole hole=  new ToHole().setNames(Arrays.asList(nameOne));
 		loaded.addOpperation(hole).join();;
