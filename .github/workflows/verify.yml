@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - name: Install updated FreeType
-      run: sudo apt-get update;sudo apt-get install libfreetype6;freetype-config --version  # For debugging, check version
+      run: sudo apt-get update;sudo apt-get install libfreetype6
     - name: Checkout repository and submodules
       uses: actions/checkout@v2
       with:
