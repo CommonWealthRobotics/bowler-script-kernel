@@ -57,8 +57,9 @@ public class Vitamins {
 	private static String jsonRootDir = "json/";
 	private static final Map<String, CSG> fileLastLoaded = new ConcurrentHashMap<String, CSG>();
 	private static final Map<String, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>> databaseSet = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>>();
-	private static final String defaultgitRpoDatabase = "https://github.com/madhephaestus/Hardware-Dimensions.git";
-	private static String gitRpoDatabase = defaultgitRpoDatabase;
+	private static final String sourceRepo = "CommonWealthRobotics/Hardware-Dimensions";
+	private static final String defaultGit = "https://github.com/" + getSourcerepo() + ".git";
+	private static String gitRpoDatabase = defaultGit;
 	// Create the type, this tells GSON what datatypes to instantiate when parsing
 	// and saving the json
 	private static Type TT_mapStringString = new TypeToken<ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>>() {
@@ -141,7 +142,7 @@ public class Vitamins {
 			} catch (Exception e) {
 				e.printStackTrace();
 
-				setGitRepoDatabase(defaultgitRpoDatabase);
+				setGitRepoDatabase(gitRpoDatabase);
 				clear();
 				return get(type, id);
 			}
@@ -224,7 +225,7 @@ public class Vitamins {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			setGitRepoDatabase(defaultgitRpoDatabase);
+			setGitRepoDatabase(gitRpoDatabase);
 			//ScriptingEngine.deleteRepo(script.get("scriptGit").toString());
 			clear();
 			if (depthGauge < 2) {
@@ -270,7 +271,7 @@ public class Vitamins {
 	}
 
 	public static Map<String, Object> getMeta(String type) {
-		return getConfigurationRW(type, "meta");
+		return getConfiguration(type, "meta");
 	}
 
 	public static void setScript(String type, String git, String file) throws Exception {
@@ -279,11 +280,23 @@ public class Vitamins {
 	}
 
 	public static Map<String, Object> getConfiguration(String type, String id) {
-		return Collections.unmodifiableMap(getConfigurationRW(type, id));
+		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
+		if (id== null) {
+			id=Vitamins.listVitaminSizes(type).get(0);
+		}
+
+		ConcurrentHashMap<String, Object> ConcurrentHashMap = database.get(id);
+		Object[] array = ConcurrentHashMap.keySet().toArray();
+		for (int i = 0; i < array.length; i++) {
+			String key = (String) array[i];
+			sanatize(key, ConcurrentHashMap);
+		}
+		return Collections.unmodifiableMap(ConcurrentHashMap);
 	}
 
 	public static void putMeasurment(String type, String size, String measurementName, Object measurmentValue) {
-		getConfigurationRW(type, size).put(measurementName, measurmentValue);
+		ConcurrentHashMap<String, Object> configurationRW = getConfigurationRW(type, size);
+		configurationRW.put(measurementName, measurmentValue);
 	}
 
 	public static Object getMeasurement(String type, String size, String measurementName) {
@@ -292,11 +305,16 @@ public class Vitamins {
 
 	public static ConcurrentHashMap<String, Object> getConfigurationRW(String type, String id) {
 		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
-		if (database.get(id) == null) {
+		if (id == null) {
 			id=Vitamins.listVitaminSizes(type).get(0);
 		}
 
 		ConcurrentHashMap<String, Object> ConcurrentHashMap = database.get(id);
+		if(ConcurrentHashMap == null) {
+			ConcurrentHashMap=new ConcurrentHashMap<String, Object> ();
+
+			database.put(id, ConcurrentHashMap);
+		}
 		Object[] array = ConcurrentHashMap.keySet().toArray();
 		for (int i = 0; i < array.length; i++) {
 			String key = (String) array[i];
@@ -316,8 +334,9 @@ public class Vitamins {
 		String jsonString = makeJson(type);
 		try {
 			// new Exception().printStackTrace();
-			ScriptingEngine.pushCodeToGit(getGitRepoDatabase(), // git repo, change this if you fork this demo
-					ScriptingEngine.getFullBranch(getGitRepoDatabase()), // branch or tag
+			String gitRepoDatabase = getGitRepoDatabase();
+			ScriptingEngine.pushCodeToGit(gitRepoDatabase, // git repo, change this if you fork this demo
+					null, // branch or tag
 					getRootFolder() + type + ".json", // local path to the file in git
 					jsonString, // content of the file
 					"Making changes to " + type + " by " + PasswordManager.getUsername()
@@ -326,68 +345,72 @@ public class Vitamins {
 			// com.neuronrobotics.sdk.common.Log.error(jsonString);
 			com.neuronrobotics.sdk.common.Log.error("Database saved " + getVitaminFile(type, null, false).getAbsolutePath());
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error("You need to fork " + defaultgitRpoDatabase + " to have permission to save");
-			com.neuronrobotics.sdk.common.Log.error(
-					"You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
+			if(ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
+				ScriptingEngine.deleteRepo(getGitRepoDatabase());
+				saveDatabase(type);
+				return true;
+			}
+			ex.printStackTrace();
 			throw ex;
 		}
 		return true;
 	}
 
-	public static void saveDatabaseForkIfMissing(String type) throws Exception {
+	public static void saveDatabaseForkIfMissing(String type,String username) throws Exception {
 
 		org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-		GHRepository repo = github.getRepository("madhephaestus/Hardware-Dimensions");
+		GHRepository repo = github.getRepository(getSourcerepo());
+		GHRepository newRepo;
 		try {
-			saveDatabase(type);
+			newRepo=github.getRepository(username+"/Hardware-Dimensions");
+			String newURL = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
+			ScriptingEngine.pull(newURL);
+			ArrayList<String> files = ScriptingEngine.filesInGit(newURL);
+			if(type!=null)
+				saveDatabase(type);
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
-			GHRepository newRepo = repo.fork();
-			Thread.sleep(6000);
-			Vitamins.setGitRepoDatabase(newRepo.getGitTransportUrl().replaceAll("git://", "https://"));
+			newRepo = github.getRepository(getSourcerepo()).fork();
+			while(true) {
+				try {
+					Thread.sleep(6000);
+					String newURL = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
+					Vitamins.setGitRepoDatabase(newURL);
+					break;
+				}catch(Exception exc) {
+					System.err.println("Waiting for repo to finish forking");
+					exc.printStackTrace();
+				}
+			}
 			saveDatabase(type);
 
 		}
-		if (PasswordManager.getUsername().contentEquals("madhephaestus"))
-			return;
-		try {
-			GHRepository myrepo = github.getRepository(PasswordManager.getUsername() + "/Hardware-Dimensions");
-			List<GHPullRequest> asList1 = myrepo.queryPullRequests().state(GHIssueState.OPEN)
-					.head("madhephaestus:master").list().asList();
-			Thread.sleep(200);// Some asynchronus delay here, not sure why...
-			if (asList1.size() == 0) {
-				try {
-					GHPullRequest request = myrepo.createPullRequest("Update from source", "madhephaestus:master",
-							"master", "## Upstream add vitamins", false, false);
-					if (request != null) {
-						processSelfPR(request);
-					}
-				} catch (org.kohsuke.github.HttpException ex) {
-					// no commits have been made to master
-				}
-
-			} else {
-				processSelfPR(asList1.get(0));
-			}
-			String head = PasswordManager.getUsername() + ":master";
-			List<GHPullRequest> asList = repo.queryPullRequests().state(GHIssueState.OPEN).head(head).list().asList();
-			if (asList.size() == 0) {
-				com.neuronrobotics.sdk.common.Log.error("Creating PR for " + head);
-				GHPullRequest request = repo.createPullRequest("User Added vitamins to " + type, head, "master",
-						"## User added vitamins", true, true);
-				try {
-					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
-				} catch (URISyntaxException e) {
-					// Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else {
-
-			}
-		} catch (Exception ex) {
-			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
-		}
+		
+//		try {
+//			GHRepository myrepo = github.getRepository(username+ "/Hardware-Dimensions");
+//			List<GHPullRequest> asList1 = myrepo.queryPullRequests().state(GHIssueState.OPEN)
+//					.head("madhephaestus:master").list().asList();
+//			Thread.sleep(200);// Some asynchronus delay here, not sure why...
+//			if (asList1.size() == 0) {
+//				try {
+//					GHPullRequest request = myrepo.createPullRequest("Update from source", "madhephaestus:master",
+//							"master", "## Upstream add vitamins", false, false);
+//					if (request != null) {
+//						processSelfPR(request);
+//					}
+//				} catch (org.kohsuke.github.HttpException ex) {
+//					// no commits have been made to master
+//				}
+//
+//			} else {
+//				processSelfPR(asList1.get(0));
+//			}
+//
+//		} catch (Exception ex) {
+//			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
+//		}
 
 	}
 
@@ -640,7 +663,7 @@ public class Vitamins {
 							throw new org.kohsuke.github.GHFileNotFoundException();
 						}
 					} catch (Exception ex) {
-						setGitRepoDatabase(defaultgitRpoDatabase);
+						setGitRepoDatabase(defaultGit);
 					}
 				}
 			} catch (Exception ex) {
@@ -692,6 +715,10 @@ public class Vitamins {
 	public static void setJsonRootDir(String jsonRootDir) throws IOException {
 		Vitamins.jsonRootDir = jsonRootDir;
 		setGitRepoDatabase(getGitRepoDatabase());
+	}
+
+	public static String getSourcerepo() {
+		return sourceRepo;
 	}
 
 }
