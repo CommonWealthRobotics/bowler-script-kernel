@@ -297,6 +297,7 @@ public class Vitamins {
 	public static void putMeasurment(String type, String size, String measurementName, Object measurmentValue) {
 		ConcurrentHashMap<String, Object> configurationRW = getConfigurationRW(type, size);
 		configurationRW.put(measurementName, measurmentValue);
+		sanatize(measurementName, configurationRW);
 	}
 
 	public static Object getMeasurement(String type, String size, String measurementName) {
