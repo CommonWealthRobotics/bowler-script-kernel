@@ -69,8 +69,9 @@ import net.sf.sevenzipjbinding.*;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 
 public class DownloadManager {
+	private static  String STUDIO_INSTALL = "BowlerStudioInstall";
 	private static String editorsURL = "https://github.com/CommonWealthRobotics/ExternalEditorsBowlerStudio.git";
-	private static String bindir = System.getProperty("user.home") + delim()+"bin"+delim()+"BowlerStudioInstall"+delim();
+	private static String bindir = System.getProperty("user.home") + delim()+"bin"+delim()+getSTUDIO_INSTALL()+delim();
 	private static int ev = 0;
 	private static String cmd = "";
 	private static IDownloadManagerEvents downloadEvents = new IDownloadManagerEvents() {
@@ -1044,6 +1045,12 @@ public class DownloadManager {
 	public static void setDownloadEvents(IDownloadManagerEvents de) {
 		if(downloadEvents!=null)
 			downloadEvents = de;
+	}
+	public static String getSTUDIO_INSTALL() {
+		return STUDIO_INSTALL;
+	}
+	public static void setSTUDIO_INSTALL(String sTUDIO_INSTALL) {
+		STUDIO_INSTALL = sTUDIO_INSTALL;
 	}
 
 }
