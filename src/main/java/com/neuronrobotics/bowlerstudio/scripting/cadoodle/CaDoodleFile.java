@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.imageio.ImageIO;
@@ -422,10 +423,11 @@ public class CaDoodleFile {
 		}
 		cache.put(op, cachedCopy);
 	}
-	private CSG cloneCSG(CSG in) {
+	private CSG cloneCSG(CSG dyingCSG) {
 		CSG csg = new CSG();
+
 		ArrayList<Polygon> collect = new ArrayList<Polygon>();
-		for (Polygon p : in.getPolygons()) {
+		for (Polygon p : dyingCSG.getPolygons()) {
 			if (p == null)
 				continue;
 			try {
@@ -435,6 +437,22 @@ public class CaDoodleFile {
 			}
 		}
 		csg.setPolygons(collect);
+		Set<String> params = dyingCSG.getParameters();
+		for (String param : params) {
+			boolean existing = false;
+			for (String s : csg.getParameters()) {
+				if (s.contentEquals(param))
+					existing = true;
+			}
+			if (!existing) {
+				Parameter vals = CSGDatabase.get(param);
+				if (vals != null)
+					csg.setParameter(vals, dyingCSG.getMapOfparametrics().get(param));
+			}
+		}
+		if (csg.getName().length() == 0)
+			csg.setName(dyingCSG.getName());
+		csg.setColor(dyingCSG.getColor());
 		return csg;
 	}
 	public void back() {
