@@ -335,7 +335,7 @@ public class CaDoodleFile {
 		return opperationRunner;
 	}
 
-	public static CSG getByName(ArrayList<CSG> back, String name) {
+	public static CSG getByName(List<CSG> back, String name) {
 		for (CSG c : back) {
 			if (c.getName().contentEquals(name))
 				return c;
