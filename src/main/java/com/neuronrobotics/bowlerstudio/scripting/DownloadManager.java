@@ -933,15 +933,28 @@ public class DownloadManager {
 		}
 		return key;
 	}
-
-	public static File download(String version, String downloadJsonURL, long sizeOfJson, String bindir, String filename,
+	/**
+	 * 
+	 * @param version  A string indicating version, this will be the folder name
+	 * @param URL The direct URL of the download
+	 * @param sizeOfFile The number of bytes in the file
+	 * @param directoryInWhichFileIsStored The root directory into which this will all be downloaded
+	 * @param filename The resulting filename
+	 * @param downloadName User level name for asking about the download
+	 * @return
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 * @throws InterruptedException
+	 */
+	public static File download(String version, String URL, long sizeOfFile, String directoryInWhichFileIsStored, String filename,
 			String downloadName)
 			throws MalformedURLException, IOException, FileNotFoundException, InterruptedException {
 
-		URL url = new URL(downloadJsonURL);
+		URL url = new URL(URL);
 		URLConnection connection = url.openConnection();
 		InputStream is = connection.getInputStream();
-		ProcessInputStream pis = new ProcessInputStream(is, (int) sizeOfJson);
+		ProcessInputStream pis = new ProcessInputStream(is, (int) sizeOfFile);
 		pis.addListener(new Listener() {
 			long timeSinceePrint = System.currentTimeMillis();
 
@@ -962,28 +975,16 @@ public class DownloadManager {
 
 		if (!folder.exists() || !exe.exists()) {
 
-			if (approval.get(downloadName, downloadJsonURL)) {
+			if (approval.get(downloadName, URL)) {
 				com.neuronrobotics.sdk.common.Log.error("Start Downloading " + filename);
-				com.neuronrobotics.sdk.common.Log.error("From "+downloadJsonURL);
+				com.neuronrobotics.sdk.common.Log.error("From "+URL);
 
 			} else {
 				pis.close();
 				throw new RuntimeException("No Application insalled");
 			}
 			downloadEvents.startDownload();
-			folder.mkdirs();
-			exe.createNewFile();
-			byte dataBuffer[] = new byte[1024*1000];
-			int bytesRead;
-			FileOutputStream fileOutputStream = new FileOutputStream(exe.getAbsoluteFile());
-			int chunks =0;
-			while ((bytesRead = pis.read(dataBuffer, 0, dataBuffer.length)) != -1) {
-				fileOutputStream.write(dataBuffer, 0, bytesRead);
-				//psudoSplash.onUpdate((int) (chunks++)+" Kb  " +filename , null);
-
-			}
-			fileOutputStream.close();
-			pis.close();
+			rawFileDownload(pis, folder, exe);
 			com.neuronrobotics.sdk.common.Log.error("Finished downloading " + filename);
 			psudoSplash.onUpdate((int) (1 * 100)+" %  " +filename , null);
 			downloadEvents.finishDownload();
@@ -991,6 +992,22 @@ public class DownloadManager {
 			com.neuronrobotics.sdk.common.Log.error("Not downloading, it existst " + filename);
 		}
 		return exe;
+	}
+	private static void rawFileDownload(ProcessInputStream pis, File folder, File exe)
+			throws IOException, FileNotFoundException {
+		folder.mkdirs();
+		exe.createNewFile();
+		byte dataBuffer[] = new byte[1024*1000];
+		int bytesRead;
+		FileOutputStream fileOutputStream = new FileOutputStream(exe.getAbsoluteFile());
+		int chunks =0;
+		while ((bytesRead = pis.read(dataBuffer, 0, dataBuffer.length)) != -1) {
+			fileOutputStream.write(dataBuffer, 0, bytesRead);
+			//psudoSplash.onUpdate((int) (chunks++)+" Kb  " +filename , null);
+
+		}
+		fileOutputStream.close();
+		pis.close();
 	}
 
 	/**
