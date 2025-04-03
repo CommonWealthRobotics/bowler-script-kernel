@@ -414,9 +414,9 @@ public class DownloadManager {
 							}
 							// extract7zArchive
 							if (type.toLowerCase().contains("7z")) {
-//								if (isWin() && !exeType.contentEquals("sevenzip")) {
-//									extract7zSystemCall(jvmArchive.getAbsolutePath(), bindir + targetdir);
-//								} else
+								if (isWin() && !exeType.contentEquals("sevenzip")) {
+									extract7zSystemCall(jvmArchive.getAbsolutePath(), bindir + targetdir);
+								} else
 									extract7zArchive(jvmArchive.getAbsolutePath(), bindir + targetdir);
 							}
 							Object installer = vm.get("installer");
