@@ -1008,9 +1008,13 @@ public class DownloadManager {
 			}
 			fileOutputStream.close();
 			pis.close();
-			Files.copy(exe.toPath(), new FileOutputStream(output.getAbsoluteFile()));
+			FileOutputStream out = new FileOutputStream(output.getAbsoluteFile());
+			Files.copy(exe.toPath(), out);
+			out.flush();
+			out.close();
 		} catch (Exception ex) {
 			ex.printStackTrace();
+			output.delete();
 		}
 		exe.delete();
 	}
