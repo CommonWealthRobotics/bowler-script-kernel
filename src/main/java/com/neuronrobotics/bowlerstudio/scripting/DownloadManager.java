@@ -993,21 +993,26 @@ public class DownloadManager {
 		}
 		return exe;
 	}
-	private static void rawFileDownload(ProcessInputStream pis, File folder, File exe)
+	private static void rawFileDownload(ProcessInputStream pis, File folder, File output)
 			throws IOException, FileNotFoundException {
 		folder.mkdirs();
-		exe.createNewFile();
-		byte dataBuffer[] = new byte[1024*1000];
+		output.createNewFile();
+		byte dataBuffer[] = new byte[1024 * 1000];
 		int bytesRead;
-		FileOutputStream fileOutputStream = new FileOutputStream(exe.getAbsoluteFile());
-		int chunks =0;
-		while ((bytesRead = pis.read(dataBuffer, 0, dataBuffer.length)) != -1) {
-			fileOutputStream.write(dataBuffer, 0, bytesRead);
-			//psudoSplash.onUpdate((int) (chunks++)+" Kb  " +filename , null);
+		File exe = File.createTempFile("tmp", output.getName());
+		try {
+			FileOutputStream fileOutputStream = new FileOutputStream(exe.getAbsoluteFile());
 
+			while ((bytesRead = pis.read(dataBuffer, 0, dataBuffer.length)) != -1) {
+				fileOutputStream.write(dataBuffer, 0, bytesRead);
+			}
+			fileOutputStream.close();
+			pis.close();
+			Files.copy(exe.toPath(), new FileOutputStream(output.getAbsoluteFile()));
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
-		fileOutputStream.close();
-		pis.close();
+		exe.delete();
 	}
 
 	/**
