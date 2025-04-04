@@ -35,8 +35,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,16 +57,21 @@ import org.apache.commons.io.FilenameUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
+import com.neuronrobotics.bowlerstudio.assets.FontSizeManager;
 import com.neuronrobotics.video.OSUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 //import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 //import javafx.scene.control.ButtonType;
 //import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
-
+import javafx.stage.Stage;
 import net.sf.sevenzipjbinding.*;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 
@@ -74,6 +81,7 @@ public class DownloadManager {
 	private static String bindir = System.getProperty("user.home") + delim()+"bin"+delim()+getSTUDIO_INSTALL()+delim();
 	private static int ev = 0;
 	private static String cmd = "";
+	private static HashSet<String> failedURLs = new HashSet<String>();
 	private static IDownloadManagerEvents downloadEvents = new IDownloadManagerEvents() {
 		
 		@Override
@@ -116,6 +124,9 @@ public class DownloadManager {
 		@Override
 		public void onInstallFail(String url) {
 			com.neuronrobotics.sdk.common.Log.error("Plugin needs to be installed from "+url);
+		}
+		public void notifyOfFailure(String name) {
+			com.neuronrobotics.sdk.common.Log.error("Plugin failed "+name);
 		}
 	};
 	private static GitLogProgressMonitor psudoSplash = new GitLogProgressMonitor() {
@@ -325,7 +336,11 @@ public class DownloadManager {
 			}
 			new RuntimeException("Download or extraction failed, retrying").printStackTrace();
 		}
-		approval.onInstallFail(jvmURL);
+		if(!failedURLs.contains(jvmURL)) {
+			failedURLs.add(jvmURL);
+			approval.notifyOfFailure(exeType);
+			approval.onInstallFail(jvmURL);
+		}
 	}
 
 	private static File getExecutable(String exeType, IExternalEditor editor, String executable) {
