@@ -18,6 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.imageio.ImageIO;
 import javafx.scene.image.WritableImage;
 import org.apache.commons.io.FileUtils;
+import org.python.google.common.io.Files;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -116,6 +117,10 @@ public class CaDoodleFile {
 		fireInitializationStart();
 		initializing = true;
 		if (selfInternal != null) {
+			File parent = selfInternal.getAbsoluteFile().getParentFile();
+			File imageCacheDir = new File(parent.getAbsolutePath() + delim() +"timeline");
+			if(!imageCacheDir.exists())
+				imageCacheDir.mkdir();
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			try {
 				// set a temp file for the database to clear
@@ -295,8 +300,15 @@ public class CaDoodleFile {
 
 	private void process(ICaDoodleOpperation op) {
 		List<CSG> process = op.process(getCurrentState());
+		int currentIndex2 = getCurrentIndex();
+		try {
+			setTimelineImage(process, currentIndex2);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		storeResultInCache(op, process);
-		setCurrentIndex(getCurrentIndex() + 1);
+		setCurrentIndex(currentIndex2 + 1);
 		setCurrentState(op, process);
 	}
 
@@ -623,30 +635,41 @@ public class CaDoodleFile {
 
 		synchronized (selfInternal) {
 			String contents = toJson();
+			List<CSG> currentState = getCurrentState();
+			int currentIndex2 = getCurrentIndex();
 			FileUtils.write(selfInternal, contents, StandardCharsets.UTF_8, false);
-			File parent = selfInternal.getAbsoluteFile().getParentFile();
-			File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
-			setImage(null);
-			loadingImageFromUIThread();
-
-			WritableImage image2 = getImage();
-			if (image2 != null) {
-				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image2, null);
-				try {
-					ImageIO.write(bufferedImage, "png", image);
-					// com.neuronrobotics.sdk.common.Log.error("Thumbnail saved successfully to " +
-					// image.getAbsolutePath());
-				} catch (IOException e) {
-					// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
-					// e.getMessage());
-					e.printStackTrace();
-				}
-			}
+			setTimelineImage(currentState, currentIndex2);
 			if (bom != null)
 				bom.save();
 		}
 
 		return getSelf();
+	}
+
+	private void setTimelineImage(List<CSG> currentState, int currentIndex2) throws IOException {
+		File parent = selfInternal.getAbsoluteFile().getParentFile();
+		File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
+		File imageCache = new File(parent.getAbsolutePath() + delim() +"timeline"+ delim() + currentIndex2+".png");
+		if(imageCache.exists())
+			return;
+		WritableImage image2 = loadingImageFromUIThread( currentState);
+		if (image2 != null) {
+			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image2, null);
+			try {
+				ImageIO.write(bufferedImage, "png", imageCache);
+				System.err.println("Thumbnail saved successfully to " +
+						imageCache.getAbsolutePath());
+			} catch (IOException e) {
+				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
+				// e.getMessage());
+				e.printStackTrace();
+			}
+
+			if(currentIndex2 == currentIndex) {
+				Files.copy(imageCache,image );
+			}
+				
+		}
 	}
 
 	public WritableImage loadImageFromFile() {
@@ -659,7 +682,7 @@ public class CaDoodleFile {
 					img = SwingFXUtils.toFXImage(bufferedImage, null);
 				}
 			} else {
-				loadingImageFromUIThread();
+				loadingImageFromUIThread( getCurrentState());
 			}
 		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error("Error loading image: " + e.getMessage());
@@ -668,14 +691,17 @@ public class CaDoodleFile {
 		return img;
 	}
 
-	private void loadingImageFromUIThread() {
+	private javafx.scene.image.WritableImage loadingImageFromUIThread(List<CSG> currentState ) {
+		ArrayList<javafx.scene.image.WritableImage> holder = new ArrayList<WritableImage>();
 		try {
-			BowlerKernel.runLater(() -> setImage(ThumbnailImage.get(getCurrentState())));
+			BowlerKernel.runLater(() -> {
+				holder.add(ThumbnailImage.get(currentState));
+			});
 		} catch (Throwable ex) {
 			ex.printStackTrace();
-			return;
+			return null;
 		}
-		while (getImage() == null)
+		while (holder.size()==0)
 			try {
 				Thread.sleep(16);
 				// com.neuronrobotics.sdk.common.Log.error("Waiting for image to write");
@@ -684,6 +710,7 @@ public class CaDoodleFile {
 				e.printStackTrace();
 				break;
 			}
+		return holder.get(0);
 	}
 
 	public static CaDoodleFile fromJsonString(String content) throws Exception {
