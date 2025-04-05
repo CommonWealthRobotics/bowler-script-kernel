@@ -684,6 +684,8 @@ public class CaDoodleFile {
 	}
 
 	private void setTimelineImage(List<CSG> currentState, int currentIndex2) throws IOException {
+		if(selfInternal==null)
+			return;
 		File parent = selfInternal.getAbsoluteFile().getParentFile();
 		File imageCache = new File(parent.getAbsolutePath() + delim() + "timeline" + delim() + currentIndex2 + ".png");
 		File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
