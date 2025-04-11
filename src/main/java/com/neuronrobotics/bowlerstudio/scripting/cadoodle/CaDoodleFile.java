@@ -31,6 +31,7 @@ import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
+import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -864,6 +865,7 @@ public class CaDoodleFile {
 	}
 
 	public void setRulerLocation(TransformNR rulerLocation) {
+		rulerLocation.setRotation(new RotationNR());
 		this.rulerLocation = rulerLocation;
 		fireWorkplaneChange();
 		fireSaveSuggestion();
