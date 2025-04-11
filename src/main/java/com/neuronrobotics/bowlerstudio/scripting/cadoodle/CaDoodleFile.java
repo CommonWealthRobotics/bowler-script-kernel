@@ -55,6 +55,8 @@ public class CaDoodleFile {
 	@Expose(serialize = true, deserialize = true)
 	private String projectName = NO_NAME;
 	@Expose(serialize = true, deserialize = true)
+	private TransformNR rulerLocation = new TransformNR();
+	@Expose(serialize = true, deserialize = true)
 	private TransformNR workplane = new TransformNR();
 	@Expose(serialize = false, deserialize = false)
 	private File selfInternal;
@@ -855,6 +857,16 @@ public class CaDoodleFile {
 
 	private void setRegenerating(boolean regenerating) {
 		this.regenerating = regenerating;
+	}
+
+	public TransformNR getRulerLocation() {
+		return rulerLocation;
+	}
+
+	public void setRulerLocation(TransformNR rulerLocation) {
+		this.rulerLocation = rulerLocation;
+		fireWorkplaneChange();
+		fireSaveSuggestion();
 	}
 
 }
