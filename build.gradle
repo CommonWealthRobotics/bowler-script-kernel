@@ -120,7 +120,7 @@ String getOsArch() {
 repositories {
 	mavenCentral()
 	maven {
-		url 'https://commonwealthrobotics.com/jcenter-mirror/'
+		url 'https://commonwealthrobotics.com/maven/'
 		allowInsecureProtocol = true
 	}
 	maven { url 'https://repo.maven.apache.org/maven2/' }
