@@ -80,6 +80,7 @@ public class CaDoodleFile {
 	private boolean initializing;
 	private static HashMap<String, VitaminBomManager> bomManagers = new HashMap<>();
 	private VitaminBomManager bom;
+	private IAcceptPruneForward accept=null;
 
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
@@ -155,7 +156,13 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				t.printStackTrace();
-				pruneForward();
+				try {
+					pruneForward();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					break;
+				}
 				indexStarting = i;
 				break;
 			}
@@ -349,7 +356,13 @@ public class CaDoodleFile {
 				opperationRunner.setName("addOpperation Thread " + toProcess.size());
 				ICaDoodleOpperation op = toProcess.remove(0);
 				if (getCurrentIndex() != getOpperations().size()) {
-					pruneForward();
+					try {
+						pruneForward();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						break;
+					}
 				}
 				try {
 					getOpperations().add(op);
@@ -442,7 +455,12 @@ public class CaDoodleFile {
 		return file;
 	}
 
-	private void pruneForward() {
+	private void pruneForward() throws Exception {
+		if(getAccept()!=null) {
+			if(!getAccept().accept()) {
+				throw new Exception("Do not accept the prune");
+			}
+		}
 		for (int i = getCurrentIndex(); i < getOpperations().size(); i++) {
 			ICaDoodleOpperation key = getOpperations().get(i);
 			List<CSG> back = cache.remove(key);
@@ -871,6 +889,14 @@ public class CaDoodleFile {
 		this.rulerLocation = rulerLocation;
 		fireWorkplaneChange();
 		fireSaveSuggestion();
+	}
+
+	public IAcceptPruneForward getAccept() {
+		return accept;
+	}
+
+	public void setAccept(IAcceptPruneForward accept) {
+		this.accept = accept;
 	}
 
 }
