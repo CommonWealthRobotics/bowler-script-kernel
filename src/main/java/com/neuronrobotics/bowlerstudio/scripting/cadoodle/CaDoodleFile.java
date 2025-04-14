@@ -156,13 +156,6 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				t.printStackTrace();
-				try {
-					pruneForward();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					break;
-				}
 				indexStarting = i;
 				break;
 			}
@@ -483,7 +476,7 @@ public class CaDoodleFile {
 		for (CSG c : process) {
 			if (names.contains(c.getName()))
 				throw new RuntimeException(
-						"There can not be 2 objects with the same name after an opperation! " + c.getName());
+						"There can not be 2 objects with the same name after an "+op.getType()+" opperation! " + c.getName());
 			names.add(c.getName());
 			cachedCopy.add(cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
 					.setRegenerate(c.getRegenerate()));
