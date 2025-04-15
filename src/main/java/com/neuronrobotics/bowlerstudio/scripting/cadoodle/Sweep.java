@@ -44,6 +44,11 @@ public class Sweep extends AbstractAddFrom {
 	private LengthParameter rad = null;
 	private LengthParameter step = null;
 	private LengthParameter angle = null;
+	
+	private double defz = 0;
+	private double defrad= 10;
+	private double defstep=30;
+	private double defangle=360;
 
 	public Sweep set(File source) throws Exception {
 		if (!source.getName().toLowerCase().endsWith(".svg"))
@@ -60,7 +65,6 @@ public class Sweep extends AbstractAddFrom {
 
 	@Override
 	public String getType() {
-		// TODO Auto-generated method stub
 		return "Sweep";
 	}
 
@@ -81,35 +85,35 @@ public class Sweep extends AbstractAddFrom {
 		return Extrude.sweep(transformedP, increment, radiusT, steps).rotx(-90).setName(name);
 	}
 
-	private LengthParameter radius(String name) {
+	public LengthParameter radius(String name) {
 		String key = name + "_CaDoodle_Rad";
 		if (rad == null)
-			rad = new LengthParameter(key, 10.0, nopt);
+			rad = new LengthParameter(key, getDefrad(), nopt);
 		if(rad.getMM()<0)
 			rad.setMM(0);
 		return rad;
 	}
 
-	private LengthParameter zoffset(String name) {
+	public LengthParameter zoffset(String name) {
 		String key = name + "_CaDoodle_Z-per";
 		if (z == null)
-			z = new LengthParameter(key, 0.0, nopt);
+			z = new LengthParameter(key, getDefz(), nopt);
 		return z;
 	}
 
-	private LengthParameter steps(String name) {
+	public LengthParameter steps(String name) {
 		String key = name + "_CaDoodle_Step";
 		if (step == null)
-			step = new LengthParameter(key, 30.0, nopt);
+			step = new LengthParameter(key, getDefstep(), nopt);
 		if(step.getMM()<3)
 			step.setMM(3);
 		return step;
 	}
 
-	private LengthParameter angle(String name) {
+	public LengthParameter angle(String name) {
 		String key = name + "_CaDoodle_Angle";
 		if (angle == null)
-			angle = new LengthParameter(key, 360.0, nopt);
+			angle = new LengthParameter(key, getDefangle(), nopt);
 		if (angle.getMM()<0.001)
 			angle.setMM(0.001);
 		return angle;
@@ -256,6 +260,38 @@ public class Sweep extends AbstractAddFrom {
 	public Sweep setPreventBoM(Boolean preventBoM) {
 		this.preventBoM = preventBoM;
 		return this;
+	}
+
+	public double getDefz() {
+		return defz;
+	}
+
+	public void setDefz(double defz) {
+		this.defz = defz;
+	}
+
+	public double getDefrad() {
+		return defrad;
+	}
+
+	public void setDefrad(double defrad) {
+		this.defrad = defrad;
+	}
+
+	public double getDefstep() {
+		return defstep;
+	}
+
+	public void setDefstep(double defstep) {
+		this.defstep = defstep;
+	}
+
+	public double getDefangle() {
+		return defangle;
+	}
+
+	public void setDefangle(double defangle) {
+		this.defangle = defangle;
 	}
 
 }
