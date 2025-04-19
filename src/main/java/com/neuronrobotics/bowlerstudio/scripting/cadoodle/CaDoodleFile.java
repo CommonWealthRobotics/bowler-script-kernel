@@ -352,7 +352,6 @@ public class CaDoodleFile {
 					try {
 						pruneForward();
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 						break;
 					}
