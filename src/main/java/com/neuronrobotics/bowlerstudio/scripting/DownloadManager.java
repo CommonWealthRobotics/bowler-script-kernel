@@ -317,21 +317,23 @@ public class DownloadManager {
 		}
 		return new HashMap<>();
 	}
-
 	public static File getRunExecutable(String exeType, IExternalEditor editor) {
+		return getRunExecutable(exeType,editor,false);
+	}
+	public static File getRunExecutable(String exeType, IExternalEditor editor,boolean justChecking) {
 		String executable = "executable";
-		retryLoop(exeType, editor, executable);
-		return getExecutable(exeType, editor, executable);
+		retryLoop(exeType, editor, executable,justChecking);
+		return getExecutable(exeType, editor, executable,justChecking);
 	}
 
 	public static File getConfigExecutable(String exeType, IExternalEditor editor) {
 		String executable = "configExecutable";
-		retryLoop(exeType, editor, executable);
-		return getExecutable(exeType, editor, executable);
+		retryLoop(exeType, editor, executable,false);
+		return getExecutable(exeType, editor, executable,false);
 	}
-	private static void retryLoop(String exeType, IExternalEditor editor, String executable) {
+	private static void retryLoop(String exeType, IExternalEditor editor, String executable,boolean justChecking) {
 		for(int i=0;i<3;i++) {
-			if(getExecutable(exeType, editor, executable).exists()) {
+			if(getExecutable(exeType, editor, executable,justChecking).exists()) {
 				return;
 			}
 			new RuntimeException("Download or extraction failed, retrying").printStackTrace();
@@ -343,7 +345,7 @@ public class DownloadManager {
 		}
 	}
 
-	private static File getExecutable(String exeType, IExternalEditor editor, String executable) {
+	private static File getExecutable(String exeType, IExternalEditor editor, String executable,boolean justChecking) {
 		String key = discoverKey();
 
 		try {
@@ -383,7 +385,7 @@ public class DownloadManager {
 							if(new File(string).exists())
 								cmd=string;
 						}
-						if (!new File(cmd).exists()) {
+						if (!new File(cmd).exists() && !justChecking) {
 							if(exeType.toLowerCase().contentEquals("freecad")) {
 								//FreecadLoader.update(vm);
 								baseURL = vm.get("url").toString();
@@ -1092,6 +1094,10 @@ public class DownloadManager {
 	}
 	public static void setSTUDIO_INSTALL(String sTUDIO_INSTALL) {
 		STUDIO_INSTALL = sTUDIO_INSTALL;
+	}
+	public static boolean isDownloadedAlready(String string) {
+		File f= DownloadManager.getRunExecutable(string, null,true);
+		return f.exists();
 	}
 
 }
