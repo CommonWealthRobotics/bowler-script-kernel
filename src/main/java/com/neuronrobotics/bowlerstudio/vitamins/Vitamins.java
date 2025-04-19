@@ -286,12 +286,17 @@ public class Vitamins {
 		}
 
 		ConcurrentHashMap<String, Object> ConcurrentHashMap = database.get(id);
-		Object[] array = ConcurrentHashMap.keySet().toArray();
-		for (int i = 0; i < array.length; i++) {
-			String key = (String) array[i];
-			sanatize(key, ConcurrentHashMap);
+		try {
+			Object[] array = ConcurrentHashMap.keySet().toArray();
+			for (int i = 0; i < array.length; i++) {
+				String key = (String) array[i];
+				sanatize(key, ConcurrentHashMap);
+			}
+			return Collections.unmodifiableMap(ConcurrentHashMap);
+		}catch(Exception ex) {
+			ex.printStackTrace();
 		}
-		return Collections.unmodifiableMap(ConcurrentHashMap);
+		return new ConcurrentHashMap<String,Object>();
 	}
 
 	public static void putMeasurment(String type, String size, String measurementName, Object measurmentValue) {
