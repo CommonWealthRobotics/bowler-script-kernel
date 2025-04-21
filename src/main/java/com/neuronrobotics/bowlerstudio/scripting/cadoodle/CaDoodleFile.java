@@ -223,7 +223,7 @@ public class CaDoodleFile {
 		if (initializing)
 			return null;
 		if (isRegenerating() || isOperationRunning()) {
-			com.neuronrobotics.sdk.common.Log.error("Opperation is running, ignoring regen");
+			System.err.println("Opperation is running, ignoring regen");
 			return null;
 		}
 		fireRegenerateStart();
@@ -255,7 +255,7 @@ public class CaDoodleFile {
 					int currentIndex2 = getCurrentIndex() - 1;
 					ICaDoodleOpperation op = opperations.get(currentIndex2);
 					List<CSG> process = op.process(getPreviouState());
-					getTimelineImageFile(currentIndex2).delete();
+					getTimelineImageFile(op).delete();
 					try {
 						setTimelineImage(process, op);
 					} catch (IOException e) {
@@ -335,7 +335,12 @@ public class CaDoodleFile {
 		if (opperationRunner != null)
 			if (!opperationRunner.isAlive())
 				opperationRunner = null;
-		return opperationRunner != null;
+		if(opperationRunner != null) {
+			if(Thread.currentThread().getId() == opperationRunner.getId())
+				return false;
+			return true;
+		}else
+			return false;
 	}
 
 	public Thread addOpperation(ICaDoodleOpperation o) throws CadoodleConcurrencyException {
@@ -349,21 +354,35 @@ public class CaDoodleFile {
 			while (toProcess.size() > 0) {
 				opperationRunner.setName("addOpperation Thread " + toProcess.size());
 				ICaDoodleOpperation op = toProcess.remove(0);
+				OperationResult res=OperationResult.APPEND;
 				if (getCurrentIndex() != getOpperations().size()) {
 					try {
 						prune=true;
 						fireRegenerateStart();
-						pruneForward();
+						res=pruneForward(op);
 					} catch (Exception e) {
 						e.printStackTrace();
 						break;
 					}
 				}
-				try {
-					getOpperations().add(op);
-					process(op);
-				} catch (Exception ex) {
-					ex.printStackTrace();
+				if(res==OperationResult.APPEND || res==OperationResult.PRUNE) {
+					try {
+						getOpperations().add(op);
+						process(op);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+				if(res==OperationResult.INSERT) {
+					getOpperations().add(getCurrentIndex(),op);
+					setCurrentIndex(getCurrentIndex()+1);
+					try {
+						regenerateFrom(op).join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					updateCurrentFromCache();
 				}
 			}
 			updateBoM();
@@ -452,10 +471,12 @@ public class CaDoodleFile {
 		return file;
 	}
 
-	private void pruneForward() throws Exception {
+	private OperationResult pruneForward(ICaDoodleOpperation op) throws Exception {
+		OperationResult res=OperationResult.INSERT;
 		if(getAccept()!=null) {
-			if(!getAccept().accept()) {
-				throw new Exception("Do not accept the prune");
+			res = getAccept().accept();
+			if(res==OperationResult.ABORT) {
+				return res;
 			}
 		}
 		for (int i = getCurrentIndex()-1; i < getOpperations().size(); i++) {
@@ -469,13 +490,15 @@ public class CaDoodleFile {
 			//System.err.println("Deleting " + imageCache.getAbsolutePath());
 			imageCache.delete();
 		}
-		List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, getCurrentIndex());
-		ArrayList<ICaDoodleOpperation> newList = new ArrayList<ICaDoodleOpperation>();
-		newList.addAll(subList);
-		setOpperations(newList);
-		com.neuronrobotics.sdk.common.Log.error("Pruning forward here!");
-		fireTimelineUpdate();
-
+		if(res==OperationResult.PRUNE) {
+			List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, getCurrentIndex());
+			ArrayList<ICaDoodleOpperation> newList = new ArrayList<ICaDoodleOpperation>();
+			newList.addAll(subList);
+			setOpperations(newList);
+			com.neuronrobotics.sdk.common.Log.error("Pruning forward here!");
+			fireTimelineUpdate();
+		}
+		return res;
 	}
 
 	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
