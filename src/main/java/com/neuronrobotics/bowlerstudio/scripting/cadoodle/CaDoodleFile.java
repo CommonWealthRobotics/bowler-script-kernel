@@ -329,6 +329,7 @@ public class CaDoodleFile {
 		storeResultInCache(op, process);
 		setCurrentIndex(currentIndex2 + 1);
 		setCurrentState(op, process);
+		
 	}
 
 	public boolean isOperationRunning() {
@@ -522,6 +523,7 @@ public class CaDoodleFile {
 			setCurrentIndex(getCurrentIndex() - 1);
 		updateCurrentFromCache();
 		fireSaveSuggestion();
+		fireTimelineUpdate();
 	}
 	
 	public void moveToOpIndex(int newIndex) {
@@ -532,6 +534,7 @@ public class CaDoodleFile {
 		setCurrentIndex(newIndex+1);
 		updateCurrentFromCache();
 		fireSaveSuggestion();
+		fireTimelineUpdate();
 	}
 
 	public boolean isBackAvailible() {
@@ -557,6 +560,7 @@ public class CaDoodleFile {
 			setCurrentIndex(getCurrentIndex() + 1);
 		updateCurrentFromCache();
 		fireSaveSuggestion();
+		fireTimelineUpdate();
 	}
 
 	public boolean isForwardAvailible() {
@@ -722,17 +726,31 @@ public class CaDoodleFile {
 			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image2, null);
 			try {
 				ImageIO.write(bufferedImage, "png", imageCache);
-				System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
 			} catch (IOException e) {
 				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
 				// e.getMessage());
 				e.printStackTrace();
 			}
-
+			do {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return;
+				}
+			}while(!imageCache.exists());
 			if (currentIndex2 == currentIndex) {
 				Files.copy(imageCache, image);
 			}
+			System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
+		}
+		fireTimelineUpdate();
+	}
 
+	private void fireTimelineUpdate() {
+		for(ICaDoodleStateUpdate s:listeners) {
+			s.onTimelineUpdate();
 		}
 	}
 
