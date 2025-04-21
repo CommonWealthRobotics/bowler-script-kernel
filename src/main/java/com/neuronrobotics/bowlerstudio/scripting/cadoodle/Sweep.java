@@ -44,10 +44,13 @@ public class Sweep extends AbstractAddFrom {
 	private LengthParameter rad = null;
 	private LengthParameter step = null;
 	private LengthParameter angle = null;
-	
+	@Expose(serialize = true, deserialize = true)
 	private double defz = 0;
+	@Expose(serialize = true, deserialize = true)
 	private double defrad= 10;
+	@Expose(serialize = true, deserialize = true)
 	private double defstep=30;
+	@Expose(serialize = true, deserialize = true)
 	private double defangle=360;
 
 	public Sweep set(File source) throws Exception {
