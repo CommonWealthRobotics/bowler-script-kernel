@@ -257,7 +257,7 @@ public class CaDoodleFile {
 					List<CSG> process = op.process(getPreviouState());
 					getTimelineImageFile(currentIndex2).delete();
 					try {
-						setTimelineImage(process, currentIndex2);
+						setTimelineImage(process, op);
 					} catch (IOException e) {
 						//  Auto-generated catch block
 						e.printStackTrace();
@@ -301,7 +301,7 @@ public class CaDoodleFile {
 			int currentIndex2 = getCurrentIndex();
 			getTimelineImageFile(currentIndex2).delete();
 			try {
-				setTimelineImage(process, currentIndex2);
+				setTimelineImage(process, op);
 			} catch (IOException e) {
 				//  Auto-generated catch block
 				e.printStackTrace();
@@ -320,16 +320,15 @@ public class CaDoodleFile {
 	private void process(ICaDoodleOpperation op) {
 		List<CSG> process = op.process(getCurrentState());
 		int currentIndex2 = getCurrentIndex();
+		storeResultInCache(op, process);
+		setCurrentIndex(currentIndex2 + 1);
+		setCurrentState(op, process);
 		try {
-			setTimelineImage(process, currentIndex2);
+			setTimelineImage(process, op);
 		} catch (IOException e) {
 			//  Auto-generated catch block
 			e.printStackTrace();
 		}
-		storeResultInCache(op, process);
-		setCurrentIndex(currentIndex2 + 1);
-		setCurrentState(op, process);
-		
 	}
 
 	public boolean isOperationRunning() {
@@ -346,11 +345,14 @@ public class CaDoodleFile {
 			return opperationRunner;
 		}
 		opperationRunner = new Thread(() -> {
+			boolean prune=false;
 			while (toProcess.size() > 0) {
 				opperationRunner.setName("addOpperation Thread " + toProcess.size());
 				ICaDoodleOpperation op = toProcess.remove(0);
 				if (getCurrentIndex() != getOpperations().size()) {
 					try {
+						prune=true;
+						fireRegenerateStart();
 						pruneForward();
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -366,6 +368,8 @@ public class CaDoodleFile {
 			}
 			updateBoM();
 			fireSaveSuggestion();
+			if(prune)
+				fireRegenerateDone();
 			opperationRunner = null;
 		});
 		opperationRunner.start();
@@ -454,11 +458,13 @@ public class CaDoodleFile {
 				throw new Exception("Do not accept the prune");
 			}
 		}
-		for (int i = getCurrentIndex(); i < getOpperations().size(); i++) {
+		for (int i = getCurrentIndex()-1; i < getOpperations().size(); i++) {
 			ICaDoodleOpperation key = getOpperations().get(i);
-			List<CSG> back = cache.remove(key);
-			if (back != null)
-				back.clear();
+			if(i>=getCurrentIndex()) {
+				List<CSG> back = cache.remove(key);
+				if (back != null)
+					back.clear();
+			}
 			File imageCache = getTimelineImageFile(i);
 			//System.err.println("Deleting " + imageCache.getAbsolutePath());
 			imageCache.delete();
@@ -468,6 +474,8 @@ public class CaDoodleFile {
 		newList.addAll(subList);
 		setOpperations(newList);
 		com.neuronrobotics.sdk.common.Log.error("Pruning forward here!");
+		fireTimelineUpdate();
+
 	}
 
 	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
@@ -529,7 +537,7 @@ public class CaDoodleFile {
 	public void moveToOpIndex(int newIndex) {
 		if(newIndex> getOpperations().size())
 			return;
-		if(newIndex<1)
+		if(newIndex<0)
 			return;
 		setCurrentIndex(newIndex+1);
 		updateCurrentFromCache();
@@ -702,7 +710,7 @@ public class CaDoodleFile {
 			List<CSG> currentState = getCurrentState();
 			int currentIndex2 = getCurrentIndex();
 			FileUtils.write(selfInternal, contents, StandardCharsets.UTF_8, false);
-			setTimelineImage(currentState, currentIndex2);
+			setTimelineImage(currentState, getCurrentOpperation());
 			if (bom != null)
 				bom.save();
 		}
@@ -710,11 +718,15 @@ public class CaDoodleFile {
 		return getSelf();
 	}
 
-	private void setTimelineImage(List<CSG> currentState, int currentIndex2) throws IOException {
+	private void setTimelineImage(List<CSG> currentState, ICaDoodleOpperation op) throws IOException {
 		if(selfInternal==null)
 			return;
-		if(currentIndex2==0)
-			return;
+		int currentIndex2=0;
+		for(int i=0;i<getOpperations().size();i++)
+			if(getOpperations().get(i)==op)
+				currentIndex2=i;
+//		if(currentIndex2==0)
+//			return;
 		File parent = selfInternal.getAbsoluteFile().getParentFile();
 		File imageCache = new File(parent.getAbsolutePath() + delim() + "timeline" + delim() + currentIndex2 + ".png");
 		File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
@@ -735,7 +747,6 @@ public class CaDoodleFile {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 					return;
 				}
@@ -843,6 +854,7 @@ public class CaDoodleFile {
 
 	public void setOpperations(ArrayList<ICaDoodleOpperation> opperations) {
 		this.opperations = opperations;
+		currentIndex=opperations.size();
 	}
 
 	public TransformNR getWorkplane() {
