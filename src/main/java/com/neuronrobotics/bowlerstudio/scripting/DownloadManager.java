@@ -332,6 +332,8 @@ public class DownloadManager {
 		return getExecutable(exeType, editor, executable,false);
 	}
 	private static void retryLoop(String exeType, IExternalEditor editor, String executable,boolean justChecking) {
+		if(justChecking)
+			return;
 		for(int i=0;i<3;i++) {
 			if(getExecutable(exeType, editor, executable,justChecking).exists()) {
 				return;
