@@ -523,6 +523,16 @@ public class CaDoodleFile {
 		updateCurrentFromCache();
 		fireSaveSuggestion();
 	}
+	
+	public void moveToOpIndex(int newIndex) {
+		if(newIndex> getOpperations().size())
+			return;
+		if(newIndex<1)
+			return;
+		setCurrentIndex(newIndex+1);
+		updateCurrentFromCache();
+		fireSaveSuggestion();
+	}
 
 	public boolean isBackAvailible() {
 		return getCurrentIndex() > 1;
