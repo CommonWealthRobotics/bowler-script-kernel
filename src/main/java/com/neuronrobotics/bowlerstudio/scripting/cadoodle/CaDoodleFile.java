@@ -811,7 +811,7 @@ public class CaDoodleFile {
 					return;
 				}
 			} while (!imageCache.exists());
-			if (currentIndex2 == currentIndex) {
+			if (getOpperations().get(getOpperations().size()-1)==op) {
 				Files.copy(imageCache, image);
 			}
 			System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
