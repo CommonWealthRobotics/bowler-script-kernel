@@ -66,14 +66,14 @@ public class Group extends AbstractAddFrom implements ICaDoodleOpperation {
 				if (intersect)
 					holecutter = intersect(holes);
 				else
-					holecutter = CSG.unionAll(holes);
+					holecutter = holes.size()==1?holes.get(0):CSG.unionAll(holes);
 				if (hull)
 					holecutter = holecutter.hull();
 			}
 			if (intersect)
 				result = intersect(solids);
 			else
-				result = CSG.unionAll(solids);
+				result =solids.size()==1?solids.get(0): CSG.unionAll(solids);
 			Color c = result.getColor();
 			if (hull) {
 				result = result.hull();

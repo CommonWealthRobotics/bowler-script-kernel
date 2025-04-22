@@ -156,7 +156,9 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				t.printStackTrace();
-				opperations.remove(op);
+				indexStarting = i+1;
+				break;
+				//opperations.remove(op);
 			}
 		}
 		setCurrentIndex(indexStarting);
