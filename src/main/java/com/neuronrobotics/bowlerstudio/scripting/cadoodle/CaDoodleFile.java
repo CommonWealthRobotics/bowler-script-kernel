@@ -80,7 +80,7 @@ public class CaDoodleFile {
 	private boolean initializing;
 	private static HashMap<String, VitaminBomManager> bomManagers = new HashMap<>();
 	private VitaminBomManager bom;
-	private IAcceptPruneForward accept=null;
+	private IAcceptPruneForward accept = null;
 
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
@@ -134,7 +134,7 @@ public class CaDoodleFile {
 				CSGDatabase.clear();
 				createTempFile.delete();
 			} catch (IOException e) {
-				//  Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			CSGDatabase.setDbFile(db);
@@ -259,7 +259,7 @@ public class CaDoodleFile {
 					try {
 						setTimelineImage(process, op);
 					} catch (IOException e) {
-						//  Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 					storeResultInCache(op, process);
@@ -303,7 +303,7 @@ public class CaDoodleFile {
 			try {
 				setTimelineImage(process, op);
 			} catch (IOException e) {
-				//  Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 			storeResultInCache(op, process);
@@ -326,7 +326,7 @@ public class CaDoodleFile {
 		try {
 			setTimelineImage(process, op);
 		} catch (IOException e) {
-			//  Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -335,11 +335,11 @@ public class CaDoodleFile {
 		if (opperationRunner != null)
 			if (!opperationRunner.isAlive())
 				opperationRunner = null;
-		if(opperationRunner != null) {
-			if(Thread.currentThread().getId() == opperationRunner.getId())
+		if (opperationRunner != null) {
+			if (Thread.currentThread().getId() == opperationRunner.getId())
 				return false;
 			return true;
-		}else
+		} else
 			return false;
 	}
 
@@ -350,22 +350,22 @@ public class CaDoodleFile {
 			return opperationRunner;
 		}
 		opperationRunner = new Thread(() -> {
-			boolean prune=false;
+			boolean prune = false;
 			while (toProcess.size() > 0) {
 				opperationRunner.setName("addOpperation Thread " + toProcess.size());
 				ICaDoodleOpperation op = toProcess.remove(0);
-				OperationResult res=OperationResult.APPEND;
+				OperationResult res = OperationResult.APPEND;
 				if (getCurrentIndex() != getOpperations().size()) {
 					try {
-						prune=true;
+						prune = true;
 						fireRegenerateStart();
-						res=pruneForward(op);
+						res = pruneForward(op);
 					} catch (Exception e) {
 						e.printStackTrace();
 						break;
 					}
 				}
-				if(res==OperationResult.APPEND || res==OperationResult.PRUNE) {
+				if (res == OperationResult.APPEND || res == OperationResult.PRUNE) {
 					try {
 						getOpperations().add(op);
 						process(op);
@@ -373,9 +373,9 @@ public class CaDoodleFile {
 						ex.printStackTrace();
 					}
 				}
-				if(res==OperationResult.INSERT) {
-					getOpperations().add(getCurrentIndex(),op);
-					setCurrentIndex(getCurrentIndex()+1);
+				if (res == OperationResult.INSERT) {
+					getOpperations().add(getCurrentIndex(), op);
+					setCurrentIndex(getCurrentIndex() + 1);
 					try {
 						regenerateFrom(op).join();
 					} catch (InterruptedException e) {
@@ -387,8 +387,40 @@ public class CaDoodleFile {
 			}
 			updateBoM();
 			fireSaveSuggestion();
-			if(prune)
+			if (prune)
 				fireRegenerateDone();
+			opperationRunner = null;
+		});
+		opperationRunner.start();
+		return opperationRunner;
+	}
+
+	public Thread deleteOperation(ICaDoodleOpperation op) {
+		if (isOperationRunning()) {
+			return opperationRunner;
+		}
+		opperationRunner = new Thread(() -> {
+			opperationRunner.setName("addOpperation Thread " + toProcess.size());
+			int index=0;
+			for(int i=0;i<getOpperations().size();i++)
+				if(getOpperations().get(i)==op)
+					index=i;
+			getOpperations().remove(op);
+			if(index==getOpperations().size())
+				index-=1;
+			if(index<1)
+				index=1;
+			ICaDoodleOpperation newTar = getOpperations().get(index-1);
+			try {
+				regenerateFrom(newTar).join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			updateCurrentFromCache();
+
+			updateBoM();
+			fireSaveSuggestion();
 			opperationRunner = null;
 		});
 		opperationRunner.start();
@@ -472,26 +504,27 @@ public class CaDoodleFile {
 	}
 
 	private OperationResult pruneForward(ICaDoodleOpperation op) throws Exception {
-		OperationResult res=OperationResult.INSERT;
-		if(getAccept()!=null) {
+		OperationResult res = OperationResult.INSERT;
+		if (getAccept() != null) {
 			res = getAccept().accept();
-			if(res==OperationResult.ABORT) {
+			if (res == OperationResult.ABORT) {
 				return res;
 			}
 		}
-		for (int i = getCurrentIndex()-1; i < getOpperations().size(); i++) {
+		for (int i = getCurrentIndex() - 1; i < getOpperations().size(); i++) {
 			ICaDoodleOpperation key = getOpperations().get(i);
-			if(i>=getCurrentIndex()) {
+			if (i >= getCurrentIndex()) {
 				List<CSG> back = cache.remove(key);
 				if (back != null)
 					back.clear();
 			}
 			File imageCache = getTimelineImageFile(i);
-			//System.err.println("Deleting " + imageCache.getAbsolutePath());
+			// System.err.println("Deleting " + imageCache.getAbsolutePath());
 			imageCache.delete();
 		}
-		if(res==OperationResult.PRUNE) {
-			List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0, getCurrentIndex());
+		if (res == OperationResult.PRUNE) {
+			List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0,
+					getCurrentIndex());
 			ArrayList<ICaDoodleOpperation> newList = new ArrayList<ICaDoodleOpperation>();
 			newList.addAll(subList);
 			setOpperations(newList);
@@ -506,8 +539,8 @@ public class CaDoodleFile {
 		HashSet<String> names = new HashSet<>();
 		for (CSG c : process) {
 			if (names.contains(c.getName()))
-				throw new RuntimeException(
-						"There can not be 2 objects with the same name after an "+op.getType()+" opperation! " + c.getName());
+				throw new RuntimeException("There can not be 2 objects with the same name after an " + op.getType()
+						+ " opperation! " + c.getName());
 			names.add(c.getName());
 			cachedCopy.add(cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
 					.setRegenerate(c.getRegenerate()));
@@ -556,13 +589,13 @@ public class CaDoodleFile {
 		fireSaveSuggestion();
 		fireTimelineUpdate();
 	}
-	
+
 	public void moveToOpIndex(int newIndex) {
-		if(newIndex> getOpperations().size())
+		if (newIndex > getOpperations().size())
 			return;
-		if(newIndex<0)
+		if (newIndex < 0)
 			return;
-		setCurrentIndex(newIndex+1);
+		setCurrentIndex(newIndex + 1);
 		updateCurrentFromCache();
 		fireSaveSuggestion();
 		fireTimelineUpdate();
@@ -742,12 +775,12 @@ public class CaDoodleFile {
 	}
 
 	private void setTimelineImage(List<CSG> currentState, ICaDoodleOpperation op) throws IOException {
-		if(selfInternal==null)
+		if (selfInternal == null)
 			return;
-		int currentIndex2=0;
-		for(int i=0;i<getOpperations().size();i++)
-			if(getOpperations().get(i)==op)
-				currentIndex2=i;
+		int currentIndex2 = 0;
+		for (int i = 0; i < getOpperations().size(); i++)
+			if (getOpperations().get(i) == op)
+				currentIndex2 = i;
 //		if(currentIndex2==0)
 //			return;
 		File parent = selfInternal.getAbsoluteFile().getParentFile();
@@ -773,7 +806,7 @@ public class CaDoodleFile {
 					e.printStackTrace();
 					return;
 				}
-			}while(!imageCache.exists());
+			} while (!imageCache.exists());
 			if (currentIndex2 == currentIndex) {
 				Files.copy(imageCache, image);
 			}
@@ -783,7 +816,7 @@ public class CaDoodleFile {
 	}
 
 	private void fireTimelineUpdate() {
-		for(ICaDoodleStateUpdate s:listeners) {
+		for (ICaDoodleStateUpdate s : listeners) {
 			s.onTimelineUpdate();
 		}
 	}
@@ -877,7 +910,7 @@ public class CaDoodleFile {
 
 	public void setOpperations(ArrayList<ICaDoodleOpperation> opperations) {
 		this.opperations = opperations;
-		currentIndex=opperations.size();
+		currentIndex = opperations.size();
 	}
 
 	public TransformNR getWorkplane() {
