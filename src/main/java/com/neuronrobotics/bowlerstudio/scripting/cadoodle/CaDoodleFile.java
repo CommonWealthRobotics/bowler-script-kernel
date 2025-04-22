@@ -156,8 +156,7 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				t.printStackTrace();
-				indexStarting = i;
-				break;
+				opperations.remove(op);
 			}
 		}
 		setCurrentIndex(indexStarting);
@@ -254,16 +253,20 @@ public class CaDoodleFile {
 					// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
 					int currentIndex2 = getCurrentIndex() - 1;
 					ICaDoodleOpperation op = opperations.get(currentIndex2);
-					List<CSG> process = op.process(getPreviouState());
 					getTimelineImageFile(op).delete();
 					try {
-						setTimelineImage(process, op);
-					} catch (IOException e) {
-						// Auto-generated catch block
-						e.printStackTrace();
+						List<CSG> process = op.process(getPreviouState());
+						try {
+							setTimelineImage(process, op);
+						} catch (IOException e) {
+							// Auto-generated catch block
+							e.printStackTrace();
+						}
+						storeResultInCache(op, process);
+						setCurrentState(op, process);
+					} catch (Throwable tr) {
+						tr.printStackTrace();
 					}
-					storeResultInCache(op, process);
-					setCurrentState(op, process);
 				}
 				if (getCurrentIndex() != endIndex) {
 					setCurrentIndex(endIndex);
@@ -401,16 +404,16 @@ public class CaDoodleFile {
 		}
 		opperationRunner = new Thread(() -> {
 			opperationRunner.setName("addOpperation Thread " + toProcess.size());
-			int index=0;
-			for(int i=0;i<getOpperations().size();i++)
-				if(getOpperations().get(i)==op)
-					index=i;
+			int index = 0;
+			for (int i = 0; i < getOpperations().size(); i++)
+				if (getOpperations().get(i) == op)
+					index = i;
 			getOpperations().remove(op);
-			if(index==getOpperations().size())
-				index-=1;
-			if(index<1)
-				index=1;
-			ICaDoodleOpperation newTar = getOpperations().get(index-1);
+			if (index == getOpperations().size())
+				index -= 1;
+			if (index < 1)
+				index = 1;
+			ICaDoodleOpperation newTar = getOpperations().get(index - 1);
 			try {
 				regenerateFrom(newTar).join();
 			} catch (InterruptedException e) {
