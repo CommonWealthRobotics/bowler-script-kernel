@@ -417,13 +417,13 @@ public class CaDoodleFile {
 			try {
 				regenerateFrom(newTar).join();
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			updateCurrentFromCache();
 
 			updateBoM();
 			fireSaveSuggestion();
+			fireTimelineUpdate();
 			opperationRunner = null;
 		});
 		opperationRunner.start();
@@ -774,7 +774,7 @@ public class CaDoodleFile {
 			if (bom != null)
 				bom.save();
 		}
-
+		fireTimelineUpdate();
 		return getSelf();
 	}
 
@@ -805,7 +805,7 @@ public class CaDoodleFile {
 			}
 			do {
 				try {
-					Thread.sleep(100);
+					Thread.sleep(10);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 					return;
@@ -816,7 +816,7 @@ public class CaDoodleFile {
 			}
 			System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
 		}
-		fireTimelineUpdate();
+		//fireTimelineUpdate();
 	}
 
 	private void fireTimelineUpdate() {
