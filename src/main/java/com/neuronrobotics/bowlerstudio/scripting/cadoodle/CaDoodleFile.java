@@ -769,7 +769,8 @@ public class CaDoodleFile {
 			List<CSG> currentState = getCurrentState();
 			int currentIndex2 = getCurrentIndex();
 			FileUtils.write(selfInternal, contents, StandardCharsets.UTF_8, false);
-			setTimelineImage(currentState, getCurrentOpperation());
+			if(currentIndex2>0)
+				setTimelineImage(currentState, getCurrentOpperation());
 			if (bom != null)
 				bom.save();
 		}
