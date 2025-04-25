@@ -196,11 +196,12 @@ public class BowlerKernel {
 				try {
 
 					File f = new File(s);
-					File parentFile = f.getParentFile();
-					if(parentFile==null) {
-						parentFile=new File(".");
+					String location;
+					try {
+						location  =ScriptingEngine.locateGitTopLevelDirectory(f).getAbsolutePath();
+					}catch(Exception ex) {
+						location= new File(".").getAbsolutePath();
 					}
-					String location  =parentFile.getAbsolutePath();
 					if(location.endsWith(".")) {
 						location=location.substring(0,location.length()-1);
 					}		
@@ -209,8 +210,8 @@ public class BowlerKernel {
 					}
 					baseWorkspaceFile = new File(location);
 					
-					com.neuronrobotics.sdk.common.Log.error("Using working directory  "+baseWorkspaceFile.getAbsolutePath());
-					f=new File(baseWorkspaceFile.getAbsolutePath()+"/"+f.getName());
+					System.out.println("Using working directory  "+baseWorkspaceFile.getAbsolutePath());
+					f=new File(baseWorkspaceFile.getAbsolutePath()+"/"+s);
 					com.neuronrobotics.sdk.common.Log.error("File   "+f.getName());
 					ret = ScriptingEngine.inlineFileScriptRun(f, null);
 				} catch (Throwable e) {

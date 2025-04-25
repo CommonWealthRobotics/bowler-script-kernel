@@ -413,20 +413,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void openGit(Repository localRepo, IGitAccessor accessor) {
 		Git git = null;
-		boolean alreadyOpen= false;
+		boolean alreadyOpen = false;
 		try {
 			String absolutePath = localRepo.getDirectory().getAbsolutePath();
 			for (String s : open.keySet()) {
 				Git g = open.get(s);
-				if(g!=null)
-				if (g.getRepository().getDirectory().getAbsolutePath()
-						.contentEquals(absolutePath)) {
-					git=g;
-					alreadyOpen=true;
-					break;
-				}
+				if (g != null)
+					if (g.getRepository().getDirectory().getAbsolutePath().contentEquals(absolutePath)) {
+						git = g;
+						alreadyOpen = true;
+						break;
+					}
 			}
-			if(!alreadyOpen) {
+			if (!alreadyOpen) {
 				git = new Git(localRepo);
 				open.put(absolutePath, git);
 			}
@@ -434,15 +433,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				try {
 					accessor.run(git);
 				} catch (Throwable t) {
-					//new IssueReportingExceptionHandler().except(t);
+					// new IssueReportingExceptionHandler().except(t);
 					throw new RuntimeException(t);
 				}
 			}
-			if(!alreadyOpen)
+			if (!alreadyOpen)
 				gitclose(git);
 		} catch (Throwable t) {
-			//new IssueReportingExceptionHandler().except(t);
-			if(!alreadyOpen)
+			// new IssueReportingExceptionHandler().except(t);
+			if (!alreadyOpen)
 				if (git != null) {
 					gitclose(git);
 				}
@@ -459,7 +458,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (git == null)
 			return;
 		open.remove(git.getRepository().getDirectory().getAbsolutePath());
-		//git.getRepository().close();
+		// git.getRepository().close();
 		git.close();
 	}
 
@@ -1765,21 +1764,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return null;
 	}
 
-	public static void locateGit(File f, IGitAccessor access) throws IOException {
+	public static File locateGitTopLevelDirectory(File f) throws IOException {
 		File gitRepoFile = f;
 		while (gitRepoFile != null) {
 			gitRepoFile = gitRepoFile.getParentFile();
 			if (gitRepoFile != null)
 				if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
-					// com.neuronrobotics.sdk.common.Log.error("Fount git repo for file:
-					// "+gitRepoFile);
-					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
-					openGit(localRepo, access);
-					return;
+					return gitRepoFile;
 				}
 		}
-
 		throw new RuntimeException("File " + f + " is not in a git repository");
+	}
+
+	public static void locateGit(File f, IGitAccessor access) throws IOException {
+		Repository localRepo = new FileRepository(locateGitTopLevelDirectory(f).getAbsoluteFile() + "/.git");
+		openGit(localRepo, access);
 	}
 
 	public static String getText(URL website) throws Exception {
@@ -2090,16 +2089,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		return langs;
 	}
+
 	public static List<String> getAllExtentions() {
 		ArrayList<String> langs = new ArrayList<>();
 		for (String L : getLangaugesMap().keySet()) {
 			IScriptingLanguage lang = getLangaugesMap().get(L);
-			for(String s:lang.getFileExtenetion()) {
+			for (String s : lang.getFileExtenetion()) {
 				langs.add(s);
 			}
 		}
 		return langs;
 	}
+
 	public static HashMap<String, IScriptingLanguage> getLangaugesMap() {
 		return langauges;
 	}
@@ -2164,7 +2165,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 			String[] newFileCode;
 			try {
-				System.out.println("Opening "+targetFilename+" from "+targetGit);
+				System.out.println("Opening " + targetFilename + " from " + targetGit);
 				newFileCode = ScriptingEngine.codeFromGit(targetGit, targetFilename);
 				if (newFileCode == null)
 					newFileCode = new String[] { "" };
