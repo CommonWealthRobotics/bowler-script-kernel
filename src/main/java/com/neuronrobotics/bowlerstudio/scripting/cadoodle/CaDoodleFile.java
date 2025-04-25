@@ -328,12 +328,14 @@ public class CaDoodleFile {
 		storeResultInCache(op, process);
 		setCurrentIndex(currentIndex2 + 1);
 		setCurrentState(op, process);
-		try {
-			setTimelineImage(process, op);
-		} catch (IOException e) {
-			// Auto-generated catch block
-			e.printStackTrace();
-		}
+		new Thread(()->{
+			try {
+				setTimelineImage(process, op);
+			} catch (IOException e) {
+				// Auto-generated catch block
+				e.printStackTrace();
+			}
+		}).start();
 	}
 
 	public boolean isOperationRunning() {
