@@ -797,12 +797,14 @@ public class CaDoodleFile {
 		int currentIndex2 = getCurrentIndex();
 		FileUtils.write(selfInternal, contents, StandardCharsets.UTF_8, false);
 		// }
+		int num=0;
 		for (int i = 0; i < opperations.size(); i++) {
 			File f = getTimelineImageFile(i);
 			ICaDoodleOpperation op = opperations.get(i);
 			List<CSG> process = cache.get(op);
 			if (!f.exists())
 				try {
+					num++;
 					setSaveImage(process, op);
 				} catch (IOException e) {
 					// Auto-generated catch block
@@ -811,7 +813,7 @@ public class CaDoodleFile {
 		}
 		if (bom != null)
 			bom.save();
-		fireTimelineUpdate();
+		fireTimelineUpdate(num);
 		// System.gc();
 		return getSelf();
 	}
@@ -860,9 +862,9 @@ public class CaDoodleFile {
 		}
 	}
 
-	private void fireTimelineUpdate() {
+	private void fireTimelineUpdate(int number) {
 		for (ICaDoodleStateUpdate s : listeners) {
-			s.onTimelineUpdate();
+			s.onTimelineUpdate(number);
 		}
 	}
 

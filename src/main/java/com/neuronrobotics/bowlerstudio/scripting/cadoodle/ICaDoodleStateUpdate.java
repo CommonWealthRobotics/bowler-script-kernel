@@ -14,5 +14,5 @@ public interface ICaDoodleStateUpdate {
 	public void onRegenerateDone();
 	public void onRegenerateStart();
 	public void onWorkplaneChange(TransformNR newWP);
-	public void onTimelineUpdate();
+	public void onTimelineUpdate(int numberOfNew);
 }
