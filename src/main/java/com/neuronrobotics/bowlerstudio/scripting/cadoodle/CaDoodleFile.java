@@ -150,9 +150,9 @@ public class CaDoodleFile {
 		int indexStarting = getCurrentIndex();
 		setCurrentIndex(0);
 		setPercentInitialized(0);
-		for (int i = 0; i < opperations.size(); i++) {
-			ICaDoodleOpperation op = opperations.get(i);
-			setPercentInitialized(((double) i) / (double) opperations.size());
+		for (int i = 0; i < getOpperations().size(); i++) {
+			ICaDoodleOpperation op = getOpperations().get(i);
+			setPercentInitialized(((double) i) / (double) getOpperations().size());
 			try {
 				process(op);
 			} catch (Throwable t) {
@@ -230,7 +230,7 @@ public class CaDoodleFile {
 		}
 		fireRegenerateStart();
 		int endIndex = getCurrentIndex();
-		double size = opperations.size();
+		double size = getOpperations().size();
 		if (endIndex != size) {
 //			new Exception("Regenerationg from a position back in time " + endIndex + " but have " + size)
 //					.printStackTrace();
@@ -246,7 +246,7 @@ public class CaDoodleFile {
 					// "+source.getType());
 					int opIndex = 0;
 					for (int i = 0; i < size; i++) {
-						ICaDoodleOpperation op = opperations.get(i);
+						ICaDoodleOpperation op = getOpperations().get(i);
 						if (source == op) {
 							opIndex = i;
 							break;
@@ -259,7 +259,7 @@ public class CaDoodleFile {
 							setPercentInitialized(((double) getCurrentIndex()) / size);
 							// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
 							int currentIndex2 = getCurrentIndex() - 1;
-							ICaDoodleOpperation op = opperations.get(currentIndex2);
+							ICaDoodleOpperation op = getOpperations().get(currentIndex2);
 							getTimelineImageFile(op).delete();
 							try {
 								List<CSG> process = op.process(getPreviouState());
@@ -288,6 +288,7 @@ public class CaDoodleFile {
 			}
 		};
 		opperationRunner.add(t);
+		t.start();
 		return t;
 	}
 
@@ -349,9 +350,10 @@ public class CaDoodleFile {
 		for (int i = 0; i < opperationRunner.size(); i++) {
 			Thread t = opperationRunner.get(i);
 			if (t != null) {
-				if(!t.isAlive()) {
+				if (!t.isAlive()) {
 					opperationRunner.remove(t);
-					new Exception("Thread failed to remove itself "+t.getName()).printStackTrace();
+					// new Exception("Thread failed to remove itself
+					// "+t.getName()).printStackTrace();
 					continue;
 				}
 				if (Thread.currentThread().getId() == t.getId())
@@ -366,7 +368,6 @@ public class CaDoodleFile {
 		toProcess.add(o);
 		if (isOperationRunning()) {
 			new Exception("Operation Running, bailing").printStackTrace();
-
 			return opperationRunner.get(0);
 		}
 		Thread t = null;
@@ -398,11 +399,10 @@ public class CaDoodleFile {
 					}
 					if (res == OperationResult.INSERT) {
 						getOpperations().add(getCurrentIndex(), op);
-						setCurrentIndex(getCurrentIndex() + 1);
+						process(op);
 						try {
 							regenerateFrom(op).join();
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						updateCurrentFromCache();
@@ -440,14 +440,13 @@ public class CaDoodleFile {
 				if (index < 1)
 					index = 1;
 				ICaDoodleOpperation newTar = getOpperations().get(index - 1);
+				setCurrentIndex(index - 1);
 				try {
 					regenerateFrom(newTar).join();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				setCurrentIndex(getCurrentIndex() - 1);
 				updateCurrentFromCache();
-
 				updateBoM();
 				fireSaveSuggestion();
 				opperationRunner.remove(this);
@@ -702,7 +701,9 @@ public class CaDoodleFile {
 	public List<CSG> getPreviouState() {
 		if (getCurrentIndex() < 2)
 			return new ArrayList<CSG>();
-		return cache.get(getOpperations().get(getCurrentIndex() - 2));
+		ICaDoodleOpperation key = getOpperations().get(getCurrentIndex() - 2);
+		
+		return cache.get(key);
 	}
 
 	private void setCurrentState(ICaDoodleOpperation op, List<CSG> currentState) {
@@ -830,28 +831,32 @@ public class CaDoodleFile {
 
 		if (imageCache.exists())
 			return;
-		WritableImage image2 = loadingImageFromUIThread(currentState);
-		if (image2 != null) {
-			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image2, null);
-			try {
-				ImageIO.write(bufferedImage, "png", imageCache);
-			} catch (IOException e) {
-				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
-				// e.getMessage());
-				e.printStackTrace();
-			}
-			do {
+		try {
+			WritableImage image2 = loadingImageFromUIThread(currentState);
+			if (image2 != null) {
+				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image2, null);
 				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
+					ImageIO.write(bufferedImage, "png", imageCache);
+				} catch (IOException e) {
+					// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
+					// e.getMessage());
 					e.printStackTrace();
-					return;
 				}
-			} while (!imageCache.exists());
-			if (getOpperations().get(getOpperations().size() - 1) == op) {
-				Files.copy(imageCache, image);
+				do {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+						return;
+					}
+				} while (!imageCache.exists());
+				if (getOpperations().get(getOpperations().size() - 1) == op) {
+					Files.copy(imageCache, image);
+				}
+				System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
 			}
-			System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
+		} catch (Throwable t) {
+			t.printStackTrace();
 		}
 	}
 
@@ -881,6 +886,8 @@ public class CaDoodleFile {
 	}
 
 	private javafx.scene.image.WritableImage loadingImageFromUIThread(List<CSG> currentState) {
+		if (currentState == null)
+			throw new RuntimeException("Can not be null");
 		ArrayList<javafx.scene.image.WritableImage> holder = new ArrayList<WritableImage>();
 		try {
 			BowlerKernel.runLater(() -> {
@@ -971,7 +978,7 @@ public class CaDoodleFile {
 
 	public void setCurrentIndex(int currentIndex) {
 		// new Exception("Current Index set to " + currentIndex).printStackTrace();
-		if ((currentIndex - 1) >= opperations.size())
+		if ((currentIndex - 1) >= getOpperations().size())
 			throw new RuntimeException("Fail! Can not set an index greater than the availible operations");
 		this.currentIndex = currentIndex;
 	}
