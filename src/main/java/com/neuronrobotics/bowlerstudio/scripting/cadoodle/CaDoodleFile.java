@@ -82,6 +82,7 @@ public class CaDoodleFile {
 	private static HashMap<String, VitaminBomManager> bomManagers = new HashMap<>();
 	private VitaminBomManager bom;
 	private IAcceptPruneForward accept = null;
+	private long timeOfLastUpdate = 0;
 
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
@@ -237,7 +238,7 @@ public class CaDoodleFile {
 		Thread t = null;
 		t = new Thread() {
 			public void run() {
-
+				timeOfLastUpdate = System.currentTimeMillis();
 				setRegenerating(true);
 				// com.neuronrobotics.sdk.common.Log.error("Regenerating Object from
 				// "+source.getType());
@@ -298,27 +299,30 @@ public class CaDoodleFile {
 		Thread t = null;
 		t = new Thread() {
 			public void run() {
-			// TickToc.setEnabled(true);
+				timeOfLastUpdate = System.currentTimeMillis();
 
-			this.setName("regenerateCurrent Thread");
+				// TickToc.setEnabled(true);
 
-			ICaDoodleOpperation op = getCurrentOpperation();
-			TickToc.tic("Start regenerate");
-			List<CSG> process = op.process(getPreviouState());
-			TickToc.tic("Finish regenerate");
-			int currentIndex2 = getCurrentIndex();
-			getTimelineImageFile(currentIndex2).delete();
-			TickToc.tic("Get timeline file");
-			storeResultInCache(op, process);
-			TickToc.tic("Stored results in cache");
-			setCurrentState(op, process);
-			TickToc.tic("set current state");
-			fireSaveSuggestion();
-			TickToc.tic("Fired save suggestion");
-			fireRegenerateDone();
-			TickToc.tic("Fired regeneration Done");
-			opperationRunner.remove(this);
-		}};
+				this.setName("regenerateCurrent Thread");
+
+				ICaDoodleOpperation op = getCurrentOpperation();
+				TickToc.tic("Start regenerate");
+				List<CSG> process = op.process(getPreviouState());
+				TickToc.tic("Finish regenerate");
+				int currentIndex2 = getCurrentIndex();
+				getTimelineImageFile(currentIndex2).delete();
+				TickToc.tic("Get timeline file");
+				storeResultInCache(op, process);
+				TickToc.tic("Stored results in cache");
+				setCurrentState(op, process);
+				TickToc.tic("set current state");
+				fireSaveSuggestion();
+				TickToc.tic("Fired save suggestion");
+				fireRegenerateDone();
+				TickToc.tic("Fired regeneration Done");
+				opperationRunner.remove(this);
+			}
+		};
 		opperationRunner.add(t);
 		t.start();
 		return t;
@@ -351,49 +355,51 @@ public class CaDoodleFile {
 			return opperationRunner.get(0);
 		}
 		Thread t = null;
-		t =new Thread() {
+		t = new Thread() {
 			public void run() {
-			boolean prune = false;
-			while (toProcess.size() > 0) {
-				this.setName("addOpperation Thread " + toProcess.size());
-				ICaDoodleOpperation op = toProcess.remove(0);
-				OperationResult res = OperationResult.APPEND;
-				if (getCurrentIndex() != getOpperations().size()) {
-					try {
-						prune = true;
-						fireRegenerateStart();
-						res = pruneForward(op);
-					} catch (Exception e) {
-						e.printStackTrace();
-						break;
+				timeOfLastUpdate=System.currentTimeMillis();
+				boolean prune = false;
+				while (toProcess.size() > 0) {
+					this.setName("addOpperation Thread " + toProcess.size());
+					ICaDoodleOpperation op = toProcess.remove(0);
+					OperationResult res = OperationResult.APPEND;
+					if (getCurrentIndex() != getOpperations().size()) {
+						try {
+							prune = true;
+							fireRegenerateStart();
+							res = pruneForward(op);
+						} catch (Exception e) {
+							e.printStackTrace();
+							break;
+						}
+					}
+					if (res == OperationResult.APPEND || res == OperationResult.PRUNE) {
+						try {
+							getOpperations().add(op);
+							process(op);
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+					if (res == OperationResult.INSERT) {
+						getOpperations().add(getCurrentIndex(), op);
+						setCurrentIndex(getCurrentIndex() + 1);
+						try {
+							regenerateFrom(op).join();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						updateCurrentFromCache();
 					}
 				}
-				if (res == OperationResult.APPEND || res == OperationResult.PRUNE) {
-					try {
-						getOpperations().add(op);
-						process(op);
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-				}
-				if (res == OperationResult.INSERT) {
-					getOpperations().add(getCurrentIndex(), op);
-					setCurrentIndex(getCurrentIndex() + 1);
-					try {
-						regenerateFrom(op).join();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					updateCurrentFromCache();
-				}
+				updateBoM();
+				fireSaveSuggestion();
+				if (prune)
+					fireRegenerateDone();
+				opperationRunner.remove(this);
 			}
-			updateBoM();
-			fireSaveSuggestion();
-			if (prune)
-				fireRegenerateDone();
-			opperationRunner.remove(this);
-		}};
+		};
 		opperationRunner.add(t);
 		t.start();
 		return t;
@@ -406,28 +412,31 @@ public class CaDoodleFile {
 		Thread t = null;
 		t = new Thread() {
 			public void run() {
-			this.setName("addOpperation Thread " + toProcess.size());
-			int index = 0;
-			for (int i = 0; i < getOpperations().size(); i++)
-				if (getOpperations().get(i) == op)
-					index = i;
-			getOpperations().remove(op);
-			if (index == getOpperations().size())
-				index -= 1;
-			if (index < 1)
-				index = 1;
-			ICaDoodleOpperation newTar = getOpperations().get(index - 1);
-			try {
-				regenerateFrom(newTar).join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			updateCurrentFromCache();
+				timeOfLastUpdate=System.currentTimeMillis();
+				this.setName("addOpperation Thread " + toProcess.size());
+				int index = 0;
+				for (int i = 0; i < getOpperations().size(); i++)
+					if (getOpperations().get(i) == op)
+						index = i;
+				getOpperations().remove(op);
+				if (index == getOpperations().size())
+					index -= 1;
+				if (index < 1)
+					index = 1;
+				ICaDoodleOpperation newTar = getOpperations().get(index - 1);
+				try {
+					regenerateFrom(newTar).join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				setCurrentIndex(getCurrentIndex() - 1);
+				updateCurrentFromCache();
 
-			updateBoM();
-			fireSaveSuggestion();
-			opperationRunner.remove(this);
-		}};
+				updateBoM();
+				fireSaveSuggestion();
+				opperationRunner.remove(this);
+			}
+		};
 		opperationRunner.add(t);
 		t.start();
 		return t;
@@ -1002,4 +1011,7 @@ public class CaDoodleFile {
 		this.accept = accept;
 	}
 
+	public long timeSinceLastUpdate() {
+		return 	System.currentTimeMillis()-timeOfLastUpdate;
+	}
 }
