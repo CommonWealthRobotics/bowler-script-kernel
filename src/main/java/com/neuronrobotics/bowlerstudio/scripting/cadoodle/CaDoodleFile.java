@@ -440,7 +440,7 @@ public class CaDoodleFile {
 				if (index < 1)
 					index = 1;
 				ICaDoodleOpperation newTar = getOpperations().get(index - 1);
-				setCurrentIndex(index - 1);
+				setCurrentIndex(index );
 				try {
 					regenerateFrom(newTar).join();
 				} catch (InterruptedException e) {
