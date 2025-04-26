@@ -225,7 +225,7 @@ public class CaDoodleFile {
 		if (initializing)
 			return null;
 		if (isRegenerating() || isOperationRunning()) {
-			System.err.println("Opperation is running, ignoring regen");
+			new Exception("Operation Running, bailing").printStackTrace();
 			return null;
 		}
 		fireRegenerateStart();
@@ -238,47 +238,52 @@ public class CaDoodleFile {
 		Thread t = null;
 		t = new Thread() {
 			public void run() {
-				timeOfLastUpdate = System.currentTimeMillis();
-				setRegenerating(true);
-				// com.neuronrobotics.sdk.common.Log.error("Regenerating Object from
-				// "+source.getType());
-				int opIndex = 0;
-				for (int i = 0; i < size; i++) {
-					ICaDoodleOpperation op = opperations.get(i);
-					if (source == op) {
-						opIndex = i;
-						break;
-					}
-				}
-				setCurrentIndex(opIndex);
+				this.setName("Regeneration Threads");
 				try {
-					for (; getCurrentIndex() < size;) {
-						setCurrentIndex(getCurrentIndex() + 1);
-						setPercentInitialized(((double) getCurrentIndex()) / size);
-						// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
-						int currentIndex2 = getCurrentIndex() - 1;
-						ICaDoodleOpperation op = opperations.get(currentIndex2);
-						getTimelineImageFile(op).delete();
-						try {
-							List<CSG> process = op.process(getPreviouState());
-							storeResultInCache(op, process);
-							setCurrentState(op, process);
-						} catch (Throwable tr) {
-							tr.printStackTrace();
+					timeOfLastUpdate = System.currentTimeMillis();
+					setRegenerating(true);
+					// com.neuronrobotics.sdk.common.Log.error("Regenerating Object from
+					// "+source.getType());
+					int opIndex = 0;
+					for (int i = 0; i < size; i++) {
+						ICaDoodleOpperation op = opperations.get(i);
+						if (source == op) {
+							opIndex = i;
+							break;
 						}
 					}
-					if (getCurrentIndex() != endIndex) {
-						setCurrentIndex(endIndex);
-						updateCurrentFromCache();
+					setCurrentIndex(opIndex);
+					try {
+						for (; getCurrentIndex() < size;) {
+							setCurrentIndex(getCurrentIndex() + 1);
+							setPercentInitialized(((double) getCurrentIndex()) / size);
+							// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
+							int currentIndex2 = getCurrentIndex() - 1;
+							ICaDoodleOpperation op = opperations.get(currentIndex2);
+							getTimelineImageFile(op).delete();
+							try {
+								List<CSG> process = op.process(getPreviouState());
+								storeResultInCache(op, process);
+								setCurrentState(op, process);
+							} catch (Throwable tr) {
+								tr.printStackTrace();
+							}
+						}
+						if (getCurrentIndex() != endIndex) {
+							setCurrentIndex(endIndex);
+							updateCurrentFromCache();
+						}
+					} catch (Exception ex) {
+						ex.printStackTrace();
 					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
+					setPercentInitialized(1);
+					updateBoM();
+					setRegenerating(false);
+					fireSaveSuggestion();
+					fireRegenerateDone();
+				} catch (Throwable th) {
+					th.printStackTrace();
 				}
-				setPercentInitialized(1);
-				updateBoM();
-				setRegenerating(false);
-				fireSaveSuggestion();
-				fireRegenerateDone();
 				opperationRunner.remove(this);
 			}
 		};
@@ -288,6 +293,8 @@ public class CaDoodleFile {
 
 	public Thread regenerateCurrent() {
 		if (isOperationRunning()) {
+			new Exception("Operation Running, bailing").printStackTrace();
+
 			return opperationRunner.get(0);
 		}
 		if (initializing) {
@@ -339,25 +346,33 @@ public class CaDoodleFile {
 	}
 
 	public boolean isOperationRunning() {
-		for (Thread t : opperationRunner)
+		for (int i = 0; i < opperationRunner.size(); i++) {
+			Thread t = opperationRunner.get(i);
 			if (t != null) {
+				if(!t.isAlive()) {
+					opperationRunner.remove(t);
+					new Exception("Thread failed to remove itself "+t.getName()).printStackTrace();
+					continue;
+				}
 				if (Thread.currentThread().getId() == t.getId())
 					return false;
 				return true;
 			}
+		}
 		return false;
 	}
 
 	public Thread addOpperation(ICaDoodleOpperation o) throws CadoodleConcurrencyException {
 		toProcess.add(o);
 		if (isOperationRunning()) {
+			new Exception("Operation Running, bailing").printStackTrace();
 
 			return opperationRunner.get(0);
 		}
 		Thread t = null;
 		t = new Thread() {
 			public void run() {
-				timeOfLastUpdate=System.currentTimeMillis();
+				timeOfLastUpdate = System.currentTimeMillis();
 				boolean prune = false;
 				while (toProcess.size() > 0) {
 					this.setName("addOpperation Thread " + toProcess.size());
@@ -407,12 +422,13 @@ public class CaDoodleFile {
 
 	public Thread deleteOperation(ICaDoodleOpperation op) {
 		if (isOperationRunning()) {
+			new Exception("Operation Running, bailing").printStackTrace();
 			return opperationRunner.get(0);
 		}
 		Thread t = null;
 		t = new Thread() {
 			public void run() {
-				timeOfLastUpdate=System.currentTimeMillis();
+				timeOfLastUpdate = System.currentTimeMillis();
 				this.setName("addOpperation Thread " + toProcess.size());
 				int index = 0;
 				for (int i = 0; i < getOpperations().size(); i++)
@@ -1012,6 +1028,6 @@ public class CaDoodleFile {
 	}
 
 	public long timeSinceLastUpdate() {
-		return 	System.currentTimeMillis()-timeOfLastUpdate;
+		return System.currentTimeMillis() - timeOfLastUpdate;
 	}
 }
