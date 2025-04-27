@@ -83,6 +83,7 @@ public class CaDoodleFile {
 	private VitaminBomManager bom;
 	private IAcceptPruneForward accept = null;
 	private long timeOfLastUpdate = 0;
+	private OperationResult result = OperationResult.APPEND;
 
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
@@ -373,23 +374,24 @@ public class CaDoodleFile {
 		Thread t = null;
 		t = new Thread() {
 			public void run() {
+				
 				timeOfLastUpdate = System.currentTimeMillis();
 				boolean prune = false;
 				while (toProcess.size() > 0) {
+					result = OperationResult.APPEND;
 					this.setName("addOpperation Thread " + toProcess.size());
 					ICaDoodleOpperation op = toProcess.remove(0);
-					OperationResult res = OperationResult.APPEND;
 					if (getCurrentIndex() != getOpperations().size()) {
 						try {
 							prune = true;
 							fireRegenerateStart();
-							res = pruneForward(op);
+							setResult(pruneForward(op));
 						} catch (Exception e) {
 							e.printStackTrace();
 							break;
 						}
 					}
-					if (res == OperationResult.APPEND || res == OperationResult.PRUNE) {
+					if (getResult() == OperationResult.APPEND || getResult() == OperationResult.PRUNE) {
 						try {
 							getOpperations().add(op);
 							process(op);
@@ -397,7 +399,7 @@ public class CaDoodleFile {
 							ex.printStackTrace();
 						}
 					}
-					if (res == OperationResult.INSERT) {
+					if (getResult() == OperationResult.INSERT) {
 						getOpperations().add(getCurrentIndex(), op);
 						process(op);
 						try {
@@ -406,6 +408,9 @@ public class CaDoodleFile {
 							e.printStackTrace();
 						}
 						updateCurrentFromCache();
+					}
+					if(getResult()==OperationResult.ABORT) {
+						setCurrentState(getCurrentOpperation(), getCurrentState());
 					}
 				}
 				updateBoM();
@@ -1041,5 +1046,13 @@ public class CaDoodleFile {
 
 	public long timeSinceLastUpdate() {
 		return System.currentTimeMillis() - timeOfLastUpdate;
+	}
+
+	public OperationResult getResult() {
+		return result;
+	}
+
+	public void setResult(OperationResult result) {
+		this.result = result;
 	}
 }
