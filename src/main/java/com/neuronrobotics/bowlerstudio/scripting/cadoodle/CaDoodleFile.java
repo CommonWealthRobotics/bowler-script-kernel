@@ -676,9 +676,12 @@ public class CaDoodleFile {
 	}
 
 	public List<CSG> getCurrentState() {
+		return getStateAtOperation(getCurrentOpperation());
+	}
+	public List<CSG> getStateAtOperation(ICaDoodleOpperation op) {
 		if (getCurrentIndex() == 0)
 			return new ArrayList<CSG>();
-		List<CSG> list = cache.get(getCurrentOpperation());
+		List<CSG> list = cache.get(op);
 		if (list == null)
 			list = new ArrayList<CSG>();
 		return list;
