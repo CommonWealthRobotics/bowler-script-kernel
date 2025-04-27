@@ -56,8 +56,8 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 			CSG source =  CaDoodleFile.getByName(back, from);
 			if (source.isGroupResult()) {
 				ArrayList<String> c = constituants(back, from);
-				if(c.size()<2)
-					throw new RuntimeException("A group result must have at least 2 constituants!");
+				if(c.size()<1)
+					throw new RuntimeException("A group result must have at least 1 constituants!");
 				String newGroupName =  CaDoodleFile.getByName(back, cpMap.get(from)).getName();
 				for (String s : c) {
 					CSG dest =  CaDoodleFile.getByName(back, s);
