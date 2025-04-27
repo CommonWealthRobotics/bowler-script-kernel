@@ -95,16 +95,19 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 		clone.setRegenerate(c.getRegenerate()).setName(name);
 		clone.getStorage().set("PreviousName", prevName);
 		Transform nrToCSG = MoveCenter.getTotalOffset(c);
+
+		Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 		CSG newOne = null;
 		if (CaDoodleVitamin.isVitamin(c)) {
 			CSG regenerate = clone.getRegenerate().regenerate(clone);
-			newOne = regenerate.transformed(nrToCSG);
+			newOne = regenerate.transformed(nrToCSG).transformed(nrToCSG2);
 			newOne.setRegenerate(regenerate.getRegenerate());
 		}else {
-			newOne = clone;
+			newOne = clone.transformed(nrToCSG2);
 			newOne.setRegenerate(c.getRegenerate());
 		}
 		newOne.syncProperties(c).setName(name);
+		MoveCenter.set(name, newOne, location);
 		index++;
 		getNamesAdded().add(name);
 		ArrayList<CSG> b = new ArrayList<>();
