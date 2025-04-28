@@ -415,8 +415,7 @@ public class CaDoodleFile {
 				}
 				updateBoM();
 				fireSaveSuggestion();
-				if (prune)
-					fireRegenerateDone();
+				fireRegenerateDone();
 				opperationRunner.remove(this);
 			}
 		};
