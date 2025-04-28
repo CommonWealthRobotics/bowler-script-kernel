@@ -439,8 +439,8 @@ public class CaDoodleFile {
 					if (getOpperations().get(i) == op)
 						index = i;
 				getOpperations().remove(op);
-				if (index == getOpperations().size())
-					index -= 1;
+//				if (index == getOpperations().size())
+//					index -= 1;
 				if (index < 1)
 					index = 1;
 				ICaDoodleOpperation newTar = getOpperations().get(index - 1);
@@ -545,6 +545,7 @@ public class CaDoodleFile {
 				return res;
 			}
 		}
+		if( getCurrentIndex() >0)
 		for (int i = getCurrentIndex() - 1; i < getOpperations().size(); i++) {
 			ICaDoodleOpperation key = getOpperations().get(i);
 			if (i >= getCurrentIndex()) {
