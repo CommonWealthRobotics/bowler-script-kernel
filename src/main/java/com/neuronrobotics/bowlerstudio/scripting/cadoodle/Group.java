@@ -78,8 +78,13 @@ public class Group extends AbstractAddFrom implements ICaDoodleOpperation {
 			if (hull) {
 				result = result.hull();
 			}
-			if (holecutter != null)
-				result = result.difference(holecutter);
+			if (holecutter != null) {
+				if(result.getBounds().isBoundsTouching(holecutter.getBounds())) {
+					result = result.difference(holecutter);
+				}else
+					result=result.clone();
+			}
+			
 			result.setIsHole(false);
 			result.setColor(c);
 		}
