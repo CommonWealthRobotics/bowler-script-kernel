@@ -84,7 +84,13 @@ public class CaDoodleFile {
 	private IAcceptPruneForward accept = null;
 	private long timeOfLastUpdate = 0;
 	private OperationResult result = OperationResult.APPEND;
-
+	private ICadoodleSaveStatusUpdate defaultSaver=new ICadoodleSaveStatusUpdate() {
+		@Override
+		public void renderSplashFrame(int percent, String message) {
+			System.out.println(percent+"% "+message);
+		}
+	};
+	private ICadoodleSaveStatusUpdate saveUpdate =null;
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
 			cache.get(op).clear();
@@ -256,11 +262,13 @@ public class CaDoodleFile {
 					setCurrentIndex(opIndex);
 					try {
 						for (; getCurrentIndex() < size;) {
+							int percent =(int)( ((double )getCurrentIndex())/((double)getOpperations().size())*100.0);
 							setCurrentIndex(getCurrentIndex() + 1);
 							setPercentInitialized(((double) getCurrentIndex()) / size);
 							// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
 							int currentIndex2 = getCurrentIndex() - 1;
 							ICaDoodleOpperation op = getOpperations().get(currentIndex2);
+							getSaveUpdate().renderSplashFrame(percent, "Regenerating "+op.getType()+" "+currentIndex2);
 							getTimelineImageFile(op).delete();
 							try {
 								List<CSG> process = op.process(getPreviouState());
@@ -803,17 +811,22 @@ public class CaDoodleFile {
 		String contents = toJson();
 		List<CSG> currentState = getCurrentState();
 		int currentIndex2 = getCurrentIndex();
+		getSaveUpdate().renderSplashFrame(1, "Save Doodle to "+selfInternal.getName());
 		FileUtils.write(selfInternal, contents, StandardCharsets.UTF_8, false);
 		// }
 		int num=0;
 		for (int i = 0; i < opperations.size(); i++) {
 			File f = getTimelineImageFile(i);
 			ICaDoodleOpperation op = opperations.get(i);
+			int percent =(int)( ((double )i)/((double)opperations.size())*100.0);
 			List<CSG> process = cache.get(op);
 			if (!f.exists())
 				try {
 					num++;
+					getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image "+i+".png");
+
 					setSaveImage(process, op);
+					
 				} catch (IOException e) {
 					// Auto-generated catch block
 					e.printStackTrace();
@@ -821,6 +834,7 @@ public class CaDoodleFile {
 		}
 		if (bom != null)
 			bom.save();
+		getSaveUpdate().renderSplashFrame(100, "Doofle save Done ");
 		fireTimelineUpdate(num);
 		// System.gc();
 		return getSelf();
@@ -863,7 +877,7 @@ public class CaDoodleFile {
 				if (getOpperations().get(getOpperations().size() - 1) == op) {
 					Files.copy(imageCache, image);
 				}
-				System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
+				//System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -1054,5 +1068,15 @@ public class CaDoodleFile {
 
 	public void setResult(OperationResult result) {
 		this.result = result;
+	}
+
+	public ICadoodleSaveStatusUpdate getSaveUpdate() {
+		if(saveUpdate==null)
+			return defaultSaver;
+		return saveUpdate;
+	}
+
+	public void setSaveUpdate(ICadoodleSaveStatusUpdate saveUpdate) {
+		this.saveUpdate = saveUpdate;
 	}
 }
