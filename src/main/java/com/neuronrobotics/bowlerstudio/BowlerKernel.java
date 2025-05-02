@@ -393,7 +393,7 @@ public class BowlerKernel {
 	public static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
 		processUIOpening(ret);
 		if(baseWorkspaceFile!=null)
-			com.neuronrobotics.sdk.common.Log.error("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
+			System.out.println("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
 
 		
 		if (baseWorkspaceFile != null) {
