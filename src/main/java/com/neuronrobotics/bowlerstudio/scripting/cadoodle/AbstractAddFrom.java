@@ -2,7 +2,9 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.io.File;
 import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import com.google.gson.annotations.Expose;
 
@@ -16,6 +18,12 @@ public abstract class AbstractAddFrom  implements ICaDoodleOpperation {
 	public HashSet<String> getNamesAdded() {
 		return namesAdded;
 	}
+	public List<String> getNames(){
+		ArrayList<String> names= new ArrayList<String>();
+		names.addAll(getNamesAdded());
+		return names;
+	}
+	
 	public String getName() {
 		if (name == null) {
 			setName(RandomStringFactory.generateRandomString());
