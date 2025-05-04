@@ -104,9 +104,12 @@ public class Group extends AbstractAddFrom implements ICaDoodleOpperation {
 		}
 		return first;
 	}
-
+	@Override
 	public List<String> getNames() {
-		return names;
+		ArrayList<String> n= new ArrayList<String>();
+		n.addAll(getNamesAdded());
+		n.addAll(names);
+		return n;
 	}
 
 	public Group setNames(List<String> names) {

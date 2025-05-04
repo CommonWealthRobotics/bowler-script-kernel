@@ -128,7 +128,10 @@ public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
 	}
 
 	public List<String> getNames() {
-		return names;
+		ArrayList<String> n= new ArrayList<String>();
+		n.addAll(getNamesAdded());
+		n.addAll(names);
+		return n;
 	}
 
 	public Paste setNames(List<String> names) {
