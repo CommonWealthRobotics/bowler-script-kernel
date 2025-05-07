@@ -37,6 +37,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -270,7 +272,7 @@ public class Vitamins {
 		return null;
 	}
 
-	public static Map<String, Object> getMeta(String type) {
+	public static ConcurrentHashMap<String, Object> getMeta(String type) {
 		return getConfiguration(type, "meta");
 	}
 
@@ -279,7 +281,7 @@ public class Vitamins {
 		setParameter(type, "meta", "scriptFile", file);
 	}
 
-	public static Map<String, Object> getConfiguration(String type, String id) {
+	public static ConcurrentHashMap<String, Object> getConfiguration(String type, String id) {
 		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
 		if (id== null) {
 			id=Vitamins.listVitaminSizes(type).get(0);
@@ -292,7 +294,7 @@ public class Vitamins {
 				String key = (String) array[i];
 				sanatize(key, ConcurrentHashMap);
 			}
-			return Collections.unmodifiableMap(ConcurrentHashMap);
+			return ConcurrentHashMap;
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
