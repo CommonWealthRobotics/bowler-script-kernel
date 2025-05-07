@@ -481,9 +481,13 @@ public class CaDoodleFile {
 			ICadoodleRecursiveEvent p, int depth) {
 		for (int i = 0; i < targetNames.size(); i++) {
 			String s = targetNames.get(i);
-			CSG c = getByName(back, s);
-			if (c.isInGroup())
-				continue;
+			try {
+				CSG c = getByName(back, s);
+				if (c.isInGroup())
+					continue;
+			}catch(Exception ex) {
+				ex.printStackTrace();
+			}
 			applyToAllConstituantElements(addRet, s, back, p, depth);
 		}
 		return back.size();
