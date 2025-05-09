@@ -594,6 +594,11 @@ public class CaDoodleFile {
 			// cachedCopy.add(c);
 		}
 		cache.put(op, cachedCopy);
+        Runtime runtime = Runtime.getRuntime();
+        long totalMemory = runtime.totalMemory(); // Current heap size
+        long freeMemory = runtime.freeMemory();   // Free memory in the heap
+        long maxMemory = runtime.maxMemory();     // Maximum heap size
+        long usedMemory = totalMemory - freeMemory;
 	}
 
 	private CSG cloneCSG(CSG dyingCSG) {
