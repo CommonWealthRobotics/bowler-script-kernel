@@ -84,16 +84,20 @@ public class ThumbnailImage {
 				continue;
 			if(csg.isInGroup())
 				continue;
-			MeshView meshView = csg.movez(-zCenter).getMesh();
-			if (csg.isHole()) {
+			try {
+				MeshView meshView = csg.movez(-zCenter).getMesh();
 				PhongMaterial material = new PhongMaterial();
-				material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
+				if (csg.isHole()) {
+					material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
+					meshView.setMaterial(material);
+					meshView.setOpacity(0.25);
+				}
 				material.setSpecularColor(javafx.scene.paint.Color.WHITE);
-				meshView.setMaterial(material);
-				meshView.setOpacity(0.25);
+				meshView.setCullFace(CullFace.BACK);
+				root.getChildren().add(meshView);
+			}catch(Throwable t) {
+				t.printStackTrace();
 			}
-			meshView.setCullFace(CullFace.BACK);
-			root.getChildren().add(meshView);
 		}
 
 		// Calculate the bounds of all CSGs combined

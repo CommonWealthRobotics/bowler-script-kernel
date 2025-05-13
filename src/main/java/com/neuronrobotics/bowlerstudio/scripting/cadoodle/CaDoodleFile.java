@@ -594,13 +594,18 @@ public class CaDoodleFile {
 			// cachedCopy.add(c);
 		}
 		cache.put(op, cachedCopy);
-        Runtime runtime = Runtime.getRuntime();
-        long totalMemory = runtime.totalMemory(); // Current heap size
-        long freeMemory = runtime.freeMemory();   // Free memory in the heap
-        long maxMemory = runtime.maxMemory();     // Maximum heap size
-        long usedMemory = totalMemory - freeMemory;
+		System.out.println("\n\nUpdated Memory use: "+getFreeMemory()+"\n\n");
 	}
+	public static double getFreeMemory() {
+		Runtime runtime = Runtime.getRuntime();
+		long maxMemory = runtime.maxMemory(); // Maximum memory the JVM will attempt to use
+		long totalMemory = runtime.totalMemory(); // Total memory currently allocated to the JVM
+		long freeMemory = runtime.freeMemory(); // Free memory within the allocated memory
+		long usedMemory = totalMemory - freeMemory; // Actually used memory
 
+		// Calculate the percentage of maximum memory that's currently being used
+		return (usedMemory * 100.0) / maxMemory;
+	}
 	private CSG cloneCSG(CSG dyingCSG) {
 		CSG csg = new CSG();
 
@@ -930,7 +935,8 @@ public class CaDoodleFile {
 			ex.printStackTrace();
 			return null;
 		}
-		while (holder.size() == 0)
+		long start = System.currentTimeMillis();
+		while (holder.size() == 0) {
 			try {
 				Thread.sleep(16);
 				// com.neuronrobotics.sdk.common.Log.error("Waiting for image to write");
@@ -939,6 +945,10 @@ public class CaDoodleFile {
 				e.printStackTrace();
 				break;
 			}
+			if(System.currentTimeMillis()-start>2500 && holder.size()==0) {
+				throw new RuntimeException("Failed to create image");
+			}
+		}
 		return holder.get(0);
 	}
 
