@@ -159,6 +159,8 @@ public class CaDoodleFile {
 		setPercentInitialized(0);
 		for (int i = 0; i < getOpperations().size(); i++) {
 			ICaDoodleOpperation op = getOpperations().get(i);
+			if(op==null)
+				continue;
 			setPercentInitialized(((double) i) / (double) getOpperations().size());
 			try {
 				process(op);
@@ -231,7 +233,7 @@ public class CaDoodleFile {
 	public Thread regenerateFrom(ICaDoodleOpperation source) {
 		if (initializing)
 			return null;
-		if (isRegenerating() || isOperationRunning()) {
+		if (isRegenerating() || isOperationRunning()||source==null) {
 			new Exception("Operation Running, bailing").printStackTrace();
 			return null;
 		}
@@ -374,6 +376,8 @@ public class CaDoodleFile {
 	}
 
 	public Thread addOpperation(ICaDoodleOpperation o) throws CadoodleConcurrencyException {
+		if(o==null)
+			throw new NullPointerException();
 		toProcess.add(o);
 		if (isOperationRunning()) {
 			new Exception("Operation Running, bailing").printStackTrace();
@@ -384,14 +388,12 @@ public class CaDoodleFile {
 			public void run() {
 				
 				timeOfLastUpdate = System.currentTimeMillis();
-				boolean prune = false;
 				while (toProcess.size() > 0) {
 					result = OperationResult.APPEND;
 					this.setName("addOpperation Thread " + toProcess.size());
 					ICaDoodleOpperation op = toProcess.remove(0);
 					if (getCurrentIndex() != getOpperations().size()) {
 						try {
-							prune = true;
 							fireRegenerateStart();
 							setResult(pruneForward(op));
 						} catch (Exception e) {
@@ -433,6 +435,8 @@ public class CaDoodleFile {
 	}
 
 	public Thread deleteOperation(ICaDoodleOpperation op) {
+		if(op==null)
+			throw new NullPointerException();
 		if (isOperationRunning()) {
 			new Exception("Operation Running, bailing").printStackTrace();
 			return opperationRunner.get(0);
@@ -550,6 +554,8 @@ public class CaDoodleFile {
 	}
 
 	private OperationResult pruneForward(ICaDoodleOpperation op) throws Exception {
+		if(op==null)
+			throw new NullPointerException();
 		OperationResult res = OperationResult.INSERT;
 		if (getAccept() != null) {
 			res = getAccept().accept();
