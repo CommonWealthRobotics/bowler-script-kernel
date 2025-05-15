@@ -11,13 +11,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javafx.scene.image.WritableImage;
 import org.apache.commons.io.FileUtils;
+import org.apache.hc.client5.http.impl.Operations;
 import org.python.google.common.io.Files;
 
 import com.google.gson.Gson;
@@ -157,6 +160,11 @@ public class CaDoodleFile {
 		int indexStarting = getCurrentIndex();
 		setCurrentIndex(0);
 		setPercentInitialized(0);
+		opperations = opperations.stream()
+		        .filter(Objects::nonNull)
+		        .collect(Collectors.toCollection(ArrayList::new));
+		if(indexStarting>opperations.size())
+			indexStarting=opperations.size();
 		for (int i = 0; i < getOpperations().size(); i++) {
 			ICaDoodleOpperation op = getOpperations().get(i);
 			if(op==null)
