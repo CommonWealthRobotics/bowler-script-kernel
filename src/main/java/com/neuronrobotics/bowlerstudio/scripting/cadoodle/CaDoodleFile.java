@@ -94,6 +94,7 @@ public class CaDoodleFile {
 		}
 	};
 	private ICadoodleSaveStatusUpdate saveUpdate =null;
+	private boolean timelineOpen;
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
 			cache.get(op).clear();
@@ -839,7 +840,8 @@ public class CaDoodleFile {
 		String contents = toJson();
 		List<CSG> currentState = getCurrentState();
 		int currentIndex2 = getCurrentIndex();
-		getSaveUpdate().renderSplashFrame(1, "Save Doodle to "+selfInternal.getName());
+		
+		if(isTimelineOpen())getSaveUpdate().renderSplashFrame(1, "Save Doodle to "+selfInternal.getName());
 		FileUtils.write(selfInternal, contents, StandardCharsets.UTF_8, false);
 		// }
 		int num=0;
@@ -851,7 +853,7 @@ public class CaDoodleFile {
 			if (!f.exists())
 				try {
 					num++;
-					getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image "+i+".png");
+					if(isTimelineOpen())getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image "+i+".png");
 
 					setSaveImage(process, op);
 					
@@ -862,7 +864,7 @@ public class CaDoodleFile {
 		}
 		if (bom != null)
 			bom.save();
-		getSaveUpdate().renderSplashFrame(100, "Doofle save Done ");
+		if(isTimelineOpen())getSaveUpdate().renderSplashFrame(100, "Doofle save Done ");
 		fireTimelineUpdate(num);
 		// System.gc();
 		return getSelf();
@@ -1111,5 +1113,13 @@ public class CaDoodleFile {
 
 	public void setSaveUpdate(ICadoodleSaveStatusUpdate saveUpdate) {
 		this.saveUpdate = saveUpdate;
+	}
+
+	public void setTimelineVisable(boolean timelineOpen) {
+		this.timelineOpen = timelineOpen;	
+	}
+
+	public boolean isTimelineOpen() {
+		return timelineOpen;
 	}
 }
