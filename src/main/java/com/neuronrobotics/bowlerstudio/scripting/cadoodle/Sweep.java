@@ -23,6 +23,7 @@ import eu.mihosoft.vrl.v3d.Extrude;
 import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.ITransformProvider;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
@@ -44,6 +45,7 @@ public class Sweep extends AbstractAddFrom {
 	private LengthParameter rad = null;
 	private LengthParameter step = null;
 	private LengthParameter angle = null;
+	private LengthParameter spiral = null;
 	@Expose(serialize = true, deserialize = true)
 	private double defz = 0;
 	@Expose(serialize = true, deserialize = true)
@@ -52,7 +54,9 @@ public class Sweep extends AbstractAddFrom {
 	private double defstep=30;
 	@Expose(serialize = true, deserialize = true)
 	private double defangle=360;
-
+	@Expose(serialize = true, deserialize = true)
+	private double defSpiral=0;
+	
 	public Sweep set(File source) throws Exception {
 		if (!source.getName().toLowerCase().endsWith(".svg"))
 			throw new Exception("Sweep can only take files with the .svg extention");
@@ -81,11 +85,15 @@ public class Sweep extends AbstractAddFrom {
 		double radius = radius(name).getMM();
 		if (angle < 0)
 			angle = -angle;
+		double sprl = spiralStep(name).getMM();
 		Transform centerandAllignedPolygon = new Transform().movex(-b.getMinX()).movey(-b.getMinY());
 		Transform increment = new Transform().rotY(-angle).movey(z);
 		Transform radiusT = new Transform().movex(radius);
 		Polygon transformedP = p.transformed(centerandAllignedPolygon);
-		return Extrude.sweep(transformedP, increment, radiusT, steps).rotx(-90).setName(name);
+		ITransformProvider pr = (unit,domain)->{
+			return new Transform().movex(sprl*unit*d);
+		};
+		return Extrude.sweep(transformedP, increment, radiusT, steps,pr).rotx(-90).setName(name);
 	}
 
 	public LengthParameter radius(String name) {
@@ -121,7 +129,14 @@ public class Sweep extends AbstractAddFrom {
 			angle.setMM(0.001);
 		return angle;
 	}
-
+	public LengthParameter spiralStep(String name) {
+		String key = name + "_CaDoodle_Spiral";
+		if (spiral == null)
+			spiral = new LengthParameter(key, defSpiral, nopt);
+		if (spiral.getMM()<0)
+			spiral.setMM(0);
+		return spiral;
+	}
 
 
 	@Override
@@ -229,7 +244,7 @@ public class Sweep extends AbstractAddFrom {
 		Parameter radius = radius(name);
 		parameter.setStrValue(pathname);
 		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(csg).setParameter(parameter).setParameter(steps)
-				.setParameter(angle).setParameter(z).setParameter(radius).setColor(c).setIsHole(hole)
+				.setParameter(angle).setParameter(z).setParameter(radius).setParameter(spiralStep(pathname)).setColor(c).setIsHole(hole)
 				.setRegenerate(previous -> {
 					try {
 						File file = getFile();
