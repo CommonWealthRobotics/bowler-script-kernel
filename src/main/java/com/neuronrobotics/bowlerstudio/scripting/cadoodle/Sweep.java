@@ -132,7 +132,7 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter spiralStep(String name) {
 		String key = name + "_CaDoodle_Spiral";
 		if (spiral == null)
-			spiral = new LengthParameter(key, defSpiral, nopt);
+			spiral = new LengthParameter(key, getDefSpiral(), nopt);
 		if (spiral.getMM()<0)
 			spiral.setMM(0);
 		return spiral;
@@ -310,6 +310,14 @@ public class Sweep extends AbstractAddFrom {
 
 	public void setDefangle(double defangle) {
 		this.defangle = defangle;
+	}
+
+	public double getDefSpiral() {
+		return defSpiral;
+	}
+
+	public void setDefSpiral(double defSpiral) {
+		this.defSpiral = defSpiral;
 	}
 
 }
