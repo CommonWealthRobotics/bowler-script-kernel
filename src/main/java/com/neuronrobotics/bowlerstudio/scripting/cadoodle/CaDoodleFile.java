@@ -94,7 +94,7 @@ public class CaDoodleFile {
 		}
 	};
 	private ICadoodleSaveStatusUpdate saveUpdate =null;
-	private boolean timelineOpen;
+	private boolean timelineOpen=false;
 	public void close() {
 		for (ICaDoodleOpperation op : cache.keySet()) {
 			cache.get(op).clear();
@@ -1121,5 +1121,9 @@ public class CaDoodleFile {
 
 	public boolean isTimelineOpen() {
 		return timelineOpen;
+	}
+
+	public void setTimeCreated(long timeCreated) {
+		this.timeCreated = timeCreated;
 	}
 }
