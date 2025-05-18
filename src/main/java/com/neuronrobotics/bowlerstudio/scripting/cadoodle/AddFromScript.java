@@ -2,6 +2,8 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +24,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
 public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
@@ -55,6 +59,7 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 		nameIndex = 0;
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
+		boolean isDoodle = fileName.toLowerCase().endsWith(".doodle");
 
 		try {
 			ArrayList<Object> args = new ArrayList<>();
@@ -63,19 +68,36 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			configs.put("name", getName());
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
+			File currentdb = CSGDatabase.getDbFile();
+			if(isDoodle) {
+				CSGDatabase.saveDatabase();
+				Path tempFile = Files.createTempFile(currentdb.getName(), ".tmp");
+				CSGDatabase.setDbFile(tempFile.toFile());
+				CSGDatabase.clear();
+			}
 			List<CSG> flaten = ScriptingEngine.flaten(gitULR, fileName, CSG.class, args);
 			ArrayList<CSG> collect = new ArrayList<>();
 			collect.addAll(flaten);
 			for(int i=0;i<collect.size();i++) {
 				CSG csg=collect.get(i);
+				if(isDoodle) {
+					csg.getMapOfparametrics().clear();
+				}
 				Transform nrToCSG = TransformFactory.nrToCSG( getLocation() );
+				String orderedName = getOrderedName();
 				CSG tmp=csg
 						.transformed(nrToCSG)
 						.syncProperties(csg)
 						.setRegenerate(csg.getRegenerate())
-						.setName(getOrderedName());
+						.setName(orderedName);
 				collect.set(i, tmp);
 				MoveCenter.set(getName(), tmp, nrToCSG);
+			}
+			if(isDoodle) {
+				Path tempFile = Files.createTempFile(currentdb.getName(), ".tmp");
+				CSGDatabase.setDbFile(tempFile.toFile());
+				CSGDatabase.clear();
+				CSGDatabase.setDbFile(currentdb);
 			}
 			back.addAll(collect);
 		} catch (Exception e) {
