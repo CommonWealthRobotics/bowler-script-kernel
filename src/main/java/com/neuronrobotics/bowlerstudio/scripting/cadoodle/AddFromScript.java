@@ -25,6 +25,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
 public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperation {
@@ -68,12 +69,10 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 			configs.put("name", getName());
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
-			File currentdb = CSGDatabase.getDbFile();
+			CSGDatabaseInstance instance = CSGDatabase.getInstance();
 			if(isDoodle) {
-				CSGDatabase.saveDatabase();
-				Path tempFile = Files.createTempFile(currentdb.getName(), ".tmp");
-				CSGDatabase.setDbFile(tempFile.toFile());
-				CSGDatabase.clear();
+				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
+				CSGDatabase.setInstance(new CSGDatabaseInstance(tempFile.toFile()));
 			}
 			List<CSG> flaten = ScriptingEngine.flaten(gitULR, fileName, CSG.class, args);
 			ArrayList<CSG> collect = new ArrayList<>();
@@ -94,10 +93,7 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 				MoveCenter.set(getName(), tmp, nrToCSG);
 			}
 			if(isDoodle) {
-				Path tempFile = Files.createTempFile(currentdb.getName(), ".tmp");
-				CSGDatabase.setDbFile(tempFile.toFile());
-				CSGDatabase.clear();
-				CSGDatabase.setDbFile(currentdb);
+				CSGDatabase.setInstance(instance);
 			}
 			back.addAll(collect);
 		} catch (Exception e) {
