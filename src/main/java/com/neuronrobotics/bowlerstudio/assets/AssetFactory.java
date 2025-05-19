@@ -29,7 +29,7 @@ public class AssetFactory {
 	private static String gitSource = "https://github.com/CommonWealthRobotics/" + repo + ".git";
 	private static HashMap<String, Image> cache = new HashMap<>();
 	private static HashMap<String, FXMLLoader> loaders = new HashMap<>();
-	private static String assetRepoBranch = "";
+	private static String assetRepoBranch = "main";
 
 	private AssetFactory() {
 	}
@@ -87,11 +87,12 @@ public class AssetFactory {
 	@SuppressWarnings("restriction")
 	public static Image loadAsset(String file) throws Exception {
 		if (cache.get(file) == null) {
+			System.out.println("Loading asset "+file);
 			File f = loadFile(file);
 			if (f.getName().endsWith(".fxml")) {
 				loadLayout(file);
 				return null;
-			} else if (f.getName().endsWith(".png")) {
+			} else if (f.getName().endsWith(".png") && f.exists()) {
 				cache.put(file, new Image(f.toURI().toString()));
 			} else if ((f == null || !f.exists()) && f.getName().endsWith(".png")) {
 				WritableImage obj_img = new WritableImage(30, 30);
