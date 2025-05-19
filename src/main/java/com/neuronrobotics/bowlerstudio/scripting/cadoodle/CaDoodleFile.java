@@ -42,6 +42,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.IParametric;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
@@ -138,18 +139,7 @@ public class CaDoodleFile {
 			if (!imageCacheDir.exists())
 				imageCacheDir.mkdir();
 			File db = new File(selfInternal.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
-			try {
-				// set a temp file for the database to clear
-				// this ensures that parameters are not cleared from another project :/
-				File createTempFile = File.createTempFile(projectName, ".json");
-				CSGDatabase.setDbFile(createTempFile);
-				CSGDatabase.clear();
-				createTempFile.delete();
-			} catch (IOException e) {
-				// Auto-generated catch block
-				e.printStackTrace();
-			}
-			CSGDatabase.setDbFile(db);
+			CSGDatabase.setInstance(new CSGDatabaseInstance(db));
 			StringParameter loc = new StringParameter("CaDoodle_File_Location", selfInternal.getAbsolutePath(),
 					new ArrayList<String>());
 			loc.setStrValue(selfInternal.getAbsolutePath());

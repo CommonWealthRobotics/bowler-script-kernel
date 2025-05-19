@@ -15,15 +15,17 @@ import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
-import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
+import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
@@ -31,15 +33,23 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 	private TransformNR location = null;
 	private ArrayList<String> options = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
-	private Boolean preventBoM =false;
+	private Boolean preventBoM = false;
+
 	public AddFromFile set(File source) {
-		for(String s:ScriptingEngine.getAllExtentions()) {
-			if(source.getName().toLowerCase().endsWith(s.toLowerCase())) {
-				toLocal(source,getName());
+		for (String s : ScriptingEngine.getAllExtentions()) {
+			if (source.getName().toLowerCase().endsWith(s.toLowerCase())) {
+				toLocal(source, getName());
+				try {
+					getFile();
+				} catch (NoSuchFileException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					break;
+				}
 				return this;
 			}
 		}
-		throw new RuntimeException("File Extention not supported: "+source.getName());
+		throw new RuntimeException("File Extention not supported: " + source.getName());
 	}
 
 	@Override
@@ -60,26 +70,37 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
-			if(!file.exists()) {
+			if (!file.exists()) {
 				throw new RuntimeException("Failed to find file");
 			}
-			
-			ArrayList<Object>args = new ArrayList<>();
-			args.addAll(Arrays.asList(name ));
-			HashMap<String, Object> configs =new HashMap<String, Object>();
+
+			ArrayList<Object> args = new ArrayList<>();
+			args.addAll(Arrays.asList(name));
+			HashMap<String, Object> configs = new HashMap<String, Object>();
 			configs.put("name", name);
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
+			boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
+			CSGDatabaseInstance instance = CSGDatabase.getInstance();
+			if(isDoodle) {
+				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
+				CSGDatabase.setInstance(new CSGDatabaseInstance(tempFile.toFile()));
+			}
 			List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
+				if(isDoodle) {
+					csg.getMapOfparametrics().clear();
+					csg.setStorage(new PropertyStorage());
+				}
 				try {
-					CSG processedCSG = processGiven(csg, i, getOrderedName());
+					CSG processedCSG = processGiven(csg, i, getOrderedName(),file);
 					collect.add(processedCSG);
-				}catch(Exception ex) {
+				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
+			CSGDatabase.setInstance(instance);
 			back.addAll(collect);
 //			VitaminBomManager boM = CaDoodleFile.getBoM();
 //			VitaminLocation loc = boM.getByName(name);
@@ -122,54 +143,172 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
 		return targetFile;
 	}
+
 	public static File toLocal(File file, String name) {
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
 		File parentFileIncoming = file.getParentFile();
-		File parentFile = new File(loc.getStrValue()).getParentFile();
-//		if(parentFile==null)
-//			try {
-//				parentFile=File.createTempFile(name, name).getParentFile();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+		String strValue = loc.getStrValue();
+		File parentFile = new File(strValue).getParentFile();
 		String source = parentFile.getAbsolutePath();
+		boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
 		if (parentFileIncoming != null) {
 			String parentIncoming = parentFileIncoming.getAbsolutePath();
-
 			String lowerCase = parentIncoming.toLowerCase();
 			String lowerCase2 = source.toLowerCase();
 			boolean b = !lowerCase.contentEquals(lowerCase2);
 			boolean exists = file.exists();
 			if (b && exists) {
-				File copied;
-				try {
-					copied = copyFileToNewDirectory(file, parentFile, name);
-					file = copied;
-				} catch (IOException e) {
-					// Auto-generated catch block
-					e.printStackTrace();
+				if (!isDoodle) {
+					File copied;
+					try {
+						copied = copyFileToNewDirectory(file, parentFile, name);
+						file = copied;
+					} catch (IOException e) {
+						// Auto-generated catch block
+						e.printStackTrace();
+					}
+				} else {
+					// doodle copy
+					File doodleParent = file.getParentFile();
+					File targetParent = new File(parentFile.getAbsoluteFile() + delim() + name);
+					targetParent.mkdirs();
+					recursiveCopy(doodleParent.getAbsolutePath(),targetParent.getAbsolutePath());
+//					for (File f : doodleParent.listFiles()) {
+//						File file2 = new File(targetParent.getAbsolutePath() + delim() + f.getName());
+//						try {
+//							Files.copy(f.toPath(), file2.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//						if (f.getName().toLowerCase().endsWith(".doodle")) {
+//							file = file2;
+//						}
+//					}
 				}
 			}
 		}
-		file = new File(source + DownloadManager.delim() + file.getName());
+		if (!isDoodle)
+			file = new File(source + delim() + file.getName());
 		return file;
 	}
-	
+
+	/**
+	 * Recursively copies all files and folders from the source directory to the
+	 * target directory.
+	 * 
+	 * @param sourceDir The source directory path
+	 * @param targetDir The target directory path
+	 * @return true if the copy operation was successful, false otherwise
+	 */
+	public static boolean recursiveCopy(String sourceDir, String targetDir) {
+		File source = new File(sourceDir);
+		File target = new File(targetDir);
+
+		// Validate inputs
+		if (!source.exists()) {
+			System.err.println("Error: Source directory '" + sourceDir + "' does not exist.");
+			return false;
+		}
+
+		if (!source.isDirectory()) {
+			System.err.println("Error: Source '" + sourceDir + "' is not a directory.");
+			return false;
+		}
+
+		// Create target directory if it doesn't exist
+		if (!target.exists()) {
+			if (!target.mkdirs()) {
+				System.err.println("Error: Could not create target directory '" + targetDir + "'.");
+				return false;
+			}
+			System.out.println("Created target directory: " + targetDir);
+		}
+
+		try {
+			return copyDirectory(source, target);
+		} catch (IOException e) {
+			System.err.println("Error during copy operation: " + e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Helper method to copy a directory recursively.
+	 * 
+	 * @param sourceDir The source directory
+	 * @param targetDir The target directory
+	 * @return true if the copy operation was successful
+	 * @throws IOException If an I/O error occurs
+	 */
+	private static boolean copyDirectory(File sourceDir, File targetDir) throws IOException {
+		// Get all files and directories in the source directory
+		File[] files = sourceDir.listFiles();
+
+		if (files == null) {
+			System.err.println("Warning: Could not list contents of directory: " + sourceDir.getAbsolutePath());
+			return false;
+		}
+
+		for (File file : files) {
+			// Construct the target path
+			File targetFile = new File(targetDir, file.getName());
+
+			if (file.isDirectory()) {
+				// Create the target directory if it doesn't exist
+				if (!targetFile.exists() && !targetFile.mkdirs()) {
+					System.err.println("Error: Could not create directory: " + targetFile.getAbsolutePath());
+					return false;
+				}
+
+				// Recursively copy the subdirectory
+				if (!copyDirectory(file, targetFile)) {
+					return false;
+				}
+			} else {
+				// Copy the file, preserving attributes
+				try {
+					Path sourcePath = file.toPath();
+					Path targetPath = targetFile.toPath();
+
+					Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING,
+							StandardCopyOption.COPY_ATTRIBUTES);
+
+					System.out.println("Copied: " + sourcePath + " -> " + targetPath);
+				} catch (IOException e) {
+					System.err.println("Error copying file " + file.getAbsolutePath() + ": " + e.getMessage());
+					throw e;
+				}
+			}
+		}
+
+		return true;
+	}
+
 	public static File getFile(String name) {
 		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
 		File parentFile = new File(loc.getStrValue()).getParentFile();
-		for(String f:parentFile.list()) {
-			if(f.contains(name)) {
-				for(String s:ScriptingEngine.getAllExtentions()) {
-					if(f.toLowerCase().endsWith(s.toLowerCase())) {
-						String pathname = parentFile.getAbsolutePath() + DownloadManager.delim() + f;
-						return  new File(pathname);
+		for (File f : parentFile.listFiles()) {
+			if (f.getName().contains(name)) {
+				if (f.isDirectory()) {
+					// is a doodle file
+					for (File d : f.listFiles()) {
+						if (d.getName().toLowerCase().endsWith(".doodle")) {
+							return d;
+						}
+					}
+				} else {
+					for (String s : ScriptingEngine.getAllExtentions()) {
+						if (f.getName().toLowerCase().endsWith(s.toLowerCase())) {
+							String pathname = parentFile.getAbsolutePath() + delim() + f;
+							return new File(pathname);
+						}
 					}
 				}
 			}
+
 		}
-		throw new RuntimeException("File not found! "+name);
+		throw new RuntimeException("File not found! " + name);
 	}
 //
 //	private String getStrValue() {
@@ -177,25 +316,36 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 //		return getParameter("UnKnown").getStrValue();
 //	}
 
-	private CSG processGiven(CSG csg, int i,  String n) {
+	private CSG processGiven(CSG csg, int i, String n, File f) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
-		String pathname = getFile(this.name).getAbsolutePath();
+		String pathname =f.getAbsolutePath();
 
-		StringParameter parameter=new StringParameter(n + "_CaDoodle_File", pathname, options);
+		StringParameter parameter = new StringParameter(n + "_CaDoodle_File", pathname, options);
 		parameter.setStrValue(pathname);
+
 		CSG processedCSG = csg
 //		    .moveToCenterX()
 //		    .moveToCenterY()
 //		    .toZMin()
-				.transformed(nrToCSG).syncProperties(csg).setParameter(parameter)
-				.setRegenerate(previous -> {
+				.transformed(nrToCSG).syncProperties(csg).setParameter(parameter).setRegenerate(previous -> {
 					try {
-						File file = getFile();
+						File file =f;
+						CSGDatabaseInstance instance = CSGDatabase.getInstance();
+						boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
+						if(isDoodle) {
+							Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
+							CSGDatabase.setInstance(new CSGDatabaseInstance(tempFile.toFile()));
+						}
 						String fileLocation = file.getAbsolutePath();
 						com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
 						List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, null);
 						CSG csg1 = flattenedCSGs.get(i);
-						return processGiven(csg1, i, n);
+						if(isDoodle) {
+							csg1.getMapOfparametrics().clear();
+							csg1.setStorage(new PropertyStorage());
+						}
+						CSGDatabase.setInstance(instance);
+						return processGiven(csg1, i, n,f);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -215,8 +365,6 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 		this.location = location;
 		return this;
 	}
-
-
 
 	public Boolean getPreventBoM() {
 		return preventBoM;
