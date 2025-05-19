@@ -7,26 +7,19 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
 import org.eclipse.jgit.api.errors.GitAPIException;
 
 import com.google.gson.annotations.Expose;
-import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
-import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
-import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
 public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperation {
 	@Expose(serialize = true, deserialize = true)
@@ -81,6 +74,7 @@ public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperatio
 				CSG csg=collect.get(i);
 				if(isDoodle) {
 					csg.getMapOfparametrics().clear();
+					csg.setStorage(new PropertyStorage());
 				}
 				Transform nrToCSG = TransformFactory.nrToCSG( getLocation() );
 				String orderedName = getOrderedName();
