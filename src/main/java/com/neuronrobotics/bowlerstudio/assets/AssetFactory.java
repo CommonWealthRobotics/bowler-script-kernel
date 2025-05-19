@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.assets;
 
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
+import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 //import javafx.embed.swing.SwingFXUtils;
@@ -87,7 +88,7 @@ public class AssetFactory {
 	@SuppressWarnings("restriction")
 	public static Image loadAsset(String file) throws Exception {
 		if (cache.get(file) == null) {
-			System.out.println("Loading asset "+file);
+			System.out.println("Loading asset " + file);
 			File f = loadFile(file);
 			if (f.getName().endsWith(".fxml")) {
 				loadLayout(file);
@@ -107,20 +108,22 @@ public class AssetFactory {
 				}
 
 				cache.put(file, obj_img);
-				com.neuronrobotics.sdk.common.Log.error("No image at " + file);
+				if (PasswordManager.loggedIn()) {
+					com.neuronrobotics.sdk.common.Log.error("No image at " + file);
 
-				try {
-					new RuntimeException().printStackTrace();
-					File imageFile = ScriptingEngine.createFile(getGitSource(), file, "create file");
 					try {
-						String fileName = imageFile.getName();
-						writeImage(obj_img, imageFile);
+						new RuntimeException().printStackTrace();
+						File imageFile = ScriptingEngine.createFile(getGitSource(), file, "create file");
+						try {
+							String fileName = imageFile.getName();
+							writeImage(obj_img, imageFile);
 
-					} catch (Exception ignored) {
+						} catch (Exception ignored) {
+						}
+						ScriptingEngine.createFile(getGitSource(), file, "saving new content");
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-					ScriptingEngine.createFile(getGitSource(), file, "saving new content");
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
 			} else {
 				return null;
