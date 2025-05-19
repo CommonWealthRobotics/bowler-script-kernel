@@ -89,10 +89,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 			List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
-				if(isDoodle) {
-					csg.getMapOfparametrics().clear();
-					csg.setStorage(new PropertyStorage());
-				}
+
 				try {
 					CSG processedCSG = processGiven(csg, i, getOrderedName(),file);
 					collect.add(processedCSG);
@@ -101,13 +98,9 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 				}
 			}
 			CSGDatabase.setInstance(instance);
+			for(CSG csg1:collect)
+				csg1.setParameter(getFileLocationparam(file));
 			back.addAll(collect);
-//			VitaminBomManager boM = CaDoodleFile.getBoM();
-//			VitaminLocation loc = boM.getByName(name);
-//			if(loc!=null) {
-//				loc.setLocation(location);
-//				boM.save();
-//			}
 		} catch (Exception e) {
 			// Auto-generated catch block
 			e.printStackTrace();
@@ -306,20 +299,16 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 
 	private CSG processGiven(CSG csg, int i, String n, File f) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
-		String pathname =f.getAbsolutePath();
-
-		StringParameter parameter = new StringParameter(n + "_CaDoodle_File", pathname, options);
-		parameter.setStrValue(pathname);
+		boolean isDoodle = f.getName().toLowerCase().endsWith(".doodle");
+		if(isDoodle) {
+			csg.setStorage(new PropertyStorage());
+		}
 
 		CSG processedCSG = csg
-//		    .moveToCenterX()
-//		    .moveToCenterY()
-//		    .toZMin()
-				.transformed(nrToCSG).syncProperties(csg).setParameter(parameter).setRegenerate(previous -> {
+				.transformed(nrToCSG).syncProperties(csg).setRegenerate(previous -> {
 					try {
 						File file =f;
 						CSGDatabaseInstance instance = CSGDatabase.getInstance();
-						boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
 						if(isDoodle) {
 							Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
 							CSGDatabase.setInstance(new CSGDatabaseInstance(tempFile.toFile()));
@@ -333,6 +322,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 							csg1.setStorage(new PropertyStorage());
 						}
 						CSGDatabase.setInstance(instance);
+						csg1.setParameter(getFileLocationparam(f));
 						return processGiven(csg1, i, n,f);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -341,6 +331,12 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 				}).setName(n);
 		MoveCenter.set(getName(), processedCSG, nrToCSG);
 		return processedCSG;
+	}
+
+	private StringParameter getFileLocationparam( File pathname) {
+		StringParameter stringParameter = new StringParameter(name + "_CaDoodle_File", pathname.getAbsolutePath(), options);
+		stringParameter.setStrValue(pathname.getAbsolutePath());
+		return stringParameter;
 	}
 
 	public TransformNR getLocation() {
