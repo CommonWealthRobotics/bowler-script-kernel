@@ -1112,6 +1112,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git
 	public static File fileFromGit(String remoteURI, String branch, String fileInRepo)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		if(branch!=null)
+			if(branch.length()==0)
+				branch=null;
 		File gitRepoFile = cloneRepo(remoteURI, branch);
 		return new File(gitRepoFile.getAbsolutePath() + "/" + fileInRepo);
 	}
