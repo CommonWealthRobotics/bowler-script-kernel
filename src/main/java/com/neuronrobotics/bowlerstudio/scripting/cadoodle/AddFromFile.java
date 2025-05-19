@@ -173,18 +173,6 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 					File targetParent = new File(parentFile.getAbsoluteFile() + delim() + name);
 					targetParent.mkdirs();
 					recursiveCopy(doodleParent.getAbsolutePath(),targetParent.getAbsolutePath());
-//					for (File f : doodleParent.listFiles()) {
-//						File file2 = new File(targetParent.getAbsolutePath() + delim() + f.getName());
-//						try {
-//							Files.copy(f.toPath(), file2.toPath(), StandardCopyOption.REPLACE_EXISTING);
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-//						if (f.getName().toLowerCase().endsWith(".doodle")) {
-//							file = file2;
-//						}
-//					}
 				}
 			}
 		}
