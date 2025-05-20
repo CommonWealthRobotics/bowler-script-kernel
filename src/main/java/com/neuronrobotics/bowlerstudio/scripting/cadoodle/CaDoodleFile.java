@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.TickToc;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
@@ -825,13 +827,30 @@ public class CaDoodleFile {
 	}
 
 	public File save() throws IOException {
-
-		// synchronized (selfInternal) {
 		String contents = toJson();
 		List<CSG> currentState = getCurrentState();
+		CSG thumb = null;
+		for(CSG c:currentState) {
+			if(c.isInGroup())
+				continue;
+			if(c.isHide())
+				continue;
+			if(thumb==null)
+				thumb=c;
+			else {
+				thumb=thumb.dumbUnion(c);
+			}
+		}
+		String string = getSTLThumbnailLocation();
 		int currentIndex2 = getCurrentIndex();
-		
 		if(isTimelineOpen())getSaveUpdate().renderSplashFrame(1, "Save Doodle to "+selfInternal.getName());
+		boolean manif=CSG.isPreventNonManifoldTriangles();
+		if(manif)
+			CSG.setPreventNonManifoldTriangles(false);
+		FileUtil.write(Paths.get(string),
+				thumb.toStlString());
+		if(manif)
+			CSG.setPreventNonManifoldTriangles(true);
 		FileUtils.write(selfInternal, contents, StandardCharsets.UTF_8, false);
 		// }
 		int num=0;
@@ -858,6 +877,15 @@ public class CaDoodleFile {
 		fireTimelineUpdate(num);
 		// System.gc();
 		return getSelf();
+	}
+	public File getSTLThumbnailFile() {
+		File back = new File(getSTLThumbnailLocation());
+		return back;
+	}
+	public String getSTLThumbnailLocation() {
+		File folder = selfInternal.getParentFile();
+		String string = folder.getAbsolutePath()+delim()+"thumbnail.stl";
+		return string;
 	}
 
 	private void setSaveImage(List<CSG> currentState, ICaDoodleOpperation op) throws IOException {

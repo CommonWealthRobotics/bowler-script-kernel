@@ -152,6 +152,7 @@ public class Sweep extends AbstractAddFrom {
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
+			System.out.println("Loading File "+file.getAbsolutePath());
 			if (!file.exists()) {
 				throw new RuntimeException("Failed to find file");
 			}

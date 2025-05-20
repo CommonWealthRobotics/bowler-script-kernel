@@ -281,8 +281,7 @@ public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation 
 				} else {
 					for (String s : ScriptingEngine.getAllExtentions()) {
 						if (f.getName().toLowerCase().endsWith(s.toLowerCase())) {
-							String pathname = parentFile.getAbsolutePath() + delim() + f;
-							return new File(pathname);
+							return f;
 						}
 					}
 				}
