@@ -65,24 +65,23 @@ public class CaDoodleFile {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR rulerLocation = new TransformNR();
 	@Expose(serialize = true, deserialize = true)
+	
+	// Non Serialised private variables
 	private TransformNR workplane = new TransformNR();
-	@Expose(serialize = false, deserialize = false)
 	private File selfInternal;
 //	@Expose (serialize = false, deserialize = false)
 //	private List<CSG> currentState = new ArrayList<CSG>();
-	@Expose(serialize = false, deserialize = false)
 	private double percentInitialized = 0;
-	@Expose(serialize = false, deserialize = false)
-	private HashMap<AbstractCaDoodleFileAccepter, List<CSG>> cache = new HashMap<AbstractCaDoodleFileAccepter, List<CSG>>();
+	private final HashMap<AbstractCaDoodleFileAccepter, List<CSG>> cache = new HashMap<AbstractCaDoodleFileAccepter, List<CSG>>();
 	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {
 	}.getType();
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting()
 			.excludeFieldsWithoutExposeAnnotation().registerTypeAdapterFactory(new ICaDoodleOperationAdapterFactory())
 			.create();
-	private ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
+	private final ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
 	private final ArrayList<Thread> opperationRunner = new ArrayList<Thread>();
 	private boolean regenerating;
-	private CopyOnWriteArrayList<AbstractCaDoodleFileAccepter> toProcess = new CopyOnWriteArrayList<AbstractCaDoodleFileAccepter>();
+	private final CopyOnWriteArrayList<AbstractCaDoodleFileAccepter> toProcess = new CopyOnWriteArrayList<AbstractCaDoodleFileAccepter>();
 	private javafx.scene.image.WritableImage img;
 	private boolean initializing;
 	private static HashMap<String, VitaminBomManager> bomManagers = new HashMap<>();
@@ -100,6 +99,7 @@ public class CaDoodleFile {
 	private boolean timelineOpen = false;
 
 	public void close() {
+		//new Exception("CaDoodle File Closed here").printStackTrace();
 		for(AbstractCaDoodleFileAccepter op:getOpperations()) {
 			op.setCaDoodleFile(null);
 		}
@@ -107,11 +107,8 @@ public class CaDoodleFile {
 			cache.get(op).clear();
 		}
 		cache.clear();
-		cache = null;
 		clearListeners();
-		listeners = null;
 		toProcess.clear();
-		toProcess = null;
 		img = null;
 		for (Thread t : opperationRunner)
 			t.interrupt();
