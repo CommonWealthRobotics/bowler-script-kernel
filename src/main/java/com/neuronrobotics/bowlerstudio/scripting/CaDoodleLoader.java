@@ -40,6 +40,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 				back.remove(c);
 			}
 		}
+		loaded.close();
 		return back;
 	}
 

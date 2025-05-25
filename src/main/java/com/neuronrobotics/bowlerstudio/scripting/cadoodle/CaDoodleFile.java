@@ -100,6 +100,9 @@ public class CaDoodleFile {
 	private boolean timelineOpen = false;
 
 	public void close() {
+		for(AbstractCaDoodleFileAccepter op:getOpperations()) {
+			op.setCaDoodleFile(null);
+		}
 		for (ICaDoodleOpperation op : cache.keySet()) {
 			cache.get(op).clear();
 		}
@@ -112,6 +115,7 @@ public class CaDoodleFile {
 		img = null;
 		for (Thread t : opperationRunner)
 			t.interrupt();
+		
 	}
 
 	public CaDoodleFile clearListeners() {
