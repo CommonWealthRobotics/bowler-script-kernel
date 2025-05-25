@@ -55,7 +55,7 @@ import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 public class CaDoodleFile {
 	public static final String NO_NAME = "NoName";
 	@Expose(serialize = true, deserialize = true)
-	private ArrayList<ICaDoodleOpperation> opperations = new ArrayList<ICaDoodleOpperation>();
+	private ArrayList<AbstractCaDoodleFileAccepter> opperations = new ArrayList<AbstractCaDoodleFileAccepter>();
 	@Expose(serialize = true, deserialize = true)
 	private int currentIndex = 0;
 	@Expose(serialize = true, deserialize = true)
@@ -73,7 +73,7 @@ public class CaDoodleFile {
 	@Expose(serialize = false, deserialize = false)
 	private double percentInitialized = 0;
 	@Expose(serialize = false, deserialize = false)
-	private HashMap<ICaDoodleOpperation, List<CSG>> cache = new HashMap<ICaDoodleOpperation, List<CSG>>();
+	private HashMap<AbstractCaDoodleFileAccepter, List<CSG>> cache = new HashMap<AbstractCaDoodleFileAccepter, List<CSG>>();
 	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {
 	}.getType();
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting()
@@ -82,7 +82,7 @@ public class CaDoodleFile {
 	private ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
 	private final ArrayList<Thread> opperationRunner = new ArrayList<Thread>();
 	private boolean regenerating;
-	private CopyOnWriteArrayList<ICaDoodleOpperation> toProcess = new CopyOnWriteArrayList<ICaDoodleOpperation>();
+	private CopyOnWriteArrayList<AbstractCaDoodleFileAccepter> toProcess = new CopyOnWriteArrayList<AbstractCaDoodleFileAccepter>();
 	private javafx.scene.image.WritableImage img;
 	private boolean initializing;
 	private static HashMap<String, VitaminBomManager> bomManagers = new HashMap<>();
@@ -158,7 +158,7 @@ public class CaDoodleFile {
 		if (indexStarting > opperations.size())
 			indexStarting = opperations.size();
 		for (int i = 0; i < getOpperations().size(); i++) {
-			ICaDoodleOpperation op = getOpperations().get(i);
+			AbstractCaDoodleFileAccepter op = getOpperations().get(i);
 			if (op == null)
 				continue;
 			setPercentInitialized(((double) i) / (double) getOpperations().size());
@@ -270,7 +270,7 @@ public class CaDoodleFile {
 							setPercentInitialized(((double) getCurrentIndex()) / size);
 							// com.neuronrobotics.sdk.common.Log.error("Regenerating "+currentIndex);
 							int currentIndex2 = getCurrentIndex() - 1;
-							ICaDoodleOpperation op = getOpperations().get(currentIndex2);
+							AbstractCaDoodleFileAccepter op = getOpperations().get(currentIndex2);
 							getSaveUpdate().renderSplashFrame(percent,
 									"Regenerating " + op.getType() + " " + currentIndex2);
 							getTimelineImageFile(op).delete();
@@ -326,7 +326,7 @@ public class CaDoodleFile {
 
 				this.setName("regenerateCurrent Thread");
 
-				ICaDoodleOpperation op = getCurrentOpperation();
+				AbstractCaDoodleFileAccepter op = getCurrentOpperation();
 				TickToc.tic("Start regenerate");
 				List<CSG> process = op.process(getPreviouState());
 				TickToc.tic("Finish regenerate");
@@ -350,7 +350,8 @@ public class CaDoodleFile {
 
 	}
 
-	private void process(ICaDoodleOpperation op) {
+	private void process(AbstractCaDoodleFileAccepter op) {
+		op.setCaDoodleFile(this);
 		List<CSG> process = op.process(getCurrentState());
 		int currentIndex2 = getCurrentIndex();
 		storeResultInCache(op, process);
@@ -377,7 +378,7 @@ public class CaDoodleFile {
 		return false;
 	}
 
-	public Thread addOpperation(ICaDoodleOpperation o) throws CadoodleConcurrencyException {
+	public Thread addOpperation(AbstractCaDoodleFileAccepter o) throws CadoodleConcurrencyException {
 		if (o == null)
 			throw new NullPointerException();
 		toProcess.add(o);
@@ -393,7 +394,7 @@ public class CaDoodleFile {
 				while (toProcess.size() > 0) {
 					result = OperationResult.APPEND;
 					this.setName("addOpperation Thread " + toProcess.size());
-					ICaDoodleOpperation op = toProcess.remove(0);
+					AbstractCaDoodleFileAccepter op = toProcess.remove(0);
 					if (getCurrentIndex() != getOpperations().size()) {
 						try {
 							fireRegenerateStart();
@@ -578,9 +579,9 @@ public class CaDoodleFile {
 				imageCache.delete();
 			}
 		if (res == OperationResult.PRUNE) {
-			List<ICaDoodleOpperation> subList = (List<ICaDoodleOpperation>) getOpperations().subList(0,
+			List<AbstractCaDoodleFileAccepter> subList = (List<AbstractCaDoodleFileAccepter>) getOpperations().subList(0,
 					getCurrentIndex());
-			ArrayList<ICaDoodleOpperation> newList = new ArrayList<ICaDoodleOpperation>();
+			ArrayList<AbstractCaDoodleFileAccepter> newList = new ArrayList<AbstractCaDoodleFileAccepter>();
 			newList.addAll(subList);
 			setOpperations(newList);
 			com.neuronrobotics.sdk.common.Log.error("Pruning forward here!");
@@ -589,7 +590,7 @@ public class CaDoodleFile {
 		return res;
 	}
 
-	private void storeResultInCache(ICaDoodleOpperation op, List<CSG> process) {
+	private void storeResultInCache(AbstractCaDoodleFileAccepter op, List<CSG> process) {
 		ArrayList<CSG> cachedCopy = new ArrayList<CSG>();
 		HashSet<String> names = new HashSet<>();
 		for (CSG c : process) {
@@ -678,7 +679,7 @@ public class CaDoodleFile {
 		setCurrentState(key, getCurrentState());
 	}
 
-	public ICaDoodleOpperation getCurrentOpperation() {
+	public AbstractCaDoodleFileAccepter getCurrentOpperation() {
 		if (getCurrentIndex() == 0)
 			return null;
 		return getOpperations().get(getCurrentIndex() - 1);
@@ -1039,11 +1040,11 @@ public class CaDoodleFile {
 		return file;
 	}
 
-	public ArrayList<ICaDoodleOpperation> getOpperations() {
+	public ArrayList<AbstractCaDoodleFileAccepter> getOpperations() {
 		return opperations;
 	}
 
-	public void setOpperations(ArrayList<ICaDoodleOpperation> opperations) {
+	public void setOpperations(ArrayList<AbstractCaDoodleFileAccepter> opperations) {
 		this.opperations = opperations;
 		currentIndex = opperations.size();
 	}
