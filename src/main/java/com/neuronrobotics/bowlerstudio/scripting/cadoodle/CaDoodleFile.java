@@ -245,6 +245,8 @@ public class CaDoodleFile {
 //					.printStackTrace();
 		}
 		Thread t = null;
+		CaDoodleFile cf = this;
+
 		t = new Thread() {
 			public void run() {
 				this.setName("Regeneration Threads");
@@ -275,6 +277,7 @@ public class CaDoodleFile {
 									"Regenerating " + op.getType() + " " + currentIndex2);
 							getTimelineImageFile(op).delete();
 							try {
+								op.setCaDoodleFile(cf);
 								List<CSG> process = op.process(getPreviouState());
 								storeResultInCache(op, process);
 								setCurrentState(op, process);
@@ -318,6 +321,7 @@ public class CaDoodleFile {
 		}
 		fireRegenerateStart();
 		Thread t = null;
+		CaDoodleFile cf = this;
 		t = new Thread() {
 			public void run() {
 				timeOfLastUpdate = System.currentTimeMillis();
@@ -328,6 +332,7 @@ public class CaDoodleFile {
 
 				AbstractCaDoodleFileAccepter op = getCurrentOpperation();
 				TickToc.tic("Start regenerate");
+				op.setCaDoodleFile(cf);
 				List<CSG> process = op.process(getPreviouState());
 				TickToc.tic("Finish regenerate");
 				int currentIndex2 = getCurrentIndex();
