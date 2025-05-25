@@ -7,7 +7,7 @@ import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class Lock implements ICaDoodleOpperation {
+public class Lock extends AbstractCaDoodleFileAccepter {
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Override

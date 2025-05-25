@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 
-public abstract class AbstractAddFrom  implements ICaDoodleOpperation {
+public abstract class AbstractAddFrom  extends AbstractCaDoodleFileAccepter{
 	@Expose (serialize = false, deserialize = false)
 	protected HashSet<String> namesAdded = new HashSet<>();
 	@Expose (serialize = false, deserialize = false)

@@ -8,7 +8,7 @@ import com.google.gson.annotations.Expose;
 import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
 
-public class ToSolid implements ICaDoodleOpperation {
+public class ToSolid extends AbstractCaDoodleFileAccepter{
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose (serialize = true, deserialize = true)

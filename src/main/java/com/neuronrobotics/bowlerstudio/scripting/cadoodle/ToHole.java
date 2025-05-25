@@ -7,7 +7,7 @@ import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class ToHole implements ICaDoodleOpperation {
+public class ToHole extends AbstractCaDoodleFileAccepter{
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Override
