@@ -57,6 +57,7 @@ import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.CSGServer;
 import eu.mihosoft.vrl.v3d.ICSGProgress;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import javafx.application.Platform;
@@ -72,7 +73,7 @@ public class BowlerKernel {
 
 	// private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
-	private static boolean kernelMode=true;
+	private static boolean kernelMode = true;
 
 	private static void loadHistoryLocal() {
 		historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
@@ -108,8 +109,9 @@ public class BowlerKernel {
 				"java -jar BowlerScriptKernel.jar -p <file 1> .. <file n> # This will load one script then take the list of objects returned and pss them to the next script as its 'args' variable ");
 		com.neuronrobotics.sdk.common.Log.error(
 				"java -jar BowlerScriptKernel.jar -r <Groovy Jython or Clojure> (Optional)(-s or -p)<file 1> .. <file n> # This will start a shell in the requested langauge and run the files provided. ");
-		com.neuronrobotics.sdk.common.Log.error("java -jar BowlerScriptKernel.jar -g <Git repo> <Git file> # this will run a file from git");
-		if(isKernelMode())
+		com.neuronrobotics.sdk.common.Log
+				.error("java -jar BowlerScriptKernel.jar -g <Git repo> <Git file> # this will run a file from git");
+		if (isKernelMode())
 			System.exit(1);
 	}
 
@@ -130,8 +132,10 @@ public class BowlerKernel {
 		boolean gitRun = false;
 		String gitRepo = null;
 		String gitFile = null;
+		boolean runCSGServer = false;
+		File keys = null;
+		int port = 3742;
 		for (String s : args) {
-
 			if (gitRun) {
 				if (gitRepo == null) {
 					gitRepo = s;
@@ -142,7 +146,34 @@ public class BowlerKernel {
 			if (s.startsWith("-g")) {
 				gitRun = true;
 			}
+			if (s.toLowerCase().contains("-csgserver")) {
+				runCSGServer = true;
+				continue;
+			}
+			if (runCSGServer) {
+				if (keys == null) {
+					keys = new File(s);
+					continue;
+				} else {
+					try {
+						port = Integer.parseInt(s);
+					}catch(NumberFormatException ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
 		}
+		if (runCSGServer) {
+			CSGServer.setDirectory(ScriptingEngine.getWorkspace());
+			CSGServer server = new CSGServer(port, keys);
+			try {
+				server.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return;
+		}
+
 		Object ret = null;
 		File baseWorkspaceFile = null;
 		if (gitRun && gitRepo != null) {
@@ -198,21 +229,21 @@ public class BowlerKernel {
 					File f = new File(s);
 					String location;
 					try {
-						location  =ScriptingEngine.locateGitTopLevelDirectory(f).getAbsolutePath();
-					}catch(Exception ex) {
-						location= new File(".").getAbsolutePath();
+						location = ScriptingEngine.locateGitTopLevelDirectory(f).getAbsolutePath();
+					} catch (Exception ex) {
+						location = new File(".").getAbsolutePath();
 					}
-					if(location.endsWith(".")) {
-						location=location.substring(0,location.length()-1);
-					}		
-					if(!location.endsWith("/")) {
-						location+="/";
+					if (location.endsWith(".")) {
+						location = location.substring(0, location.length() - 1);
+					}
+					if (!location.endsWith("/")) {
+						location += "/";
 					}
 					baseWorkspaceFile = new File(location);
-					
-					System.out.println("Using working directory  "+baseWorkspaceFile.getAbsolutePath());
-					f=new File(baseWorkspaceFile.getAbsolutePath()+"/"+s);
-					com.neuronrobotics.sdk.common.Log.error("File   "+f.getName());
+
+					System.out.println("Using working directory  " + baseWorkspaceFile.getAbsolutePath());
+					f = new File(baseWorkspaceFile.getAbsolutePath() + "/" + s);
+					com.neuronrobotics.sdk.common.Log.error("File   " + f.getName());
 					ret = ScriptingEngine.inlineFileScriptRun(f, null);
 				} catch (Throwable e) {
 					e.printStackTrace();
@@ -385,27 +416,27 @@ public class BowlerKernel {
 	}
 
 	private static void finish(long startTime) {
-		com.neuronrobotics.sdk.common.Log.error(
-				"Process took " + (((double) (System.currentTimeMillis() - startTime))) / 60000.0 + " minutes");
+		com.neuronrobotics.sdk.common.Log
+				.error("Process took " + (((double) (System.currentTimeMillis() - startTime))) / 60000.0 + " minutes");
 		System.exit(0);
 	}
 
 	public static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
 		processUIOpening(ret);
-		if(baseWorkspaceFile!=null)
-			System.out.println("Processing file in directory "+baseWorkspaceFile.getAbsolutePath());
+		if (baseWorkspaceFile != null)
+			System.out.println("Processing file in directory " + baseWorkspaceFile.getAbsolutePath());
 
-		
 		if (baseWorkspaceFile != null) {
-			
-			File baseDirForFiles = new File(baseWorkspaceFile.getAbsolutePath()+"/manufacturing/");
+
+			File baseDirForFiles = new File(baseWorkspaceFile.getAbsolutePath() + "/manufacturing/");
 			if (baseDirForFiles.exists()) {
 				// baseDirForFiles.mkdir();
 				File bomCSV = new File(
 						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
 				if (bomCSV.exists()) {
 
-					File file = new File(baseWorkspaceFile.getAbsolutePath() + "/"+ VitaminBomManager.getManufacturingBomCsv());
+					File file = new File(
+							baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -418,7 +449,8 @@ public class BowlerKernel {
 				File bom = new File(
 						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 				if (bom.exists()) {
-					File file = new File(baseWorkspaceFile.getAbsolutePath() + "/"+ VitaminBomManager.getManufacturingBomJson());
+					File file = new File(
+							baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -428,7 +460,7 @@ public class BowlerKernel {
 						e.printStackTrace();
 					}
 				}
-			}else {
+			} else {
 				baseDirForFiles.mkdirs();
 			}
 		}
@@ -436,9 +468,9 @@ public class BowlerKernel {
 		try {
 			processReturnedObjects(ret, csgBits);
 			String url = ScriptingEngine.locateGitUrl(baseWorkspaceFile);
-			com.neuronrobotics.sdk.common.Log.error("Loading printbed URL  "+url);
+			com.neuronrobotics.sdk.common.Log.error("Loading printbed URL  " + url);
 			PrintBedManager printBedManager = new PrintBedManager(baseWorkspaceFile, csgBits);
-			if(printBedManager.hasPrintBed())
+			if (printBedManager.hasPrintBed())
 				csgBits = printBedManager.makePrintBeds();
 			else {
 				com.neuronrobotics.sdk.common.Log.error("Exporting files without print bed");
@@ -451,12 +483,12 @@ public class BowlerKernel {
 	}
 
 	private static void processUIOpening(Object ret) {
-		if(Tab.class.isInstance(ret)) {
+		if (Tab.class.isInstance(ret)) {
 			com.neuronrobotics.sdk.common.Log.error("Launching User Defined UI");
-			Tab t=(Tab)ret;
+			Tab t = (Tab) ret;
 			CompletableFuture<Boolean> future = new CompletableFuture<>();
 
-			BowlerKernel.runLater(()->{
+			BowlerKernel.runLater(() -> {
 				// Get the content from the tab
 				javafx.scene.Node content = t.getContent();
 				// Create a new stage
@@ -482,7 +514,7 @@ public class BowlerKernel {
 				newStage.setOnCloseRequest(event -> {
 					// Exit the JVM when the window is closed
 					future.complete(true);
-					BowlerKernel.runLater(()->Platform.exit());
+					BowlerKernel.runLater(() -> Platform.exit());
 				});
 				FontSizeManager.addListener(fontNum -> {
 					int tmp = fontNum - 10;
@@ -491,10 +523,10 @@ public class BowlerKernel {
 					root.setStyle("-fx-font-size: " + tmp + "pt");
 					newStage.sizeToScene();
 				});
-				if(IStageReceiver.class.isInstance(ret)) {
+				if (IStageReceiver.class.isInstance(ret)) {
 					com.neuronrobotics.sdk.common.Log.error("UI is a IStageReceiver");
-					IStageReceiver r=(IStageReceiver)ret;
-					BowlerKernel.runLater(()->{
+					IStageReceiver r = (IStageReceiver) ret;
+					BowlerKernel.runLater(() -> {
 						r.receiveStage(newStage, scene);
 					});
 				}
@@ -505,13 +537,13 @@ public class BowlerKernel {
 				scene.getRoot().layout();
 			});
 			try {
-				 future.get();
+				future.get();
 				System.exit(0);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 	private static void processReturnedObjects(Object ret, ArrayList<CSG> csgBits) {
@@ -524,8 +556,8 @@ public class BowlerKernel {
 		if (CSG.class.isInstance(ret)) {
 			csgBits.add((CSG) ret);
 		}
-		if(CaDoodleFile.class.isInstance(ret)) {
-			processReturnedObjects(CaDoodleLoader.process((CaDoodleFile)ret), csgBits);
+		if (CaDoodleFile.class.isInstance(ret)) {
+			processReturnedObjects(CaDoodleLoader.process((CaDoodleFile) ret), csgBits);
 			return;
 		}
 		if (MobileBase.class.isInstance(ret)) {
@@ -830,6 +862,5 @@ public class BowlerKernel {
 	public static void setKernelMode(boolean kernelMode) {
 		BowlerKernel.kernelMode = kernelMode;
 	}
-
 
 }
