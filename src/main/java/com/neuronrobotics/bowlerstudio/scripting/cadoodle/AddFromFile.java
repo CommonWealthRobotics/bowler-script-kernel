@@ -28,7 +28,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
-public class AddFromFile extends AbstractAddFrom implements ICaDoodleOpperation {
+public class AddFromFile extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
 	private ArrayList<String> options = new ArrayList<String>();

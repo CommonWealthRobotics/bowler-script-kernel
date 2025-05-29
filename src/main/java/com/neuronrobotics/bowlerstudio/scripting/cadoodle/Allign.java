@@ -13,7 +13,7 @@ import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 
-public class Allign implements ICaDoodleOpperation {
+public class Allign extends AbstractCaDoodleFileAccepter{
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose (serialize = true, deserialize = true)

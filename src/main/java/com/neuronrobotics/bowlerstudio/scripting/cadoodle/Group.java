@@ -12,7 +12,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.IParametric;
 import javafx.scene.paint.Color;
 
-public class Group extends AbstractAddFrom implements ICaDoodleOpperation {
+public class Group extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)

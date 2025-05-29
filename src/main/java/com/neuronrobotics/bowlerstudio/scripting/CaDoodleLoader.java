@@ -22,13 +22,17 @@ public class CaDoodleLoader implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
 		CaDoodleFile loaded = CaDoodleFile.fromFile(code);
-		return process(loaded);
+		Object process = process(loaded);
+		loaded.close();
+		return process;
 	}
 
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
 		CaDoodleFile loaded = CaDoodleFile.fromJsonString(code);
-		return process(loaded);
+		Object process = process(loaded);
+		loaded.close();
+		return process;
 	}
 
 	public static Object process(CaDoodleFile loaded) {

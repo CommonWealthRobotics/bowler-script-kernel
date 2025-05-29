@@ -22,7 +22,7 @@ import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
-public class Paste extends AbstractAddFrom implements ICaDoodleOpperation {
+public class Paste extends AbstractAddFrom  {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = new TransformNR();
 	@Expose(serialize = true, deserialize = true)

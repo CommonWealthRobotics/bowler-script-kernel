@@ -16,7 +16,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
 
-public class MoveCenter implements ICaDoodleOpperation {
+public class MoveCenter extends AbstractCaDoodleFileAccepter{
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = new TransformNR();
 	@Expose(serialize = true, deserialize = true)

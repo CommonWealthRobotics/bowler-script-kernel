@@ -21,7 +21,7 @@ import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
-public class AddFromScript extends AbstractAddFrom implements ICaDoodleOpperation {
+public class AddFromScript extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private String gitULR = "";
 	@Expose(serialize = true, deserialize = true)
