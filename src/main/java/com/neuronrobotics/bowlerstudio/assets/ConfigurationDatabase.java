@@ -146,7 +146,7 @@ public class ConfigurationDatabase {
 			e.printStackTrace();
 			return;
 		}
-		com.neuronrobotics.sdk.common.Log.error("Saved "+f.getName());
+		//com.neuronrobotics.sdk.common.Log.error("Saved "+f.getName());
 	}
 
 	@SuppressWarnings("unchecked")

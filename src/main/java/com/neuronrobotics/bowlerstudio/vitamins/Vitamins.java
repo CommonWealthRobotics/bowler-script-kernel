@@ -72,7 +72,7 @@ public class Vitamins {
 	private static ConcurrentHashMap<String, Runnable> changeListeners = new ConcurrentHashMap<String, Runnable>();
 
 	public static void clear() {
-		com.neuronrobotics.sdk.common.Log.error("Vitamins Database Cleraing, reloading files");
+		//com.neuronrobotics.sdk.common.Log.error("Vitamins Database Cleraing, reloading files");
 		for (String keys : databaseSet.keySet()) {
 			ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> data = databaseSet.get(keys);
 			for (String key2 : data.keySet()) {
@@ -351,7 +351,7 @@ public class Vitamins {
 							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
 																																		// message
 			// com.neuronrobotics.sdk.common.Log.error(jsonString);
-			com.neuronrobotics.sdk.common.Log.error("Database saved " + getVitaminFile(type, null, false).getAbsolutePath());
+			//com.neuronrobotics.sdk.common.Log.error("Database saved " + getVitaminFile(type, null, false).getAbsolutePath());
 		} catch (Exception ex) {
 			if(ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
 				ScriptingEngine.deleteRepo(getGitRepoDatabase());
@@ -378,7 +378,7 @@ public class Vitamins {
 				saveDatabase(type);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
+			//com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			newRepo = github.getRepository(getSourcerepo()).fork();
 			while(true) {
@@ -429,8 +429,8 @@ public class Vitamins {
 			if (request.getMergeable()) {
 				request.merge("Auto Merging Master");
 				reLoadDatabaseFromFiles();
-				com.neuronrobotics.sdk.common.Log.error("Merged Hardware-Dimensions madhephaestus:master into "
-						+ PasswordManager.getUsername() + ":master");
+				//com.neuronrobotics.sdk.common.Log.error("Merged Hardware-Dimensions madhephaestus:master into "
+				//		+ PasswordManager.getUsername() + ":master");
 			} else {
 				try {
 					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
@@ -503,7 +503,7 @@ public class Vitamins {
 				if (changeListeners.get(type) == null) {
 					changeListeners.put(type, () -> {
 						// If the file changes, clear the database and load the new data
-						com.neuronrobotics.sdk.common.Log.error("Re-loading " + type);
+						//com.neuronrobotics.sdk.common.Log.error("Re-loading " + type);
 						databaseSet.put(type, null);
 						new RuntimeException().printStackTrace();
 					});
@@ -519,7 +519,7 @@ public class Vitamins {
 
 					jsonString = IOUtils.toString(inPut);
 					inPut.close();
-					com.neuronrobotics.sdk.common.Log.error("JSON loading Loading " + type + " " + jsonString.length());
+					//com.neuronrobotics.sdk.common.Log.error("JSON loading Loading " + type + " " + jsonString.length());
 					// perfoem the GSON parse
 					database = gson.fromJson(jsonString, TT_mapStringString);
 					if (database == null)
