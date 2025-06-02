@@ -114,7 +114,6 @@ String getOsArch() {
 	return System.getProperty("os.arch");
 }
 
-//https://oss.sonatype.org/service/local/repositories/releases/content/com/neuronrobotics/nrjavaserial/3.10.1/nrjavaserial-3.10.1.jar
 
 
 repositories {
@@ -147,7 +146,6 @@ repositories {
 	
 	maven { url "https://jitpack.io" }
 	maven { url "https://repo.eclipse.org/content/groups/releases/" }
-	maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 	maven { url "https://dl.bintray.com/dfki-lt/maven/" }
 	maven { url "https://raw.github.com/marytts/marytts/master/repository/" }
 	maven { url "https://repo.jenkins-ci.org/public/" }
@@ -156,7 +154,7 @@ repositories {
 
 dependencies {
 
-	api 'com.neuronrobotics:JavaCad:2.8.2'
+	api 'com.neuronrobotics:JavaCad:2.8.8'
 	api project('java-bowler')
 	api project('GithubPasswordManager:GithubPasswordManager')
 	
@@ -388,47 +386,4 @@ test {
 		exceptionFormat = 'full'
 	}
 }
-/*
- signing {
- sign configurations.archives
- }
- uploadArchives {
- repositories {
- mavenDeployer {
- beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
- repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
- authentication(userName: ossrhUsername, password: ossrhPassword)
- }
- snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
- authentication(userName: ossrhUsername, password: ossrhPassword)
- }
- pom.project {
- name 'Bowler Scripting Kernel'
- packaging 'jar'
- // optionally artifactId can be defined here
- description 'A command line utility for accsing the bowler framework.'
- url 'http://neuronrobotics.com'
- scm {
- connection 			'scm:git:https://github.com/NeuronRobotics/bowler-script-kernel.git'
- developerConnection 'scm:git:git@github.com:NeuronRobotics/bowler-script-kernel.git'
- url 'https://github.com/NeuronRobotics/bowler-script-kernel'
- }
- licenses {
- license {
- name 'The Apache License, Version 2.0'
- url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
- }
- }
- developers {
- developer {
- id 'madhephaestus'
- name 'Kevin Harrington'
- email 'kharrington@neuronrobotics.com'
- }
- }
- }
- }
- }
- }
- */
 
