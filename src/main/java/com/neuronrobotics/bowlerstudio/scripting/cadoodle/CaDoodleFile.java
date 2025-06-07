@@ -609,7 +609,8 @@ public class CaDoodleFile {
 			// cachedCopy.add(c);
 		}
 		cache.put(op, cachedCopy);
-		System.out.println("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
+		if(getFreeMemory()>50)
+			System.out.println("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
 	}
 
 	public static double getFreeMemory() {
@@ -872,7 +873,7 @@ public class CaDoodleFile {
 			ICaDoodleOpperation op = opperations.get(i);
 			int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
 			List<CSG> process = cache.get(op);
-			if (!f.exists())
+			if (!f.exists() && process!=null)
 				try {
 					num++;
 					if (isTimelineOpen())
