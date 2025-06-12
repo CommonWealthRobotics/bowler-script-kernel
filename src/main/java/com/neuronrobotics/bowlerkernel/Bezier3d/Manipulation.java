@@ -114,6 +114,8 @@ public class Manipulation {
 			@Override
 			public void handle(MouseEvent event) {
 				String name = event.getEventType().getName();
+				if(event.isControlDown())
+					return;
 				switch (name) {
 				case "MOUSE_PRESSED":
 					if(event.isPrimaryButtonDown())
