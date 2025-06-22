@@ -998,7 +998,7 @@ public class CaDoodleFile {
 				e.printStackTrace();
 				break;
 			}
-			if (System.currentTimeMillis() - start > 2500 && holder.size() == 0) {
+			if (System.currentTimeMillis() - start > 25000 && holder.size() == 0) {
 				throw new RuntimeException("Failed to create image");
 			}
 		}
