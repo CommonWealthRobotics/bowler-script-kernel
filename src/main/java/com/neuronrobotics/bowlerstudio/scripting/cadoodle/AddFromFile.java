@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,6 +23,7 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
@@ -86,7 +88,14 @@ public class AddFromFile extends AbstractAddFrom {
 				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
 				CSGDatabase.setInstance(new CSGDatabaseInstance(tempFile.toFile()));
 			}
-			List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
+			List<CSG> flattenedCSGs;
+			try {
+				flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
+			}catch(Throwable t) {
+				t.printStackTrace();
+				flattenedCSGs=new ArrayList<CSG>();
+				flattenedCSGs.add(new Cube(10).toCSG().setColor(javafx.scene.paint.Color.HOTPINK));
+			}
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
 
