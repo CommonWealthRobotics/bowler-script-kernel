@@ -19,6 +19,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
+import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.Extrude;
 import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.Polygon;
@@ -89,11 +91,19 @@ public class Sweep extends AbstractAddFrom {
 		Transform centerandAllignedPolygon = new Transform().movex(-b.getMinX()).movey(-b.getMinY());
 		Transform increment = new Transform().rotY(-angle).movey(z);
 		Transform radiusT = new Transform().movex(radius);
-		Polygon transformedP = p.transformed(centerandAllignedPolygon);
-		ITransformProvider pr = (unit,domain)->{
-			return new Transform().movex(sprl*unit*d);
-		};
-		return Extrude.sweep(transformedP, increment, radiusT, steps,pr).rotx(-90).setName(name);
+		Polygon transformedP;
+		try {
+			transformedP = p.transformed(centerandAllignedPolygon);
+
+			ITransformProvider pr = (unit,domain)->{
+				return new Transform().movex(sprl*unit*d);
+			};
+			return Extrude.sweep(transformedP, increment, radiusT, steps,pr).rotx(-90).setName(name);
+		} catch (ColinearPointsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new Cube(10).toCSG().setColor(Color.PINK);
 	}
 
 	public LengthParameter radius(String name) {
