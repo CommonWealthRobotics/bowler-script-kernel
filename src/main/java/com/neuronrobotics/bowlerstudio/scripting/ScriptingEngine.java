@@ -334,7 +334,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				// com.neuronrobotics.sdk.common.Log.error(str);
 
 				for (GitLogProgressMonitor l : logListeners) {
-					l.onUpdate(str, e);
+					l.onLogUpdate(str, e);
 				}
 			}
 
@@ -354,7 +354,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				if (printProgress)
 					com.neuronrobotics.sdk.common.Log.error(string);
 				for (GitLogProgressMonitor l : logListeners) {
-					l.onUpdate(string, e);
+					l.onLogUpdate(string, e);
 				}
 			}
 
