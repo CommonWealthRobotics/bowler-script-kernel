@@ -132,7 +132,7 @@ public class DownloadManager {
 	private static GitLogProgressMonitor psudoSplash = new GitLogProgressMonitor() {
 
 		@Override
-		public void onUpdate(String update, Exception e) {
+		public void onLogUpdate(String update, Exception e) {
 			// Auto-generated method stub
 			
 		}
@@ -703,7 +703,7 @@ public class DownloadManager {
 			result = inArchive.extractSlow(index, new ISequentialOutStream() {
 				public int write(byte[] data) throws SevenZipException {
 					try {
-						psudoSplash.onUpdate("Inflate 7z .. " + outputFile.getName(),null);
+						psudoSplash.onLogUpdate("Inflate 7z .. " + outputFile.getName(),null);
 						fos.write(data);
 					} catch (IOException e) {
 						throw new SevenZipException("Error writing to file: " + e.getMessage());
@@ -839,7 +839,7 @@ public class DownloadManager {
 					try (OutputStream out = Files.newOutputStream(outPath)) {
 						byte[] buffer = new byte[1024];
 						int len;
-						psudoSplash.onUpdate("Inflate Tar XZ " + outPath.getFileName(),null);
+						psudoSplash.onLogUpdate("Inflate Tar XZ " + outPath.getFileName(),null);
 						while ((len = tarIn.read(buffer)) != -1) {
 							out.write(buffer, 0, len);
 						}
@@ -981,7 +981,7 @@ public class DownloadManager {
 			public void process(double percent) {
 				if (System.currentTimeMillis() - timeSinceePrint > 1000) {
 					timeSinceePrint = System.currentTimeMillis();
-					psudoSplash.onUpdate((int) (percent * 100)+" % "+filename ,null);
+					psudoSplash.onLogUpdate((int) (percent * 100)+" % "+filename ,null);
 				}
 //				if(progress!=null)
 //					Platform.runLater(() -> {
@@ -1005,7 +1005,7 @@ public class DownloadManager {
 			downloadEvents.startDownload();
 			rawFileDownload(pis, folder, exe);
 			com.neuronrobotics.sdk.common.Log.error("Finished downloading " + filename);
-			psudoSplash.onUpdate((int) (1 * 100)+" %  " +filename , null);
+			psudoSplash.onLogUpdate((int) (1 * 100)+" %  " +filename , null);
 			downloadEvents.finishDownload();
 		} else {
 			com.neuronrobotics.sdk.common.Log.error("Not downloading, it existst " + filename);
