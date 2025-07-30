@@ -34,6 +34,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.Polygon;
@@ -113,15 +114,22 @@ public class FreecadLoader implements IScriptingLanguage {
 		int planes=1;
 		if(slicePlanes!=null)
 			for(Transform pose:slicePlanes) {
-				List<Polygon> polygons = Slice.slice(toSlice, pose, 0);
-				String svgName = toSlice.getName();
-				if(svgName.length()==0)
-					svgName="SVG_EXPORT";
-				svgName+="_"+planes;
-				File svg = File.createTempFile(svgName, ".svg");
-				SVGExporter.export(polygons, svg, false);
-				addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
-				planes++;
+				List<Polygon> polygons;
+				try {
+					polygons = Slice.slice(toSlice, pose, 0);
+					String svgName = toSlice.getName();
+					if(svgName.length()==0)
+						svgName="SVG_EXPORT";
+					svgName+="_"+planes;
+					File svg = File.createTempFile(svgName, ".svg");
+					SVGExporter.export(polygons, svg, false);
+					addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
+					planes++;
+				} catch (ColinearPointsException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
 		addSTLToFreecad(freecadModel,tmp,name);
 	}
