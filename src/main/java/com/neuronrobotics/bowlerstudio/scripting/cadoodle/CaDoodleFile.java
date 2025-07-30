@@ -153,7 +153,10 @@ public class CaDoodleFile {
 
 		}
 		int indexStarting = getCurrentIndex();
-		setCurrentIndex(0);
+		if(indexStarting==0) {
+			indexStarting=opperations.size();
+		}
+		this.currentIndex=0;
 		setPercentInitialized(0);
 		opperations = opperations.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
 		if (indexStarting > opperations.size())
@@ -1073,7 +1076,8 @@ public class CaDoodleFile {
 	}
 
 	public void setCurrentIndex(int currentIndex) {
-		// new Exception("Current Index set to " + currentIndex).printStackTrace();
+//		if(currentIndex==0)
+//			new Exception("Current Index set to " + currentIndex).printStackTrace();
 		if ((currentIndex - 1) >= getOpperations().size())
 			throw new RuntimeException("Fail! Can not set an index greater than the availible operations");
 		this.currentIndex = currentIndex;
