@@ -127,7 +127,7 @@ public class Paste extends AbstractAddFrom  {
 		return this;
 	}
 
-	public List<String> getNames() {
+	public List<String> getNamesAddedInThisOperation() {
 		ArrayList<String> n= new ArrayList<String>();
 		n.addAll(getNamesAdded());
 		n.addAll(names);

@@ -8,5 +8,5 @@ public interface ICaDoodleOpperation {
 	
 	public String getType();
 	public List<CSG> process(List<CSG> incoming);
-	public List<String> getNames();
+	public List<String> getNamesAddedInThisOperation();
 }

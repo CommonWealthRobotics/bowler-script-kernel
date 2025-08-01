@@ -119,7 +119,7 @@ public class MoveCenter extends CaDoodleOperation{
 		return this;
 	}
 
-	public List<String> getNames() {
+	public List<String> getNamesAddedInThisOperation() {
 		return names;
 	}
 

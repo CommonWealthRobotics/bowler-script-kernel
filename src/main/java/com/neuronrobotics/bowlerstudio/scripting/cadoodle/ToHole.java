@@ -38,7 +38,7 @@ public class ToHole extends CaDoodleOperation{
 		return back;
 	}
 
-	public List<String> getNames() {
+	public List<String> getNamesAddedInThisOperation() {
 		return names;
 	}
 

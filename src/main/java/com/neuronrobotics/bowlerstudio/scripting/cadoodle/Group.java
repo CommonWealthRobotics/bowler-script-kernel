@@ -105,7 +105,7 @@ public class Group extends AbstractAddFrom {
 		return first;
 	}
 	@Override
-	public List<String> getNames() {
+	public List<String> getNamesAddedInThisOperation() {
 		ArrayList<String> n= new ArrayList<String>();
 		n.addAll(getNamesAdded());
 		n.addAll(names);

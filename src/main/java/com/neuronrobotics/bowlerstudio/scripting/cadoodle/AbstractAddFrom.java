@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 
-public abstract class AbstractAddFrom  extends CaDoodleOperation{
+public abstract class AbstractAddFrom  extends CaDoodleOperation implements INamedOperation{
 	@Expose (serialize = false, deserialize = false)
 	protected HashSet<String> namesAdded = new HashSet<>();
 	@Expose (serialize = false, deserialize = false)
@@ -18,7 +18,7 @@ public abstract class AbstractAddFrom  extends CaDoodleOperation{
 	public HashSet<String> getNamesAdded() {
 		return namesAdded;
 	}
-	public List<String> getNames(){
+	public List<String> getNamesAddedInThisOperation(){
 		ArrayList<String> names= new ArrayList<String>();
 		names.addAll(getNamesAdded());
 		return names;

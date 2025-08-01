@@ -1,29 +1,15 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot;
 
+import java.io.File;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.annotations.Expose;
-import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleOperation;
-import com.neuronrobotics.bowlerstudio.scripting.cadoodle.RandomStringFactory;
-
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AbstractAddFrom;
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class MakeRobot extends CaDoodleOperation{
-	@Expose(serialize = true, deserialize = true)
-	protected String name = null;
-	
-	
-	public String getName() {
-		if (name == null) {
-			setName(RandomStringFactory.generateRandomString());
-		}
-		return name;
-	}
+public class MakeRobot extends AbstractAddFrom{
 
-	public void setName(String name) {
-		this.name = name;
-	}
 	@Override
 	public String getType() {
 		return "MakeRobot";
@@ -35,8 +21,14 @@ public class MakeRobot extends CaDoodleOperation{
 	}
 
 	@Override
-	public List<String> getNames() {
+	public List<String> getNamesAddedInThisOperation() {
 		return new ArrayList<String>();
+	}
+
+	@Override
+	public File getFile() throws NoSuchFileException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

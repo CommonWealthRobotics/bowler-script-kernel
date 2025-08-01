@@ -46,7 +46,7 @@ public class Allign extends CaDoodleOperation{
 	@Override
 	public String toString(){
 		String string = getType()+" "+x+" "+y+" "+z;
-		for(String n:getNames()) {
+		for(String n:getNamesAddedInThisOperation()) {
 			string+=" "+n;
 		}
 		return string;
@@ -160,7 +160,7 @@ public class Allign extends CaDoodleOperation{
 		return c.syncProperties(incoming).setName(incoming.getName()).setColor(incoming.getColor());
 	}
 
-	public List<String> getNames() {
+	public List<String> getNamesAddedInThisOperation() {
 		return names;
 	}
 
