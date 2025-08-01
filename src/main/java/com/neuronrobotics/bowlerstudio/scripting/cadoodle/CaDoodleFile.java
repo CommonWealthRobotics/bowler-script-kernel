@@ -76,7 +76,7 @@ public class CaDoodleFile {
 	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {
 	}.getType();
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting()
-			.excludeFieldsWithoutExposeAnnotation().registerTypeAdapterFactory(new ICaDoodleOperationAdapterFactory())
+			.excludeFieldsWithoutExposeAnnotation().registerTypeAdapterFactory(new CaDoodleJsonOperationAdapterFactory())
 			.create();
 	private final ArrayList<ICaDoodleStateUpdate> listeners = new ArrayList<ICaDoodleStateUpdate>();
 	private final ArrayList<Thread> opperationRunner = new ArrayList<Thread>();
