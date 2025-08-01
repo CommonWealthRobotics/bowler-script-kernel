@@ -13,7 +13,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class Delete extends AbstractCaDoodleFileAccepter {
+public class Delete extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = new TransformNR();
 	@Expose(serialize = true, deserialize = true)

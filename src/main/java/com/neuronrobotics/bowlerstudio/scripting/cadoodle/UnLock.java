@@ -7,7 +7,7 @@ import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class UnLock extends AbstractCaDoodleFileAccepter{
+public class UnLock extends CaDoodleOperation{
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Override

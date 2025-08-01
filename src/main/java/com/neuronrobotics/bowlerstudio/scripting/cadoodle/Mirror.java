@@ -11,7 +11,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 
-public class Mirror extends AbstractCaDoodleFileAccepter {
+public class Mirror extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
 	private MirrorOrentation location;
 	@Expose(serialize = true, deserialize = true)

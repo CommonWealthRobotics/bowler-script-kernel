@@ -1,6 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
-public abstract class AbstractCaDoodleFileAccepter implements ICaDoodleOpperation{
+public abstract class CaDoodleOperation implements ICaDoodleOpperation{
 	private CaDoodleFile cf = null;
 
 	public CaDoodleFile getCaDoodleFile() {

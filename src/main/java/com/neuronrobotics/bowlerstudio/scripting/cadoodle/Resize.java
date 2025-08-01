@@ -16,7 +16,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 
-public class Resize extends AbstractCaDoodleFileAccepter{
+public class Resize extends CaDoodleOperation{
 
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
