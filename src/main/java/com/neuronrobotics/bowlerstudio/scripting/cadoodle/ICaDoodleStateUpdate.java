@@ -7,7 +7,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public interface ICaDoodleStateUpdate {
-	public void onUpdate(List<CSG>  currentState, ICaDoodleOpperation source,CaDoodleFile file );
+	public void onUpdate(List<CSG>  currentState, CaDoodleOperation source,CaDoodleFile file );
 	public void onSaveSuggestion();
 	public void onInitializationDone();
 	public void onInitializationStart();

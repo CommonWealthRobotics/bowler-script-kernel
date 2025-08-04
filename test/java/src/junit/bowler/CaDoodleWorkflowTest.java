@@ -26,18 +26,21 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToSolid;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.UnGroup;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import javafx.scene.paint.Color;
 
-public class TestCaDoodleWorkflow {
+public class CaDoodleWorkflowTest {
 
 	@Test
 	public void test() throws Exception {
+		JavaFXInitializer.go();
 		CaDoodleFile cf = new CaDoodleFile()
-					.setSelf(new File("Test.doodle"))
+					.setSelf(new File("doodle/Test.doodle"))
 					.setProjectName("A Test Project");
 		
 		String jsonContent = cf.toJson();
@@ -224,8 +227,13 @@ public class TestCaDoodleWorkflow {
 
 		com.neuronrobotics.sdk.common.Log.error(after);
 		
-
-
+		MakeRobot mr = new MakeRobot();
+		mr.setNames(selectAll);
+		while(loaded.isForwardAvailible())
+			loaded.forward();
+		loaded.addOpperation(mr).join();
+		loaded.save();
+		
 	
 	}
 
