@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
-    private final Map<String, Class<? extends ICaDoodleOpperation>> typeRegistry = new HashMap<>();
-    private final Map<Class<? extends ICaDoodleOpperation>, String> classRegistry = new HashMap<>();
+    private final Map<String, Class<? extends CaDoodleOperation>> typeRegistry = new HashMap<>();
+    private final Map<Class<? extends CaDoodleOperation>, String> classRegistry = new HashMap<>();
 
     public CaDoodleJsonOperationAdapterFactory() {
     	registerType("AddFromFile", AddFromFile.class);
@@ -36,14 +36,14 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
         
     }
 
-    private void registerType(String typeName, Class<? extends ICaDoodleOpperation> clazz) {
+    private void registerType(String typeName, Class<? extends CaDoodleOperation> clazz) {
         typeRegistry.put(typeName, clazz);
         classRegistry.put(clazz, typeName);
     }
 
     @Override
     public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-        if (!ICaDoodleOpperation.class.isAssignableFrom(type.getRawType())) {
+        if (!CaDoodleOperation.class.isAssignableFrom(type.getRawType())) {
             return null;
         }
 
@@ -71,11 +71,11 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
                 JsonElement typeElement = jsonObject.get("type");
                 JsonElement dataElement = jsonObject.get("data");
                 String typeName = typeElement.getAsString();
-                Class<? extends ICaDoodleOpperation> clazz = typeRegistry.get(typeName);
+                Class<? extends CaDoodleOperation> clazz = typeRegistry.get(typeName);
                 if (clazz == null) {
                     throw new JsonParseException("Unknown type: " + typeName);
                 }
-                TypeAdapter<? extends ICaDoodleOpperation> delegateAdapter = gson.getDelegateAdapter(CaDoodleJsonOperationAdapterFactory.this, TypeToken.get(clazz));
+                TypeAdapter<? extends CaDoodleOperation> delegateAdapter = gson.getDelegateAdapter(CaDoodleJsonOperationAdapterFactory.this, TypeToken.get(clazz));
                 com.neuronrobotics.sdk.common.Log.error("JSON Parsing "+typeName);
                 return (T) delegateAdapter.fromJsonTree(dataElement);
             }
