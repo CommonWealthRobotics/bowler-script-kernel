@@ -737,6 +737,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void waitForRepo(String remoteURI, String reason) {
+		if (isNotURL(remoteURI)) {
+			return;
+		}
 		try {
 			File f = getRepository(remoteURI).getDirectory();
 			while (ScriptingEngine.isUrlAlreadyOpen(f)) {
@@ -904,6 +907,27 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void commit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile) throws Exception {
+		if (isNotURL(id)) {
+			try {
+				File f = new File(id);
+				if (f.exists() && f.isDirectory()) {
+					System.out.println("remoteURI is actually a directory " + f);
+					OutputStream out = null;
+					try {
+						out = FileUtils.openOutputStream(new File(f + "/" + FileName), false);
+						IOUtils.write(content, out, Charset.defaultCharset());
+						out.close(); // don't swallow close Exception if copy
+						// completes
+						// normally
+					} finally {
+						IOUtils.closeQuietly(out);
+					}
+					return;
+				}
+			} catch (Exception ex) {
+				// not a file i guess...
+			}
+		}
 		openGit(id, git -> {
 			commit(id, branch, FileName, content, commitMessage, flagNewFile, git);
 		});
@@ -980,11 +1004,34 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	@SuppressWarnings("deprecation")
 	public static void pushCodeToGit(String remoteURI, String branch, String FileName, String content,
 			String commitMessage, boolean flagNewFile) throws Exception {
+		if (isNotURL(remoteURI)) {
+			try {
+				File f = new File(remoteURI);
+				if (f.exists() && f.isDirectory()) {
+					System.out.println("remoteURI is actually a directory " + f);
+					OutputStream out = null;
+					try {
+						out = FileUtils.openOutputStream(new File(f + "/" + FileName), false);
+						IOUtils.write(content, out, Charset.defaultCharset());
+						out.close(); // don't swallow close Exception if copy
+						// completes
+						// normally
+					} finally {
+						IOUtils.closeQuietly(out);
+					}
+					return;
+				}
+			} catch (Exception ex) {
+				// not a file i guess...
+			}
+		}
+
 		waitForRepo(remoteURI, "push");
 		if (content != null)
 			if ("Binary File".contentEquals(content)) {
 				content = null;
 			}
+
 		commit(remoteURI, branch, FileName, content, commitMessage, flagNewFile);
 		if (PasswordManager.getUsername() == null)
 			login();
@@ -1112,9 +1159,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git
 	public static File fileFromGit(String remoteURI, String branch, String fileInRepo)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
-		if(branch!=null)
-			if(branch.length()==0)
-				branch=null;
+		if (branch != null)
+			if (branch.length() == 0)
+				branch = null;
 		File gitRepoFile = cloneRepo(remoteURI, branch);
 		return new File(gitRepoFile.getAbsolutePath() + "/" + fileInRepo);
 	}
@@ -1684,7 +1731,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @return The local directory containing the .git
 	 */
 	public static File cloneRepo(String remoteURI, String branch) {
-
+		if (isNotURL(remoteURI)) {
+			try {
+				File f = new File(remoteURI);
+				if (f.exists() && f.isDirectory()) {
+					System.out.println("remoteURI is actually a directory " + f);
+					return f;
+				}
+			} catch (Exception ex) {
+				// not a file i guess...
+			}
+		}
+		// Assume it is a URL
 		File gistDir = getRepositoryCloneDirectory(remoteURI);
 		String localPath = gistDir.getAbsolutePath();
 		File gitRepoFile = new File(localPath + "/.git");
@@ -1733,6 +1791,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		return gistDir;
 
+	}
+
+	private static boolean isNotURL(String remoteURI) {
+		return !remoteURI.startsWith("http") && !remoteURI.startsWith("git@");
 	}
 
 	public static String locateGitUrl(File f) throws IOException {
