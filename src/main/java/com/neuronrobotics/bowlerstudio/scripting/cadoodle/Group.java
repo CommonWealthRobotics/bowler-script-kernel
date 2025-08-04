@@ -5,6 +5,7 @@ import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.gson.annotations.Expose;
 
@@ -34,11 +35,20 @@ public class Group extends AbstractAddFrom {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		ArrayList<CSG> replace = new ArrayList<CSG>();
 		back.addAll(incoming);
+		String mobileBase=null;
 		for (CSG csg : incoming) {
 			if (csg.isLock())
 				continue;
 			for (String name : names) {
 				if (name.contentEquals(csg.getName())) {
+					Optional<String> mobileBaseName = csg.getMobileBaseName();
+					if(mobileBaseName.isPresent()) {
+						if(mobileBase==null)
+							mobileBase= mobileBaseName.get();
+						if(!mobileBase.contentEquals(mobileBaseName.get())) {
+							continue;// skip grouping any item that is of a different mobile base;
+						}
+					}
 					replace.add(csg);
 					CSG c = csg.clone().syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(name);
 					if (csg.isHole()) {
@@ -87,6 +97,8 @@ public class Group extends AbstractAddFrom {
 			result.setIsHole(false);
 			result.setColor(c);
 		}
+		if(mobileBase!=null)
+			result.setMobileBaseName(mobileBase);
 		HashMap<String, IParametric> mapOfparametrics = result.getMapOfparametrics();
 		if (mapOfparametrics != null)
 			mapOfparametrics.clear();
