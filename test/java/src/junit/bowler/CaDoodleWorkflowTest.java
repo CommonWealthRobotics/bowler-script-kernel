@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.creature.ControllerOption;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 import java.lang.reflect.Type;
@@ -233,8 +234,11 @@ public class CaDoodleWorkflowTest {
 			loaded.forward();
 		loaded.addOpperation(mr).join();
 		loaded.save();
-		
-	
+		ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
+		ArrayList<ControllerOption> controllers = ControllerOption.getOptions();
+		for(ControllerOption o:controllers) {
+			System.out.println(o);
+		}
 	}
 
 }

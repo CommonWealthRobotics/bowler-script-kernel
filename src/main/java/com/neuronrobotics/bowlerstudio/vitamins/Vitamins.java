@@ -296,7 +296,7 @@ public class Vitamins {
 			}
 			return ConcurrentHashMap;
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			//ex.printStackTrace();
 		}
 		return new ConcurrentHashMap<String,Object>();
 	}
@@ -657,26 +657,26 @@ public class Vitamins {
 	public static String getGitRepoDatabase() {
 		if (!checked) {
 			checked = true;
-			try {
-				if (PasswordManager.getUsername() != null) {
-					// ScriptingEngine.setAutoupdate(true);
-					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-					try {
-						GHRepository repo = github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions");
-						if (repo != null) {
-							String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
-							// com.neuronrobotics.sdk.common.Log.error("Using my version of Viamins: "+myAssets);
-							setGitRepoDatabase(myAssets);
-						} else {
-							throw new org.kohsuke.github.GHFileNotFoundException();
-						}
-					} catch (Exception ex) {
-						setGitRepoDatabase(defaultGit);
-					}
-				}
-			} catch (Exception ex) {
-				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
-			}
+//			try {
+//				if (PasswordManager.getUsername() != null) {
+//					// ScriptingEngine.setAutoupdate(true);
+//					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
+//					try {
+//						GHRepository repo = github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions");
+//						if (repo != null) {
+//							String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
+//							// com.neuronrobotics.sdk.common.Log.error("Using my version of Viamins: "+myAssets);
+//							setGitRepoDatabase(myAssets);
+//						} else {
+//							throw new org.kohsuke.github.GHFileNotFoundException();
+//						}
+//					} catch (Exception ex) {
+//						setGitRepoDatabase(defaultGit);
+//					}
+//				}
+//			} catch (Exception ex) {
+//				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
+//			}
 			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
 			try {
 				ScriptingEngine.pull(gitRpoDatabase);

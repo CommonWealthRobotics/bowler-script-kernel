@@ -20,11 +20,15 @@ public class CaDoodleVitamin {
 		String name = args.get(0).toString();
 		ArrayList<String>types=new ArrayList<>();
 		types.addAll(Vitamins.listVitaminTypes());
-		StringParameter typeParam = new StringParameter(name + "_CaDoodle_Vitamin_Type", typencoming,
-				types);
+		StringParameter typeParam = new StringParameter(name + "_CaDoodle_Vitamin_Type", typencoming,types);
 		String type=typeParam.getStrValue();
 		ArrayList<String> listVitaminSizes = Vitamins.listVitaminSizes(type);
-		return get( type, listVitaminSizes.get(0),  args);
+		try {
+			return get( type, listVitaminSizes.get(0),  args);
+		}catch(Exception ex) {
+			ex.printStackTrace();
+			throw ex;
+		}
 	}
 	public static boolean isVitamin(CSG c) {
 		for(String s:c.getParameters()) {
