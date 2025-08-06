@@ -36,11 +36,15 @@ public class Group extends AbstractAddFrom {
 		ArrayList<CSG> replace = new ArrayList<CSG>();
 		back.addAll(incoming);
 		String mobileBase=null;
+		boolean noscale=false;
 		for (CSG csg : incoming) {
 			if (csg.isLock())
 				continue;
+			
 			for (String name : names) {
 				if (name.contentEquals(csg.getName())) {
+					if(csg.isNoScale())
+						noscale=true;
 					Optional<String> mobileBaseName = csg.getMobileBaseName();
 					if(mobileBaseName.isPresent()) {
 						if(mobileBase==null)
@@ -104,6 +108,8 @@ public class Group extends AbstractAddFrom {
 			mapOfparametrics.clear();
 		result.addIsGroupResult(getGroupID());
 		result.setName(getGroupID());
+		result.setNoScale(noscale);
+		result.setIsAlwaysShow(false);
 		namesAdded.add(result.getName());
 		back.add(result);
 		return back;
