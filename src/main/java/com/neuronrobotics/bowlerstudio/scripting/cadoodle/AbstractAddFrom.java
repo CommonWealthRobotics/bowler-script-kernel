@@ -26,18 +26,18 @@ public abstract class AbstractAddFrom  extends CaDoodleOperation implements INam
 	
 	public String getName() {
 		if (name == null) {
-			setName(RandomStringFactory.generateRandomString());
+			name=(RandomStringFactory.generateRandomString());
 		}
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+//	public void setName(String name) {
+//		this.name = name;
+//	}
 	
 	public String getOrderedName() {
 		if(getName()==null) {
-			setName(RandomStringFactory.generateRandomString());
+			name=(RandomStringFactory.generateRandomString());
 		}
 		String result= getName();
 		if(nameIndex!=0){
