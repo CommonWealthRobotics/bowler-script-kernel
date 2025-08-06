@@ -473,6 +473,7 @@ public class CaDoodleFile {
 					if (getOpperations().get(i) == op)
 						index = i;
 				getOpperations().remove(op);
+				op.pruneCleanup();
 //				if (index == getOpperations().size())
 //					index -= 1;
 				if (index < 1)
@@ -600,6 +601,9 @@ public class CaDoodleFile {
 		if (res == OperationResult.PRUNE) {
 			List<CaDoodleOperation> subList = (List<CaDoodleOperation>) getOpperations().subList(0,
 					getCurrentIndex());
+			for(int i=getCurrentIndex();i<getOpperations().size();i++) {
+				getOpperations().get(i).pruneCleanup();
+			}
 			ArrayList<CaDoodleOperation> newList = new ArrayList<CaDoodleOperation>();
 			newList.addAll(subList);
 			setOpperations(newList);
