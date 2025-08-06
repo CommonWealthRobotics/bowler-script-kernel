@@ -115,6 +115,7 @@ public class CaDoodleVitamin {
 				}
 			});
 			//back.getStorage().set("PreviousName", name);
+			back.setIsAlwaysShow(true);
 			return back;
 		} catch (Exception e) {
 			// Auto-generated catch block
