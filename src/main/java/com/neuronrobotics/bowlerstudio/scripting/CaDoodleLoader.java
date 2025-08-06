@@ -40,7 +40,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		for(CSG c: incoming) {
-			if(c.isInGroup() || c.isHide()) {
+			if((c.isInGroup()&&!c.isAlwaysShow()) || c.isHide()) {
 				back.remove(c);
 			}
 		}
