@@ -214,4 +214,12 @@ public class ControllerOption {
 	public CSG getIndicator() {
 		return indicator;
 	}
+
+	public ControllerFeatures getProvides() {
+		return provides;
+	}
+
+	public ControllerFeatures getConsumes() {
+		return consumes;
+	}
 }
