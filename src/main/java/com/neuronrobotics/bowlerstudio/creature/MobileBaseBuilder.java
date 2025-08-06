@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.creature;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -26,7 +27,7 @@ import java.util.Map;
 
 public class MobileBaseBuilder {
 	@Expose(serialize = true, deserialize = true)
-	ArrayList<ControllerInstance> controllers = new ArrayList<ControllerInstance>();
+	ArrayList<AddRobotController> controllers = new ArrayList<AddRobotController>();
 	
 	
 	private MobileBase mobileBase;
@@ -396,6 +397,15 @@ public class MobileBaseBuilder {
 		ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
 
 		return mobileBase;
+	}
+	public void addController(AddRobotController controller) {
+		getControllers().add(controller);
+	}
+	public void removeController(AddRobotController addRobotController) {
+		getControllers().remove(addRobotController);
+	}
+	public ArrayList<AddRobotController> getControllers() {
+		return controllers;
 	}
 
 }
