@@ -1,8 +1,11 @@
 package com.neuronrobotics.bowlerstudio.creature;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
+
+import eu.mihosoft.vrl.v3d.Plane;
 
 public class ControllerFeatures {
 	@Expose(serialize = true, deserialize = true)
@@ -27,6 +30,47 @@ public class ControllerFeatures {
 	double batteryWattHour = 0;
 	@Expose(serialize = true, deserialize = true)
 	double batteryPeakWatt = 0;
+	
+	public void add(ControllerFeatures f) {
+		if(f==null)
+			return;
+		servoChannels+=f.servoChannels;
+		motorChannels+=f.motorChannels;
+		analogSensorChannels+=f.analogSensorChannels;
+		cameras+=f.cameras;
+		digitalSensorChannels+=f.digitalSensorChannels;
+		inertialSensors+=f.inertialSensors;
+		distanceSensors+=f.distanceSensors;
+		pointCloudSensors+=f.pointCloudSensors;
+		ArrayList<Double> toadd=new ArrayList<Double>();
+		for(Double v:f.getBatteryVoltage()) {
+			boolean found=false;
+			for(Double d:getBatteryVoltage()) {
+				if(Math.abs(v-d)<Plane.getEPSILON()) {
+					found=true;
+				}
+			}
+			if(!found)
+				toadd.add(v);
+		}
+		getBatteryVoltage().addAll(toadd);
+		batteryPeakWatt+=f.batteryPeakWatt;
+		batteryWattHour+=f.batteryWattHour;
+	}
+	public void subtract(ControllerFeatures f) {
+		if( f== null)
+			return;
+		servoChannels-=f.servoChannels;
+		motorChannels-=f.motorChannels;
+		analogSensorChannels-=f.analogSensorChannels;
+		cameras-=f.cameras;
+		digitalSensorChannels-=f.digitalSensorChannels;
+		inertialSensors-=f.inertialSensors;
+		distanceSensors-=f.distanceSensors;
+		pointCloudSensors-=f.pointCloudSensors;
+		batteryPeakWatt-=f.batteryPeakWatt;
+		batteryWattHour-=f.batteryWattHour;
+	}
 	
 	public int getServoChannels() {
 		return servoChannels;
@@ -61,6 +105,8 @@ public class ControllerFeatures {
 	}
 
 	public List<Double> getBatteryVoltage() {
+		if(voltages==null)
+			voltages=new ArrayList<Double>();
 		return voltages;
 	}
 
