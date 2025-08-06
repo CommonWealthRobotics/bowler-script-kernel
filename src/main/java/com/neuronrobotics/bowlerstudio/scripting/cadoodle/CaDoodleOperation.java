@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 
@@ -13,6 +14,10 @@ public abstract class CaDoodleOperation {
 	public abstract String getType();
 	public abstract List<CSG> process(List<CSG> incoming);
 	public abstract List<String> getNamesAddedInThisOperation();
+	public void pruneCleanup() {
+		
+	}
+	
 	public CaDoodleFile getCaDoodleFile() {
 		return cf;
 	}
@@ -26,6 +31,26 @@ public abstract class CaDoodleOperation {
 	public HashMap<String,MobileBaseBuilder> getRobots() {
 		return robots;
 	}
+	
+	public String getBuilder(List<String> selected, List<CSG> state) {
+		if(selected==null)
+			return null;
+		for(CSG c: state) {
+			for(String s:selected) {
+				if(s.contentEquals(c.getName())) {
+					Optional<String> mobileBaseName= c.getMobileBaseName();
+					if(mobileBaseName.isPresent()) {
+						MobileBaseBuilder b = robots.get(mobileBaseName.get());
+						if(b!=null) {
+							return mobileBaseName.get();
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * @param robots the robots to set
 	 */
