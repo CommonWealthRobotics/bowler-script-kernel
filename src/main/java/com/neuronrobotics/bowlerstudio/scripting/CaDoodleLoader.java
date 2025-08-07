@@ -35,7 +35,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 		return process;
 	}
 
-	public static Object process(CaDoodleFile loaded) {
+	public static Object process(CaDoodleFile loaded,boolean includeAlwaysShow) {
 		List<CSG> incoming = loaded.getCurrentState();
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);

@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,8 @@ public class Mirror extends CaDoodleOperation {
 					MoveCenter.set(getName()+(index++) , tf, wp);
 					b.add(tf);
 					return b;
-				}, 1);
+				}, 1,new HashSet<String>()
+);
 			}
 		}
 		return back;

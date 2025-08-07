@@ -87,7 +87,7 @@ public class Allign extends CaDoodleOperation{
 				MoveCenter.set(getName() , c, times);
 				b.add(c);
 				return b;
-			}, 1);
+			}, 1,new HashSet<String>());
 		}
 		return back;
 	}
