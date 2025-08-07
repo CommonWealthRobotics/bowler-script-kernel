@@ -464,10 +464,29 @@ public class MobileBaseBuilder {
 	public ArrayList<AddRobotController> getControllers() {
 		return controllers;
 	}
-
+	public ControllerFeatures getCapibilities() {
+		ControllerFeatures test = new ControllerFeatures();
+		for(AddRobotController c:controllers) {
+			test.add(c.getController().getProvides());
+			test.subtract(c.getController().getConsumes());
+		}
+		for(AddRobotLimb c:limbs) {
+			test.add(c.getLimb().getProvides());
+			test.subtract(c.getLimb().getConsumes());
+		}
+		return test;
+	}
 	public void addLimb(AddRobotLimb controller) {
+		LimbOption consumes = controller.getLimb();
+		if(!checkOptionSupported(consumes)) {
+			throw new RuntimeException("Robot doesnt have enough resources to support "+controller.getLimb());
+		}
 		if (!getLimmbs().contains(controller))
 			getLimmbs().add(controller);
+	}
+
+	public boolean checkOptionSupported(LimbOption consumes) {
+		return getCapibilities().check(consumes.consumes);
 	}
 
 	public void removeLimb(AddRobotLimb controller) {
