@@ -189,13 +189,14 @@ public class Vitamins {
 	private static CSG get(String type, String id, int depthGauge) throws Exception {
 		String key = type + id;
 		Map<String, Object> script = getMeta(type);
-
+		Object file = null;
+		Object repostring =null;
 		try {
 			CSG newVitamin = null;
 			StringParameter size = new StringParameter(type + " Default", id, Vitamins.listVitaminSizes(type));
 			size.setStrValue(id);
-			Object file = script.get("scriptGit");
-			Object repostring = script.get("scriptFile");
+			 file = script.get("scriptGit");
+			 repostring = script.get("scriptFile");
 			Object repo = repostring;
 			if (file != null && repo != null) {
 				ArrayList<Object> servoMeasurments = new ArrayList<Object>();
