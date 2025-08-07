@@ -7,6 +7,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 import com.neuronrobotics.sdk.common.Log;
@@ -389,12 +390,54 @@ public class MobileBaseBuilder {
 	}
 
 	public MobileBase build() throws Exception {
+		if(!mobileBase.isAvailable())
+			mobileBase.connect();
 		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName() ;
 		mobileBase.setGitSelfSource(new String[] { gitURL, filename });
-
+		for (int i = 0; i < controllers.size(); i++) {
+			AddRobotController con = controllers.get(i);
+			for(VitaminLocation l:con.getVitamins(con.getName()+"_"+i)) {
+				try {
+					if(!mobileBase.hasVitamin(l))
+						mobileBase.addVitamin(l);
+				}catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+		for(int i=0;i<limbs.size();i++) {
+			AddRobotLimb limb= limbs.get(i);
+			if(mobileBase.getLimbByName(limb.getName())==null) {
+				TransformNR location = limb.getLocation();
+				DHParameterKinematics kin =  limb.getLimb().getLimb(limb.getName());
+				kin.setRobotToFiducialTransform(location);
+				//TODO add the channel mapping here
+				kin.connect();
+				kin.zero();
+				switch(limb.getLimb().type) {
+				case arm:
+				case flap:
+				case hand:
+				case head:
+					mobileBase.getAppendages().add(kin);
+					break;
+				case leg:
+					mobileBase.getLegs().add(kin);
+					break;
+				case steerable:
+					mobileBase.getSteerable().add(kin);
+					break;
+				case wheel:
+					mobileBase.getFixed().add(kin);
+					break;
+				default:
+					throw new RuntimeException("Unknown limb type in builder! "+limb.getLimb().type);
+				}
+			}
+		}
+		getCadManager().render();
 		// Push to git
 		ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
-
 		return mobileBase;
 	}
 
@@ -406,6 +449,16 @@ public class MobileBaseBuilder {
 	public void removeController(AddRobotController controller) {
 		if (controllers.contains(controller))
 			getControllers().remove(controller);
+		for (int i = 0; i < controllers.size(); i++) {
+			AddRobotController con = controllers.get(i);
+			for(VitaminLocation l:con.getVitamins(con.getName()+"_"+i)) {
+				try {
+					mobileBase.removeVitamin(l);
+				}catch(Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
 	}
 
 	public ArrayList<AddRobotController> getControllers() {
@@ -420,10 +473,18 @@ public class MobileBaseBuilder {
 	public void removeLimb(AddRobotLimb controller) {
 		if (getLimmbs().contains(controller))
 			getLimmbs().remove(controller);
+		mobileBase.deleteLimbByName(controller.getName());
 	}
 
 	public ArrayList<AddRobotLimb> getLimmbs() {
 		return limbs;
+	}
+
+	public MobileBaseCadManager getCadManager() {
+		MobileBaseCadManager mobileBaseCadManager = MobileBaseCadManager.get(mobileBase);
+		mobileBaseCadManager.setAutoRegen(false);
+		mobileBaseCadManager.setConfigurationViewerMode(false);
+		return mobileBaseCadManager;
 	}
 
 }
