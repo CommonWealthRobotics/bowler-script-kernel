@@ -215,7 +215,6 @@ public class Vitamins {
 							.movez(Double.parseDouble(configuration.get("massCentroidZ").toString()));
 					newVitamin.getStorage().set("massKg", configuration.get("massKg"));
 					newVitamin.getStorage().set("massCentroid", com);
-
 					return newVitamin;
 				} catch (Exception ex) {
 					// com.neuronrobotics.sdk.common.Log.error(type +"-"+ id+" Failed");
