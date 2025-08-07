@@ -36,6 +36,7 @@ import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
+import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
@@ -100,7 +101,13 @@ public class CaDoodleFile {
 	private ICadoodleSaveStatusUpdate saveUpdate = null;
 	private boolean timelineOpen = false;
 	private HashMap<String,MobileBaseBuilder> robots = new HashMap<String, MobileBaseBuilder>();
-
+	public ArrayList<MobileBase> getMobileBases(){
+		ArrayList<MobileBase> back = new ArrayList<MobileBase>();
+		for(MobileBaseBuilder b:robots.values()) {
+			back.add(b.getMobileBase());
+		}
+		return back;
+	}
 	public void close() {
 		//new Exception("CaDoodle File Closed here").printStackTrace();
 		for(CaDoodleOperation op:getOpperations()) {
@@ -626,7 +633,7 @@ public class CaDoodleFile {
 						+ " opperation! " + c.getName());
 			names.add(c.getName());
 			cachedCopy.add(cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
-					.setRegenerate(c.getRegenerate()));
+					.setRegenerate(c.getRegenerate()).setManipulator(c.getManipulator()));
 			// cachedCopy.add(c);
 		}
 		cache.put(op, cachedCopy);
@@ -925,6 +932,8 @@ public class CaDoodleFile {
 
 	public String getSTLThumbnailLocation() {
 		File folder =  getSelf().getAbsoluteFile().getParentFile();
+		if(!folder.exists())
+			folder.mkdirs();
 		String string = folder.getAbsolutePath() + delim() + "thumbnail.stl";
 		return string;
 	}
@@ -939,6 +948,9 @@ public class CaDoodleFile {
 //		if(currentIndex2==0)
 //			return;
 		File parent =  getSelf().getAbsoluteFile().getParentFile();
+		File imageFolder=new File(parent.getAbsolutePath() + delim() + "timeline" + delim());
+		if(!imageFolder.exists())
+			imageFolder.mkdirs();
 		File imageCache = new File(parent.getAbsolutePath() + delim() + "timeline" + delim() + currentIndex2 + ".png");
 		File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
 
@@ -966,8 +978,8 @@ public class CaDoodleFile {
 				if (getOpperations().get(getOpperations().size() - 1) == op) {
 					Files.copy(imageCache, image);
 				}
-				// System.err.println("Thumbnail saved successfully to " +
-				// imageCache.getAbsolutePath());
+				System.err.println("Thumbnail saved successfully to " +
+				 imageCache.getAbsolutePath());
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
