@@ -255,14 +255,18 @@ public class CaDoodleWorkflowTest {
 		ArrayList<LimbOption> limbs = LimbOption.getOptions();
 		TransformNR tf = new TransformNR();
 		for(LimbOption o:limbs) {
-			System.out.println(o);
-			tf = new TransformNR(0,0,30).times(tf);
-			AddRobotLimb limb = new AddRobotLimb()
-					.setLimb(o)
-					.setNames(selectAll)
-					.setLocation(tf);
-			loaded.addOpperation(limb).join();
-			break;
+			if(mr.getBuilder().checkOptionSupported(o)) {
+				System.out.println(o);
+				tf = new TransformNR(0,0,30).times(tf);
+				AddRobotLimb limb = new AddRobotLimb()
+						.setLimb(o)
+						.setNames(selectAll)
+						.setLocation(tf);
+				loaded.addOpperation(limb).join();
+			}else {
+				System.out.println("Unsupported limb "+o);
+			}
+			//break;
 		}
 		for(MobileBase mb:loaded.getMobileBases()) {
 			System.out.println("Base "+mb);
