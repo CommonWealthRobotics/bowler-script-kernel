@@ -106,6 +106,8 @@ public class ControllerFeatures {
 			}
 			if (!found)
 				return false;
+			else
+				break;
 		}
 		if (batteryPeakWatt < f.batteryPeakWatt)
 			return false;
