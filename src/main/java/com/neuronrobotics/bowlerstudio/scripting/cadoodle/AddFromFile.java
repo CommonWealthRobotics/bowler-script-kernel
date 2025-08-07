@@ -33,7 +33,7 @@ import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 public class AddFromFile extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
-	private ArrayList<String> options = new ArrayList<String>();
+	//private ArrayList<String> options = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM = false;
 
@@ -100,7 +100,7 @@ public class AddFromFile extends AbstractAddFrom {
 				CSG csg = flattenedCSGs.get(i);
 
 				try {
-					CSG processedCSG = processGiven(csg, i, getOrderedName(),file);
+					CSG processedCSG = processGiven(csg, i, getOrderedName(),file,name,getLocation());
 					collect.add(processedCSG);
 				} catch (Exception ex) {
 					ex.printStackTrace();
@@ -108,7 +108,7 @@ public class AddFromFile extends AbstractAddFrom {
 			}
 			CSGDatabase.setInstance(instance);
 			for(CSG csg1:collect)
-				csg1.setParameter(getFileLocationparam(file));
+				csg1.setParameter(getFileLocationparam(file,name));
 			back.addAll(collect);
 		} catch (Exception e) {
 			// Auto-generated catch block
@@ -305,8 +305,8 @@ public class AddFromFile extends AbstractAddFrom {
 //		return getParameter("UnKnown").getStrValue();
 //	}
 
-	private CSG processGiven(CSG csg, int i, String n, File f) {
-		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
+	private static CSG processGiven(CSG csg, int i, String name, File f,String task,TransformNR location) {
+		Transform nrToCSG = TransformFactory.nrToCSG(location);
 		boolean isDoodle = f.getName().toLowerCase().endsWith(".doodle");
 		if(isDoodle) {
 			csg.setStorage(new PropertyStorage());
@@ -330,19 +330,19 @@ public class AddFromFile extends AbstractAddFrom {
 							csg1.setStorage(new PropertyStorage());
 						}
 						CSGDatabase.setInstance(instance);
-						csg1.setParameter(getFileLocationparam(f));
-						return processGiven(csg1, i, n,f);
+						csg1.setParameter(getFileLocationparam(f,task));
+						return processGiven(csg1, i, name,f,task,location);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 					return previous;
-				}).setName(n);
-		MoveCenter.set(getName(), processedCSG, nrToCSG);
+				}).setName(name);
+		MoveCenter.set(task, processedCSG, nrToCSG);
 		return processedCSG;
 	}
 
-	private StringParameter getFileLocationparam( File pathname) {
-		StringParameter stringParameter = new StringParameter(name + "_CaDoodle_File", pathname.getAbsolutePath(), options);
+	private static StringParameter getFileLocationparam( File pathname,String task) {
+		StringParameter stringParameter = new StringParameter(task + "_CaDoodle_File", pathname.getAbsolutePath(), new ArrayList<String>());
 		stringParameter.setStrValue(pathname.getAbsolutePath());
 		return stringParameter;
 	}
