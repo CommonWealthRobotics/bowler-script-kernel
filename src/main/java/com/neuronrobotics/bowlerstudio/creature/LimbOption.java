@@ -68,6 +68,14 @@ public class LimbOption {
 
 	@Override
 	public String toString() {
-		return type + " " + name + " " + url + "/" + file + "\n\tConsumes:" + consumes + "\n\tProvides:" + provides;
+		return type + " " + name + " " + url + "/" + file + "\n\tConsumes:" + getConsumes() + "\n\tProvides:" + getProvides();
+	}
+
+	public ControllerFeatures getConsumes() {
+		return consumes;
+	}
+
+	public ControllerFeatures getProvides() {
+		return provides;
 	}
 }
