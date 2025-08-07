@@ -11,6 +11,14 @@ public class ControllerFeatures {
 	@Expose(serialize = true, deserialize = true)
 	int servoChannels = 0;
 	@Expose(serialize = true, deserialize = true)
+	int vexV5Motors = 0;
+	@Expose(serialize = true, deserialize = true)
+	int hiwonderBus = 0;
+	@Expose(serialize = true, deserialize = true)
+	int dynamixelBus = 0;
+	@Expose(serialize = true, deserialize = true)
+	int steppers = 0;
+	@Expose(serialize = true, deserialize = true)
 	int motorChannels = 0;
 	@Expose(serialize = true, deserialize = true)
 	int analogSensorChannels = 0;
@@ -25,68 +33,116 @@ public class ControllerFeatures {
 	@Expose(serialize = true, deserialize = true)
 	int pointCloudSensors = 0;
 	@Expose(serialize = true, deserialize = true)
-	List<Double> voltages ;
+	List<Double> voltages;
 	@Expose(serialize = true, deserialize = true)
 	double batteryWattHour = 0;
 	@Expose(serialize = true, deserialize = true)
 	double batteryPeakWatt = 0;
-	
+
 	public void add(ControllerFeatures f) {
-		if(f==null)
+		if (f == null)
 			return;
-		servoChannels+=f.servoChannels;
-		motorChannels+=f.motorChannels;
-		analogSensorChannels+=f.analogSensorChannels;
-		cameras+=f.cameras;
-		digitalSensorChannels+=f.digitalSensorChannels;
-		inertialSensors+=f.inertialSensors;
-		distanceSensors+=f.distanceSensors;
-		pointCloudSensors+=f.pointCloudSensors;
-		ArrayList<Double> toadd=new ArrayList<Double>();
-		for(Double v:f.getBatteryVoltage()) {
-			boolean found=false;
-			for(Double d:getBatteryVoltage()) {
-				if(Math.abs(v-d)<Plane.getEPSILON()) {
-					found=true;
+		vexV5Motors += f.vexV5Motors;
+		hiwonderBus += f.hiwonderBus;
+		dynamixelBus += f.dynamixelBus;
+		steppers += f.steppers;
+		servoChannels += f.servoChannels;
+		motorChannels += f.motorChannels;
+		analogSensorChannels += f.analogSensorChannels;
+		cameras += f.cameras;
+		digitalSensorChannels += f.digitalSensorChannels;
+		inertialSensors += f.inertialSensors;
+		distanceSensors += f.distanceSensors;
+		pointCloudSensors += f.pointCloudSensors;
+		ArrayList<Double> toadd = new ArrayList<Double>();
+		for (Double v : f.getBatteryVoltage()) {
+			boolean found = false;
+			for (Double d : getBatteryVoltage()) {
+				if (Math.abs(v - d) < Plane.getEPSILON()) {
+					found = true;
 				}
 			}
-			if(!found)
+			if (!found)
 				toadd.add(v);
 		}
 		getBatteryVoltage().addAll(toadd);
-		batteryPeakWatt+=f.batteryPeakWatt;
-		batteryWattHour+=f.batteryWattHour;
+		batteryPeakWatt += f.batteryPeakWatt;
+		batteryWattHour += f.batteryWattHour;
 	}
+
+	public boolean check(ControllerFeatures f) {
+		if (f == null)
+			return false;
+		if (vexV5Motors < f.vexV5Motors)
+			return false;
+		if (hiwonderBus < f.hiwonderBus)
+			return false;
+		if (dynamixelBus < f.dynamixelBus)
+			return false;
+		if (steppers < f.steppers)
+			return false;
+		if (servoChannels < f.servoChannels)
+			return false;
+		if (motorChannels < f.motorChannels)
+			return false;
+		if (analogSensorChannels < f.analogSensorChannels)
+			return false;
+		if (cameras < f.cameras)
+			return false;
+		if (digitalSensorChannels < f.digitalSensorChannels)
+			return false;
+		if (inertialSensors < f.inertialSensors)
+			return false;
+		if (distanceSensors < f.distanceSensors)
+			return false;
+		if (pointCloudSensors < f.pointCloudSensors)
+			return false;
+		for (Double v : f.getBatteryVoltage()) {
+			boolean found = false;
+			for (Double d : getBatteryVoltage()) {
+				if (Math.abs(v - d) < Plane.getEPSILON()) {
+					found = true;
+				}
+			}
+			if (!found)
+				return false;
+		}
+		if (batteryPeakWatt < f.batteryPeakWatt)
+			return false;
+		if (batteryWattHour < f.batteryWattHour)
+			return false;
+		return true;
+	}
+
 	public void subtract(ControllerFeatures f) {
-		if( f== null)
+		if (f == null)
 			return;
-		servoChannels-=f.servoChannels;
-		motorChannels-=f.motorChannels;
-		analogSensorChannels-=f.analogSensorChannels;
-		cameras-=f.cameras;
-		digitalSensorChannels-=f.digitalSensorChannels;
-		inertialSensors-=f.inertialSensors;
-		distanceSensors-=f.distanceSensors;
-		pointCloudSensors-=f.pointCloudSensors;
-		batteryPeakWatt-=f.batteryPeakWatt;
-		batteryWattHour-=f.batteryWattHour;
+		vexV5Motors -= f.vexV5Motors;
+		hiwonderBus -= f.hiwonderBus;
+		dynamixelBus -= f.dynamixelBus;
+		steppers -= f.steppers;
+		servoChannels -= f.servoChannels;
+		motorChannels -= f.motorChannels;
+		analogSensorChannels -= f.analogSensorChannels;
+		cameras -= f.cameras;
+		digitalSensorChannels -= f.digitalSensorChannels;
+		inertialSensors -= f.inertialSensors;
+		distanceSensors -= f.distanceSensors;
+		pointCloudSensors -= f.pointCloudSensors;
+		batteryPeakWatt -= f.batteryPeakWatt;
+		batteryWattHour -= f.batteryWattHour;
 	}
-	@Override 
+
+	@Override
 	public String toString() {
-		return "\n\tServos: "+servoChannels+"\n"+
-				"\tmotorChannels: "+motorChannels+"\n"+
-				"\tanalogSensorChannels: "+analogSensorChannels+"\n"+
-				"\tcameras: "+cameras+"\n"+
-				"\tdigitalSensorChannels: "+digitalSensorChannels+"\n"+
-				"\tinertialSensors: "+inertialSensors+"\n"+
-				"\tdistanceSensors: "+distanceSensors+"\n"+
-				"\tpointCloudSensors: "+pointCloudSensors+"\n"+
-				"\tbatteryPeakWatt: "+batteryPeakWatt+"\n"+
-				"\tbatteryWattHour: "+batteryWattHour+"\n"+
-				"\tVoltages: "+voltages+"\n"
-				;
+		return "\n\tServos: " + servoChannels + "\n" + "\tmotorChannels: " + motorChannels + "\n"
+				+ "\tanalogSensorChannels: " + analogSensorChannels + "\n" + "\tcameras: " + cameras + "\n"
+				+ "\tdigitalSensorChannels: " + digitalSensorChannels + "\n" + "\tinertialSensors: " + inertialSensors
+				+ "\n" + "\tdistanceSensors: " + distanceSensors + "\n" + "\tpointCloudSensors: " + pointCloudSensors
+				+ "\n" + "\tbatteryPeakWatt: " + batteryPeakWatt + "\n" + "\tbatteryWattHour: " + batteryWattHour + "\n"
+				+ "\tVoltages: " + voltages + "\n";
 	}
-	
+
 	public int getServoChannels() {
 		return servoChannels;
 	}
@@ -120,16 +176,17 @@ public class ControllerFeatures {
 	}
 
 	public List<Double> getBatteryVoltage() {
-		if(voltages==null)
-			voltages=new ArrayList<Double>();
+		if (voltages == null)
+			voltages = new ArrayList<Double>();
 		return voltages;
 	}
 
 	public double getBatteryPeakWatts() {
 		return batteryPeakWatt;
 	}
+
 	public double getBatteryWattHours() {
 		return batteryWattHour;
 	}
-	
+
 }
