@@ -22,7 +22,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
 		CaDoodleFile loaded = CaDoodleFile.fromFile(code);
-		Object process = process(loaded);
+		Object process = process(loaded,false);
 		loaded.close();
 		return process;
 	}
@@ -30,7 +30,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
 		CaDoodleFile loaded = CaDoodleFile.fromJsonString(code);
-		Object process = process(loaded);
+		Object process = process(loaded,false);
 		loaded.close();
 		return process;
 	}
@@ -40,7 +40,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		for(CSG c: incoming) {
-			if((c.isInGroup()&&!c.isAlwaysShow()) || c.isHide()) {
+			if((c.isInGroup() && (!c.isAlwaysShow() && includeAlwaysShow )) || c.isHide()) {
 				back.remove(c);
 			}
 		}

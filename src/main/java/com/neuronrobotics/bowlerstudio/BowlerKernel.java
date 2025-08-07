@@ -557,7 +557,7 @@ public class BowlerKernel {
 			csgBits.add((CSG) ret);
 		}
 		if (CaDoodleFile.class.isInstance(ret)) {
-			processReturnedObjects(CaDoodleLoader.process((CaDoodleFile) ret), csgBits);
+			processReturnedObjects(CaDoodleLoader.process((CaDoodleFile) ret,false), csgBits);
 			return;
 		}
 		if (MobileBase.class.isInstance(ret)) {
