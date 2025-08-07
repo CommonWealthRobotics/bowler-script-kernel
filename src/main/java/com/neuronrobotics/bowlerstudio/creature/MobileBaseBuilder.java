@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerstudio.creature;
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -26,10 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 public class MobileBaseBuilder {
-	@Expose(serialize = true, deserialize = true)
 	ArrayList<AddRobotController> controllers = new ArrayList<AddRobotController>();
-	
-	
+	ArrayList<AddRobotLimb> limbs = new ArrayList<AddRobotLimb>();
+
 	private MobileBase mobileBase;
 	private String gitURL;
 	private String xmlName = null;
@@ -44,6 +44,7 @@ public class MobileBaseBuilder {
 		this.mobileBase.setScriptingName(name);
 		initializeChannelMap();
 	}
+
 	// Constructor for extending an existing MobileBase
 	public MobileBaseBuilder(MobileBase existingBase) {
 		this.gitURL = existingBase.getGitSelfSource()[0];
@@ -51,7 +52,7 @@ public class MobileBaseBuilder {
 		initializeChannelMap();
 		scanExistingChannels();
 	}
-	
+
 	// Copy functionality from the menu factory
 	public MobileBaseBuilder copyFrom(MobileBase source, String newName) {
 		try {
@@ -62,7 +63,7 @@ public class MobileBaseBuilder {
 				mobileBase.setGitCadEngine(copyGitFile(source.getGitCadEngine(), gitURL));
 			}
 			if (source.getGitWalkingEngine() != null) {
-				mobileBase.setGitWalkingEngine( copyGitFile(source.getGitWalkingEngine(), gitURL));
+				mobileBase.setGitWalkingEngine(copyGitFile(source.getGitWalkingEngine(), gitURL));
 			}
 
 			// Copy appendages
@@ -83,7 +84,7 @@ public class MobileBaseBuilder {
 
 			for (DHParameterKinematics wheel : source.getDrivable()) {
 				DHParameterKinematics copiedWheel = copyDHParameterKinematics(wheel);
-				mobileBase.getDrivable() .add(copiedWheel);
+				mobileBase.getDrivable().add(copiedWheel);
 			}
 
 			// Copy transforms
@@ -94,8 +95,6 @@ public class MobileBaseBuilder {
 		}
 		return this;
 	}
-
-
 
 //	// Constructor for extending an existing MobileBase with new name
 //	public MobileBaseBuilder(String gitURL, MobileBase existingBase, String newName) {
@@ -384,7 +383,7 @@ public class MobileBaseBuilder {
 	private String[] copyGitFile(String[] sourceGit, String targetGit) {
 		return ScriptingEngine.copyGitFile(sourceGit[0], targetGit, sourceGit[1]);
 	}
-	
+
 	public File getFile() throws Exception {
 		return ScriptingEngine.fileFromGit(gitURL, mobileBase.getScriptingName() + ".xml");
 	}
@@ -398,14 +397,33 @@ public class MobileBaseBuilder {
 
 		return mobileBase;
 	}
+
 	public void addController(AddRobotController controller) {
-		getControllers().add(controller);
+		if (!controllers.contains(controller))
+			getControllers().add(controller);
 	}
-	public void removeController(AddRobotController addRobotController) {
-		getControllers().remove(addRobotController);
+
+	public void removeController(AddRobotController controller) {
+		if (controllers.contains(controller))
+			getControllers().remove(controller);
 	}
+
 	public ArrayList<AddRobotController> getControllers() {
 		return controllers;
+	}
+
+	public void addLimb(AddRobotLimb controller) {
+		if (!getLimmbs().contains(controller))
+			getLimmbs().add(controller);
+	}
+
+	public void removeLimb(AddRobotLimb controller) {
+		if (getLimmbs().contains(controller))
+			getLimmbs().remove(controller);
+	}
+
+	public ArrayList<AddRobotLimb> getLimmbs() {
+		return limbs;
 	}
 
 }
