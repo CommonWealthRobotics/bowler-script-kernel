@@ -71,6 +71,21 @@ public class ControllerFeatures {
 		batteryPeakWatt-=f.batteryPeakWatt;
 		batteryWattHour-=f.batteryWattHour;
 	}
+	@Override 
+	public String toString() {
+		return "\n\tServos: "+servoChannels+"\n"+
+				"\tmotorChannels: "+motorChannels+"\n"+
+				"\tanalogSensorChannels: "+analogSensorChannels+"\n"+
+				"\tcameras: "+cameras+"\n"+
+				"\tdigitalSensorChannels: "+digitalSensorChannels+"\n"+
+				"\tinertialSensors: "+inertialSensors+"\n"+
+				"\tdistanceSensors: "+distanceSensors+"\n"+
+				"\tpointCloudSensors: "+pointCloudSensors+"\n"+
+				"\tbatteryPeakWatt: "+batteryPeakWatt+"\n"+
+				"\tbatteryWattHour: "+batteryWattHour+"\n"+
+				"\tVoltages: "+voltages+"\n"
+				;
+	}
 	
 	public int getServoChannels() {
 		return servoChannels;
@@ -116,4 +131,5 @@ public class ControllerFeatures {
 	public double getBatteryWattHours() {
 		return batteryWattHour;
 	}
+	
 }
