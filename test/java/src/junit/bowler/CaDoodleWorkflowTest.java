@@ -31,6 +31,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.UnGroup;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
+import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
@@ -230,11 +231,15 @@ public class CaDoodleWorkflowTest {
 		loaded.setSelf(cf.getSelf());
 
 		com.neuronrobotics.sdk.common.Log.error(after);
-		
-		MakeRobot mr = new MakeRobot();
-		mr.setNames(selectAll);
 		while(loaded.isForwardAvailible())
 			loaded.forward();
+		selectAll = new  ArrayList<String>();
+		for(CSG c:loaded.getCurrentState()) {
+			selectAll.add(c.getName());
+		}
+		MakeRobot mr = new MakeRobot();
+		mr.setNames(selectAll);
+
 		loaded.addOpperation(mr).join();
 		loaded.save();
 		ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
@@ -248,14 +253,24 @@ public class CaDoodleWorkflowTest {
 		}
 		loaded.save();
 		ArrayList<LimbOption> limbs = LimbOption.getOptions();
+		TransformNR tf = new TransformNR();
 		for(LimbOption o:limbs) {
 			System.out.println(o);
+			tf = new TransformNR(0,0,30).times(tf);
 			AddRobotLimb limb = new AddRobotLimb()
 					.setLimb(o)
-					.setNames(selectAll);
+					.setNames(selectAll)
+					.setLocation(tf);
 			loaded.addOpperation(limb).join();
+			break;
 		}
+		for(MobileBase mb:loaded.getMobileBases()) {
+			System.out.println("Base "+mb);
+			mb.disconnect();
+		}
+		System.out.println("Saving");
 		loaded.save();
+		System.out.println("Save finished");
 	}
 
 }
