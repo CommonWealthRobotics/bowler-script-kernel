@@ -13,7 +13,7 @@ import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class MakeRobot extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
-	private List<String> assignedAsBase = new ArrayList<String>();
+	private List<String> names = new ArrayList<String>();
 	//@Expose(serialize = true, deserialize = true)
 	MobileBaseBuilder builder;
 
@@ -27,7 +27,7 @@ public class MakeRobot extends AbstractAddFrom {
 		try {
 			getBuilder().build();
 			for(CSG c:incoming) {
-				for(String s:assignedAsBase) {
+				for(String s:names) {
 					if(c.getName().contentEquals(s)) {
 						c.setMobileBaseName(getName());
 					}
@@ -54,12 +54,14 @@ public class MakeRobot extends AbstractAddFrom {
 		}
 	}
 
-	public List<String> getAssignedAsBase() {
-		return assignedAsBase;
+	public List<String> getNames() {
+		return names;
 	}
 
 	public void setNames(List<String> assignedAsBase) {
-		this.assignedAsBase = assignedAsBase;
+		if(assignedAsBase.size()==0)
+			throw new RuntimeException("Can not create a robot without specifying a base");
+		this.names = assignedAsBase;
 	}
 
 	/**
