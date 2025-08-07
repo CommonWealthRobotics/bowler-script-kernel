@@ -24,6 +24,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -67,6 +68,8 @@ public class ControllerOption {
 	javafx.scene.image.Image image = null;
 	CSG indicator = null;
 	File stlFile = null;
+	private ArrayList<VitaminLocation> back;
+	private String baseName;
 	
 	public void build(CaDoodleFile f) {
 		if(built)
@@ -221,5 +224,18 @@ public class ControllerOption {
 
 	public ControllerFeatures getConsumes() {
 		return consumes;
+	}
+
+	public ArrayList<VitaminLocation> getVitamins(TransformNR location, String baseName) {
+		if(back==null ) {
+			this.baseName = baseName;
+			back = new ArrayList<VitaminLocation>();
+			for (int i = 0; i < getVitaminNumber(); i++) {
+				TransformNR offset = location.times(getVitaminPose(i));
+				back.add(new VitaminLocation(false,baseName+"_"+i, vitaminType.get(i), vitaminSize.get(i), offset)
+						);
+			}
+		}
+		return back;
 	}
 }
