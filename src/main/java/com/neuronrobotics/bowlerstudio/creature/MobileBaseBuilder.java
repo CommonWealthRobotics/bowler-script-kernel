@@ -389,7 +389,7 @@ public class MobileBaseBuilder {
 	}
 
 	public MobileBase build() throws Exception {
-		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName() + ".xml";
+		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName() ;
 		mobileBase.setGitSelfSource(new String[] { gitURL, filename });
 
 		// Push to git
