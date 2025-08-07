@@ -14,6 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.creature.ControllerOption;
+import com.neuronrobotics.bowlerstudio.creature.LimbOption;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 import java.lang.reflect.Type;
@@ -27,6 +28,8 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToSolid;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.UnGroup;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
@@ -238,7 +241,21 @@ public class CaDoodleWorkflowTest {
 		ArrayList<ControllerOption> controllers = ControllerOption.getOptions();
 		for(ControllerOption o:controllers) {
 			System.out.println(o);
+			AddRobotController con = new AddRobotController()
+					.setNames(selectAll)
+					.setController(o);
+			loaded.addOpperation(con).join();
 		}
+		loaded.save();
+		ArrayList<LimbOption> limbs = LimbOption.getOptions();
+		for(LimbOption o:limbs) {
+			System.out.println(o);
+			AddRobotLimb limb = new AddRobotLimb()
+					.setLimb(o)
+					.setNames(selectAll);
+			loaded.addOpperation(limb).join();
+		}
+		loaded.save();
 	}
 
 }
