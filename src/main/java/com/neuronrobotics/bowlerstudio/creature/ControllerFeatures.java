@@ -42,10 +42,10 @@ public class ControllerFeatures {
 	public void add(ControllerFeatures f) {
 		if (f == null)
 			return;
-		vexV5Motors += f.vexV5Motors;
-		hiwonderBus += f.hiwonderBus;
-		dynamixelBus += f.dynamixelBus;
-		steppers += f.steppers;
+		vexV5Motors = getVexV5Motors() + f.vexV5Motors;
+		hiwonderBus = getHiwonderBus() + f.hiwonderBus;
+		dynamixelBus = getDynamixelBus() + f.dynamixelBus;
+		steppers = getSteppers() + f.steppers;
 		servoChannels += f.servoChannels;
 		motorChannels += f.motorChannels;
 		analogSensorChannels += f.analogSensorChannels;
@@ -73,13 +73,13 @@ public class ControllerFeatures {
 	public boolean check(ControllerFeatures f) {
 		if (f == null)
 			return false;
-		if (vexV5Motors < f.vexV5Motors)
+		if (getVexV5Motors() < f.getVexV5Motors())
 			return false;
-		if (hiwonderBus < f.hiwonderBus)
+		if (getHiwonderBus() < f.getHiwonderBus())
 			return false;
-		if (dynamixelBus < f.dynamixelBus)
+		if (getDynamixelBus() < f.getDynamixelBus())
 			return false;
-		if (steppers < f.steppers)
+		if (getSteppers() < f.getSteppers())
 			return false;
 		if (servoChannels < f.servoChannels)
 			return false;
@@ -119,10 +119,10 @@ public class ControllerFeatures {
 	public void subtract(ControllerFeatures f) {
 		if (f == null)
 			return;
-		vexV5Motors -= f.vexV5Motors;
-		hiwonderBus -= f.hiwonderBus;
-		dynamixelBus -= f.dynamixelBus;
-		steppers -= f.steppers;
+		vexV5Motors = getVexV5Motors() - f.vexV5Motors;
+		hiwonderBus = getHiwonderBus() - f.hiwonderBus;
+		dynamixelBus = getDynamixelBus() - f.dynamixelBus;
+		steppers = getSteppers() - f.steppers;
 		servoChannels -= f.servoChannels;
 		motorChannels -= f.motorChannels;
 		analogSensorChannels -= f.analogSensorChannels;
@@ -189,6 +189,22 @@ public class ControllerFeatures {
 
 	public double getBatteryWattHours() {
 		return batteryWattHour;
+	}
+
+	public int getVexV5Motors() {
+		return vexV5Motors;
+	}
+
+	public int getHiwonderBus() {
+		return hiwonderBus;
+	}
+
+	public int getDynamixelBus() {
+		return dynamixelBus;
+	}
+
+	public int getSteppers() {
+		return steppers;
 	}
 
 }
