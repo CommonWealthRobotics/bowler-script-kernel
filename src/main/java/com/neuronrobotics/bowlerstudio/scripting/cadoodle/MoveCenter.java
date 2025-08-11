@@ -94,7 +94,11 @@ public class MoveCenter extends CaDoodleOperation{
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
 			public ArrayList<CSG> process(CSG incoming, int depth) {
+				
 				Transform nrToCSG2 = TransformFactory.nrToCSG(location);
+				if(incoming.isMotionLock()) {
+					nrToCSG2=new Transform();
+				}
 				CSG tmpToAdd = incoming.transformed(nrToCSG2).syncProperties(incoming).setName(incoming.getName());
 				ArrayList<CSG> b = new ArrayList<>();
 				b.add(tmpToAdd);
