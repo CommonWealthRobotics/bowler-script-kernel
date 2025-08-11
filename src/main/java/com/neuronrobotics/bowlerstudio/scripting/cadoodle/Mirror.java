@@ -11,6 +11,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
+import javafx.scene.transform.Affine;
 
 public class Mirror extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
@@ -50,7 +51,9 @@ public class Mirror extends CaDoodleOperation {
 			for (CSG csg : incoming) {
 				if(!csg.getName().contentEquals(name))
 					continue;
-				CSG base = csg.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
+//				if(csg.isNoScale())
+//					continue;
+				CSG base = csg.transformed(TransformFactory.nrToCSG(getWorkplane(csg)).inverse());
 				Transform mirroringCenter = new Transform().movex(base.getCenterX()).movey(base.getCenterY())
 						.movez(base.getCenterZ());
 				Transform sc = new Transform();
@@ -67,12 +70,12 @@ public class Mirror extends CaDoodleOperation {
 				
 				CaDoodleFile.applyToAllConstituantElements(false, name, back, (incoming1, depth) -> {
 					ArrayList<CSG> b = new ArrayList<>();
-					Transform inverse = TransformFactory.nrToCSG(getWorkplane()).inverse();
+					Transform inverse = TransformFactory.nrToCSG(getWorkplane(incoming1)).inverse();
 					CSG t = incoming1.transformed(inverse);
 					CSG centered = t.transformed(mirroringCenter.inverse());
 					centered = centered.transformed(scale);
 					centered = centered.transformed(mirroringCenter);
-					Transform wp = TransformFactory.nrToCSG(getWorkplane());
+					Transform wp = TransformFactory.nrToCSG(getWorkplane(incoming1));
 					centered = centered.transformed(wp);					
 					CSG tf = centered.setName(name).syncProperties(incoming1);
 					sync(incoming1, tf);
@@ -107,7 +110,7 @@ public class Mirror extends CaDoodleOperation {
 	}
 
 	private CSG mirror(CSG csg, String name) {
-		CSG t = csg.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
+		CSG t = csg.transformed(TransformFactory.nrToCSG(getWorkplane(csg)).inverse());
 		Transform mirroringCenter = new Transform().movex(t.getCenterX()).movex(t.getCenterY()).movez(t.getCenterZ());
 
 		CSG centered = t.transformed(mirroringCenter.inverse());
@@ -121,7 +124,7 @@ public class Mirror extends CaDoodleOperation {
 			centered = centered.mirrorz();
 		}
 		centered = centered.transformed(mirroringCenter);
-		centered = centered.transformed(TransformFactory.nrToCSG(getWorkplane()));
+		centered = centered.transformed(TransformFactory.nrToCSG(getWorkplane(csg)));
 		return centered.setName(name).syncProperties(csg);
 	}
 
@@ -143,10 +146,12 @@ public class Mirror extends CaDoodleOperation {
 		return this;
 	}
 
-	public TransformNR getWorkplane() {
+	public TransformNR getWorkplane(CSG c) {
 		if (workplane == null)
 			workplane = new TransformNR();
-		return workplane;
+		Affine af = c.getManipulator();
+		TransformNR afNR = TransformFactory.affineToNr(af).inverse();
+		return afNR.times(workplane);
 	}
 
 	public Mirror setWorkplane(TransformNR workplane) {
