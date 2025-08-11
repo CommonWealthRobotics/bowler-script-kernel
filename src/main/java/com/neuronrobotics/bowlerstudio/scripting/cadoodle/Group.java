@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.IParametric;
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Affine;
 
 public class Group extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
@@ -37,6 +39,7 @@ public class Group extends AbstractAddFrom {
 		back.addAll(incoming);
 		String mobileBase=null;
 		boolean noscale=false;
+		Affine manip = null;
 		for (CSG csg : incoming) {
 			if (csg.isLock())
 				continue;
@@ -53,12 +56,19 @@ public class Group extends AbstractAddFrom {
 							continue;// skip grouping any item that is of a different mobile base;
 						}
 					}
+					if(csg.hasManipulator())
+						manip=csg.getManipulator();
 					replace.add(csg);
-					CSG c = csg.clone().syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(name);
+					CSG clone = csg.clone();
+					if(csg.hasManipulator()) {
+						clone=clone.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip)));
+					}
+					CSG c = clone.syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(name);
 					if (csg.isHole()) {
 						holes.add(c);
 					} else
 						solids.add(c);
+					
 					c.addGroupMembership(getGroupID());
 					back.add(c);
 				}
@@ -100,6 +110,10 @@ public class Group extends AbstractAddFrom {
 			
 			result.setIsHole(false);
 			result.setColor(c);
+		}
+		if(manip!=null) {
+			result=result.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip).inverse()));
+			result.setManipulator(manip);
 		}
 		if(mobileBase!=null)
 			result.setMobileBaseName(mobileBase);
