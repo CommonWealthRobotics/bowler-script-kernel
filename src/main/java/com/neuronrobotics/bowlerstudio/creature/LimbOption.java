@@ -1,10 +1,18 @@
 package com.neuronrobotics.bowlerstudio.creature;
 
+import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.delim;
+
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -16,9 +24,23 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
+import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+
+import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.FileUtil;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 
 public class LimbOption {
 	@Expose(serialize = true, deserialize = true)
@@ -35,6 +57,10 @@ public class LimbOption {
 	ControllerFeatures consumes;
 	@Expose(serialize = true, deserialize = true)
 	ControllerFeatures provides;
+	public static final TransformNR LimbRotationOffset=new TransformNR(new RotationNR(0, 90, -90));
+
+	private CSG indicator;
+	private Image image;
 
 	public DHParameterKinematics getLimb(String uniqueName) throws Exception {
 		String xmlContent = ScriptingEngine.codeFromGit(url, file)[0];
@@ -68,7 +94,7 @@ public class LimbOption {
 
 	@Override
 	public String toString() {
-		return type + " " + name + " " + url + "/" + file + "\n\tConsumes:" + getConsumes() + "\n\tProvides:" + getProvides();
+		return getType() + " " + getName() + " " + url + "/" + file + "\n\tConsumes:" + getConsumes() + "\n\tProvides:" + getProvides();
 	}
 
 	public ControllerFeatures getConsumes() {
@@ -77,5 +103,88 @@ public class LimbOption {
 
 	public ControllerFeatures getProvides() {
 		return provides;
+	}
+
+	public LimbType getType() {
+		return type;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void build(CaDoodleFile f) throws IOException {
+		String absolutePath = ScriptingEngine.getWorkspace().getAbsolutePath() + delim() + "uicache";
+		File dir = new File(absolutePath);
+		if (!dir.exists())
+			dir.mkdirs();
+		File imageFile = new File(absolutePath + delim() + type + name + ".png");
+		File stlFile = new File(absolutePath + delim() + type + name + ".stl");
+		if (imageFile.exists() && stlFile.exists()) {
+			indicator = Vitamins.get(stlFile);
+			indicator=indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
+			indicator.setColor(Color.WHITE);
+			image = new Image(imageFile.toURI().toString());
+			return;
+		}
+		AddRobotLimb add = new AddRobotLimb().setLimb(this)
+				.setLocation(new TransformNR());
+		add.setCaDoodleFile(f);
+		add.forceLoad=true;
+		MobileBaseBuilder value = new MobileBaseBuilder(Files.createTempDirectory(name + "-").toFile().getAbsolutePath(), "testfile");
+		add.setBuilderName("tmp");
+		add.getRobots().put("tmp", value);
+		List<CSG> so = add.process(new ArrayList<>());
+		add.getRobots().remove("tmp");
+		for (CSG c : so) {
+			for (String s : c.getParameters()) {
+				CSGDatabase.delete(s);
+			}
+		}
+		BowlerKernel.runLater(() -> {
+			image = ThumbnailImage.get(so);
+		});
+		while(image==null) {
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+			ImageIO.write(bufferedImage, "png", imageFile);
+			System.err.println("Thumbnail saved successfully to " + imageFile.getAbsolutePath());
+		} catch (Exception e) {
+			// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
+			// e.getMessage());
+			e.printStackTrace();
+		}
+		indicator = get(so.get(0));
+		if (so.size() > 1) {
+			for(int i=1;i<so.size();i++) {
+				indicator=indicator.dumbUnion(get(so.get(i)));
+			}
+		}
+		indicator.setColor(Color.WHITE);
+		try {
+			FileUtil.write(Paths.get(stlFile.getAbsolutePath()),indicator.toStlString());
+			System.err.println("Indicator STL saved successfully to " + stlFile.getAbsolutePath());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		indicator=indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
+
+	}
+	CSG get(CSG in) {
+		return in.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(in.getManipulator())));
+	}
+	public javafx.scene.image.Image getImage() {
+		return image;
+	}
+	public CSG getIndicator() {
+		return indicator;
 	}
 }
