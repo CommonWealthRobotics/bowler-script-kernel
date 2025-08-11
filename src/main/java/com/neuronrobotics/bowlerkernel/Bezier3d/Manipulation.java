@@ -45,6 +45,7 @@ public class Manipulation {
 	}
 
 	private DragState state = DragState.IDLE;
+	private boolean resizeAllowed=true;
 
 	public void addEventListener(EventHandler<MouseEvent> r) {
 		if (eventListeners.contains(r))
@@ -171,6 +172,7 @@ public class Manipulation {
 	}
 
 	private void dragged(MouseEvent event, MouseEvent event2) {
+		if(resizeAllowed)
 		if(state==DragState.Dragging) {
 			getUi().runLater(() -> {
 				setDragging(event);
@@ -352,6 +354,10 @@ public class Manipulation {
 
 	public void setFrameOfReference(IFrameProvider frameOfReference) {
 		this.frameOfReference = frameOfReference;
+	}
+
+	public void setUnlocked(boolean resizeAllowed) {
+		this.resizeAllowed = resizeAllowed;		
 	}
 
 }
