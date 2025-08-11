@@ -63,17 +63,20 @@ public class Group extends AbstractAddFrom {
 						manip=csg.getManipulator();
 					replace.add(csg);
 					CSG clone = csg.clone();
-					if(csg.hasManipulator()) {
-						clone=clone.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip)));
-					}
+					
 					CSG c = clone.syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(name);
+					c.addGroupMembership(getGroupID());
+					back.add(c);
+					if(csg.hasManipulator()) {
+						c=c.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip)))
+								.syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(name);
+						c.addGroupMembership(getGroupID());
+					}
 					if (csg.isHole()) {
 						holes.add(c);
 					} else
 						solids.add(c);
-					
-					c.addGroupMembership(getGroupID());
-					back.add(c);
+
 				}
 			}
 		}
