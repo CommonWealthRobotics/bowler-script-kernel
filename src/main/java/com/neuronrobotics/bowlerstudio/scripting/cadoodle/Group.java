@@ -49,7 +49,7 @@ public class Group extends AbstractAddFrom {
 				if (name.contentEquals(csg.getName())) {
 					if(csg.isNoScale())
 						noscale=true;
-					if(csg.isMotionLock())
+					if(csg.isMotionLock() || csg.isInGroup())
 						nomove=true;
 					Optional<String> mobileBaseName = csg.getMobileBaseName();
 					if(mobileBaseName.isPresent()) {
