@@ -4,7 +4,9 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.*;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
 
 import java.io.IOException;
 import java.util.HashMap;
