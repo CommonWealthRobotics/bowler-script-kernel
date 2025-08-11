@@ -40,6 +40,7 @@ public class Group extends AbstractAddFrom {
 		String mobileBase=null;
 		boolean noscale=false;
 		Affine manip = null;
+		boolean nomove=false;
 		for (CSG csg : incoming) {
 			if (csg.isLock())
 				continue;
@@ -48,6 +49,8 @@ public class Group extends AbstractAddFrom {
 				if (name.contentEquals(csg.getName())) {
 					if(csg.isNoScale())
 						noscale=true;
+					if(csg.isMotionLock())
+						nomove=true;
 					Optional<String> mobileBaseName = csg.getMobileBaseName();
 					if(mobileBaseName.isPresent()) {
 						if(mobileBase==null)
@@ -123,6 +126,7 @@ public class Group extends AbstractAddFrom {
 		result.addIsGroupResult(getGroupID());
 		result.setName(getGroupID());
 		result.setNoScale(noscale);
+		result.setIsMotionLock(nomove);
 		result.setIsAlwaysShow(false);
 		namesAdded.add(result.getName());
 		back.add(result);
