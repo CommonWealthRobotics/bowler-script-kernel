@@ -9,7 +9,6 @@ import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public abstract class CaDoodleOperation {
-	private HashMap<String,MobileBaseBuilder> robots;
 	private CaDoodleFile cf = null;
 	public abstract String getType();
 	public abstract List<CSG> process(List<CSG> incoming);
@@ -29,7 +28,7 @@ public abstract class CaDoodleOperation {
 	 * @return the robots
 	 */
 	public HashMap<String,MobileBaseBuilder> getRobots() {
-		return robots;
+		return cf.getRobots();
 	}
 	
 	public String getBuilder(List<String> selected, List<CSG> state) {
@@ -40,7 +39,7 @@ public abstract class CaDoodleOperation {
 				if(s.contentEquals(c.getName())) {
 					Optional<String> mobileBaseName= c.getMobileBaseName();
 					if(mobileBaseName.isPresent()) {
-						MobileBaseBuilder b = robots.get(mobileBaseName.get());
+						MobileBaseBuilder b = getRobots().get(mobileBaseName.get());
 						if(b!=null) {
 							return mobileBaseName.get();
 						}
@@ -49,13 +48,6 @@ public abstract class CaDoodleOperation {
 			}
 		}
 		return null;
-	}
-	
-	/**
-	 * @param robots the robots to set
-	 */
-	public void setRobots(HashMap<String,MobileBaseBuilder> robots) {
-		this.robots = robots;
 	}
 	
 }
