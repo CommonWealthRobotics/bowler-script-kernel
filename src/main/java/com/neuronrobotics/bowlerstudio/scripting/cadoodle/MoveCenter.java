@@ -96,7 +96,6 @@ public class MoveCenter extends CaDoodleOperation{
 			public ArrayList<CSG> process(CSG incoming, int depth) {
 				Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 				CSG tmpToAdd = incoming.transformed(nrToCSG2).syncProperties(incoming).setName(incoming.getName());
-				tmpToAdd.setManipulator(incoming.getManipulator());
 				ArrayList<CSG> b = new ArrayList<>();
 				b.add(tmpToAdd);
 				set(getName(), tmpToAdd, location);

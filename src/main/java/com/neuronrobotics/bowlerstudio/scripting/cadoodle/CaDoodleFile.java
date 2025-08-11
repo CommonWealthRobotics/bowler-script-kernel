@@ -632,7 +632,7 @@ public class CaDoodleFile {
 						+ " opperation! " + c.getName());
 			names.add(c.getName());
 			cachedCopy.add(cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
-					.setRegenerate(c.getRegenerate()).setManipulator(c.getManipulator()));
+					.setRegenerate(c.getRegenerate()));
 			// cachedCopy.add(c);
 		}
 		cache.put(op, cachedCopy);

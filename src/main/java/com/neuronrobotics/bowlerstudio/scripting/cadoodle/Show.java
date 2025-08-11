@@ -24,7 +24,7 @@ public class Show extends CaDoodleOperation{
 			for(String name:names) {
 				if(name.contentEquals(c.getName())) {
 					replace.add(c);
-					CSG b=c.clone().setRegenerate(c.getRegenerate()).syncProperties(c).setManipulator(c.getManipulator());
+					CSG b=c.clone().setRegenerate(c.getRegenerate()).syncProperties(c);
 					b.setIsHide(false);
 					back.add(b);
 				}
