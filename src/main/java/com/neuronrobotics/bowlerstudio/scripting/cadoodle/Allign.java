@@ -12,6 +12,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
+import javafx.scene.transform.Affine;
 
 public class Allign extends CaDoodleOperation{
 	@Expose (serialize = true, deserialize = true)
@@ -64,19 +65,21 @@ public class Allign extends CaDoodleOperation{
 			throw new RuntimeException("Allign can not be initialized without bounds!");
 		}
 		HashMap<String,TransformNR> moves= new HashMap<>();
+		HashMap<String,CSG> objects = new HashMap<String, CSG>();
 		for(String name :names) {
 			for(CSG tmp:back) {
 				if(!tmp.getName().contentEquals(name))
 					continue;
-				CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane()).inverse());
+				objects.put(name, tmp);
+				CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane(tmp)).inverse());
 				TransformNR tf = performTransform(bounds2, c);
 				moves.put(c.getName(),tf);
 			}
 		}
 		for(String name:moves.keySet()) {
-			TransformNR wpinv = getWorkplane().inverse();
 			TransformNR nr = moves.get(name);
-			TransformNR wp = getWorkplane();
+			TransformNR wp = getWorkplane(objects.get(name));
+			TransformNR wpinv = wp.inverse();
 			
 			TransformNR times = wp.times(nr.times(wpinv));
 			Transform tf =  TransformFactory.nrToCSG(times);
@@ -175,10 +178,12 @@ public class Allign extends CaDoodleOperation{
 		return this;
 	}
 
-	public TransformNR getWorkplane() {
+	public TransformNR getWorkplane(CSG c) {
 		if(workplane==null)
 			workplane= new TransformNR();
-		return workplane;
+		Affine af = c.getManipulator();
+		TransformNR afNR = TransformFactory.affineToNr(af).inverse();
+		return afNR.times(workplane);
 	}
 
 	public Allign setWorkplane(TransformNR workplane) {
