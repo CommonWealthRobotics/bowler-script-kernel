@@ -414,7 +414,7 @@ public class MobileBaseBuilder {
 				//TODO add the channel mapping here
 				kin.connect();
 				kin.zero();
-				switch(limb.getLimb().type) {
+				switch(limb.getLimb().getType()) {
 				case arm:
 				case flap:
 				case hand:
@@ -431,7 +431,7 @@ public class MobileBaseBuilder {
 					mobileBase.getFixed().add(kin);
 					break;
 				default:
-					throw new RuntimeException("Unknown limb type in builder! "+limb.getLimb().type);
+					throw new RuntimeException("Unknown limb type in builder! "+limb.getLimb().getType());
 				}
 			}
 		}
@@ -477,8 +477,11 @@ public class MobileBaseBuilder {
 		return test;
 	}
 	public void addLimb(AddRobotLimb controller) {
+		addLimb(controller,false);
+	}
+	public void addLimb(AddRobotLimb controller, boolean forceLoad) {
 		LimbOption consumes = controller.getLimb();
-		if(!checkOptionSupported(consumes)) {
+		if(!checkOptionSupported(consumes) && !forceLoad) {
 			throw new RuntimeException("Robot doesnt have enough resources to support "+controller.getLimb());
 		}
 		if (!getLimmbs().contains(controller))
