@@ -373,7 +373,6 @@ public class CaDoodleFile {
 
 	private void process(CaDoodleOperation op) {
 		op.setCaDoodleFile(this);
-		op.setRobots(getRobots());
 		List<CSG> process = op.process(getCurrentState());
 		if(MakeRobot.class.isInstance(op)) {
 			MakeRobot mr = (MakeRobot)op;
