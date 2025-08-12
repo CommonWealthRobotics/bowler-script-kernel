@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.ModifyLimb;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -30,7 +31,7 @@ import java.util.Map;
 public class MobileBaseBuilder {
 	ArrayList<AddRobotController> controllers = new ArrayList<AddRobotController>();
 	ArrayList<AddRobotLimb> limbs = new ArrayList<AddRobotLimb>();
-
+	ArrayList<ModifyLimb> mods = new ArrayList<ModifyLimb>();
 	private MobileBase mobileBase;
 	private String gitURL;
 	private String xmlName = null;
@@ -491,7 +492,14 @@ public class MobileBaseBuilder {
 	public boolean checkOptionSupported(LimbOption consumes) {
 		return getCapibilities().check(consumes.consumes);
 	}
-
+	public void addModification(ModifyLimb modifyLimb) {
+		if(!mods.contains(modifyLimb))
+			mods.add(modifyLimb);
+	}
+	public void removeModification(ModifyLimb modifyLimb) {
+		if(mods.contains(modifyLimb))
+			mods.remove(modifyLimb);
+	}
 	public void removeLimb(AddRobotLimb controller) {
 		if (getLimmbs().contains(controller))
 			getLimmbs().remove(controller);
@@ -508,5 +516,7 @@ public class MobileBaseBuilder {
 		mobileBaseCadManager.setConfigurationViewerMode(false);
 		return mobileBaseCadManager;
 	}
+
+	
 
 }
