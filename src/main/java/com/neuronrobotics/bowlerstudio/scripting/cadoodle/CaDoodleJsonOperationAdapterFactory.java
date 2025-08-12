@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonWriter;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.ModifyLimb;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -17,30 +18,32 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 	private final Map<Class<? extends CaDoodleOperation>, String> classRegistry = new HashMap<>();
 
 	public CaDoodleJsonOperationAdapterFactory() {
-		registerType("AddFromFile", AddFromFile.class);
-		registerType("AddFromScript", AddFromScript.class);
-		registerType("AddRobotController", AddRobotController.class);
-		registerType("AddRobotLimb", AddRobotLimb.class);
-		registerType("Allign", Allign.class);
-		registerType("Delete", Delete.class);
-		registerType("Group", Group.class);
-		registerType("Hide", Hide.class);
-		registerType("Lock", Lock.class);
-		registerType("MakeRobot", MakeRobot.class);
-		registerType("Mirror", Mirror.class);
-		registerType("MoveCenter", MoveCenter.class);
-		registerType("Paste", Paste.class);
-		registerType("Resize", Resize.class);
-		registerType("Show", Show.class);
-		registerType("ToHole", ToHole.class);
-		registerType("ToSolid", ToSolid.class);
-		registerType("UnGroup", UnGroup.class);
-		registerType("UnLock", UnLock.class);
-		registerType("Sweep", Sweep.class);
+		registerType( AddFromFile.class);
+		registerType( AddFromScript.class);
+		registerType( AddRobotController.class);
+		registerType( AddRobotLimb.class);
+		registerType( Allign.class);
+		registerType( Delete.class);
+		registerType( Group.class);
+		registerType(Hide.class);
+		registerType(Lock.class);
+		registerType( MakeRobot.class);
+		registerType( Mirror.class);
+		registerType( ModifyLimb.class);
+		registerType( MoveCenter.class);
+		registerType( Paste.class);
+		registerType( Resize.class);
+		registerType( Show.class);
+		registerType(ToHole.class);
+		registerType( ToSolid.class);
+		registerType( UnGroup.class);
+		registerType( UnLock.class);
+		registerType( Sweep.class);
 
 	}
 
-	private void registerType(String typeName, Class<? extends CaDoodleOperation> clazz) {
+	private void registerType(Class<? extends CaDoodleOperation> clazz) {
+		String typeName=clazz.getSimpleName();
 		typeRegistry.put(typeName, clazz);
 		classRegistry.put(clazz, typeName);
 	}
