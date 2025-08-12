@@ -1,14 +1,62 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot;
 
+import java.io.File;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleOperation;
+import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.creature.LimbOption;
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AbstractAddFrom;
+import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class ModifyLimb extends CaDoodleOperation{
-
+public class ModifyLimb extends AbstractAddFrom{
+	@Expose(serialize = true, deserialize = true)
+	String limbName;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR base = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR tip = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR elbow = null;
+	
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR basePrevious = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR tipPrevious = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR elbowPrevious = null;
+	@Expose(serialize = true, deserialize = true)
+	private List<String> names;
+	
+	private String builderName;
+	@Override
+	public void pruneCleanup() {
+		if (getBuilderName() != null) {
+			MobileBaseBuilder builder = getRobots().get(getBuilderName());
+			base = basePrevious;
+			tip=tipPrevious;
+			elbow=elbowPrevious;
+			try {
+				builder.build();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	public String getBuilderName() {
+		return builderName;
+	}
+	public void setBuilderName(String builderName) {
+		this.builderName = builderName;
+	}
 	@Override
 	public String getType() {
 		return "ModifyLimb";
@@ -16,13 +64,103 @@ public class ModifyLimb extends CaDoodleOperation{
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
+		if(names==null)
+			throw new RuntimeException("Names can not be null");
+		nameIndex=0;
+		if(builderName==null)
+			setBuilderName(getBuilder(names, incoming));
+		limbName = getLimbName(names, incoming);				
 		
-		return incoming;
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		back.addAll(incoming);
+		if(getBuilderName()!=null && limbName!=null) {
+			MobileBaseBuilder builder = getRobots().get(getBuilderName());
+			builder.addModification(this);
+			try {
+				builder.build();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			DHParameterKinematics newLimb = builder.getMobileBase().getLimbByName(limbName);
+			if(newLimb==null)
+				throw new RuntimeException("Failed to create a limb!");
+			MobileBaseCadManager manager=builder.getCadManager();
+			ArrayList<CSG> limbCad = manager.generateCad(newLimb);
+			for(CSG c: incoming) {
+				Optional<String> limbName2 = c.getLimbName();
+				if(limbName2.isPresent())
+					if(limbName2.get().contains(limbName)) {
+						back.remove(c);
+					}
+			}
+			for(CSG c:limbCad) {
+				c.setName(getOrderedName());
+				c.setLimbName(limbName);
+				c.setMobileBaseName(getBuilderName());
+				c.setNoScale(true);
+				c.setIsMotionLock(true);
+				back.add(c);
+			}
+			manager.render();
+		}else {
+			throw new RuntimeException("Failed to find builder or limb "+limbName+" "+builderName);
+		}
+		return back;
 	}
 
 	@Override
-	public List<String> getNamesAddedInThisOperation() {
-		return new ArrayList<String>();
+	public File getFile() throws NoSuchFileException {
+		throw new NoSuchFileException("");
+	}
+
+	/**
+	 * @return the base
+	 */
+	public TransformNR getBase() {
+		return base;
+	}
+
+	/**
+	 * @param base the base to set
+	 */
+	public ModifyLimb setBase(TransformNR base) {
+		this.base = base;
+		return this;
+	}
+
+	/**
+	 * @return the tip
+	 */
+	public TransformNR getTip() {
+		return tip;
+	}
+
+	/**
+	 * @param tip the tip to set
+	 */
+	public ModifyLimb setTip(TransformNR tip) {
+		this.tip = tip;
+		return this;
+	}
+
+	/**
+	 * @return the elbow
+	 */
+	public TransformNR getElbow() {
+		return elbow;
+	}
+
+	/**
+	 * @param elbow the elbow to set
+	 */
+	public ModifyLimb setElbow(TransformNR elbow) {
+		this.elbow = elbow;
+		return this;
+	}
+	public ModifyLimb setNames(List<String> names) {
+		this.names = names;
+		return this;
 	}
 
 }
