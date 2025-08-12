@@ -49,5 +49,23 @@ public abstract class CaDoodleOperation {
 		}
 		return null;
 	}
-	
+	public String getLimbName(List<String> selected, List<CSG> state) {
+		if(selected==null)
+			return null;
+		for(CSG c: state) {
+			for(String s:selected) {
+				if(s.contentEquals(c.getName())) {
+					Optional<String> limbNameOption= c.getLimbName();
+					if(limbNameOption.isPresent()) {
+						MobileBaseBuilder b = getRobots().get(limbNameOption.get());
+						if(b!=null) {
+							if(b.getMobileBase().getLimbByName(limbNameOption.get())!=null)
+								return limbNameOption.get();
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 }
