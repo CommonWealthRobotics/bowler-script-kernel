@@ -36,9 +36,6 @@ public abstract class AbstractAddFrom  extends CaDoodleOperation implements INam
 //	}
 	
 	public String getOrderedName() {
-		if(getName()==null) {
-			name=(RandomStringFactory.generateRandomString());
-		}
 		String result= getName();
 		if(nameIndex!=0){
 			result+= "_"+nameIndex;
