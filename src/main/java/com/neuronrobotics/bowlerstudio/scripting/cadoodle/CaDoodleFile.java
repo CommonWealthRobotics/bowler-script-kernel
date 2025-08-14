@@ -685,9 +685,25 @@ public class CaDoodleFile {
 	}
 
 	public void back() {
+		CaDoodleOperation op = getCurrentOpperation();
 		if (isBackAvailible())
 			setCurrentIndex(getCurrentIndex() - 1);
 		updateCurrentFromCache();
+		if(ICadoodleOperationUndo.class.isInstance(op)) {
+			ICadoodleOperationUndo un = (ICadoodleOperationUndo)op;
+			un.undo();
+		}
+		fireSaveSuggestion();
+	}
+	public void forward() {
+		if (isForwardAvailible())
+			setCurrentIndex(getCurrentIndex() + 1);
+		updateCurrentFromCache();
+		CaDoodleOperation op = getCurrentOpperation();
+		if(ICadoodleOperationUndo.class.isInstance(op)) {
+			ICadoodleOperationUndo un = (ICadoodleOperationUndo)op;
+			un.redo();
+		}
 		fireSaveSuggestion();
 	}
 
@@ -717,13 +733,6 @@ public class CaDoodleFile {
 		if (getCurrentIndex() == 0)
 			return null;
 		return getOpperations().get(getCurrentIndex() - 1);
-	}
-
-	public void forward() {
-		if (isForwardAvailible())
-			setCurrentIndex(getCurrentIndex() + 1);
-		updateCurrentFromCache();
-		fireSaveSuggestion();
 	}
 
 	public boolean isForwardAvailible() {
