@@ -436,6 +436,14 @@ public class MobileBaseBuilder {
 				}
 			}
 		}
+		for(int i=0;i<mods.size();i++) {
+			ModifyLimb mod=mods.get(i);
+			DHParameterKinematics kin=mod.getLimb();
+			if(kin==null)
+				continue;
+			kin.setRobotToFiducialTransform(mod.getBase());
+			kin.setDesiredTaskSpaceTransform(mod.getTip(), 0);
+		}
 		getCadManager().render();
 		// Push to git
 		ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
