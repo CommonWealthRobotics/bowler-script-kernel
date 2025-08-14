@@ -90,7 +90,7 @@ public class AddRobotLimb extends AbstractAddFrom{
 		return limb;
 	}
 	public AddRobotLimb setLocation(TransformNR location) {
-		this.location = location;
+		this.location = location.copy();
 		return this;
 	}
 	public TransformNR getLocation() {
