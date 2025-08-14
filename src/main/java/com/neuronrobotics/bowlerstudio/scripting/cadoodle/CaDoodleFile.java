@@ -712,7 +712,27 @@ public class CaDoodleFile {
 			return;
 		if (newIndex < 0)
 			return;
-		setCurrentIndex(newIndex + 1);
+		int ci =getCurrentIndex();
+		int ni=newIndex + 1;
+		boolean forward= ci<ni;
+		if(forward) {
+			for(int i=ci;i<ni+1;i++) {
+				CaDoodleOperation op = opperations.get(i-1);
+				if(ICadoodleOperationUndo.class.isInstance(op)) {
+					ICadoodleOperationUndo un = (ICadoodleOperationUndo)op;
+					un.redo();
+				}
+			}
+		}else {
+			for(int i=ni;i<ci+1;i++) {
+				CaDoodleOperation op = opperations.get(i-1);
+				if(ICadoodleOperationUndo.class.isInstance(op)) {
+					ICadoodleOperationUndo un = (ICadoodleOperationUndo)op;
+					un.undo();
+				}
+			}	
+		}
+		setCurrentIndex(ni);
 		updateCurrentFromCache();
 		fireSaveSuggestion();
 	}
