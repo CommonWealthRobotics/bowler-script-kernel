@@ -57,7 +57,7 @@ public abstract class CaDoodleOperation {
 				if(s.contentEquals(c.getName())) {
 					Optional<String> limbNameOption= c.getLimbName();
 					if(limbNameOption.isPresent()) {
-						MobileBaseBuilder b = getRobots().get(limbNameOption.get());
+						MobileBaseBuilder b = getRobots().get(c.getMobileBaseName().get());
 						if(b!=null) {
 							if(b.getMobileBase().getLimbByName(limbNameOption.get())!=null)
 								return limbNameOption.get();
