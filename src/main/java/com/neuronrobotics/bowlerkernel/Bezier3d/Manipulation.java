@@ -257,7 +257,7 @@ public class Manipulation {
 		return Math.round(in / increment) * increment;
 	}
 	
-	private void setGlobal(TransformNR global) {
+	public void setGlobal(TransformNR global) {
 //		newx = global.getX();
 //		newy = global.getY();
 //		newz = global.getZ();
