@@ -411,7 +411,7 @@ public class MobileBaseBuilder {
 			if(mobileBase.getLimbByName(limb.getName())==null) {
 				TransformNR location = limb.getLocation();
 				DHParameterKinematics kin =  limb.getLimb().getLimb(limb.getName());
-				kin.setRobotToFiducialTransform(location);
+				kin.setRobotToFiducialTransform(location.copy());
 				//TODO add the channel mapping here
 				kin.connect();
 				kin.zero();
@@ -441,7 +441,9 @@ public class MobileBaseBuilder {
 			DHParameterKinematics kin=mod.getLimb();
 			if(kin==null)
 				continue;
-			kin.setRobotToFiducialTransform(mod.getBase());
+			TransformNR base = mod.getBase();
+			System.out.println("Base set to "+base);
+			kin.setRobotToFiducialTransform(base);
 			kin.setDesiredTaskSpaceTransform(mod.getTip(), 0);
 		}
 		getCadManager().render();
