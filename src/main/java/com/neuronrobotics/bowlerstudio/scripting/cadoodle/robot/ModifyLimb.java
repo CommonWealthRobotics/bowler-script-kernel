@@ -11,12 +11,13 @@ import com.neuronrobotics.bowlerstudio.creature.LimbOption;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AbstractAddFrom;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ICadoodleOperationUndo;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class ModifyLimb extends AbstractAddFrom{
+public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUndo {
 	@Expose(serialize = true, deserialize = true)
 	String limbName;
 	@Expose(serialize = true, deserialize = true)
@@ -25,7 +26,10 @@ public class ModifyLimb extends AbstractAddFrom{
 	private TransformNR tip = null;
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR elbow = null;
-	
+
+	@Expose(serialize = true, deserialize = true)
+	boolean undo = false;
+
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR basePrevious = null;
 	@Expose(serialize = true, deserialize = true)
@@ -34,29 +38,27 @@ public class ModifyLimb extends AbstractAddFrom{
 	private TransformNR elbowPrevious = null;
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names;
-	
+
 	private String builderName;
+	private DHParameterKinematics newLimb;
+
 	@Override
 	public void pruneCleanup() {
 		if (getBuilderName() != null) {
 			MobileBaseBuilder builder = getRobots().get(getBuilderName());
-			base = basePrevious;
-			tip=tipPrevious;
-			elbow=elbowPrevious;
-			try {
-				builder.build();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			undo();
+			builder.removeModification(this);
 		}
 	}
+
 	public String getBuilderName() {
 		return builderName;
 	}
+
 	public void setBuilderName(String builderName) {
 		this.builderName = builderName;
 	}
+
 	@Override
 	public String getType() {
 		return "ModifyLimb";
@@ -64,47 +66,45 @@ public class ModifyLimb extends AbstractAddFrom{
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
-		if(names==null)
+		if (names == null)
 			throw new RuntimeException("Names can not be null");
-		nameIndex=0;
-		if(builderName==null)
+		nameIndex = 0;
+		if (builderName == null)
 			setBuilderName(getBuilder(names, incoming));
-		limbName = getLimbName(names, incoming);				
-		
+		limbName = getLimbName(names, incoming);
+
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		if(getBuilderName()!=null && limbName!=null) {
+		if (getBuilderName() != null && limbName != null) {
 			MobileBaseBuilder builder = getRobots().get(getBuilderName());
 			builder.addModification(this);
-			try {
-				builder.build();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			DHParameterKinematics newLimb = builder.getMobileBase().getLimbByName(limbName);
-			if(newLimb==null)
+			if (getLimb() == null)
+				setLimb(builder.getMobileBase().getLimbByName(limbName));
+			if (getLimb() == null)
 				throw new RuntimeException("Failed to create a limb!");
-			MobileBaseCadManager manager=builder.getCadManager();
-			ArrayList<CSG> limbCad = manager.generateCad(newLimb);
-			for(CSG c: incoming) {
-				Optional<String> limbName2 = c.getLimbName();
-				if(limbName2.isPresent())
-					if(limbName2.get().contains(limbName)) {
-						back.remove(c);
-					}
-			}
-			for(CSG c:limbCad) {
-				c.setName(getOrderedName());
-				c.setLimbName(limbName);
-				c.setMobileBaseName(getBuilderName());
-				c.setNoScale(true);
-				c.setIsMotionLock(true);
-				back.add(c);
+			redo();
+			MobileBaseCadManager manager = builder.getCadManager();
+			if (elbow != null) {
+				ArrayList<CSG> limbCad = manager.generateCad(getLimb());
+				for (CSG c : incoming) {
+					Optional<String> limbName2 = c.getLimbName();
+					if (limbName2.isPresent())
+						if (limbName2.get().contains(limbName)) {
+							back.remove(c);
+						}
+				}
+				for (CSG c : limbCad) {
+					c.setName(getOrderedName());
+					c.setLimbName(limbName);
+					c.setMobileBaseName(getBuilderName());
+					c.setNoScale(true);
+					c.setIsMotionLock(true);
+					back.add(c);
+				}
 			}
 			manager.render();
-		}else {
-			throw new RuntimeException("Failed to find builder or limb "+limbName+" "+builderName);
+		} else {
+			throw new RuntimeException("Failed to find builder or limb " + limbName + " " + builderName);
 		}
 		return back;
 	}
@@ -118,7 +118,7 @@ public class ModifyLimb extends AbstractAddFrom{
 	 * @return the base
 	 */
 	public TransformNR getBase() {
-		return base;
+		return undo ? base : basePrevious;
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class ModifyLimb extends AbstractAddFrom{
 	 * @return the tip
 	 */
 	public TransformNR getTip() {
-		return tip;
+		return undo ? tip : tipPrevious;
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class ModifyLimb extends AbstractAddFrom{
 	 * @return the elbow
 	 */
 	public TransformNR getElbow() {
-		return elbow;
+		return undo ? elbow : elbowPrevious;
 	}
 
 	/**
@@ -158,9 +158,53 @@ public class ModifyLimb extends AbstractAddFrom{
 		this.elbow = elbow;
 		return this;
 	}
+
 	public ModifyLimb setNames(List<String> names) {
 		this.names = names;
 		return this;
+	}
+
+	/**
+	 * @return the newLimb
+	 */
+	public DHParameterKinematics getLimb() {
+		return newLimb;
+	}
+
+	/**
+	 * @param newLimb the newLimb to set
+	 */
+	public void setLimb(DHParameterKinematics newLimb) {
+		this.newLimb = newLimb;
+		basePrevious = newLimb.getRobotToFiducialTransform();
+		tipPrevious = newLimb.getCurrentPoseTarget();
+
+	}
+
+	@Override
+	public void undo() {
+		MobileBaseBuilder builder = getRobots().get(getBuilderName());
+		undo = true;
+		System.out.println("Undo ModifyLimb");
+		try {
+			builder.build();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void redo() {
+		MobileBaseBuilder builder = getRobots().get(getBuilderName());
+		undo = false;
+		System.out.println("Redo ModifyLimb");
+		try {
+			builder.build();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
