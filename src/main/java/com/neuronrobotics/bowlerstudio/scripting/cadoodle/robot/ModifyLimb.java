@@ -104,7 +104,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 			}
 			manager.render();
 		} else {
-			throw new RuntimeException("Failed to find builder or limb " + limbName + " " + builderName);
+			throw new RuntimeException("Failed to find limb: " + limbName + " or builder: " + builderName);
 		}
 		return back;
 	}
@@ -118,7 +118,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	 * @return the base
 	 */
 	public TransformNR getBase() {
-		return undo ? base : basePrevious;
+		return !isUndo() ? base : basePrevious;
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	 * @return the tip
 	 */
 	public TransformNR getTip() {
-		return undo ? tip : tipPrevious;
+		return !isUndo() ? tip : tipPrevious;
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	 * @return the elbow
 	 */
 	public TransformNR getElbow() {
-		return undo ? elbow : elbowPrevious;
+		return !isUndo() ? elbow : elbowPrevious;
 	}
 
 	/**
@@ -174,17 +174,17 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	/**
 	 * @param newLimb the newLimb to set
 	 */
-	public void setLimb(DHParameterKinematics newLimb) {
+	public ModifyLimb setLimb(DHParameterKinematics newLimb) {
 		this.newLimb = newLimb;
-		basePrevious = newLimb.getRobotToFiducialTransform();
-		tipPrevious = newLimb.getCurrentPoseTarget();
-
+		basePrevious = newLimb.getRobotToFiducialTransform().copy();
+		tipPrevious = newLimb.getCurrentTaskSpaceTransform().copy();
+		return this;
 	}
 
 	@Override
 	public void undo() {
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
-		undo = true;
+		setUndo(true);
 		//System.out.println("Undo ModifyLimb");
 		try {
 			builder.build();
@@ -197,7 +197,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	@Override
 	public void redo() {
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
-		undo = false;
+		setUndo(false);
 		//System.out.println("Redo ModifyLimb");
 		try {
 			builder.build();
@@ -205,6 +205,20 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * @return the undo
+	 */
+	public boolean isUndo() {
+		return undo;
+	}
+
+	/**
+	 * @param undo the undo to set
+	 */
+	public void setUndo(boolean undo) {
+		this.undo = undo;
 	}
 
 }
