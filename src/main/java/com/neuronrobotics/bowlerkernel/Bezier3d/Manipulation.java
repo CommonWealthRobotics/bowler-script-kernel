@@ -40,7 +40,7 @@ public class Manipulation {
 	//private PhongMaterial color;// = new PhongMaterial(getColor());
 	//private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
 
-	private enum DragState {
+	public enum DragState {
 		IDLE, Dragging
 	}
 
@@ -149,7 +149,7 @@ public class Manipulation {
 	}
 
 	private void pressed(MouseEvent event) {
-		state = DragState.Dragging;
+		setState(DragState.Dragging);
 		new Thread(() -> {
 			event.consume();
 			dragging = false;
@@ -168,13 +168,13 @@ public class Manipulation {
 		mouseRelease(event);
 		for (Manipulation R : dependants)
 			R.mouseRelease(event);
-		state = DragState.IDLE;
+		setState(DragState.IDLE);
 		//manip.getMesh().setMaterial(color);
 	}
 
 	private void dragged(MouseEvent event, MouseEvent event2) {
 		if(resizeAllowed)
-		if(state==DragState.Dragging) {
+		if(getState()==DragState.Dragging) {
 			getUi().runLater(() -> {
 				setDragging(event);
 				double deltx = (startx - event.getScreenX());
@@ -194,7 +194,7 @@ public class Manipulation {
 	}
 
 	public boolean isMoving() {
-		return state == DragState.Dragging;
+		return getState() == DragState.Dragging;
 	}
 
 	private void mouseRelease(MouseEvent event) {
@@ -362,6 +362,14 @@ public class Manipulation {
 
 	public void setUnlocked(boolean resizeAllowed) {
 		this.resizeAllowed = resizeAllowed;		
+	}
+
+	public DragState getState() {
+		return state;
+	}
+
+	public void setState(DragState state) {
+		this.state = state;
 	}
 
 }
