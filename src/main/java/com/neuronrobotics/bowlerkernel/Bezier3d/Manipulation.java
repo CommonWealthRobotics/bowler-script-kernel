@@ -76,6 +76,7 @@ public class Manipulation {
 		for (Manipulation R : dependants) {
 			R.performMove(trans,event2);
 		}
+		//System.out.println("Mouse event "+event2.getEventType());
 		for (EventHandler<MouseEvent> R : eventListeners) {
 			R.handle(event2);
 		}
@@ -276,7 +277,15 @@ public class Manipulation {
 	public static void setUi(IInteractiveUIElementProvider ui) {
 		Manipulation.ui = ui;
 	}
-
+	public void reset() {
+		newx = 0;
+		newy = 0;
+		newz = 0;
+		getGlobalPose().setX(0);
+		getGlobalPose().setY(0);
+		getGlobalPose().setZ(0);
+		setGlobal(new TransformNR(0, 0, 0, new RotationNR()));
+	}
 	public void set(double newX, double newY, double newZ) {
 		newx = newX;
 		newy = newY;
@@ -302,11 +311,6 @@ public class Manipulation {
 		}
 
 	}
-	public void reset() {
-		// Auto-generated method stub
-		
-	}
-
 	public TransformNR getGlobalPose() {
 		return globalPose;
 	}
