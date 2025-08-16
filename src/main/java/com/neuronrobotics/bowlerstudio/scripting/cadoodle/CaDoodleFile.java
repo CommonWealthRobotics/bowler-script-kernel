@@ -420,6 +420,7 @@ public class CaDoodleFile {
 					result = OperationResult.APPEND;
 					this.setName("addOpperation Thread " + toProcess.size());
 					CaDoodleOperation op = toProcess.remove(0);
+					System.out.println("Adding Operation "+op);
 					if (getCurrentIndex() != getOpperations().size()) {
 						try {
 							fireRegenerateStart();
