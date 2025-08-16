@@ -391,31 +391,31 @@ public class MobileBaseBuilder {
 	}
 
 	public MobileBase build() throws Exception {
-		if(!mobileBase.isAvailable())
+		if (!mobileBase.isAvailable())
 			mobileBase.connect();
-		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName() ;
+		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName();
 		mobileBase.setGitSelfSource(new String[] { gitURL, filename });
 		for (int i = 0; i < controllers.size(); i++) {
 			AddRobotController con = controllers.get(i);
-			for(VitaminLocation l:con.getVitamins(con.getName()+"_"+i)) {
+			for (VitaminLocation l : con.getVitamins(con.getName() + "_" + i)) {
 				try {
-					if(!mobileBase.hasVitamin(l))
+					if (!mobileBase.hasVitamin(l))
 						mobileBase.addVitamin(l);
-				}catch(Exception ex) {
+				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
 		}
-		for(int i=0;i<limbs.size();i++) {
-			AddRobotLimb limb= limbs.get(i);
-			if(mobileBase.getLimbByName(limb.getName())==null) {
+		for (int i = 0; i < limbs.size(); i++) {
+			AddRobotLimb limb = limbs.get(i);
+			if (mobileBase.getLimbByName(limb.getName()) == null) {
 				TransformNR location = limb.getLocation();
-				DHParameterKinematics kin =  limb.getLimb().getLimb(limb.getName());
+				DHParameterKinematics kin = limb.getLimb().getLimb(limb.getName());
 				kin.setRobotToFiducialTransform(location.copy());
-				//TODO add the channel mapping here
+				// TODO add the channel mapping here
 				kin.connect();
 				kin.zero();
-				switch(limb.getLimb().getType()) {
+				switch (limb.getLimb().getType()) {
 				case arm:
 				case flap:
 				case hand:
@@ -432,20 +432,32 @@ public class MobileBaseBuilder {
 					mobileBase.getFixed().add(kin);
 					break;
 				default:
-					throw new RuntimeException("Unknown limb type in builder! "+limb.getLimb().getType());
+					throw new RuntimeException("Unknown limb type in builder! " + limb.getLimb().getType());
 				}
 			}
 		}
-		for(int i=0;i<mods.size();i++) {
-			ModifyLimb mod=mods.get(i);
-			DHParameterKinematics kin=mod.getLimb();
-			if(kin==null)
+		ArrayList<ModifyLimb > toRemove = new ArrayList<ModifyLimb>();
+		for (int i = 0; i < mods.size(); i++) {
+			ModifyLimb mod = mods.get(i);
+			DHParameterKinematics kin = mod.getLimb();
+			if (kin == null)
 				continue;
+
 			TransformNR base = mod.getBase();
-			System.out.println("Base set to "+base);
-			kin.setRobotToFiducialTransform(base);
-			kin.setDesiredTaskSpaceTransform(mod.getTip(), 0);
+			if (base != null) {
+				//System.out.println("Base set to " + base);
+				kin.setRobotToFiducialTransform(base);
+			}
+			if (mod.getTip() != null) {
+				try {
+					kin.setDesiredTaskSpaceTransform(mod.getTip(), 0);
+				}catch(Exception ex) {
+					ex.printStackTrace();
+					toRemove.add(mod);
+				}
+			}
 		}
+		mods.removeAll(toRemove);
 		getCadManager().render();
 		// Push to git
 		ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
@@ -462,10 +474,10 @@ public class MobileBaseBuilder {
 			getControllers().remove(controller);
 		for (int i = 0; i < controllers.size(); i++) {
 			AddRobotController con = controllers.get(i);
-			for(VitaminLocation l:con.getVitamins(con.getName()+"_"+i)) {
+			for (VitaminLocation l : con.getVitamins(con.getName() + "_" + i)) {
 				try {
 					mobileBase.removeVitamin(l);
-				}catch(Exception ex) {
+				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
@@ -475,25 +487,28 @@ public class MobileBaseBuilder {
 	public ArrayList<AddRobotController> getControllers() {
 		return controllers;
 	}
+
 	public ControllerFeatures getCapibilities() {
 		ControllerFeatures test = new ControllerFeatures();
-		for(AddRobotController c:controllers) {
+		for (AddRobotController c : controllers) {
 			test.add(c.getController().getProvides());
 			test.subtract(c.getController().getConsumes());
 		}
-		for(AddRobotLimb c:limbs) {
+		for (AddRobotLimb c : limbs) {
 			test.add(c.getLimb().getProvides());
 			test.subtract(c.getLimb().getConsumes());
 		}
 		return test;
 	}
+
 	public void addLimb(AddRobotLimb controller) {
-		addLimb(controller,false);
+		addLimb(controller, false);
 	}
+
 	public void addLimb(AddRobotLimb controller, boolean forceLoad) {
 		LimbOption consumes = controller.getLimb();
-		if(!checkOptionSupported(consumes) && !forceLoad) {
-			throw new RuntimeException("Robot doesnt have enough resources to support "+controller.getLimb());
+		if (!checkOptionSupported(consumes) && !forceLoad) {
+			throw new RuntimeException("Robot doesnt have enough resources to support " + controller.getLimb());
 		}
 		if (!getLimmbs().contains(controller))
 			getLimmbs().add(controller);
@@ -502,14 +517,17 @@ public class MobileBaseBuilder {
 	public boolean checkOptionSupported(LimbOption consumes) {
 		return getCapibilities().check(consumes.consumes);
 	}
+
 	public void addModification(ModifyLimb modifyLimb) {
-		if(!mods.contains(modifyLimb))
+		if (!mods.contains(modifyLimb))
 			mods.add(modifyLimb);
 	}
+
 	public void removeModification(ModifyLimb modifyLimb) {
-		if(mods.contains(modifyLimb))
+		if (mods.contains(modifyLimb))
 			mods.remove(modifyLimb);
 	}
+
 	public void removeLimb(AddRobotLimb controller) {
 		if (getLimmbs().contains(controller))
 			getLimmbs().remove(controller);
@@ -526,7 +544,5 @@ public class MobileBaseBuilder {
 		mobileBaseCadManager.setConfigurationViewerMode(false);
 		return mobileBaseCadManager;
 	}
-
-	
 
 }
