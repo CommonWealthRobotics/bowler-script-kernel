@@ -7,6 +7,7 @@ import com.google.gson.stream.JsonWriter;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.ModifyLimb;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 		registerType("MakeRobot", MakeRobot.class);
 		registerType("Mirror", Mirror.class);
 		registerType("MoveCenter", MoveCenter.class);
+		registerType("ModifyLimb", ModifyLimb.class);
 		registerType("Paste", Paste.class);
 		registerType("Resize", Resize.class);
 		registerType("Show", Show.class);
