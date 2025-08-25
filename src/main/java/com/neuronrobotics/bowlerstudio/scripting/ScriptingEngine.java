@@ -561,7 +561,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Files.createSymbolicLink(symlinkPath, appDataDir.toPath());
 		com.neuronrobotics.sdk.common.Log.error("Symlink created: " + symlinkPath);
 	}
-
+    private static Path getWindowsAppData(String appName) {
+        // Try APPDATA first, then LOCALAPPDATA, then fallback
+        String appData = System.getenv("APPDATA");
+        if (appData != null) {
+            return Paths.get(appData, appName);
+        }
+        
+        String localAppData = System.getenv("LOCALAPPDATA");
+        if (localAppData != null) {
+            return Paths.get(localAppData, appName);
+        }
+        
+        // Fallback
+        String userHome = System.getProperty("user.home");
+        return Paths.get(userHome, "AppData", "Roaming", appName);
+    }
 	public static File getWorkingDirectory() {
 		String relative = Paths.get(System.getProperty("user.home"), "Documents").toString();
 		if (OSUtil.isOSX()) {
@@ -586,10 +601,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				relative = relative + delim + "Documents";
 			}
 		if (OSUtil.isWindows()) {
-			delim = "\\";
-			if (!relative.endsWith("Documents")) {
-				relative = relative + delim + "Documents";
-			}
+			relative = getWindowsAppData(appName).toString();
 		}
 		File file = new File(relative + delim);
 		file.mkdirs();
