@@ -422,6 +422,7 @@ public class BowlerKernel {
 	}
 
 	public static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
+		CSG.setPreventNonManifoldTriangles(true);
 		processUIOpening(ret);
 		if (baseWorkspaceFile != null)
 			System.out.println("Processing file in directory " + baseWorkspaceFile.getAbsolutePath());
