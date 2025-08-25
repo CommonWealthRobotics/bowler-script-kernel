@@ -601,7 +601,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				relative = relative + delim + "Documents";
 			}
 		if (OSUtil.isWindows()) {
-			relative = getWindowsAppData(appName).toString();
+			delim = "\\";
+			if (!relative.endsWith("Documents")) {
+				relative = relative + delim + "Documents";
+			}
 		}
 		File file = new File(relative + delim);
 		file.mkdirs();
