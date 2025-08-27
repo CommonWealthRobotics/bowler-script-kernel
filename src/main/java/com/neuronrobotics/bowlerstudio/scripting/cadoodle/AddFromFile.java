@@ -98,7 +98,8 @@ public class AddFromFile extends AbstractAddFrom {
 			}
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
-
+				if(isDoodle && csg.isInGroup())
+					continue;
 				try {
 					CSG processedCSG = processGiven(csg, i, getOrderedName(),file,name,getLocation());
 					collect.add(processedCSG);
