@@ -22,6 +22,10 @@ import com.neuronrobotics.bowlerstudio.scripting.IGithubLoginListener;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import java.nio.charset.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.commons.io.*;
 public class ConfigurationDatabase {
 
@@ -173,7 +177,7 @@ public class ConfigurationDatabase {
 	}
 
 	public static File loadFile() {
-		File f = new File(ScriptingEngine.getWorkspace().getAbsolutePath()+"/ConfigurationDatabase.json");
+		File f = new File(getAppDataDirectory()+"/ConfigurationDatabase.json");
 		if(!f.exists()) {
 			try {
 				f.createNewFile();
@@ -182,6 +186,78 @@ public class ConfigurationDatabase {
 			}
 		}
 		return f;
+	}
+	public static Path getAppDataDirectory() {
+		String appName="CaDoodle";
+		String os = System.getProperty("os.name").toLowerCase();
+
+		if (os.contains("win")) {
+			return getWindowsAppData(appName);
+		} else if (os.contains("mac")) {
+			return getMacAppData(appName);
+		} else {
+			return getLinuxAppData(appName);
+		}
+	}
+
+	public static Path getWindowsAppData(String appName) {
+		// Try LOCALAPPDATA first (safe, never synced to OneDrive)
+		String localAppData = System.getenv("LOCALAPPDATA");
+		if (localAppData != null && !localAppData.isEmpty()) {
+			return Paths.get(localAppData, appName);
+		}
+
+		// Next try APPDATA
+		String appData = System.getenv("APPDATA");
+		if (appData != null && !appData.isEmpty()) {
+			return ensureNoOneDrive(Paths.get(appData), appName);
+		}
+
+		// Fallback to user.home
+		String userHome = System.getProperty("user.home");
+		Path homePath = Paths.get(userHome);
+		homePath = stripOneDrive(homePath); // sanitize
+		return homePath.resolve("AppData").resolve("Local").resolve(appName);
+	}
+
+	private static Path ensureNoOneDrive(Path path, String appName) {
+		Path sanitized = stripOneDrive(path);
+		return sanitized.resolve(appName);
+	}
+
+	private static Path stripOneDrive(Path path) {
+		// Look for "OneDrive" component in the path and cut everything after it
+		for (int i = 0; i < path.getNameCount(); i++) {
+			if (path.getName(i).toString().equalsIgnoreCase("OneDrive")) {
+				// Return path up to but not including "OneDrive"
+				return path.getRoot().resolve(path.subpath(0, i));
+			}
+		}
+		return path;
+	}
+
+	private static Path getMacAppData(String appName) {
+		String userHome = System.getProperty("user.home");
+		return Paths.get(userHome, "Library", "Application Support", appName);
+	}
+
+	private static Path getLinuxAppData(String appName) {
+		// Follow XDG Base Directory Specification
+		String xdgConfigHome = System.getenv("XDG_CONFIG_HOME");
+		if (xdgConfigHome != null && !xdgConfigHome.isEmpty()) {
+			return Paths.get(xdgConfigHome, appName);
+		}
+
+		String userHome = System.getProperty("user.home");
+		return Paths.get(userHome, ".config", appName);
+	}
+
+	public static void ensureDirectoryExists(Path directory) {
+		try {
+			Files.createDirectories(directory);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to create app data directory: " + directory, e);
+		}
 	}
 
 
