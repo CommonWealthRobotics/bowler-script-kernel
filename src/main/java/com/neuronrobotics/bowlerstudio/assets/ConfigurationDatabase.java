@@ -177,7 +177,12 @@ public class ConfigurationDatabase {
 	}
 
 	public static File loadFile() {
-		File f = new File(getAppDataDirectory()+"/ConfigurationDatabase.json");
+		Path appDataDirectory = getAppDataDirectory();
+		File dir = appDataDirectory.toFile();
+		if(!dir.exists()) {
+			dir.mkdirs();
+		}
+		File f = new File(appDataDirectory+"/ConfigurationDatabase.json");
 		if(!f.exists()) {
 			try {
 				f.createNewFile();
