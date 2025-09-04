@@ -110,7 +110,7 @@ public class JythonHelper implements IScriptingLanguage {
   @Override
   public ArrayList<String> getFileExtenetion() {
     // Auto-generated method stub
-    return new ArrayList<>(Arrays.asList("py", "jy"));
+    return new ArrayList<>(Arrays.asList( "jy"));
   }
 
 }
