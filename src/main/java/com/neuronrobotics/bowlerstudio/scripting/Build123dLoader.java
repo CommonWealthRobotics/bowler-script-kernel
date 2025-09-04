@@ -79,7 +79,9 @@ public class Build123dLoader implements IScriptingLanguage {
 	}
 	@Override
 	public String getDefaultContents() {
-		return "cube([30, 20, 10]);";
+		return "from build123d import *\n"
+				+ "\n"
+				+ "cube = Box(10, 10, 10)";
 	}
 
 	@Override
@@ -87,5 +89,15 @@ public class Build123dLoader implements IScriptingLanguage {
 		return true;
 	}
 
+	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		Build123dLoader loader = new Build123dLoader();
+		
+		// create test file
+		File testblend = new File("build123dTest.py");
+		if(!testblend.exists())
+			loader.getDefaultContents(testblend);
+		HashMap<String,Double> params = new HashMap<String, Double>();
+		toSTLFile(testblend, new File("build123dTest.py.stl"),params);
+	}
 
 }
