@@ -112,8 +112,7 @@ public class AddFromFile extends AbstractAddFrom {
 				csg1.setParameter(getFileLocationparam(file,name));
 			back.addAll(collect);
 		} catch (Exception e) {
-			// Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		return back;
 	}
