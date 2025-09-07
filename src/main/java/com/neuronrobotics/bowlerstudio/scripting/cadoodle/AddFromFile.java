@@ -37,10 +37,10 @@ public class AddFromFile extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM = false;
 
-	public AddFromFile set(File source) {
+	public AddFromFile set(File source, CaDoodleFile cf) {
 		for (String s : ScriptingEngine.getAllExtentions()) {
 			if (source.getName().toLowerCase().endsWith(s.toLowerCase())) {
-				toLocal(source, getName(),getCaDoodleFile());
+				toLocal(source, getName(),cf);
 				try {
 					getFile();
 				} catch (NoSuchFileException e) {
