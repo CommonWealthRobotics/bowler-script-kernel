@@ -63,7 +63,7 @@ public class Sweep extends AbstractAddFrom {
 		if (!source.getName().toLowerCase().endsWith(".svg"))
 			throw new Exception("Sweep can only take files with the .svg extention");
 		System.out.println("Saving Local Copy of "+source.getAbsolutePath());
-		AddFromFile.toLocal(source, getName());
+		AddFromFile.toLocal(source, getName(),getCaDoodleFile());
 		try {
 			getFile();
 		} catch (Exception ex) {
@@ -230,7 +230,7 @@ public class Sweep extends AbstractAddFrom {
 
 	@Override
 	public File getFile() throws NoSuchFileException {
-		return AddFromFile.getFile(name);
+		return AddFromFile.getFile(name,getCaDoodleFile());
 	}
 
 	private CSG processGiven(Polygon p, Bounds b, int j, String name) {

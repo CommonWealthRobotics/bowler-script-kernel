@@ -159,7 +159,7 @@ public class CaDoodleFile {
 			StringParameter loc = new StringParameter("CaDoodle_File_Location", self.getAbsolutePath(),
 					new ArrayList<String>());
 			loc.setStrValue(self.getAbsolutePath());
-			bom = CaDoodleFile.getBillOfMaterials();
+			bom = CaDoodleFile.getBillOfMaterials(this);
 			bom.clear();
 			bom.save();
 
@@ -230,9 +230,9 @@ public class CaDoodleFile {
 		bom.save();
 	}
 
-	public static VitaminBomManager getBillOfMaterials() {
+	public static VitaminBomManager getBillOfMaterials(CaDoodleFile cf) {
 
-		String strValue = getCadoodleFileLocation();
+		String strValue = cf.getSelf().getAbsolutePath() ;
 		File file = new File(strValue).getParentFile();
 		if (bomManagers.get(strValue) == null) {
 			bomManagers.put(strValue, new VitaminBomManager(file));
@@ -240,11 +240,10 @@ public class CaDoodleFile {
 		return bomManagers.get(strValue);
 	}
 
-	private static String getCadoodleFileLocation() {
-		StringParameter loc = new StringParameter("CaDoodle_File_Location", "", new ArrayList<String>());
-		String strValue = loc.getStrValue();
-		return strValue;
-	}
+//	private static String getCadoodleFileLocation() {
+//		
+//		return get;
+//	}
 
 	public Thread regenerateFrom(CaDoodleOperation source) {
 		if (initializing)

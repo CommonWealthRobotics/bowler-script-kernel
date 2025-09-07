@@ -69,8 +69,7 @@ public class MakeRobot extends AbstractAddFrom {
 	 */
 	public MobileBaseBuilder getBuilder() {
 		if (builder == null) {
-			StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
-			String strValue = loc.getStrValue();
+			String strValue = getCaDoodleFile().getSelf().getAbsolutePath();
 			File parentFile = new File(strValue).getParentFile();
 			String source = parentFile.getAbsolutePath();
 			builder = new MobileBaseBuilder(source, getName() + "-mobilbase.xml");

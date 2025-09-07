@@ -40,7 +40,7 @@ public class AddFromFile extends AbstractAddFrom {
 	public AddFromFile set(File source) {
 		for (String s : ScriptingEngine.getAllExtentions()) {
 			if (source.getName().toLowerCase().endsWith(s.toLowerCase())) {
-				toLocal(source, getName());
+				toLocal(source, getName(),getCaDoodleFile());
 				try {
 					getFile();
 				} catch (NoSuchFileException e) {
@@ -146,10 +146,9 @@ public class AddFromFile extends AbstractAddFrom {
 		return targetFile;
 	}
 
-	public static File toLocal(File file, String name) {
-		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
+	public static File toLocal(File file, String name,CaDoodleFile cf ) {
 		File parentFileIncoming = file.getParentFile();
-		String strValue = loc.getStrValue();
+		String strValue = cf.getSelf().getAbsolutePath();
 		File parentFile = new File(strValue).getParentFile();
 		String source = parentFile.getAbsolutePath();
 		boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
@@ -157,9 +156,9 @@ public class AddFromFile extends AbstractAddFrom {
 			String parentIncoming = parentFileIncoming.getAbsolutePath();
 			String lowerCase = parentIncoming.toLowerCase();
 			String lowerCase2 = source.toLowerCase();
-			boolean b = !lowerCase.contentEquals(lowerCase2);
+			boolean namesNotEqual = !lowerCase.contentEquals(lowerCase2);
 			boolean exists = file.exists();
-			if (b && exists) {
+			if (namesNotEqual && exists) {
 				if (!isDoodle) {
 					File copied;
 					try {
@@ -275,9 +274,9 @@ public class AddFromFile extends AbstractAddFrom {
 		return true;
 	}
 
-	public static File getFile(String name) {
-		StringParameter loc = new StringParameter("CaDoodle_File_Location", "NotSet", new ArrayList<String>());
-		File parentFile = new File(loc.getStrValue()).getParentFile();
+	public static File getFile(String name,CaDoodleFile cf) {
+		String strValue = cf.getSelf().getAbsolutePath();
+		File parentFile = new File(strValue).getParentFile();
 		for (File f : parentFile.listFiles()) {
 			if (f.getName().contains(name)) {
 				if (f.isDirectory()) {
@@ -369,6 +368,6 @@ public class AddFromFile extends AbstractAddFrom {
 
 	@Override
 	public File getFile() throws NoSuchFileException {
-		return AddFromFile.getFile(name);
+		return getFile(name,getCaDoodleFile());
 	}
 }
