@@ -147,6 +147,8 @@ public class AddFromFile extends AbstractAddFrom {
 	}
 
 	public static File toLocal(File file, String name,CaDoodleFile cf ) {
+		if(cf==null)
+			return file;
 		File parentFileIncoming = file.getParentFile();
 		String strValue = cf.getSelf().getAbsolutePath();
 		File parentFile = new File(strValue).getParentFile();
