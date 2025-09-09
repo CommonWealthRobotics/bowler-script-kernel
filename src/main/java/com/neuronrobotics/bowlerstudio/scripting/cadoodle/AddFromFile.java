@@ -38,6 +38,7 @@ public class AddFromFile extends AbstractAddFrom {
 	private Boolean preventBoM = false;
 
 	public AddFromFile set(File source, CaDoodleFile cf) {
+		setCaDoodleFile(cf);
 		for (String s : ScriptingEngine.getAllExtentions()) {
 			if (source.getName().toLowerCase().endsWith(s.toLowerCase())) {
 				toLocal(source, getName(),cf);
