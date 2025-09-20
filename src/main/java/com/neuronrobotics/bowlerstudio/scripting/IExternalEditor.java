@@ -31,7 +31,7 @@ public interface IExternalEditor {
 		return false;
 	}
 	
-	void launch(File file, Button advanced);
+	void launch(File file, Button advanced,Runnable onExit);
 	
 	String nameOfEditor();
 	

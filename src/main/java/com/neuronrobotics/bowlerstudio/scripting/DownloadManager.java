@@ -464,7 +464,7 @@ public class DownloadManager {
 									}
 
 									@Override
-									public void launch(File file, Button advanced) {
+									public void launch(File file, Button advanced,Runnable r) {
 										// Auto-generated method stub
 
 									}
