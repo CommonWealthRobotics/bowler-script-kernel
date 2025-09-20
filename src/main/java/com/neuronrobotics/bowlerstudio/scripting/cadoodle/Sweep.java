@@ -59,11 +59,12 @@ public class Sweep extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private double defSpiral=0;
 	
-	public Sweep set(File source) throws Exception {
+	public Sweep set(File source,CaDoodleFile cf) throws Exception {
 		if (!source.getName().toLowerCase().endsWith(".svg"))
 			throw new Exception("Sweep can only take files with the .svg extention");
 		com.neuronrobotics.sdk.common.Log.debug("Saving Local Copy of "+source.getAbsolutePath());
-		AddFromFile.toLocal(source, getName(),getCaDoodleFile());
+		AddFromFile.toLocal(source, getName(),cf);
+		setCaDoodleFile(cf);
 		try {
 			getFile();
 		} catch (Exception ex) {
