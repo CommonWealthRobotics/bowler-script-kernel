@@ -126,7 +126,7 @@ public class ControllerOption {
 
 	public void runLinkLoader() throws FileNotFoundException {
 		if (linkLoaderGit == null || linkLoaderFile == null) {
-			System.out.println("Using built in link loaders");
+			com.neuronrobotics.sdk.common.Log.debug("Using built in link loaders");
 			return;
 		}
 		try {

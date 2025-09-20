@@ -70,7 +70,7 @@ public class Resize extends CaDoodleOperation {
 				max.z = max2.z;
 		}
 		if (min == null || max == null) {
-			System.out.println("Found bounds to be null ");
+			com.neuronrobotics.sdk.common.Log.debug("Found bounds to be null ");
 
 			throw new RuntimeException("Min and max can not be null");
 		}

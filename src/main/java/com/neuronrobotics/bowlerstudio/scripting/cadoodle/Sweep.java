@@ -62,7 +62,7 @@ public class Sweep extends AbstractAddFrom {
 	public Sweep set(File source) throws Exception {
 		if (!source.getName().toLowerCase().endsWith(".svg"))
 			throw new Exception("Sweep can only take files with the .svg extention");
-		System.out.println("Saving Local Copy of "+source.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Saving Local Copy of "+source.getAbsolutePath());
 		AddFromFile.toLocal(source, getName(),getCaDoodleFile());
 		try {
 			getFile();
@@ -162,7 +162,7 @@ public class Sweep extends AbstractAddFrom {
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
-			System.out.println("Loading File "+file.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Loading File "+file.getAbsolutePath());
 			if (!file.exists()) {
 				throw new RuntimeException("Failed to find file");
 			}

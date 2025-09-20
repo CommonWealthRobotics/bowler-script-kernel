@@ -113,7 +113,7 @@ public class Paste extends AbstractAddFrom  {
 		ArrayList<CSG> b = new ArrayList<>();
 		b.add(c);
 		b.add(newOne);
-		//System.out.println("Copy "+c.getName()+" to "+newOne.getName());
+		//com.neuronrobotics.sdk.common.Log.debug("Copy "+c.getName()+" to "+newOne.getName());
 		cpMap.put(c.getName(), newOne.getName());
 		return b;
 	}

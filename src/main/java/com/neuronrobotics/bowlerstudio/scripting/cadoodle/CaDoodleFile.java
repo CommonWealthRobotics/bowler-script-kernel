@@ -95,7 +95,7 @@ public class CaDoodleFile {
 	private ICadoodleSaveStatusUpdate defaultSaver = new ICadoodleSaveStatusUpdate() {
 		@Override
 		public void renderSplashFrame(int percent, String message) {
-			System.out.println(percent + "% " + message);
+			com.neuronrobotics.sdk.common.Log.debug(percent + "% " + message);
 		}
 	};
 	private ICadoodleSaveStatusUpdate saveUpdate = null;
@@ -419,7 +419,7 @@ public class CaDoodleFile {
 					result = OperationResult.APPEND;
 					this.setName("addOpperation Thread " + toProcess.size());
 					CaDoodleOperation op = toProcess.remove(0);
-					System.out.println("Adding Operation "+op);
+					com.neuronrobotics.sdk.common.Log.debug("Adding Operation "+op);
 					if (getCurrentIndex() != getOpperations().size()) {
 						try {
 							fireRegenerateStart();
@@ -637,7 +637,7 @@ public class CaDoodleFile {
 		}
 		cache.put(op, cachedCopy);
 		if(getFreeMemory()>50)
-			System.out.println("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
+			com.neuronrobotics.sdk.common.Log.debug("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
 	}
 
 	public static double getFreeMemory() {

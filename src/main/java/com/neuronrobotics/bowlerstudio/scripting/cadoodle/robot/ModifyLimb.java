@@ -185,7 +185,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	public void undo() {
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
 		setUndo(true);
-		//System.out.println("Undo ModifyLimb");
+		//com.neuronrobotics.sdk.common.Log.debug("Undo ModifyLimb");
 		try {
 			builder.build();
 		} catch (Exception e) {
@@ -198,7 +198,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	public void redo() {
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
 		setUndo(false);
-		//System.out.println("Redo ModifyLimb");
+		//com.neuronrobotics.sdk.common.Log.debug("Redo ModifyLimb");
 		try {
 			builder.build();
 		} catch (Exception e) {

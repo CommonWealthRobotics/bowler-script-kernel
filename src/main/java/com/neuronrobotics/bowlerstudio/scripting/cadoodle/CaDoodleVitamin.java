@@ -74,13 +74,13 @@ public class CaDoodleVitamin {
 			if (!(Boolean) object.get("PreventBomAdd")) {
 				
 //				VitaminLocation vl = new VitaminLocation(false, name, type, word.getStrValue(), new TransformNR());
-//				//System.out.println("BoM update "+vl);
+//				//com.neuronrobotics.sdk.common.Log.debug("BoM update "+vl);
 //				CaDoodleFile.getBoM().addVitamin(vl, true);
 			}
 		}
 		CSG part;
 		try {
-//			System.out.println("Generating Vitamin "+type+" "+word.getStrValue()+" for vitamin named "+name);
+//			com.neuronrobotics.sdk.common.Log.debug("Generating Vitamin "+type+" "+word.getStrValue()+" for vitamin named "+name);
 			part = Vitamins.get(type, word.getStrValue()).setIsHole(true);
 			CSGDatabase.saveDatabase();
 			Set<String> params = part.getParameters();
@@ -89,9 +89,9 @@ public class CaDoodleVitamin {
 			part.setParameter(typeParam);
 			params = part.getParameters();
 			part.setName(name);
-//			System.out.println("Parameters on Vitamin: "+name);
+//			com.neuronrobotics.sdk.common.Log.debug("Parameters on Vitamin: "+name);
 //			for(String s:params) {
-//				System.out.println("\t"+s);
+//				com.neuronrobotics.sdk.common.Log.debug("\t"+s);
 //			}
 			CSG back = part.setRegenerate(new IRegenerate() {
 				@Override
@@ -102,14 +102,14 @@ public class CaDoodleVitamin {
 						name2=pv.get().toString();
 					else
 						name2=name;
-					//System.out.println("Regenerating source \n\t"+name+" on part \n\t"+name2);
+					//com.neuronrobotics.sdk.common.Log.debug("Regenerating source \n\t"+name+" on part \n\t"+name2);
 					ArrayList<Object> ar = new ArrayList<>();
 					ar.addAll(args);
 					ar.set(0, previous.getName());
 					Parameter s = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Size");
 					Parameter t = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Type");
 					if(t==null) {
-						System.out.println(" Error, type is null, previous "+name2+" has no parameters somehow??");
+						com.neuronrobotics.sdk.common.Log.debug(" Error, type is null, previous "+name2+" has no parameters somehow??");
 					}
  					return CaDoodleVitamin.get(t.getStrValue(),s.getStrValue(), ar);
 				}

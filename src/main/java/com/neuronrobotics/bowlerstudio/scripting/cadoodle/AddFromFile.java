@@ -214,7 +214,7 @@ public class AddFromFile extends AbstractAddFrom {
 				System.err.println("Error: Could not create target directory '" + targetDir + "'.");
 				return false;
 			}
-			System.out.println("Created target directory: " + targetDir);
+			com.neuronrobotics.sdk.common.Log.debug("Created target directory: " + targetDir);
 		}
 
 		try {
@@ -266,7 +266,7 @@ public class AddFromFile extends AbstractAddFrom {
 					Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING,
 							StandardCopyOption.COPY_ATTRIBUTES);
 
-					System.out.println("Copied: " + sourcePath + " -> " + targetPath);
+					com.neuronrobotics.sdk.common.Log.debug("Copied: " + sourcePath + " -> " + targetPath);
 				} catch (IOException e) {
 					System.err.println("Error copying file " + file.getAbsolutePath() + ": " + e.getMessage());
 					throw e;

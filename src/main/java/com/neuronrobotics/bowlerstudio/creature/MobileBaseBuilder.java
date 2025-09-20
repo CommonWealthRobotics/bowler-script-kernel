@@ -445,7 +445,7 @@ public class MobileBaseBuilder {
 
 			TransformNR base = mod.getBase();
 			if (base != null) {
-				//System.out.println("Base set to " + base);
+				//com.neuronrobotics.sdk.common.Log.debug("Base set to " + base);
 				kin.setRobotToFiducialTransform(base);
 			}
 			if (mod.getTip() != null) {

@@ -926,7 +926,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				File f = new File(id);
 				if (f.exists() && f.isDirectory()) {
-					System.out.println("remoteURI is actually a directory " + f);
+					com.neuronrobotics.sdk.common.Log.debug("remoteURI is actually a directory " + f);
 					OutputStream out = null;
 					try {
 						out = FileUtils.openOutputStream(new File(f + "/" + FileName), false);
@@ -1023,7 +1023,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				File f = new File(remoteURI);
 				if (f.exists() && f.isDirectory()) {
-					System.out.println("remoteURI is actually a directory " + f);
+					com.neuronrobotics.sdk.common.Log.debug("remoteURI is actually a directory " + f);
 					OutputStream out = null;
 					try {
 						out = FileUtils.openOutputStream(new File(f + "/" + FileName), false);
@@ -1104,7 +1104,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					git.push().setCredentialsProvider(PasswordManager.getCredentialProvider())
 							.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
 			});
-			System.out.println("PUSH OK! file: " + desired + " on branch " + getBranch(remoteURI));
+			com.neuronrobotics.sdk.common.Log.debug("PUSH OK! file: " + desired + " on branch " + getBranch(remoteURI));
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
@@ -1750,7 +1750,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				File f = new File(remoteURI);
 				if (f.exists() && f.isDirectory()) {
-					System.out.println("remoteURI is actually a directory " + f);
+					com.neuronrobotics.sdk.common.Log.debug("remoteURI is actually a directory " + f);
 					return f;
 				}
 			} catch (Exception ex) {
@@ -2245,7 +2245,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 			String[] newFileCode;
 			try {
-				System.out.println("Opening " + targetFilename + " from " + targetGit);
+				com.neuronrobotics.sdk.common.Log.debug("Opening " + targetFilename + " from " + targetGit);
 				newFileCode = ScriptingEngine.codeFromGit(targetGit, targetFilename);
 				if (newFileCode == null)
 					newFileCode = new String[] { "" };

@@ -241,7 +241,7 @@ public class BowlerKernel {
 					}
 					baseWorkspaceFile = new File(location);
 
-					System.out.println("Using working directory  " + baseWorkspaceFile.getAbsolutePath());
+					com.neuronrobotics.sdk.common.Log.debug("Using working directory  " + baseWorkspaceFile.getAbsolutePath());
 					f = new File(baseWorkspaceFile.getAbsolutePath() + "/" + s);
 					com.neuronrobotics.sdk.common.Log.error("File   " + f.getName());
 					ret = ScriptingEngine.inlineFileScriptRun(f, null);
@@ -425,7 +425,7 @@ public class BowlerKernel {
 		CSG.setPreventNonManifoldTriangles(true);
 		processUIOpening(ret);
 		if (baseWorkspaceFile != null)
-			System.out.println("Processing file in directory " + baseWorkspaceFile.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory " + baseWorkspaceFile.getAbsolutePath());
 
 		if (baseWorkspaceFile != null) {
 

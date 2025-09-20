@@ -76,7 +76,7 @@ public class Manipulation {
 		for (Manipulation R : dependants) {
 			R.performMove(trans,event2);
 		}
-		//System.out.println("Mouse event "+event2.getEventType());
+		//com.neuronrobotics.sdk.common.Log.debug("Mouse event "+event2.getEventType());
 		for (EventHandler<MouseEvent> R : eventListeners) {
 			R.handle(event2);
 		}

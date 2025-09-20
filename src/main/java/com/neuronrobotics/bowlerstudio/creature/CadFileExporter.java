@@ -154,12 +154,12 @@ public class CadFileExporter {
 		if(freecadParts.size()>0){
 			allCadStl.add(makeFreecad(nameBase,freecadParts));// default to stl
 		}
-		System.out.println("Finished Export!");
+		com.neuronrobotics.sdk.common.Log.debug("Finished Export!");
 		return allCadStl;
 	}
 	private File makeFreecad(String nameBase,List<CSG>  current ) throws IOException{
 		File blend = new File(nameBase + ".FCStd");
-		System.out.println("Writing "+blend.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Writing "+blend.getAbsolutePath());
 		for(CSG tmp:current)
 			FreecadLoader.addCSGToFreeCAD( blend,tmp);
 		return blend;
@@ -171,20 +171,20 @@ public class CadFileExporter {
 //		CSG.setPreventNonManifoldTriangles(false);
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
 		//CSG.setPreventNonManifoldTriangles(manifold);
-		System.out.println("Writing "+stl.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
 	private File makeObj(String nameBase,CSG tmp ) throws IOException{
 		File stl = new File(nameBase + ".obj");
 		
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toObjString());
-		System.out.println("Writing "+stl.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
 	
 	private File makeBlender(String nameBase,List<CSG>  current ) throws IOException{
 		File blend = new File(nameBase + ".blend");
-		System.out.println("Writing "+blend.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Writing "+blend.getAbsolutePath());
 		for(CSG tmp:current)
 			BlenderLoader.toBlenderFile(tmp, blend);
 		return blend;
@@ -215,7 +215,7 @@ public class CadFileExporter {
 
 				}
 
-				System.out.println("Writing " + stl.getAbsolutePath());
+				com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine availible for slicing");
 				t.printStackTrace();

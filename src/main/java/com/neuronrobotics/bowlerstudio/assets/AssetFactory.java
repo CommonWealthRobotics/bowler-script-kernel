@@ -88,7 +88,7 @@ public class AssetFactory {
 	@SuppressWarnings("restriction")
 	public static Image loadAsset(String file) throws Exception {
 		if (cache.get(file) == null) {
-			System.out.println("Loading asset " + file);
+			com.neuronrobotics.sdk.common.Log.debug("Loading asset " + file);
 			File f = loadFile(file);
 			if (f.getName().endsWith(".fxml")) {
 				loadLayout(file);
