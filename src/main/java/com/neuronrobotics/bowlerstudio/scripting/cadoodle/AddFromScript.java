@@ -91,12 +91,12 @@ public class AddFromScript extends AbstractAddFrom {
 			}
 			back.addAll(collect);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			if (!fileName.contains("generated")) {
 				try {
 					return process(incoming, "generated/" + fileRel);
 				} catch (Exception e2) {
-					e2.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e2);
 				}
 			}
 			throw new RuntimeException(e);
@@ -125,7 +125,7 @@ public class AddFromScript extends AbstractAddFrom {
 			return ScriptingEngine.fileFromGit(gitULR, fileRel);
 		} catch (GitAPIException | IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			return null;
 		}
 	}

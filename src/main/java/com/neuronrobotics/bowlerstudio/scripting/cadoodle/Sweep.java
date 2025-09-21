@@ -68,7 +68,7 @@ public class Sweep extends AbstractAddFrom {
 		try {
 			getFile();
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 		}
 		return this;
 	}
@@ -102,7 +102,7 @@ public class Sweep extends AbstractAddFrom {
 			return Extrude.sweep(transformedP, increment, radiusT, steps,pr).rotx(-90).setName(name);
 		} catch (ColinearPointsException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return new Cube(10).toCSG().setColor(Color.PINK);
 	}
@@ -192,7 +192,7 @@ public class Sweep extends AbstractAddFrom {
 
 			back.addAll(collect);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return back;
 	}
@@ -264,7 +264,7 @@ public class Sweep extends AbstractAddFrom {
 						com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
 						return processGiven(p, b, j, name);
 					} catch (Exception e) {
-						e.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(e);
 					}
 					return previous;
 				}).setName(name);

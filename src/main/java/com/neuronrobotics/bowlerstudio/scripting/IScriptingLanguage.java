@@ -86,7 +86,7 @@ public interface IScriptingLanguage {
 				out.close(); // don't swallow close Exception if copy completes
 				// normally
 			} catch (Throwable t) {
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(t);
 			} finally {
 				try {
 					out.close();
@@ -119,7 +119,7 @@ public interface IScriptingLanguage {
 			getDefaultContents(ScriptingEngine.fileFromGit(gitURL, fileSlug));
 		} catch (GitAPIException | IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
 

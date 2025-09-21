@@ -96,7 +96,7 @@ public class ThumbnailImage {
 				meshView.setCullFace(CullFace.BACK);
 				root.getChildren().add(meshView);
 			}catch(Throwable t) {
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 		}
 

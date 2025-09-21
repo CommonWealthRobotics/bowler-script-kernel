@@ -185,7 +185,7 @@ public class Purchasing {
 
     } catch (Exception e) {
       // Auto-generated catch block
-      e.printStackTrace();
+      com.neuronrobotics.sdk.common.Log.error(e);
     }
     return types;
   }
@@ -231,7 +231,7 @@ public class Purchasing {
         } catch (java.net.ConnectException ce) {
           // server or cart is not availible, reject vitamin
         } catch (Exception ex) {
-          ex.printStackTrace();
+          com.neuronrobotics.sdk.common.Log.error(ex);;
         }
       }
 

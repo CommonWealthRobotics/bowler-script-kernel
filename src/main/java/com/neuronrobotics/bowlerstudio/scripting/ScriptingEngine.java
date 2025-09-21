@@ -258,7 +258,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			accessor.run(git);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		gitclose(git);
 	}
@@ -385,7 +385,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			return;
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		throw new RuntimeException("IOException making repo");
 	}
@@ -592,7 +592,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				createSymlinkInDocuments(appDataDir);
 			} catch (IOException e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 		delim = "/";
@@ -763,7 +763,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 
 	}
@@ -802,7 +802,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 							com.neuronrobotics.sdk.common.Log.error("File failed to delete! " + f);
 						}
 					} catch (Throwable t) {
-						t.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(t);
 					}
 					// com.neuronrobotics.sdk.common.Log.error("Deleting " + f.getAbsolutePath());
 				}
@@ -812,7 +812,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			com.neuronrobotics.sdk.common.Log.error("Deleting Folder " + folder.getAbsolutePath());
 			folder.delete();
 		} catch (Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 		if (folder.exists()) {
 			com.neuronrobotics.sdk.common.Log.error("Folder failed to delete! " + folder);
@@ -1012,7 +1012,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		} catch (Exception e) {
 			// ignore CSG database
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
 
@@ -1106,7 +1106,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			});
 			com.neuronrobotics.sdk.common.Log.debug("PUSH OK! file: " + desired + " on branch " + getBranch(remoteURI));
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
 			String id = gitID[0];
 
@@ -1304,7 +1304,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 
 		openGit(localRepo, git -> {
@@ -1335,7 +1335,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			com.neuronrobotics.sdk.common.Log.error("Created new branch " + remoteURI + "\t\t" + newBranch);
 		} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
 			com.neuronrobotics.sdk.common.Log.error("ERROR Creating " + newBranch + " in " + remoteURI);
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 		} catch (org.eclipse.jgit.api.errors.RefAlreadyExistsException ex) {
 			// just checkout the existing branch then
 		}
@@ -1487,7 +1487,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				PasswordManager.checkInternet();
 				throw ex;
 			} catch (WrongRepositoryStateException e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 
 				PasswordManager.checkInternet();
 				// deleteRepo(remoteURI);
@@ -1527,7 +1527,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						});
 					}
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 					throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + ex.getMessage());
 				}
 			} catch (NoHeadException e) {
@@ -1543,7 +1543,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 //			}
 
 			} catch (TransportException e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				PasswordManager.checkInternet();
 
 				if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
@@ -1559,7 +1559,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 
 			} catch (GitAPIException e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				PasswordManager.checkInternet();
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			}
@@ -1712,11 +1712,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 									"auto-save in ScriptingEngine.resolveConflict", false, git);
 						} catch (Exception e) {
 							// Auto-generated catch block
-							e.printStackTrace();
+							com.neuronrobotics.sdk.common.Log.error(e);
 						}
 					} catch (IOException e1) {
 						// Auto-generated catch block
-						e1.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(e1);
 					}
 
 				}
@@ -1734,7 +1734,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return true;
 	}
@@ -1787,7 +1787,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					checkout(remoteURI, branch);
 				}
 			} catch (Throwable t) {
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 
 		}
@@ -2071,9 +2071,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					back.add(PasswordManager.getGithub().getRepository(PasswordManager.getLoginID() + "/" + newRepoName)
 							.getHttpTransportUrl());
 				}
-				ex.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 			} catch (Throwable ex) {
-				ex.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 			}
 			if (back.size() == 0)
 				throw new RuntimeException("Repo could not be forked and does not exist");
@@ -2093,13 +2093,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					repo = github.getRepositoryById("" + repo.getId());
 					return repo;
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					// Auto-generated catch block
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 			}
 			return repo;
@@ -2124,7 +2124,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				newBranch(url, "main");
 			} catch (IOException | GitAPIException e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		} catch (org.kohsuke.github.HttpException ex) {
 			if (ex.getMessage().contains("name already exists on this account")) {
@@ -2147,7 +2147,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			return back.get(0);
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return null;
 	}
@@ -2361,7 +2361,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					try {
 						r.run();
 					} catch (Throwable t) {
-						t.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(t);
 					}
 				}
 			}
@@ -2423,7 +2423,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 			} catch (Throwable e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 			Collections.sort(tags, new Comparator<String>() {
 				public int compare(String object1, String object2) {
@@ -2455,7 +2455,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				git.tag().setName(newTag).setForceUpdate(true).call();
 			} catch (Throwable t) {
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
 				git.push().setPushTags().setTransportConfigCallback(transportConfigCallback)
@@ -2495,7 +2495,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 				reader.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 		contents += filepattern;

@@ -59,7 +59,7 @@ public class BlenderLoader implements IScriptingLanguage {
 			stlIn = File.createTempFile(stl.getName(), ".stl");
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			return;
 		}
 		stlIn.deleteOnExit();
@@ -86,7 +86,7 @@ public class BlenderLoader implements IScriptingLanguage {
 			
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			return;
 		}
 	}
@@ -100,7 +100,7 @@ public class BlenderLoader implements IScriptingLanguage {
 			CSG.setPreventNonManifoldTriangles(manifold);
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}		
 	}
 	public static CSG remesh(CSG incoming, double MMVoxel) throws Exception {
@@ -178,10 +178,10 @@ public class BlenderLoader implements IScriptingLanguage {
 			DownloadManager.legacySystemRun(null, parent, System.out, args);
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (InterruptedException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		
 	}

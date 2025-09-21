@@ -78,7 +78,7 @@ public class MoveCenter extends CaDoodleOperation{
 					Transform transTmp = new Transform().apply((Transform) storage.getValue(s).get());
 					start = transTmp.apply(start);
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 			}
 			nrToCSG = start;

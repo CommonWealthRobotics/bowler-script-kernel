@@ -46,7 +46,7 @@ public class AddFromFile extends AbstractAddFrom {
 					getFile();
 				} catch (NoSuchFileException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 					break;
 				}
 				return this;
@@ -93,7 +93,7 @@ public class AddFromFile extends AbstractAddFrom {
 			try {
 				flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
 			}catch(Throwable t) {
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(t);
 				flattenedCSGs=new ArrayList<CSG>();
 				flattenedCSGs.add(new Cube(10).toCSG().setColor(javafx.scene.paint.Color.HOTPINK));
 			}
@@ -105,7 +105,7 @@ public class AddFromFile extends AbstractAddFrom {
 					CSG processedCSG = processGiven(csg, i, getOrderedName(),file,name,getLocation());
 					collect.add(processedCSG);
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 			}
 			CSGDatabase.setInstance(instance);
@@ -169,7 +169,7 @@ public class AddFromFile extends AbstractAddFrom {
 						file = copied;
 					} catch (IOException e) {
 						// Auto-generated catch block
-						e.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(e);
 					}
 				} else {
 					// doodle copy
@@ -335,7 +335,7 @@ public class AddFromFile extends AbstractAddFrom {
 						csg1.setParameter(getFileLocationparam(f,task));
 						return processGiven(csg1, i, name,f,task,location);
 					} catch (Exception e) {
-						e.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(e);
 					}
 					return previous;
 				}).setName(name);

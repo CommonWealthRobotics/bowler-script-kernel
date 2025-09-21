@@ -87,7 +87,7 @@ public class LimbOption {
 			String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 			return gson.fromJson(content, TT_CaDoodleFile);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			return new ArrayList<LimbOption>();
 		}
 	}
@@ -149,7 +149,7 @@ public class LimbOption {
 				Thread.sleep(20);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 		try {
@@ -159,7 +159,7 @@ public class LimbOption {
 		} catch (Exception e) {
 			// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
 			// e.getMessage());
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		indicator = get(so.get(0));
 		if (so.size() > 1) {
@@ -173,7 +173,7 @@ public class LimbOption {
 			System.err.println("Indicator STL saved successfully to " + stlFile.getAbsolutePath());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		indicator=indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
 

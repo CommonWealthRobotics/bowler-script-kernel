@@ -35,7 +35,7 @@ public class MakeRobot extends AbstractAddFrom {
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return incoming;
 	}

@@ -105,7 +105,7 @@ public class CadFileExporter {
 					allCadStl.add(makeStl(nameBase,manufactured));// default to stl
 				}catch(Throwable t) {
 					com.neuronrobotics.sdk.common.Log.error("Failed to generate "+part.getName());
-					t.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(t);
 				}
 			}else{
 
@@ -218,7 +218,7 @@ public class CadFileExporter {
 				com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine availible for slicing");
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 		
 		return stl;

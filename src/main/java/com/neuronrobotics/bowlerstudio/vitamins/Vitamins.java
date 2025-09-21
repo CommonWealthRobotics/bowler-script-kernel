@@ -116,11 +116,11 @@ public class Vitamins {
 //					});
 //				} catch (IOException e) {
 //					// Auto-generated catch block
-//					e.printStackTrace();
+//					com.neuronrobotics.sdk.common.Log.error(e);
 //				}
 			} catch (IOException e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 		CSG csg = fileLastLoaded.get(resource.getAbsolutePath());
@@ -142,7 +142,7 @@ public class Vitamins {
 			try {
 				fileLastLoaded.put(key, get(type, id));
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 
 				setGitRepoDatabase(gitRpoDatabase);
 				clear();
@@ -165,7 +165,7 @@ public class Vitamins {
 			new java.net.URL(text2);
 		} catch (Exception ex) {
 			if (!text2.startsWith("git@")) {
-				ex.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 				return false;
 			}
 		}
@@ -219,7 +219,7 @@ public class Vitamins {
 					return newVitamin;
 				} catch (Exception ex) {
 					// com.neuronrobotics.sdk.common.Log.error(type +"-"+ id+" Failed");
-					// ex.printStackTrace();
+					// com.neuronrobotics.sdk.common.Log.error(ex);;
 					return newVitamin;
 				}
 			} else {
@@ -227,7 +227,7 @@ public class Vitamins {
 				return null;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			setGitRepoDatabase(gitRpoDatabase);
 			//ScriptingEngine.deleteRepo(script.get("scriptGit").toString());
 			clear();
@@ -259,16 +259,16 @@ public class Vitamins {
 			return ScriptingEngine.fileFromGit(script.get("scriptGit").toString(), script.get("scriptFile").toString());
 		} catch (InvalidRemoteException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (TransportException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (GitAPIException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return null;
 	}
@@ -297,7 +297,7 @@ public class Vitamins {
 			}
 			return ConcurrentHashMap;
 		}catch(Exception ex) {
-			//ex.printStackTrace();
+			//com.neuronrobotics.sdk.common.Log.error(ex);;
 		}
 		return new ConcurrentHashMap<String,Object>();
 	}
@@ -359,7 +359,7 @@ public class Vitamins {
 				saveDatabase(type);
 				return true;
 			}
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			throw ex;
 		}
 		return true;
@@ -378,7 +378,7 @@ public class Vitamins {
 			if(type!=null)
 				saveDatabase(type);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			//com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			newRepo = github.getRepository(getSourcerepo()).fork();
@@ -390,7 +390,7 @@ public class Vitamins {
 					break;
 				}catch(Exception exc) {
 					System.err.println("Waiting for repo to finish forking");
-					exc.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(exc);
 				}
 			}
 			saveDatabase(type);
@@ -437,11 +437,11 @@ public class Vitamins {
 					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
 				} catch (URISyntaxException e) {
 					// Auto-generated catch block
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 			}
 		} catch (java.lang.NullPointerException ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 		}
 	}
 
@@ -506,7 +506,7 @@ public class Vitamins {
 						// If the file changes, clear the database and load the new data
 						//com.neuronrobotics.sdk.common.Log.error("Re-loading " + type);
 						databaseSet.put(type, null);
-						new RuntimeException().printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(new RuntimeException());
 					});
 					onChange = changeListeners.get(type);
 				}
@@ -537,7 +537,7 @@ public class Vitamins {
 							double num = Double.parseDouble(conf.get(confKey).toString());
 							conf.put(confKey, num);
 						} catch (NumberFormatException ex) {
-							// ex.printStackTrace();
+							// com.neuronrobotics.sdk.common.Log.error(ex);;
 							// leave as a string
 							conf.put(confKey, conf.get(confKey).toString());
 						}
@@ -545,7 +545,7 @@ public class Vitamins {
 				}
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				databaseSet.put(type, new ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>());
 			}
 		}
@@ -632,7 +632,7 @@ public class Vitamins {
 
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		Collections.sort(types);
 		return types;
@@ -701,7 +701,7 @@ public class Vitamins {
 				ScriptingEngine.pull(getGitRepoDatabase());
 			} catch (Exception e1) {
 				// Auto-generated catch block
-				e1.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e1);
 			}
 		} catch (Exception e) {
 			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), e);

@@ -402,7 +402,7 @@ public class MobileBaseBuilder {
 					if (!mobileBase.hasVitamin(l))
 						mobileBase.addVitamin(l);
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 			}
 		}
@@ -452,7 +452,7 @@ public class MobileBaseBuilder {
 				try {
 					kin.setDesiredTaskSpaceTransform(mod.getTip(), 0);
 				}catch(Exception ex) {
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 					toRemove.add(mod);
 				}
 			}
@@ -478,7 +478,7 @@ public class MobileBaseBuilder {
 				try {
 					mobileBase.removeVitamin(l);
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 			}
 		}

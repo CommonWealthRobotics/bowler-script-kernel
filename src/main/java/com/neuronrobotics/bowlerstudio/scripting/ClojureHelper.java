@@ -70,7 +70,7 @@ public class ClojureHelper implements IScriptingLanguage {
 			return inlineScriptRun(s, args);
 		} catch (IOException e1) {
 			// Auto-generated catch block
-			e1.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e1);
 		}
 		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of type="+ret.getClass()+" value="+ret);
 		return null;

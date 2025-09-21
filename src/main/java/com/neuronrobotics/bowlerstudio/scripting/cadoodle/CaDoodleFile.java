@@ -181,7 +181,7 @@ public class CaDoodleFile {
 			try {
 				process(op);
 			} catch (Throwable t) {
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(t);
 				indexStarting = i + 1;
 				break;
 				// opperations.remove(op);
@@ -195,7 +195,7 @@ public class CaDoodleFile {
 			try {
 				l.onInitializationDone();
 			} catch (Throwable e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 		updateBoM();
@@ -249,7 +249,7 @@ public class CaDoodleFile {
 		if (initializing)
 			return null;
 		if (isRegenerating() || isOperationRunning() || source == null) {
-			new Exception("Operation Running, bailing").printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(new Exception("Operation Running, bailing"));
 			return null;
 		}
 		fireRegenerateStart();
@@ -297,7 +297,7 @@ public class CaDoodleFile {
 								storeResultInCache(op, process);
 								setCurrentState(op, process);
 							} catch (Throwable tr) {
-								tr.printStackTrace();
+								com.neuronrobotics.sdk.common.Log.error(tr);
 							}
 						}
 						if (getCurrentIndex() != endIndex) {
@@ -305,7 +305,7 @@ public class CaDoodleFile {
 							updateCurrentFromCache();
 						}
 					} catch (Exception ex) {
-						ex.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(ex);;
 					}
 					setPercentInitialized(1);
 					updateBoM();
@@ -313,7 +313,7 @@ public class CaDoodleFile {
 					fireSaveSuggestion();
 					fireRegenerateDone();
 				} catch (Throwable th) {
-					th.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(th);
 				}
 				opperationRunner.remove(this);
 			}
@@ -325,7 +325,7 @@ public class CaDoodleFile {
 
 	public Thread regenerateCurrent() {
 		if (isOperationRunning()) {
-			new Exception("Operation Running, bailing").printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(new Exception("Operation Running, bailing"));
 
 			return opperationRunner.get(0);
 		}
@@ -407,7 +407,7 @@ public class CaDoodleFile {
 			throw new NullPointerException();
 		toProcess.add(o);
 		if (isOperationRunning()) {
-			new Exception("Operation Running, bailing").printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(new Exception("Operation Running, bailing"));
 			return opperationRunner.get(0);
 		}
 		Thread t = null;
@@ -425,7 +425,7 @@ public class CaDoodleFile {
 							fireRegenerateStart();
 							setResult(pruneForward(op));
 						} catch (Exception e) {
-							e.printStackTrace();
+							com.neuronrobotics.sdk.common.Log.error(e);
 							break;
 						}
 					}
@@ -434,7 +434,7 @@ public class CaDoodleFile {
 							getOpperations().add(op);
 							process(op);
 						} catch (Exception ex) {
-							ex.printStackTrace();
+							com.neuronrobotics.sdk.common.Log.error(ex);;
 						}
 					}
 					if (getResult() == OperationResult.INSERT) {
@@ -443,7 +443,7 @@ public class CaDoodleFile {
 						try {
 							regenerateFrom(op).join();
 						} catch (InterruptedException e) {
-							e.printStackTrace();
+							com.neuronrobotics.sdk.common.Log.error(e);
 						}
 						updateCurrentFromCache();
 					}
@@ -466,7 +466,7 @@ public class CaDoodleFile {
 		if (op == null)
 			throw new NullPointerException();
 		if (isOperationRunning()) {
-			new Exception("Operation Running, bailing").printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(new Exception("Operation Running, bailing"));
 			return opperationRunner.get(0);
 		}
 		Thread t = null;
@@ -489,7 +489,7 @@ public class CaDoodleFile {
 				try {
 					regenerateFrom(newTar).join();
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 				updateCurrentFromCache();
 				updateBoM();
@@ -520,7 +520,7 @@ public class CaDoodleFile {
 				if (c.isInGroup())
 					continue;
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 			}
 			applyToAllConstituantElements(addRet, s, back, p, depth,appliedMemory);
 		}
@@ -661,7 +661,7 @@ public class CaDoodleFile {
 			try {
 				collect.add(p);
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 			}
 		}
 		csg.setPolygons(collect);
@@ -765,7 +765,7 @@ public class CaDoodleFile {
 				self = File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle");
 			} catch (IOException e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 		return self;
@@ -816,7 +816,7 @@ public class CaDoodleFile {
 			try {
 				l.onUpdate(currentState, op, this);
 			} catch (Throwable e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 	}
@@ -827,7 +827,7 @@ public class CaDoodleFile {
 			try {
 				l.onSaveSuggestion();
 			} catch (Throwable e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 	}
@@ -838,7 +838,7 @@ public class CaDoodleFile {
 			try {
 				l.onInitializationStart();
 			} catch (Throwable e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 	}
@@ -850,7 +850,7 @@ public class CaDoodleFile {
 				TickToc.tic("Fire " + l.getClass());
 				l.onRegenerateDone();
 			} catch (Throwable e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 	}
@@ -861,7 +861,7 @@ public class CaDoodleFile {
 			try {
 				l.onRegenerateStart();
 			} catch (Throwable e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 	}
@@ -872,7 +872,7 @@ public class CaDoodleFile {
 			try {
 				l.onWorkplaneChange(workplane);
 			} catch (Throwable e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 	}
@@ -941,7 +941,7 @@ public class CaDoodleFile {
 
 				} catch (IOException e) {
 					// Auto-generated catch block
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 		}
 		if (bom != null)
@@ -993,13 +993,13 @@ public class CaDoodleFile {
 				} catch (IOException e) {
 					// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
 					// e.getMessage());
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 				do {
 					try {
 						Thread.sleep(10);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(e);
 						return;
 					}
 				} while (!imageCache.exists());
@@ -1010,7 +1010,7 @@ public class CaDoodleFile {
 				 imageCache.getAbsolutePath());
 			}
 		} catch (Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 
@@ -1034,7 +1034,7 @@ public class CaDoodleFile {
 			}
 		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error("Error loading image: " + e.getMessage());
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return img;
 	}
@@ -1048,7 +1048,7 @@ public class CaDoodleFile {
 				holder.add(ThumbnailImage.get(currentState));
 			});
 		} catch (Throwable ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			return null;
 		}
 		long start = System.currentTimeMillis();
@@ -1058,7 +1058,7 @@ public class CaDoodleFile {
 				// com.neuronrobotics.sdk.common.Log.error("Waiting for image to write");
 			} catch (InterruptedException e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				break;
 			}
 			if (System.currentTimeMillis() - start > 25000 && holder.size() == 0) {

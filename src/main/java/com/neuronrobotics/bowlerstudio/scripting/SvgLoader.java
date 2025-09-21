@@ -22,7 +22,7 @@ public class SvgLoader implements IScriptingLanguage {
 			SVGLoad s = new SVGLoad(code.toURI());
 			return run(s);
 		}catch(Exception e) {
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			com.neuronrobotics.sdk.common.Log.error("SVG had error, attempting to fix "+code.getAbsolutePath());
 			File tmp=GeometrySimplification.simplifySVG(code);
 			SVGLoad s = new SVGLoad(tmp.toURI());

@@ -32,12 +32,12 @@ public class RobotHelper implements IScriptingLanguage {
 				return MobileBaseLoader.get(mb).getBase();
 			} catch (IOException e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				return null;
 			}
 		} catch (IOException e1) {
 			// Auto-generated catch block
-			e1.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e1);
 		}
 		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of type="+ret.getClass()+" value="+ret);
 		return null;
@@ -51,7 +51,7 @@ public class RobotHelper implements IScriptingLanguage {
 			mb = new MobileBase(IOUtils.toInputStream(code, "UTF-8"));
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			return null;
 		}
 
@@ -122,7 +122,7 @@ public class RobotHelper implements IScriptingLanguage {
 			out.close(); // don't swallow close Exception if copy completes
 			// normally
 		} catch(Throwable t){
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}finally {
 			try {
 				out.close();

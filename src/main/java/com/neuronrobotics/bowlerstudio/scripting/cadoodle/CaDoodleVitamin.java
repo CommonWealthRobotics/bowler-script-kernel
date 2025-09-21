@@ -26,7 +26,7 @@ public class CaDoodleVitamin {
 		try {
 			return get( type, listVitaminSizes.get(0),  args);
 		}catch(Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			throw ex;
 		}
 	}
@@ -119,7 +119,7 @@ public class CaDoodleVitamin {
 			return back;
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		throw new RuntimeException("Failed to load vitamin of type " + type);
 	}

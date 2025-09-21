@@ -130,7 +130,7 @@ public class MobileBaseCadManager implements Runnable {
 				parts.add(vitamin);
 			} catch (Exception e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 		return parts;
@@ -163,7 +163,7 @@ public class MobileBaseCadManager implements Runnable {
 				starting.syncProperties(origin);
 			} catch (Exception e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				return null;
 			}
 			vitaminCad.put(vitamin, starting);
@@ -195,7 +195,7 @@ public class MobileBaseCadManager implements Runnable {
 				}
 			} catch (Exception e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				return null;
 			}
 			starting.setManipulator(manipulator);
@@ -264,7 +264,7 @@ public class MobileBaseCadManager implements Runnable {
 				parts.add(vitamin);
 			} catch (Exception e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
 		return parts;
@@ -470,8 +470,9 @@ public class MobileBaseCadManager implements Runnable {
 
 		@Override
 		public void highlightException(File fileEngineRunByName, Throwable ex) {
-			new Exception("Caught here:").printStackTrace();
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(new Exception("Caught here:"));
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 		}
 
 		@Override
@@ -620,7 +621,7 @@ public class MobileBaseCadManager implements Runnable {
 											TransformFactory.nrToAffine(vals[i], af);
 										}
 									} catch (Throwable t) {
-										t.printStackTrace();
+										com.neuronrobotics.sdk.common.Log.error(t);
 									}
 									rendering = false;
 									fireIRenderSynchronizationEvent();
@@ -643,7 +644,7 @@ public class MobileBaseCadManager implements Runnable {
 										}
 										t.clear();
 									} catch (Throwable tr) {
-										tr.printStackTrace();
+										com.neuronrobotics.sdk.common.Log.error(tr);
 									}
 								});
 								Thread.sleep(32);
@@ -652,7 +653,7 @@ public class MobileBaseCadManager implements Runnable {
 							// rendering not availible
 							com.neuronrobotics.sdk.common.Log
 									.error("Exception for render engine " + base.getScriptingName());
-							t.printStackTrace();
+							com.neuronrobotics.sdk.common.Log.error(t);
 							try {
 								Thread.sleep(100);
 							} catch (InterruptedException e) {
@@ -752,7 +753,7 @@ public class MobileBaseCadManager implements Runnable {
 		try {
 			base.setGlobalToFiducialTransform(baseLoc, false);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			throw new RuntimeException("MB " + base.getScriptingName() + ", " + e.getMessage());
 		}
 
@@ -800,9 +801,9 @@ public class MobileBaseCadManager implements Runnable {
 								build(key, f);
 							} catch (Throwable e) {
 								// Auto-generated catch block
-								e.printStackTrace();
+								com.neuronrobotics.sdk.common.Log.error(e);
 							}
-							// ex.printStackTrace();
+							// com.neuronrobotics.sdk.common.Log.error(ex);;
 							runner.run();
 						} catch (Exception e) {
 							getUi().highlightException(f, e);
@@ -832,7 +833,7 @@ public class MobileBaseCadManager implements Runnable {
 			return cadScriptCache.get(key);
 		} catch (GitAPIException | IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		throw new RuntimeException("File Missing!");
 
@@ -858,16 +859,16 @@ public class MobileBaseCadManager implements Runnable {
 
 		} catch (InvalidRemoteException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (TransportException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (GitAPIException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 
 	}
@@ -918,7 +919,7 @@ public class MobileBaseCadManager implements Runnable {
 					getConfigurationDisplay();
 				} catch (Throwable e) {
 					// Auto-generated catch block
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 				MobileBaseCadManager mobileBaseCadManager = null;
 				try {
@@ -991,8 +992,8 @@ public class MobileBaseCadManager implements Runnable {
 				} else
 					getUi().highlightException(null, new Exception());
 				ArrayList<CSG> arrayList = getBasetoCadMap().get(device);
-				if (arrayList== null) {
-					arrayList=new ArrayList<CSG>();
+				if (arrayList == null) {
+					arrayList = new ArrayList<CSG>();
 					getBasetoCadMap().put(device, arrayList);
 				}
 
@@ -1076,7 +1077,7 @@ public class MobileBaseCadManager implements Runnable {
 			return ScriptingEngine.fileFromGit(l.getGitCadEngine()[0], l.getGitCadEngine()[1]);
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return null;
 	}
@@ -1086,7 +1087,7 @@ public class MobileBaseCadManager implements Runnable {
 			return ScriptingEngine.fileFromGit(device.getGitCadEngine()[0], device.getGitCadEngine()[1]);
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return null;
 	}
@@ -1214,7 +1215,7 @@ public class MobileBaseCadManager implements Runnable {
 							com.neuronrobotics.sdk.common.Log
 									.error("Writing STL for " + name + " to " + stl.getAbsolutePath());
 							boolean manifold = CSG.isPreventNonManifoldTriangles();
-							//CSG.setPreventNonManifoldTriangles(false);
+							// CSG.setPreventNonManifoldTriangles(false);
 							FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
 
 							CSG.setPreventNonManifoldTriangles(manifold);
@@ -1311,8 +1312,8 @@ public class MobileBaseCadManager implements Runnable {
 			@Override
 			public void onDisconnect(BowlerAbstractDevice arg0) {
 				if (arg0 != base) {
-					new Exception("This listener called from the wrong device!! " + arg0.getScriptingName())
-							.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(
+							new Exception("This listener called from the wrong device!! " + arg0.getScriptingName()));
 					return;
 				}
 				base.setRenderWrangler(null);
@@ -1411,7 +1412,7 @@ public class MobileBaseCadManager implements Runnable {
 			}
 
 		} catch (Throwable e) {
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			getUi().highlightException(getCadScriptFromLimnb(dh), e);
 		}
 		return dhLinks;
@@ -1496,14 +1497,14 @@ public class MobileBaseCadManager implements Runnable {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					// Auto-generated catch block
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 				setProgress(1);
 				if (done != null) {
 					try {
 						done.run();
 					} catch (Throwable t) {
-						t.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(t);
 					}
 				}
 				System.gc();

@@ -98,7 +98,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadGenFile.getAbsolutePath());
 			legacySystemRun(null, freecadGenFile.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 		
 	}
@@ -127,7 +127,7 @@ public class FreecadLoader implements IScriptingLanguage {
 					planes++;
 				} catch (ColinearPointsException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 
 			}
@@ -160,7 +160,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(bodyName);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	public static void addSTLToFreecad(File freecadModel, File stlToAdd,String meshName) {
@@ -180,7 +180,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(meshName);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	public static void toSTLFile(File freecadModel,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
@@ -200,7 +200,7 @@ public class FreecadLoader implements IScriptingLanguage {
 
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	public static void open(File freecadModel) {
@@ -221,7 +221,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			else
 				legacySystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	/**

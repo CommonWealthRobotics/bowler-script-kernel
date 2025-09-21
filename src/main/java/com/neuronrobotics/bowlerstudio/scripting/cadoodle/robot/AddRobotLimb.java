@@ -58,7 +58,7 @@ public class AddRobotLimb extends AbstractAddFrom{
 			try {
 				builder.build();
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 			
 			DHParameterKinematics newLimb = builder.getMobileBase().getLimbByName(getName());

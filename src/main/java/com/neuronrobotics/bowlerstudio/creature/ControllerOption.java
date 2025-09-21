@@ -110,16 +110,16 @@ public class ControllerOption {
 			return ScriptingEngine.fileFromGit(imageGit, imageFile);
 		} catch (InvalidRemoteException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (TransportException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (GitAPIException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		throw new RuntimeException(imageGit+"/"+ imageFile);
 	}
@@ -133,7 +133,7 @@ public class ControllerOption {
 			ScriptingEngine.inlineGistScriptRun(linkLoaderGit, linkLoaderFile, null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		throw new FileNotFoundException(linkLoaderGit + "/" + linkLoaderFile);
 	}
@@ -143,16 +143,16 @@ public class ControllerOption {
 			return ScriptingEngine.fileFromGit(firmwareGit, firmwareFile);
 		} catch (InvalidRemoteException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (TransportException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (GitAPIException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		throw new FileNotFoundException();
 	}
@@ -173,7 +173,7 @@ public class ControllerOption {
 			String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 			return gson.fromJson(content, TT_CaDoodleFile);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			return new ArrayList<ControllerOption>();
 		}
 	}

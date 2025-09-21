@@ -90,7 +90,7 @@ public class MobileBaseLoader {
 		try {
 			code = ScriptingEngine.fileFromGit(git, file);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			ScriptingEngine.deleteRepo(git);
 			try {
 				code = ScriptingEngine.fileFromGit(git, file);

@@ -59,7 +59,7 @@ public class VitaminBomManager {
 				bom.createNewFile();
 			} catch (IOException e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		} else {
 			String source;
@@ -70,7 +70,7 @@ public class VitaminBomManager {
 				if (source.length() > 0)
 					database = gson.fromJson(source, type);
 			} catch (Exception ex) {
-				ex.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 			}
 		}
 		if (database == null) {
@@ -148,7 +148,7 @@ public class VitaminBomManager {
 
 		} catch (Exception e1) {
 			// Auto-generated catch block
-			e1.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e1);
 		}
 		return null;
 	}
@@ -171,7 +171,7 @@ public class VitaminBomManager {
 		try {
 			return (double) getConfiguration(name).get("massKg");
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			return 0.001;
 		}
 	}
@@ -228,7 +228,7 @@ public class VitaminBomManager {
 						URL = (String) configuration.get("source");
 						object = configuration.get("price");
 					} catch (Exception ex) {
-						ex.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(ex);;
 					}
 
 				if (URL == null) {
@@ -257,7 +257,7 @@ public class VitaminBomManager {
 			write(getManufacturingBomCsv(), csv);
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		saving = false;
 

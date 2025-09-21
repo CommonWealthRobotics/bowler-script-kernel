@@ -190,7 +190,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 			builder.build();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
 
@@ -203,7 +203,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 			builder.build();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
 

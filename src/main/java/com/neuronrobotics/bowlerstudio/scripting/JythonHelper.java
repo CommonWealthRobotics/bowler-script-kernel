@@ -43,7 +43,7 @@ public class JythonHelper implements IScriptingLanguage {
 //                .cast(bad));
 //      } catch (ClassNotFoundException e) {
 //        // Auto-generated catch block
-//        e.printStackTrace();
+//        com.neuronrobotics.sdk.common.Log.error(e);
 //      }
 //      com.neuronrobotics.sdk.common.Log.error("Device " + bad.getScriptingName() + " is "
 //          + bad);
@@ -57,17 +57,17 @@ public class JythonHelper implements IScriptingLanguage {
     try {
       results.add(interp.get("csg", CSG.class));
     } catch (Exception e) {
-      e.printStackTrace();
+      com.neuronrobotics.sdk.common.Log.error(e);
     }
     try {
       results.add(interp.get("tab", Tab.class));
     } catch (Exception e) {
-      e.printStackTrace();
+      com.neuronrobotics.sdk.common.Log.error(e);
     }
     try {
       results.add(interp.get("device", BowlerAbstractDevice.class));
     } catch (Exception e) {
-      e.printStackTrace();
+      com.neuronrobotics.sdk.common.Log.error(e);
     }
 
     Log.debug("Jython return = " + results);
@@ -83,7 +83,7 @@ public class JythonHelper implements IScriptingLanguage {
       return inlineScriptRun(s, args);
     } catch (IOException e1) {
       // Auto-generated catch block
-      e1.printStackTrace();
+      com.neuronrobotics.sdk.common.Log.error(e1);
     }
     return null;
   }

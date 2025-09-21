@@ -276,7 +276,7 @@ public class DownloadManager {
 					out.println(line);
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}).start();
 	}
@@ -312,7 +312,7 @@ public class DownloadManager {
 				}
 			}
 		} catch (Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 
 		}
 		return new HashMap<>();
@@ -338,7 +338,7 @@ public class DownloadManager {
 			if(getExecutable(exeType, editor, executable,justChecking).exists()) {
 				return;
 			}
-			new RuntimeException("Download or extraction failed, retrying").printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(new RuntimeException("Download or extraction failed, retrying"));
 		}
 		if(!failedURLs.contains(jvmURL)) {
 			failedURLs.add(jvmURL);
@@ -520,7 +520,7 @@ public class DownloadManager {
 			}
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 
 		throw new RuntimeException("Executable for OS: " + key + " has no entry for " + exeType);
@@ -531,7 +531,7 @@ public class DownloadManager {
 			FileUtils.writeStringToFile(file, json, Charset.forName("UTF-8"));
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
 
@@ -550,7 +550,7 @@ public class DownloadManager {
 						tcopy.join();
 					} catch (InterruptedException e) {
 						// Auto-generated catch block
-						e.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(e);
 					}
 			}else {
 				Thread tcopy = run(null, new File("."), System.out, Arrays.asList(installerFile.getAbsolutePath()));
@@ -558,7 +558,7 @@ public class DownloadManager {
 					tcopy.join();
 				} catch (InterruptedException e) {
 					// Auto-generated catch block
-					e.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 			}
 		}
@@ -583,7 +583,7 @@ public class DownloadManager {
 			Files.move(Paths.get(bindir + name + "." + type), Paths.get(cmd), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		new File(cmd).setExecutable(true);
 	}
@@ -621,7 +621,7 @@ public class DownloadManager {
 			tdetach.join();
 		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 			return;
 		} // wait for the mount to finish
 
@@ -657,10 +657,10 @@ public class DownloadManager {
 			legacySystemRun(null, outputDir, System.out, args);
 		} catch (IOException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		} catch (InterruptedException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
 
@@ -682,7 +682,7 @@ public class DownloadManager {
 
 		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error("Error extracting archive: " + e.getMessage());
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
 
@@ -772,7 +772,7 @@ public class DownloadManager {
 									continue;
 								}
 							} catch (Exception ex) {
-								ex.printStackTrace();
+								com.neuronrobotics.sdk.common.Log.error(ex);;
 							}
 							try (OutputStream out = new FileOutputStream(entryPath.toFile())) {
 								IOUtils.copy(in, out);
@@ -855,7 +855,7 @@ public class DownloadManager {
 			}
 		}catch(Throwable ex) {
 			downloadEvents.finishDownload();
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			new File(inputFile).delete();
 			throw ex;
 		}
@@ -1032,7 +1032,7 @@ public class DownloadManager {
 			out.flush();
 			out.close();
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			output.delete();
 		}
 		exe.delete();
@@ -1062,7 +1062,7 @@ public class DownloadManager {
 //			PasswordManager.login();
 //		} catch (IOException e) {
 //			// Auto-generated catch block
-//			e.printStackTrace();
+//			com.neuronrobotics.sdk.common.Log.error(e);
 //		}
 //		File f = getRunExecutable("eclipse",null);
 //		String ws = EclipseExternalEditor.getEclipseWorkspace();
