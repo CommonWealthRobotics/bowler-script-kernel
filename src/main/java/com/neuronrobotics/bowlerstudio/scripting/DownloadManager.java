@@ -37,6 +37,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -902,7 +903,7 @@ public class DownloadManager {
 	}
 
 	private static String bits(byte b) {
-		return String.format("%6s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+		return String.format(Locale.US,"%6s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
 	}
 
 	public static boolean isWin() {
