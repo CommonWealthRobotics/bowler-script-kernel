@@ -203,7 +203,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void setWorkspace(File file) {
 		workspace = file;
-		com.neuronrobotics.sdk.common.Log.error("Workspace: " + workspace.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Workspace: " + workspace.getAbsolutePath());
 		if (!workspace.exists()) {
 			workspace.mkdir();
 		}
@@ -328,7 +328,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				String str = format + "% " + stage + " " + reponame + "  " + tasks + " of task " + type;
 				if (timeofLastUpdate + 500 < System.currentTimeMillis()) {
 					if (printProgress)
-						com.neuronrobotics.sdk.common.Log.error(str);
+						com.neuronrobotics.sdk.common.Log.debug(str);
 					timeofLastUpdate = System.currentTimeMillis();
 				}
 				// com.neuronrobotics.sdk.common.Log.error(str);
@@ -352,7 +352,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			public void endTask() {
 				String string = "100%  " + stage + " " + reponame + "  " + type;
 				if (printProgress)
-					com.neuronrobotics.sdk.common.Log.error(string);
+					com.neuronrobotics.sdk.common.Log.debug(string);
 				for (GitLogProgressMonitor l : logListeners) {
 					l.onLogUpdate(string, e);
 				}
@@ -559,7 +559,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		// Create the symlink
 		Files.createSymbolicLink(symlinkPath, appDataDir.toPath());
-		com.neuronrobotics.sdk.common.Log.error("Symlink created: " + symlinkPath);
+		com.neuronrobotics.sdk.common.Log.debug("Symlink created: " + symlinkPath);
 	}
     private static Path getWindowsAppData(String appName) {
         // Try APPDATA first, then LOCALAPPDATA, then fallback
@@ -737,7 +737,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				com.neuronrobotics.sdk.common.Log.error("No login api key found!");
 				return;
 			}
-			com.neuronrobotics.sdk.common.Log.error("Performing Login");
+			com.neuronrobotics.sdk.common.Log.debug("Performing Login");
 			PasswordManager.waitForLogin();
 
 			if (!PasswordManager.loggedIn()) {
@@ -797,9 +797,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					try {
 						FileChangeWatcher.notifyOfDelete(f);
 						FileChangeWatcher.close(f);
-						com.neuronrobotics.sdk.common.Log.error("Deleting File " + f.getAbsolutePath());
+						com.neuronrobotics.sdk.common.Log.debug("Deleting File " + f.getAbsolutePath());
 						if (!f.delete()) {
-							com.neuronrobotics.sdk.common.Log.error("File failed to delete! " + f);
+							com.neuronrobotics.sdk.common.Log.debug("File failed to delete! " + f);
 						}
 					} catch (Throwable t) {
 						com.neuronrobotics.sdk.common.Log.error(t);
@@ -1135,7 +1135,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		File targetFile = fileFromGit(giturl, FileName);
 		if (targetFile.exists()) {
-			com.neuronrobotics.sdk.common.Log.error("Gist at GIT : " + giturl);
+			com.neuronrobotics.sdk.common.Log.debug("Gist at GIT : " + giturl);
 			// Target file is ready to go
 			String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())),
 					StandardCharsets.UTF_8);
@@ -1332,9 +1332,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				setName.setForce(true);
 			}
 			setName.call();
-			com.neuronrobotics.sdk.common.Log.error("Created new branch " + remoteURI + "\t\t" + newBranch);
+			com.neuronrobotics.sdk.common.Log.debug("Created new branch " + remoteURI + "\t\t" + newBranch);
 		} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
-			com.neuronrobotics.sdk.common.Log.error("ERROR Creating " + newBranch + " in " + remoteURI);
+			com.neuronrobotics.sdk.common.Log.debug("ERROR Creating " + newBranch + " in " + remoteURI);
 			com.neuronrobotics.sdk.common.Log.error(ex);;
 		} catch (org.eclipse.jgit.api.errors.RefAlreadyExistsException ex) {
 			// just checkout the existing branch then
@@ -1579,7 +1579,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		waitForRepo(remoteURI, "checkoutCommit");
 		File gitRepoFile = ScriptingEngine.uriToFile(remoteURI);
 		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
-			com.neuronrobotics.sdk.common.Log.error("Invailid git file!" + gitRepoFile.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Invailid git file!" + gitRepoFile.getAbsolutePath());
 			throw new RuntimeException("Invailid git file!" + gitRepoFile.getAbsolutePath());
 		}
 		Repository localRepo = new FileRepository(gitRepoFile);
@@ -1611,7 +1611,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		// cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
-			com.neuronrobotics.sdk.common.Log.error("Invailid git file!" + gitRepoFile.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Invailid git file!" + gitRepoFile.getAbsolutePath());
 			throw new RuntimeException("Invailid git file!" + gitRepoFile.getAbsolutePath());
 		}
 
@@ -1631,7 +1631,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					openGit(localRepo, git -> {
 						for (Ref R : branches) {
 							if (R.getName().endsWith(br)) {
-								com.neuronrobotics.sdk.common.Log.error("\nFound upstream " + R.getName());
+								com.neuronrobotics.sdk.common.Log.debug("Found upstream " + R.getName());
 								shallowCheckout(remoteURI, br, git);
 							}
 						}
@@ -1699,9 +1699,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			Status stat = git.status().call();
 			Set<String> changed = stat.getModified();
 			if (changed.size() > 0) {
-				com.neuronrobotics.sdk.common.Log.error("Modified ");
+				com.neuronrobotics.sdk.common.Log.debug("Modified ");
 				for (String p : changed) {
-					com.neuronrobotics.sdk.common.Log.error("Modified Conflict with: " + p);
+					com.neuronrobotics.sdk.common.Log.debug("Modified Conflict with: " + p);
 					byte[] bytes;
 					String content = "";
 					try {
@@ -1767,10 +1767,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if (!hasNetwork())
 				return null;// No login info means there is no way to publish
 			waitForRepo(remoteURI, "cloneRepo");
-			com.neuronrobotics.sdk.common.Log.error("Cloning files from: " + remoteURI);
+			com.neuronrobotics.sdk.common.Log.debug("Cloning files from: " + remoteURI);
 			if (branch != null)
-				com.neuronrobotics.sdk.common.Log.error("            branch: " + branch);
-			com.neuronrobotics.sdk.common.Log.error("                to: " + localPath);
+				com.neuronrobotics.sdk.common.Log.debug("            branch: " + branch);
+			com.neuronrobotics.sdk.common.Log.debug("                to: " + localPath);
 			Throwable ex = null;
 			// Clone the repo
 			try {
@@ -2158,7 +2158,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static String urlToGist(URL htmlUrl) {
 		String externalForm = urlToString(htmlUrl);
-		com.neuronrobotics.sdk.common.Log.error(externalForm);
+		com.neuronrobotics.sdk.common.Log.debug(externalForm);
 		return ScriptingEngine.urlToGist(externalForm);
 	}
 
@@ -2250,7 +2250,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				if (newFileCode == null)
 					newFileCode = new String[] { "" };
 				if (newFileCode[0].length() < 10) {
-					com.neuronrobotics.sdk.common.Log.error("Copy Content to " + targetGit + "/" + targetFilename);
+					com.neuronrobotics.sdk.common.Log.debug("Copy Content to " + targetGit + "/" + targetFilename);
 					ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename,
 							WalkingEngine[0], "copy file content");
 				}
@@ -2437,7 +2437,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static boolean tagExists(String remoteURI, String newTag) {
 		List<String> tags = getAllTags(remoteURI);
 		for (String s : tags) {
-			com.neuronrobotics.sdk.common.Log.error("Checking " + newTag + " against " + s);
+			com.neuronrobotics.sdk.common.Log.debug("Checking " + newTag + " against " + s);
 			if (s.contentEquals(newTag)) {
 				return true;
 			}
@@ -2446,7 +2446,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void tagRepo(String remoteURI, String newTag) {
-		com.neuronrobotics.sdk.common.Log.error("Tagging " + remoteURI + " at " + newTag);
+		com.neuronrobotics.sdk.common.Log.debug("Tagging " + remoteURI + " at " + newTag);
 		if (tagExists(remoteURI, newTag)) {
 			com.neuronrobotics.sdk.common.Log.error("ERROR! Tag exists " + remoteURI + "@" + newTag);
 			return;
@@ -2485,7 +2485,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				while (line != null) {
 					if (line.contains(filepattern)) {
 						com.neuronrobotics.sdk.common.Log
-								.error("" + filepattern + " exists in " + ignorefile.getAbsolutePath());
+								.debug("" + filepattern + " exists in " + ignorefile.getAbsolutePath());
 						reader.close();
 						return;
 					}
