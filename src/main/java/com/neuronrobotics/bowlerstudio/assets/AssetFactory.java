@@ -36,7 +36,7 @@ public class AssetFactory {
 	}
 
 	static {
-		com.neuronrobotics.sdk.common.Log.error("AssetFactory loaded");
+		com.neuronrobotics.sdk.common.Log.info("AssetFactory loaded");
 		// new RuntimeException().printStackTrace();
 	}
 
@@ -88,7 +88,7 @@ public class AssetFactory {
 	@SuppressWarnings("restriction")
 	public static Image loadAsset(String file) throws Exception {
 		if (cache.get(file) == null) {
-			com.neuronrobotics.sdk.common.Log.debug("Loading asset " + file);
+			//com.neuronrobotics.sdk.common.Log.debug("Loading asset " + file);
 			File f = loadFile(file);
 			if (f.getName().endsWith(".fxml")) {
 				loadLayout(file);
@@ -165,7 +165,7 @@ public class AssetFactory {
 	}
 
 	public static void loadAllAssets() throws Exception {
-		com.neuronrobotics.sdk.common.Log.error("Loading assets");
+		com.neuronrobotics.sdk.common.Log.info("Loading assets");
 		List<String> files;
 		try {
 			files = ScriptingEngine.filesInGit(gitSource, StudioBuildInfo.getVersion(), null);
@@ -173,7 +173,7 @@ public class AssetFactory {
 			files = ScriptingEngine.filesInGit(getGitSource());
 		}
 		for (String file : files) {
-			com.neuronrobotics.sdk.common.Log.error("Loading asset file: " + file);
+			//com.neuronrobotics.sdk.common.Log.error("Loading asset file: " + file);
 			loadAsset(file);
 		}
 	}

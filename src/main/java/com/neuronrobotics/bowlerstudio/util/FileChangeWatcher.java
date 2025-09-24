@@ -114,7 +114,7 @@ public class FileChangeWatcher {
 		String path = fileToWatch.getAbsolutePath();
 		if (activeListener.get(path) == null) {
 			activeListener.put(path, new FileChangeWatcher(fileToWatch));
-			com.neuronrobotics.sdk.common.Log.error("Adding file to listening " + fileToWatch.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Adding file to listening " + fileToWatch.getAbsolutePath());
 		}
 		return activeListener.get(path);
 	}

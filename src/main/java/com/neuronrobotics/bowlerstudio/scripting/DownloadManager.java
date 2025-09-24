@@ -60,6 +60,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.assets.FontSizeManager;
+import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.video.OSUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -332,6 +333,7 @@ public class DownloadManager {
 		retryLoop(exeType, editor, executable,false);
 		return getExecutable(exeType, editor, executable,false);
 	}
+	
 	private static void retryLoop(String exeType, IExternalEditor editor, String executable,boolean justChecking) {
 		if(justChecking)
 			return;
@@ -347,13 +349,16 @@ public class DownloadManager {
 			approval.onInstallFail(jvmURL);
 		}
 	}
-
+	public static File getDestinationDir(String exeType) {
+		return new File(bindir + exeType);
+	}
 	private static File getExecutable(String exeType, IExternalEditor editor, String executable,boolean justChecking) {
 		String key = discoverKey();
 
 		try {
 			for (String f : ScriptingEngine.filesInGit(editorsURL)) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
+				Log.debug("Looking at json file "+file.getAbsolutePath());
 				if (file.getName().toLowerCase().startsWith(exeType.toLowerCase())
 						&& file.getName().toLowerCase().endsWith(".json")) {
 					String jsonText = new String(Files.readAllBytes(file.toPath()));
@@ -364,7 +369,7 @@ public class DownloadManager {
 					Map<String, Object> vm = (Map<String, Object>) database.get(key);
 					if (vm != null) {
 						String targetdir = exeType;
-						com.neuronrobotics.sdk.common.Log.error("Configuration found for " + exeType + " on " + key);
+						com.neuronrobotics.sdk.common.Log.debug("Configuration found for " + exeType + " on " + key);
 						String baseURL = vm.get("url").toString();
 						String type = vm.get("type").toString();
 						String name = vm.get("name").toString();
@@ -442,6 +447,12 @@ public class DownloadManager {
 							Object installer = vm.get("installer");
 							if (installer != null) {
 								runInstaller((List<String>) installer);
+							}
+							Object setup = vm.get("setup");
+							if (setup != null) {
+								String setupScript = setup.toString();
+								File setupEXE = new File(getDestinationDir(exeType).getAbsolutePath()+delim()+setupScript);
+								runInstaller(setupEXE,exeType);
 							}
 
 							Object configurations = database.get("Meta-Configuration");
@@ -535,10 +546,14 @@ public class DownloadManager {
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
-
 	private static void runInstaller(List<String> installerList) {
 		for (String installer : installerList) {
 			File installerFile = getRunExecutable(installer, null);
+			runInstaller( installerFile, installer);
+		}
+	}
+	private static void runInstaller(File installerFile,String installer) {
+		
 			if(installerFile.getAbsolutePath().toLowerCase().endsWith("msi")) {
 				 List<String> command = new ArrayList<>();
 			        command.add("msiexec.exe");
@@ -553,8 +568,16 @@ public class DownloadManager {
 						// Auto-generated catch block
 						com.neuronrobotics.sdk.common.Log.error(e);
 					}
+			}else if(installerFile.getAbsolutePath().toLowerCase().endsWith("sh")) {
+				Thread tcopy = run(null, getDestinationDir(installer), System.out, Arrays.asList("bash",installerFile.getAbsolutePath()));
+				try {
+					tcopy.join();
+				} catch (InterruptedException e) {
+					// Auto-generated catch block
+					com.neuronrobotics.sdk.common.Log.error(e);
+				}
 			}else {
-				Thread tcopy = run(null, new File("."), System.out, Arrays.asList(installerFile.getAbsolutePath()));
+				Thread tcopy = run(null, getDestinationDir(installer), System.out, Arrays.asList(installerFile.getAbsolutePath()));
 				try {
 					tcopy.join();
 				} catch (InterruptedException e) {
@@ -562,7 +585,7 @@ public class DownloadManager {
 					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 			}
-		}
+		
 	}
 
 	private static boolean deleteDirectory(File directoryToBeDeleted) {

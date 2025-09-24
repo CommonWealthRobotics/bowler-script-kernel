@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
@@ -59,8 +60,9 @@ public class Build123dLoader implements IScriptingLanguage {
 
 
 
-	public static void toSTLFile(File openscadfile,File stlout, HashMap<String,Double> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void toSTLFile(File build123dScript,File stlout, HashMap<String,Double> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("build123d", null);
+		File dir = getDestinationDir("build123d");
 		if(params==null)
 			params=new HashMap<String, Double>();
 		ArrayList<String> args = new ArrayList<>();
@@ -68,14 +70,16 @@ public class Build123dLoader implements IScriptingLanguage {
 		if(stlout.exists())
 			stlout.delete();
 		args.add(exe.getAbsolutePath());
+		args.add("run");
+		args.add("python");
 		for(String key:params.keySet()) {
 			args.add("-D");
 			args.add(key+"="+params.get(key));
 		}
-		args.add("-o");
-		args.add(stlout.getAbsolutePath());
-		args.add(openscadfile.getAbsolutePath());
-		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
+		args.add(build123dScript.getAbsolutePath());
+//		args.add("-o");
+//		args.add(stlout.getAbsolutePath());
+		legacySystemRun(null, dir, System.out, args);
 	}
 	@Override
 	public String getDefaultContents() {
@@ -91,7 +95,7 @@ public class Build123dLoader implements IScriptingLanguage {
 
 	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		Build123dLoader loader = new Build123dLoader();
-		
+		Log.enableDebugPrint();
 		// create test file
 		File testblend = new File("build123dTest.py");
 		if(!testblend.exists())
