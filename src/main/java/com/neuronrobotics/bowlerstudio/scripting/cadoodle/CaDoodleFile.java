@@ -1148,12 +1148,20 @@ public class CaDoodleFile {
 		this.img = img;
 		return img;
 	}
-
+	public boolean isInitialized() {
+		return !(percentInitialized<1);
+	}
+	/**
+	 * A value from 0 to 1 representing how complete the initialization is
+	 * @return
+	 */
 	public double getPercentInitialized() {
 		return percentInitialized;
 	}
 
-	public void setPercentInitialized(double percentInitialized) {
+	private void setPercentInitialized(double percentInitialized) {
+		if(percentInitialized>1||percentInitialized<0)
+			throw new NumberFormatException("Number must be between 0 and 1");
 		this.percentInitialized = percentInitialized;
 	}
 
