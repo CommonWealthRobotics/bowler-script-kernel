@@ -156,9 +156,6 @@ public class CaDoodleFile {
 				imageCacheDir.mkdir();
 			File db = new File(self.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			CSGDatabase.setInstance(new CSGDatabaseInstance(db));
-			StringParameter loc = new StringParameter("CaDoodle_File_Location", self.getAbsolutePath(),
-					new ArrayList<String>());
-			loc.setStrValue(self.getAbsolutePath());
 			bom = CaDoodleFile.getBillOfMaterials(this);
 			bom.clear();
 			bom.save();
