@@ -21,6 +21,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
@@ -177,11 +178,18 @@ public class AddFromFile extends AbstractAddFrom {
 					File targetParent = new File(parentFile.getAbsoluteFile() + delim() + name);
 					targetParent.mkdirs();
 					recursiveCopy(doodleParent.getAbsolutePath(),targetParent.getAbsolutePath());
+					file = new File(targetParent.getAbsolutePath()+delim()+file.getName());
+					try {
+						CaDoodleFile f = CaDoodleFile.fromFile(file);
+						f.setProjectName(cf.getMyProjectName()+"->"+f.getMyProjectName());
+						f.save();
+					} catch (Exception e) {
+						com.neuronrobotics.sdk.common.Log.error(e);
+						throw new RuntimeException(e);
+					}
 				}
 			}
 		}
-		if (!isDoodle)
-			file = new File(source + delim() + file.getName());
 		return file;
 	}
 
