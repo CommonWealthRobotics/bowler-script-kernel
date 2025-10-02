@@ -91,14 +91,6 @@ public class AddFromScript extends AbstractAddFrom {
 			}
 			back.addAll(collect);
 		} catch (Exception e) {
-			com.neuronrobotics.sdk.common.Log.error(e);
-			if (!fileName.contains("generated")) {
-				try {
-					return process(incoming, "generated/" + fileRel);
-				} catch (Exception e2) {
-					com.neuronrobotics.sdk.common.Log.error(e2);
-				}
-			}
 			throw new RuntimeException(e);
 		}
 
