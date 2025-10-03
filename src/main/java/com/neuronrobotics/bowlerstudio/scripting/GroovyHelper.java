@@ -16,6 +16,9 @@ import org.codehaus.groovy.control.customizers.*;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.DeviceManager;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebugger {
 
 	private Object inline(Object code, ArrayList<Object> args) throws Exception {
@@ -42,17 +45,27 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 //    }
 
 		binding.setVariable("args", args);
-
+		File code2 = null;
+		if (File.class.isInstance(code)) {
+			 code2 = (File)code;
+			if (!code2.getName().toLowerCase().contentEquals("csgdatabase.json")) {
+				File p = code2.getParentFile();
+				for (String s : p.list()) {
+					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
+						CSGDatabaseInstance db =new CSGDatabaseInstance(new File(p.getAbsoluteFile()+DownloadManager.delim()+s));
+						binding.setVariable("csgdb", db);
+					}
+				}
+			}
+		}
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
 		// com.neuronrobotics.sdk.common.Log.error(code + "\n\nStart\n\n");
 		Script script;
-		if (String.class.isInstance(code)) {
+		
+		if(code2==null) {
 			script = shell.parse((String) code);
-		} else if (File.class.isInstance(code)) {
-
-			script = shell.parse((File) code);
-		} else {
-			return null;
+		} else  {
+			script = shell.parse(code2);
 		}
 		return script.run();
 
