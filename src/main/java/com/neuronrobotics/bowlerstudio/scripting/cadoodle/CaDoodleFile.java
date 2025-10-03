@@ -101,6 +101,7 @@ public class CaDoodleFile {
 	private ICadoodleSaveStatusUpdate saveUpdate = null;
 	private boolean timelineOpen = false;
 	private HashMap<String,MobileBaseBuilder> robots = new HashMap<String, MobileBaseBuilder>();
+	private CSGDatabaseInstance csgDBinstance;
 	public ArrayList<MobileBase> getMobileBases(){
 		ArrayList<MobileBase> back = new ArrayList<MobileBase>();
 		for(MobileBaseBuilder b:robots.values()) {
@@ -155,7 +156,8 @@ public class CaDoodleFile {
 			if (!imageCacheDir.exists())
 				imageCacheDir.mkdir();
 			File db = new File(self.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
-			CSGDatabase.setInstance(new CSGDatabaseInstance(db));
+			setCsgDBinstance(new CSGDatabaseInstance(db));
+			CSGDatabase.setInstance(getCsgDBinstance());
 			bom = CaDoodleFile.getBillOfMaterials(this);
 			bom.clear();
 			bom.save();
@@ -1245,5 +1247,11 @@ public class CaDoodleFile {
 	 */
 	public void setRobots(HashMap<String,MobileBaseBuilder> robots) {
 		this.robots = robots;
+	}
+	public CSGDatabaseInstance getCsgDBinstance() {
+		return csgDBinstance;
+	}
+	private void setCsgDBinstance(CSGDatabaseInstance csgDBinstance) {
+		this.csgDBinstance = csgDBinstance;
 	}
 }
