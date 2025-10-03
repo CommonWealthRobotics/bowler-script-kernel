@@ -8,6 +8,8 @@ import com.neuronrobotics.video.OSUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.CloneCommand;
@@ -497,11 +499,26 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			filesRun.put(code.getName(), code);
 			// com.neuronrobotics.sdk.common.Log.error("Loading "+code.getAbsolutePath());
 		}
-
+		 CSGDatabaseInstance prevDB = CSGDatabase.getInstance();
+		try {
+			if (!code.getName().toLowerCase().contentEquals("csgdatabase.json")) {
+				File p = code.getParentFile();
+				for (String s : p.list()) {
+					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
+						CSGDatabase.setInstance(new CSGDatabaseInstance(new File(p.getAbsoluteFile()+DownloadManager.delim()+s) ));
+					}
+				}
+			}
+		} catch (Exception e) {
+			Log.error(e);
+		}
 		IScriptingLanguage iScriptingLanguage = langauges.get(shellTypeStorage);
 		if (iScriptingLanguage != null) {
-			return iScriptingLanguage.inlineScriptRun(code, args);
+			Object inlineScriptRun = iScriptingLanguage.inlineScriptRun(code, args);
+			CSGDatabase.setInstance(prevDB);
+			return inlineScriptRun;
 		}
+		CSGDatabase.setInstance(prevDB);
 		return null;
 	}
 
@@ -1002,7 +1019,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 						File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
 						if (!CSGDatabase.getDbFile().equals(dbFile))
-							CSGDatabase.setDbFile(dbFile);
+							CSGDatabase.setInstance(new CSGDatabaseInstance(dbFile));
 						CSGDatabase.saveDatabase();
 						@SuppressWarnings("resource")
 						String c = new Scanner(dbFile).useDelimiter("\\Z").next();
