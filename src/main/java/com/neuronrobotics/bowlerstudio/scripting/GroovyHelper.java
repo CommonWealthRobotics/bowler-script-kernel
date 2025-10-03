@@ -18,15 +18,13 @@ import com.neuronrobotics.sdk.common.DeviceManager;
 
 public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebugger {
 
+	private Object inline(Object code, ArrayList<Object> args) throws Exception {
+		CompilerConfiguration cc = new CompilerConfiguration();
+		cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(ScriptingEngine.getImports())
 
-  private Object inline(Object code, ArrayList<Object> args) throws Exception {
-    CompilerConfiguration cc = new CompilerConfiguration();
-    cc.addCompilationCustomizers(new ImportCustomizer()
-        .addStarImports(ScriptingEngine.getImports())
+		);
 
-    );
-
-    Binding binding = new Binding();
+		Binding binding = new Binding();
 //    for (String pm : DeviceManager.listConnectedDevice()) {
 //      BowlerAbstractDevice bad =  DeviceManager.getSpecificDevice(null, pm);
 //      try {
@@ -42,28 +40,29 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 ////			com.neuronrobotics.sdk.common.Log.error("Device " + bad.getScriptingName() + " is "
 ////					+ bad);
 //    }
-    binding.setVariable("args", args);
 
-    GroovyShell shell = new GroovyShell(GroovyHelper.class
-        .getClassLoader(), binding, cc);
-    //com.neuronrobotics.sdk.common.Log.error(code + "\n\nStart\n\n");
-    Script script;
-    if (String.class.isInstance(code)) {
-      script = shell.parse((String) code);
-    } else if (File.class.isInstance(code)) {
-      script = shell.parse((File) code);
-    } else {
-      return null;
-    }
-    return script.run();
+		binding.setVariable("args", args);
 
-  }
+		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
+		// com.neuronrobotics.sdk.common.Log.error(code + "\n\nStart\n\n");
+		Script script;
+		if (String.class.isInstance(code)) {
+			script = shell.parse((String) code);
+		} else if (File.class.isInstance(code)) {
 
+			script = shell.parse((File) code);
+		} else {
+			return null;
+		}
+		return script.run();
 
-  @Override
-  public String getShellType() {
-    return "Groovy";
-  }
+	}
+
+	@Override
+	public String getShellType() {
+		return "Groovy";
+	}
+
 	/**
 	 * Get the contents of an empty file
 	 * 
@@ -73,41 +72,39 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		return "// code here";
 	}
 
-  @Override
-  public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-    return inline(code, args);
-  }
+	@Override
+	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+		return inline(code, args);
+	}
 
+	@Override
+	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+		return inline(code, args);
+	}
 
-  @Override
-  public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
-    return inline(code, args);
-  }
+	@Override
+	public boolean getIsTextFile() {
+		// Auto-generated method stub
+		return true;
+	}
 
+	@Override
+	public ArrayList<String> getFileExtenetion() {
+		// Auto-generated method stub
+		return new ArrayList<>(Arrays.asList("groovy", "java"));
+	}
 
-  @Override
-  public boolean getIsTextFile() {
-    // Auto-generated method stub
-    return true;
-  }
+	@Override
+	public IDebugScriptRunner compileDebug(File f) {
+		// Auto-generated method stub
+		return new IDebugScriptRunner() {
 
-  @Override
-  public ArrayList<String> getFileExtenetion() {
-    // Auto-generated method stub
-    return new ArrayList<>(Arrays.asList( "groovy","java"));
-  }
-
-  @Override
-  public IDebugScriptRunner compileDebug(File f) {
-    // Auto-generated method stub
-    return new IDebugScriptRunner() {
-
-      @Override
-      public String[] step() {
-        // Auto-generated method stub
-        return new String[]{"fileame.groovy", "345"};
-      }
-    };
-  }
+			@Override
+			public String[] step() {
+				// Auto-generated method stub
+				return new String[] { "fileame.groovy", "345" };
+			}
+		};
+	}
 
 }
