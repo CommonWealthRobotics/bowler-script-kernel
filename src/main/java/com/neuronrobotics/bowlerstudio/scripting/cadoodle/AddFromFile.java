@@ -69,6 +69,7 @@ public class AddFromFile extends AbstractAddFrom {
 		if (getName() == null) {
 
 		}
+		CSGDatabaseInstance instance = CSGDatabase.getInstance();
 		try {
 //			ArrayList<Object>args = new ArrayList<>();
 //			args.addAll(Arrays.asList(getName() ));
@@ -85,7 +86,6 @@ public class AddFromFile extends AbstractAddFrom {
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
 			boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
-			CSGDatabaseInstance instance = CSGDatabase.getInstance();
 			if(isDoodle) {
 				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
 				CSGDatabase.setInstance(new CSGDatabaseInstance(tempFile.toFile()));
@@ -114,6 +114,7 @@ public class AddFromFile extends AbstractAddFrom {
 				csg1.setParameter(getFileLocationparam(file,name));
 			back.addAll(collect);
 		} catch (Exception e) {
+			CSGDatabase.setInstance(instance);
 			throw new RuntimeException(e);
 		}
 		return back;
