@@ -263,11 +263,11 @@ public class CaDoodleFile {
 				if (!param.contains(c.getName()))
 					continue;
 				if (param.contains("_CaDoodle_Vitamin_Type")) {
-					Parameter p = CSGDatabase.get(param);
+					Parameter p = getCsgDBinstance().get(param);
 					type = p.getStrValue();
 				}
 				if (param.contains("_CaDoodle_Vitamin_Size")) {
-					Parameter p = CSGDatabase.get(param);
+					Parameter p = getCsgDBinstance().get(param);
 					size = p.getStrValue();
 				}
 				if (type != null && size != null) {
@@ -722,7 +722,7 @@ public class CaDoodleFile {
 					existing = true;
 			}
 			if (!existing) {
-				Parameter vals = CSGDatabase.get(param);
+				Parameter vals = getCsgDBinstance().get(param);
 				if (vals != null)
 					csg.setParameter(getCsgDBinstance(),vals, getCsgDBinstance().getMapOfparametrics(dyingCSG).get(param));
 			}

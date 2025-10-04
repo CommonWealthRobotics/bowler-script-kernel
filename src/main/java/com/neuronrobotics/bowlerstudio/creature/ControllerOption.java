@@ -29,6 +29,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
@@ -91,7 +92,7 @@ public class ControllerOption {
 			List<CSG> so = arc.process(new ArrayList<>());
 			for (CSG c : so) {
 				for (String s : c.getParameters(f.getCsgDBinstance())) {
-					CSGDatabase.delete(s);
+					f.getCsgDBinstance().delete(s);
 				}
 			}
 			indicator = so.get(0);
@@ -181,9 +182,9 @@ public class ControllerOption {
 	public String getLinkDeviceName() {
 		return linkDeviceName;
 	}
-	public CSG getVitaminCSG(int index) {
+	public CSG getVitaminCSG(CSGDatabaseInstance instance,int index) {
 		try {
-			return Vitamins.get(vitaminType.get(index), vitaminSize.get(index));
+			return Vitamins.get(instance,vitaminType.get(index), vitaminSize.get(index));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

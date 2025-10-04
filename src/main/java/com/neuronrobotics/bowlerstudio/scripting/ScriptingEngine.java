@@ -131,9 +131,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return flattened;
 	}
 
-	public static <T> List<T> flaten(File f, Class<T> type, ArrayList<Object> args) throws Exception {
+	public static <T> List<T> flaten(CSGDatabaseInstance instance,File f, Class<T> type, ArrayList<Object> args) throws Exception {
 		ArrayList<T> flattened = new ArrayList<T>();
-		Object o = inlineFileScriptRun(f, args);
+		Object o = inlineFileScriptRun(instance,f, args);
 		flatenInterna(o, type, flattened);
 		return flattened;
 	}
@@ -511,18 +511,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		CSGDatabaseInstance prevDB = instance;
 		if(prevDB==null)
-		try {
-			if (!code.getName().toLowerCase().contentEquals("csgdatabase.json")) {
-				File p = code.getParentFile();
-				for (String s : p.list()) {
-					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
-						prevDB=(new CSGDatabaseInstance(new File(p.getAbsoluteFile()+DownloadManager.delim()+s) ));
+			try {
+				if (!code.getName().toLowerCase().contentEquals("csgdatabase.json")) {
+					File p = code.getParentFile();
+					for (String s : p.list()) {
+						if (s.toLowerCase().contentEquals("csgdatabase.json")) {
+							prevDB = (new CSGDatabaseInstance(
+									new File(p.getAbsoluteFile() + DownloadManager.delim() + s)));
+						}
 					}
 				}
+			} catch (Exception e) {
+				Log.error(e);
 			}
-		} catch (Exception e) {
-			Log.error(e);
-		}
 		if(prevDB==null)
 			prevDB=CSGDatabase.getInstance();
 		IScriptingLanguage iScriptingLanguage = langauges.get(shellTypeStorage);
@@ -1184,10 +1185,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		return null;
 	}
-
 	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception {
 
 		return inlineScriptRun(f, args, getShellType(f.getName()));
+	}
+	public static Object inlineFileScriptRun(CSGDatabaseInstance instance,File f, ArrayList<Object> args) throws Exception {
+
+		return inlineScriptRun(instance,f, args, getShellType(f.getName()));
 	}
 
 	public static Object inlineGistScriptRun(String gistID, String Filename, ArrayList<Object> args) throws Exception {
@@ -1196,12 +1200,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static Object gitScriptRun(String gitURL, String Filename) throws Exception {
-		return gitScriptRun(gitURL, Filename, null);
+		return gitScriptRun(CSGDatabase.getInstance(),gitURL, Filename, null);
 	}
-
+	public static Object gitScriptRun(CSGDatabaseInstance db,String gitURL, String Filename) throws Exception {
+		return gitScriptRun(db,gitURL, Filename, null);
+	}
 	public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args) throws Exception {
-		String[] gistData = codeFromGit(gitURL, Filename);
-		return inlineScriptRun(new File(gistData[2]), args, getShellType(gistData[1]));
+		return gitScriptRun(CSGDatabase.getInstance(), gitURL, Filename, args);
+	}
+	public static Object gitScriptRun(CSGDatabaseInstance db,String gitURL, String Filename, ArrayList<Object> args) throws Exception {
+		return inlineScriptRun(db,fileFromGit(gitURL, Filename), args, getShellType(Filename));
 	}
 
 	public static File fileFromGit(String remoteURI, String fileInRepo)

@@ -17,6 +17,8 @@ import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.ext.openjfx.importers.obj.ObjImporter;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import javafx.scene.paint.Color;
@@ -128,33 +130,33 @@ public class Vitamins {
 		return csg.clone().setRegenerate(csg.getRegenerate()).syncProperties(csg);
 	}
 
-	public static CSG get(String type, String id, String purchasingVariant) throws Exception {
-		String key = type + id + purchasingVariant;
-		if (fileLastLoaded.get(key) == null) {
-			PurchasingData purchasData = Purchasing.get(type, id, purchasingVariant);
-			for (String variable : purchasData.getVariantParameters().keySet()) {
-				double data = purchasData.getVariantParameters().get(variable);
-				LengthParameter parameter = new LengthParameter(variable, data,
-						(ArrayList<Double>) Arrays.asList(data, data));
-				parameter.setMM(data);
-			}
-
-			try {
-				fileLastLoaded.put(key, get(type, id));
-			} catch (Exception e) {
-				com.neuronrobotics.sdk.common.Log.error(e);
-
-				setGitRepoDatabase(gitRpoDatabase);
-				clear();
-				return get(type, id);
-			}
-
-		}
-
-		CSG vitToGet = fileLastLoaded.get(type + id);
-		// com.neuronrobotics.sdk.common.Log.error("Loading "+vitToGet);
-		return vitToGet;
-	}
+//	public static CSG get(String type, String id, String purchasingVariant) throws Exception {
+//		String key = type + id + purchasingVariant;
+//		if (fileLastLoaded.get(key) == null) {
+////			PurchasingData purchasData = Purchasing.get(type, id, purchasingVariant);
+////			for (String variable : purchasData.getVariantParameters().keySet()) {
+////				double data = purchasData.getVariantParameters().get(variable);
+////				LengthParameter parameter = new LengthParameter(variable, data,
+////						(ArrayList<Double>) Arrays.asList(data, data));
+////				parameter.setMM(data);
+////			}
+//
+//			try {
+//				fileLastLoaded.put(key, get(type, id));
+//			} catch (Exception e) {
+//				com.neuronrobotics.sdk.common.Log.error(e);
+//
+//				setGitRepoDatabase(gitRpoDatabase);
+//				clear();
+//				return get(type, id);
+//			}
+//
+//		}
+//
+//		CSG vitToGet = fileLastLoaded.get(type + id);
+//		// com.neuronrobotics.sdk.common.Log.error("Loading "+vitToGet);
+//		return vitToGet;
+//	}
 
 	public static boolean isGitURL(String text2) {
 		if (!text2.endsWith(".git"))
@@ -175,25 +177,27 @@ public class Vitamins {
 	public static void flatten(ArrayList<CSG> flat, Object o) {
 		ScriptingEngine.flatten(flat, o);
 	}
-
-	public static CSG get(String type, String id) throws Exception {
+//	public static CSG get(String type, String id) throws Exception {
+//		return get(CSGDatabase.getInstance(),type,id);
+//	}
+	public static CSG get(CSGDatabaseInstance instance,String type, String id) throws Exception {
 		if (isGitURL(type)) {
 			Object o = ScriptingEngine.gitScriptRun(type, id);
 			ArrayList<CSG> flat = new ArrayList<CSG>();
 			Vitamins.flatten(flat, o);
 			return CSG.unionAll(flat);
 		}
-		return get(type, id, 0);
+		return get(instance,type, id, 0);
 	}
 
-	private static CSG get(String type, String id, int depthGauge) throws Exception {
+	private static CSG get(CSGDatabaseInstance instance,String type, String id, int depthGauge) throws Exception {
 		String key = type + id;
 		Map<String, Object> script = getMeta(type);
 		Object file = null;
 		Object repostring =null;
 		try {
 			CSG newVitamin = null;
-			StringParameter size = new StringParameter(type + " Default", id, Vitamins.listVitaminSizes(type));
+			StringParameter size = new StringParameter(instance,type + " Default", id, Vitamins.listVitaminSizes(type));
 			size.setStrValue(id);
 			 file = script.get("scriptGit");
 			 repostring = script.get("scriptFile");
@@ -201,7 +205,7 @@ public class Vitamins {
 			if (file != null && repo != null) {
 				ArrayList<Object> servoMeasurments = new ArrayList<Object>();
 				servoMeasurments.add(id);
-				newVitamin = (CSG) ScriptingEngine.gitScriptRun(script.get("scriptGit").toString(), // git location of
+				newVitamin = (CSG) ScriptingEngine.gitScriptRun(instance,script.get("scriptGit").toString(), // git location of
 																									// the library
 						repostring.toString(), // file to load
 						servoMeasurments);
@@ -232,7 +236,7 @@ public class Vitamins {
 			//ScriptingEngine.deleteRepo(script.get("scriptGit").toString());
 			clear();
 			if (depthGauge < 2) {
-				return get(type, id, depthGauge + 1);
+				return get(instance,type, id, depthGauge + 1);
 			} else {
 				return new Cube(20).toCSG().setColor(Color.RED);
 			}

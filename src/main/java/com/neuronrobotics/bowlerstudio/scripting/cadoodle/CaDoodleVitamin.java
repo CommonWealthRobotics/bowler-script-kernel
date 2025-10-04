@@ -25,7 +25,7 @@ public class CaDoodleVitamin {
 		String name = args.get(0).toString();
 		ArrayList<String>types=new ArrayList<>();
 		types.addAll(Vitamins.listVitaminTypes());
-		StringParameter typeParam = new StringParameter(name + "_CaDoodle_Vitamin_Type", typencoming,types);
+		StringParameter typeParam = new StringParameter(instance,name + "_CaDoodle_Vitamin_Type", typencoming,types);
 		String type=typeParam.getStrValue();
 		ArrayList<String> listVitaminSizes = Vitamins.listVitaminSizes(type);
 		try {
@@ -48,19 +48,19 @@ public class CaDoodleVitamin {
 
 		ArrayList<String>types=new ArrayList<>();
 		types.addAll(Vitamins.listVitaminTypes());
-		StringParameter typeParam = new StringParameter(name + "_CaDoodle_Vitamin_Type", typencoming,
+		StringParameter typeParam = new StringParameter(instance,name + "_CaDoodle_Vitamin_Type", typencoming,
 				types);
 		String type=typeParam.getStrValue();
 		ArrayList<String> listVitaminSizes = Vitamins.listVitaminSizes(type);
 		
-		StringParameter size = new StringParameter(type + " Default", defaultValue, listVitaminSizes);
+		StringParameter size = new StringParameter(instance,type + " Default", defaultValue, listVitaminSizes);
 		
 		String strValue = size.getStrValue();
 		if(strValue.length() == 0) {
 			size.setStrValue(listVitaminSizes.get(0));
 		}
 		String string = "_CaDoodle_Vitamin_Size";
-		StringParameter word = new StringParameter(name + string, strValue,
+		StringParameter word = new StringParameter(instance,name + string, strValue,
 				listVitaminSizes);
 		boolean sizeExists=false;
 		for(String s:Vitamins.listVitaminSizes(type)) {
@@ -86,8 +86,8 @@ public class CaDoodleVitamin {
 		CSG part;
 		try {
 //			com.neuronrobotics.sdk.common.Log.debug("Generating Vitamin "+type+" "+word.getStrValue()+" for vitamin named "+name);
-			part = Vitamins.get(type, word.getStrValue()).setIsHole(true);
-			CSGDatabase.saveDatabase();
+			part = Vitamins.get(instance,type, word.getStrValue()).setIsHole(true);
+			instance.saveDatabase();
 			Set<String> params = part.getParameters(instance);
 
 			part.setParameter(instance,word);
@@ -111,8 +111,8 @@ public class CaDoodleVitamin {
 					ArrayList<Object> ar = new ArrayList<>();
 					ar.addAll(args);
 					ar.set(0, previous.getName());
-					Parameter s = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Size");
-					Parameter t = CSGDatabase.get(name2+"_CaDoodle_Vitamin_Type");
+					Parameter s = instance.get(name2+"_CaDoodle_Vitamin_Size");
+					Parameter t = instance.get(name2+"_CaDoodle_Vitamin_Type");
 					if(t==null) {
 						com.neuronrobotics.sdk.common.Log.debug(" Error, type is null, previous "+name2+" has no parameters somehow??");
 					}

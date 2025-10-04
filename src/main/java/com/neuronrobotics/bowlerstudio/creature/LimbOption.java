@@ -138,7 +138,7 @@ public class LimbOption {
 		add.getRobots().remove("tmp");
 		for (CSG c : so) {
 			for (String s : c.getParameters(f.getCsgDBinstance())) {
-				CSGDatabase.delete(s);
+				f.getCsgDBinstance().delete(s);
 			}
 		}
 		BowlerKernel.runLater(() -> {

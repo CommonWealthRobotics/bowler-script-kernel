@@ -57,6 +57,7 @@ import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.beans.property.*;
 import javafx.scene.transform.Affine;
 import javafx.application.Platform;
@@ -97,36 +98,36 @@ public class MobileBaseCadManager implements Runnable {
 	private ArrayList<IRenderSynchronizationEvent> rendersync = new ArrayList<>();
 	private boolean forceChage = true;
 
-	public CSG getVitamin(VitaminLocation vitamin) throws Exception {
-		return getVitamin(vitamin, new Affine(), null);
+	public CSG getVitamin(CSGDatabaseInstance db,VitaminLocation vitamin) throws Exception {
+		return getVitamin(db,vitamin, new Affine(), null);
 	}
 
-	public ArrayList<CSG> getVitamins(IVitaminHolder link, Affine manipulator) {
+	public ArrayList<CSG> getVitamins(CSGDatabaseInstance db,IVitaminHolder link, Affine manipulator) {
 		ArrayList<VitaminLocation> vitamins = link.getVitamins();
-		return toVitaminCad(vitamins, manipulator, null);
+		return toVitaminCad(db,vitamins, manipulator, null);
 	}
 
-	public ArrayList<CSG> getOriginVitamins(IVitaminHolder link, Affine manipulator, TransformNR offset) {
+	public ArrayList<CSG> getOriginVitamins(CSGDatabaseInstance db,IVitaminHolder link, Affine manipulator, TransformNR offset) {
 		ArrayList<VitaminLocation> vitamins = link.getOriginVitamins();
-		return toVitaminCad(vitamins, manipulator, offset);
+		return toVitaminCad(db,vitamins, manipulator, offset);
 	}
 
-	public ArrayList<CSG> getDefaultVitamins(IVitaminHolder link, Affine manipulator) {
+	public ArrayList<CSG> getDefaultVitamins(CSGDatabaseInstance db,IVitaminHolder link, Affine manipulator) {
 		ArrayList<VitaminLocation> vitamins = link.getDefaultVitamins();
-		return toVitaminCad(vitamins, manipulator, null);
+		return toVitaminCad(db,vitamins, manipulator, null);
 	}
 
-	public ArrayList<CSG> getPreviousLinkVitamins(IVitaminHolder link, Affine manipulator) {
+	public ArrayList<CSG> getPreviousLinkVitamins(CSGDatabaseInstance db,IVitaminHolder link, Affine manipulator) {
 		ArrayList<VitaminLocation> vitamins = link.getPreviousLinkVitamins();
-		return toVitaminCad(vitamins, manipulator, null);
+		return toVitaminCad(db,vitamins, manipulator, null);
 	}
 
-	private ArrayList<CSG> toVitaminCad(ArrayList<VitaminLocation> vitamins, Affine manipulator, TransformNR offset) {
+	private ArrayList<CSG> toVitaminCad(CSGDatabaseInstance db,ArrayList<VitaminLocation> vitamins, Affine manipulator, TransformNR offset) {
 		ArrayList<CSG> parts = new ArrayList<CSG>();
 		for (VitaminLocation vi : vitamins) {
 			CSG vitamin;
 			try {
-				vitamin = getVitamin(vi, manipulator, offset);
+				vitamin = getVitamin(db,vi, manipulator, offset);
 				parts.add(vitamin);
 			} catch (Exception e) {
 				// Auto-generated catch block
@@ -136,26 +137,26 @@ public class MobileBaseCadManager implements Runnable {
 		return parts;
 	}
 
-	public ArrayList<CSG> getVitamins(AbstractLink link) {
+	public ArrayList<CSG> getVitamins(CSGDatabaseInstance db,AbstractLink link) {
 		LinkConfiguration conf = link.getLinkConfiguration();
-		return getVitamins(conf, (Affine) link.getGlobalPositionListener());
+		return getVitamins(db,conf, (Affine) link.getGlobalPositionListener());
 	}
 
-	public ArrayList<CSG> getVitamins(AbstractLink link, Affine manipulator) {
+	public ArrayList<CSG> getVitamins(CSGDatabaseInstance db,AbstractLink link, Affine manipulator) {
 		LinkConfiguration conf = link.getLinkConfiguration();
-		return getVitamins(conf, manipulator);
+		return getVitamins(db,conf, manipulator);
 	}
 
-	public ArrayList<CSG> getVitamins(MobileBase base) {
+	public ArrayList<CSG> getVitamins(CSGDatabaseInstance db,MobileBase base) {
 		Affine rootListener = (Affine) base.getRootListener();
-		return getVitamins(base, rootListener);
+		return getVitamins(db,base, rootListener);
 	}
 
-	public CSG getVitamin(VitaminLocation vitamin, Affine manipulator, TransformNR offset) {
+	public CSG getVitamin(CSGDatabaseInstance instance,VitaminLocation vitamin, Affine manipulator, TransformNR offset) {
 		if (!vitaminCad.containsKey(vitamin)) {
 			CSG starting;
 			try {
-				CSG origin = vitaminMakeCSG(vitamin);
+				CSG origin = vitaminMakeCSG(instance,vitamin);
 				starting = origin.transformed(TransformFactory.nrToCSG(vitamin.getLocation()));
 				if (offset != null)
 					starting = starting.transformed(TransformFactory.nrToCSG(offset));
@@ -172,22 +173,22 @@ public class MobileBaseCadManager implements Runnable {
 		return vitaminCad.get(vitamin);
 	}
 
-	public static CSG vitaminMakeCSG(VitaminLocation vitamin) throws Exception {
+	public static CSG vitaminMakeCSG(CSGDatabaseInstance instance,VitaminLocation vitamin) throws Exception {
 		if (vitamin.isScript()) {
 			Object o = ScriptingEngine.gitScriptRun(vitamin.getType(), vitamin.getSize());
 			ArrayList<CSG> flat = new ArrayList<CSG>();
 			Vitamins.flatten(flat, o);
 			return CSG.unionAll(flat);
 		} else
-			return Vitamins.get(vitamin.getType(), vitamin.getSize());
+			return Vitamins.get(instance,vitamin.getType(), vitamin.getSize());
 	}
 
-	public CSG getVitaminDisplay(VitaminLocation vitamin, Affine manipulator, TransformNR offset) {
+	public CSG getVitaminDisplay(CSGDatabaseInstance instance,VitaminLocation vitamin, Affine manipulator, TransformNR offset) {
 		if (!vitaminDisplay.containsKey(vitamin)) {
 			CSG starting;
 			Affine offsetDisplay = new Affine();
 			try {
-				starting = vitaminMakeCSG(vitamin);
+				starting = vitaminMakeCSG(instance,vitamin);
 				if (offset != null) {
 					BowlerKernel.runLater(() -> {
 						TransformFactory.nrToAffine(offset, offsetDisplay);
@@ -231,36 +232,36 @@ public class MobileBaseCadManager implements Runnable {
 		throw new RuntimeException("Affine not present! " + vitamin.getName());
 	}
 
-	public ArrayList<CSG> getOriginVitaminsDisplay(IVitaminHolder link, Affine manipulator, TransformNR offset) {
+	public ArrayList<CSG> getOriginVitaminsDisplay(CSGDatabaseInstance db,IVitaminHolder link, Affine manipulator, TransformNR offset) {
 		ArrayList<VitaminLocation> vitamins = link.getOriginVitamins();
-		return vitaminsToDisplay(vitamins, manipulator, offset);
+		return vitaminsToDisplay(db,vitamins, manipulator, offset);
 	}
 
-	public ArrayList<CSG> getDefaultVitaminsDisplay(IVitaminHolder link, Affine manipulator) {
+	public ArrayList<CSG> getDefaultVitaminsDisplay(CSGDatabaseInstance db,IVitaminHolder link, Affine manipulator) {
 		ArrayList<VitaminLocation> vitamins = link.getDefaultVitamins();
-		return vitaminsToDisplay(vitamins, manipulator);
+		return vitaminsToDisplay(db,vitamins, manipulator);
 	}
 
-	public ArrayList<CSG> getPreviousLinkVitaminsDisplay(IVitaminHolder link, Affine manipulator) {
+	public ArrayList<CSG> getPreviousLinkVitaminsDisplay(CSGDatabaseInstance db,IVitaminHolder link, Affine manipulator) {
 		ArrayList<VitaminLocation> vitamins = link.getPreviousLinkVitamins();
-		return vitaminsToDisplay(vitamins, manipulator);
+		return vitaminsToDisplay(db,vitamins, manipulator);
 	}
 
-	public ArrayList<CSG> getVitaminsDisplay(IVitaminHolder link, Affine manipulator) {
+	public ArrayList<CSG> getVitaminsDisplay(CSGDatabaseInstance db,IVitaminHolder link, Affine manipulator) {
 
-		return vitaminsToDisplay(link.getVitamins(), manipulator);
+		return vitaminsToDisplay(db,link.getVitamins(), manipulator);
 	}
 
-	public ArrayList<CSG> vitaminsToDisplay(ArrayList<VitaminLocation> l, Affine manipulator) {
-		return vitaminsToDisplay(l, manipulator, null);
+	public ArrayList<CSG> vitaminsToDisplay(CSGDatabaseInstance db,ArrayList<VitaminLocation> l, Affine manipulator) {
+		return vitaminsToDisplay(db,l, manipulator, null);
 	}
 
-	public ArrayList<CSG> vitaminsToDisplay(ArrayList<VitaminLocation> l, Affine manipulator, TransformNR offset) {
+	public ArrayList<CSG> vitaminsToDisplay(CSGDatabaseInstance db,ArrayList<VitaminLocation> l, Affine manipulator, TransformNR offset) {
 		ArrayList<CSG> parts = new ArrayList<CSG>();
 		for (VitaminLocation vi : l) {
 			CSG vitamin;
 			try {
-				vitamin = getVitaminDisplay(vi, manipulator, offset);
+				vitamin = getVitaminDisplay(db,vi, manipulator, offset);
 				parts.add(vitamin);
 			} catch (Exception e) {
 				// Auto-generated catch block
@@ -270,19 +271,19 @@ public class MobileBaseCadManager implements Runnable {
 		return parts;
 	}
 
-	public ArrayList<CSG> getVitaminsDisplay(AbstractLink link) {
+	public ArrayList<CSG> getVitaminsDisplay(CSGDatabaseInstance db,AbstractLink link) {
 		LinkConfiguration conf = link.getLinkConfiguration();
-		return getVitaminsDisplay(conf, (Affine) link.getGlobalPositionListener());
+		return getVitaminsDisplay(db,conf, (Affine) link.getGlobalPositionListener());
 	}
 
-	public ArrayList<CSG> getVitaminsDisplay(AbstractLink link, Affine manipulator) {
+	public ArrayList<CSG> getVitaminsDisplay(CSGDatabaseInstance db,AbstractLink link, Affine manipulator) {
 		LinkConfiguration conf = link.getLinkConfiguration();
-		return getVitaminsDisplay(conf, manipulator);
+		return getVitaminsDisplay(db,conf, manipulator);
 	}
 
-	public ArrayList<CSG> getVitaminsDisplay(MobileBase base) {
+	public ArrayList<CSG> getVitaminsDisplay(CSGDatabaseInstance db,MobileBase base) {
 		Affine rootListener = (Affine) base.getRootListener();
-		return getVitaminsDisplay(base, rootListener);
+		return getVitaminsDisplay(db,base, rootListener);
 	}
 
 	public void render() {

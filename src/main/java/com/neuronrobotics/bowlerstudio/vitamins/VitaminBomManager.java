@@ -26,6 +26,7 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 
 public class VitaminBomManager {
@@ -132,13 +133,13 @@ public class VitaminBomManager {
 		return this;
 	}
 
-	public CSG get(String name) {
+	public CSG get(CSGDatabaseInstance db,String name) {
 		VitaminLocation e = getElement(name);
 		if (e == null)
 			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
 
 		try {
-			CSG transformed = MobileBaseCadManager.vitaminMakeCSG(e)
+			CSG transformed = MobileBaseCadManager.vitaminMakeCSG(db,e)
 					.transformed(TransformFactory.nrToCSG(e.getLocation()));
 			transformed.setManufacturing(incominng -> {
 				return null;

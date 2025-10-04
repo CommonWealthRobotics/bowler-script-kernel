@@ -67,7 +67,7 @@ public class AddRobotController extends AbstractAddFrom {
 		} catch (FileNotFoundException e) {
 		}
 		for (int i = 0; i < controller.getVitaminNumber(); i++) {
-			CSG csg = controller.getVitaminCSG(i).cloneShallow();
+			CSG csg = controller.getVitaminCSG(getCaDoodleFile().getCsgDBinstance(),i).cloneShallow();
 			TransformNR offset = getLocation().times(controller.getVitaminPose(i));
 			Transform nrToCSG = TransformFactory.nrToCSG(offset);
 			String orderedName = getOrderedName();

@@ -69,7 +69,7 @@ public class AddFromFile extends AbstractAddFrom {
 		if (getName() == null) {
 
 		}
-		CSGDatabaseInstance instance = CSGDatabase.getInstance();
+		//CSGDatabaseInstance instance = CSGDatabase.getInstance();
 		try {
 //			ArrayList<Object>args = new ArrayList<>();
 //			args.addAll(Arrays.asList(getName() ));
@@ -92,7 +92,7 @@ public class AddFromFile extends AbstractAddFrom {
 			}
 			List<CSG> flattenedCSGs;
 			try {
-				flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, args);
+				flattenedCSGs = ScriptingEngine.flaten(getCaDoodleFile().getCsgDBinstance(),file, CSG.class, args);
 			}catch(Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
 				flattenedCSGs=new ArrayList<CSG>();
@@ -109,12 +109,12 @@ public class AddFromFile extends AbstractAddFrom {
 					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 			}
-			CSGDatabase.setInstance(instance);
+			//CSGDatabase.setInstance(instance);
 			for(CSG csg1:collect)
-				csg1.setParameter(getCaDoodleFile().getCsgDBinstance(),getFileLocationparam(file,name));
+				csg1.setParameter(getCaDoodleFile().getCsgDBinstance(),getFileLocationparam(getCaDoodleFile().getCsgDBinstance(),file,name));
 			back.addAll(collect);
 		} catch (Exception e) {
-			CSGDatabase.setInstance(instance);
+			//CSGDatabase.setInstance(instance);
 			throw new RuntimeException(e);
 		}
 		return back;
@@ -335,18 +335,18 @@ public class AddFromFile extends AbstractAddFrom {
 						if(isDoodle) {
 							Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
 							instancetmp = new CSGDatabaseInstance(tempFile.toFile());
-							CSGDatabase.setInstance(instancetmp);
+							//CSGDatabase.setInstance(instancetmp);
 						}
 						String fileLocation = file.getAbsolutePath();
 						com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
-						List<CSG> flattenedCSGs = ScriptingEngine.flaten(file, CSG.class, null);
+						List<CSG> flattenedCSGs = ScriptingEngine.flaten(instancetmp,file, CSG.class, null);
 						CSG csg1 = flattenedCSGs.get(i);
 						if(isDoodle) {
 							csg1.getMapOfparametrics(instancetmp ).clear();
 							csg1.setStorage(new PropertyStorage());
 						}
-						CSGDatabase.setInstance(instance);
-						csg1.setParameter(instance,getFileLocationparam(f,task));
+						//CSGDatabase.setInstance(instance);
+						csg1.setParameter(instance,getFileLocationparam(instance,f,task));
 						return processGiven(csg1, i, name,f,task,location,instance);
 					} catch (Exception e) {
 						com.neuronrobotics.sdk.common.Log.error(e);
@@ -357,8 +357,8 @@ public class AddFromFile extends AbstractAddFrom {
 		return processedCSG;
 	}
 
-	private static StringParameter getFileLocationparam( File pathname,String task) {
-		StringParameter stringParameter = new StringParameter(task + "_CaDoodle_File", pathname.getAbsolutePath(), new ArrayList<String>());
+	private static StringParameter getFileLocationparam(CSGDatabaseInstance instance, File pathname,String task) {
+		StringParameter stringParameter = new StringParameter(instance,task + "_CaDoodle_File", pathname.getAbsolutePath(), new ArrayList<String>());
 		stringParameter.setStrValue(pathname.getAbsolutePath());
 		return stringParameter;
 	}

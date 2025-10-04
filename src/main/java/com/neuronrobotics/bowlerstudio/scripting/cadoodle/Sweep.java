@@ -111,7 +111,7 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter radius(String name) {
 		String key = name + "_CaDoodle_Rad";
 		if (rad == null)
-			rad = new LengthParameter(key, getDefrad(), nopt);
+			rad = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefrad(), nopt);
 		if (rad.getMM() < 0)
 			rad.setMM(0);
 		return rad;
@@ -120,14 +120,14 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter zoffset(String name) {
 		String key = name + "_CaDoodle_Z-per";
 		if (z == null)
-			z = new LengthParameter(key, getDefz(), nopt);
+			z = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefz(), nopt);
 		return z;
 	}
 
 	public LengthParameter steps(String name) {
 		String key = name + "_CaDoodle_Step";
 		if (step == null)
-			step = new LengthParameter(key, getDefstep(), nopt);
+			step = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefstep(), nopt);
 		if (step.getMM() < 3)
 			step.setMM(3);
 		return step;
@@ -136,7 +136,7 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter angle(String name) {
 		String key = name + "_CaDoodle_Angle";
 		if (angle == null)
-			angle = new LengthParameter(key, getDefangle(), nopt);
+			angle = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefangle(), nopt);
 		if (angle.getMM() < 0.001)
 			angle.setMM(0.001);
 		return angle;
@@ -145,7 +145,7 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter spiralStep(String name) {
 		String key = name + "_CaDoodle_Spiral";
 		if (spiral == null)
-			spiral = new LengthParameter(key, getDefSpiral(), nopt);
+			spiral = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefSpiral(), nopt);
 		if (spiral.getMM() < 0)
 			spiral.setMM(0);
 		return spiral;
@@ -250,7 +250,7 @@ public class Sweep extends AbstractAddFrom {
 			throw new RuntimeException(e);
 		}
 
-		StringParameter parameter = new StringParameter(name + "_CaDoodle_File", pathname, options);
+		StringParameter parameter = new StringParameter(getCaDoodleFile().getCsgDBinstance(),name + "_CaDoodle_File", pathname, options);
 		Parameter steps = steps(name);
 		Parameter angle = angle(name);
 		Parameter z = zoffset(name);
