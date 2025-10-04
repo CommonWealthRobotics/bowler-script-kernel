@@ -51,24 +51,25 @@ public class Sweep extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private double defz = 0;
 	@Expose(serialize = true, deserialize = true)
-	private double defrad= 10;
+	private double defrad = 10;
 	@Expose(serialize = true, deserialize = true)
-	private double defstep=30;
+	private double defstep = 30;
 	@Expose(serialize = true, deserialize = true)
-	private double defangle=360;
+	private double defangle = 360;
 	@Expose(serialize = true, deserialize = true)
-	private double defSpiral=0;
-	
-	public Sweep set(File source,CaDoodleFile cf) throws Exception {
+	private double defSpiral = 0;
+
+	public Sweep set(File source, CaDoodleFile cf) throws Exception {
 		if (!source.getName().toLowerCase().endsWith(".svg"))
 			throw new Exception("Sweep can only take files with the .svg extention");
-		com.neuronrobotics.sdk.common.Log.debug("Saving Local Copy of "+source.getAbsolutePath());
-		AddFromFile.toLocal(source, getName(),cf);
+		com.neuronrobotics.sdk.common.Log.debug("Saving Local Copy of " + source.getAbsolutePath());
+		AddFromFile.toLocal(source, getName(), cf);
 		setCaDoodleFile(cf);
 		try {
 			getFile();
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 		}
 		return this;
 	}
@@ -96,10 +97,10 @@ public class Sweep extends AbstractAddFrom {
 		try {
 			transformedP = p.transformed(centerandAllignedPolygon);
 
-			ITransformProvider pr = (unit,domain)->{
-				return new Transform().movex(sprl*unit*d);
+			ITransformProvider pr = (unit, domain) -> {
+				return new Transform().movex(sprl * unit * d);
 			};
-			return Extrude.sweep(transformedP, increment, radiusT, steps,pr).rotx(-90).setName(name);
+			return Extrude.sweep(transformedP, increment, radiusT, steps, pr).rotx(-90).setName(name);
 		} catch (ColinearPointsException e) {
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
@@ -111,7 +112,7 @@ public class Sweep extends AbstractAddFrom {
 		String key = name + "_CaDoodle_Rad";
 		if (rad == null)
 			rad = new LengthParameter(key, getDefrad(), nopt);
-		if(rad.getMM()<0)
+		if (rad.getMM() < 0)
 			rad.setMM(0);
 		return rad;
 	}
@@ -127,7 +128,7 @@ public class Sweep extends AbstractAddFrom {
 		String key = name + "_CaDoodle_Step";
 		if (step == null)
 			step = new LengthParameter(key, getDefstep(), nopt);
-		if(step.getMM()<3)
+		if (step.getMM() < 3)
 			step.setMM(3);
 		return step;
 	}
@@ -136,19 +137,19 @@ public class Sweep extends AbstractAddFrom {
 		String key = name + "_CaDoodle_Angle";
 		if (angle == null)
 			angle = new LengthParameter(key, getDefangle(), nopt);
-		if (angle.getMM()<0.001)
+		if (angle.getMM() < 0.001)
 			angle.setMM(0.001);
 		return angle;
 	}
+
 	public LengthParameter spiralStep(String name) {
 		String key = name + "_CaDoodle_Spiral";
 		if (spiral == null)
 			spiral = new LengthParameter(key, getDefSpiral(), nopt);
-		if (spiral.getMM()<0)
+		if (spiral.getMM() < 0)
 			spiral.setMM(0);
 		return spiral;
 	}
-
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
@@ -163,7 +164,7 @@ public class Sweep extends AbstractAddFrom {
 //			args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
-			com.neuronrobotics.sdk.common.Log.debug("Loading File "+file.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Loading File " + file.getAbsolutePath());
 			if (!file.exists()) {
 				throw new RuntimeException("Failed to find file");
 			}
@@ -231,7 +232,7 @@ public class Sweep extends AbstractAddFrom {
 
 	@Override
 	public File getFile() throws NoSuchFileException {
-		return AddFromFile.getFile(name,getCaDoodleFile());
+		return AddFromFile.getFile(name, getCaDoodleFile());
 	}
 
 	private CSG processGiven(Polygon p, Bounds b, int j, String name) {
@@ -255,8 +256,14 @@ public class Sweep extends AbstractAddFrom {
 		Parameter z = zoffset(name);
 		Parameter radius = radius(name);
 		parameter.setStrValue(pathname);
-		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(csg).setParameter(parameter).setParameter(steps)
-				.setParameter(angle).setParameter(z).setParameter(radius).setParameter(spiralStep(pathname)).setColor(c).setIsHole(hole)
+		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(csg)
+				.setParameter(getCaDoodleFile().getCsgDBinstance(), parameter)
+				.setParameter(getCaDoodleFile().getCsgDBinstance(), steps)
+				.setParameter(getCaDoodleFile().getCsgDBinstance(), angle)
+				.setParameter(getCaDoodleFile().getCsgDBinstance(), z)
+				.setParameter(getCaDoodleFile().getCsgDBinstance(), radius)
+				.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(pathname))
+				.setColor(c).setIsHole(hole)
 				.setRegenerate(previous -> {
 					try {
 						File file = getFile();

@@ -98,7 +98,7 @@ public class Paste extends AbstractAddFrom  {
 
 		Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 		CSG newOne = null;
-		if (CaDoodleVitamin.isVitamin(c)) {
+		if (new CaDoodleVitamin(getCaDoodleFile().getCsgDBinstance()).isVitamin(c)) {
 			CSG regenerate = clone.getRegenerate().regenerate(clone);
 			newOne = regenerate.transformed(nrToCSG).transformed(nrToCSG2);
 			newOne.setRegenerate(regenerate.getRegenerate());

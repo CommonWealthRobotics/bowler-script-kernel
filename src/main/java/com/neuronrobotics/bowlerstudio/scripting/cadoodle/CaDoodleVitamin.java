@@ -11,12 +11,17 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.IRegenerate;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class CaDoodleVitamin {
-	public static CSG get(String typencoming, ArrayList<Object> args) {
+	private CSGDatabaseInstance instance;
+	public CaDoodleVitamin(CSGDatabaseInstance myinstance) {
+		instance=myinstance;
+	}
+	public CSG get(String typencoming, ArrayList<Object> args) {
 		String name = args.get(0).toString();
 		ArrayList<String>types=new ArrayList<>();
 		types.addAll(Vitamins.listVitaminTypes());
@@ -30,15 +35,15 @@ public class CaDoodleVitamin {
 			throw ex;
 		}
 	}
-	public static boolean isVitamin(CSG c) {
-		for(String s:c.getParameters()) {
+	public boolean isVitamin(CSG c) {
+		for(String s:instance.getParameters(c)) {
 			if(s.contains("_CaDoodle_Vitamin_") && s.contains(c.getName())) {
 				return true;
 			}
 		}
 		return false;
 	}
-	public static CSG get(String typencoming,String defaultValue, ArrayList<Object> args) {
+	public  CSG get(String typencoming,String defaultValue, ArrayList<Object> args) {
 		String name = args.get(0).toString();
 
 		ArrayList<String>types=new ArrayList<>();
@@ -83,11 +88,11 @@ public class CaDoodleVitamin {
 //			com.neuronrobotics.sdk.common.Log.debug("Generating Vitamin "+type+" "+word.getStrValue()+" for vitamin named "+name);
 			part = Vitamins.get(type, word.getStrValue()).setIsHole(true);
 			CSGDatabase.saveDatabase();
-			Set<String> params = part.getParameters();
+			Set<String> params = part.getParameters(instance);
 
-			part.setParameter(word);
-			part.setParameter(typeParam);
-			params = part.getParameters();
+			part.setParameter(instance,word);
+			part.setParameter(instance,typeParam);
+			params = part.getParameters(instance);
 			part.setName(name);
 //			com.neuronrobotics.sdk.common.Log.debug("Parameters on Vitamin: "+name);
 //			for(String s:params) {
@@ -111,7 +116,7 @@ public class CaDoodleVitamin {
 					if(t==null) {
 						com.neuronrobotics.sdk.common.Log.debug(" Error, type is null, previous "+name2+" has no parameters somehow??");
 					}
- 					return CaDoodleVitamin.get(t.getStrValue(),s.getStrValue(), ar);
+ 					return get(t.getStrValue(),s.getStrValue(), ar);
 				}
 			});
 			//back.getStorage().set("PreviousName", name);

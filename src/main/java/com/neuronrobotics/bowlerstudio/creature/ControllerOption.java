@@ -90,7 +90,7 @@ public class ControllerOption {
 			arc.setCaDoodleFile(f);
 			List<CSG> so = arc.process(new ArrayList<>());
 			for (CSG c : so) {
-				for (String s : c.getParameters()) {
+				for (String s : c.getParameters(f.getCsgDBinstance())) {
 					CSGDatabase.delete(s);
 				}
 			}

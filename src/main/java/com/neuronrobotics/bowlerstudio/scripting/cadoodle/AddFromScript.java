@@ -73,7 +73,7 @@ public class AddFromScript extends AbstractAddFrom {
 			for(int i=0;i<collect.size();i++) {
 				CSG csg=collect.get(i);
 				if(isDoodle) {
-					csg.getMapOfparametrics().clear();
+					csg.getMapOfparametrics(getCaDoodleFile().getCsgDBinstance()).clear();
 					csg.setStorage(new PropertyStorage());
 				}
 				Transform nrToCSG = TransformFactory.nrToCSG( getLocation() );

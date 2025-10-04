@@ -123,7 +123,7 @@ public class Group extends AbstractAddFrom {
 		}
 		if(mobileBase!=null)
 			result.setMobileBaseName(mobileBase);
-		HashMap<String, IParametric> mapOfparametrics = result.getMapOfparametrics();
+		HashMap<String, IParametric> mapOfparametrics = result.getMapOfparametrics(getCaDoodleFile().getCsgDBinstance());
 		if (mapOfparametrics != null)
 			mapOfparametrics.clear();
 		result.addIsGroupResult(getGroupID());

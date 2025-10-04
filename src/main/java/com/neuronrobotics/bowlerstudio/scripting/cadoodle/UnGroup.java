@@ -35,7 +35,7 @@ public class UnGroup extends CaDoodleOperation{
 						// release this object from the group
 						Transform nrToCSG = MoveCenter.getTotalOffset(csg);
 						CSG transformed=csg;
-						if(CaDoodleVitamin.isVitamin(csg)) {
+						if(new CaDoodleVitamin(getCaDoodleFile().getCsgDBinstance()).isVitamin(csg)) {
 							CSG regenerate = csg.getRegenerate().regenerate(csg);
 							transformed = regenerate.transformed(nrToCSG);
 						}

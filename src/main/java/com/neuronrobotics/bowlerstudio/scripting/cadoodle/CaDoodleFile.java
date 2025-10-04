@@ -259,7 +259,7 @@ public class CaDoodleFile {
 		for (CSG c : getCurrentState()) {
 			String type = null;
 			String size = null;
-			for (String param : c.getParameters()) {
+			for (String param : c.getParameters(getCsgDBinstance())) {
 				if (!param.contains(c.getName()))
 					continue;
 				if (param.contains("_CaDoodle_Vitamin_Type")) {
@@ -714,17 +714,17 @@ public class CaDoodleFile {
 			}
 		}
 		csg.setPolygons(collect);
-		Set<String> params = dyingCSG.getParameters();
+		Set<String> params = dyingCSG.getParameters(getCsgDBinstance());
 		for (String param : params) {
 			boolean existing = false;
-			for (String s : csg.getParameters()) {
+			for (String s : csg.getParameters(getCsgDBinstance())) {
 				if (s.contentEquals(param))
 					existing = true;
 			}
 			if (!existing) {
 				Parameter vals = CSGDatabase.get(param);
 				if (vals != null)
-					csg.setParameter(vals, dyingCSG.getMapOfparametrics().get(param));
+					csg.setParameter(getCsgDBinstance(),vals, getCsgDBinstance().getMapOfparametrics(dyingCSG).get(param));
 			}
 		}
 		if (csg.getName().length() == 0)

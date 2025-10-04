@@ -1540,12 +1540,12 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public void setAllCad(ArrayList<CSG> allCad) {
-		for (CSG part : allCad)
-			for (String p : part.getParameters()) {
-				CSGDatabase.addParameterListener(p, (arg0, arg1) -> {
-					// generateCad(); //TODO Undo this after debugging
-				});
-			}
+//		for (CSG part : allCad)
+//			for (String p : part.getParameters()) {
+//				CSGDatabase.addParameterListener(p, (arg0, arg1) -> {
+//					// generateCad(); //TODO Undo this after debugging
+//				});
+//			}
 
 		if (this.allCad != null && this.allCad != allCad)
 			this.allCad.clear();

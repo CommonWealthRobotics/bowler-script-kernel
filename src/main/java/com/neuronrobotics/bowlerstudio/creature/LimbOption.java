@@ -137,7 +137,7 @@ public class LimbOption {
 		List<CSG> so = add.process(new ArrayList<>());
 		add.getRobots().remove("tmp");
 		for (CSG c : so) {
-			for (String s : c.getParameters()) {
+			for (String s : c.getParameters(f.getCsgDBinstance())) {
 				CSGDatabase.delete(s);
 			}
 		}
