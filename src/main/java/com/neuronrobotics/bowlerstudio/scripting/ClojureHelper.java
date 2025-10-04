@@ -9,6 +9,7 @@ import java.util.Arrays;
 import clojure.lang.RT;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 /**
  * Class containing static utility methods for Java to Clojure interop
@@ -62,12 +63,12 @@ public class ClojureHelper implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) {
+	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) {
 		byte[] bytes;
 		try {
 			bytes = Files.readAllBytes(code.toPath());
 			String s = new String(bytes, "UTF-8");
-			return inlineScriptRun(s, args);
+			return inlineScriptRun( db,s, args);
 		} catch (IOException e1) {
 			// Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e1);
@@ -77,7 +78,7 @@ public class ClojureHelper implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) {
+	public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) {
 
 		return ClojureHelper.eval(code);
 	}

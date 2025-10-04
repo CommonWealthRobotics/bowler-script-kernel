@@ -17,10 +17,11 @@ import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public class CaDoodleLoader implements IScriptingLanguage {
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
 		CaDoodleFile loaded = CaDoodleFile.fromFile(code);
 		Object process = process(loaded,false);
 		loaded.close();
@@ -28,7 +29,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
 		CaDoodleFile loaded = CaDoodleFile.fromJsonString(code);
 		Object process = process(loaded,false);
 		loaded.close();

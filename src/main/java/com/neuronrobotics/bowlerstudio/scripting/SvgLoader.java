@@ -17,7 +17,7 @@ import javafx.scene.paint.Color;
 public class SvgLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
 		try {
 			SVGLoad s = new SVGLoad(code.toURI());
 			return run(s);
@@ -31,7 +31,7 @@ public class SvgLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
 		SVGLoad s = new SVGLoad(code);
 		return run(s);
 	}

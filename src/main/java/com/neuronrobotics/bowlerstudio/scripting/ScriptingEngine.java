@@ -494,34 +494,60 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception {
+	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception{
+		return inlineScriptRun(null, code, args, shellTypeStorage);
+	}
+	/**
+	 * This interface is for adding additional language support.
+	 *
+	 * @param code file content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	public static Object inlineScriptRun(CSGDatabaseInstance instance,File code, ArrayList<Object> args, String shellTypeStorage) throws Exception {
 		if (filesRun.get(code.getName()) == null) {
 			filesRun.put(code.getName(), code);
 			// com.neuronrobotics.sdk.common.Log.error("Loading "+code.getAbsolutePath());
 		}
-		 CSGDatabaseInstance prevDB = CSGDatabase.getInstance();
+		CSGDatabaseInstance prevDB = instance;
+		if(prevDB==null)
 		try {
 			if (!code.getName().toLowerCase().contentEquals("csgdatabase.json")) {
 				File p = code.getParentFile();
 				for (String s : p.list()) {
 					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
-						CSGDatabase.setInstance(new CSGDatabaseInstance(new File(p.getAbsoluteFile()+DownloadManager.delim()+s) ));
+						prevDB=(new CSGDatabaseInstance(new File(p.getAbsoluteFile()+DownloadManager.delim()+s) ));
 					}
 				}
 			}
 		} catch (Exception e) {
 			Log.error(e);
 		}
+		if(prevDB==null)
+			prevDB=CSGDatabase.getInstance();
 		IScriptingLanguage iScriptingLanguage = langauges.get(shellTypeStorage);
 		if (iScriptingLanguage != null) {
-			Object inlineScriptRun = iScriptingLanguage.inlineScriptRun(code, args);
+			Object inlineScriptRun = iScriptingLanguage.inlineScriptRun(prevDB,code, args);
 			CSGDatabase.setInstance(prevDB);
 			return inlineScriptRun;
 		}
-		CSGDatabase.setInstance(prevDB);
 		return null;
 	}
+	/**
+	 * This interface is for adding additional language support.
+	 *
+	 * @param line the text content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	public static Object inlineScriptStringRun(CSGDatabaseInstance instance, String line, ArrayList<Object> args, String shellTypeStorage)
+			throws Exception {
 
+		if (langauges.get(shellTypeStorage) != null) {
+			return langauges.get(shellTypeStorage).inlineScriptRun(instance,line, args);
+		}
+		return null;
+	}
 	/**
 	 * This interface is for adding additional language support.
 	 *
@@ -532,10 +558,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
 			throws Exception {
 
-		if (langauges.get(shellTypeStorage) != null) {
-			return langauges.get(shellTypeStorage).inlineScriptRun(line, args);
-		}
-		return null;
+		return inlineScriptStringRun(CSGDatabase.getInstance(),line,args,shellTypeStorage);
 	}
 
 	public static void addScriptingLanguage(IScriptingLanguage lang) {
@@ -1010,23 +1033,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throw ex;
 		}
 		try {
-			if (!desired.getName().contentEquals("csgDatabase.json")) {
-				String[] gitID = ScriptingEngine.findGitTagFromFile(desired, gitRef);
-				String remoteURI = gitID[0];
-				ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI, gitRef);
-				for (String s : f) {
-					if (s.contentEquals("csgDatabase.json")) {
-
-						File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
-						if (!CSGDatabase.getDbFile().equals(dbFile))
-							CSGDatabase.setInstance(new CSGDatabaseInstance(dbFile));
-						CSGDatabase.saveDatabase();
-						@SuppressWarnings("resource")
-						String c = new Scanner(dbFile).useDelimiter("\\Z").next();
-						commit(remoteURI, branch, s, c, "saving CSG database", false, gitRef);
-					}
-				}
-			}
+//			if (!desired.getName().contentEquals("csgDatabase.json")) {
+//				String[] gitID = ScriptingEngine.findGitTagFromFile(desired, gitRef);
+//				String remoteURI = gitID[0];
+//				ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI, gitRef);
+//				for (String s : f) {
+//					if (s.contentEquals("csgDatabase.json")) {
+//
+//						File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
+//						if (!CSGDatabase.getDbFile().equals(dbFile))
+//							CSGDatabase.setInstance(new CSGDatabaseInstance(dbFile));
+//						CSGDatabase.saveDatabase();
+//						@SuppressWarnings("resource")
+//						String c = new Scanner(dbFile).useDelimiter("\\Z").next();
+//						commit(remoteURI, branch, s, c, "saving CSG database", false, gitRef);
+//					}
+//				}
+//			}
 		} catch (Exception e) {
 			// ignore CSG database
 			com.neuronrobotics.sdk.common.Log.error(e);

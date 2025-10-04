@@ -24,7 +24,7 @@ public class JythonHelper implements IScriptingLanguage {
 
 
   @Override
-  public Object inlineScriptRun(String code, ArrayList<Object> args) {
+  public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) {
     Properties props = new Properties();
     PythonInterpreter.initialize(System.getProperties(), props,
         new String[]{""});
@@ -75,12 +75,12 @@ public class JythonHelper implements IScriptingLanguage {
   }
 
   @Override
-  public Object inlineScriptRun(File code, ArrayList<Object> args) {
+  public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) {
     byte[] bytes;
     try {
       bytes = Files.readAllBytes(code.toPath());
       String s = new String(bytes, "UTF-8");
-      return inlineScriptRun(s, args);
+      return inlineScriptRun( db,s, args);
     } catch (IOException e1) {
       // Auto-generated catch block
       com.neuronrobotics.sdk.common.Log.error(e1);

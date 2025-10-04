@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.util.io.AutoLFInputStream.IsBinaryException;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.Group;
 
 /**
@@ -23,7 +24,7 @@ import javafx.scene.Group;
  * @author hephaestus
  */
 public interface IScriptingLanguage {
-
+	
 	/**
 	 * This interface is for adding additional language support.
 	 *
@@ -31,7 +32,7 @@ public interface IScriptingLanguage {
 	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public abstract Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception;
+	public abstract Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception;
 
 	/**
 	 * This interface is for adding additional language support.
@@ -40,7 +41,7 @@ public interface IScriptingLanguage {
 	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public abstract Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception;
+	public abstract Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception;
 
 	/**
 	 * Returns the HashMap key for this language

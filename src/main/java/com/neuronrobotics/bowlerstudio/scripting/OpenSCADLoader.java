@@ -21,7 +21,7 @@ import javafx.scene.paint.Color;
 public class OpenSCADLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
 		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl");
 		stl.deleteOnExit();
 		HashMap<String,Double> params=new HashMap<String, Double>();
@@ -39,7 +39,7 @@ public class OpenSCADLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("Blender can not run from a string");
 	}
 

@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 public class ArduinoLoader implements IScriptingLanguage {
 
 
@@ -14,7 +16,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 
   @SuppressWarnings("unchecked")
   @Override
-  public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+  public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
     if (args == null) {
       args = new ArrayList<>();
     }
@@ -82,7 +84,7 @@ public class ArduinoLoader implements IScriptingLanguage {
   }
 
   @Override
-  public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+  public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
     // Auto-generated method stub
     return null;
   }

@@ -49,7 +49,7 @@ import javafx.scene.paint.Color;
 public class FreecadLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
 		toSTLFile(code,stl);
@@ -59,7 +59,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("Freecad file can not be instantiated from a string");
 	}
 

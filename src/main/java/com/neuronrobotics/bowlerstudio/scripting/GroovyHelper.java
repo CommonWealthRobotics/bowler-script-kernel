@@ -21,7 +21,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebugger {
 
-	private Object inline(Object code, ArrayList<Object> args) throws Exception {
+	private Object inline(Object code, ArrayList<Object> args, CSGDatabaseInstance db2) throws Exception {
 		CompilerConfiguration cc = new CompilerConfiguration();
 		cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(ScriptingEngine.getImports())
 
@@ -46,18 +46,7 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 
 		binding.setVariable("args", args);
 		File code2 = null;
-		if (File.class.isInstance(code)) {
-			 code2 = (File)code;
-			if (!code2.getName().toLowerCase().contentEquals("csgdatabase.json")) {
-				File p = code2.getParentFile();
-				for (String s : p.list()) {
-					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
-						CSGDatabaseInstance db =new CSGDatabaseInstance(new File(p.getAbsoluteFile()+DownloadManager.delim()+s));
-						binding.setVariable("csgdb", db);
-					}
-				}
-			}
-		}
+		binding.setVariable("csgdb", db2);
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
 		// com.neuronrobotics.sdk.common.Log.error(code + "\n\nStart\n\n");
 		Script script;
@@ -86,13 +75,13 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 	}
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-		return inline(code, args);
+	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
+		return inline(code, args,db);
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
-		return inline(code, args);
+	public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+		return inline(code, args,db);
 	}
 
 	@Override

@@ -20,7 +20,7 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 public class RobotHelper implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) {
 		byte[] bytes;
 		try {
 			bytes = Files.readAllBytes(code.toPath());
@@ -44,7 +44,7 @@ public class RobotHelper implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) {
 
 		MobileBase mb = null;
 		try {
