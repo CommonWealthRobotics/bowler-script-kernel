@@ -2,7 +2,11 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +44,9 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
+
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
@@ -75,7 +81,7 @@ public class CaDoodleFile {
 //	@Expose (serialize = false, deserialize = false)
 //	private List<CSG> currentState = new ArrayList<CSG>();
 	private double percentInitialized = 0;
-	private final HashMap<CaDoodleOperation, List<CSG>> cache = new HashMap<CaDoodleOperation, List<CSG>>();
+//	private final HashMap<CaDoodleOperation, List<CSG>> cache = new HashMap<CaDoodleOperation, List<CSG>>();
 	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {
 	}.getType();
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting()
@@ -102,6 +108,7 @@ public class CaDoodleFile {
 	private boolean timelineOpen = false;
 	private HashMap<String,MobileBaseBuilder> robots = new HashMap<String, MobileBaseBuilder>();
 	private CSGDatabaseInstance csgDBinstance;
+	private File objectDir;
 	public ArrayList<MobileBase> getMobileBases(){
 		ArrayList<MobileBase> back = new ArrayList<MobileBase>();
 		for(MobileBaseBuilder b:robots.values()) {
@@ -114,10 +121,10 @@ public class CaDoodleFile {
 		for(CaDoodleOperation op:getOpperations()) {
 			op.setCaDoodleFile(null);
 		}
-		for (CaDoodleOperation op : cache.keySet()) {
-			cache.get(op).clear();
-		}
-		cache.clear();
+//		for (CaDoodleOperation op : cache.keySet()) {
+//			clearCache(op);
+//		}
+//		cache.clear();
 		clearListeners();
 		toProcess.clear();
 		img = null;
@@ -125,7 +132,48 @@ public class CaDoodleFile {
 			t.interrupt();
 		
 	}
-
+	private int opToIndex(CaDoodleOperation op) {
+		for(int i=0;i<opperations.size();i++) {
+			if(op==opperations.get(i))
+				return i;
+		}
+		throw new IndexOutOfBoundsException();
+	}
+	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
+		int opIndex = opToIndex(op);
+		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
+			return (List<CSG>) ois.readObject();
+		} catch (Exception ex) {
+			Log.error(ex);
+		}
+		return null;
+	}
+	
+	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopy) {
+		int opIndex = opToIndex(op);
+		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+		if(cacheFile.exists())
+			cacheFile.delete();
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+			oos.writeObject(cachedCopy);
+		}catch(Exception ex) {
+			Log.error(ex);
+		}
+		//cache.put(op, cachedCopy);
+	}
+	private void clearCache(CaDoodleOperation key) {
+		int opIndex = opToIndex(key);
+		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+		if(cacheFile.exists())
+			cacheFile.delete();
+		
+//		List<CSG> back = cache.remove(key);
+//		if (back != null)
+//			back.clear();
+	}
+	
+	
 	public CaDoodleFile clearListeners() {
 		listeners.clear();
 		return this;
@@ -155,13 +203,15 @@ public class CaDoodleFile {
 			File imageCacheDir = new File(parent.getAbsolutePath() + delim() + "timeline");
 			if (!imageCacheDir.exists())
 				imageCacheDir.mkdir();
+			objectDir = new File(parent.getAbsolutePath() + delim() + "timeline"+ delim()+"objectCache");
+			if (!objectDir.exists())
+				objectDir.mkdir();
 			File db = new File(self.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			setCsgDBinstance(new CSGDatabaseInstance(db));
 			CSGDatabase.setInstance(getCsgDBinstance());
 			bom = CaDoodleFile.getBillOfMaterials(this);
 			bom.clear();
 			bom.save();
-
 		}
 		int indexStarting = getCurrentIndex();
 		if(indexStarting==0) {
@@ -599,9 +649,7 @@ public class CaDoodleFile {
 			for (int i = getCurrentIndex() - 1; i < getOpperations().size(); i++) {
 				CaDoodleOperation key = getOpperations().get(i);
 				if (i >= getCurrentIndex()) {
-					List<CSG> back = cache.remove(key);
-					if (back != null)
-						back.clear();
+					clearCache(key);
 				}
 				File imageCache = getTimelineImageFile(i);
 				// System.err.println("Deleting " + imageCache.getAbsolutePath());
@@ -622,6 +670,7 @@ public class CaDoodleFile {
 		return res;
 	}
 
+
 	private void storeResultInCache(CaDoodleOperation op, List<CSG> process) {
 		ArrayList<CSG> cachedCopy = new ArrayList<CSG>();
 		HashSet<String> names = new HashSet<>();
@@ -634,10 +683,11 @@ public class CaDoodleFile {
 					.setRegenerate(c.getRegenerate()));
 			// cachedCopy.add(c);
 		}
-		cache.put(op, cachedCopy);
+		placeCSGsInCache(op, cachedCopy);
 		if(getFreeMemory()>50)
 			com.neuronrobotics.sdk.common.Log.debug("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
 	}
+
 
 	public static double getFreeMemory() {
 		Runtime runtime = Runtime.getRuntime();
@@ -782,7 +832,7 @@ public class CaDoodleFile {
 	public List<CSG> getStateAtOperation(CaDoodleOperation op) {
 		if (getCurrentIndex() == 0)
 			return new ArrayList<CSG>();
-		List<CSG> list = cache.get(op);
+		List<CSG> list = getCachedCSGs(op);
 		if (list == null)
 			list = new ArrayList<CSG>();
 		return list;
@@ -807,7 +857,7 @@ public class CaDoodleFile {
 			return new ArrayList<CSG>();
 		CaDoodleOperation key = getOpperations().get(getCurrentIndex() - 2);
 
-		return cache.get(key);
+		return getCachedCSGs(key);
 	}
 
 	private void setCurrentState(CaDoodleOperation op, List<CSG> currentState) {
@@ -929,7 +979,7 @@ public class CaDoodleFile {
 			File f = getTimelineImageFile(i);
 			CaDoodleOperation op = opperations.get(i);
 			int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
-			List<CSG> process = cache.get(op);
+			List<CSG> process = getCachedCSGs(op);
 			if (!f.exists() && process!=null)
 				try {
 					num++;
