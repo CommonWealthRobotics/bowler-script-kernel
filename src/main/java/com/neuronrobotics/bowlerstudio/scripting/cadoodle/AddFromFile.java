@@ -216,6 +216,8 @@ public class AddFromFile extends AbstractAddFrom {
 			System.err.println("Error: Source '" + sourceDir + "' is not a directory.");
 			return false;
 		}
+		if(source.getName().contentEquals("timeline"))
+			return true;
 
 		// Create target directory if it doesn't exist
 		if (!target.exists()) {
