@@ -202,7 +202,10 @@ public class CaDoodleFile {
 			throw new RuntimeException(ex);
 		}
 		memoryCheck();
-		//cache.put(op, cachedCopy);
+		// clear the stale cache value
+		List<CSG> back = cache.remove(op);
+		if (back != null)
+			back.clear();
 	}
 	private void clearCache(CaDoodleOperation key) {
 		int opIndex = opToIndex(key);
