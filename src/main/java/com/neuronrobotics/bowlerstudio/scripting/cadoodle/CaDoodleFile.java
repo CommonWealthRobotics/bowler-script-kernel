@@ -139,12 +139,18 @@ public class CaDoodleFile {
 		}
 		throw new IndexOutOfBoundsException();
 	}
+	private boolean inCache(CaDoodleOperation op) {
+		int opIndex = opToIndex(op);
+		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+		return cacheFile.exists();
+	}
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
 		
 		if(cache.get(op)==null) {
 			int opIndex = opToIndex(op);
 			File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
 			Log.debug("Loading Cached Objects from file: "+cacheFile.getAbsolutePath());
+			//Log.error(new Exception());
 			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
 				if(getFreeMemory()>50) {
 					com.neuronrobotics.sdk.common.Log.error("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
@@ -240,14 +246,15 @@ public class CaDoodleFile {
 			if (op == null)
 				continue;
 			setPercentInitialized(((double) i) / (double) getOpperations().size());
-			try {
-				process(op);
-			} catch (Throwable t) {
-				com.neuronrobotics.sdk.common.Log.error(t);
-				indexStarting = i + 1;
-				break;
-				// opperations.remove(op);
-			}
+			if(!inCache(op))
+				try {
+					process(op);
+				} catch (Throwable t) {
+					com.neuronrobotics.sdk.common.Log.error(t);
+					indexStarting = i + 1;
+					break;
+					// opperations.remove(op);
+				}
 		}
 		setCurrentIndex(indexStarting);
 		updateCurrentFromCache();
