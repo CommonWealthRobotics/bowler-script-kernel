@@ -140,21 +140,31 @@ public class CaDoodleFile {
 		throw new IndexOutOfBoundsException();
 	}
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
-//		int opIndex = opToIndex(op);
-//		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
-//		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
-//			return (List<CSG>) ois.readObject();
-//		} catch (Exception ex) {
-//			Log.error(ex);
-//		}
-//		return null;
 		
+		if(cache.get(op)==null) {
+			int opIndex = opToIndex(op);
+			File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+			Log.debug("Loading Cached Objects from file: "+cacheFile.getAbsolutePath());
+			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
+				if(getFreeMemory()>50) {
+					com.neuronrobotics.sdk.common.Log.error("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
+					cache.clear();
+				}else {
+					com.neuronrobotics.sdk.common.Log.debug("Memory use: " + getFreeMemory());
+				}
+				cache.put( op,(List<CSG>) ois.readObject());
+				
+			} catch (Exception ex) {
+				Log.error(ex);
+			}
+		}		
 		return cache.get(op);
 	}
 	
 	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopy) {
 		int opIndex = opToIndex(op);
 		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+		
 		if(cacheFile.exists())
 			cacheFile.delete();
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
@@ -163,17 +173,17 @@ public class CaDoodleFile {
 			Log.error(ex);
 			throw new RuntimeException(ex);
 		}
-		cache.put(op, cachedCopy);
+//		cache.put(op, cachedCopy);
 	}
 	private void clearCache(CaDoodleOperation key) {
-//		int opIndex = opToIndex(key);
-//		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
-//		if(cacheFile.exists())
-//			cacheFile.delete();
+		int opIndex = opToIndex(key);
+		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+		if(cacheFile.exists())
+			cacheFile.delete();
 		
-		List<CSG> back = cache.remove(key);
-		if (back != null)
-			back.clear();
+//		List<CSG> back = cache.remove(key);
+//		if (back != null)
+//			back.clear();
 	}
 	
 	
@@ -687,8 +697,7 @@ public class CaDoodleFile {
 			// cachedCopy.add(c);
 		}
 		placeCSGsInCache(op, cachedCopy);
-		if(getFreeMemory()>50)
-			com.neuronrobotics.sdk.common.Log.debug("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
+
 	}
 
 
