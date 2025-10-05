@@ -86,12 +86,18 @@ public class Vitamins {
 		databaseSet.clear();
 		fileLastLoaded.clear();
 	}
-
 	public static CSG get(File resource) {
-		return get(resource, false);
+		return get(CSGDatabase.getInstance(),resource, false);
 	}
 
 	public static CSG get(File resource, boolean forceRefresh) {
+		return get(CSGDatabase.getInstance(), resource,  forceRefresh);
+	}
+	public static CSG get(CSGDatabaseInstance db,File resource) {
+		return get(db,resource, false);
+	}
+
+	public static CSG get(CSGDatabaseInstance db,File resource, boolean forceRefresh) {
 
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
