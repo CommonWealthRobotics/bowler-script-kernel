@@ -153,16 +153,16 @@ public class CaDoodleFile {
 	}
 	
 	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopy) {
-//		int opIndex = opToIndex(op);
-//		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
-//		if(cacheFile.exists())
-//			cacheFile.delete();
-//		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-//			oos.writeObject(cachedCopy);
-//		}catch(Exception ex) {
-//			Log.error(ex);
-//			throw new RuntimeException(ex);
-//		}
+		int opIndex = opToIndex(op);
+		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+		if(cacheFile.exists())
+			cacheFile.delete();
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+			oos.writeObject(cachedCopy);
+		}catch(Exception ex) {
+			Log.error(ex);
+			throw new RuntimeException(ex);
+		}
 		cache.put(op, cachedCopy);
 	}
 	private void clearCache(CaDoodleOperation key) {
