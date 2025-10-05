@@ -9,12 +9,14 @@ import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+
 public class SequenceTest {
 
 	@Test
 	public void test() throws Exception {
 		try {
-			ScriptingEngine.gitScriptRun("https://github.com/madhephaestus/sequencetest.git", "test.sequence");
+			ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),"https://github.com/madhephaestus/sequencetest.git", "test.sequence");
 		}catch(Throwable t) {
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);

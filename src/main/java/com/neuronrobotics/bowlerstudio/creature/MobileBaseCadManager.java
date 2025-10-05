@@ -24,6 +24,7 @@ import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
+import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
@@ -49,6 +50,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.IDeviceConnectionEventListener;
+import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.pid.PIDLimitEvent;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
@@ -97,6 +99,7 @@ public class MobileBaseCadManager implements Runnable {
 	private static ArrayList<Runnable> toRun = new ArrayList<Runnable>();
 	private ArrayList<IRenderSynchronizationEvent> rendersync = new ArrayList<>();
 	private boolean forceChage = true;
+	
 
 	public CSG getVitamin(CSGDatabaseInstance db,VitaminLocation vitamin) throws Exception {
 		return getVitamin(db,vitamin, new Affine(), null);
@@ -175,7 +178,7 @@ public class MobileBaseCadManager implements Runnable {
 
 	public static CSG vitaminMakeCSG(CSGDatabaseInstance instance,VitaminLocation vitamin) throws Exception {
 		if (vitamin.isScript()) {
-			Object o = ScriptingEngine.gitScriptRun(vitamin.getType(), vitamin.getSize());
+			Object o = ScriptingEngine.gitScriptRun(instance,vitamin.getType(), vitamin.getSize());
 			ArrayList<CSG> flat = new ArrayList<CSG>();
 			Vitamins.flatten(flat, o);
 			return CSG.unionAll(flat);
@@ -781,12 +784,12 @@ public class MobileBaseCadManager implements Runnable {
 		setMobileBase(base);
 	}
 
-	private Object scriptFromFileInfo(String name, String[] args, Runnable runner) throws Throwable {
+	private Object scriptFromFileInfo(CSGDatabaseInstance db,String name, String[] args, Runnable runner) throws Throwable {
 		String key = args[0] + ":" + args[1];
 		try {
 			File f = ScriptingEngine.fileFromGit(args[0], args[1]);
 			if (cadScriptCache.get(key) == null) {
-				build(key, f);
+				build(db,key, f);
 				FileChangeWatcher watcher = FileChangeWatcher.watch(f);
 				Exception ex = new Exception("CAD script declared here and regenerated");
 				IFileChangeListener l = new IFileChangeListener() {
@@ -799,7 +802,7 @@ public class MobileBaseCadManager implements Runnable {
 							com.neuronrobotics.sdk.common.Log.error("Clearing the compiled CAD script for " + key);
 							cadScriptCache.remove(key);
 							try {
-								build(key, f);
+								build(db,key, f);
 							} catch (Throwable e) {
 								// Auto-generated catch block
 								com.neuronrobotics.sdk.common.Log.error(e);
@@ -840,11 +843,11 @@ public class MobileBaseCadManager implements Runnable {
 
 	}
 
-	private void build(String key, File f) throws Throwable {
+	private void build(CSGDatabaseInstance db,String key, File f) throws Throwable {
 		try {
 			com.neuronrobotics.sdk.common.Log
 					.error("Building the compiled CAD script for " + key + " " + base + " " + base.getScriptingName());
-			cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(f, null));
+			cadScriptCache.put(key, ScriptingEngine.inlineFileScriptRun(db,f, null));
 		} catch (Throwable e) {
 			getUi().highlightException(f, e);
 			throw e;
@@ -877,7 +880,7 @@ public class MobileBaseCadManager implements Runnable {
 	private IgenerateBody getIgenerateBody(MobileBase b) throws Throwable {
 		if (isConfigMode())
 			return getConfigurationDisplay();
-		Object cadForBodyEngine = scriptFromFileInfo(b.getScriptingName(), b.getGitCadEngine(), () -> {
+		Object cadForBodyEngine = scriptFromFileInfo(getDb(),b.getScriptingName(), b.getGitCadEngine(), () -> {
 			run();
 			generateCad();
 		});
@@ -890,7 +893,7 @@ public class MobileBaseCadManager implements Runnable {
 	private IgenerateCad getIgenerateCad(DHParameterKinematics dh) throws Throwable {
 		if (isConfigMode())
 			return getConfigurationDisplay();
-		Object cadForBodyEngine = scriptFromFileInfo(dh.getScriptingName(), dh.getGitCadEngine(), () -> {
+		Object cadForBodyEngine = scriptFromFileInfo(getDb(),dh.getScriptingName(), dh.getGitCadEngine(), () -> {
 			run();
 			generateCad();
 		});
@@ -901,7 +904,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public IgenerateBed getIgenerateBed() throws Throwable {
-		Object cadForBodyEngine = scriptFromFileInfo(base.getScriptingName(), base.getGitCadEngine(), () -> {
+		Object cadForBodyEngine = scriptFromFileInfo(getDb(),base.getScriptingName(), base.getGitCadEngine(), () -> {
 			run();
 		});
 		if (IgenerateBed.class.isInstance(cadForBodyEngine)) {
@@ -914,7 +917,7 @@ public class MobileBaseCadManager implements Runnable {
 		if (cadEngineConfiguration == null) {
 			String[] args = new String[] { "https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git",
 					"dhcad.groovy" };
-			Object cadForBodyEngine = scriptFromFileInfo("ConfigDisplay", args, () -> {
+			Object cadForBodyEngine = scriptFromFileInfo(getDb(),"ConfigDisplay", args, () -> {
 				cadEngineConfiguration = null;
 				try {
 					getConfigurationDisplay();
@@ -940,6 +943,10 @@ public class MobileBaseCadManager implements Runnable {
 				cadEngineConfiguration = (ICadGenerator) cadForBodyEngine;
 		}
 		return cadEngineConfiguration;
+	}
+
+	private CSGDatabaseInstance getDb() {
+		return MobileBaseLoader.get(base).getDb();
 	}
 
 	public ArrayList<CSG> generateBody() {
@@ -1294,6 +1301,7 @@ public class MobileBaseCadManager implements Runnable {
 			}
 		}
 		this.base = b;
+
 		cadmap.put(base, this);
 		MobileBaseLoader.get(base);// load the dependant scripts
 		base.updatePositions();
@@ -1727,5 +1735,7 @@ public class MobileBaseCadManager implements Runnable {
 		}
 		return null;
 	}
+
+
 
 }

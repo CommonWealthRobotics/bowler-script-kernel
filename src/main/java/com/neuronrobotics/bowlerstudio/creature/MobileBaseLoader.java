@@ -6,8 +6,11 @@ import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.TransportException;
 
+import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.FileWatchDeviceWrapper;
 import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
@@ -17,12 +20,23 @@ import com.neuronrobotics.sdk.addons.kinematics.DhInverseSolver;
 import com.neuronrobotics.sdk.addons.kinematics.IDriveEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
+import com.neuronrobotics.sdk.common.Log;
+
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public class MobileBaseLoader {
 	private static HashMap<MobileBase, MobileBaseLoader> map = new HashMap<>();
 	private MobileBase base;
 	private IDriveEngine defaultDriveEngine;
+	private CSGDatabaseInstance db;
+	public CSGDatabaseInstance getDb() {
+		return db;
+	}
 
+	public void setDb(CSGDatabaseInstance db) {
+		this.db = db;
+	}
 	private MobileBaseLoader(MobileBase base) {
 		this.setBase(base);
 
@@ -41,7 +55,7 @@ public class MobileBaseLoader {
 		File code = null;
 		try {
 			code = ScriptingEngine.fileFromGit(device.getGitDhEngine()[0], device.getGitDhEngine()[1]);
-			DhInverseSolver defaultDHSolver = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(code, null);
+			DhInverseSolver defaultDHSolver = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(getDb(),code, null);
 
 			File c = code;
 			FileWatchDeviceWrapper.watch(device, code,new IFileChangeListener() {
@@ -57,7 +71,7 @@ public class MobileBaseLoader {
 
 					try {
 						com.neuronrobotics.sdk.common.Log.error("D-H Solver changed, updating " + device.getScriptingName());
-						DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(c, null);
+						DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(getDb(),c, null);
 						device.setInverseSolver(d);
 					} catch (Exception ex) {
 						MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
@@ -114,7 +128,7 @@ public class MobileBaseLoader {
 
 				try {
 					com.neuronrobotics.sdk.common.Log.error("Walking Gait Script changed, updating " + device.getScriptingName());
-					defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
+					defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(getDb(),c, null);
 					device.setWalkingDriveEngine(defaultDriveEngine);
 				} catch (Exception ex) {
 					MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
@@ -123,7 +137,7 @@ public class MobileBaseLoader {
 		});
 
 		try {
-			defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(c, null);
+			defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(getDb(),c, null);
 			device.setWalkingDriveEngine(defaultDriveEngine);
 		} catch (Exception ex) {
 			MobileBaseCadManager.get(base).getUi().highlightException(c, ex);
@@ -170,6 +184,26 @@ public class MobileBaseLoader {
 
 	public void setBase(MobileBase base) {
 		this.base = base;
+		setDb(CSGDatabase.getInstance());
+		try {
+			String[] self = base.getGitSelfSource();
+			File selfFile =ScriptingEngine.fileFromGit(self);
+			File parent = selfFile.getParentFile();
+			File database = new File(parent.getAbsolutePath()+DownloadManager.delim()+"csgDatabase.json");
+			setDb(new CSGDatabaseInstance(database));
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			Log.error(e);
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			Log.error(e);
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			Log.error(e);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Log.error(e);
+		}
 	}
 
 }

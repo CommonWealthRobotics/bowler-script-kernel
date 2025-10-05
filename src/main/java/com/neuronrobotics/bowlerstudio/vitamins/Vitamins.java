@@ -182,7 +182,7 @@ public class Vitamins {
 //	}
 	public static CSG get(CSGDatabaseInstance instance,String type, String id) throws Exception {
 		if (isGitURL(type)) {
-			Object o = ScriptingEngine.gitScriptRun(type, id);
+			Object o = ScriptingEngine.gitScriptRun(instance,type, id);
 			ArrayList<CSG> flat = new ArrayList<CSG>();
 			Vitamins.flatten(flat, o);
 			return CSG.unionAll(flat);

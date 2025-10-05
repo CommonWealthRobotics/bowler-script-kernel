@@ -26,6 +26,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.scripting.RobotHelper;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
@@ -69,7 +70,7 @@ public class LimbOption {
 			newLimb.setScriptingName(uniqueName);
 			return newLimb;
 		} else {
-			MobileBase base = (MobileBase) ScriptingEngine.gitScriptRun(url, file);
+			MobileBase base =  RobotHelper.fileToRobot(url, file);
 			DHParameterKinematics newLimb = base.getAllDHChains().get(0);
 			newLimb.setScriptingName(uniqueName);
 			return newLimb;

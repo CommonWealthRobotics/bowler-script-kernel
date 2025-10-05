@@ -131,7 +131,7 @@ public class ControllerOption {
 			return;
 		}
 		try {
-			ScriptingEngine.inlineGistScriptRun(linkLoaderGit, linkLoaderFile, null);
+			ScriptingEngine.inlineGistScriptRun(CSGDatabase.getInstance(),linkLoaderGit, linkLoaderFile, null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);

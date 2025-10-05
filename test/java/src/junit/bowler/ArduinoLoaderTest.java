@@ -13,6 +13,8 @@ import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import gnu.io.NRSerialPort;
 
 public class ArduinoLoaderTest {
@@ -32,7 +34,7 @@ public class ArduinoLoaderTest {
       ArrayList<Object> params = new ArrayList<>();
       params.add(board);
       params.add(portname);
-      ScriptingEngine.gitScriptRun("https://github.com/madhephaestus/Blink.git", "Blink.ino", params);
+      ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),"https://github.com/madhephaestus/Blink.git", "Blink.ino", params);
     }
   }
 

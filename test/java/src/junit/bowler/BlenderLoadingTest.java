@@ -15,7 +15,7 @@ public class BlenderLoadingTest {
 
 	@Test
 	public void test() throws Exception {
-		CSG loaded =(CSG)ScriptingEngine.gitScriptRun(
+		CSG loaded =(CSG)ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
 				"https://github.com/madhephaestus/TestRepo.git",
 				"TestRepo4.blend");
 		if(loaded.getPolygons().size()!=12)

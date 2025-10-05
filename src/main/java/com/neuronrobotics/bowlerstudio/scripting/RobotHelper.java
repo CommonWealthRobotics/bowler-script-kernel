@@ -10,6 +10,9 @@ import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader;
 import com.neuronrobotics.sdk.addons.kinematics.DHLink;
@@ -21,6 +24,27 @@ public class RobotHelper implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) {
+		return fileToRobot(code);
+	}
+	public static MobileBase fileToRobot(String url,String file) {
+		try {
+			return fileToRobot(ScriptingEngine.fileFromGit(url, file)) ;
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public static MobileBase fileToRobot(File code) {
 		byte[] bytes;
 		try {
 			bytes = Files.readAllBytes(code.toPath());

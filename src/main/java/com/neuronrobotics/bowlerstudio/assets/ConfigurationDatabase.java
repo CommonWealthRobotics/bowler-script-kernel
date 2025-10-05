@@ -21,6 +21,9 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.IGithubLoginListener;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+
 import java.nio.charset.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -161,7 +164,7 @@ public class ConfigurationDatabase {
 		File loadFile = loadFile();
 		if(loadFile.exists())
 			try {
-				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(loadFile, null);
+				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(),loadFile, null);
 				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) inlineFileScriptRun);
 				
 			} catch (Exception e) {

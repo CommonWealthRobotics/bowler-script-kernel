@@ -60,6 +60,8 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.CSGServer;
 import eu.mihosoft.vrl.v3d.ICSGProgress;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.application.Platform;
 import javafx.scene.control.Tab;
 import javafx.scene.transform.Affine;
@@ -198,7 +200,7 @@ public class BowlerKernel {
 			}
 			if (gitFile != null)
 				try {
-					ret = ScriptingEngine.gitScriptRun(gitRepo, gitFile, null);
+					ret = ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),gitRepo, gitFile, null);
 					url = gitRepo;
 					baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(url);
 
@@ -244,7 +246,7 @@ public class BowlerKernel {
 					com.neuronrobotics.sdk.common.Log.debug("Using working directory  " + baseWorkspaceFile.getAbsolutePath());
 					f = new File(baseWorkspaceFile.getAbsolutePath() + "/" + s);
 					com.neuronrobotics.sdk.common.Log.error("File   " + f.getName());
-					ret = ScriptingEngine.inlineFileScriptRun(f, null);
+					ret = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(),f, null);
 				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
@@ -265,7 +267,7 @@ public class BowlerKernel {
 
 			if (startLoadingScripts) {
 				try {
-					ret = ScriptingEngine.inlineFileScriptRun(new File(s), (ArrayList<Object>) ret);
+					ret = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(),new File(s), (ArrayList<Object>) ret);
 				} catch (Throwable e) {
 					e.printStackTrace();
 					fail();
@@ -374,7 +376,7 @@ public class BowlerKernel {
 					continue;
 				}
 				try {
-					ret = ScriptingEngine.inlineScriptStringRun(line, null, shellTypeStorage);
+					ret = ScriptingEngine.inlineScriptStringRun(CSGDatabase.getInstance(),line, null, shellTypeStorage);
 					if (ret != null) {
 						com.neuronrobotics.sdk.common.Log.error(ret);
 					}
@@ -402,7 +404,9 @@ public class BowlerKernel {
 		if (args.length == 0) {
 			fail();
 		}
-		ScriptingEngine.gitScriptRun("https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
+		CSGDatabase.setInstance(new CSGDatabaseInstance(new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/csgDatabase.json")));
+
+		ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),"https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
 				null);
 		CSG.setPreventNonManifoldTriangles(true);
 		CSG.setProgressMoniter(new ICSGProgress() {

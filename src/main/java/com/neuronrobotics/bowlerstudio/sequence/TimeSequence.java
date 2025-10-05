@@ -16,6 +16,9 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -91,7 +94,7 @@ public class TimeSequence {
 
 	public void runSequence() throws Exception {
 		com.neuronrobotics.sdk.common.Log.error("Initialize Sequence");
-		ScriptingEngine.gitScriptRun(getUrl(), getFile());
+		ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),getUrl(), getFile());
 
 		HashMap<String, AbstractKinematicsNR> devices = getDevices();
 		long start = System.currentTimeMillis();

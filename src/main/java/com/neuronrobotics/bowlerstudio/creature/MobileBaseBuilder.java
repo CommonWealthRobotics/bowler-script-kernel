@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.creature;
 
 import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.scripting.RobotHelper;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
@@ -12,6 +13,8 @@ import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 import com.neuronrobotics.sdk.common.Log;
+
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -290,7 +293,7 @@ public class MobileBaseBuilder {
 		try {
 			@SuppressWarnings("unchecked")
 			HashMap<String, HashMap<String, Object>> options = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
-					.gitScriptRun("https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git",
+					.gitScriptRun(CSGDatabase.getInstance(),"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git",
 							"wheelOptions.json");
 
 			if (options.containsKey(wheelType)) {
@@ -303,7 +306,7 @@ public class MobileBaseBuilder {
 							IOUtils.toInputStream(xmlContent, "UTF-8"));
 					return addFixedWheel(newWheel);
 				} else {
-					MobileBase base = (MobileBase) ScriptingEngine.gitScriptRun(values.get("scriptGit").toString(),
+					MobileBase base = RobotHelper.fileToRobot(values.get("scriptGit").toString(),
 							values.get("scriptFile").toString());
 					DHParameterKinematics newWheel = base.getDrivable().get(0);
 					return addFixedWheel(newWheel);
