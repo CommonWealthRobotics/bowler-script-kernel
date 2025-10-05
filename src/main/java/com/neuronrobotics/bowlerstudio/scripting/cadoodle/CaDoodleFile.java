@@ -383,6 +383,7 @@ public class CaDoodleFile {
 							getSaveUpdate().renderSplashFrame(percent,
 									"Regenerating " + op.getType() + " " + currentIndex2);
 							getTimelineImageFile(op).delete();
+							clearCache(op);
 							try {
 								op.setCaDoodleFile(cf);
 								List<CSG> process = op.process(getPreviouState());
