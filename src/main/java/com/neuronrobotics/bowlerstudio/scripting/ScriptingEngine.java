@@ -1159,68 +1159,67 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	
-//	@Deprecated
-//	public static Object inlineGistScriptRun(String gistID, String Filename, ArrayList<Object> args) throws Exception {
-//		String[] gistData = codeFromGistID(gistID, Filename);
-//		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-//		return inlineScriptRun(CSGDatabase.getInstance(),new File(gistData[2]), args, getShellType(gistData[1]));
-//	}
-//	@Deprecated
-//	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception {
-//		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-//		return inlineScriptRun(CSGDatabase.getInstance(),f, args, getShellType(f.getName()));
-//	}
-	
-//	@Deprecated
-//	public static Object gitScriptRun(String gitURL, String Filename) throws Exception {
-//		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-//
-//		return gitScriptRun(CSGDatabase.getInstance(),gitURL, Filename, null);
-//	}
-//	/**
-//	 * This interface is for adding additional language support.
-//	 *
-//	 * @param code file content of the code to be executed
-//	 * @param args the incoming arguments as a list of objects
-//	 * @return the objects returned form the code that ran
-//	 */
-//	@Deprecated
-//	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception{
-//		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-//		CSGDatabaseInstance prevDB = CSGDatabase.getInstance();
-//		try {
-//			if (!code.getName().toLowerCase().contentEquals("csgdatabase.json")) {
-//				File p = code.getParentFile();
-//				for (String s : p.list()) {
-//					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
-//						prevDB = (new CSGDatabaseInstance(
-//								new File(p.getAbsoluteFile() + DownloadManager.delim() + s)));
-//					}
-//				}
-//			}
-//		} catch (Exception e) {
-//			Log.error(e);
-//		}
-//		return inlineScriptRun(prevDB, code, args, shellTypeStorage);
-//	}
-//	/**
-//	 * This interface is for adding additional language support.
-//	 *
-//	 * @param line the text content of the code to be executed
-//	 * @param args the incoming arguments as a list of objects
-//	 * @return the objects returned form the code that ran
-//	 */
-//	@Deprecated
-//	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
-//			throws Exception {
-//		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-//		return inlineScriptStringRun(CSGDatabase.getInstance(),line,args,shellTypeStorage);
-//	}
-//	@Deprecated
-//	public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args) throws Exception {
-//		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-//		return gitScriptRun(CSGDatabase.getInstance(), gitURL, Filename, args);
-//	}
+	@Deprecated
+	public static Object inlineGistScriptRun(String gistID, String Filename, ArrayList<Object> args) throws Exception {
+		String[] gistData = codeFromGistID(gistID, Filename);
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		return inlineScriptRun(CSGDatabase.getInstance(),new File(gistData[2]), args, getShellType(gistData[1]));
+	}
+	@Deprecated
+	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception {
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		return inlineScriptRun(CSGDatabase.getInstance(),f, args, getShellType(f.getName()));
+	}
+	@Deprecated
+	public static Object gitScriptRun(String gitURL, String Filename) throws Exception {
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+
+		return gitScriptRun(CSGDatabase.getInstance(),gitURL, Filename, null);
+	}
+	/**
+	 * This interface is for adding additional language support.
+	 *
+	 * @param code file content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	@Deprecated
+	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception{
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		CSGDatabaseInstance prevDB = CSGDatabase.getInstance();
+		try {
+			if (!code.getName().toLowerCase().contentEquals("csgdatabase.json")) {
+				File p = code.getParentFile();
+				for (String s : p.list()) {
+					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
+						prevDB = (new CSGDatabaseInstance(
+								new File(p.getAbsoluteFile() + DownloadManager.delim() + s)));
+					}
+				}
+			}
+		} catch (Exception e) {
+			Log.error(e);
+		}
+		return inlineScriptRun(prevDB, code, args, shellTypeStorage);
+	}
+	/**
+	 * This interface is for adding additional language support.
+	 *
+	 * @param line the text content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	@Deprecated
+	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
+			throws Exception {
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		return inlineScriptStringRun(CSGDatabase.getInstance(),line,args,shellTypeStorage);
+	}
+	@Deprecated
+	public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args) throws Exception {
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		return gitScriptRun(CSGDatabase.getInstance(), gitURL, Filename, args);
+	}
 	
 	
 	public static Object gitScriptRun(CSGDatabaseInstance db,String gitURL, String Filename) throws Exception {
