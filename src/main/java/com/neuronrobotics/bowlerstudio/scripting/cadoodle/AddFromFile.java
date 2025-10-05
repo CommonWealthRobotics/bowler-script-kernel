@@ -115,6 +115,7 @@ public class AddFromFile extends AbstractAddFrom {
 			back.addAll(collect);
 		} catch (Exception e) {
 			//CSGDatabase.setInstance(instance);
+			Log.error(e);
 			throw new RuntimeException(e);
 		}
 		return back;
