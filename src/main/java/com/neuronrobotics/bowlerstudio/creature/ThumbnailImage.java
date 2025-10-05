@@ -10,6 +10,8 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
@@ -61,12 +63,12 @@ public class ThumbnailImage {
 		return new Bounds(min, max);
 	}
 
-	public static WritableImage get(List<CSG> c) {
+	public static WritableImage get(CSGDatabaseInstance instance,List<CSG> c) {
 		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
 		for(CSG cs:c) {
 			if(cs.getManipulator()!=null) {
 				TransformNR nr = TransformFactory.affineToNr(cs.getManipulator());
-				csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(cs));
+				csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance,cs));
 			}else
 				csgList.add(cs);
 		}

@@ -256,7 +256,7 @@ public class Sweep extends AbstractAddFrom {
 		Parameter z = zoffset(name);
 		Parameter radius = radius(name);
 		parameter.setStrValue(pathname);
-		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(csg)
+		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(getCaDoodleFile().getCsgDBinstance(),csg)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), parameter)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), steps)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), angle)

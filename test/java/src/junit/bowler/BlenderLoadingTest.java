@@ -9,6 +9,7 @@ import com.neuronrobotics.bowlerstudio.util.GeometrySimplification;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 
 public class BlenderLoadingTest {
 
@@ -21,7 +22,7 @@ public class BlenderLoadingTest {
 			fail("Failed to load polygon!");
 		com.neuronrobotics.sdk.common.Log.error("Blender file loaded num polys: "+loaded.getPolygons().size());
 		CSG cube = new Cube(100).toCSG();
-		CSG remeshed = GeometrySimplification.remesh(cube, 10.0);
+		CSG remeshed = GeometrySimplification.remesh(cube, 10.0,CSGDatabase.getInstance());
 		if(remeshed.getPolygons().size()!=1452)
 			fail("Blender failed to remesh");
 		com.neuronrobotics.sdk.common.Log.error("Remeshing produced: "+remeshed.getPolygons().size());

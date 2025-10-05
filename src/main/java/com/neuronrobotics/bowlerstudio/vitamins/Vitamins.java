@@ -127,7 +127,7 @@ public class Vitamins {
 		}
 		CSG csg = fileLastLoaded.get(resource.getAbsolutePath());
 
-		return csg.clone().setRegenerate(csg.getRegenerate()).syncProperties(csg);
+		return csg.clone().setRegenerate(csg.getRegenerate());
 	}
 
 //	public static CSG get(String type, String id, String purchasingVariant) throws Exception {

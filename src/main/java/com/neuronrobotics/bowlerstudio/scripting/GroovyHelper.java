@@ -6,9 +6,12 @@ import groovy.lang.Script;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.*;
@@ -21,41 +24,30 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebugger {
 
-	private Object inline(Object code, ArrayList<Object> args, CSGDatabaseInstance db2) throws Exception {
+	private Object inline(String code, ArrayList<Object> args, CSGDatabaseInstance db2) throws Exception {
 		CompilerConfiguration cc = new CompilerConfiguration();
 		cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(ScriptingEngine.getImports())
 
 		);
 
 		Binding binding = new Binding();
-//    for (String pm : DeviceManager.listConnectedDevice()) {
-//      BowlerAbstractDevice bad =  DeviceManager.getSpecificDevice(null, pm);
-//      try {
-//        // groovy needs the objects cas to thier actual type befor
-//        // passing into the scipt
-//
-//        binding.setVariable(bad.getScriptingName(),
-//            Class.forName(bad.getClass().getName())
-//                .cast(bad));
-//      } catch (Throwable e) {
-//        //throw e;
-//      }
-////			com.neuronrobotics.sdk.common.Log.error("Device " + bad.getScriptingName() + " is "
-////					+ bad);
-//    }
 
 		binding.setVariable("args", args);
-		File code2 = null;
 		binding.setVariable("csgdb", db2);
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
 		// com.neuronrobotics.sdk.common.Log.error(code + "\n\nStart\n\n");
 		Script script;
-		
-		if(code2==null) {
-			script = shell.parse((String) code);
-		} else  {
-			script = shell.parse(code2);
+		if(!code.contains("csgdb")) {
+			code=code.replace("StringParameter(", "StringParameter(csgdb,");
+			code=code.replace("LengthParameter(", "LengthParameter(csgdb,");
+			code=code.replace("setParameter(", "setParameter(csgdb,");
+
+			code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "");
+			code=code.replace("CSGDatabase", "csgdb");
 		}
+		
+		script = shell.parse(code);
+
 		return script.run();
 
 	}
@@ -75,13 +67,17 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 	}
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
-		return inline(code, args,db);
+	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
+		String jsonString = null;
+		InputStream inPut = null;
+		inPut = FileUtils.openInputStream(code);
+		jsonString = IOUtils.toString(inPut);
+		return inline(jsonString, args, db);
 	}
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
-		return inline(code, args,db);
+	public Object inlineScriptRun(CSGDatabaseInstance db, String code, ArrayList<Object> args) throws Exception {
+		return inline(code, args, db);
 	}
 
 	@Override

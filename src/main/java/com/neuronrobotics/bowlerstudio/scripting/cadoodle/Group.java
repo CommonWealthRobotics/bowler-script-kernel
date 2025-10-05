@@ -64,12 +64,12 @@ public class Group extends AbstractAddFrom {
 					replace.add(csg);
 					CSG clone = csg.clone();
 					
-					CSG c = clone.syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(name);
+					CSG c = clone.syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setRegenerate(csg.getRegenerate()).setName(name);
 					c.addGroupMembership(getGroupID());
 					back.add(c);
 					if(csg.hasManipulator()) {
 						c=c.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip)))
-								.syncProperties(csg).setRegenerate(csg.getRegenerate()).setName(name);
+								.syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setRegenerate(csg.getRegenerate()).setName(name);
 						c.addGroupMembership(getGroupID());
 					}
 					if (csg.isHole()) {

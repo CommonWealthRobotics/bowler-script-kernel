@@ -160,7 +160,7 @@ public class Allign extends CaDoodleOperation{
 	}
 
 	private CSG sync(CSG incoming, CSG c) {
-		return c.syncProperties(incoming).setName(incoming.getName()).setColor(incoming.getColor());
+		return c.syncProperties(getCaDoodleFile().getCsgDBinstance(),incoming).setName(incoming.getName()).setColor(incoming.getColor());
 	}
 
 	public List<String> getNamesAddedInThisOperation() {

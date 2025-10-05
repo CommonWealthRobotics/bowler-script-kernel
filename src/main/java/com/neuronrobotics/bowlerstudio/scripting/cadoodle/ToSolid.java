@@ -38,7 +38,7 @@ public class ToSolid extends CaDoodleOperation{
 			for(String name:names) {
 				if(name.contentEquals(c.getName())) {
 					replace.add(c);
-					CSG t=c.clone().setRegenerate(c.getRegenerate()).syncProperties(c);
+					CSG t=c.clone().setRegenerate(c.getRegenerate()).syncProperties(getCaDoodleFile().getCsgDBinstance(),c);
 					t.setIsHole(false);
 					if(useColor) {
 						t.setColor(getColor());

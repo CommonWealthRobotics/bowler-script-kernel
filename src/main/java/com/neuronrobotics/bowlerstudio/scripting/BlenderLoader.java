@@ -104,11 +104,11 @@ public class BlenderLoader implements IScriptingLanguage {
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}		
 	}
-	public static CSG remesh(CSG incoming, double MMVoxel) throws Exception {
+	public static CSG remesh(CSG incoming, double MMVoxel,CSGDatabaseInstance instance) throws Exception {
 		File stl = DownloadManager.getTmpSTL(incoming);
 		remeshSTLFile(stl, MMVoxel);
 		CSG back = Vitamins.get(stl,true);
-		return back.syncProperties(incoming).setName(incoming.getName());
+		return back.syncProperties(instance,incoming).setName(incoming.getName());
 	}
 	public static void remeshSTLFile(File stlout,double MMVoxel) throws Exception {
 		File blend = File.createTempFile(stlout.getName(), ".blend");

@@ -154,7 +154,7 @@ public class Resize extends CaDoodleOperation {
 				if (debug != null) {
 					debug.setCsg(resizeUp, null);
 				}
-				resizeUp.syncProperties(starting).setName(name);
+				resizeUp.syncProperties(getCaDoodleFile().getCsgDBinstance(),starting).setName(name);
 				ResizeEvent ev = new ResizeEvent();
 				ev.movex = xMove;
 				ev.movey = yMove;
@@ -186,7 +186,7 @@ public class Resize extends CaDoodleOperation {
 				gc = gc.movez(ev.movez);
 				gc = gc.transformed(ev.scale);
 				gc = gc.movex(ev.movex).movey(ev.movey).transformed(TransformFactory.nrToCSG(getWorkplane()));
-				gc.syncProperties(c).setName(c.getName());
+				gc.syncProperties(getCaDoodleFile().getCsgDBinstance(),c).setName(c.getName());
 				back.set(i, gc);
 				if (c.isGroupResult()) {
 					groupsProcessed.put(c.getName(), ev);

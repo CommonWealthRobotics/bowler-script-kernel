@@ -106,7 +106,7 @@ public class Paste extends AbstractAddFrom  {
 			newOne = clone.transformed(nrToCSG2);
 			newOne.setRegenerate(c.getRegenerate());
 		}
-		newOne.syncProperties(c).setName(name);
+		newOne.syncProperties(getCaDoodleFile().getCsgDBinstance(),c).setName(name);
 		MoveCenter.set(name, newOne, location);
 		index++;
 		getNamesAdded().add(name);

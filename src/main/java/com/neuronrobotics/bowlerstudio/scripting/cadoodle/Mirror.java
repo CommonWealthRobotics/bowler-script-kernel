@@ -39,7 +39,7 @@ public class Mirror extends CaDoodleOperation {
 	}
 
 	private CSG sync(CSG incoming, CSG c) {
-		return c.syncProperties(incoming).setName(incoming.getName()).setColor(incoming.getColor());
+		return c.syncProperties(getCaDoodleFile().getCsgDBinstance(),incoming).setName(incoming.getName()).setColor(incoming.getColor());
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class Mirror extends CaDoodleOperation {
 					centered = centered.transformed(mirroringCenter);
 					Transform wp = TransformFactory.nrToCSG(getWorkplane(incoming1));
 					centered = centered.transformed(wp);					
-					CSG tf = centered.setName(name).syncProperties(incoming1);
+					CSG tf = centered.setName(name).syncProperties(getCaDoodleFile().getCsgDBinstance(),incoming1);
 					sync(incoming1, tf);
 					MoveCenter.set(getName()+(index++) , tf, inverse);
 					MoveCenter.set(getName()+(index++) , tf, mirroringCenter.inverse());
@@ -125,7 +125,7 @@ public class Mirror extends CaDoodleOperation {
 		}
 		centered = centered.transformed(mirroringCenter);
 		centered = centered.transformed(TransformFactory.nrToCSG(getWorkplane(csg)));
-		return centered.setName(name).syncProperties(csg);
+		return centered.setName(name).syncProperties(getCaDoodleFile().getCsgDBinstance(),csg);
 	}
 
 	public MirrorOrentation getLocation() {

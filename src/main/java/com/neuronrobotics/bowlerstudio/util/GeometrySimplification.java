@@ -10,6 +10,7 @@ import com.neuronrobotics.bowlerstudio.scripting.BlenderLoader;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public class GeometrySimplification {
 	/**
@@ -19,8 +20,8 @@ public class GeometrySimplification {
 	 * @return a re-meshed CSG
 	 * @throws Exception
 	 */
-	public static CSG remesh(CSG incoming, double MMVoxel) throws Exception {
-		return BlenderLoader.remesh(incoming, MMVoxel);
+	public static CSG remesh(CSG incoming, double MMVoxel,CSGDatabaseInstance instance) throws Exception {
+		return BlenderLoader.remesh(incoming, MMVoxel,instance);
 	}
 	/**
 	 * RE-mesh an STL file in place

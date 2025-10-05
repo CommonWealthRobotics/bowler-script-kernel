@@ -142,7 +142,7 @@ public class LimbOption {
 			}
 		}
 		BowlerKernel.runLater(() -> {
-			image = ThumbnailImage.get(so);
+			image = ThumbnailImage.get(f.getCsgDBinstance(),so);
 		});
 		while(image==null) {
 			try {

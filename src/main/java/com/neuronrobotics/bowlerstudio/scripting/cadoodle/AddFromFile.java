@@ -69,7 +69,7 @@ public class AddFromFile extends AbstractAddFrom {
 		if (getName() == null) {
 
 		}
-		//CSGDatabaseInstance instance = CSGDatabase.getInstance();
+		CSGDatabaseInstance instance = getCaDoodleFile().getCsgDBinstance();
 		try {
 //			ArrayList<Object>args = new ArrayList<>();
 //			args.addAll(Arrays.asList(getName() ));
@@ -88,11 +88,11 @@ public class AddFromFile extends AbstractAddFrom {
 			boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
 			if(isDoodle) {
 				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
-				CSGDatabase.setInstance(new CSGDatabaseInstance(tempFile.toFile()));
+				instance=(new CSGDatabaseInstance(tempFile.toFile()));
 			}
 			List<CSG> flattenedCSGs;
 			try {
-				flattenedCSGs = ScriptingEngine.flaten(getCaDoodleFile().getCsgDBinstance(),file, CSG.class, args);
+				flattenedCSGs = ScriptingEngine.flaten(instance,file, CSG.class, args);
 			}catch(Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
 				flattenedCSGs=new ArrayList<CSG>();
@@ -326,7 +326,7 @@ public class AddFromFile extends AbstractAddFrom {
 		}
 		
 		CSG processedCSG = csg
-				.transformed(nrToCSG).syncProperties(csg).setRegenerate(previous -> {
+				.transformed(nrToCSG).syncProperties(instance,csg).setRegenerate(previous -> {
 					try {
 						File file =f;
 						//CSGDatabaseInstance instance = CSGDatabase.getInstance();

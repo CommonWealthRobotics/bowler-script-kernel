@@ -39,7 +39,7 @@ public class UnGroup extends CaDoodleOperation{
 							CSG regenerate = csg.getRegenerate().regenerate(csg);
 							transformed = regenerate.transformed(nrToCSG);
 						}
-						CSG readd= transformed.setRegenerate(csg.getRegenerate()).syncProperties(csg).setName(csg.getName());
+						CSG readd= transformed.setRegenerate(csg.getRegenerate()).syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setName(csg.getName());
 						
 						readd.removeGroupMembership(name);
 						back.remove(csg);

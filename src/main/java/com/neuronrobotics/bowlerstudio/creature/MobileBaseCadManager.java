@@ -161,7 +161,7 @@ public class MobileBaseCadManager implements Runnable {
 				if (offset != null)
 					starting = starting.transformed(TransformFactory.nrToCSG(offset));
 				starting.setIsWireFrame(true);
-				starting.syncProperties(origin);
+				starting.syncProperties(instance,origin);
 			} catch (Exception e) {
 				// Auto-generated catch block
 				com.neuronrobotics.sdk.common.Log.error(e);

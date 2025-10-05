@@ -14,6 +14,7 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
@@ -62,35 +63,37 @@ public class AddFromScript extends AbstractAddFrom {
 			configs.put("name", getName());
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
-			CSGDatabaseInstance instance = CSGDatabase.getInstance();
+			CSGDatabaseInstance instance = getCaDoodleFile().getCsgDBinstance();
 			if(isDoodle) {
 				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
-				CSGDatabase.setInstance(new CSGDatabaseInstance(tempFile.toFile()));
+				instance=(new CSGDatabaseInstance(tempFile.toFile()));
 			}
-			List<CSG> flaten = ScriptingEngine.flaten(gitULR, fileName, CSG.class, args);
+			List<CSG> flaten = ScriptingEngine.flaten(instance,gitULR, fileName, CSG.class, args);
+			for(CSG c:flaten)
+			for(String s:c.getParameters(instance)) {
+				Log.debug("Parameter added "+s);
+			}
 			ArrayList<CSG> collect = new ArrayList<>();
 			collect.addAll(flaten);
 			for(int i=0;i<collect.size();i++) {
 				CSG csg=collect.get(i);
 				if(isDoodle) {
-					csg.getMapOfparametrics(getCaDoodleFile().getCsgDBinstance()).clear();
 					csg.setStorage(new PropertyStorage());
 				}
 				Transform nrToCSG = TransformFactory.nrToCSG( getLocation() );
 				String orderedName = getOrderedName();
 				CSG tmp=csg
 						.transformed(nrToCSG)
-						.syncProperties(csg)
+						.syncProperties(getCaDoodleFile().getCsgDBinstance(),csg)
 						.setRegenerate(csg.getRegenerate())
 						.setName(orderedName);
 				collect.set(i, tmp);
 				MoveCenter.set(getName(), tmp, nrToCSG);
 			}
-			if(isDoodle) {
-				CSGDatabase.setInstance(instance);
-			}
+
 			back.addAll(collect);
 		} catch (Exception e) {
+			Log.error(e);
 			throw new RuntimeException(e);
 		}
 

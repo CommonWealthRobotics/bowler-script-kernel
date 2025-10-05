@@ -77,7 +77,7 @@ public class AddRobotController extends AbstractAddFrom {
 			if (getBuilderName() != null) {
 				csg.setMobileBaseName(getBuilderName());
 			}
-			CSG tmp = csg.transformed(nrToCSG).syncProperties(csg).setRegenerate(csg.getRegenerate())
+			CSG tmp = csg.transformed(nrToCSG).syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setRegenerate(csg.getRegenerate())
 					.setName(orderedName);
 			back.add(tmp);
 			MoveCenter.set(getName(), tmp, nrToCSG);

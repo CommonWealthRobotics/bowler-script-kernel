@@ -81,7 +81,7 @@ public class CaDoodleFile {
 //	@Expose (serialize = false, deserialize = false)
 //	private List<CSG> currentState = new ArrayList<CSG>();
 	private double percentInitialized = 0;
-//	private final HashMap<CaDoodleOperation, List<CSG>> cache = new HashMap<CaDoodleOperation, List<CSG>>();
+	private final HashMap<CaDoodleOperation, List<CSG>> cache = new HashMap<CaDoodleOperation, List<CSG>>();
 	private static Type TT_CaDoodleFile = new TypeToken<CaDoodleFile>() {
 	}.getType();
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting()
@@ -140,37 +140,40 @@ public class CaDoodleFile {
 		throw new IndexOutOfBoundsException();
 	}
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
-		int opIndex = opToIndex(op);
-		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
-			return (List<CSG>) ois.readObject();
-		} catch (Exception ex) {
-			Log.error(ex);
-		}
-		return null;
+//		int opIndex = opToIndex(op);
+//		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+//		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
+//			return (List<CSG>) ois.readObject();
+//		} catch (Exception ex) {
+//			Log.error(ex);
+//		}
+//		return null;
+		
+		return cache.get(op);
 	}
 	
 	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopy) {
-		int opIndex = opToIndex(op);
-		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
-		if(cacheFile.exists())
-			cacheFile.delete();
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-			oos.writeObject(cachedCopy);
-		}catch(Exception ex) {
-			Log.error(ex);
-		}
-		//cache.put(op, cachedCopy);
+//		int opIndex = opToIndex(op);
+//		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+//		if(cacheFile.exists())
+//			cacheFile.delete();
+//		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+//			oos.writeObject(cachedCopy);
+//		}catch(Exception ex) {
+//			Log.error(ex);
+//			throw new RuntimeException(ex);
+//		}
+		cache.put(op, cachedCopy);
 	}
 	private void clearCache(CaDoodleOperation key) {
-		int opIndex = opToIndex(key);
-		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
-		if(cacheFile.exists())
-			cacheFile.delete();
+//		int opIndex = opToIndex(key);
+//		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
+//		if(cacheFile.exists())
+//			cacheFile.delete();
 		
-//		List<CSG> back = cache.remove(key);
-//		if (back != null)
-//			back.clear();
+		List<CSG> back = cache.remove(key);
+		if (back != null)
+			back.clear();
 	}
 	
 	
@@ -208,7 +211,7 @@ public class CaDoodleFile {
 				objectDir.mkdir();
 			File db = new File(self.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
 			setCsgDBinstance(new CSGDatabaseInstance(db));
-			CSGDatabase.setInstance(getCsgDBinstance());
+			//CSGDatabase.setInstance(getCsgDBinstance());
 			bom = CaDoodleFile.getBillOfMaterials(this);
 			bom.clear();
 			bom.save();
@@ -679,7 +682,7 @@ public class CaDoodleFile {
 				throw new RuntimeException("There can not be 2 objects with the same name after an " + op.getType()
 						+ " opperation! " + c.getName());
 			names.add(c.getName());
-			cachedCopy.add(cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(c).setName(c.getName())
+			cachedCopy.add(cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(getCsgDBinstance(),c).setName(c.getName())
 					.setRegenerate(c.getRegenerate()));
 			// cachedCopy.add(c);
 		}
@@ -1094,7 +1097,7 @@ public class CaDoodleFile {
 		ArrayList<javafx.scene.image.WritableImage> holder = new ArrayList<WritableImage>();
 		try {
 			BowlerKernel.runLater(() -> {
-				holder.add(ThumbnailImage.get(currentState));
+				holder.add(ThumbnailImage.get(getCsgDBinstance(),currentState));
 			});
 		} catch (Throwable ex) {
 			com.neuronrobotics.sdk.common.Log.error(ex);;
