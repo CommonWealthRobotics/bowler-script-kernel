@@ -162,8 +162,8 @@ public class CaDoodleFile {
 		return cache.get(op);
 	}
 	private void memoryCheck() {
-		if(getFreeMemory()>50) {
-			com.neuronrobotics.sdk.common.Log.error("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
+		if(getFreeMemory()>75) {
+			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
 			cache.clear();
 			System.gc();
 		}else {
