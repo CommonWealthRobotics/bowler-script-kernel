@@ -152,12 +152,7 @@ public class CaDoodleFile {
 			Log.debug("Loading Cached Objects from file: "+cacheFile.getAbsolutePath());
 			//Log.error(new Exception());
 			try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile))) {
-				if(getFreeMemory()>50) {
-					com.neuronrobotics.sdk.common.Log.error("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
-					cache.clear();
-				}else {
-					com.neuronrobotics.sdk.common.Log.debug("Memory use: " + getFreeMemory());
-				}
+				memoryCheck();
 				cache.put( op,(List<CSG>) ois.readObject());
 				
 			} catch (Exception ex) {
@@ -165,6 +160,15 @@ public class CaDoodleFile {
 			}
 		}		
 		return cache.get(op);
+	}
+	private void memoryCheck() {
+		if(getFreeMemory()>50) {
+			com.neuronrobotics.sdk.common.Log.error("\n\nUpdated Memory use: " + getFreeMemory() + "\n\n");
+			cache.clear();
+			System.gc();
+		}else {
+			//com.neuronrobotics.sdk.common.Log.debug("Memory use: " + getFreeMemory());
+		}
 	}
 	
 	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopy) {
@@ -175,11 +179,30 @@ public class CaDoodleFile {
 			cacheFile.delete();
 		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
 			oos.writeObject(cachedCopy);
+//			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
+//			List<CSG> readback = (List<CSG>) ois.readObject();
+//			ois.close();
+//			for(int i=0;i<cachedCopy.size();i++) {
+//				CSG down = cachedCopy.get(i);
+//				CSG back = readback.get(i);
+//				if(down.getRegenerate()!= back.getRegenerate()) {
+//					throw new RuntimeException("Data loss! getRegenerate");
+//				}
+//				if(down.getManufacturing()!= back.getManufacturing()) {
+//					throw new RuntimeException("Data loss! getManufacturing");
+//				}
+//				if(down.getParameters(getCsgDBinstance()).size() !=
+//						back.getParameters(getCsgDBinstance()).size()) {
+//					throw new RuntimeException("Data loss! getParameters");
+//				}
+//			}
+			Log.debug("Saved "+cacheFile.getAbsolutePath());
 		}catch(Exception ex) {
 			Log.error(ex);
 			throw new RuntimeException(ex);
 		}
-//		cache.put(op, cachedCopy);
+		memoryCheck();
+		cache.put(op, cachedCopy);
 	}
 	private void clearCache(CaDoodleOperation key) {
 		int opIndex = opToIndex(key);
@@ -187,9 +210,9 @@ public class CaDoodleFile {
 		if(cacheFile.exists())
 			cacheFile.delete();
 		
-//		List<CSG> back = cache.remove(key);
-//		if (back != null)
-//			back.clear();
+		List<CSG> back = cache.remove(key);
+		if (back != null)
+			back.clear();
 	}
 	
 	
@@ -246,7 +269,7 @@ public class CaDoodleFile {
 			if (op == null)
 				continue;
 			setPercentInitialized(((double) i) / (double) getOpperations().size());
-			if(!inCache(op))
+			//if(!inCache(op))
 				try {
 					process(op);
 				} catch (Throwable t) {
