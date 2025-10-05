@@ -35,8 +35,6 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		binding.setVariable("args", args);
 		binding.setVariable("csgdb", db2);
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
-		// com.neuronrobotics.sdk.common.Log.error(code + "\n\nStart\n\n");
-		Script script;
 		if(!code.contains("csgdb")) {
 			code=code.replace("StringParameter(", "StringParameter(csgdb,");
 			code=code.replace("LengthParameter(", "LengthParameter(csgdb,");
@@ -44,10 +42,15 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 
 			code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "");
 			code=code.replace("CSGDatabase", "csgdb");
+			
+			code=code.replace("inlineGistScriptRun(", "inlineGistScriptRun(csgdb,");
+			code=code.replace("inlineFileScriptRun(", "inlineFileScriptRun(csgdb,");
+			code=code.replace("inlineScriptRun(", "inlineScriptRun(csgdb,");
+			code=code.replace("inlineScriptStringRun(", "inlineScriptStringRun(csgdb,");
+			code=code.replace("gitScriptRun(", "gitScriptRun(csgdb,");
 		}
 		
-		script = shell.parse(code);
-
+		Script script = shell.parse(code);
 		return script.run();
 
 	}
