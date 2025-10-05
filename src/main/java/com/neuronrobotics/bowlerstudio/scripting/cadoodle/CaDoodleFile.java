@@ -206,6 +206,7 @@ public class CaDoodleFile {
 		List<CSG> back = cache.remove(op);
 		if (back != null)
 			back.clear();
+		cache.put(op, cachedCopy);
 	}
 	private void clearCache(CaDoodleOperation key) {
 		int opIndex = opToIndex(key);
@@ -386,7 +387,7 @@ public class CaDoodleFile {
 							getSaveUpdate().renderSplashFrame(percent,
 									"Regenerating " + op.getType() + " " + currentIndex2);
 							getTimelineImageFile(op).delete();
-							clearCache(op);
+							//clearCache(op);
 							try {
 								op.setCaDoodleFile(cf);
 								List<CSG> process = op.process(getPreviouState());

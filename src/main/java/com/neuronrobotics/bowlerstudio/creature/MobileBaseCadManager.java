@@ -1374,6 +1374,7 @@ public class MobileBaseCadManager implements Runnable {
 					try {
 						newcad = generatorToUse.generateCad(dh, i);
 					} catch (Throwable t) {
+						Log.error(t);
 						getUi().highlightException(null, t);
 					}
 					if (newcad == null) {

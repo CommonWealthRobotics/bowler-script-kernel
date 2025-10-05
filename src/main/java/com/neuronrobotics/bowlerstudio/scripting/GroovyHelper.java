@@ -36,7 +36,9 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		binding.setVariable("csgdb", db2);
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
 		if(!code.contains("csgdb")) {
-			//CaDoodleVitamin.
+			//Vitamins.get(
+			code=code.replace("Vitamins.get(", "Vitamins.get(csgdb,");
+
 			code=code.replace("CaDoodleVitamin.", "new CaDoodleVitamin(csgdb).");
 			code=code.replace("StringParameter(", "StringParameter(csgdb,");
 			code=code.replace("LengthParameter(", "LengthParameter(csgdb,");
