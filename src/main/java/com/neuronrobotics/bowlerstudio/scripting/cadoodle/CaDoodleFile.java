@@ -541,10 +541,10 @@ public class CaDoodleFile {
 					if (getResult() == OperationResult.ABORT) {
 						setCurrentState(getCurrentOpperation(), getCurrentState());
 					}
+					updateBoM();
+					fireSaveSuggestion();
+					fireRegenerateDone();
 				}
-				updateBoM();
-				fireSaveSuggestion();
-				fireRegenerateDone();
 				opperationRunner.remove(this);
 			}
 		};
