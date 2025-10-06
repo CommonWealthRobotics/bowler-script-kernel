@@ -812,10 +812,14 @@ public class CaDoodleFile {
 		boolean forward= ci<ni;
 		if(forward) {
 			for(int i=ci;i<ni+1;i++) {
-				CaDoodleOperation op = opperations.get(i-1);
-				if(ICadoodleOperationUndo.class.isInstance(op)) {
-					ICadoodleOperationUndo un = (ICadoodleOperationUndo)op;
-					un.redo();
+				try {
+					CaDoodleOperation op = opperations.get(i - 1);
+					if (ICadoodleOperationUndo.class.isInstance(op)) {
+						ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
+						un.redo();
+					}
+				} catch (Exception ex) {
+					Log.error(ex);
 				}
 			}
 		}else {
