@@ -12,7 +12,7 @@ public interface ICaDoodleStateUpdate {
 	public void onInitializationDone();
 	public void onInitializationStart();
 	public void onRegenerateDone();
-	public void onRegenerateStart();
+	public void onRegenerateStart(CaDoodleOperation source);
 	public void onWorkplaneChange(TransformNR newWP);
 	public void onTimelineUpdate(int numberOfNew);
 }

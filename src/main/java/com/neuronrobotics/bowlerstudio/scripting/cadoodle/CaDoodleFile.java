@@ -341,7 +341,7 @@ public class CaDoodleFile {
 			com.neuronrobotics.sdk.common.Log.error(new Exception("Operation Running, bailing"));
 			return null;
 		}
-		fireRegenerateStart();
+		fireRegenerateStart(source);
 		int endIndex = getCurrentIndex();
 		double size = getOpperations().size();
 		if (endIndex != size) {
@@ -424,7 +424,9 @@ public class CaDoodleFile {
 			t.start();
 			return t;
 		}
-		fireRegenerateStart();
+		CaDoodleOperation op = getCurrentOpperation();
+
+		fireRegenerateStart(op);
 		Thread t = null;
 		CaDoodleFile cf = this;
 		t = new Thread() {
@@ -435,7 +437,6 @@ public class CaDoodleFile {
 
 				this.setName("regenerateCurrent Thread");
 
-				CaDoodleOperation op = getCurrentOpperation();
 				TickToc.tic("Start regenerate");
 				op.setCaDoodleFile(cf);
 				List<CSG> process = op.process(getPreviouState());
@@ -512,7 +513,7 @@ public class CaDoodleFile {
 					com.neuronrobotics.sdk.common.Log.debug("Adding Operation "+op);
 					if (getCurrentIndex() != getOpperations().size()) {
 						try {
-							fireRegenerateStart();
+							fireRegenerateStart(op);
 							setResult(pruneForward(op));
 						} catch (Exception e) {
 							com.neuronrobotics.sdk.common.Log.error(e);
@@ -949,11 +950,11 @@ public class CaDoodleFile {
 		}
 	}
 
-	private void fireRegenerateStart() {
+	private void fireRegenerateStart(CaDoodleOperation source) {
 
 		for (ICaDoodleStateUpdate l : listeners) {
 			try {
-				l.onRegenerateStart();
+				l.onRegenerateStart(source);
 			} catch (Throwable e) {
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}
