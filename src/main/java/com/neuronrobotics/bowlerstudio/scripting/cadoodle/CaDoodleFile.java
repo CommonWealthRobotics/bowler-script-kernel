@@ -164,6 +164,28 @@ public class CaDoodleFile {
 	private void memoryCheck() {
 		if(getFreeMemory()>75) {
 			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
+			Set<CaDoodleOperation> keySet = cache.keySet();
+			int index=0;
+			for (CaDoodleOperation op : keySet) {
+				List<CSG> cachedCopy = cache.get(op);
+				getSaveUpdate().renderSplashFrame((int) (((double) index) / ((double) keySet.size()) * 100),
+						"Clearing Ram to Disk");
+				int opIndex = opToIndex(op);
+				File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex);
+				if (!isInitialized())
+					if (cacheFile.exists())
+						return;
+				if (cacheFile.exists())
+					cacheFile.delete();
+				try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+					oos.writeObject(cachedCopy);
+					Log.debug("Saved " + cacheFile.getAbsolutePath());
+				} catch (Exception ex) {
+					Log.error(ex);
+					throw new RuntimeException(ex);
+				}
+				index++;
+			}
 			cache.clear();
 			System.gc();
 		}else {
@@ -172,35 +194,6 @@ public class CaDoodleFile {
 	}
 	
 	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopy) {
-		int opIndex = opToIndex(op);
-		File cacheFile = new File(objectDir.getAbsolutePath()+delim()+opIndex);
-		
-		if(cacheFile.exists())
-			cacheFile.delete();
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-			oos.writeObject(cachedCopy);
-//			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
-//			List<CSG> readback = (List<CSG>) ois.readObject();
-//			ois.close();
-//			for(int i=0;i<cachedCopy.size();i++) {
-//				CSG down = cachedCopy.get(i);
-//				CSG back = readback.get(i);
-//				if(down.getRegenerate()!= back.getRegenerate()) {
-//					throw new RuntimeException("Data loss! getRegenerate");
-//				}
-//				if(down.getManufacturing()!= back.getManufacturing()) {
-//					throw new RuntimeException("Data loss! getManufacturing");
-//				}
-//				if(down.getParameters(getCsgDBinstance()).size() !=
-//						back.getParameters(getCsgDBinstance()).size()) {
-//					throw new RuntimeException("Data loss! getParameters");
-//				}
-//			}
-			Log.debug("Saved "+cacheFile.getAbsolutePath());
-		}catch(Exception ex) {
-			Log.error(ex);
-			throw new RuntimeException(ex);
-		}
 		memoryCheck();
 		// clear the stale cache value
 		List<CSG> back = cache.remove(op);
@@ -727,8 +720,13 @@ public class CaDoodleFile {
 				throw new RuntimeException("There can not be 2 objects with the same name after an " + op.getType()
 						+ " opperation! " + c.getName());
 			names.add(c.getName());
-			cachedCopy.add(cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(getCsgDBinstance(),c).setName(c.getName())
-					.setRegenerate(c.getRegenerate()));
+			CSG cachedVer = cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(getCsgDBinstance(),c).setName(c.getName())
+					.setRegenerate(c.getRegenerate());
+			if(cachedVer.isHole() != c.isHole()||
+					cachedVer.isHide() != c.isHide()	) {
+				throw new RuntimeException("Lost properties");
+			}
+			cachedCopy.add(cachedVer);
 			// cachedCopy.add(c);
 		}
 		placeCSGsInCache(op, cachedCopy);
