@@ -86,10 +86,10 @@ public class AddFromFile extends AbstractAddFrom {
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
 			boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
-			if(isDoodle) {
-				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
-				instance=(new CSGDatabaseInstance(tempFile.toFile()));
-			}
+//			if(isDoodle) {
+//				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
+//				instance=(new CSGDatabaseInstance(tempFile.toFile()));
+//			}
 			List<CSG> flattenedCSGs;
 			try {
 				flattenedCSGs = ScriptingEngine.flaten(instance,file, CSG.class, args);
