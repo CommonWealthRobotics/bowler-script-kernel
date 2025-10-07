@@ -23,6 +23,7 @@ import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 import java.nio.charset.*;
 import java.nio.file.Files;
@@ -164,7 +165,7 @@ public class ConfigurationDatabase {
 		File loadFile = loadFile();
 		if(loadFile.exists())
 			try {
-				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(),loadFile, null);
+				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(new CSGDatabaseInstance(new File("CSGdatabase.json")),loadFile, null);
 				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) inlineFileScriptRun);
 				
 			} catch (Exception e) {

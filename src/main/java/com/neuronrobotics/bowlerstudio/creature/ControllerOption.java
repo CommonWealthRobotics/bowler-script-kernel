@@ -83,7 +83,7 @@ public class ControllerOption {
 			dir.mkdirs();
 		stlFile = new File(absolutePath + delim() + type + ".stl");
 		if ( stlFile.exists()) {
-			indicator = Vitamins.get(stlFile);
+			indicator = Vitamins.get(f.getCsgDBinstance(),stlFile);
 			getIndicator().setColor(Color.WHITE);
 			return;
 		}else {

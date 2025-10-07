@@ -53,7 +53,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
 		toSTLFile(code,stl);
-		CSG back = Vitamins.get(stl,true);
+		CSG back = Vitamins.get(db,stl,true);
 		back.setColor(Color.BLUE);
 		return back;
 	}
@@ -243,7 +243,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		File stlToImport =ScriptingEngine.fileFromGit(
 				"https://github.com/NeuronRobotics/NASACurisoity.git"
 				, "STL/upper-arm.STL");
-		CSG toSlice = Vitamins.get(stlToImport,true);
+		CSG toSlice = Vitamins.get(null,stlToImport,true);
 //		toSlice=toSlice.union(
 //					new Cube(20).toCSG()
 //						.toXMin()

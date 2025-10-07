@@ -35,7 +35,7 @@ public class Build123dLoader implements IScriptingLanguage {
 		}
 		
 		toSTLFile(code,stl,params);
-		CSG back = Vitamins.get(stl,true);
+		CSG back = Vitamins.get(db,stl,true);
 		back.setColor(Color.ANTIQUEWHITE);
 		return back;
 	}

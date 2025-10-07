@@ -12,7 +12,7 @@ public class ObjLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
-		CSG sllLoaded  = Vitamins.get(code);
+		CSG sllLoaded  = Vitamins.get(db,code);
 		return sllLoaded;
 	}
 

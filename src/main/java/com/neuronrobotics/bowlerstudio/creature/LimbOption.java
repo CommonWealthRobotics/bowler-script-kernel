@@ -122,7 +122,7 @@ public class LimbOption {
 		File imageFile = new File(absolutePath + delim() + type + name + ".png");
 		File stlFile = new File(absolutePath + delim() + type + name + ".stl");
 		if (imageFile.exists() && stlFile.exists()) {
-			indicator = Vitamins.get(stlFile);
+			indicator = Vitamins.get(f.getCsgDBinstance(),stlFile);
 			indicator=indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
 			indicator.setColor(Color.WHITE);
 			image = new Image(imageFile.toURI().toString());

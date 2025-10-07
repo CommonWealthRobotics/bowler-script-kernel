@@ -16,6 +16,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
 import javafx.scene.transform.Affine;
 
@@ -186,7 +187,7 @@ public class CadFileExporter {
 		File blend = new File(nameBase + ".blend");
 		com.neuronrobotics.sdk.common.Log.debug("Writing "+blend.getAbsolutePath());
 		for(CSG tmp:current)
-			BlenderLoader.toBlenderFile(tmp, blend);
+			BlenderLoader.toBlenderFile(null,tmp, blend);
 		return blend;
 	}
 	

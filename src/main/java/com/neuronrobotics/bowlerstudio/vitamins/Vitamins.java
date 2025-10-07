@@ -86,10 +86,11 @@ public class Vitamins {
 		databaseSet.clear();
 		fileLastLoaded.clear();
 	}
+	@Deprecated
 	public static CSG get(File resource) {
 		return get(CSGDatabase.getInstance(),resource, false);
 	}
-
+	@Deprecated
 	public static CSG get(File resource, boolean forceRefresh) {
 		return get(CSGDatabase.getInstance(), resource,  forceRefresh);
 	}

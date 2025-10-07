@@ -21,7 +21,7 @@ public class GeometrySimplification {
 	 * @throws Exception
 	 */
 	public static CSG remesh(CSG incoming, double MMVoxel,CSGDatabaseInstance instance) throws Exception {
-		return BlenderLoader.remesh(incoming, MMVoxel,instance);
+		return BlenderLoader.remesh(null,incoming, MMVoxel,instance);
 	}
 	/**
 	 * RE-mesh an STL file in place
@@ -31,7 +31,7 @@ public class GeometrySimplification {
 	 * @throws Exception
 	 */
 	public static void remeshSTLFile(File stlout,double MMVoxel) throws Exception {
-		BlenderLoader.remeshSTLFile(stlout, MMVoxel);
+		BlenderLoader.remeshSTLFile(null,stlout, MMVoxel);
 	}
 	/**
 	 * Simplify an SVG file

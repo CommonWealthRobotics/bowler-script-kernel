@@ -33,7 +33,7 @@ public class OpenSCADLoader implements IScriptingLanguage {
 		}
 		
 		toSTLFile(code,stl,params);
-		CSG back = Vitamins.get(stl,true);
+		CSG back = Vitamins.get(db,stl,true);
 		back.setColor(Color.YELLOW);
 		return back;
 	}
