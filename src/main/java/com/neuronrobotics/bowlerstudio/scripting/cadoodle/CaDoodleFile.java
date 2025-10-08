@@ -56,6 +56,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.IParametric;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
@@ -149,17 +150,21 @@ public class CaDoodleFile {
 	}
 
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
-
+		if (Platform.isFxApplicationThread()) {
+			new RuntimeException("This should not be called from the UI thread!").printStackTrace();;
+		}
 		if (cache.get(op) == null && objectDir !=null) {
 			try {
 				int opIndex = opToIndex(op);
 				File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex);
-				Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
-				// Log.error(new Exception());
-				ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
-				memoryCheck();
-				cache.put(op, (List<CSG>) ois.readObject());
-				ois.close();
+				if(cacheFile.exists()) {
+					Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
+					// Log.error(new Exception());
+					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
+					memoryCheck();
+					cache.put(op, (List<CSG>) ois.readObject());
+					ois.close();
+				}
 			} catch (Exception ex) {
 				Log.error(ex);
 			}
@@ -170,29 +175,29 @@ public class CaDoodleFile {
 	private void memoryCheck() {
 		if (getFreeMemory() > 75) {
 			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
-			Set<CaDoodleOperation> keySet = cache.keySet();
-			int index = 0;
-			for (CaDoodleOperation op : keySet) {
-				List<CSG> cachedCopy = cache.get(op);
-				getSaveUpdate().renderSplashFrame((int) (((double) index) / ((double) keySet.size()) * 100),
-						"Clearing Ram to Disk");
-				int opIndex = opToIndex(op);
-				File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex);
-				if (!isInitialized())
-					if (cacheFile.exists())
-						return;
-				if (cacheFile.exists())
-					cacheFile.delete();
-				try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-					oos.writeObject(cachedCopy);
-					Log.debug("Saved " + cacheFile.getAbsolutePath());
-				} catch (Exception ex) {
-					Log.error(ex);
-					throw new RuntimeException(ex);
-				}
-				index++;
-			}
-			cache.clear();
+//			Set<CaDoodleOperation> keySet = cache.keySet();
+//			int index = 0;
+//			for (CaDoodleOperation op : keySet) {
+//				List<CSG> cachedCopy = cache.get(op);
+//				getSaveUpdate().renderSplashFrame((int) (((double) index) / ((double) keySet.size()) * 100),
+//						"Clearing Ram to Disk");
+//				int opIndex = opToIndex(op);
+//				File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex);
+//				if (!isInitialized())
+//					if (cacheFile.exists())
+//						return;
+//				if (cacheFile.exists())
+//					cacheFile.delete();
+//				try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+//					oos.writeObject(cachedCopy);
+//					Log.debug("Saved " + cacheFile.getAbsolutePath());
+//				} catch (Exception ex) {
+//					Log.error(ex);
+//					throw new RuntimeException(ex);
+//				}
+//				index++;
+//			}
+//			cache.clear();
 			System.gc();
 		} else {
 			// com.neuronrobotics.sdk.common.Log.debug("Memory use: " + getFreeMemory());
