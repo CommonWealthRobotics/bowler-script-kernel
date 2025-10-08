@@ -341,9 +341,9 @@ public class AddFromFile extends AbstractAddFrom {
 						String fileLocation = file.getAbsolutePath();
 						com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
 						List<CSG> flattenedCSGs = ScriptingEngine.flaten(instancetmp,file, CSG.class, null);
+						
 						CSG csg1 = flattenedCSGs.get(i);
 						if(isDoodle) {
-							csg1.getMapOfparametrics(instancetmp ).clear();
 							csg1.setStorage(new PropertyStorage());
 						}
 						//CSGDatabase.setInstance(instance);
