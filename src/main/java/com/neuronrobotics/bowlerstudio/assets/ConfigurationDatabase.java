@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
+import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.IGithubLoginListener;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -165,7 +166,10 @@ public class ConfigurationDatabase {
 		File loadFile = loadFile();
 		if(loadFile.exists())
 			try {
-				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(new CSGDatabaseInstance(new File("CSGdatabase.json")),loadFile, null);
+				File parent =loadFile.getParentFile();
+				File db = new File(parent.getAbsolutePath()+DownloadManager.delim()+"CSGdatabase.json");
+				CSGDatabaseInstance instance = new CSGDatabaseInstance(db);
+				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(instance,loadFile, null);
 				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) inlineFileScriptRun);
 				
 			} catch (Exception e) {
