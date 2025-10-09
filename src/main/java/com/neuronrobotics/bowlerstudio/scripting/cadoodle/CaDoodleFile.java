@@ -641,7 +641,7 @@ public class CaDoodleFile {
 		immutable.addAll(back);
 		for (int i = 0; i < immutable.size(); i++) {
 			CSG csg = immutable.get(i);
-			if (csg.isLock())
+			if ( csg==null || csg.isLock())
 				continue;
 			// boolean inGroup = csg.isInGroup();
 			boolean thisCSGIsInGroupNamedAfterTarget = csg.checkGroupMembership(targetName);
