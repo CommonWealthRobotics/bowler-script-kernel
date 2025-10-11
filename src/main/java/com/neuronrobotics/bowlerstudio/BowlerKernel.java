@@ -207,7 +207,7 @@ public class BowlerKernel {
 
 					processReturnedObjectsStart(ret, baseWorkspaceFile);
 				} catch (Throwable e) {
-					e.printStackTrace();
+					Log.error(e);
 					fail();
 				}
 			else {
@@ -249,7 +249,7 @@ public class BowlerKernel {
 					com.neuronrobotics.sdk.common.Log.error("File   " + f.getName());
 					ret = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(),f, null);
 				} catch (Throwable e) {
-					e.printStackTrace();
+					Log.error(e);
 					fail();
 				}
 			}
@@ -270,7 +270,7 @@ public class BowlerKernel {
 				try {
 					ret = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(),new File(s), (ArrayList<Object>) ret);
 				} catch (Throwable e) {
-					e.printStackTrace();
+					Log.error(e);
 					fail();
 				}
 			}
@@ -382,14 +382,12 @@ public class BowlerKernel {
 						com.neuronrobotics.sdk.common.Log.error(ret);
 					}
 					processReturnedObjectsStart(ret, null);
-				} catch (Error e) {
-					e.printStackTrace();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				} catch (Throwable e) {
+					Log.error(e);
+				} 
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 
@@ -449,7 +447,7 @@ public class BowlerKernel {
 						Files.copy(bomCSV.toPath(), file.toPath());
 					} catch (IOException e) {
 						// Auto-generated catch block
-						e.printStackTrace();
+						Log.error(e);
 					}
 				}
 				File bom = new File(
@@ -463,7 +461,7 @@ public class BowlerKernel {
 						Files.copy(bom.toPath(), file.toPath());
 					} catch (IOException e) {
 						// Auto-generated catch block
-						e.printStackTrace();
+						Log.error(e);
 					}
 				}
 			} else {
@@ -483,7 +481,7 @@ public class BowlerKernel {
 			}
 			new CadFileExporter().generateManufacturingParts(csgBits, baseWorkspaceFile);
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Log.error(t);
 			fail();
 		}
 	}
@@ -546,7 +544,7 @@ public class BowlerKernel {
 				future.get();
 				System.exit(0);
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.error(e);
 			}
 		}
 
@@ -591,7 +589,7 @@ public class BowlerKernel {
 
 				@Override
 				public void highlightException(File fileEngineRunByName, Throwable ex) {
-					ex.printStackTrace();
+					Log.error(ex);
 					fail();
 				}
 
