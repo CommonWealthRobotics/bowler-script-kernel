@@ -184,7 +184,6 @@ public class MobileBaseLoader {
 
 	public void setBase(MobileBase base) {
 		this.base = base;
-		setDb(CSGDatabase.getInstance());
 		try {
 			String[] self = base.getGitSelfSource();
 			File selfFile =ScriptingEngine.fileFromGit(self);
