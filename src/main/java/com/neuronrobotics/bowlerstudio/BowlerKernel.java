@@ -55,6 +55,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.CSGServer;
@@ -160,7 +161,7 @@ public class BowlerKernel {
 					try {
 						port = Integer.parseInt(s);
 					}catch(NumberFormatException ex) {
-						ex.printStackTrace();
+						Log.error(ex);
 					}
 				}
 			}
@@ -171,7 +172,7 @@ public class BowlerKernel {
 			try {
 				server.start();
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.error(e);
 			}
 			return;
 		}
@@ -658,7 +659,7 @@ public class BowlerKernel {
 				}
 			} catch (Exception e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				Log.error(e);
 				fail();
 			}
 		}
@@ -689,12 +690,9 @@ public class BowlerKernel {
 			}
 
 			bw.close();
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			// Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// Auto-generated catch block
-			e.printStackTrace();
+			Log.error(e);
 		}
 
 	}
@@ -727,7 +725,7 @@ public class BowlerKernel {
 				}
 			}
 		} catch (Throwable t) {
-			t.printStackTrace();
+			Log.error(t);
 		}
 		TextToSpeech tts = new TextToSpeech();
 		// cd ..
@@ -811,10 +809,10 @@ public class BowlerKernel {
 
 		} catch (URISyntaxException e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			Log.error(e);
 		} catch (Throwable e) {
 			// Auto-generated catch block
-			e.printStackTrace();
+			Log.error(e);
 		}
 	}
 
@@ -824,7 +822,7 @@ public class BowlerKernel {
 				Desktop.getDesktop().browse(htmlUrl);
 			} catch (IOException e) {
 				// Auto-generated catch block
-				e.printStackTrace();
+				Log.error(e);
 			}
 	}
 
@@ -834,7 +832,7 @@ public class BowlerKernel {
 			try {
 				r.run();
 			} catch (Throwable t) {
-				t.printStackTrace();
+				Log.error(t);
 			}
 		else
 			runLater(r, new Exception("UI Thread Exception here!"));
@@ -846,7 +844,7 @@ public class BowlerKernel {
 			try {
 				r.run();
 			} catch (Throwable t) {
-				t.printStackTrace();
+				Log.error(t);
 			}
 		else
 			Platform.runLater(() -> {
