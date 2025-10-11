@@ -19,16 +19,16 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 public class SequenceRunner implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
 		String jsonString = null;
 		InputStream inPut = null;
 		inPut = FileUtils.openInputStream(code);
 		jsonString = IOUtils.toString(inPut);
-		return inlineScriptRun(jsonString, args);
+		return inlineScriptRun( db,jsonString, args);
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
 
 		new TimeSequence().execute(code);
 		return null;
@@ -55,7 +55,7 @@ public class SequenceRunner implements IScriptingLanguage {
 
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("sequence"));
 	}
 }

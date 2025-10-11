@@ -19,7 +19,7 @@ import org.xml.sax.SAXException;
 import com.neuronrobotics.sdk.dyio.DyIO;
 import com.neuronrobotics.sdk.dyio.peripherals.ServoChannel;
 import com.neuronrobotics.sdk.util.ThreadUtil;
-// TODO: Auto-generated Javadoc
+//  Auto-generated Javadoc
 
 /**
  * The Class CoreScheduler.
@@ -117,10 +117,10 @@ public class CoreScheduler {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		//System.out.println("Parsing File...");
+		//com.neuronrobotics.sdk.common.Log.error("Parsing File...");
 		NodeList nList = doc.getElementsByTagName("ServoOutputSequenceGroup");
 		for (int temp = 0; temp < nList.getLength(); temp++) {
-			//System.out.println("Leg # "+temp);
+			//com.neuronrobotics.sdk.common.Log.error("Leg # "+temp);
 		    Node nNode = nList.item(temp);
 		    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 		    	Element eElement = (Element) nNode;
@@ -134,7 +134,7 @@ public class CoreScheduler {
 		    	setLoopTime(Integer.parseInt(getTagValue("loopTime",eElement)));
 		    	NodeList links = eElement.getElementsByTagName("ServoOutputSequence");
 		    	for (int i = 0; i < links.getLength(); i++) {
-		    		//System.out.println("\tLink # "+i);
+		    		//com.neuronrobotics.sdk.common.Log.error("\tLink # "+i);
 		    		Node lNode = links.item(i);
 		    		if (lNode.getNodeType() == Node.ELEMENT_NODE) {
 			    		Element lElement = (Element) lNode;
@@ -158,7 +158,7 @@ public class CoreScheduler {
 			    			int current = data[j];
 			    			int after = data[j+1];
 			    			if(current == 0 &&before!=0 &&  after!=0){
-			    				System.out.println("Smoothing xml");
+			    				com.neuronrobotics.sdk.common.Log.error("Smoothing xml");
 			    				data[j]=(before+after)/2;
 			    			}
 			    		}
@@ -177,10 +177,10 @@ public class CoreScheduler {
 		    	}
 
 		    }else{
-		    	//System.out.println("Not Element Node");
+		    	//com.neuronrobotics.sdk.common.Log.error("Not Element Node");
 		    }
 		}
-		System.out.println("Populated Scheduler");
+		com.neuronrobotics.sdk.common.Log.error("Populated Scheduler");
 	}
 	
 	/**
@@ -193,7 +193,7 @@ public class CoreScheduler {
 	private static String getTagValue(String sTag, Element eElement){
 	    NodeList nlList= eElement.getElementsByTagName(sTag).item(0).getChildNodes();
 	    Node nValue = (Node) nlList.item(0); 
-	    //System.out.println("\t\t"+sTag+" = "+nValue.getNodeValue());
+	    //com.neuronrobotics.sdk.common.Log.error("\t\t"+sTag+" = "+nValue.getNodeValue());
 	    return nValue.getNodeValue();    
 	}
 	
@@ -209,7 +209,7 @@ public class CoreScheduler {
 		filename=f.getAbsolutePath();
     	mp3 = new SequencerWAV(f.getAbsolutePath());
     	msDuration = mp3.getTrackLength();
-    	System.out.println("Setting track length: "+msDuration);
+    	com.neuronrobotics.sdk.common.Log.error("Setting track length: "+msDuration);
     	setSequenceParams( msDuration, 0);
     	
 	}
@@ -259,7 +259,7 @@ public class CoreScheduler {
 	 * @return the servo output schedule channel
 	 */
 	public ServoOutputScheduleChannel addServoChannel(int dyIOChannel){
-		System.out.println("Adding DyIO channel: "+dyIOChannel);
+		com.neuronrobotics.sdk.common.Log.error("Adding DyIO channel: "+dyIOChannel);
 		ServoChannel srv = new ServoChannel(getDyIO().getChannel(dyIOChannel));
 		srv.SetPosition(srv.getValue());
 		srv.flush();
@@ -290,7 +290,7 @@ public class CoreScheduler {
 	public void setSequenceParams(int setpoint,long StartOffset){
 		msDuration=setpoint;
 		this.StartOffset=StartOffset;
-		//System.out.println("Starting scheduler setpoint="+setpoint+" offset="+StartOffset);
+		//com.neuronrobotics.sdk.common.Log.error("Starting scheduler setpoint="+setpoint+" offset="+StartOffset);
 		if(getSt()==null)
 			setSt(new SchedulerThread(msDuration,StartOffset));
 		if(mp3!=null)
@@ -475,14 +475,14 @@ public class CoreScheduler {
 					}
 					flushTime = System.currentTimeMillis()-start;
 					if(flushTime>getLoopTime()){
-						System.err.println("Flush took:"+flushTime+ " and loop time="+getLoopTime());
+						com.neuronrobotics.sdk.common.Log.error("Flush took:"+flushTime+ " and loop time="+getLoopTime());
 						flushTime=getLoopTime();
 					}
 				}else{
 					try {
 						Thread.sleep(10);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -543,7 +543,7 @@ public class CoreScheduler {
 		public SchedulerThread(double ms,final long so){
 			time = ms;
 			StartOffset=so;
-			//System.out.println("Slider value of init="+StartOffset);
+			//com.neuronrobotics.sdk.common.Log.error("Slider value of init="+StartOffset);
 			if(mp3!=null) {
 				mp3.setCurrentTime((int) (StartOffset));
 			}
@@ -556,7 +556,7 @@ public class CoreScheduler {
 		 * Play step.
 		 */
 		public void playStep(){
-			//System.out.println("Stepping scheduler");
+			//com.neuronrobotics.sdk.common.Log.error("Stepping scheduler");
 			boolean playing;
 			long current;
 			if(mp3==null){
@@ -580,7 +580,7 @@ public class CoreScheduler {
 		 * @see java.lang.Thread#run()
 		 */
 		public void run(){
-			//System.out.println("Starting timer");
+			//com.neuronrobotics.sdk.common.Log.error("Starting timer");
 			do{
 				do{
 					while(pause){
@@ -590,7 +590,7 @@ public class CoreScheduler {
 					long start = System.currentTimeMillis();
 					playStep();
 					ThreadUtil.wait(getLoopTime());
-					//System.out.println("Flush took "+(System.currentTimeMillis()-start));
+					//com.neuronrobotics.sdk.common.Log.error("Flush took "+(System.currentTimeMillis()-start));
 				}while(isRun());
 				setCurrentTime(0);
 				setPause(true);

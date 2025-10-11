@@ -10,11 +10,13 @@ import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 
 import com.neuronrobotics.bowlerstudio.scripting.BlenderLoader;
+import com.neuronrobotics.bowlerstudio.scripting.FreecadLoader;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
 import javafx.scene.transform.Affine;
 
@@ -29,37 +31,37 @@ public class CadFileExporter {
       
       @Override
       public void setSelectedCsg(Collection<CSG> selectedCsg) {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         
       }
       
       @Override
       public void setAllCSG(Collection<CSG> toAdd, File source) {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         
       }
       
       @Override
       public void highlightException(File fileEngineRunByName, Throwable ex) {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         
       }
       
       @Override
       public Set<CSG> getVisibleCSGs() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
       }
       
       @Override
       public void addCSG(Collection<CSG> toAdd, File source) {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         
       }
 
 	@Override
 	public void setSelected(Affine rootListener) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
     };
@@ -82,7 +84,11 @@ public class CadFileExporter {
 		}
 		int index=0;
 		ArrayList<CSG> svgParts = new ArrayList<>();
+		ArrayList<CSG> blendParts = new ArrayList<>();
+		ArrayList<CSG> freecadParts = new ArrayList<>();
 		String svgName =null;
+		String blendName=null;
+		String freecadName=null;
 		String nameBase ="";
 		for(CSG part: totalAssembly){
 			String name = part.getName();
@@ -99,18 +105,14 @@ public class CadFileExporter {
 				try {
 					allCadStl.add(makeStl(nameBase,manufactured));// default to stl
 				}catch(Throwable t) {
-					System.err.println("Failed to generate "+part.getName());
-					t.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error("Failed to generate "+part.getName());
+					com.neuronrobotics.sdk.common.Log.error(t);
 				}
 			}else{
 
 				for(String format:part.getExportFormats()){
 					if(format.toLowerCase().contains("obj")){
 						allCadStl.add(makeObj(nameBase,manufactured));//
-						ui.setCsg(manufactured , null);
-					}
-					if(format.toLowerCase().contains("blend")){
-						allCadStl.add(makeBlender(nameBase,manufactured));// 
 						ui.setCsg(manufactured , null);
 					}
 					if(format.toLowerCase().contains("stl")){
@@ -124,7 +126,22 @@ public class CadFileExporter {
 						svgParts.add(manufactured);
 						ui.setAllCSG(svgParts , null);
 					}
-					
+					if(format.toLowerCase().contains("blend")){
+						//allCadStl.add(makeBlender(nameBase,manufactured));// 
+						ui.setCsg(manufactured , null);
+						if(blendName==null){
+							blendName =part.toString();
+						}
+						blendParts.add(manufactured);
+					}
+					if(format.toLowerCase().contains("freecad")){
+						//allCadStl.add(makeBlender(nameBase,manufactured));// 
+						ui.setCsg(manufactured , null);
+						if(freecadName==null){
+							freecadName =part.toString();
+						}
+						freecadParts.add(manufactured);
+					}
 				}
 
 			}
@@ -132,28 +149,45 @@ public class CadFileExporter {
 		if(svgParts.size()>0){
 			allCadStl.add(makeSvg(nameBase,svgParts));// default to stl
 		}
-		
+		if(blendParts.size()>0){
+			allCadStl.add(makeBlender(nameBase,blendParts));// default to stl
+		}
+		if(freecadParts.size()>0){
+			allCadStl.add(makeFreecad(nameBase,freecadParts));// default to stl
+		}
+		com.neuronrobotics.sdk.common.Log.debug("Finished Export!");
 		return allCadStl;
 	}
+	private File makeFreecad(String nameBase,List<CSG>  current ) throws IOException{
+		File blend = new File(nameBase + ".FCStd");
+		com.neuronrobotics.sdk.common.Log.debug("Writing "+blend.getAbsolutePath());
+		for(CSG tmp:current)
+			FreecadLoader.addCSGToFreeCAD( blend,tmp);
+		return blend;
+	}
+	
 	private File makeStl(String nameBase,CSG tmp ) throws IOException{
 		File stl = new File(nameBase + ".stl");
-		
+//		boolean manifold=CSG.isPreventNonManifoldTriangles();
+//		CSG.setPreventNonManifoldTriangles(false);
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
-		System.out.println("Writing "+stl.getAbsolutePath());
+		//CSG.setPreventNonManifoldTriangles(manifold);
+		com.neuronrobotics.sdk.common.Log.debug("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
 	private File makeObj(String nameBase,CSG tmp ) throws IOException{
 		File stl = new File(nameBase + ".obj");
 		
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toObjString());
-		System.out.println("Writing "+stl.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Writing "+stl.getAbsolutePath());
 		return stl;
 	}
 	
-	private File makeBlender(String nameBase,CSG tmp ) throws IOException{
+	private File makeBlender(String nameBase,List<CSG>  current ) throws IOException{
 		File blend = new File(nameBase + ".blend");
-		System.out.println("Writing "+blend.getAbsolutePath());
-		BlenderLoader.toBlenderFile(tmp, blend);
+		com.neuronrobotics.sdk.common.Log.debug("Writing "+blend.getAbsolutePath());
+		for(CSG tmp:current)
+			BlenderLoader.toBlenderFile(null,tmp, blend);
 		return blend;
 	}
 	
@@ -182,10 +216,10 @@ public class CadFileExporter {
 
 				}
 
-				System.out.println("Writing " + stl.getAbsolutePath());
+				com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
 			} catch (Throwable t) {
-				System.err.println("ERROR, NO pixelization engine availible for slicing");
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine availible for slicing");
+				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 		
 		return stl;

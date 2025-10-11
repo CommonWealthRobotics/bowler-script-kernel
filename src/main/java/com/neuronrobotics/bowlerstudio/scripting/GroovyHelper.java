@@ -6,9 +6,12 @@ import groovy.lang.Script;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.*;
@@ -16,54 +19,51 @@ import org.codehaus.groovy.control.customizers.*;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.DeviceManager;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebugger {
 
+	private Object inline(String code, ArrayList<Object> args, CSGDatabaseInstance db2) throws Exception {
+		CompilerConfiguration cc = new CompilerConfiguration();
+		cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(ScriptingEngine.getImports())
 
-  private Object inline(Object code, ArrayList<Object> args) throws Exception {
-    CompilerConfiguration cc = new CompilerConfiguration();
-    cc.addCompilationCustomizers(new ImportCustomizer()
-        .addStarImports(ScriptingEngine.getImports())
+		);
 
-    );
+		Binding binding = new Binding();
 
-    Binding binding = new Binding();
-//    for (String pm : DeviceManager.listConnectedDevice()) {
-//      BowlerAbstractDevice bad =  DeviceManager.getSpecificDevice(null, pm);
-//      try {
-//        // groovy needs the objects cas to thier actual type befor
-//        // passing into the scipt
-//
-//        binding.setVariable(bad.getScriptingName(),
-//            Class.forName(bad.getClass().getName())
-//                .cast(bad));
-//      } catch (Throwable e) {
-//        //throw e;
-//      }
-////			System.err.println("Device " + bad.getScriptingName() + " is "
-////					+ bad);
-//    }
-    binding.setVariable("args", args);
+		binding.setVariable("args", args);
+		binding.setVariable("csgdb", db2);
+		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
+		if(!code.contains("csgdb")) {
+			//Vitamins.get(
+			code=code.replace("Vitamins.get(", "Vitamins.get(csgdb,");
 
-    GroovyShell shell = new GroovyShell(GroovyHelper.class
-        .getClassLoader(), binding, cc);
-    //System.out.println(code + "\n\nStart\n\n");
-    Script script;
-    if (String.class.isInstance(code)) {
-      script = shell.parse((String) code);
-    } else if (File.class.isInstance(code)) {
-      script = shell.parse((File) code);
-    } else {
-      return null;
-    }
-    return script.run();
+			code=code.replace("CaDoodleVitamin.", "new CaDoodleVitamin(csgdb).");
+			code=code.replace("StringParameter(", "StringParameter(csgdb,");
+			code=code.replace("LengthParameter(", "LengthParameter(csgdb,");
+			code=code.replace("setParameter(", "setParameter(csgdb,");
 
-  }
+			code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "");
+			code=code.replace("CSGDatabase", "csgdb");
+			
+			code=code.replace("inlineGistScriptRun(", "inlineGistScriptRun(csgdb,");
+			code=code.replace("inlineFileScriptRun(", "inlineFileScriptRun(csgdb,");
+			code=code.replace("inlineScriptRun(", "inlineScriptRun(csgdb,");
+			code=code.replace("inlineScriptStringRun(", "inlineScriptStringRun(csgdb,");
+			code=code.replace("gitScriptRun(", "gitScriptRun(csgdb,");
+		}
+		
+		Script script = shell.parse(code);
+		return script.run();
 
+	}
 
-  @Override
-  public String getShellType() {
-    return "Groovy";
-  }
+	@Override
+	public String getShellType() {
+		return "Groovy";
+	}
+
 	/**
 	 * Get the contents of an empty file
 	 * 
@@ -73,41 +73,43 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		return "// code here";
 	}
 
-  @Override
-  public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-    return inline(code, args);
-  }
+	@Override
+	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
+		String jsonString = null;
+		InputStream inPut = null;
+		inPut = FileUtils.openInputStream(code);
+		jsonString = IOUtils.toString(inPut);
+		return inline(jsonString, args, db);
+	}
 
+	@Override
+	public Object inlineScriptRun(CSGDatabaseInstance db, String code, ArrayList<Object> args) throws Exception {
+		return inline(code, args, db);
+	}
 
-  @Override
-  public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
-    return inline(code, args);
-  }
+	@Override
+	public boolean getIsTextFile() {
+		// Auto-generated method stub
+		return true;
+	}
 
+	@Override
+	public ArrayList<String> getFileExtenetion() {
+		// Auto-generated method stub
+		return new ArrayList<>(Arrays.asList("groovy", "java"));
+	}
 
-  @Override
-  public boolean getIsTextFile() {
-    // TODO Auto-generated method stub
-    return true;
-  }
+	@Override
+	public IDebugScriptRunner compileDebug(File f) {
+		// Auto-generated method stub
+		return new IDebugScriptRunner() {
 
-  @Override
-  public ArrayList<String> getFileExtenetion() {
-    // TODO Auto-generated method stub
-    return new ArrayList<>(Arrays.asList( "groovy","java"));
-  }
-
-  @Override
-  public IDebugScriptRunner compileDebug(File f) {
-    // TODO Auto-generated method stub
-    return new IDebugScriptRunner() {
-
-      @Override
-      public String[] step() {
-        // TODO Auto-generated method stub
-        return new String[]{"fileame.groovy", "345"};
-      }
-    };
-  }
+			@Override
+			public String[] step() {
+				// Auto-generated method stub
+				return new String[] { "fileame.groovy", "345" };
+			}
+		};
+	}
 
 }

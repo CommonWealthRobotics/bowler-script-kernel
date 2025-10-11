@@ -10,6 +10,9 @@ import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader;
 import com.neuronrobotics.sdk.addons.kinematics.DHLink;
@@ -20,7 +23,28 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 public class RobotHelper implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) {
+		return fileToRobot(code);
+	}
+	public static MobileBase fileToRobot(String url,String file) {
+		try {
+			return fileToRobot(ScriptingEngine.fileFromGit(url, file)) ;
+		} catch (InvalidRemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransportException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public static MobileBase fileToRobot(File code) {
 		byte[] bytes;
 		try {
 			bytes = Files.readAllBytes(code.toPath());
@@ -31,27 +55,27 @@ public class RobotHelper implements IScriptingLanguage {
 				mb.setGitSelfSource(ScriptingEngine.findGitTagFromFile(code));
 				return MobileBaseLoader.get(mb).getBase();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
 				return null;
 			}
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			// Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e1);
 		}
-		// System.out.println("Clojure returned of type="+ret.getClass()+" value="+ret);
+		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of type="+ret.getClass()+" value="+ret);
 		return null;
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) {
 
 		MobileBase mb = null;
 		try {
 			mb = new MobileBase(IOUtils.toInputStream(code, "UTF-8"));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e);
 			return null;
 		}
 
@@ -65,7 +89,7 @@ public class RobotHelper implements IScriptingLanguage {
 
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return true;
 	}
 
@@ -122,7 +146,7 @@ public class RobotHelper implements IScriptingLanguage {
 			out.close(); // don't swallow close Exception if copy completes
 			// normally
 		} catch(Throwable t){
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}finally {
 			try {
 				out.close();
@@ -134,7 +158,7 @@ public class RobotHelper implements IScriptingLanguage {
 
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("xml"));
 	}
 

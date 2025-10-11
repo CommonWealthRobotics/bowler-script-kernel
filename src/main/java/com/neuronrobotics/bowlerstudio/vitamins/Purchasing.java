@@ -81,8 +81,8 @@ public class Purchasing {
           "Pushing changed Database");//commit message
 
     } catch (org.eclipse.jgit.api.errors.TransportException ex) {
-      System.out.println("You need to fork " + getGitRpoDatabase() + " to have permission to save");
-      System.out.println(
+      com.neuronrobotics.sdk.common.Log.error("You need to fork " + getGitRpoDatabase() + " to have permission to save");
+      com.neuronrobotics.sdk.common.Log.error(
           "You do not have permission to push to this repo, change the GIT repo to your fork with setGitRpoDatabase(String gitRpoDatabase) ");
       throw ex;
     }
@@ -184,8 +184,8 @@ public class Purchasing {
       }
 
     } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      // Auto-generated catch block
+      com.neuronrobotics.sdk.common.Log.error(e);
     }
     return types;
   }
@@ -231,7 +231,7 @@ public class Purchasing {
         } catch (java.net.ConnectException ce) {
           // server or cart is not availible, reject vitamin
         } catch (Exception ex) {
-          ex.printStackTrace();
+          com.neuronrobotics.sdk.common.Log.error(ex);;
         }
       }
 

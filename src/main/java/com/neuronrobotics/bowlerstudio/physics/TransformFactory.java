@@ -8,10 +8,11 @@ import javax.vecmath.Vector3d;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
+import eu.mihosoft.vrl.v3d.Transform;
 import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
-// TODO: Auto-generated Javadoc
+//  Auto-generated Javadoc
 
 /**
  * A factory for creating Transform objects.
@@ -187,6 +188,10 @@ public class TransformFactory {
 		rotation.get(t1);
 
 		return new TransformNR(t1.x, t1.y, t1.z, new RotationNR(q1.w, q1.x, q1.y, q1.z));
+	}
+
+	public static Transform affineToCSG(Affine manipulator) {
+		return nrToCSG(affineToNr(manipulator));
 	}
 
 }

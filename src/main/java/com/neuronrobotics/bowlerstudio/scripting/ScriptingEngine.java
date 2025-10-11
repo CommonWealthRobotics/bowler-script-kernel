@@ -6,7 +6,10 @@ import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 import com.neuronrobotics.video.OSUtil;
 
+import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.CloneCommand;
@@ -63,6 +66,7 @@ import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -89,9 +93,50 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// sake, because multiple inheritance is TOO
 	// hard for java...
 	private static final int TIME_TO_WAIT_BETWEEN_GIT_PULL = 100000;
+
 	/**
 	 *
 	 */
+	public static void flatten(ArrayList<CSG> flat, Object o) {
+		if (CSG.class.isInstance(o))
+			flat.add((CSG) o);
+		if (List.class.isInstance(o)) {
+			for (Object ob : (List) o) {
+				flatten(flat, ob);
+			}
+		}
+
+	}
+
+	public static <T> void flatenInterna(CSGDatabaseInstance instance,Object o, Class<T> type, ArrayList<T> flattened) {
+		if (type.isInstance(o))
+			flattened.add((T) o);
+		else if (List.class.isInstance(o)) {
+			for (Object ob : (List) o) {
+				flatenInterna(instance,ob, type, flattened);
+			}
+		} else if (Map.class.isInstance(o)) {
+			Map m = (Map) o;
+			for (Object key : m.keySet()) {
+				flatenInterna(instance,m.get(key), type, flattened);
+				flatenInterna(instance,key, type, flattened);
+			}
+		}
+	}
+
+	public static <T> List<T> flaten(CSGDatabaseInstance instance,String git, String file, Class<T> type, ArrayList<Object> args) throws Exception {
+		ArrayList<T> flattened = new ArrayList<T>();
+		Object o = gitScriptRun(instance,git, file, args);
+		flatenInterna(instance,o, type, flattened);
+		return flattened;
+	}
+
+	public static <T> List<T> flaten(CSGDatabaseInstance instance,File f, Class<T> type, ArrayList<Object> args) throws Exception {
+		ArrayList<T> flattened = new ArrayList<T>();
+		Object o = inlineFileScriptRun(instance,f, args);
+		flatenInterna(instance,o, type, flattened);
+		return flattened;
+	}
 
 	private static final ArrayList<GitLogProgressMonitor> logListeners = new ArrayList<>();
 
@@ -110,9 +155,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"com.neuronrobotics.bowlerstudio.scripting", "com.neuronrobotics.bowlerstudio.tabs",
 			"com.neuronrobotics.bowlerstudio.physics", "com.neuronrobotics.bowlerstudio.physics",
 			"com.neuronrobotics.bowlerstudio.vitamins", "com.neuronrobotics.bowlerstudio.creature",
-			"com.neuronrobotics.bowlerstudio.threed","com.neuronrobotics.sdk.util.ThreadUtil",
-            "eu.mihosoft.vrl.v3d.Transform",
-            "com.neuronrobotics.bowlerstudio.vitamins.Vitamins" };
+			"com.neuronrobotics.bowlerstudio.threed", "com.neuronrobotics.sdk.util.ThreadUtil",
+			"eu.mihosoft.vrl.v3d.Transform", "com.neuronrobotics.bowlerstudio.vitamins.Vitamins" };
 
 	private static HashMap<String, File> filesRun = new HashMap<>();
 
@@ -131,11 +175,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static HashMap<String, ArrayList<Runnable>> onCommitEventListeners = new HashMap<>();
 	// static IssueReportingExceptionHandler exp = new
 	// IssueReportingExceptionHandler();
-	static HashMap<Git, GitTimeoutThread> gitOpenTimeout = new HashMap<>();
+	// static HashMap<Git, GitTimeoutThread> gitOpenTimeout = new HashMap<>();
+	static HashMap<String, Git> open = new HashMap<String, Git>();
+
+	private static String delim;
+
+	private static String appName = "BowlerLauncher";
 	static {
 
 		PasswordManager.hasNetwork();
-
+		addScriptingLanguage(new StlLoader());
 		addScriptingLanguage(new ClojureHelper());
 		addScriptingLanguage(new GroovyHelper());
 		addScriptingLanguage(new JythonHelper());
@@ -149,11 +198,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new BlenderLoader());
 		addScriptingLanguage(new FreecadLoader());
 		addScriptingLanguage(new FXMLBowlerLoader());
+		addScriptingLanguage(new OpenSCADLoader());
+		addScriptingLanguage(new CaDoodleLoader());
+		addScriptingLanguage(new ObjLoader());
 	}
 
 	public static void setWorkspace(File file) {
 		workspace = file;
-		System.err.println("Workspace: " + workspace.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Workspace: " + workspace.getAbsolutePath());
 		if (!workspace.exists()) {
 			workspace.mkdir();
 		}
@@ -189,7 +241,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		logListeners.clear();
 	}
 
-	private static Git cloneRepoLocalSelectAuth(String remoteURI, File dir, boolean useSSH)
+	private static void cloneRepoLocalSelectAuth(String remoteURI, File dir, boolean useSSH, IGitAccessor accessor)
 			throws InvalidRemoteException, TransportException, GitAPIException {
 		CloneCommand setURI = Git.cloneRepository().setURI(remoteURI);
 
@@ -203,12 +255,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 
 		Git git = setURI.call();
-		gitOpenTimeout.put(git, makeTimeoutThread(git));
-		return git;
+		open.put(dir.getAbsolutePath(), git);
+		try {
+			accessor.run(git);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e);
+		}
+		gitclose(git);
 	}
 
 	/**
-	 * CLoe git and start a timeout timer
+	 * Clone git and start a timeout timer
 	 * 
 	 * @param remoteURI
 	 * @param branch
@@ -218,21 +276,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @throws TransportException
 	 * @throws GitAPIException
 	 */
-	private static Git cloneRepoLocal(String remoteURI, File dir)
+	private static void cloneRepoLocal(String remoteURI, File dir, IGitAccessor accessor)
 			throws InvalidRemoteException, TransportException, GitAPIException {
 		boolean startsWith = remoteURI.startsWith("git@");
-
 		try {
-			return cloneRepoLocalSelectAuth(remoteURI, dir, startsWith);
+			cloneRepoLocalSelectAuth(remoteURI, dir, startsWith, accessor);
 		} catch (org.eclipse.jgit.api.errors.JGitInternalException ex) {
 			if (ex.getMessage().contains("already exists and is not an empty directory")) {
 				deleteRepo(remoteURI);
-				return cloneRepoLocal(remoteURI, dir);
+				cloneRepoLocal(remoteURI, dir, accessor);
+				return;
 			}
 			throw ex;
 		} catch (org.eclipse.jgit.api.errors.TransportException ex) {
 			if (ex.getMessage().contains("Auth fail") && !startsWith) {
-				return cloneRepoLocalSelectAuth(remoteURI, dir, true);
+				cloneRepoLocalSelectAuth(remoteURI, dir, true, accessor);
+				return;
 			}
 			throw ex;
 		}
@@ -251,14 +310,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			@Override
 			public void update(int completed) {
-				for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-					Git g = iterator.next();
-					GitTimeoutThread t = gitOpenTimeout.get(g);
-					if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
-						t.resetTimer();
-						break;
-					}
-				}
+//				for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
+//					Git g = iterator.next();
+//					GitTimeoutThread t = gitOpenTimeout.get(g);
+//					if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
+//						t.resetTimer();
+//						break;
+//					}
+//				}
 
 				sum += completed;
 				DecimalFormat df = new DecimalFormat("###.#");
@@ -270,13 +329,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				}
 				String str = format + "% " + stage + " " + reponame + "  " + tasks + " of task " + type;
 				if (timeofLastUpdate + 500 < System.currentTimeMillis()) {
-					if(printProgress)System.out.println(str);
+					if (printProgress)
+						com.neuronrobotics.sdk.common.Log.debug(str);
 					timeofLastUpdate = System.currentTimeMillis();
 				}
-				// System.err.println(str);
+				// com.neuronrobotics.sdk.common.Log.error(str);
 
 				for (GitLogProgressMonitor l : logListeners) {
-					l.onUpdate(str, e);
+					l.onLogUpdate(str, e);
 				}
 			}
 
@@ -293,16 +353,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			@Override
 			public void endTask() {
 				String string = "100%  " + stage + " " + reponame + "  " + type;
-				if(printProgress)System.out.println(string);
+				if (printProgress)
+					com.neuronrobotics.sdk.common.Log.debug(string);
 				for (GitLogProgressMonitor l : logListeners) {
-					l.onUpdate(string, e);
+					l.onLogUpdate(string, e);
 				}
 			}
 
 			@Override
 			public void beginTask(String title, int totalWork) {
 				stage = title;
-				// System.out.println("Setting totalWork to "+totalWork+" for stage "+stage);
+				// com.neuronrobotics.sdk.common.Log.error("Setting totalWork to "+totalWork+"
+				// for stage "+stage);
 				total = totalWork;
 				sum = 0;
 				tasks += 1;
@@ -317,29 +379,26 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @param url
 	 * @return
 	 */
-	public static Git openGit(String url) {
+	public static void openGit(String url, IGitAccessor accessor) {
 		Repository localRepo;
 		try {
 			localRepo = getRepository(url);
-			return openGit(localRepo);
+			openGit(localRepo, accessor);
+			return;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		throw new RuntimeException("IOException making repo");
 	}
 
-	public static boolean isUrlAlreadyOpen(String URL) {
+	public static boolean isUrlAlreadyOpen(File URL) {
 		if (URL == null)
 			return false;
-		Object[] keySet;
-		synchronized(gitOpenTimeout) {
-		 keySet =  gitOpenTimeout.keySet().toArray();
-		}
-		for (int i = 0; i < keySet.length; i++) {
-			Git g = (Git)keySet[i];
-			GitTimeoutThread t = gitOpenTimeout.get(g);
-			if (t.ref.toLowerCase().contentEquals(URL.toLowerCase())) {
+		Set<String> keySet = open.keySet();
+
+		for (String s : keySet) {
+			if (s.toLowerCase().contentEquals(URL.getAbsolutePath())) {
 				// t.getException().printStackTrace(System.err);
 				return true;
 			}
@@ -354,41 +413,42 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @return
 	 */
 
-	public static Git openGit(Repository localRepo) {
-
-		Object[] keySet;
-		synchronized(gitOpenTimeout) {
-		 keySet =  gitOpenTimeout.keySet().toArray();
-		}
-		for (int j = 0; j < keySet.length; j++) {
-			Object gO = keySet[j];
-			Git g=(Git)gO;
-			if (g.getRepository().getDirectory().getAbsolutePath()
-					.contentEquals(localRepo.getDirectory().getAbsolutePath())) {
-				GitTimeoutThread t = gitOpenTimeout.get(g);
-				int i = 0;
-				while (gitOpenTimeout.containsKey(g)) {
-
-					System.out.println(
-							"Git is locked by other process, blocking " + localRepo.getDirectory().getAbsolutePath());
-					System.out.println("Git locked " + t.ref);
-					if (i > 3) {
-						t.getException().printStackTrace(System.out);
-						System.out.println("Blocking process: ");
-
-						new Exception().printStackTrace(System.out);
+	public static void openGit(Repository localRepo, IGitAccessor accessor) {
+		Git git = null;
+		boolean alreadyOpen = false;
+		try {
+			String absolutePath = localRepo.getDirectory().getAbsolutePath();
+			for (String s : open.keySet()) {
+				Git g = open.get(s);
+				if (g != null)
+					if (g.getRepository().getDirectory().getAbsolutePath().contentEquals(absolutePath)) {
+						git = g;
+						alreadyOpen = true;
+						break;
 					}
-					i++;
-					ThreadUtil.wait(1000);
-				}
-				break;
 			}
+			if (!alreadyOpen) {
+				git = new Git(localRepo);
+				open.put(absolutePath, git);
+			}
+			if (accessor != null) {
+				try {
+					accessor.run(git);
+				} catch (Throwable t) {
+					// new IssueReportingExceptionHandler().except(t);
+					throw new RuntimeException(t);
+				}
+			}
+			if (!alreadyOpen)
+				gitclose(git);
+		} catch (Throwable t) {
+			// new IssueReportingExceptionHandler().except(t);
+			if (!alreadyOpen)
+				if (git != null) {
+					gitclose(git);
+				}
+			throw new RuntimeException(t);
 		}
-
-		Git git = new Git(localRepo);
-
-		gitOpenTimeout.put(git, makeTimeoutThread(git));
-		return git;
 	}
 
 	/**
@@ -396,33 +456,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * 
 	 * @param git
 	 */
-	public static void closeGit(Git git) {
+	private static void gitclose(Git git) {
 		if (git == null)
 			return;
-		if (gitOpenTimeout.containsKey(git)) {
-			Thread thread = gitOpenTimeout.remove(git);
-			if (thread != null) {
-				thread.interrupt();
-			} else {
-				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),
-						new RuntimeException("Closing a git object that was not opened with a timeout!"));
-			}
-		}
-		git.getRepository().close();
+		open.remove(git.getRepository().getDirectory().getAbsolutePath());
+		// git.getRepository().close();
 		git.close();
-	}
-
-	/**
-	 * Make a timeout thread for printing an exception whenever a git object is
-	 * opened and not closed within 5 seconds
-	 * 
-	 * @return
-	 */
-	private static GitTimeoutThread makeTimeoutThread(Git git) {
-
-		GitTimeoutThread thread = new GitTimeoutThread(git);
-		thread.start();
-		return thread;
 	}
 
 	public static void addOnCommitEventListeners(String url, Runnable event) {
@@ -448,6 +487,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 	}
 
+
 	/**
 	 * This interface is for adding additional language support.
 	 *
@@ -455,18 +495,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception {
+	public static Object inlineScriptRun(CSGDatabaseInstance instance,File code, ArrayList<Object> args, String shellTypeStorage) throws Exception {
 		if (filesRun.get(code.getName()) == null) {
 			filesRun.put(code.getName(), code);
-			// System.out.println("Loading "+code.getAbsolutePath());
+			// com.neuronrobotics.sdk.common.Log.error("Loading "+code.getAbsolutePath());
 		}
 
-		if (langauges.get(shellTypeStorage) != null) {
-			return langauges.get(shellTypeStorage).inlineScriptRun(code, args);
+		IScriptingLanguage iScriptingLanguage = langauges.get(shellTypeStorage);
+		if (iScriptingLanguage != null) {
+			Object inlineScriptRun = iScriptingLanguage.inlineScriptRun(instance,code, args);
+			return inlineScriptRun;
 		}
 		return null;
 	}
-
 	/**
 	 * This interface is for adding additional language support.
 	 *
@@ -474,14 +515,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
+	public static Object inlineScriptStringRun(CSGDatabaseInstance instance, String line, ArrayList<Object> args, String shellTypeStorage)
 			throws Exception {
 
 		if (langauges.get(shellTypeStorage) != null) {
-			return langauges.get(shellTypeStorage).inlineScriptRun(line, args);
+			return langauges.get(shellTypeStorage).inlineScriptRun(instance,line, args);
 		}
 		return null;
 	}
+
 
 	public static void addScriptingLanguage(IScriptingLanguage lang) {
 		langauges.put(lang.getShellType(), lang);
@@ -501,23 +543,76 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static File getWorkspace() {
 		if (workspace == null) {
-			String relative = FileSystemView.getFileSystemView().getDefaultDirectory().getPath();
-			// https://github.com/CommonWealthRobotics/BowlerStudio/issues/378
-			if (OSUtil.isOSX() || OSUtil.isLinux())
-				if (!relative.endsWith("Documents")) {
-					relative = relative + "/Documents";
-				}
-			if (OSUtil.isWindows()) {
-				if (!relative.endsWith("Documents")) {
-					relative = relative + "\\Documents";
-				}
-			}
-
-			File file = new File(relative + "/bowler-workspace/");
+			File relative = getWorkingDirectory();
+			File file = new File(relative.getAbsolutePath() + delim + "bowler-workspace" + delim);
 			file.mkdirs();
 			setWorkspace(file);
 		}
 		return workspace;
+	}
+
+	public static void createSymlinkInDocuments(File appDataDir) throws IOException {
+		String userHome = System.getProperty("user.home");
+		Path documentsDir = Paths.get(userHome, "Documents");
+		Path symlinkPath = documentsDir.resolve(appDataDir.getName());
+
+		// Delete existing symlink if it exists
+		if (Files.exists(symlinkPath)) {
+			return;
+		}
+
+		// Create the symlink
+		Files.createSymbolicLink(symlinkPath, appDataDir.toPath());
+		com.neuronrobotics.sdk.common.Log.debug("Symlink created: " + symlinkPath);
+	}
+    private static Path getWindowsAppData(String appName) {
+        // Try APPDATA first, then LOCALAPPDATA, then fallback
+        String appData = System.getenv("APPDATA");
+        if (appData != null) {
+            return Paths.get(appData, appName);
+        }
+        
+        String localAppData = System.getenv("LOCALAPPDATA");
+        if (localAppData != null) {
+            return Paths.get(localAppData, appName);
+        }
+        
+        // Fallback
+        String userHome = System.getProperty("user.home");
+        return Paths.get(userHome, "AppData", "Roaming", appName);
+    }
+	public static File getWorkingDirectory() {
+		String relative = Paths.get(System.getProperty("user.home"), "Documents").toString();
+		if (OSUtil.isOSX()) {
+			File appDataDir = new File(System.getProperty("user.home") + "/Library/Application Support/" + appName);
+
+			if (!appDataDir.exists()) {
+				if (!appDataDir.mkdirs()) {
+					throw new RuntimeException("Failed to create app data directory");
+				}
+			}
+			relative = appDataDir.getAbsolutePath();
+			try {
+				createSymlinkInDocuments(appDataDir);
+			} catch (IOException e) {
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
+			}
+		}
+		delim = "/";
+		if (OSUtil.isLinux())
+			if (!relative.endsWith("Documents")) {
+				relative = relative + delim + "Documents";
+			}
+		if (OSUtil.isWindows()) {
+			delim = "\\";
+			if (!relative.endsWith("Documents")) {
+				relative = relative + delim + "Documents";
+			}
+		}
+		File file = new File(relative + delim);
+		file.mkdirs();
+		return file;
 	}
 
 	public static String getShellType(String name) {
@@ -548,7 +643,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static GitHub setupAnyonmous() throws IOException {
-		//ScriptingEngine.setAutoupdate(false);
+		// ScriptingEngine.setAutoupdate(false);
 		return PasswordManager.setupAnyonmous();
 	}
 
@@ -585,11 +680,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Elements links = doc.select("script");
 		for (int i = 0; i < links.size(); i++) {
 			Element e = links.get(i);
-			/// System.out.println("Found gist embed: "+e);
+			/// com.neuronrobotics.sdk.common.Log.error("Found gist embed: "+e);
 			Attributes n = e.attributes();
 			String jSSource = n.get("src");
 			if (jSSource.contains("https://gist.github.com/")) {
-				// System.out.println("Source = "+jSSource);
+				// com.neuronrobotics.sdk.common.Log.error("Source = "+jSSource);
 				String slug = jSSource;
 				String js = slug.split(".js")[0];
 				String[] id = js.split("/");
@@ -631,7 +726,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 */
 	public static void waitForLogin() throws IOException, InvalidRemoteException, TransportException, GitAPIException {
 		if (!PasswordManager.hasNetwork()) {
-			System.err.println("No network, cant log in");
+			com.neuronrobotics.sdk.common.Log.error("No network, cant log in");
 			return;
 		}
 		try {
@@ -639,18 +734,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if (PasswordManager.loggedIn())
 				return;
 			if (PasswordManager.getLoginID() == null) {
-				System.err.println("No login ID found!");
+				com.neuronrobotics.sdk.common.Log.error("No login ID found!");
 				return;
 			}
 			if (PasswordManager.getPassword() == null) {
-				System.err.println("No login api key found!");
+				com.neuronrobotics.sdk.common.Log.error("No login api key found!");
 				return;
 			}
-			System.err.println("Performing Login");
+			com.neuronrobotics.sdk.common.Log.debug("Performing Login");
 			PasswordManager.waitForLogin();
 
 			if (!PasswordManager.loggedIn()) {
-				System.err.println("\nERROR: Wrong Password!\n");
+				com.neuronrobotics.sdk.common.Log.error("\nERROR: Wrong Password!\n");
 				login();
 			}
 
@@ -661,22 +756,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void waitForRepo(String remoteURI, String reason) {
-		while (ScriptingEngine.isUrlAlreadyOpen(remoteURI)) {
-			ThreadUtil.wait(500);
-			for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-				Git g = iterator.next();
-				GitTimeoutThread t = gitOpenTimeout.get(g);
-				if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
-
-					System.err.println("\n\n\nPaused " + reason + " by another thread, waiting for repo " + remoteURI);
-					new Exception().printStackTrace(System.err);
-					System.err.println("Paused by:");
-					t.getException().printStackTrace(System.err);
-					System.err.println("\n\n\n");
-
-				}
-			}
+		if (isNotURL(remoteURI)) {
+			return;
 		}
+		try {
+			File f = getRepository(remoteURI).getDirectory();
+			while (ScriptingEngine.isUrlAlreadyOpen(f)) {
+				ThreadUtil.wait(500);
+				System.err.println("Waiting...");
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e);
+		}
+
 	}
 
 	public static void deleteRepo(String remoteURI) {
@@ -708,25 +801,25 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					try {
 						FileChangeWatcher.notifyOfDelete(f);
 						FileChangeWatcher.close(f);
-						System.out.println("Deleting File " + f.getAbsolutePath());
+						com.neuronrobotics.sdk.common.Log.debug("Deleting File " + f.getAbsolutePath());
 						if (!f.delete()) {
-							System.err.println("File failed to delete! " + f);
+							com.neuronrobotics.sdk.common.Log.debug("File failed to delete! " + f);
 						}
 					} catch (Throwable t) {
-						t.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(t);
 					}
-					// System.out.println("Deleting " + f.getAbsolutePath());
+					// com.neuronrobotics.sdk.common.Log.error("Deleting " + f.getAbsolutePath());
 				}
 			}
 		}
 		try {
-			System.out.println("Deleting Folder " + folder.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Deleting Folder " + folder.getAbsolutePath());
 			folder.delete();
 		} catch (Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 		if (folder.exists()) {
-			System.err.println("Folder failed to delete! " + folder);
+			com.neuronrobotics.sdk.common.Log.error("Folder failed to delete! " + folder);
 			deleteFolder(folder);
 		}
 
@@ -821,10 +914,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		File parent = desired.getParentFile();
 		if (!parent.exists()) {
 			parent.mkdirs();
-			System.err.println("Creating " + parent.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Creating " + parent.getAbsolutePath());
 		}
 		if (!desired.exists() && parent.exists()) {
-			System.err.println("Creating " + desired.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Creating " + desired.getAbsolutePath());
 			desired.createNewFile();
 			createdFlag = true;
 		}
@@ -833,16 +926,39 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static void commit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile) throws Exception {
-		commit(id, branch, FileName, content, commitMessage, flagNewFile, null);
+		if (isNotURL(id)) {
+			try {
+				File f = new File(id);
+				if (f.exists() && f.isDirectory()) {
+					com.neuronrobotics.sdk.common.Log.debug("remoteURI is actually a directory " + f);
+					OutputStream out = null;
+					try {
+						out = FileUtils.openOutputStream(new File(f + "/" + FileName), false);
+						IOUtils.write(content, out, Charset.defaultCharset());
+						out.close(); // don't swallow close Exception if copy
+						// completes
+						// normally
+					} finally {
+						IOUtils.closeQuietly(out);
+					}
+					return;
+				}
+			} catch (Exception ex) {
+				// not a file i guess...
+			}
+		}
+		openGit(id, git -> {
+			commit(id, branch, FileName, content, commitMessage, flagNewFile, git);
+		});
 	}
 
 	@SuppressWarnings("deprecation")
-	public static void commit(String id, String branch, String FileName, String content, String commitMessage,
+	private static void commit(String id, String branch, String FileName, String content, String commitMessage,
 			boolean flagNewFile, Git gitRef) throws Exception {
-		if(content !=null)
-		if("Binary File".contentEquals(content)){
-			content=null;
-		}
+		if (content != null)
+			if ("Binary File".contentEquals(content)) {
+				content = null;
+			}
 		if (PasswordManager.getUsername() == null)
 			login();
 		if (!hasNetwork())
@@ -858,13 +974,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		Git git = gitRef;
 		if (git == null)
-			git = openGit(localRepo);
+			throw new RuntimeException("Fail! Git must exist before commiting");
 		try { // latest version
 			if (flagNewFile) {
 				git.add().addFilepattern(FileName).call();
 			}
-			if (gitRef == null)
-				closeGit(git);
 			if (content != null) {
 				OutputStream out = null;
 				try {
@@ -880,45 +994,63 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			commit(id, branch, commitMessage, gitRef);
 		} catch (Exception ex) {
-			if (gitRef == null)
-				closeGit(git);
-
 			throw ex;
 		}
-		if (gitRef == null)
-			closeGit(git);
 		try {
-			if (!desired.getName().contentEquals("csgDatabase.json")) {
-				String[] gitID = ScriptingEngine.findGitTagFromFile(desired, gitRef);
-				String remoteURI = gitID[0];
-				ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI, gitRef);
-				for (String s : f) {
-					if (s.contentEquals("csgDatabase.json")) {
-
-						File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
-						if (!CSGDatabase.getDbFile().equals(dbFile))
-							CSGDatabase.setDbFile(dbFile);
-						CSGDatabase.saveDatabase();
-						@SuppressWarnings("resource")
-						String c = new Scanner(dbFile).useDelimiter("\\Z").next();
-						ScriptingEngine.commit(remoteURI, branch, s, c, "saving CSG database", false, gitRef);
-					}
-				}
-			}
+//			if (!desired.getName().contentEquals("csgDatabase.json")) {
+//				String[] gitID = ScriptingEngine.findGitTagFromFile(desired, gitRef);
+//				String remoteURI = gitID[0];
+//				ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI, gitRef);
+//				for (String s : f) {
+//					if (s.contentEquals("csgDatabase.json")) {
+//
+//						File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
+//						if (!CSGDatabase.getDbFile().equals(dbFile))
+//							CSGDatabase.setInstance(new CSGDatabaseInstance(dbFile));
+//						CSGDatabase.saveDatabase();
+//						@SuppressWarnings("resource")
+//						String c = new Scanner(dbFile).useDelimiter("\\Z").next();
+//						commit(remoteURI, branch, s, c, "saving CSG database", false, gitRef);
+//					}
+//				}
+//			}
 		} catch (Exception e) {
 			// ignore CSG database
-			e.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
 
 	@SuppressWarnings("deprecation")
 	public static void pushCodeToGit(String remoteURI, String branch, String FileName, String content,
 			String commitMessage, boolean flagNewFile) throws Exception {
-		waitForRepo(remoteURI, "push");
-		if(content!=null)
-			if("Binary File".contentEquals(content)){
-				content=null;
+		if (isNotURL(remoteURI)) {
+			try {
+				File f = new File(remoteURI);
+				if (f.exists() && f.isDirectory()) {
+					com.neuronrobotics.sdk.common.Log.debug("remoteURI is actually a directory " + f);
+					OutputStream out = null;
+					try {
+						out = FileUtils.openOutputStream(new File(f + "/" + FileName), false);
+						IOUtils.write(content, out, Charset.defaultCharset());
+						out.close(); // don't swallow close Exception if copy
+						// completes
+						// normally
+					} finally {
+						IOUtils.closeQuietly(out);
+					}
+					return;
+				}
+			} catch (Exception ex) {
+				// not a file i guess...
 			}
+		}
+
+		waitForRepo(remoteURI, "push");
+		if (content != null)
+			if ("Binary File".contentEquals(content)) {
+				content = null;
+			}
+
 		commit(remoteURI, branch, FileName, content, commitMessage, flagNewFile);
 		if (PasswordManager.getUsername() == null)
 			login();
@@ -945,40 +1077,40 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		File gitRepoFile = new File(localPath + "/.git");
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-		Git git = null;
+		// Git git = null;
 		try {
 			try {
 				pull(remoteURI, branch);
 			} catch (java.lang.RuntimeException exp) {
 			}
-			git = openGit(localRepo);
-			// latest version
-			if (flagNewFile) {
-				git.add().addFilepattern(FileName).call();
-			}
-			if (content != null) {
-				OutputStream out = null;
-				try {
-					out = FileUtils.openOutputStream(desired, false);
-					IOUtils.write(content, out);
-					out.close(); // don't swallow close Exception if copy
-					// completes
-					// normally
-				} finally {
-					IOUtils.closeQuietly(out);
+			String c = content;
+			openGit(localRepo, git -> {
+				// latest version
+				if (flagNewFile) {
+					git.add().addFilepattern(FileName).call();
 				}
-			}
-			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
-				git.push().setTransportConfigCallback(transportConfigCallback)
-						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
-			else
-				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider())
-						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
-			closeGit(git);
-			System.out.println("PUSH OK! file: " + desired + " on branch " + getBranch(remoteURI));
+				if (c != null) {
+					OutputStream out = null;
+					try {
+						out = FileUtils.openOutputStream(desired, false);
+						IOUtils.write(c, out, Charset.defaultCharset());
+						out.close(); // don't swallow close Exception if copy
+						// completes
+						// normally
+					} finally {
+						IOUtils.closeQuietly(out);
+					}
+				}
+				if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
+					git.push().setTransportConfigCallback(transportConfigCallback)
+							.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
+				else
+					git.push().setCredentialsProvider(PasswordManager.getCredentialProvider())
+							.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
+			});
+			com.neuronrobotics.sdk.common.Log.debug("PUSH OK! file: " + desired + " on branch " + getBranch(remoteURI));
 		} catch (Exception ex) {
-			ex.printStackTrace();
-			closeGit(git);
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			String[] gitID = ScriptingEngine.findGitTagFromFile(desired);
 			String id = gitID[0];
 
@@ -991,7 +1123,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		File targetFile = fileFromGit(id, FileName);
 		if (targetFile.exists()) {
-			// System.err.println("Loading file:
+			// com.neuronrobotics.sdk.common.Log.error("Loading file:
 			// "+targetFile.getAbsoluteFile());
 			// Target file is ready to go
 			String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())),
@@ -999,7 +1131,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			return new String[] { text, FileName, targetFile.getAbsolutePath() };
 		}
 
-		return null;
+		throw new RuntimeException("File missing! " + targetFile.getAbsolutePath());
 	}
 
 	private static String[] codeFromGistID(String id, String FileName) throws Exception {
@@ -1007,7 +1139,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		File targetFile = fileFromGit(giturl, FileName);
 		if (targetFile.exists()) {
-			System.err.println("Gist at GIT : " + giturl);
+			com.neuronrobotics.sdk.common.Log.debug("Gist at GIT : " + giturl);
 			// Target file is ready to go
 			String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())),
 					StandardCharsets.UTF_8);
@@ -1017,25 +1149,90 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return null;
 	}
 
-	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception {
+	public static Object inlineFileScriptRun(CSGDatabaseInstance instance,File f, ArrayList<Object> args) throws Exception {
 
-		return inlineScriptRun(f, args, getShellType(f.getName()));
+		return inlineScriptRun(instance,f, args, getShellType(f.getName()));
+	}
+	public static Object inlineGistScriptRun(CSGDatabaseInstance db,String gistID, String Filename, ArrayList<Object> args) throws Exception {
+		String[] gistData = codeFromGistID(gistID, Filename);
+		return inlineScriptRun(db,new File(gistData[2]), args, getShellType(gistData[1]));
 	}
 
+	
+	@Deprecated
 	public static Object inlineGistScriptRun(String gistID, String Filename, ArrayList<Object> args) throws Exception {
 		String[] gistData = codeFromGistID(gistID, Filename);
-		return inlineScriptRun(new File(gistData[2]), args, getShellType(gistData[1]));
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		return inlineScriptRun(CSGDatabase.getInstance(),new File(gistData[2]), args, getShellType(gistData[1]));
 	}
-
+	@Deprecated
+	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception {
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		return inlineScriptRun(CSGDatabase.getInstance(),f, args, getShellType(f.getName()));
+	}
+	@Deprecated
 	public static Object gitScriptRun(String gitURL, String Filename) throws Exception {
-		return gitScriptRun(gitURL, Filename, null);
-	}
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
 
+		return gitScriptRun(CSGDatabase.getInstance(),gitURL, Filename, null);
+	}
+	/**
+	 * This interface is for adding additional language support.
+	 *
+	 * @param code file content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	@Deprecated
+	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception{
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		CSGDatabaseInstance prevDB = CSGDatabase.getInstance();
+		try {
+			if (!code.getName().toLowerCase().contentEquals("csgdatabase.json")) {
+				File p = code.getParentFile();
+				for (String s : p.list()) {
+					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
+						prevDB = (new CSGDatabaseInstance(
+								new File(p.getAbsoluteFile() + DownloadManager.delim() + s)));
+					}
+				}
+			}
+		} catch (Exception e) {
+			Log.error(e);
+		}
+		return inlineScriptRun(prevDB, code, args, shellTypeStorage);
+	}
+	/**
+	 * This interface is for adding additional language support.
+	 *
+	 * @param line the text content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	@Deprecated
+	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
+			throws Exception {
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		return inlineScriptStringRun(CSGDatabase.getInstance(),line,args,shellTypeStorage);
+	}
+	@Deprecated
 	public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args) throws Exception {
-		String[] gistData = codeFromGit(gitURL, Filename);
-		return inlineScriptRun(new File(gistData[2]), args, getShellType(gistData[1]));
+		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
+		return gitScriptRun(CSGDatabase.getInstance(), gitURL, Filename, args);
+	}
+	
+	
+	public static Object gitScriptRun(CSGDatabaseInstance db,String gitURL, String Filename) throws Exception {
+		return gitScriptRun(db,gitURL, Filename, null);
 	}
 
+	public static Object gitScriptRun(CSGDatabaseInstance db,String gitURL, String Filename, ArrayList<Object> args) throws Exception {
+		return inlineScriptRun(db,fileFromGit(gitURL, Filename), args, getShellType(Filename));
+	}
+	public static File fileFromGit(String[] self)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		return fileFromGit(self[0], null, self[1]);
+	}
 	public static File fileFromGit(String remoteURI, String fileInRepo)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		return fileFromGit(remoteURI, null, fileInRepo);
@@ -1046,6 +1243,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	// https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git
 	public static File fileFromGit(String remoteURI, String branch, String fileInRepo)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
+		if (branch != null)
+			if (branch.length() == 0)
+				branch = null;
 		File gitRepoFile = cloneRepo(remoteURI, branch);
 		return new File(gitRepoFile.getAbsolutePath() + "/" + fileInRepo);
 	}
@@ -1058,7 +1258,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			File gistDir = new File(getWorkspace().getAbsolutePath() + "/gitcache/" + gitSplit + "/.git");
 			return gistDir;
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			System.err.println("Failed to parse " + remoteURI);
+			com.neuronrobotics.sdk.common.Log.error("Failed to parse " + remoteURI);
 			throw ex;
 		}
 
@@ -1120,31 +1320,31 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		// CheckoutCommand checkout;
 		// String source = getFullBranch(remoteURI);
 
-		Git git;
+		openGit(localRepo, git -> {
+			String d = toDelete;
+			if (!toDelete.contains("heads")) {
+				d = "heads/" + d;
+			}
+			if (!toDelete.contains("refs")) {
+				d = "refs/" + d;
+			}
+			Exception ex = null;
+			try {
+				// delete branch 'branchToDelete' locally
+				git.branchDelete().setBranchNames(d).call();
 
-		git = openGit(localRepo);
-		if (!toDelete.contains("heads")) {
-			toDelete = "heads/" + toDelete;
-		}
-		if (!toDelete.contains("refs")) {
-			toDelete = "refs/" + toDelete;
-		}
-		Exception ex = null;
-		try {
-			// delete branch 'branchToDelete' locally
-			git.branchDelete().setBranchNames(toDelete).call();
+				// delete branch 'branchToDelete' on remote 'origin'
+				RefSpec refSpec = new RefSpec().setSource(null).setDestination(d);
+				git.push().setRefSpecs(refSpec).setRemote("origin")
+						.setCredentialsProvider(PasswordManager.getCredentialProvider())
+						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
+			} catch (Exception e) {
+				ex = e;
+			}
+			if (ex != null)
+				throw ex;
+		});
 
-			// delete branch 'branchToDelete' on remote 'origin'
-			RefSpec refSpec = new RefSpec().setSource(null).setDestination(toDelete);
-			git.push().setRefSpecs(refSpec).setRemote("origin")
-					.setCredentialsProvider(PasswordManager.getCredentialProvider())
-					.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
-		} catch (Exception e) {
-			ex = e;
-		}
-		closeGit(git);
-		if (ex != null)
-			throw ex;
 	}
 
 	public static String newBranch(String remoteURI, String newBranch)
@@ -1160,41 +1360,32 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		waitForRepo(remoteURI, "newBranch");
 		Repository localRepo = getRepository(remoteURI);
 
-		Git git = null;
 		try {
 			for (String s : listBranchNames(remoteURI)) {
 				if (s.contains(newBranch)) {
 					// throw new RuntimeException(newBranch + " can not be created because " + s + "
 					// is too similar");
-
-					git = openGit(localRepo);
-					shallowCheckout(remoteURI, newBranch, git);
-					closeGit(git);
+					openGit(localRepo, git -> {
+						shallowCheckout(remoteURI, newBranch, git);
+					});
 					return;
 
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			closeGit(git);
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 
-		git = openGit(localRepo);
-		try {
+		openGit(localRepo, git -> {
 			try {
-				if (source == null)
-					source = git.log().setMaxCount(1).call().iterator().next();
-				newBranchLocal(newBranch, remoteURI, git, source);
+				RevCommit s = source;
+				if (s == null)
+					s = git.log().setMaxCount(1).call().iterator().next();
+				newBranchLocal(newBranch, remoteURI, git, s);
 			} catch (NoHeadException ex) {
 				newBranchLocal(newBranch, remoteURI, git, null);
 			}
-		} catch (Throwable ex) {
-			closeGit(git);
-			throw ex;
-		}
-
-		closeGit(git);
-
+		});
 	}
 
 	private static void newBranchLocal(String newBranch, String remoteURI, Git git, RevCommit source)
@@ -1210,10 +1401,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				setName.setForce(true);
 			}
 			setName.call();
-			System.out.println("Created new branch " + remoteURI + "\t\t" + newBranch);
+			com.neuronrobotics.sdk.common.Log.debug("Created new branch " + remoteURI + "\t\t" + newBranch);
 		} catch (org.eclipse.jgit.api.errors.RefNotFoundException ex) {
-			System.err.println("ERROR Creating " + newBranch + " in " + remoteURI);
-			ex.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.debug("ERROR Creating " + newBranch + " in " + remoteURI);
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 		} catch (org.eclipse.jgit.api.errors.RefAlreadyExistsException ex) {
 			// just checkout the existing branch then
 		}
@@ -1241,7 +1432,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				if (ref.getObjectId() != null) {
 					List<Ref> branchList = listBranches(remoteURI, git);
 					if (branchList.size() > 0) {
-						// System.out.println("Found "+branchList.size()+"
+						// com.neuronrobotics.sdk.common.Log.error("Found "+branchList.size()+"
 						// branches");
 						return true;
 					}
@@ -1262,20 +1453,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		// https://gist.github.com/0e6454891a3b3f7c8f28.git
-		List<Ref> Ret;
-		Git git = openGit(localRepo);
-		Ret = listBranches(remoteURI, git);
-		closeGit(git);
-		return Ret;
+		ArrayList<Ref> back = new ArrayList<Ref>();
+		openGit(localRepo, git -> {
+			List<Ref> Ret = listBranches(remoteURI, git);
+			back.addAll(Ret);
+		});
+		return back;
 	}
 
 	public static List<Ref> listBranches(String remoteURI, Git git) throws Exception {
 
 		// https://gist.github.com/0e6454891a3b3f7c8f28.git
-		// System.out.println("Listing references from: "+remoteURI);
-		// System.out.println(" branch: "+getFullBranch(remoteURI));
+		// com.neuronrobotics.sdk.common.Log.error("Listing references from:
+		// "+remoteURI);
+		// com.neuronrobotics.sdk.common.Log.error(" branch:
+		// "+getFullBranch(remoteURI));
 		List<Ref> list = git.branchList().setListMode(ListMode.ALL).call();
-		// System.out.println(" size : "+list.size());
+		// com.neuronrobotics.sdk.common.Log.error(" size : "+list.size());
 		return list;
 	}
 
@@ -1288,16 +1482,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
 		// https://gist.github.com/0e6454891a3b3f7c8f28.git
-		Git git = openGit(localRepo);
-		try {
+		ArrayList<Ref> back = new ArrayList<Ref>();
+		openGit(localRepo, git -> {
 			List<Ref> list = git.branchList().call();
-			closeGit(git);
-			return list;
-		} catch (Exception ex) {
-
-		}
-		closeGit(git);
-		return new ArrayList<>();
+			back.addAll(list);
+		});
+		return back;
 	}
 
 	public static List<String> listLocalBranchNames(String remoteURI) throws Exception {
@@ -1305,7 +1495,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		List<Ref> list = listLocalBranches(remoteURI);
 		for (Ref ref : list) {
-			// System.out.println("Branch: " + ref + " " + ref.getName() + " " +
+			// com.neuronrobotics.sdk.common.Log.error("Branch: " + ref + " " +
+			// ref.getName() + " " +
 			// ref.getObjectId().getName());
 			branchNames.add(ref.getName());
 		}
@@ -1317,7 +1508,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		List<Ref> list = listBranches(remoteURI);
 		for (Ref ref : list) {
-			// System.out.println("Branch: " + ref + " " + ref.getName() + " " +
+			// com.neuronrobotics.sdk.common.Log.error("Branch: " + ref + " " +
+			// ref.getName() + " " +
 			// ref.getObjectId().getName());
 			branchNames.add(ref.getName());
 		}
@@ -1337,8 +1529,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 
 		Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile());
-		Git git = openGit(localRepo);
-		try {
+		openGit(localRepo, git -> {
 
 			String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
 			try {
@@ -1360,64 +1551,57 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 						throw ex;
 
 				}
-				closeGit(git);
-				// new Exception(ref).printStackTrace();
 			} catch (CheckoutConflictException ex) {
-//			closeGit(git);
-//			resolveConflict(remoteURI, ex, git);
-//			pull(remoteURI, branch);
-				closeGit(git);
+
 				PasswordManager.checkInternet();
 				throw ex;
 			} catch (WrongRepositoryStateException e) {
-				e.printStackTrace();
-				closeGit(git);
+				com.neuronrobotics.sdk.common.Log.error(e);
+
 				PasswordManager.checkInternet();
 				// deleteRepo(remoteURI);
 				throw e;
 			} catch (InvalidConfigurationException e) {
 
 				PasswordManager.checkInternet();
-				closeGit(git);
+
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			} catch (DetachedHeadException e) {
 				PasswordManager.checkInternet();
-				closeGit(git);
+
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			} catch (InvalidRemoteException e) {
 				PasswordManager.checkInternet();
-				closeGit(git);
+
 				throw new InvalidRemoteException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			} catch (CanceledException e) {
 				PasswordManager.checkInternet();
-				closeGit(git);
+
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			} catch (RefNotFoundException e) {
 				PasswordManager.checkInternet();
-				closeGit(git);
+
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			} catch (RefNotAdvertisedException e) {
 				PasswordManager.checkInternet();
-				closeGit(git);
+
 				try {
 					if (branch != null)
 						newBranch(remoteURI, branch);
 					else {
-						git = openGit(remoteURI);
-						RevCommit source = git.log().setMaxCount(1).call().iterator().next();
+						openGit(remoteURI, g -> {
+							RevCommit source = g.log().setMaxCount(1).call().iterator().next();
 
-						newBranchLocal("main", remoteURI, git, source);
-						closeGit(git);
+							newBranchLocal("main", remoteURI, g, source);
+						});
 					}
 				} catch (Exception ex) {
-					closeGit(git);
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 					throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + ex.getMessage());
 				}
 			} catch (NoHeadException e) {
 
 				PasswordManager.checkInternet();
-				closeGit(git);
 				throw e;
 //			try {
 //				closeGit(git);
@@ -1428,37 +1612,27 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 //			}
 
 			} catch (TransportException e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				PasswordManager.checkInternet();
 
 				if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@")) {
 					try {
 						git.pull().setTransportConfigCallback(transportConfigCallback)
 								.setProgressMonitor(getProgressMoniter("Pull ", remoteURI)).call();
-						closeGit(git);
 					} catch (Exception ex) {
-						closeGit(git);
 						throw new RuntimeException(
 								"remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 					}
 				} else {
-					closeGit(git);
 					throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 				}
 
 			} catch (GitAPIException e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 				PasswordManager.checkInternet();
-				closeGit(git);
 				throw new RuntimeException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
 			}
-		} catch (InvalidRemoteException e) {
-			PasswordManager.checkInternet();
-			closeGit(git);
-			throw new InvalidRemoteException("remoteURI " + remoteURI + " branch " + branch + " " + e.getMessage());
-		} catch (Throwable t) {
-			closeGit(git);
-		}
+		});
 
 	}
 
@@ -1474,21 +1648,14 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		waitForRepo(remoteURI, "checkoutCommit");
 		File gitRepoFile = ScriptingEngine.uriToFile(remoteURI);
 		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
-			System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Invailid git file!" + gitRepoFile.getAbsolutePath());
 			throw new RuntimeException("Invailid git file!" + gitRepoFile.getAbsolutePath());
 		}
 		Repository localRepo = new FileRepository(gitRepoFile);
-		Git git = openGit(localRepo);
-		try {
+		openGit(localRepo, git -> {
 			git.checkout().setName(commitHash).call();
 			git.checkout().setCreateBranch(true).setName(branch).setStartPoint(commitHash).call();
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-		closeGit(git);
-
+		});
 	}
 
 	public static void checkout(String remoteURI, RevCommit commit)
@@ -1513,7 +1680,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		// cloneRepo(remoteURI, branch);
 		File gitRepoFile = uriToFile(remoteURI);
 		if (!gitRepoFile.exists() || !gitRepoFile.getAbsolutePath().endsWith(".git")) {
-			System.err.println("Invailid git file!" + gitRepoFile.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Invailid git file!" + gitRepoFile.getAbsolutePath());
 			throw new RuntimeException("Invailid git file!" + gitRepoFile.getAbsolutePath());
 		}
 
@@ -1525,58 +1692,50 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				branch = currentBranch;
 
 			if (currentBranch.length() < branch.length() || !currentBranch.endsWith(branch)) {
-				System.err.println("Current branch is " + currentBranch + " need " + branch);
+				com.neuronrobotics.sdk.common.Log.error("Current branch is " + currentBranch + " need " + branch);
 
-				Git git = null;
 				try {
 					Collection<Ref> branches = getAllBranches(remoteURI);
-					git = openGit(localRepo);
-					for (Ref R : branches) {
-						if (R.getName().endsWith(branch)) {
-							System.err.println("\nFound upstream " + R.getName());
-							shallowCheckout(remoteURI, branch, git);
-							closeGit(git);
+					String br = branch;
+					openGit(localRepo, git -> {
+						for (Ref R : branches) {
+							if (R.getName().endsWith(br)) {
+								com.neuronrobotics.sdk.common.Log.debug("Found upstream " + R.getName());
+								shallowCheckout(remoteURI, br, git);
+							}
 						}
-					}
-					// The ref does not exist upstream, create
-					try {
-						PasswordManager.checkInternet();
-						closeGit(git);
-						newBranch(remoteURI, branch);
-					} catch (org.eclipse.jgit.api.errors.TransportException ex) {
-						// Not logged in yet, just return
-						PasswordManager.checkInternet();
-						closeGit(git);
-						return;
-					} catch (RefAlreadyExistsException e) {
-						PasswordManager.checkInternet();
-						closeGit(git);
-						throw new RuntimeException(e);
-					} catch (RefNotFoundException e) {
-						PasswordManager.checkInternet();
-						closeGit(git);
-						throw new RuntimeException(e);
-					} catch (InvalidRefNameException e) {
-						PasswordManager.checkInternet();
-						closeGit(git);
-						throw new RuntimeException(e);
-					} catch (CheckoutConflictException e) {
-						resolveConflict(remoteURI, e, git);
-					} catch (GitAPIException e) {
-						PasswordManager.checkInternet();
-						closeGit(git);
-						throw new RuntimeException(e);
-					} catch (Exception e) {
-						PasswordManager.checkInternet();
-						closeGit(git);
-						throw new RuntimeException(e);
-					}
+						// The ref does not exist upstream, create
+						try {
+							PasswordManager.checkInternet();
+							newBranch(remoteURI, br);
+						} catch (org.eclipse.jgit.api.errors.TransportException ex) {
+							// Not logged in yet, just return
+							PasswordManager.checkInternet();
+							return;
+						} catch (RefAlreadyExistsException e) {
+							PasswordManager.checkInternet();
+							throw new RuntimeException(e);
+						} catch (RefNotFoundException e) {
+							PasswordManager.checkInternet();
+							throw new RuntimeException(e);
+						} catch (InvalidRefNameException e) {
+							PasswordManager.checkInternet();
+							throw new RuntimeException(e);
+						} catch (CheckoutConflictException e) {
+							resolveConflict(remoteURI, e, git);
+						} catch (GitAPIException e) {
+							PasswordManager.checkInternet();
+							throw new RuntimeException(e);
+						} catch (Exception e) {
+							PasswordManager.checkInternet();
+							throw new RuntimeException(e);
+						}
+					});
+
 				} catch (Exception ex) {
 					PasswordManager.checkInternet();
-					closeGit(git);
 					throw new RuntimeException(ex);
 				}
-				closeGit(git);
 			}
 
 		}
@@ -1609,9 +1768,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			Status stat = git.status().call();
 			Set<String> changed = stat.getModified();
 			if (changed.size() > 0) {
-				System.out.println("Modified ");
+				com.neuronrobotics.sdk.common.Log.debug("Modified ");
 				for (String p : changed) {
-					System.out.println("Modified Conflict with: " + p);
+					com.neuronrobotics.sdk.common.Log.debug("Modified Conflict with: " + p);
 					byte[] bytes;
 					String content = "";
 					try {
@@ -1621,12 +1780,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 							commit(remoteURI, getBranch(remoteURI), p, content,
 									"auto-save in ScriptingEngine.resolveConflict", false, git);
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							// Auto-generated catch block
+							com.neuronrobotics.sdk.common.Log.error(e);
 						}
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						// Auto-generated catch block
+						com.neuronrobotics.sdk.common.Log.error(e1);
 					}
 
 				}
@@ -1634,17 +1793,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 			Set<String> untracked = stat.getUntracked();
 			if (untracked.size() > 0) {
-				System.out.println("Untracked ");
+				com.neuronrobotics.sdk.common.Log.error("Untracked ");
 				for (String p : untracked) {
-					System.out.println("Untracked Conflict with: " + p);
+					com.neuronrobotics.sdk.common.Log.error("Untracked Conflict with: " + p);
 					File f = fileFromGit(remoteURI, p);
 					f.delete();
 				}
 				return resolveConflict(remoteURI, con, git);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return true;
 	}
@@ -1656,7 +1815,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	 * @return The local directory containing the .git
 	 */
 	public static File cloneRepo(String remoteURI, String branch) {
-
+		if (isNotURL(remoteURI)) {
+			try {
+				File f = new File(remoteURI);
+				if (f.exists() && f.isDirectory()) {
+					com.neuronrobotics.sdk.common.Log.debug("remoteURI is actually a directory " + f);
+					return f;
+				}
+			} catch (Exception ex) {
+				// not a file i guess...
+			}
+		}
+		// Assume it is a URL
 		File gistDir = getRepositoryCloneDirectory(remoteURI);
 		String localPath = gistDir.getAbsolutePath();
 		File gitRepoFile = new File(localPath + "/.git");
@@ -1666,36 +1836,27 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			if (!hasNetwork())
 				return null;// No login info means there is no way to publish
 			waitForRepo(remoteURI, "cloneRepo");
-			System.out.println("Cloning files from: " + remoteURI);
+			com.neuronrobotics.sdk.common.Log.debug("Cloning files from: " + remoteURI);
 			if (branch != null)
-				System.out.println("            branch: " + branch);
-			System.out.println("                to: " + localPath);
+				com.neuronrobotics.sdk.common.Log.debug("            branch: " + branch);
+			com.neuronrobotics.sdk.common.Log.debug("                to: " + localPath);
 			Throwable ex = null;
 			// Clone the repo
-			Git git = null;
 			try {
 				if (branch == null) {
-					git = cloneRepoLocal(remoteURI, dir);
-					hasAtLeastOneReference(git);
-					closeGit(git);
+					cloneRepoLocal(remoteURI, dir, git -> {
+						hasAtLeastOneReference(git);
+					});
 					branch = getFullBranch(remoteURI);
 
 				} else {
-					git = cloneRepoLocal(remoteURI, dir);
-					hasAtLeastOneReference(git);
-					closeGit(git);
+					cloneRepoLocal(remoteURI, dir, git -> {
+						hasAtLeastOneReference(git);
+					});
 					checkout(remoteURI, branch);
 				}
-
-			} catch (org.eclipse.jgit.api.errors.JGitInternalException exe) {
-				closeGit(git);
-				// deleteRepo(remoteURI);
-				throw exe;
-			} catch (Throwable e) {
-				e.printStackTrace();
-				closeGit(git);
-				PasswordManager.checkInternet();
-				throw new RuntimeException(e);
+			} catch (Throwable t) {
+				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 
 		}
@@ -1703,12 +1864,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			try {
 				checkout(remoteURI, branch);
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				try {
+					// try the checkout with no branch specified
+					return cloneRepo(remoteURI, null);
+				} catch (Exception ex) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 
 		return gistDir;
 
+	}
+
+	private static boolean isNotURL(String remoteURI) {
+		return !remoteURI.startsWith("http") && !remoteURI.startsWith("git@");
 	}
 
 	public static String locateGitUrl(File f) throws IOException {
@@ -1719,16 +1889,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		File gitRepoFile = new File(f.getAbsolutePath());
 		while (gitRepoFile != null) {
 			if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
-				// System.err.println("Fount git repo for file: "+gitRepoFile);
+				// com.neuronrobotics.sdk.common.Log.error("Fount git repo for file:
+				// "+gitRepoFile);
 				Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
-				Git git = ref;
-				if (git == null)
-					git = openGit(localRepo);
-				String url = git.getRepository().getConfig().getString("remote", "origin", "url");
+				// Git git = ref;
+				if (ref == null) {
+					ArrayList<String> s = new ArrayList<String>();
+					File fi = gitRepoFile;
+					openGit(localRepo, git -> {
+						s.add(locateGitUrl(fi, git));
+					});
+					return s.get(0);
+				}
+				String url = ref.getRepository().getConfig().getString("remote", "origin", "url");
 				if (!url.endsWith(".git"))
 					url += ".git";
-				if (ref == null)
-					closeGit(git);
+				localRepo.close();
 				return url;
 			}
 			gitRepoFile = gitRepoFile.getParentFile();
@@ -1737,20 +1913,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return null;
 	}
 
-	public static Git locateGit(File f) throws IOException {
+	public static File locateGitTopLevelDirectory(File f) throws IOException {
 		File gitRepoFile = f;
 		while (gitRepoFile != null) {
 			gitRepoFile = gitRepoFile.getParentFile();
 			if (gitRepoFile != null)
 				if (new File(gitRepoFile.getAbsolutePath() + "/.git/config").exists()) {
-					// System.err.println("Fount git repo for file: "+gitRepoFile);
-					Repository localRepo = new FileRepository(gitRepoFile.getAbsoluteFile() + "/.git");
-					return openGit(localRepo);
-
+					return gitRepoFile;
 				}
 		}
+		throw new RuntimeException("File " + f + " is not in a git repository");
+	}
 
-		throw new RuntimeException("File "+f+" is not in a git repository");
+	public static void locateGit(File f, IGitAccessor access) throws IOException {
+		Repository localRepo = new FileRepository(locateGitTopLevelDirectory(f).getAbsoluteFile() + "/.git");
+		openGit(localRepo, access);
 	}
 
 	public static String getText(URL website) throws Exception {
@@ -1824,15 +2001,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	@SuppressWarnings("unused")
 	public static String findLocalPath(File currentFile) {
-		Git git = null;
 		try {
-			git = locateGit(currentFile);
-			String ret = findLocalPath(currentFile, git);
-			closeGit(git);
-			return ret;
+			ArrayList<String> s = new ArrayList<String>();
+			locateGit(currentFile, git -> {
+				s.add(findLocalPath(currentFile, git));
+			});
+			return s.get(0);
 		} catch (IOException e) {
-			if (git != null)
-				closeGit(git);
 			throw new RuntimeException(e);
 		}
 
@@ -1844,55 +2019,39 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static String[] findGitTagFromFile(File currentFile, Git ref) throws IOException {
 		String string = locateGitUrl(currentFile, ref);
-		Git git = ref;
-		if (git == null)
-			git = locateGit(currentFile);
-		try {
-			String[] strings = new String[] { string, findLocalPath(currentFile, git) };
-			if (ref == null)
-				closeGit(git);
-			return strings;
-		} catch (Throwable t) {
-			t.printStackTrace();
-			if (ref == null)
-				closeGit(git);
-			throw t;
+		String[] strings = new String[2];
+		if (ref == null)
+			locateGit(currentFile, git -> {
+				String[] str = findGitTagFromFile(currentFile, git);
+				strings[0] = str[0];
+				strings[1] = str[1];
+			});
+		else {
+			strings[0] = string;
+			strings[1] = findLocalPath(currentFile, ref);
 		}
+		return strings;
+
 	}
 
 	public static boolean checkOwner(String url) {
-		Git git = null;
-		try {
-			git = openGit(getRepository(url));
-		} catch (IOException e1) {
-			closeGit(git);
-			throw new RuntimeException(e1);
-		}
-		boolean owned = checkOwner(git);
-		closeGit(git);
-		return owned;
+		ArrayList<Boolean> owners = new ArrayList<Boolean>();
+		openGit(url, git -> {
+			owners.add(checkOwner(git));
+		});
+		return owners.get(0);
 	}
 
 	public static boolean checkOwner(File currentFile) {
+		ArrayList<Boolean> owners = new ArrayList<Boolean>();
 		try {
-			Git git;
-			try {
-				git = locateGit(currentFile);
-			} catch (Exception e1) {
-
-				return false;
-			}
-			boolean owned;
-			try {
-				owned = checkOwner(git);
-			} catch (Throwable t) {
-				owned = false;
-			}
-			closeGit(git);
-			return owned;
-		} catch (Throwable t) {
+			locateGit(currentFile, git -> {
+				owners.add(checkOwner(git));
+			});
+		} catch (Throwable e1) {
 			return false;
 		}
+		return owners.get(0);
 	}
 
 	private static boolean checkOwner(Git git) {
@@ -1953,7 +2112,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		} catch (org.kohsuke.github.HttpException ex) {
 			if (ex.getMessage().contains("name already exists on this account")) {
 				repository = github.getRepository(PasswordManager.getLoginID() + "/" + newRepoName);
-				System.out.println("Repo exists!");
+				com.neuronrobotics.sdk.common.Log.error("Repo exists!");
 				return repository.getHttpTransportUrl();
 			}
 			throw ex;
@@ -1961,33 +2120,34 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		String gitRepo = repository.getHttpTransportUrl();
 
 		ArrayList<String> files = filesInGit(sourceURL);
-		Git git = locateGit(fileFromGit(sourceURL, files.get(0)));
-		Repository sourceRepoObject = git.getRepository();
-		try {
-			sourceRepoObject.getConfig().setString("remote", "origin", "url", gitRepo);
-			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
-				git.push().setTransportConfigCallback(transportConfigCallback)
-						.setProgressMonitor(getProgressMoniter("Pushing ", gitRepo)).call();
-			else
-				git.push().setCredentialsProvider(PasswordManager.getCredentialProvider())
-						.setProgressMonitor(getProgressMoniter("Pushing ", gitRepo)).call();
-			closeGit(git);
+		ArrayList<String> back = new ArrayList<String>();
+		locateGit(fileFromGit(sourceURL, files.get(0)), git -> {
+			Repository sourceRepoObject = git.getRepository();
+			try {
+				sourceRepoObject.getConfig().setString("remote", "origin", "url", gitRepo);
+				if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
+					git.push().setTransportConfigCallback(transportConfigCallback)
+							.setProgressMonitor(getProgressMoniter("Pushing ", gitRepo)).call();
+				else
+					git.push().setCredentialsProvider(PasswordManager.getCredentialProvider())
+							.setProgressMonitor(getProgressMoniter("Pushing ", gitRepo)).call();
 
-			filesInGit(gitRepo);
+				filesInGit(gitRepo);
 
-			return gitRepo;
-		} catch (org.kohsuke.github.HttpException ex) {
-			closeGit(git);
-			if (ex.getMessage().contains("name already exists on this account")) {
-				return PasswordManager.getGithub().getRepository(PasswordManager.getLoginID() + "/" + newRepoName)
-						.getHttpTransportUrl();
+				back.add(gitRepo);
+			} catch (org.kohsuke.github.HttpException ex) {
+				if (ex.getMessage().contains("name already exists on this account")) {
+					back.add(PasswordManager.getGithub().getRepository(PasswordManager.getLoginID() + "/" + newRepoName)
+							.getHttpTransportUrl());
+				}
+				com.neuronrobotics.sdk.common.Log.error(ex);;
+			} catch (Throwable ex) {
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 			}
-			ex.printStackTrace();
-		} catch (Throwable ex) {
-			ex.printStackTrace();
-		}
-		closeGit(git);
-		throw new RuntimeException("Repo could not be forked and does not exist");
+			if (back.size() == 0)
+				throw new RuntimeException("Repo could not be forked and does not exist");
+		});
+		return back.get(0);
 	}
 
 	public static GHRepository makeNewRepoNoFailOver(String newName, String description)
@@ -2002,13 +2162,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					repo = github.getRepositoryById("" + repo.getId());
 					return repo;
 				} catch (Exception ex) {
-					ex.printStackTrace();
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					// Auto-generated catch block
+					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 			}
 			return repo;
@@ -2032,8 +2192,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				commit(url, "main", "firstCommit");
 				newBranch(url, "main");
 			} catch (IOException | GitAPIException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		} catch (org.kohsuke.github.HttpException ex) {
 			if (ex.getMessage().contains("name already exists on this account")) {
@@ -2047,15 +2207,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static String locateGitUrlString(File f) {
 
 		try {
-			Git locateGit = ScriptingEngine.locateGit(f);
-			Repository repository = locateGit.getRepository();
-			String string = repository.getConfig().getString("remote", "origin", "url");
-			ScriptingEngine.closeGit(locateGit);
-			return string;
-
+			ArrayList<String> back = new ArrayList<String>();
+			locateGit(f, locateGit -> {
+				Repository repository = locateGit.getRepository();
+				String string = repository.getConfig().getString("remote", "origin", "url");
+				back.add(string);
+			});
+			return back.get(0);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return null;
 	}
@@ -2066,7 +2227,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static String urlToGist(URL htmlUrl) {
 		String externalForm = urlToString(htmlUrl);
-		System.out.println(externalForm);
+		com.neuronrobotics.sdk.common.Log.debug(externalForm);
 		return ScriptingEngine.urlToGist(externalForm);
 	}
 
@@ -2074,6 +2235,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		ArrayList<String> langs = new ArrayList<>();
 		for (String L : getLangaugesMap().keySet()) {
 			langs.add(L);
+		}
+		return langs;
+	}
+
+	public static List<String> getAllExtentions() {
+		ArrayList<String> langs = new ArrayList<>();
+		for (String L : getLangaugesMap().keySet()) {
+			IScriptingLanguage lang = getLangaugesMap().get(L);
+			for (String s : lang.getFileExtenetion()) {
+				langs.add(s);
+			}
 		}
 		return langs;
 	}
@@ -2142,16 +2314,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 			String[] newFileCode;
 			try {
+				com.neuronrobotics.sdk.common.Log.debug("Opening " + targetFilename + " from " + targetGit);
 				newFileCode = ScriptingEngine.codeFromGit(targetGit, targetFilename);
 				if (newFileCode == null)
 					newFileCode = new String[] { "" };
 				if (newFileCode[0].length() < 10) {
-					System.out.println("Copy Content to " + targetGit + "/" + targetFilename);
+					com.neuronrobotics.sdk.common.Log.debug("Copy Content to " + targetGit + "/" + targetFilename);
 					ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename,
 							WalkingEngine[0], "copy file content");
 				}
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename,
+						WalkingEngine[0], "copy file content");
 			}
 		} catch (Exception e1) {
 			throw new RuntimeException(e1);
@@ -2174,9 +2348,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static Collection<Ref> getAllBranches(String remoteURI) throws IOException, GitAPIException {
 		cloneRepo(remoteURI, null);
-		Git git = openGit(getRepository(remoteURI));
-		String ref = git.getRepository().getConfig().getString("remote", "origin", "url");
-		closeGit(git);
+		ArrayList<String> refs = new ArrayList<String>();
+		openGit(getRepository(remoteURI), git -> {
+			refs.add(git.getRepository().getConfig().getString("remote", "origin", "url"));
+		});
+		String ref = refs.get(0);
 
 		System.out.print("Getting branches " + ref + "  ");
 		if (ref != null && ref.startsWith("git@")) {
@@ -2238,11 +2414,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static void commit(String url, String branch, String message, Git passedRef)
 			throws IOException, GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
 			ConcurrentRefUpdateException, WrongRepositoryStateException, AbortedByHookException {
-		Git git = passedRef;
-		if (git == null)
-			git = openGit(getRepository(url));
+
+		if (passedRef == null) {
+			openGit(getRepository(url), git -> {
+				commit(url, branch, message, git);
+			});
+			return;
+		}
 		try {
-			git.commit().setAll(true).setMessage(message).call();
+			passedRef.commit().setAll(true).setMessage(message).call();
 			ArrayList<Runnable> arrayList = onCommitEventListeners.get(url);
 			if (arrayList != null) {
 				for (int i = 0; i < arrayList.size(); i++) {
@@ -2250,17 +2430,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					try {
 						r.run();
 					} catch (Throwable t) {
-						t.printStackTrace();
+						com.neuronrobotics.sdk.common.Log.error(t);
 					}
 				}
 			}
 		} catch (Throwable t) {
-			if (passedRef == null)
-				closeGit(git);
 			throw t;
 		}
-		if (passedRef == null)
-			closeGit(git);
 	}
 
 	public static File getAppData() {
@@ -2306,32 +2482,31 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static List<String> getAllTags(String gitRepo) {
 		ArrayList<String> tags = new ArrayList<>();
-		Git jGit = openGit(gitRepo);
-		List<Ref> call;
-		try {
-			call = jGit.tagList().call();
-			for (Ref ref : call) {
-				String string = ref.getName().split("/")[2];
-				tags.add(string);
+		openGit(gitRepo, jGit -> {
+			List<Ref> call;
+			try {
+				call = jGit.tagList().call();
+				for (Ref ref : call) {
+					String string = ref.getName().split("/")[2];
+					tags.add(string);
+				}
+			} catch (Throwable e) {
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
-		} catch (Throwable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-
-		}
-		Collections.sort(tags, new Comparator<String>() {
-			public int compare(String object1, String object2) {
-				return versionCompare(object1, object2);
-			}
+			Collections.sort(tags, new Comparator<String>() {
+				public int compare(String object1, String object2) {
+					return versionCompare(object1, object2);
+				}
+			});
 		});
-		closeGit(jGit);
 		return tags;
 	}
 
 	public static boolean tagExists(String remoteURI, String newTag) {
 		List<String> tags = getAllTags(remoteURI);
 		for (String s : tags) {
-			System.out.println("Checking " + newTag + " against " + s);
+			com.neuronrobotics.sdk.common.Log.debug("Checking " + newTag + " against " + s);
 			if (s.contentEquals(newTag)) {
 				return true;
 			}
@@ -2340,18 +2515,16 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static void tagRepo(String remoteURI, String newTag) {
-		System.out.println("Tagging " + remoteURI + " at " + newTag);
+		com.neuronrobotics.sdk.common.Log.debug("Tagging " + remoteURI + " at " + newTag);
 		if (tagExists(remoteURI, newTag)) {
-			System.out.println("ERROR! Tag exists " + remoteURI + "@" + newTag);
+			com.neuronrobotics.sdk.common.Log.error("ERROR! Tag exists " + remoteURI + "@" + newTag);
 			return;
 		}
-		Git git = openGit(remoteURI);
-		// Creating tag
-		try {
+		openGit(remoteURI, git -> {
 			try {
 				git.tag().setName(newTag).setForceUpdate(true).call();
 			} catch (Throwable t) {
-				t.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 			if (git.getRepository().getConfig().getString("remote", "origin", "url").startsWith("git@"))
 				git.push().setPushTags().setTransportConfigCallback(transportConfigCallback)
@@ -2359,11 +2532,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			else
 				git.push().setPushTags().setCredentialsProvider(PasswordManager.getCredentialProvider())
 						.setProgressMonitor(getProgressMoniter("Pushing ", remoteURI)).call();
-		} catch (GitAPIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		closeGit(git);
+		});
 	}
 
 	public static boolean isPrintProgress() {
@@ -2373,32 +2542,41 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static void setPrintProgress(boolean printProgress) {
 		ScriptingEngine.printProgress = printProgress;
 	}
-	
-	public static void ignore(String url,String filepattern) throws Exception {
+
+	public static void ignore(String url, String filepattern) throws Exception {
 		File ignorefile = fileFromGit(url, ".gitignore");
-		String contents="";
-		if(ignorefile.exists()) {
+		String contents = "";
+		if (ignorefile.exists()) {
 			BufferedReader reader;
 			try {
 				reader = new BufferedReader(new FileReader(ignorefile));
 				String line = reader.readLine();
 				while (line != null) {
-					if(line.contains(filepattern)) {
-						System.out.println(""+filepattern+" exists in "+ignorefile.getAbsolutePath());
+					if (line.contains(filepattern)) {
+						com.neuronrobotics.sdk.common.Log
+								.debug("" + filepattern + " exists in " + ignorefile.getAbsolutePath());
 						reader.close();
 						return;
 					}
-					contents+=line+"\n";
+					contents += line + "\n";
 					// read next line
 					line = reader.readLine();
 				}
 				reader.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
-		contents+=filepattern;
-		pushCodeToGit(url, null, ".gitignore", contents, "Adding ignore for "+filepattern);
+		contents += filepattern;
+		pushCodeToGit(url, null, ".gitignore", contents, "Adding ignore for " + filepattern);
+	}
+
+	public static String getAppName() {
+		return appName;
+	}
+
+	public static void setAppName(String appName) {
+		ScriptingEngine.appName = appName;
 	}
 
 }

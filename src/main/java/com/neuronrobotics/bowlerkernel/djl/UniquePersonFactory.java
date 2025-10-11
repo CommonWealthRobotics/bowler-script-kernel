@@ -105,13 +105,13 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		try {
 			features = PredictorFactory.faceFeatureFactory();
 		} catch (ModelNotFoundException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (MalformedModelException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		factory = ImageFactory.getInstance();
@@ -144,7 +144,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		try {
 			Files.write(path, strToBytes);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (workingMemory != null)
@@ -262,7 +262,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					if (up.features.size() >= numberOfTrainingHashes) {
 						if (!longTermMemory.contains(up)) {
 							longTermMemory.add(up);
-							System.out.println("Saving new Face to database " + up.name);
+							com.neuronrobotics.sdk.common.Log.error("Saving new Face to database " + up.name);
 							save();
 						}
 					}
@@ -280,7 +280,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					try {
 						id = features.predict(cmp);
 					} catch (Throwable ex) {
-						System.out.println("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
+						com.neuronrobotics.sdk.common.Log.error("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
 						// ex.printStackTrace();
 						continue;
 					}
@@ -344,7 +344,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	private EventHandler<ActionEvent> setAction(UniquePerson p) {
 		return event -> {
 			String newName = getUI(p).name.getText();
-			System.out.println("Renaming " + p.name + " to " + newName);
+			com.neuronrobotics.sdk.common.Log.error("Renaming " + p.name + " to " + newName);
 			p.name = newName;
 			new Thread(() -> save()).start();
 		};
@@ -415,7 +415,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 
 	@Override
 	public ArrayList<String> getNamespacesImp() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
 	}
 
@@ -480,7 +480,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				database.createNewFile();
 				save();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e1.printStackTrace();
 			}
 		else {
@@ -490,7 +490,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 				longTermMemory = gson.fromJson(jsonString, TT_mapStringString);
 				resetHash();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

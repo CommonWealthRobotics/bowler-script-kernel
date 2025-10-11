@@ -34,6 +34,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.Polygon;
@@ -48,17 +49,17 @@ import javafx.scene.paint.Color;
 public class FreecadLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
 		toSTLFile(code,stl);
-		CSG back = Vitamins.get(stl,true);
+		CSG back = Vitamins.get(db,stl,true);
 		back.setColor(Color.BLUE);
 		return back;
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("Freecad file can not be instantiated from a string");
 	}
 
@@ -97,7 +98,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadGenFile.getAbsolutePath());
 			legacySystemRun(null, freecadGenFile.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 		
 	}
@@ -105,7 +106,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		addCSGToFreeCAD(freecadModel,incoming,incoming.getSlicePlanes());
 	}
 	public static void addCSGToFreeCAD(File freecadModel,CSG toSlice, List<Transform> slicePlanes) throws IOException {
-		File tmp = BlenderLoader.getTmpSTL(toSlice);
+		File tmp =getTmpSTL(toSlice);
 		String name = toSlice.getName();
 		if(name.length()==0) {
 			name="CSG_TO_FREECAD";
@@ -113,45 +114,26 @@ public class FreecadLoader implements IScriptingLanguage {
 		int planes=1;
 		if(slicePlanes!=null)
 			for(Transform pose:slicePlanes) {
-				List<Polygon> polygons = Slice.slice(toSlice, pose, 0);
-				String svgName = toSlice.getName();
-				if(svgName.length()==0)
-					svgName="SVG_EXPORT";
-				svgName+="_"+planes;
-				File svg = File.createTempFile(svgName, ".svg");
-				SVGExporter.export(polygons, svg, false);
-				addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
-				planes++;
+				List<Polygon> polygons;
+				try {
+					polygons = Slice.slice(toSlice, pose, 0);
+					String svgName = toSlice.getName();
+					if(svgName.length()==0)
+						svgName="SVG_EXPORT";
+					svgName+="_"+planes;
+					File svg = File.createTempFile(svgName, ".svg");
+					SVGExporter.export(polygons, svg, false);
+					addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
+					planes++;
+				} catch (ColinearPointsException e) {
+					// TODO Auto-generated catch block
+					com.neuronrobotics.sdk.common.Log.error(e);
+				}
+
 			}
 		addSTLToFreecad(freecadModel,tmp,name);
 	}
-	public static File simplifySVG(File incoming, double threshhold) {
-		try {
-			File inkscape = DownloadManager.getConfigExecutable("inkscape", null);
-			File svg = File.createTempFile(incoming.getName(), ".svg");
-			List <String >args = Arrays.asList(
-					inkscape.getAbsolutePath(),
-		            "--actions",
-		            "\"select-all:all;path-simplify:threshold=" + threshhold+ ";;export-overwrite;export-do;quit-inkscape\"",
-		            incoming.getAbsolutePath()
-					);
-			legacySystemRun(null, inkscape.getAbsoluteFile().getParentFile(), System.out, args);
-			args = Arrays.asList(
-					inkscape.getAbsolutePath(),
-					"--export-plain-svg",
-		            "--export-type=svg",
-		            "--vacuum-defs",
-		            "--export-filename="+svg.getAbsolutePath(),
-		            incoming.getAbsolutePath()
-					);
-			legacySystemRun(null, inkscape.getAbsoluteFile().getParentFile(), System.out, args);
-			return svg;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return incoming;
-	}
+
 	public static void addSVGToFreeCAD(File freecadModel,File SVG, Transform pose, String name, String bodyName) {
 		TransformNR nr=TransformFactory.csgToNR(pose);
 		RotationNR r=nr.getRotation();
@@ -178,7 +160,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(bodyName);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	public static void addSTLToFreecad(File freecadModel, File stlToAdd,String meshName) {
@@ -198,7 +180,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(meshName);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	public static void toSTLFile(File freecadModel,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
@@ -218,7 +200,7 @@ public class FreecadLoader implements IScriptingLanguage {
 
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	public static void open(File freecadModel) {
@@ -239,7 +221,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			else
 				legacySystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
-			t.printStackTrace();
+			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	/**
@@ -261,7 +243,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		File stlToImport =ScriptingEngine.fileFromGit(
 				"https://github.com/NeuronRobotics/NASACurisoity.git"
 				, "STL/upper-arm.STL");
-		CSG toSlice = Vitamins.get(stlToImport,true);
+		CSG toSlice = Vitamins.get(null,stlToImport,true);
 //		toSlice=toSlice.union(
 //					new Cube(20).toCSG()
 //						.toXMin()
@@ -289,7 +271,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		return sb.toString();
 	}
 	public static void update(Map<String, Object> vm) throws MalformedURLException, IOException {
-		String url= "https://api.github.com/repos/FreeCAD/FreeCAD-Bundle/releases/tags/weekly-builds";
+		String url= "https://api.github.com/repos/FreeCAD/FreeCAD-Bundle/releases/tags/1.0rc2";
 		InputStream is = new URL(url).openStream();
 		String type = vm.get("type").toString();
 
@@ -331,7 +313,7 @@ public class FreecadLoader implements IScriptingLanguage {
 						continue;
 				}
 				String name = assetName.replace("."+type, "");
-				System.out.println("Updating Freecad assets to "+name);
+				com.neuronrobotics.sdk.common.Log.error("Updating Freecad assets to "+name);
 				vm.put("name",name);
 				if(isMac())
 					continue;

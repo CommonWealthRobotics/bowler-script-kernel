@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.neuronrobotics.bowlerstudio.util.GeometrySimplification;
+
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
@@ -15,13 +17,21 @@ import javafx.scene.paint.Color;
 public class SvgLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
-		SVGLoad s = new SVGLoad(code.toURI());
-		return run(s);
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
+		try {
+			SVGLoad s = new SVGLoad(code.toURI());
+			return run(s);
+		}catch(Exception e) {
+			com.neuronrobotics.sdk.common.Log.error(e);
+			com.neuronrobotics.sdk.common.Log.error("SVG had error, attempting to fix "+code.getAbsolutePath());
+			File tmp=GeometrySimplification.simplifySVG(code);
+			SVGLoad s = new SVGLoad(tmp.toURI());
+			return run(s);
+		}
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
 		SVGLoad s = new SVGLoad(code);
 		return run(s);
 	}
@@ -40,9 +50,11 @@ public class SvgLoader implements IScriptingLanguage {
 		double depth =5+(layers.size()*5);
 		for(int i=0;i<layers.size();i++) {
 			String layerName=layers.get(i);
-			CSG extrudeLayerToCSG = s.extrudeLayerToCSG(depth,layerName);
+			if(layerName==null)
+				layerName="TopLayer";
+			 ArrayList<CSG> extrudeLayerToCSG = s.extrudeLayer(depth,layerName);
 			//extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
-			polys.add(extrudeLayerToCSG);
+			polys.addAll(extrudeLayerToCSG);
 			depth-=5;
 		}
 		

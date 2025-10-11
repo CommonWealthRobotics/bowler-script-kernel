@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Install updated FreeType
+      run: sudo apt-get update;sudo apt-get install libfreetype6
     - name: Checkout repository and submodules
       uses: actions/checkout@v2
       with:
@@ -37,7 +39,7 @@ jobs:
         export DISPLAY=:0
           
     - name: Pull a JavaFX JDK
-      run: wget http://static.azul.com/zulu/bin/zulu8.33.0.1-ca-fx-jdk8.0.192-linux_x64.tar.gz
+      run: wget http://static.azul.com/zulu/bin/zulu8.78.0.19-ca-fx-jdk8.0.412-linux_x64.tar.gz
 
     - name: After JDK download, list directory contnts
       run: pwd; ls -la
@@ -46,7 +48,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-        jdkFile: ./zulu8.33.0.1-ca-fx-jdk8.0.192-linux_x64.tar.gz
+        jdkFile: ./zulu8.78.0.19-ca-fx-jdk8.0.412-linux_x64.tar.gz
         
      
     - name: Build with Gradle 
@@ -59,17 +61,17 @@ jobs:
       run: cat /home/runner/work/bowler-script-kernel/bowler-script-kernel/build/reports/tests/test/index.html
          
     - name: Test Bezier 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.verbose=true -Dprism.forceGPU=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy 
+      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy 
     - name: start xvfb
       run:
         Xvfb :0 &
     - name: Test Local 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.verbose=true -Dprism.forceGPU=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
+      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
       
     - name: Clean Cad 
       run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
     - name: build Cad 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.verbose=true -Dprism.forceGPU=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
+      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
      
       

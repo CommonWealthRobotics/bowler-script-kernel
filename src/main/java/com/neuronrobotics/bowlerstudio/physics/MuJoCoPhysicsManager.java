@@ -147,7 +147,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			double target = Math.toRadians(link.getCurrentEngineeringUnits()) * gearRatios.get(link);
 //			double error = target-positions.get(s);
 //			double effort = error * kp;
-			// System.out.println("Actuator "+s+" position "+positions.get(s)+" effort
+			// com.neuronrobotics.sdk.common.Log.error("Actuator "+s+" position "+positions.get(s)+" effort
 			// "+effort);
 			setEfforts.put(s, target);
 		}
@@ -173,11 +173,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 								rotxAcceleration, rotyAcceleration, rotzAcceleration, currentTimeMillis()));
 					} catch (NullPointerException e) {
 						// startup sync problems, ignore
-						System.out.println(e.getMessage());
+						com.neuronrobotics.sdk.common.Log.error(e.getMessage());
 					}
 
 				}
-				// System.out.println("Body "+s+" pose "+);
+				// com.neuronrobotics.sdk.common.Log.error("Body "+s+" pose "+);
 			}
 		}
 	}
@@ -309,14 +309,14 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			try {
 				Thread.sleep(diff);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				throw new RuntimeException(e);
 			}
 		} else if (diff == 0) {
 			if (Thread.interrupted())
 				throw new RuntimeException("Interrupted exception!");
 		} else {
-			// System.err.println("MuJoCo Real time broken, expected
+			// com.neuronrobotics.sdk.common.Log.error("MuJoCo Real time broken, expected
 			// "+getTimestepMilliSeconds()+" took "+time);
 		}
 		if (Thread.interrupted())
@@ -364,7 +364,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		} else {
 			tempFile = new File(workingDir.getAbsolutePath() + "/" + name + ".xml");
 		}
-		System.out.println("Writing " + tempFile.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.error("Writing " + tempFile.getAbsolutePath());
 		Files.write(Paths.get(tempFile.getAbsolutePath()), xml.getBytes());
 		return tempFile;
 	}
@@ -546,7 +546,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				double val = part.getMassKG(mass) * KgtoMujocoMass;
 				geom.withMass(BigDecimal.valueOf(val));
 			} else {
-				System.out.println("\nUsing density for "+part.getName());
+				com.neuronrobotics.sdk.common.Log.error("\nUsing density for "+part.getName());
 			}
 		}
 
@@ -614,7 +614,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 						double val = csg.getMassKG(linkMass/numPartsWithoutMassLink) * KgtoMujocoMass;
 						geom.withMass(BigDecimal.valueOf(val));
 					} else {
-						System.out.println("\nUsing density for "+csg.getName());
+						com.neuronrobotics.sdk.common.Log.error("\nUsing density for "+csg.getName());
 					}
 				}
 			}
@@ -778,7 +778,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 							}
 						}
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else {
@@ -954,7 +954,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			Files.write(Paths.get(tempFile.getAbsolutePath()), obj.getBytes());
 			System.out.print(" " + (System.currentTimeMillis() - start+"\n"));
 		} else {
-			System.out.println("Loading cache " + tempFile.getName());
+			com.neuronrobotics.sdk.common.Log.error("Loading cache " + tempFile.getName());
 		}
 		if (isFree) {
 			asset.addTexture().withRgb1(toColorString(hull.getColor())).withRgb2(toColorString(hull.getColor()))
@@ -994,11 +994,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				// Auto-generated catch block
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			}
-			System.out.println("Waiting for cad to process " + percent);
+			com.neuronrobotics.sdk.common.Log.error("Waiting for cad to process " + percent);
 		}
 	}
 

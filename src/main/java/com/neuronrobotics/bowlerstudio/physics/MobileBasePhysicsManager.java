@@ -116,7 +116,7 @@ public class MobileBasePhysicsManager {
 				Maxz = c.getMaxZ();
 			}
 		}
-		// System.out.println("Minimum z = "+minz);
+		// com.neuronrobotics.sdk.common.Log.error("Minimum z = "+minz);
 		Transform start = new Transform();
 		base.setFiducialToGlobalTransform(new TransformNR());
 		// TransformNR globe= base.getFiducialToGlobalTransform();
@@ -279,7 +279,7 @@ public class MobileBasePhysicsManager {
 						ILinkListener ll = new ILinkListener() {
 							@Override
 							public void onLinkPositionUpdate(AbstractLink source, double engineeringUnitsValue) {
-								// System.out.println("
+								// com.neuronrobotics.sdk.common.Log.error("
 								// value="+engineeringUnitsValue);
 								hingePhysicsManager.setTarget(Math.toRadians(-engineeringUnitsValue));
 

@@ -7,7 +7,7 @@ import java.util.Arrays;
 public class FXMLBowlerLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(File xml, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File xml, ArrayList<Object> args) throws Exception {
 		javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(xml.toURI().toURL());
 		javafx.scene.layout.Pane newLoadedPane =  loader.load();
 		// Create a tab
@@ -18,18 +18,18 @@ public class FXMLBowlerLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("This engine only supports files");
 	}
 
 	@Override
 	public String getShellType() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return "fxml";
 	}
 	@Override
 	public boolean getIsTextFile() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return true;
 	}
 	/**
@@ -42,7 +42,7 @@ public class FXMLBowlerLoader implements IScriptingLanguage {
 	}
 	@Override
 	public ArrayList<String> getFileExtenetion() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("fxml","FXML","FxML"));
 	}
 

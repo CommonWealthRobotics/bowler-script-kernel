@@ -3,11 +3,13 @@ package com.neuronrobotics.bowlerstudio.printbed;
 import java.util.Arrays;
 import java.util.List;
 
-import com.neuronrobotics.bowlerkernel.Bezier3d.manipulation;
+import com.neuronrobotics.bowlerkernel.Bezier3d.Manipulation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Affine;
 
 public class PrintBedObject {
@@ -17,7 +19,7 @@ public class PrintBedObject {
 	private double yMin;
 	private CSG part;
 	private String name;
-	private manipulation manip;
+	private Manipulation manip;
 	private Affine affine = new Affine();
 	private TransformNR globalPose;
 	public PrintBedObject(String name, CSG part, double xMax, double xMin, double yMax, double yMin, TransformNR startPose){
@@ -29,11 +31,13 @@ public class PrintBedObject {
 		this.yMin =  yMin;
 		this.globalPose = startPose;
 		
-		manip = new manipulation(affine, new Vector3d(1, 1, 0), part, startPose);
-		manip.addSaveListener(() -> System.out.println("Saving PrintBedObject "+name));
+		manip = new Manipulation(affine, new Vector3d(1, 1, 0), startPose);
+		part.getStorage().set("manipulator",manip.map);
+		part.setManipulator(affine);
+		manip.addSaveListener(() -> com.neuronrobotics.sdk.common.Log.error("Saving PrintBedObject "+name));
 		checkBounds();
 	}
-	public void addEventListener(Runnable r) {
+	public void addEventListener(EventHandler<MouseEvent> r) {
 		manip.addEventListener(r);
 	}
 
@@ -45,15 +49,15 @@ public class PrintBedObject {
 	}
 
 	public double getX() {
-		return manip.currentPose.getX();
+		return manip.getCurrentPose().getX();
 	}
 
 	public double getY() {
-		return manip.currentPose.getY();
+		return manip.getCurrentPose().getY();
 	}
 
 	public double getZ() {
-		return manip.currentPose.getZ();
+		return manip.getCurrentPose().getZ();
 	}
 	public void checkBounds() {
 		double minYTest = part.getMinY()-yMin+globalPose.getY();

@@ -16,6 +16,9 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -90,8 +93,8 @@ public class TimeSequence {
 	}
 
 	public void runSequence() throws Exception {
-		System.out.println("Initialize Sequence");
-		ScriptingEngine.gitScriptRun(getUrl(), getFile());
+		com.neuronrobotics.sdk.common.Log.error("Initialize Sequence");
+		ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),getUrl(), getFile());
 
 		HashMap<String, AbstractKinematicsNR> devices = getDevices();
 		long start = System.currentTimeMillis();
@@ -103,13 +106,13 @@ public class TimeSequence {
 		for (String mine : devices.keySet()) {
 			for (String key : getDevicesInSequence())
 				if (mine.contentEquals(key)) {
-					System.out.println("Found Device " + key);
+					com.neuronrobotics.sdk.common.Log.error("Found Device " + key);
 					HashMap<String, SequenceEvent> devSeq = getSequence(key);
 					Thread t = new Thread(() -> {
 						for (int i = 0; i < finalDur && !Thread.interrupted(); i++) {
 							SequenceEvent event = devSeq.get("" + i);
 							if (event != null) {
-								System.out.println(key + " Execute @ " + i);
+								com.neuronrobotics.sdk.common.Log.error(key + " Execute @ " + i);
 								event.execute((DHParameterKinematics) devices.get(key));
 							}
 							try {
@@ -122,7 +125,7 @@ public class TimeSequence {
 					threads.add(t);
 				}
 		}
-		System.out.println("Running sequence");
+		com.neuronrobotics.sdk.common.Log.error("Running sequence");
 		for (Thread t : threads) {
 			t.start();
 		}
@@ -135,7 +138,7 @@ public class TimeSequence {
 				t.interrupt();
 			}
 		}
-		System.out.println(
+		com.neuronrobotics.sdk.common.Log.error(
 				"Running complete, took " + (System.currentTimeMillis() - start) + " expcted " + getDuration());
 	}
 
@@ -163,7 +166,7 @@ public class TimeSequence {
 					while (audioClip.isRunning() && !Thread.interrupted()) {
 						double pos = (double) audioClip.getMicrosecondPosition() / 1000.0;
 						double percent = pos / len * 100.0;
-						// System.out.println("Current " + pos + " Percent = " + percent);
+						// com.neuronrobotics.sdk.common.Log.error("Current " + pos + " Percent = " + percent);
 						ThreadUtil.wait(10);
 					}
 				} catch (Throwable t) {
@@ -172,7 +175,7 @@ public class TimeSequence {
 				audioClip.stop();
 				audioClip.close();
 				((AudioInputStream) audioStream).close();
-				System.out.println("Audio clip exited "+getWavurl()+" : "+getWavfile());
+				com.neuronrobotics.sdk.common.Log.error("Audio clip exited "+getWavurl()+" : "+getWavfile());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

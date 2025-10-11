@@ -41,7 +41,7 @@ public abstract class AbstractImageProvider extends NonBowlerDevice {
 	
 	@Override
 	public void onAsyncResponse(BowlerDatagram data) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 	

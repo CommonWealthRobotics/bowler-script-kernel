@@ -1,0 +1,179 @@
+package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
+
+import java.io.File;
+import java.nio.file.NoSuchFileException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+
+import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+
+import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.IParametric;
+import javafx.scene.paint.Color;
+import javafx.scene.transform.Affine;
+
+public class Group extends AbstractAddFrom {
+	@Expose(serialize = true, deserialize = true)
+	private List<String> names = new ArrayList<String>();
+	@Expose(serialize = true, deserialize = true)
+	public String groupID = null;
+	@Expose(serialize = true, deserialize = true)
+	public boolean hull = false;
+	@Expose(serialize = true, deserialize = true)
+	public boolean intersect = false;
+
+	@Override
+	public String getType() {
+		return "Group";
+	}
+
+	@Override
+	public List<CSG> process(List<CSG> incoming) {
+		ArrayList<CSG> holes = new ArrayList<CSG>();
+		ArrayList<CSG> solids = new ArrayList<CSG>();
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		ArrayList<CSG> replace = new ArrayList<CSG>();
+		back.addAll(incoming);
+		String mobileBase=null;
+		boolean noscale=false;
+		Affine manip = null;
+		boolean nomove=false;
+		for (CSG csg : incoming) {
+			if (csg.isLock())
+				continue;
+			
+			for (String name : names) {
+				if (name.contentEquals(csg.getName())) {
+					if(csg.isNoScale())
+						noscale=true;
+					if(csg.isMotionLock() )
+						nomove=true;
+					Optional<String> mobileBaseName = csg.getMobileBaseName();
+					if(mobileBaseName.isPresent()) {
+						if(mobileBase==null)
+							mobileBase= mobileBaseName.get();
+						if(!mobileBase.contentEquals(mobileBaseName.get())) {
+							continue;// skip grouping any item that is of a different mobile base;
+						}
+					}
+					if(csg.hasManipulator())
+						manip=csg.getManipulator();
+					replace.add(csg);
+					CSG clone = csg.clone();
+					
+					CSG c = clone.syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setRegenerate(csg.getRegenerate()).setName(name);
+					c.addGroupMembership(getGroupID());
+					back.add(c);
+					if(csg.hasManipulator()) {
+						c=c.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip)))
+								.syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setRegenerate(csg.getRegenerate()).setName(name);
+						c.addGroupMembership(getGroupID());
+					}
+					if (csg.isHole()) {
+						holes.add(c);
+					} else
+						solids.add(c);
+
+				}
+			}
+		}
+		for (CSG c : replace) {
+			back.remove(c);
+		}
+		CSG result = null;
+		if (holes.size() > 0 && solids.size() == 0) {
+			result = CSG.unionAll(holes);
+			if (hull)
+				result = result.hull();
+			result.setIsHole(true);
+
+		} else {
+			CSG holecutter = null;
+			if (holes.size() > 0) {
+				if (intersect)
+					holecutter = intersect(holes);
+				else
+					holecutter = holes.size()==1?holes.get(0):CSG.unionAll(holes);
+				if (hull)
+					holecutter = holecutter.hull();
+			}
+			if (intersect)
+				result = intersect(solids);
+			else
+				result =solids.size()==1?solids.get(0).clone(): CSG.unionAll(solids);
+			Color c = result.getColor();
+			if (hull) {
+				result = result.hull();
+			}
+			if (holecutter != null) {
+				if(result.getBounds().isBoundsTouching(holecutter.getBounds())) {
+					result = result.difference(holecutter);
+				}
+			}
+			
+			result.setIsHole(false);
+			result.setColor(c);
+		}
+		if(manip!=null) {
+			result=result.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip).inverse()));
+			result.setManipulator(manip);
+		}
+		if(mobileBase!=null)
+			result.setMobileBaseName(mobileBase);
+		HashMap<String, IParametric> mapOfparametrics = result.getMapOfparametrics(getCaDoodleFile().getCsgDBinstance());
+		if (mapOfparametrics != null)
+			mapOfparametrics.clear();
+		result.addIsGroupResult(getGroupID());
+		result.setName(getGroupID());
+		result.setNoScale(noscale);
+		result.setIsMotionLock(nomove);
+		result.setIsAlwaysShow(false);
+		namesAdded.add(result.getName());
+		back.add(result);
+		return back;
+	}
+
+	private CSG intersect(ArrayList<CSG> solids) {
+		CSG first = solids.get(0);
+		for(int i=1;i<solids.size();i++) {
+			first=first.intersect(solids.get(i));
+		}
+		return first;
+	}
+	@Override
+	public List<String> getNamesAddedInThisOperation() {
+		ArrayList<String> n= new ArrayList<String>();
+		n.addAll(getNamesAdded());
+		n.addAll(names);
+		return n;
+	}
+
+	public Group setNames(List<String> names) {
+		this.names = names;
+		return this;
+	}
+
+	public String getGroupID() {
+		if (groupID == null)
+			groupID = RandomStringFactory.generateRandomString();
+		return groupID;
+	}
+
+	public Group setIntersect(boolean intersect) {
+		this.intersect = intersect;
+		return this;
+	}
+
+	public Group setHull(boolean hull) {
+		this.hull = hull;
+		return this;
+	}
+
+	@Override
+	public File getFile() throws NoSuchFileException {
+		throw new NoSuchFileException(null);
+	}
+}

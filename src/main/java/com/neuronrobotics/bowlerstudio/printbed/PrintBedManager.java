@@ -55,7 +55,7 @@ public class PrintBedManager {
 		try {
 			this.url=ScriptingEngine.locateGitUrl(dir);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 		setHasPrintBed(init(dir,  parts));
@@ -65,9 +65,9 @@ public class PrintBedManager {
 		if (url == null)
 			return false;
 		File f = new File(dir.getAbsolutePath() + "/" + file);
-		System.out.println("Searching for printbed at "+f);
+		com.neuronrobotics.sdk.common.Log.error("Searching for printbed at "+f);
 		if (f.exists()) {
-			System.out.println("Print Bed file found! "+f.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Print Bed file found! "+f.getAbsolutePath());
 			String source;
 			byte[] bytes;
 			try {
@@ -79,7 +79,7 @@ public class PrintBedManager {
 			}
 
 		}else {
-			System.out.println("Print Bed NOT file found! "+f.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Print Bed NOT file found! "+f.getAbsolutePath());
 			return false;
 		}
 		if (database == null) {
@@ -104,7 +104,7 @@ public class PrintBedManager {
 				if(names.contains(name))
 					continue;
 				names.add(name);
-				System.out.println(bit.getName() + " on " + index + " rot " + zrot + " y " + yval);
+				com.neuronrobotics.sdk.common.Log.error(bit.getName() + " on " + index + " rot " + zrot + " y " + yval);
 				if (database.locations.get(name) == null) {
 					database.locations.put(name, new TransformNR());
 				}
@@ -169,7 +169,7 @@ public class PrintBedManager {
 						bed.addExportFormat(s);
 			}
 			if (bed != null) {
-				//System.out.println("Mesh fixing for "+name);
+				//com.neuronrobotics.sdk.common.Log.error("Mesh fixing for "+name);
 				//bed=bed.union(bed);
 				bed.setName(name);
 			}
@@ -201,7 +201,7 @@ public class PrintBedManager {
 //			ScriptingEngine.commit(url, ScriptingEngine.getBranch(url), file, content, "Save Print Bed Locations",
 //					true);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

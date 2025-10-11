@@ -17,7 +17,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 
-// TODO: Auto-generated Javadoc
+//  Auto-generated Javadoc
 /**
  * The Class BowlerJInputDevice.
  */
@@ -96,7 +96,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 						controller = c;
 						break;
 					} else
-						System.out.println("Non match: " + c.getName() + " " + n);
+						com.neuronrobotics.sdk.common.Log.error("Non match: " + c.getName() + " " + n);
 				}
 			}
 		}
@@ -149,12 +149,12 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 										setControllerByName(searches);
 										break;
 									} catch (Throwable t) {
-										System.out.println("BowlerJInputDevice Waiting for device to be availible");
+										com.neuronrobotics.sdk.common.Log.error("BowlerJInputDevice Waiting for device to be availible");
 										t.printStackTrace();
 										try {
 											Thread.sleep(1000);
 										} catch (InterruptedException e) {
-											// TODO Auto-generated catch block
+											// Auto-generated catch block
 											e.printStackTrace();
 										}
 									}
@@ -227,7 +227,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	 * @param controller the new controller
 	 */
 	public void setController(Controller controller) {
-		System.out.println("Found! " + controller.getName());
+		com.neuronrobotics.sdk.common.Log.error("Found! " + controller.getName());
 		this.name = controller.getName();
 		controller.poll();
 		EventQueue queue = controller.getEventQueue();
@@ -277,7 +277,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	 */
 	@Override
 	public ArrayList<String> getNamespacesImp() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return new ArrayList<String>();
 	}
 
@@ -322,13 +322,13 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 				BowlerJInputDevice g = new BowlerJInputDevice("X-Box","Gamesir","Dragon"); // 
 				g.connect(); // Connect to it.
 				g.addListeners((name, value) -> {
-					System.out.println(g);
+					com.neuronrobotics.sdk.common.Log.error(g);
 				});
 				while (g.isAvailable())
 					Thread.sleep(100);
-				System.out.println("Controller clean exit");
+				com.neuronrobotics.sdk.common.Log.error("Controller clean exit");
 			} catch (Throwable t) {
-				System.out.println("Waiting for device to be availible");
+				com.neuronrobotics.sdk.common.Log.error("Waiting for device to be availible");
 				t.printStackTrace();
 				Thread.sleep(1000);
 			}

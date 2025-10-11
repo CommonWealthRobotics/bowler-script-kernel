@@ -120,7 +120,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 				FileOutputStream fis = new FileOutputStream(zipfile);
 				byte[] buffer = new byte[1024];
 				int count = 0;
-				System.out.println("Downloading Vosk Model " + getModelName());
+				com.neuronrobotics.sdk.common.Log.error("Downloading Vosk Model " + getModelName());
 				while ((count = bis.read(buffer, 0, 1024)) != -1) {
 					fis.write(buffer, 0, count);
 					System.out.print(".");
@@ -130,7 +130,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 
 				String source = zipfile.getAbsolutePath();
 				String destination = ScriptingEngine.getWorkspace().getAbsolutePath();
-				System.out.println("Unzipping Vosk Model " + getModelName());
+				com.neuronrobotics.sdk.common.Log.error("Unzipping Vosk Model " + getModelName());
 				ZipFile zipFile = new ZipFile(source);
 				zipFile.extractAll(destination);
 			}
@@ -370,7 +370,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(json.getAbsolutePath()));
 				writer.write(s);
 				writer.close();
-				System.out.println("Lip Sync data writen to " + json.getAbsolutePath());
+				com.neuronrobotics.sdk.common.Log.error("Lip Sync data writen to " + json.getAbsolutePath());
 				timeCodedVisemesCache.clear();
 			} catch (Throwable tr) {
 				tr.printStackTrace();
@@ -398,7 +398,7 @@ public class VoskLipSync implements IAudioProcessingLambda {
 		File audio = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/tmp-tts.wav");
 		try {
 			long start = System.currentTimeMillis();
-			System.out.println("Vosk Lip Sync Begin writing..");
+			com.neuronrobotics.sdk.common.Log.error("Vosk Lip Sync Begin writing..");
 			AudioSystem.write(ais, AudioFileFormat.Type.WAVE, audio);
 			ais = AudioSystem.getAudioInputStream(audio);
 			File text = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/tmp-tts.txt");
@@ -413,9 +413,9 @@ public class VoskLipSync implements IAudioProcessingLambda {
 			}
 			// rhubarb!
 			processRaw(audio, text.getAbsolutePath());
-			System.out.println("Vosk Lip Sync Done writing! took " + (System.currentTimeMillis() - start));
+			com.neuronrobotics.sdk.common.Log.error("Vosk Lip Sync Done writing! took " + (System.currentTimeMillis() - start));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -490,14 +490,14 @@ public class VoskLipSync implements IAudioProcessingLambda {
 						// println "Listening..."
 					}
 				} else {
-					// System.out.println(recognizer.getPartialResult());
+					// com.neuronrobotics.sdk.common.Log.error(recognizer.getPartialResult());
 				}
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 		recognizer.close();
-		// System.out.println(result);
+		// com.neuronrobotics.sdk.common.Log.error(result);
 		microphone.close();
 		return result;
 	}

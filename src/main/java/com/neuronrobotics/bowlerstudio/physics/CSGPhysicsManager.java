@@ -83,7 +83,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		//if(polygons.size()>1000)
 		//	 polygons = getBoundingBox(finalCSG).getPolygons();
 		for (Polygon p : polygons) {
-			for (Vertex v : p.vertices) {
+			for (Vertex v : p.getVertices()) {
 				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
 			}
 		}
@@ -106,7 +106,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		this.setCore(core);
 
 		// setup the motion state for the ball
-		System.out.println("Starting Object at " + TransformFactory.bulletToNr(pose));
+		com.neuronrobotics.sdk.common.Log.error("Starting Object at " + TransformFactory.bulletToNr(pose));
 		DefaultMotionState fallMotionState = new DefaultMotionState(pose);
 		// This we're going to give mass so it responds to gravity
 		Vector3f fallInertia = new Vector3f(0, 0, 0);

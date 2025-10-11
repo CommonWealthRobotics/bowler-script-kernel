@@ -1,0 +1,239 @@
+package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.creature.IMobileBaseUI;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+
+import eu.mihosoft.vrl.v3d.Bounds;
+import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.Vector3d;
+
+public class Resize extends CaDoodleOperation {
+
+	@Expose(serialize = true, deserialize = true)
+	private List<String> names = new ArrayList<String>();
+
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR height = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR leftFront = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR rightRear = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR workplane = new TransformNR();
+	@Expose(serialize = false, deserialize = false)
+	private IMobileBaseUI debug;
+
+	@Override
+	public String getType() {
+		return "Resize";
+	}
+
+	private class ResizeEvent {
+		Transform scaleZ;
+		Transform scale;
+		double movez;
+		double movey;
+		double movex;
+	}
+
+	public Bounds getSellectedBounds(List<CSG> incoming) {
+		Vector3d min = null;
+		Vector3d max = null;
+		for (CSG i : incoming) {
+			CSG c = i.transformed(TransformFactory.nrToCSG(getWorkplane().inverse()));
+			Vector3d min2 = c.getBounds().getMin().clone();
+			Vector3d max2 = c.getBounds().getMax().clone();
+			if (min == null)
+				min = min2;
+			if (max == null)
+				max = max2;
+			if (min2.x < min.x)
+				min.x = min2.x;
+			if (min2.y < min.y)
+				min.y = min2.y;
+			if (min2.z < min.z)
+				min.z = min2.z;
+			if (max.x < max2.x)
+				max.x = max2.x;
+			if (max.y < max2.y)
+				max.y = max2.y;
+			if (max.z < max2.z)
+				max.z = max2.z;
+		}
+		if (min == null || max == null) {
+			com.neuronrobotics.sdk.common.Log.debug("Found bounds to be null ");
+
+			throw new RuntimeException("Min and max can not be null");
+		}
+		return new Bounds(min, max);
+	}
+
+	@Override
+	public List<CSG> process(List<CSG> incoming) {
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		back.addAll(incoming);
+		HashMap<String, ResizeEvent> groupsProcessed = new HashMap<>();
+		ArrayList<CSG> selected = new ArrayList<CSG>();
+		for (CSG c : incoming) {
+			if (c.isLock())
+				continue;
+			if (c.isNoScale())
+				continue;
+			for (String name : names) {
+				if (c.getName().contentEquals(name)) {
+					selected.add(c);
+				}
+			}
+		}
+		if (selected.size() > 0) {
+			Bounds b = getSellectedBounds(selected);
+			for (String name : names) {
+				resizeByName(name, back, groupsProcessed, b);
+			}
+		}
+		return back;
+	}
+
+	private void resizeByName(String name, ArrayList<CSG> back, HashMap<String, ResizeEvent> groupsProcessed,
+			Bounds bounds) {
+		for (int i = 0; i < back.size(); i++) {
+			CSG starting = back.get(i);
+			if (starting.getName().contentEquals(name)) {
+				double zScale = height.getZ() - bounds.getMin().z;
+				double scalez = zScale / (bounds.getMax().z - bounds.getMin().z);
+
+				Transform scaleZ = new Transform().scaleZ(scalez);
+				CSG transformed = starting.transformed(TransformFactory.nrToCSG(getWorkplane().inverse()));
+				if (debug != null) {
+					debug.setCsg(transformed, null);
+				}
+				CSG resizeUp = transformed.transformed(scaleZ);
+				if (debug != null) {
+					debug.setCsg(resizeUp, null);
+				}
+				double zMove = -(bounds.getMin().z * scalez) + bounds.getMin().z;
+				resizeUp = resizeUp.movez(zMove);
+				if (debug != null) {
+					debug.setCsg(resizeUp, null);
+				}
+				double xdimen = Math.abs(leftFront.getX() - rightRear.getX());
+				double ydimen = Math.abs(leftFront.getY() - rightRear.getY());
+				double scalex = xdimen / (bounds.getMax().x - bounds.getMin().x);
+				double scaley = ydimen / (bounds.getMax().y - bounds.getMin().y);
+				double x = rightRear.getX();
+				double y = rightRear.getY();
+
+				if (leftFront.getX() < x) {
+					scalex = -scalex;
+				}
+				if (leftFront.getY() < y) {
+					scaley = -scaley;
+				}
+				Transform scale = new Transform().scale(scalex, scaley, 1);
+				resizeUp = resizeUp.transformed(scale);
+				if (debug != null) {
+					debug.setCsg(resizeUp, null);
+				}
+
+				double xMove = -(bounds.getMin().x * scalex) + x;
+				double yMove = -(bounds.getMin().y * scaley) + y;
+				resizeUp = resizeUp.movex(xMove).movey(yMove);
+				if (debug != null) {
+					debug.setCsg(resizeUp, null);
+				}
+				resizeUp = resizeUp.transformed(TransformFactory.nrToCSG(getWorkplane()));
+				if (debug != null) {
+					debug.setCsg(resizeUp, null);
+				}
+				resizeUp.syncProperties(getCaDoodleFile().getCsgDBinstance(),starting).setName(name);
+				ResizeEvent ev = new ResizeEvent();
+				ev.movex = xMove;
+				ev.movey = yMove;
+				ev.movez = zMove;
+				ev.scale = scale;
+				ev.scaleZ = scaleZ;
+				back.set(i, resizeUp);
+				groupsProcessed.put(name, ev);
+
+				if (starting.isGroupResult()) {
+					processCompositMembers(name, back, groupsProcessed);
+				}
+			}
+		}
+	}
+
+	private void processCompositMembers(String name, ArrayList<CSG> back,
+			HashMap<String, ResizeEvent> groupsProcessed) {
+		for (int i = 0; i < back.size(); i++) {
+			CSG c = back.get(i);
+			if (c.isInGroup() && c.checkGroupMembership(name)) {
+
+				ResizeEvent ev = groupsProcessed.get(name);
+				CSG transformed = c.transformed(TransformFactory.nrToCSG(getWorkplane().inverse()));
+				if (debug != null) {
+					debug.setCsg(transformed, null);
+				}
+				CSG gc = transformed.transformed(ev.scaleZ);
+				gc = gc.movez(ev.movez);
+				gc = gc.transformed(ev.scale);
+				gc = gc.movex(ev.movex).movey(ev.movey).transformed(TransformFactory.nrToCSG(getWorkplane()));
+				gc.syncProperties(getCaDoodleFile().getCsgDBinstance(),c).setName(c.getName());
+				back.set(i, gc);
+				if (c.isGroupResult()) {
+					groupsProcessed.put(c.getName(), ev);
+					processCompositMembers(c.getName(), back, groupsProcessed);
+				}
+			}
+		}
+	}
+
+	public Resize setResize(TransformNR h, TransformNR lf, TransformNR rr) {
+		height = h;
+		leftFront = lf;
+		rightRear = rr;
+		if (Math.abs(lf.getZ() - rr.getZ()) > 0.00001) {
+			throw new RuntimeException("The control points of the corners must be at the same Z value \n"
+					+ lf.toSimpleString() + "\n" + rr.toSimpleString());
+		}
+		if (rightRear.getY() >= leftFront.getY() && rightRear.getX() >= leftFront.getX())
+			return setResize(h, rr, lf);// they were swapped, just fix it and move along
+//		if(rightRear.getY()>=leftFront.getY() || rightRear.getX()>=leftFront.getX())
+//			throw new RuntimeException("Scale must be positive!");
+		return this;
+	}
+
+	public List<String> getNamesAddedInThisOperation() {
+		return names;
+	}
+
+	public Resize setNames(List<String> names) {
+		this.names = names;
+		return this;
+	}
+
+	public TransformNR getWorkplane() {
+		if (workplane == null)
+			workplane = new TransformNR();
+		return workplane;
+	}
+
+	public Resize setWorkplane(TransformNR workplane) {
+		this.workplane = workplane;
+		return this;
+	}
+
+	public Resize setDebugger(IMobileBaseUI engine) {
+		this.debug = engine;
+		return this;
+	}
+
+}

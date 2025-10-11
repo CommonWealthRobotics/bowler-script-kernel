@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 public class ArduinoLoader implements IScriptingLanguage {
 
 
@@ -14,7 +16,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 
   @SuppressWarnings("unchecked")
   @Override
-  public Object inlineScriptRun(File code, ArrayList<Object> args) throws Exception {
+  public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
     if (args == null) {
       args = new ArrayList<>();
     }
@@ -38,14 +40,14 @@ public class ArduinoLoader implements IScriptingLanguage {
     }
     File ino = findIno(code);
     if (ino == null) {
-      //System.out.println("Error: no .ino file found!");
+      //com.neuronrobotics.sdk.common.Log.error("Error: no .ino file found!");
       return null;
     }
     
     commands.add("upload");
     commands.add(ino.getAbsolutePath());
 
-    //System.out.println("Arduino Load: \n"+execString);
+    //com.neuronrobotics.sdk.common.Log.error("Arduino Load: \n"+execString);
     Thread ret = DownloadManager.run(null, ino.getParentFile(), System.out, commands);
     ret.join();
 
@@ -82,8 +84,8 @@ public class ArduinoLoader implements IScriptingLanguage {
   }
 
   @Override
-  public Object inlineScriptRun(String code, ArrayList<Object> args) throws Exception {
-    // TODO Auto-generated method stub
+  public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+    // Auto-generated method stub
     return null;
   }
 
@@ -164,7 +166,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 
   @Override
   public ArrayList<String> getFileExtenetion() {
-    // TODO Auto-generated method stub
+    // Auto-generated method stub
     return new ArrayList<>(Arrays.asList( ".ino",".c", ".h", ".cpp", ".hpp"));
   }
 

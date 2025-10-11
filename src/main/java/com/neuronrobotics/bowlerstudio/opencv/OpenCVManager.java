@@ -52,7 +52,7 @@ public class OpenCVManager extends NonBowlerDevice {
 
 	@Override
 	public ArrayList<String> getNamespacesImp() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
 	}
 

@@ -18,10 +18,19 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
+import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.IGithubLoginListener;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 import java.nio.charset.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.commons.io.*;
 public class ConfigurationDatabase {
 
@@ -57,6 +66,7 @@ public class ConfigurationDatabase {
 	}
 	public static boolean containsKey(String paramsKey, String string) {
 		boolean containsKey = false;
+		getDatabase();
 		synchronized(database){
 			containsKey = ConfigurationDatabase.getParamMap(paramsKey).containsKey(string);
 		}
@@ -89,7 +99,7 @@ public class ConfigurationDatabase {
 		getDatabase();
 		synchronized(database){
 			if (getParamMap(paramsKey).get(objectKey) == null) {
-				//System.err.println("Cant find: " + paramsKey + ":" + objectKey);
+				//com.neuronrobotics.sdk.common.Log.error("Cant find: " + paramsKey + ":" + objectKey);
 				setObject(paramsKey, objectKey, defaultValue);
 			}
 			ret= getParamMap(paramsKey).get(objectKey);
@@ -141,11 +151,11 @@ public class ConfigurationDatabase {
 		try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
 		    out.println(writeOut);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
-		System.out.println("Saved "+f.getName());
+		//com.neuronrobotics.sdk.common.Log.error("Saved "+f.getName());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -156,11 +166,14 @@ public class ConfigurationDatabase {
 		File loadFile = loadFile();
 		if(loadFile.exists())
 			try {
-				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) ScriptingEngine.inlineFileScriptRun(loadFile, null));
+				File parent =loadFile.getParentFile();
+				File db = new File(parent.getAbsolutePath()+DownloadManager.delim()+"CSGdatabase.json");
+				CSGDatabaseInstance instance = new CSGDatabaseInstance(db);
+				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(instance,loadFile, null);
+				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) inlineFileScriptRun);
 				
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// databse is empty
 			}
 		
 		if (database == null) {
@@ -172,32 +185,92 @@ public class ConfigurationDatabase {
 	}
 
 	public static File loadFile() {
-		File f = new File(ScriptingEngine.getWorkspace().getAbsolutePath()+"/ConfigurationDatabase.json");
+		Path appDataDirectory = getAppDataDirectory();
+		File dir = appDataDirectory.toFile();
+		if(!dir.exists()) {
+			dir.mkdirs();
+		}
+		File f = new File(appDataDirectory+"/ConfigurationDatabase.json");
 		if(!f.exists()) {
 			try {
 				f.createNewFile();
 			} catch (IOException e) {
 				throw new RuntimeException(e.getMessage());
 			}
-			String username = PasswordManager.getLoginID();
-			if(username!=null)
-			    try {
-					File file =ScriptingEngine.fileFromGit("https://github.com/"+username+"/BowlerStudioConfiguration.git", "database.json");
-					if(file.exists()) {
-						String contents= FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-						try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
-						    out.println(contents);
-						} catch (FileNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 		}
 		return f;
+	}
+	public static Path getAppDataDirectory() {
+		String appName="CaDoodle";
+		String os = System.getProperty("os.name").toLowerCase();
+
+		if (os.contains("win")) {
+			return getWindowsAppData(appName);
+		} else if (os.contains("mac")) {
+			return getMacAppData(appName);
+		} else {
+			return getLinuxAppData(appName);
+		}
+	}
+
+	public static Path getWindowsAppData(String appName) {
+		// Try LOCALAPPDATA first (safe, never synced to OneDrive)
+		String localAppData = System.getenv("LOCALAPPDATA");
+		if (localAppData != null && !localAppData.isEmpty()) {
+			return Paths.get(localAppData, appName);
+		}
+
+		// Next try APPDATA
+		String appData = System.getenv("APPDATA");
+		if (appData != null && !appData.isEmpty()) {
+			return ensureNoOneDrive(Paths.get(appData), appName);
+		}
+
+		// Fallback to user.home
+		String userHome = System.getProperty("user.home");
+		Path homePath = Paths.get(userHome);
+		homePath = stripOneDrive(homePath); // sanitize
+		return homePath.resolve("AppData").resolve("Local").resolve(appName);
+	}
+
+	private static Path ensureNoOneDrive(Path path, String appName) {
+		Path sanitized = stripOneDrive(path);
+		return sanitized.resolve(appName);
+	}
+
+	private static Path stripOneDrive(Path path) {
+		// Look for "OneDrive" component in the path and cut everything after it
+		for (int i = 0; i < path.getNameCount(); i++) {
+			if (path.getName(i).toString().equalsIgnoreCase("OneDrive")) {
+				// Return path up to but not including "OneDrive"
+				return path.getRoot().resolve(path.subpath(0, i));
+			}
+		}
+		return path;
+	}
+
+	private static Path getMacAppData(String appName) {
+		String userHome = System.getProperty("user.home");
+		return Paths.get(userHome, "Library", "Application Support", appName);
+	}
+
+	private static Path getLinuxAppData(String appName) {
+		// Follow XDG Base Directory Specification
+		String xdgConfigHome = System.getenv("XDG_CONFIG_HOME");
+		if (xdgConfigHome != null && !xdgConfigHome.isEmpty()) {
+			return Paths.get(xdgConfigHome, appName);
+		}
+
+		String userHome = System.getProperty("user.home");
+		return Paths.get(userHome, ".config", appName);
+	}
+
+	public static void ensureDirectoryExists(Path directory) {
+		try {
+			Files.createDirectories(directory);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to create app data directory: " + directory, e);
+		}
 	}
 
 

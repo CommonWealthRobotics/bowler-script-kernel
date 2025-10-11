@@ -40,7 +40,7 @@ public class NativeResource {
 			loadResource(resourceLocation);
 			testNativeCode();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -49,8 +49,8 @@ public class NativeResource {
 	public static File inJarLoad(Class inputClass, String name) throws IOException{
 		InputStream resourceSource = inputClass.getResourceAsStream(name);
 		File resourceLocation = prepResourceLocation(name);
-		//System.out.println("Resource selected "+resourceSource);
-		//System.out.println("Resource target "+resourceLocation);
+		//com.neuronrobotics.sdk.common.Log.error("Resource selected "+resourceSource);
+		//com.neuronrobotics.sdk.common.Log.error("Resource target "+resourceLocation);
 
 		copyResource(resourceSource, resourceLocation);
 		return resourceLocation;
@@ -58,8 +58,8 @@ public class NativeResource {
 	public static File inJarLoad(InputStream inputStream, String name) throws IOException{
 		InputStream resourceSource = inputStream;
 		File resourceLocation = prepResourceLocation(name);
-		//System.out.println("Resource selected "+resourceSource);
-		//System.out.println("Resource target "+resourceLocation);
+		//com.neuronrobotics.sdk.common.Log.error("Resource selected "+resourceSource);
+		//com.neuronrobotics.sdk.common.Log.error("Resource target "+resourceLocation);
 
 		copyResource(resourceSource, resourceLocation);
 		return resourceLocation;
@@ -99,17 +99,17 @@ public class NativeResource {
 				}
 			}
 		}else{
-			System.err.println("Can't load native file: "+name+" for os arch: "+ getOsArch());
+			com.neuronrobotics.sdk.common.Log.error("Can't load native file: "+name+" for os arch: "+ getOsArch());
 			return null;
 		}
-		//System.out.println("Loading "+file);
+		//com.neuronrobotics.sdk.common.Log.error("Loading "+file);
 		return getClass().getResourceAsStream(file);
 	}
 	
 	private void loadResource(File resource) {
 		if(!resource.canRead())
 			throw new RuntimeException("Cant open JNI file: "+resource.getAbsolutePath());
-		//System.out.println("Loading: "+resource.getAbsolutePath());
+		//com.neuronrobotics.sdk.common.Log.error("Loading: "+resource.getAbsolutePath());
 		System.load(resource.getAbsolutePath());
 	}
 
@@ -190,13 +190,13 @@ public class NativeResource {
 		if(fd == null || !fd.canRead()) {
 			throw new NativeResourceException("Unable to deploy native resource");
 		}
-		//System.out.println("Local file: "+fd.getAbsolutePath());
+		//com.neuronrobotics.sdk.common.Log.error("Local file: "+fd.getAbsolutePath());
 		return fd;
 	}
 	
 
 		public static boolean is64Bit() {
-			////System.out.println("Arch: "+getOsArch());
+			////com.neuronrobotics.sdk.common.Log.error("Arch: "+getOsArch());
 			return getOsArch().startsWith("x86_64") || getOsArch().startsWith("amd64");
 		}
 		public static boolean isARM() {
@@ -210,7 +210,7 @@ public class NativeResource {
 			return false;
 		}
 		public static boolean isWindows() {
-			////System.out.println("OS name: "+getOsName());
+			////com.neuronrobotics.sdk.common.Log.error("OS name: "+getOsName());
 			return getOsName().toLowerCase().startsWith("windows") ||getOsName().toLowerCase().startsWith("microsoft") || getOsName().toLowerCase().startsWith("ms");
 		}
 		
