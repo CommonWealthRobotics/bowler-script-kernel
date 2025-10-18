@@ -1676,7 +1676,9 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public void setConfigurationViewerMode(boolean b) {
-		com.neuronrobotics.sdk.common.Log.error("Setting config mode " + b);
+		if(configMode==b)
+			return;
+		com.neuronrobotics.sdk.common.Log.debug("Setting config mode " + b);
 		setConfigMode(b);
 		for (MobileBaseCadManager m : slaves) {
 			m.setConfigurationViewerMode(b);
