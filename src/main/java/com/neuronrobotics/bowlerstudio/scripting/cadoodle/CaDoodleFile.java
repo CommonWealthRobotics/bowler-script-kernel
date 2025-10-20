@@ -161,7 +161,6 @@ public class CaDoodleFile {
 					Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
 					// Log.error(new Exception());
 					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
-					memoryCheck();
 					cache.put(op, (List<CSG>) ois.readObject());
 					ois.close();
 				}
@@ -173,7 +172,7 @@ public class CaDoodleFile {
 	}
 
 	private void memoryCheck() {
-		if (getFreeMemory() > 75) {
+		if (getFreeMemory() > 85) {
 			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
 //			Set<CaDoodleOperation> keySet = cache.keySet();
 //			int index = 0;
