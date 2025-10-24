@@ -31,6 +31,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 import Jama.Matrix;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 //import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
 //import eu.mihosoft.vvecmath.Vector3d;
 import javafx.application.Platform;
@@ -93,12 +94,12 @@ public class MobileBasePhysicsManager {
 		};
 	}
 
-	public MobileBasePhysicsManager(MobileBase base, ArrayList<CSG> baseCad,
+	public MobileBasePhysicsManager(CSGDatabaseInstance db,MobileBase base, ArrayList<CSG> baseCad,
 			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad) {
-		this(base, baseCad, simplecad, PhysicsEngine.get());
+		this(db,base, baseCad, simplecad, PhysicsEngine.get());
 	}
 
-	public MobileBasePhysicsManager(MobileBase base, ArrayList<CSG> baseCad,
+	public MobileBasePhysicsManager(CSGDatabaseInstance db,MobileBase base, ArrayList<CSG> baseCad,
 			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad, PhysicsCore core) {
 		this.simplecad = simplecad;
 		double minz = 0;
@@ -140,7 +141,7 @@ public class MobileBasePhysicsManager {
 //
 //			collisionBod = HullUtil.hull(points);
 //		} catch (Exception ex) {
-			collisionBod = CSG.hullAll(MobileBaseCadManager.getBaseCad(base));
+			collisionBod = CSG.hullAll(MobileBaseCadManager.getBaseCad(db,base));
 //		}
 
 		CSGPhysicsManager baseManager = new CSGPhysicsManager((List<CSG>) Arrays.asList(collisionBod), start,

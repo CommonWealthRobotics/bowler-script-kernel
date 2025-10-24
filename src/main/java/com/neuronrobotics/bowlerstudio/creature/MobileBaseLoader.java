@@ -74,7 +74,7 @@ public class MobileBaseLoader {
 						DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(getDb(),c, null);
 						device.setInverseSolver(d);
 					} catch (Exception ex) {
-						MobileBaseCadManager.findCadManager(base).getUi().highlightException(c, ex);
+						MobileBaseCadManager.get(db,base).getUi().highlightException(c, ex);
 					}
 				}
 			});
@@ -82,7 +82,7 @@ public class MobileBaseLoader {
 			device.setInverseSolver(defaultDHSolver);
 			return code;
 		} catch (Exception e1) {
-			MobileBaseCadManager.findCadManager(base).getUi().highlightException(code, e1);
+			MobileBaseCadManager.get(db,base).getUi().highlightException(code, e1);
 		}
 		return null;
 
@@ -109,7 +109,7 @@ public class MobileBaseLoader {
 			try {
 				code = ScriptingEngine.fileFromGit(git, file);
 			} catch (GitAPIException | IOException e) {
-				MobileBaseCadManager.findCadManager(base).getUi().highlightException(code, e);
+				MobileBaseCadManager.get(db,base).getUi().highlightException(code, e);
 				throw new RuntimeException(e);
 			}
 		}
@@ -131,7 +131,7 @@ public class MobileBaseLoader {
 					defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(getDb(),c, null);
 					device.setWalkingDriveEngine(defaultDriveEngine);
 				} catch (Exception ex) {
-					MobileBaseCadManager.findCadManager(base).getUi().highlightException(c, ex);
+					MobileBaseCadManager.get(db,base).getUi().highlightException(c, ex);
 				}
 			}
 		});
@@ -140,7 +140,7 @@ public class MobileBaseLoader {
 			defaultDriveEngine = (IDriveEngine) ScriptingEngine.inlineFileScriptRun(getDb(),c, null);
 			device.setWalkingDriveEngine(defaultDriveEngine);
 		} catch (Exception ex) {
-			MobileBaseCadManager.findCadManager(base).getUi().highlightException(c, ex);
+			MobileBaseCadManager.get(db,base).getUi().highlightException(c, ex);
 		}
 	}
 

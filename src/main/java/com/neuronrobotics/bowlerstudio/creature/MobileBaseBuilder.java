@@ -15,6 +15,7 @@ import com.neuronrobotics.sdk.addons.kinematics.parallel.ParallelGroup;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -41,6 +42,7 @@ public class MobileBaseBuilder {
 
 	// Channel management
 	private Map<String, Map<Integer, Boolean>> deviceChannelMap = new HashMap<>();
+	private CSGDatabaseInstance db;
 
 	// Constructor for creating a new MobileBase
 	public MobileBaseBuilder(String gitURL, String name) {
@@ -51,7 +53,8 @@ public class MobileBaseBuilder {
 	}
 
 	// Constructor for extending an existing MobileBase
-	public MobileBaseBuilder(MobileBase existingBase) {
+	public MobileBaseBuilder(CSGDatabaseInstance db,MobileBase existingBase) {
+		this.db = db;
 		this.gitURL = existingBase.getGitSelfSource()[0];
 		this.mobileBase = existingBase;
 		initializeChannelMap();
@@ -542,7 +545,7 @@ public class MobileBaseBuilder {
 	}
 
 	public MobileBaseCadManager getCadManager() {
-		MobileBaseCadManager mobileBaseCadManager = MobileBaseCadManager.findCadManager(mobileBase);
+		MobileBaseCadManager mobileBaseCadManager = MobileBaseCadManager.get(db,mobileBase);
 		mobileBaseCadManager.setAutoRegen(false);
 		mobileBaseCadManager.setConfigurationViewerMode(false);
 		return mobileBaseCadManager;

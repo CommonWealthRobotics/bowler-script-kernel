@@ -422,7 +422,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	public double computeLowestPoint(MobileBase cat) {
-		MobileBaseCadManager cadMan = MobileBaseCadManager.findCadManager(cat);
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(db,cat);
 
 		return cadMan.computeLowestPoint().z;
 	}
@@ -440,7 +440,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 
 		// println "\n\nLowest point "+lowestPoint+" \n\n";
 		String bodyName = getMujocoName(cat);
-		MobileBaseCadManager cadMan = MobileBaseCadManager.findCadManager(cat);
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(db,cat);
 		loadCadForMobileBase(db,cadMan);
 		double lowestPoint = (-computeLowestPoint(cat)) / 1000.0;
 
