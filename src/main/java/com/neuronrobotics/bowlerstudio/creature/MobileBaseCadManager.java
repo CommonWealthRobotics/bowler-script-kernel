@@ -1739,6 +1739,20 @@ public class MobileBaseCadManager implements Runnable {
 		return null;
 	}
 
+	public CSGDatabaseInstance getCSGDatabase() {
+		try {
+			File f = ScriptingEngine.fileFromGit(base.getGitSelfSource());
+			File dir = f.getParentFile();
+			File db = new File(dir.getAbsolutePath()+DownloadManager.delim()+"CSGDatabase.json");
+			if(db.exists())
+				return new CSGDatabaseInstance(db);
+		} catch (Exception e) {
+			Log.error(e);
+		}
+		
+		return CSGDatabase.getInstance();
+	}
+
 
 
 }

@@ -54,6 +54,7 @@ import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.ext.openjfx.importers.obj.ObjImporter;
 import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 
@@ -93,6 +94,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	public Builder<?> actuators;
 	private IntegratorType integratorType = IntegratorType.RK_4;
 	public HashMap<AbstractLink, Double> gearRatios = new HashMap<>();
+	private CSGDatabaseInstance db;
 
 	public long currentTimeMillis() {
 		return (long) (getmRuntime().getCurrentSimulationTimeSeconds() * 1000.0);
@@ -113,8 +115,9 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		}
 	}
 
-	public MuJoCoPhysicsManager(String name, List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
+	public MuJoCoPhysicsManager(CSGDatabaseInstance db,String name, List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
 			File workingDir) throws IOException, JAXBException {
+		this.db = db;
 		this.name = name.trim();
 		if (!(name.length() > 0))
 			throw new RuntimeException("Name must be not empty");
@@ -232,14 +235,14 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		return parts;
 	}
 
-	public void generateNewModel() throws IOException, JAXBException {
+	public void generateNewModel(CSGDatabaseInstance db) throws IOException, JAXBException {
 		mapNameToCSG.clear();
 		initializeModel(name);
 		if (bases != null)
 			if (bases.size() > 0) {
 				actuators = builder.addActuator();
 				for (MobileBase cat : bases) {
-					loadBase(cat);
+					loadBase(db,cat);
 				}
 			}
 		if (freeObjects != null) {
@@ -424,11 +427,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		return cadMan.computeLowestPoint().z;
 	}
 
-	public void loadBase(MobileBase cat) throws IOException {
-		loadBase(cat, null, new TransformNR());
+	public void loadBase(CSGDatabaseInstance db,MobileBase cat) throws IOException {
+		loadBase(db,cat, null, new TransformNR());
 	}
 
-	public void loadBase(MobileBase cat, org.mujoco.xml.BodyarchType.Builder<?> linkBody2, TransformNR offsetGlobal)
+	public void loadBase(CSGDatabaseInstance db,MobileBase cat, org.mujoco.xml.BodyarchType.Builder<?> linkBody2, TransformNR offsetGlobal)
 			throws IOException {
 		if (contacts == null)
 			contacts = builder.addContact();
@@ -438,7 +441,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		// println "\n\nLowest point "+lowestPoint+" \n\n";
 		String bodyName = getMujocoName(cat);
 		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
-		loadCadForMobileBase(cadMan);
+		loadCadForMobileBase(db,cadMan);
 		double lowestPoint = (-computeLowestPoint(cat)) / 1000.0;
 
 		int bodyParts = 0;
@@ -589,7 +592,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					linkBody = loadLink(cat, k, i, parts, linkBody, linkToBulder);
 				MobileBase follower = k.getFollowerMobileBase(link);
 				if (follower != null) {
-					loadBase(follower, linkBody, k.getDHStep(i));
+					loadBase(db,follower, linkBody, k.getDHStep(i));
 				}
 			}
 			for (String affineNameMapGet : geomToCSGMap.keySet()) {
@@ -977,10 +980,10 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		return cat.getScriptingName().trim() + "_base";
 	}
 
-	public void loadCadForMobileBase(MobileBaseCadManager cadMan) {
+	public void loadCadForMobileBase(CSGDatabaseInstance db,MobileBaseCadManager cadMan) {
 		cadMan.run();
 		if (!cadMan.isCADstarted() && cadMan.getProcesIndictor().get() < 0.1) {
-			cadMan.generateCad();
+			cadMan.generateCad(db);
 		}
 		long start = System.currentTimeMillis();
 		waitForCad(cadMan, start);
@@ -1063,7 +1066,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		if (mRuntime == null)
 			try {
 				new RuntimeException("ERROR loading runtime before it was generated").printStackTrace();
-				generateNewModel();
+				generateNewModel(db);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

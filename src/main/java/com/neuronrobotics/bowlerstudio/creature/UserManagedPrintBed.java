@@ -19,6 +19,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 import java.lang.reflect.Type;
 import java.nio.file.Path;
@@ -37,7 +38,7 @@ public class UserManagedPrintBed implements IgenerateBed {
 	}
 
 	@Override
-	public ArrayList<CSG> generateCad(DHParameterKinematics dh, int linkIndex) {
+	public ArrayList<CSG> generateCad(CSGDatabaseInstance db,DHParameterKinematics dh, int linkIndex) {
 		throw new RuntimeException("This is not a cad generator");
 	}
 

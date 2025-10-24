@@ -567,6 +567,7 @@ public class BowlerKernel {
 		if (MobileBase.class.isInstance(ret)) {
 			MobileBase ret2 = (MobileBase) ret;
 			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
+			CSGDatabaseInstance db = m.getCSGDatabase();
 			m.setUi(new IMobileBaseUI() {
 
 				@Override
@@ -607,7 +608,7 @@ public class BowlerKernel {
 			});
 			m.setConfigurationViewerMode(false);
 			ret2.connect();
-			m.generateBody();
+			m.generateBody(db);
 			try {
 
 				File baseDir = new File("./manufacturing/");

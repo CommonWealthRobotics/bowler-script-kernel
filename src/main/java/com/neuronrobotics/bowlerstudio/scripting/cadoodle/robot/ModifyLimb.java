@@ -85,7 +85,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 			redo();
 			MobileBaseCadManager manager = builder.getCadManager();
 			if (elbow != null) {
-				ArrayList<CSG> limbCad = manager.generateCad(getLimb());
+				ArrayList<CSG> limbCad = manager.generateCad(getCaDoodleFile().getCsgDBinstance(),getLimb());
 				for (CSG c : incoming) {
 					Optional<String> limbName2 = c.getLimbName();
 					if (limbName2.isPresent())
