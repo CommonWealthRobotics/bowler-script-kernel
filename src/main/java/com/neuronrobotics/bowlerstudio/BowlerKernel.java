@@ -566,7 +566,7 @@ public class BowlerKernel {
 		}
 		if (MobileBase.class.isInstance(ret)) {
 			MobileBase ret2 = (MobileBase) ret;
-			MobileBaseCadManager m = MobileBaseCadManager.get(ret2);
+			MobileBaseCadManager m = MobileBaseCadManager.findCadManager(ret2);
 			CSGDatabaseInstance db = m.getCSGDatabase();
 			m.setUi(new IMobileBaseUI() {
 

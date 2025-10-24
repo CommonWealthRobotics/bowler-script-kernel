@@ -332,7 +332,7 @@ public class MobileBaseCadManager implements Runnable {
 	public Vector3d computeHighestPoint() {
 		render();
 		MobileBase cat = base;
-		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
+		MobileBaseCadManager cadMan = MobileBaseCadManager.findCadManager(cat);
 		Vector3d highest = null;
 		Affine l = (Affine) cat.getRootListener();
 		TransformNR tmp = TransformFactory.affineToNr(l);
@@ -385,7 +385,7 @@ public class MobileBaseCadManager implements Runnable {
 	public Vector3d computeLowestPoint() {
 		render();
 		MobileBase cat = base;
-		MobileBaseCadManager cadMan = MobileBaseCadManager.get(cat);
+		MobileBaseCadManager cadMan = MobileBaseCadManager.findCadManager(cat);
 		Vector3d lowest = null;
 		Affine l = (Affine) cat.getRootListener();
 		TransformNR tmp = TransformFactory.affineToNr(l);
@@ -1431,7 +1431,7 @@ public class MobileBaseCadManager implements Runnable {
 	public void selectCsgByMobileBase(MobileBase base) {
 		try {
 
-			ArrayList<CSG> csg = MobileBaseCadManager.get(base).getBasetoCadMap().get(base);
+			ArrayList<CSG> csg = MobileBaseCadManager.findCadManager(base).getBasetoCadMap().get(base);
 			getUi().setSelectedCsg(csg);
 		} catch (Exception ex) {
 			// getUi().highlightException(null, ex);
@@ -1455,7 +1455,7 @@ public class MobileBaseCadManager implements Runnable {
 	public void selectCsgByLink(MobileBase base, LinkConfiguration limb) {
 		try {
 
-			ArrayList<CSG> limCad = MobileBaseCadManager.get(base).getLinktoCadMap().get(limb);
+			ArrayList<CSG> limCad = MobileBaseCadManager.findCadManager(base).getLinktoCadMap().get(limb);
 			getUi().setSelectedCsg(limCad);
 		} catch (Exception ex) {
 			com.neuronrobotics.sdk.common.Log.error("Limb not loaded yet");
@@ -1486,7 +1486,7 @@ public class MobileBaseCadManager implements Runnable {
 						master.allCad.remove(allCad.get(i));
 				}
 				MobileBase device = base;
-				MobileBaseCadManager.get(base).clear();
+				MobileBaseCadManager.findCadManager(base).clear();
 
 				try {
 					setAllCad(generateBody(csgDatabaseInstance,device, true));
@@ -1500,7 +1500,7 @@ public class MobileBaseCadManager implements Runnable {
 						master.allCad.add(allCad.get(i));
 					getUi().setCsg(master, getCadScriptFromMobileBase(device));
 				} else
-					getUi().setCsg(MobileBaseCadManager.get(base), getCadScriptFromMobileBase(device));
+					getUi().setCsg(MobileBaseCadManager.findCadManager(base), getCadScriptFromMobileBase(device));
 				cadGenerating = false;
 				System.out.print("\r\nDone Generating CAD! num parts: " + allCad.size() + "\r\n");
 				try {
@@ -1584,7 +1584,7 @@ public class MobileBaseCadManager implements Runnable {
 					for (int i = 0; i < kin.getNumberOfLinks(); i++) {
 						MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
 						if (m == device) {
-							return get(mb);
+							return findCadManager(mb);
 						}
 					}
 				}
@@ -1612,7 +1612,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public static HashMap<LinkConfiguration, ArrayList<CSG>> getSimplecad(MobileBase device) {
-		return get(device).LinktoCadMap;
+		return findCadManager(device).LinktoCadMap;
 	}
 
 	private ArrayList<CSG> localGetBaseCad(MobileBase device) {
@@ -1621,7 +1621,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public static ArrayList<CSG> getBaseCad(MobileBase device) {
-		return get(device).localGetBaseCad(device);
+		return findCadManager(device).localGetBaseCad(device);
 	}
 
 	public DoubleProperty getProcesIndictor() {
@@ -1709,7 +1709,7 @@ public class MobileBaseCadManager implements Runnable {
 		return cadGenerating;
 	}
 
-	public static MobileBaseCadManager get(IVitaminHolder holder) {
+	public static MobileBaseCadManager findCadManager(IVitaminHolder holder) {
 		Set<MobileBase> keySet = cadmap.keySet();
 		for (MobileBase b : keySet) {
 			MobileBaseCadManager m = checkforBase(holder, b);
@@ -1721,12 +1721,12 @@ public class MobileBaseCadManager implements Runnable {
 
 	private static MobileBaseCadManager checkforBase(IVitaminHolder holder, MobileBase b) {
 		if (b == holder)
-			return get(b);
+			return findCadManager(b);
 		for (DHParameterKinematics k : b.getAllDHChains()) {
 			for (int i = 0; i < k.getNumberOfLinks(); i++) {
 				AbstractLink abstractLink = k.getAbstractLink(i);
 				if (abstractLink == holder || k.getLinkConfiguration(i) == holder) {
-					return get(b);
+					return findCadManager(b);
 				}
 				MobileBase follower = k.getFollowerMobileBase(abstractLink);
 				if (follower != null) {

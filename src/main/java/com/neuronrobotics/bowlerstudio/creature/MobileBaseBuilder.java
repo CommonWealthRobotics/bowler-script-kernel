@@ -542,7 +542,7 @@ public class MobileBaseBuilder {
 	}
 
 	public MobileBaseCadManager getCadManager() {
-		MobileBaseCadManager mobileBaseCadManager = MobileBaseCadManager.get(mobileBase);
+		MobileBaseCadManager mobileBaseCadManager = MobileBaseCadManager.findCadManager(mobileBase);
 		mobileBaseCadManager.setAutoRegen(false);
 		mobileBaseCadManager.setConfigurationViewerMode(false);
 		return mobileBaseCadManager;
