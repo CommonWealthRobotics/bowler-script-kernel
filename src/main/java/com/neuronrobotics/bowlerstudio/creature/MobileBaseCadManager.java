@@ -474,7 +474,7 @@ public class MobileBaseCadManager implements Runnable {
 
 		@Override
 		public void highlightException(File fileEngineRunByName, Throwable ex) {
-			com.neuronrobotics.sdk.common.Log.error(new Exception("Caught here:"));
+			//com.neuronrobotics.sdk.common.Log.error(new Exception("Caught here:"));
 			com.neuronrobotics.sdk.common.Log.error(ex);
 			;
 		}

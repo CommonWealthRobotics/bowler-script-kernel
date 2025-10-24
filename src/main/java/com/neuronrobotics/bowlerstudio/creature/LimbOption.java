@@ -136,6 +136,8 @@ public class LimbOption {
 		add.setBuilderName("tmp");
 		add.getRobots().put("tmp", value);
 		List<CSG> so = add.process(new ArrayList<>());
+		if(so.size()==0)
+			throw new RuntimeException("Add limb produced no parts!");
 		add.getRobots().remove("tmp");
 		for (CSG c : so) {
 			for (String s : c.getParameters(f.getCsgDBinstance())) {
