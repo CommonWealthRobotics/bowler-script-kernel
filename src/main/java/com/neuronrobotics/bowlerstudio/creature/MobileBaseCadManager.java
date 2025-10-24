@@ -779,9 +779,9 @@ public class MobileBaseCadManager implements Runnable {
 		return forwardOffset;
 	}
 
-	private MobileBaseCadManager(MobileBase base, IMobileBaseUI myUI) {
+	private MobileBaseCadManager(CSGDatabaseInstance csgDatabaseInstance,MobileBase base, IMobileBaseUI myUI) {
 		this.setUi(myUI);
-		setMobileBase(base);
+		setMobileBase(csgDatabaseInstance,base);
 	}
 
 	private Object scriptFromFileInfo(CSGDatabaseInstance db,String name, String[] args, Runnable runner) throws Throwable {
@@ -877,12 +877,12 @@ public class MobileBaseCadManager implements Runnable {
 
 	}
 
-	private IgenerateBody getIgenerateBody(MobileBase b) throws Throwable {
+	private IgenerateBody getIgenerateBody(CSGDatabaseInstance csgDatabaseInstance,MobileBase b) throws Throwable {
 		if (isConfigMode())
-			return getConfigurationDisplay();
+			return getConfigurationDisplay(csgDatabaseInstance);
 		Object cadForBodyEngine = scriptFromFileInfo(getDb(),b.getScriptingName(), b.getGitCadEngine(), () -> {
 			run();
-			generateCad();
+			generateCad(csgDatabaseInstance);
 		});
 		if (IgenerateBody.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateBody) cadForBodyEngine;
@@ -890,12 +890,12 @@ public class MobileBaseCadManager implements Runnable {
 		return null;
 	}
 
-	private IgenerateCad getIgenerateCad(DHParameterKinematics dh) throws Throwable {
+	private IgenerateCad getIgenerateCad(CSGDatabaseInstance csgDatabaseInstance,DHParameterKinematics dh) throws Throwable {
 		if (isConfigMode())
-			return getConfigurationDisplay();
+			return getConfigurationDisplay(csgDatabaseInstance);
 		Object cadForBodyEngine = scriptFromFileInfo(getDb(),dh.getScriptingName(), dh.getGitCadEngine(), () -> {
 			run();
-			generateCad();
+			generateCad(csgDatabaseInstance);
 		});
 		if (IgenerateCad.class.isInstance(cadForBodyEngine)) {
 			return (IgenerateCad) cadForBodyEngine;
@@ -913,14 +913,14 @@ public class MobileBaseCadManager implements Runnable {
 		return null;
 	}
 
-	private ICadGenerator getConfigurationDisplay() throws Throwable {
+	private ICadGenerator getConfigurationDisplay(CSGDatabaseInstance csgDatabaseInstance) throws Throwable {
 		if (cadEngineConfiguration == null) {
 			String[] args = new String[] { "https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git",
 					"dhcad.groovy" };
 			Object cadForBodyEngine = scriptFromFileInfo(getDb(),"ConfigDisplay", args, () -> {
 				cadEngineConfiguration = null;
 				try {
-					getConfigurationDisplay();
+					getConfigurationDisplay(csgDatabaseInstance);
 				} catch (Throwable e) {
 					// Auto-generated catch block
 					com.neuronrobotics.sdk.common.Log.error(e);
@@ -931,7 +931,7 @@ public class MobileBaseCadManager implements Runnable {
 						mobileBaseCadManager = cadmap.get(manager);
 						if (mobileBaseCadManager.autoRegen)
 							if (mobileBaseCadManager.isConfigMode())
-								mobileBaseCadManager.generateCad();
+								mobileBaseCadManager.generateCad(csgDatabaseInstance);
 					}
 				} catch (Exception e) {
 					if (mobileBaseCadManager != null)
@@ -949,11 +949,11 @@ public class MobileBaseCadManager implements Runnable {
 		return MobileBaseLoader.get(base).getDb();
 	}
 
-	public ArrayList<CSG> generateBody() {
-		return generateBody(getMobileBase(), true);
+	public ArrayList<CSG> generateBody(CSGDatabaseInstance csgDatabaseInstance) {
+		return generateBody(csgDatabaseInstance,getMobileBase(), true);
 	}
 
-	public ArrayList<CSG> generateBody(MobileBase base, boolean clear) {
+	public ArrayList<CSG> generateBody(CSGDatabaseInstance csgDatabaseInstance,MobileBase base, boolean clear) {
 		if (!base.isAvailable())
 			throw new RuntimeException("Device " + base.getScriptingName() + " is not connected, can not generate cad");
 
@@ -981,7 +981,7 @@ public class MobileBaseCadManager implements Runnable {
 
 					ArrayList<CSG> newcad = null;
 					try {
-						newcad = getIgenerateBody(device).generateBody(device);
+						newcad = getIgenerateBody(csgDatabaseInstance,device).generateBody(device);
 					} catch (Throwable t) {
 						getUi().highlightException(null, t);
 					}
@@ -989,7 +989,7 @@ public class MobileBaseCadManager implements Runnable {
 						newcad = new ArrayList<CSG>();
 					}
 					if (newcad.size() == 0) {
-						newcad = getConfigurationDisplay().generateBody(device);
+						newcad = getConfigurationDisplay(csgDatabaseInstance).generateBody(device);
 					}
 					if (device.isAvailable()) {
 						for (CSG c : newcad) {
@@ -1050,7 +1050,7 @@ public class MobileBaseCadManager implements Runnable {
 					arrayList.clear();
 					// System.gc();
 				}
-				ArrayList<CSG> linksCad = generateCad(l);
+				ArrayList<CSG> linksCad = generateCad(csgDatabaseInstance,l);
 
 				for (CSG csg : linksCad) {
 
@@ -1067,7 +1067,7 @@ public class MobileBaseCadManager implements Runnable {
 
 		}
 		for (MobileBaseCadManager m : slaves) {
-			getAllCad().addAll(m.generateBody(m.base, false));
+			getAllCad().addAll(m.generateBody(csgDatabaseInstance,m.base, false));
 		}
 		showingStl = false;
 		// setProgress(1);
@@ -1289,7 +1289,7 @@ public class MobileBaseCadManager implements Runnable {
 		return base;
 	}
 
-	public void setMobileBase(MobileBase b) {
+	public void setMobileBase(CSGDatabaseInstance csgDatabaseInstance,MobileBase b) {
 		for (MobileBase mb : cadmap.keySet()) {
 			if (mb == b)
 				throw new RuntimeException("Can not duplicat mobile base");
@@ -1310,7 +1310,7 @@ public class MobileBaseCadManager implements Runnable {
 			k.setRenderWrangler(this);
 		}
 		base.setConfigurationUpdate(() -> {
-			generateCad();
+			generateCad(csgDatabaseInstance);
 		});
 		run();
 		// new Exception("Adding the mysteryListener
@@ -1350,12 +1350,12 @@ public class MobileBaseCadManager implements Runnable {
 	 * @param dh
 	 * @return
 	 */
-	public ArrayList<CSG> generateCad(DHParameterKinematics dh) {
+	public ArrayList<CSG> generateCad(CSGDatabaseInstance csgDatabaseInstance,DHParameterKinematics dh) {
 		ArrayList<CSG> dhLinks = new ArrayList<>();
 
 		try {
-			IgenerateCad generatorToUse = getConfigurationDisplay();
-			Object object = getIgenerateCad(dh);
+			IgenerateCad generatorToUse = getConfigurationDisplay(csgDatabaseInstance);
+			Object object = getIgenerateCad(csgDatabaseInstance,dh);
 			if (object != null && !isConfigMode()) {
 				if (IgenerateCad.class.isInstance(object))
 					generatorToUse = (IgenerateCad) object;
@@ -1372,7 +1372,7 @@ public class MobileBaseCadManager implements Runnable {
 				if (!bail) {
 					ArrayList<CSG> newcad = null;
 					try {
-						newcad = generatorToUse.generateCad(dh, i);
+						newcad = generatorToUse.generateCad(csgDatabaseInstance,dh, i);
 					} catch (Throwable t) {
 						Log.error(t);
 						getUi().highlightException(null, t);
@@ -1381,7 +1381,7 @@ public class MobileBaseCadManager implements Runnable {
 						newcad = new ArrayList<CSG>();
 					}
 					if (newcad.size() == 0) {
-						newcad = getConfigurationDisplay().generateCad(dh, i);
+						newcad = getConfigurationDisplay(csgDatabaseInstance).generateCad(csgDatabaseInstance,dh, i);
 					}
 					getUi().addCSG(newcad, getCadScriptFromLimnb(dh));
 					LinkConfiguration configuration = dh.getLinkConfiguration(i);
@@ -1414,7 +1414,7 @@ public class MobileBaseCadManager implements Runnable {
 					});
 					DHLink dhl = dh.getDhLink(i);
 					if (dhl.getSlaveMobileBase() != null) {
-						ArrayList<CSG> slParts = generateBody(dhl.getSlaveMobileBase(), false);
+						ArrayList<CSG> slParts = generateBody(csgDatabaseInstance,dhl.getSlaveMobileBase(), false);
 						dhLinks.addAll(slParts);
 					}
 					// ArrayList<CSG> generateBody(MobileBase base)
@@ -1462,11 +1462,11 @@ public class MobileBaseCadManager implements Runnable {
 		}
 	}
 
-	public void generateCad() {
-		generateCadWithEnd((Runnable) null);
+	public void generateCad(CSGDatabaseInstance csgDatabaseInstance) {
+		generateCadWithEnd(csgDatabaseInstance,(Runnable) null);
 	}
 
-	public void generateCadWithEnd(Runnable done) {
+	public void generateCadWithEnd(CSGDatabaseInstance csgDatabaseInstance,Runnable done) {
 		if (cadGenerating || !getAutoRegen())
 			return;
 		cadGenerating = true;
@@ -1489,7 +1489,7 @@ public class MobileBaseCadManager implements Runnable {
 				MobileBaseCadManager.get(base).clear();
 
 				try {
-					setAllCad(generateBody(device, true));
+					setAllCad(generateBody(csgDatabaseInstance,device, true));
 				} catch (Exception e) {
 
 					getUi().highlightException(getCadScriptFromMobileBase(device), e);
@@ -1562,11 +1562,11 @@ public class MobileBaseCadManager implements Runnable {
 		this.allCad = allCad;
 	}
 
-	public static MobileBaseCadManager get(MobileBase device, IMobileBaseUI ui) {
+	public static MobileBaseCadManager get(CSGDatabaseInstance csgDatabaseInstance,MobileBase device, IMobileBaseUI ui) {
 		if (cadmap.get(device) == null) {
 			// new RuntimeException("No Mobile Base Cad Manager UI
 			// specified").printStackTrace();
-			MobileBaseCadManager mbcm = new MobileBaseCadManager(device, ui);
+			MobileBaseCadManager mbcm = new MobileBaseCadManager(csgDatabaseInstance,device, ui);
 
 		}
 		MobileBaseCadManager mobileBaseCadManager = cadmap.get(device);
@@ -1577,7 +1577,7 @@ public class MobileBaseCadManager implements Runnable {
 		return mobileBaseCadManager;
 	}
 
-	public static MobileBaseCadManager get(MobileBase device) {
+	public static MobileBaseCadManager get(CSGDatabaseInstance csgDatabaseInstance,MobileBase device) {
 		if (cadmap.get(device) == null) {
 			for (MobileBase mb : cadmap.keySet()) {
 				for (DHParameterKinematics kin : mb.getAllDHChains()) {
@@ -1606,7 +1606,7 @@ public class MobileBaseCadManager implements Runnable {
 				}
 			});
 
-			return get(device, ui2);
+			return get(csgDatabaseInstance,device, ui2);
 		}
 		return cadmap.get(device);
 	}
