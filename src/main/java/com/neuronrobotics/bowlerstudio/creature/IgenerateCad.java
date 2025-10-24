@@ -17,5 +17,5 @@ public interface IgenerateCad {
    * @param dh the list of DH configurations
    * @return simulatable CAD objects
    */
-  ArrayList<CSG> generateCad(CSGDatabaseInstance csgDatabaseInstance, DHParameterKinematics dh, int linkIndex);
+  ArrayList<CSG> generateCad( DHParameterKinematics dh, int linkIndex);
 }

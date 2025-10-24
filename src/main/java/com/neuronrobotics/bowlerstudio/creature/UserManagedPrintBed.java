@@ -38,7 +38,7 @@ public class UserManagedPrintBed implements IgenerateBed {
 	}
 
 	@Override
-	public ArrayList<CSG> generateCad(CSGDatabaseInstance db,DHParameterKinematics dh, int linkIndex) {
+	public ArrayList<CSG> generateCad(DHParameterKinematics dh, int linkIndex) {
 		throw new RuntimeException("This is not a cad generator");
 	}
 

@@ -1374,7 +1374,7 @@ public class MobileBaseCadManager implements Runnable {
 				if (!bail) {
 					ArrayList<CSG> newcad = null;
 					try {
-						newcad = generatorToUse.generateCad(csgDatabaseInstance,dh, i);
+						newcad = generatorToUse.generateCad(dh, i);
 					} catch (Throwable t) {
 						Log.error(t);
 						getUi().highlightException(null, t);
@@ -1383,7 +1383,7 @@ public class MobileBaseCadManager implements Runnable {
 						newcad = new ArrayList<CSG>();
 					}
 					if (newcad.size() == 0) {
-						newcad = getConfigurationDisplay(csgDatabaseInstance).generateCad(csgDatabaseInstance,dh, i);
+						newcad = getConfigurationDisplay(csgDatabaseInstance).generateCad(dh, i);
 					}
 					getUi().addCSG(newcad, getCadScriptFromLimnb(dh));
 					LinkConfiguration configuration = dh.getLinkConfiguration(i);
