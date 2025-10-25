@@ -25,7 +25,7 @@ public class MakeRobot extends AbstractAddFrom {
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		try {
-			getBuilder().build();
+			getBuilder().build(getDb());
 			for(CSG c:incoming) {
 				for(String s:assignedAsBase) {
 					if(c.getName().contentEquals(s)) {

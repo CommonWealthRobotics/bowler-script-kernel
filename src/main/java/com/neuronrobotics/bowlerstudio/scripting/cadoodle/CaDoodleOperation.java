@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public abstract class CaDoodleOperation {
 	private CaDoodleFile cf = null;
@@ -16,7 +17,10 @@ public abstract class CaDoodleOperation {
 	public void pruneCleanup() {
 		
 	}
-	
+	public CSGDatabaseInstance getDb() {
+		return cf.getCsgDBinstance();
+	}
+
 	public CaDoodleFile getCaDoodleFile() {
 		return cf;
 	}

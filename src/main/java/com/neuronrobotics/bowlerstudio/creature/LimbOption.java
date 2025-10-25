@@ -39,6 +39,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
@@ -63,14 +64,14 @@ public class LimbOption {
 	private CSG indicator;
 	private Image image;
 
-	public DHParameterKinematics getLimb(String uniqueName) throws Exception {
+	public DHParameterKinematics getLimb(CSGDatabaseInstance db,String uniqueName) throws Exception {
 		String xmlContent = ScriptingEngine.codeFromGit(url, file)[0];
 		if (!composite) {
 			DHParameterKinematics newLimb = new DHParameterKinematics(null, IOUtils.toInputStream(xmlContent, "UTF-8"));
 			newLimb.setScriptingName(uniqueName);
 			return newLimb;
 		} else {
-			MobileBase base =  RobotHelper.fileToRobot(url, file);
+			MobileBase base =  RobotHelper.fileToRobot(db,url, file);
 			DHParameterKinematics newLimb = base.getAllDHChains().get(0);
 			newLimb.setScriptingName(uniqueName);
 			return newLimb;

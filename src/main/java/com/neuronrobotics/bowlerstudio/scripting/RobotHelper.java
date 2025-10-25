@@ -24,11 +24,11 @@ public class RobotHelper implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) {
-		return fileToRobot(code);
+		return fileToRobot(db,code);
 	}
-	public static MobileBase fileToRobot(String url,String file) {
+	public static MobileBase fileToRobot(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String url,String file) {
 		try {
-			return fileToRobot(ScriptingEngine.fileFromGit(url, file)) ;
+			return fileToRobot(db,ScriptingEngine.fileFromGit(url, file)) ;
 		} catch (InvalidRemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -44,7 +44,7 @@ public class RobotHelper implements IScriptingLanguage {
 		}
 		return null;
 	}
-	public static MobileBase fileToRobot(File code) {
+	public static MobileBase fileToRobot(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code) {
 		byte[] bytes;
 		try {
 			bytes = Files.readAllBytes(code.toPath());
@@ -53,7 +53,7 @@ public class RobotHelper implements IScriptingLanguage {
 			try {
 				mb = new MobileBase(IOUtils.toInputStream(s, "UTF-8"));
 				mb.setGitSelfSource(ScriptingEngine.findGitTagFromFile(code));
-				return MobileBaseLoader.get(mb).getBase();
+				return MobileBaseLoader.get(db,mb).getBase();
 			} catch (IOException e) {
 				// Auto-generated catch block
 				com.neuronrobotics.sdk.common.Log.error(e);

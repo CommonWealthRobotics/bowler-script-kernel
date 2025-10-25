@@ -948,7 +948,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	private CSGDatabaseInstance getDb() {
-		return MobileBaseLoader.get(base).getDb();
+		return db;
 	}
 
 	public ArrayList<CSG> generateBody(CSGDatabaseInstance csgDatabaseInstance) {
@@ -1305,7 +1305,7 @@ public class MobileBaseCadManager implements Runnable {
 		this.base = b;
 
 		cadmap.put(base, this);
-		MobileBaseLoader.get(base);// load the dependant scripts
+		MobileBaseLoader.get(db,base);// load the dependant scripts
 		base.updatePositions();
 		base.setRenderWrangler(this);
 		for (DHParameterKinematics k : base.getAllDHChains()) {
@@ -1710,7 +1710,11 @@ public class MobileBaseCadManager implements Runnable {
 		// Auto-generated method stub
 		return cadGenerating;
 	}
-
+	public static MobileBaseCadManager get(CSGDatabaseInstance db,IVitaminHolder holder) {
+		if(MobileBase.class.isInstance(holder))
+			return get(db,(MobileBase)holder);
+		return searchForCadManager( holder);
+	}
 	public static MobileBaseCadManager searchForCadManager(IVitaminHolder holder) {
 		Set<MobileBase> keySet = cadmap.keySet();
 		for (MobileBase b : keySet) {
@@ -1723,7 +1727,7 @@ public class MobileBaseCadManager implements Runnable {
 
 	private static MobileBaseCadManager checkforBase(IVitaminHolder holder, MobileBase b) {
 		if (b == holder)
-			return searchForCadManager(b);
+			return cadmap.get(b);
 		for (DHParameterKinematics k : b.getAllDHChains()) {
 			for (int i = 0; i < k.getNumberOfLinks(); i++) {
 				AbstractLink abstractLink = k.getAbstractLink(i);

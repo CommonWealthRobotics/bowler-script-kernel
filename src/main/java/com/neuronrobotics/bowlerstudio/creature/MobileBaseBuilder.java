@@ -292,7 +292,7 @@ public class MobileBaseBuilder {
 		return this;
 	}
 
-	public MobileBaseBuilder addFixedWheelFromOptions(String wheelType) {
+	public MobileBaseBuilder addFixedWheelFromOptions(CSGDatabaseInstance db,String wheelType) {
 		try {
 			@SuppressWarnings("unchecked")
 			HashMap<String, HashMap<String, Object>> options = (HashMap<String, HashMap<String, Object>>) ScriptingEngine
@@ -309,7 +309,7 @@ public class MobileBaseBuilder {
 							IOUtils.toInputStream(xmlContent, "UTF-8"));
 					return addFixedWheel(newWheel);
 				} else {
-					MobileBase base = RobotHelper.fileToRobot(values.get("scriptGit").toString(),
+					MobileBase base = RobotHelper.fileToRobot(db,values.get("scriptGit").toString(),
 							values.get("scriptFile").toString());
 					DHParameterKinematics newWheel = base.getDrivable().get(0);
 					return addFixedWheel(newWheel);
@@ -396,7 +396,7 @@ public class MobileBaseBuilder {
 		return ScriptingEngine.fileFromGit(gitURL, mobileBase.getScriptingName() + ".xml");
 	}
 
-	public MobileBase build() throws Exception {
+	public MobileBase build(CSGDatabaseInstance db) throws Exception {
 		if (!mobileBase.isAvailable())
 			mobileBase.connect();
 		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName();
@@ -416,7 +416,7 @@ public class MobileBaseBuilder {
 			AddRobotLimb limb = limbs.get(i);
 			if (mobileBase.getLimbByName(limb.getName()) == null) {
 				TransformNR location = limb.getLocation();
-				DHParameterKinematics kin = limb.getLimb().getLimb(limb.getName());
+				DHParameterKinematics kin = limb.getLimb().getLimb(db,limb.getName());
 				kin.setRobotToFiducialTransform(location.copy());
 				// TODO add the channel mapping here
 				kin.connect();

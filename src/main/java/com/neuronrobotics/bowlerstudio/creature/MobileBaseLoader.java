@@ -37,9 +37,9 @@ public class MobileBaseLoader {
 	public void setDb(CSGDatabaseInstance db) {
 		this.db = db;
 	}
-	private MobileBaseLoader(MobileBase base) {
+	private MobileBaseLoader(CSGDatabaseInstance dbIn,MobileBase base) {
 		this.setBase(base);
-
+		setDb(dbIn);
 		setDefaultWalkingEngine(base);
 		base.initializeParalellGroups();
 	}
@@ -144,11 +144,11 @@ public class MobileBaseLoader {
 		}
 	}
 
-	public static MobileBase initializeScripts(MobileBase base) {
+	public static MobileBase initializeScripts(CSGDatabaseInstance db,MobileBase base) {
 		if (map.get(base) == null) {
 
 			if (map.get(base) == null)
-				map.put(base, new MobileBaseLoader(base));
+				map.put(base, new MobileBaseLoader(db,base));
 //			for (DHParameterKinematics kin : base.getAllDHChains()) {
 //				for (int i = 0; i < kin.getNumberOfLinks(); i++) {
 //					MobileBase m = kin.getDhLink(i).getSlaveMobileBase();
@@ -164,16 +164,16 @@ public class MobileBaseLoader {
 		return base;
 	}
 
-	public static MobileBase fromGit(String id, String file) throws Exception {
+	public static MobileBase fromGit(CSGDatabaseInstance db,String id, String file) throws Exception {
 		String xmlContent = ScriptingEngine.codeFromGit(id, file)[0];
 		MobileBase mb = new MobileBase(IOUtils.toInputStream(xmlContent, "UTF-8"));
 
 		mb.setGitSelfSource(new String[] { id, file });
-		return initializeScripts(mb);
+		return initializeScripts(db,mb);
 	}
 
-	public static MobileBaseLoader get(MobileBase base) {
-		initializeScripts(base);
+	public static MobileBaseLoader get(CSGDatabaseInstance db,MobileBase base) {
+		initializeScripts(db,base);
 
 		return map.get(base);
 	}

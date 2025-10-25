@@ -187,7 +187,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 		setUndo(true);
 		//com.neuronrobotics.sdk.common.Log.debug("Undo ModifyLimb");
 		try {
-			builder.build();
+			builder.build(getDb());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
@@ -200,7 +200,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 		setUndo(false);
 		//com.neuronrobotics.sdk.common.Log.debug("Redo ModifyLimb");
 		try {
-			builder.build();
+			builder.build(getDb());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);

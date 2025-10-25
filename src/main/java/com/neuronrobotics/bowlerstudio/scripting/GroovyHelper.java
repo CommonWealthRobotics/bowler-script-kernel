@@ -16,6 +16,7 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.*;
 
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.DeviceManager;
 
@@ -36,7 +37,8 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		binding.setVariable("csgdb", db2);
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
 		if(!code.contains("csgdb")) {
-			//Vitamins.get(
+			//MobileBaseCadManager.get(
+			code=code.replace("MobileBaseCadManager.get(", "MobileBaseCadManager.get(csgdb,");
 			code=code.replace("Vitamins.get(", "Vitamins.get(csgdb,");
 
 			code=code.replace("CaDoodleVitamin.", "new CaDoodleVitamin(csgdb).");

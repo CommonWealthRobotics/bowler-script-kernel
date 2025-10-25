@@ -9,6 +9,9 @@ import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+
 public class MobileBaseBuilderTest {
 
 	@Test
@@ -18,7 +21,7 @@ public class MobileBaseBuilderTest {
 				"https://github.com/madhephaestus/TestRepo.git", "BuiltRobot")
 				.setXmlName("RobRobotExample.xml");
 		
-		MobileBase base = builder.build();
+		MobileBase base = builder.build(CSGDatabase.getInstance());
 		
 		
 	}
