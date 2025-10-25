@@ -1292,6 +1292,8 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public void setMobileBase(CSGDatabaseInstance csgDatabaseInstance,MobileBase b) {
+		if(csgDatabaseInstance==null)
+			throw new RuntimeException("DB can not be null");
 		for (MobileBase mb : cadmap.keySet()) {
 			if (mb == b)
 				throw new RuntimeException("Can not duplicat mobile base");
@@ -1303,7 +1305,7 @@ public class MobileBaseCadManager implements Runnable {
 			}
 		}
 		this.base = b;
-
+		db = csgDatabaseInstance;
 		cadmap.put(base, this);
 		MobileBaseLoader.get(db,base);// load the dependant scripts
 		base.updatePositions();
@@ -1580,6 +1582,8 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	public static MobileBaseCadManager get(CSGDatabaseInstance db,MobileBase device) {
+		if(db==null)
+			throw new RuntimeException("Db can not be null");
 		if (cadmap.get(device) == null) {
 			for (MobileBase mb : cadmap.keySet()) {
 				for (DHParameterKinematics kin : mb.getAllDHChains()) {

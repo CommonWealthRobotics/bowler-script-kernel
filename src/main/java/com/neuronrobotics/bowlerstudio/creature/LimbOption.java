@@ -133,7 +133,7 @@ public class LimbOption {
 				.setLocation(new TransformNR());
 		add.setCaDoodleFile(f);
 		add.forceLoad=true;
-		MobileBaseBuilder value = new MobileBaseBuilder(Files.createTempDirectory(name + "-").toFile().getAbsolutePath(), "testfile");
+		MobileBaseBuilder value = new MobileBaseBuilder(f.getCsgDBinstance(),Files.createTempDirectory(name + "-").toFile().getAbsolutePath(), "testfile");
 		add.setBuilderName("tmp");
 		add.getRobots().put("tmp", value);
 		List<CSG> so = add.process(new ArrayList<>());

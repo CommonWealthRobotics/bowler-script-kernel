@@ -45,7 +45,8 @@ public class MobileBaseBuilder {
 	private CSGDatabaseInstance db;
 
 	// Constructor for creating a new MobileBase
-	public MobileBaseBuilder(String gitURL, String name) {
+	public MobileBaseBuilder(CSGDatabaseInstance db,String gitURL, String name) {
+		this.db=db;
 		this.gitURL = gitURL;
 		this.mobileBase = new MobileBase();
 		this.mobileBase.setScriptingName(name);

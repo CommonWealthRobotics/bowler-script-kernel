@@ -34,6 +34,9 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		Binding binding = new Binding();
 
 		binding.setVariable("args", args);
+		if(db2==null) {
+			throw new RuntimeException("Can not send an empty CSG Database to script");
+		}
 		binding.setVariable("csgdb", db2);
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
 		if(!code.contains("csgdb")) {

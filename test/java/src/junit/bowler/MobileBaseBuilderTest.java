@@ -17,7 +17,7 @@ public class MobileBaseBuilderTest {
 	@Test
 	public void test() throws Exception {
 		ScriptingEngine.login();
-		MobileBaseBuilder builder = new MobileBaseBuilder(
+		MobileBaseBuilder builder = new MobileBaseBuilder(CSGDatabase.getInstance(),
 				"https://github.com/madhephaestus/TestRepo.git", "BuiltRobot")
 				.setXmlName("RobRobotExample.xml");
 		

@@ -35,6 +35,8 @@ public class MobileBaseLoader {
 	}
 
 	public void setDb(CSGDatabaseInstance db) {
+		if(db==null)
+			throw new RuntimeException("DB can not be null!");
 		this.db = db;
 	}
 	private MobileBaseLoader(CSGDatabaseInstance dbIn,MobileBase base) {
