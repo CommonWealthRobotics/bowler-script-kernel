@@ -56,7 +56,9 @@ public class MobileBaseLoader {
 	public File setDefaultDhParameterKinematics(DHParameterKinematics device) {
 		File code = null;
 		try {
-			code = ScriptingEngine.fileFromGit(device.getGitDhEngine()[0], device.getGitDhEngine()[1]);
+			String remoteURI = device.getGitDhEngine()[0];
+			String fileInRepo = device.getGitDhEngine()[1];
+			code = ScriptingEngine.fileFromGit(remoteURI, fileInRepo);
 			DhInverseSolver defaultDHSolver = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(getDb(),code, null);
 
 			File c = code;
