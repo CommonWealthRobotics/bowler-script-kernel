@@ -55,9 +55,12 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 			code=code.replace("LengthParameter(", "LengthParameter(csgdb,");
 			code=code.replace("setParameter(", "setParameter(csgdb,");
 
-			//code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "");
+			code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "MYTMPFINDREPLACETHINGY");
+			code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance", "MYTMPFINDREPLACETHINGY2");
 			code=code.replace("CSGDatabase", "csgdb");
-			
+			code=code.replace( "MYTMPFINDREPLACETHINGY","import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase");
+			code=code.replace( "MYTMPFINDREPLACETHINGY2","import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance");
+
 			code=code.replace("inlineGistScriptRun(", "inlineGistScriptRun(csgdb,");
 			code=code.replace("inlineFileScriptRun(", "inlineFileScriptRun(csgdb,");
 			code=code.replace("inlineScriptRun(", "inlineScriptRun(csgdb,");
