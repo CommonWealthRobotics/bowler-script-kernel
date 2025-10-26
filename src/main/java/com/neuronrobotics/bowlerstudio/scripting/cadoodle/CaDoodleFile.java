@@ -1047,7 +1047,8 @@ public class CaDoodleFile {
 					num++;
 					if (isTimelineOpen())
 						getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i + ".png");
-
+					else
+						Log.debug(percent+ " Save Timeline Image " + i + ".png");
 					setSaveImage(process, op);
 
 				} catch (IOException e) {
@@ -1058,7 +1059,7 @@ public class CaDoodleFile {
 		if (bom != null)
 			bom.save();
 		if (isTimelineOpen())
-			getSaveUpdate().renderSplashFrame(100, "Doofle save Done ");
+			getSaveUpdate().renderSplashFrame(100, "Doodle save Done ");
 		fireTimelineUpdate(num);
 		// System.gc();
 		return getSelf();
@@ -1339,6 +1340,7 @@ public class CaDoodleFile {
 	}
 
 	public void setTimelineVisable(boolean timelineOpen) {
+		Log.debug("Setting timeline state "+timelineOpen);
 		this.timelineOpen = timelineOpen;
 	}
 
