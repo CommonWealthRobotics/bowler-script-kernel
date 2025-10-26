@@ -400,6 +400,7 @@ public class MobileBaseBuilder {
 	public MobileBase build(CSGDatabaseInstance db) throws Exception {
 		if (!mobileBase.isAvailable())
 			mobileBase.connect();
+		this.db=db;
 		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName();
 		mobileBase.setGitSelfSource(new String[] { gitURL, filename });
 		for (int i = 0; i < controllers.size(); i++) {
