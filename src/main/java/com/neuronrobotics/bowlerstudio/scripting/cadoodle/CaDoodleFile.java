@@ -20,6 +20,8 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -109,6 +111,8 @@ public class CaDoodleFile {
 	private HashMap<String, MobileBaseBuilder> robots = new HashMap<String, MobileBaseBuilder>();
 	private CSGDatabaseInstance csgDBinstance;
 	private File objectDir;
+    private ExecutorService executor = Executors.newFixedThreadPool(5);
+
 
 	public ArrayList<MobileBase> getMobileBases() {
 		ArrayList<MobileBase> back = new ArrayList<MobileBase>();
@@ -156,7 +160,7 @@ public class CaDoodleFile {
 		if (cache.get(op) == null && objectDir !=null) {
 			try {
 				int opIndex = opToIndex(op);
-				File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex);
+				File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex+".csg");
 				if(cacheFile.exists()) {
 					Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
 					// Log.error(new Exception());
@@ -172,32 +176,15 @@ public class CaDoodleFile {
 	}
 
 	private void memoryCheck() {
-		if (getFreeMemory() > 85) {
+		if (getFreeMemory() > 45) {
 			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
-//			Set<CaDoodleOperation> keySet = cache.keySet();
-//			int index = 0;
-//			for (CaDoodleOperation op : keySet) {
-//				List<CSG> cachedCopy = cache.get(op);
-//				getSaveUpdate().renderSplashFrame((int) (((double) index) / ((double) keySet.size()) * 100),
-//						"Clearing Ram to Disk");
-//				int opIndex = opToIndex(op);
-//				File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex);
-//				if (!isInitialized())
-//					if (cacheFile.exists())
-//						return;
-//				if (cacheFile.exists())
-//					cacheFile.delete();
-//				try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-//					oos.writeObject(cachedCopy);
-//					Log.debug("Saved " + cacheFile.getAbsolutePath());
-//				} catch (Exception ex) {
-//					Log.error(ex);
-//					throw new RuntimeException(ex);
-//				}
-//				index++;
-//			}
-//			cache.clear();
+			CaDoodleOperation op = getCurrentOpperation();
+			List<CSG> back = cache.get(op);
+			
+			cache.clear();
+			cache.put(op, back);
 			System.gc();
+			com.neuronrobotics.sdk.common.Log.debug("Memory use down to: " + getFreeMemory());
 		} else {
 			// com.neuronrobotics.sdk.common.Log.debug("Memory use: " + getFreeMemory());
 		}
@@ -210,6 +197,19 @@ public class CaDoodleFile {
 		if (back != null)
 			back.clear();
 		cache.put(op, cachedCopy);
+		executor.submit(()->{
+			File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opToIndex(op)+".csg");
+			if (cacheFile.exists())
+				cacheFile.delete();
+			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+				oos.writeObject(cachedCopy);
+				Log.debug("Saved " + cacheFile.getAbsolutePath());
+			} catch (Exception ex) {
+				Log.error(ex);
+				throw new RuntimeException(ex);
+			}
+		});
+
 	}
 
 	private void clearCache(CaDoodleOperation key) {
@@ -1006,6 +1006,8 @@ public class CaDoodleFile {
 	}
 
 	public File save() throws IOException {
+		if(!isInitialized())
+			return null;// do not save during initialize
 		if (timeCreated < 0)
 			timeCreated = System.currentTimeMillis();
 		String contents = toJson();
@@ -1040,10 +1042,10 @@ public class CaDoodleFile {
 		for (int i = 0; i < opperations.size(); i++) {
 			File f = getTimelineImageFile(i);
 			CaDoodleOperation op = opperations.get(i);
-			int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
-			List<CSG> process = getCachedCSGs(op);
-			if (!f.exists() && process != null)
+			if (!f.exists() && cache.get(op) != null)
 				try {
+					int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
+					List<CSG> process = getCachedCSGs(op);
 					num++;
 					if (isTimelineOpen())
 						getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i + ".png");
