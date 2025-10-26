@@ -19,13 +19,14 @@ import org.codehaus.groovy.control.customizers.*;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.DeviceManager;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebugger {
 
-	private Object inline(String code, ArrayList<Object> args, CSGDatabaseInstance db2) throws Exception {
+	private Object inline(String codeIn, ArrayList<Object> args, CSGDatabaseInstance db2) throws Exception {
 		CompilerConfiguration cc = new CompilerConfiguration();
 		cc.addCompilationCustomizers(new ImportCustomizer().addStarImports(ScriptingEngine.getImports())
 
@@ -39,8 +40,13 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		}
 		binding.setVariable("csgdb", db2);
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
+		String code=codeIn;
 		if(!code.contains("csgdb")) {
-			//MobileBaseCadManager.get(
+			//getDefaultVitaminsDisplay(
+			code=code.replace("MobileBaseCadManager.getDefaultVitaminsDisplay(", "MobileBaseCadManager.getDefaultVitaminsDisplay(csgdb,");
+
+			code=code.replace("MobileBaseCadManager.getOriginVitaminsDisplay(", "MobileBaseCadManager.getOriginVitaminsDisplay(csgdb,");
+
 			code=code.replace("MobileBaseCadManager.get(", "MobileBaseCadManager.get(csgdb,");
 			code=code.replace("Vitamins.get(", "Vitamins.get(csgdb,");
 
@@ -49,17 +55,24 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 			code=code.replace("LengthParameter(", "LengthParameter(csgdb,");
 			code=code.replace("setParameter(", "setParameter(csgdb,");
 
-			code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "");
+			//code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "");
 			code=code.replace("CSGDatabase", "csgdb");
 			
 			code=code.replace("inlineGistScriptRun(", "inlineGistScriptRun(csgdb,");
 			code=code.replace("inlineFileScriptRun(", "inlineFileScriptRun(csgdb,");
 			code=code.replace("inlineScriptRun(", "inlineScriptRun(csgdb,");
 			code=code.replace("inlineScriptStringRun(", "inlineScriptStringRun(csgdb,");
-			code=code.replace("gitScriptRun(", "gitScriptRun(csgdb,");
+			code=code.replace("gitScriptRun(", "gitScriptRun(((eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance)csgdb),");
 		}
 		
-		Script script = shell.parse(code);
+		Script script;
+		try {
+			script= shell.parse(code);
+		}catch(Throwable t) {
+			Log.error("Compilation error");
+			Log.error(t);
+			throw t;
+		}
 		return script.run();
 
 	}
