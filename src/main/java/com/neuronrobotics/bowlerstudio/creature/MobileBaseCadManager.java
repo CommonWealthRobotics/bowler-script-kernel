@@ -100,6 +100,8 @@ public class MobileBaseCadManager implements Runnable {
 	private ArrayList<IRenderSynchronizationEvent> rendersync = new ArrayList<>();
 	private boolean forceChage = true;
 	private CSGDatabaseInstance db;
+	private String[] configDisplayData = new String[] { "https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git",
+	"dhcad.groovy" };;
 	
 
 	public CSG getVitamin(CSGDatabaseInstance db,VitaminLocation vitamin) throws Exception {
@@ -917,9 +919,8 @@ public class MobileBaseCadManager implements Runnable {
 
 	private ICadGenerator getConfigurationDisplay(CSGDatabaseInstance csgDatabaseInstance) throws Throwable {
 		if (cadEngineConfiguration == null) {
-			String[] args = new String[] { "https://github.com/CommonWealthRobotics/DHParametersCadDisplay.git",
-					"dhcad.groovy" };
-			Object cadForBodyEngine = scriptFromFileInfo(getDb(),"ConfigDisplay", args, () -> {
+			
+			Object cadForBodyEngine = scriptFromFileInfo(getDb(),"ConfigDisplay", configDisplayData, () -> {
 				cadEngineConfiguration = null;
 				try {
 					getConfigurationDisplay(csgDatabaseInstance);
@@ -1378,6 +1379,10 @@ public class MobileBaseCadManager implements Runnable {
 					try {
 						newcad = generatorToUse.generateCad(dh, i);
 					} catch (Throwable t) {
+						if(isConfigMode()) {
+							Log.error("Failed on script "+configDisplayData[0]+":"+configDisplayData[1]);
+						}else
+							Log.error("Failed on script "+dh.getGitCadEngine()[0]+":"+dh.getGitCadEngine()[1]);
 						Log.error(t);
 						getUi().highlightException(null, t);
 					}
