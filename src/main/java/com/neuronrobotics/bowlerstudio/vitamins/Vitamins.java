@@ -212,6 +212,7 @@ public class Vitamins {
 			if (file != null && repo != null) {
 				ArrayList<Object> servoMeasurments = new ArrayList<Object>();
 				servoMeasurments.add(id);
+				Log.debug("Loading Vitamin "+type+" "+id);
 				newVitamin = (CSG) ScriptingEngine.gitScriptRun(instance,script.get("scriptGit").toString(), // git location of
 																									// the library
 						repostring.toString(), // file to load
@@ -239,9 +240,6 @@ public class Vitamins {
 			}
 		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error(e);
-			setGitRepoDatabase(gitRpoDatabase);
-			//ScriptingEngine.deleteRepo(script.get("scriptGit").toString());
-			clear();
 			if (depthGauge < 2) {
 				return get(instance,type, id, depthGauge + 1);
 			} else {
@@ -531,7 +529,7 @@ public class Vitamins {
 
 					jsonString = IOUtils.toString(inPut);
 					inPut.close();
-					//com.neuronrobotics.sdk.common.Log.error("JSON loading Loading " + type + " " + jsonString.length());
+					com.neuronrobotics.sdk.common.Log.debug("JSON loading Loading " + type + " " + jsonString.length());
 					// perfoem the GSON parse
 					database = gson.fromJson(jsonString, TT_mapStringString);
 					if (database == null)
