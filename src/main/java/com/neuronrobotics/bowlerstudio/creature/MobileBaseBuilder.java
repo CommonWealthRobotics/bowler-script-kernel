@@ -468,7 +468,7 @@ public class MobileBaseBuilder {
 		mods.removeAll(toRemove);
 		getCadManager().render();
 		// Push to git
-		ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
+		//ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
 		return mobileBase;
 	}
 

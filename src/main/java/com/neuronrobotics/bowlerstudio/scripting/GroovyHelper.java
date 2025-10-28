@@ -17,6 +17,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.*;
 
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader;
 import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.common.Log;
@@ -43,6 +44,9 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		String code=codeIn;
 		if(!code.contains("csgdb")) {
 			//getDefaultVitaminsDisplay(
+			//			MobileBaseLoader.fromGit(
+			code=code.replace("MobileBaseLoader.fromGit(", "MobileBaseLoader.fromGit(csgdb,");
+
 			code=code.replace("MobileBaseCadManager.getDefaultVitaminsDisplay(", "MobileBaseCadManager.getDefaultVitaminsDisplay(csgdb,");
 
 			code=code.replace("MobileBaseCadManager.getOriginVitaminsDisplay(", "MobileBaseCadManager.getOriginVitaminsDisplay(csgdb,");
