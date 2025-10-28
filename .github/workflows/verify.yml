@@ -55,10 +55,10 @@ jobs:
       run: ./gradlew shadowJar
       
     - name: Test with Gradle 
-      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test --scan
+      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test --scan --log-file=errlog.txt
     - name: If Fail
       if: ${{ failure() }}
-      run: cat /home/runner/work/bowler-script-kernel/bowler-script-kernel/build/reports/tests/test/index.html
+      run: cat errlog.txt
          
     - name: Test Bezier 
       run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy 
