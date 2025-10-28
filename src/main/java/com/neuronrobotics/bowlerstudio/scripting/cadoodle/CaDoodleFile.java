@@ -198,10 +198,10 @@ public class CaDoodleFile {
 		if (back != null)
 			back.clear();
 		cache.put(op, cachedCopy);
+		File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opToIndex(op)+".csg");
+		if (!cacheFile.exists())
 		executor.submit(()->{
-			File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opToIndex(op)+".csg");
-			if (cacheFile.exists())
-				cacheFile.delete();
+
 			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
 				oos.writeObject(cachedCopy);
 				Log.debug("Saved " + cacheFile.getAbsolutePath());
