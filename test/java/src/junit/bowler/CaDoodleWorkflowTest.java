@@ -34,6 +34,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
@@ -43,13 +44,14 @@ public class CaDoodleWorkflowTest {
 
 	@Test
 	public void test() throws Exception {
+		Log.enableDebugPrint();
 		JavaFXInitializer.go();
 		CaDoodleFile cf = new CaDoodleFile()
 					.setSelf(new File("doodle/Test.doodle"))
 					.setProjectName("A Test Project");
-		
+		cf.initialize();
 		String jsonContent = cf.toJson();
-		com.neuronrobotics.sdk.common.Log.error(jsonContent);
+		com.neuronrobotics.sdk.common.Log.debug("Starting file contents:\n"+jsonContent);
 		
 		AddFromScript cube1 = new AddFromScript()
 				.set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
@@ -88,7 +90,10 @@ public class CaDoodleWorkflowTest {
 		jsonContent = cf.toJson();
 		//com.neuronrobotics.sdk.common.Log.error(jsonContent);
 		cf.save();
-		CaDoodleFile loaded = CaDoodleFile.fromFile(cf.getSelf());
+		File self = cf.getSelf();
+		if(!self.exists())
+			fail("Doodle file does not exist, save failed! "+self.getAbsolutePath());
+		CaDoodleFile loaded = CaDoodleFile.fromFile(self);
 		if(!MoveCenter.class.isInstance(loaded.getOpperations().get(2))) {
 			fail("Third Opperation is supposed to be a move");
 		}
@@ -228,7 +233,8 @@ public class CaDoodleWorkflowTest {
 		String after =loaded.toJson();
 		if(!before.contentEquals(after))
 			fail("Load and export mismatch");
-		loaded.setSelf(cf.getSelf());
+		File self2 = cf.getSelf();
+		loaded.setSelf(self2);
 
 		com.neuronrobotics.sdk.common.Log.error(after);
 		while(loaded.isForwardAvailible())
@@ -252,6 +258,7 @@ public class CaDoodleWorkflowTest {
 			loaded.addOpperation(con).join();
 		}
 		loaded.save();
+		ScriptingEngine.pull("https://github.com/madhephaestus/carl-the-hexapod.git");
 		ArrayList<LimbOption> limbs = LimbOption.getOptions();
 		TransformNR tf = new TransformNR();
 		for(LimbOption o:limbs) {

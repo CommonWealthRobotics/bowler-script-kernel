@@ -10,7 +10,9 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +30,6 @@ import javax.imageio.ImageIO;
 import javafx.scene.image.WritableImage;
 import org.apache.commons.io.FileUtils;
 import org.apache.hc.client5.http.impl.Operations;
-import org.python.google.common.io.Files;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -255,8 +256,7 @@ public class CaDoodleFile {
 			objectDir = new File(parent.getAbsolutePath() + delim() + "timeline" + delim() + "objectCache");
 			if (!objectDir.exists())
 				objectDir.mkdir();
-			File db = new File(self.getAbsoluteFile().getParent() + delim() + "CSGdatabase.json");
-			setCsgDBinstance(new CSGDatabaseInstance(db));
+			getCsgDBinstance();// initialize the instance on initialize
 			// CSGDatabase.setInstance(getCsgDBinstance());
 			bom = CaDoodleFile.getBillOfMaterials(this);
 			bom.clear();
@@ -275,6 +275,7 @@ public class CaDoodleFile {
 			CaDoodleOperation op = getOpperations().get(i);
 			if (op == null)
 				continue;
+			op.setCaDoodleFile(this);
 			setPercentInitialized(((double) i) / (double) getOpperations().size());
 			// if(!inCache(op))
 			try {
@@ -883,7 +884,7 @@ public class CaDoodleFile {
 	}
 
 	public CaDoodleFile setSelf(File self) {
-		this.self = self;
+		this.self = self.getAbsoluteFile();
 		return this;
 	}
 
@@ -1118,7 +1119,7 @@ public class CaDoodleFile {
 					}
 				} while (!imageCache.exists());
 				if (getOpperations().get(getOpperations().size() - 1) == op) {
-					Files.copy(imageCache, image);
+					Files.copy(imageCache.toPath(), image.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				}
 				System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
 			}
@@ -1369,6 +1370,30 @@ public class CaDoodleFile {
 	}
 
 	public CSGDatabaseInstance getCsgDBinstance() {
+		if(csgDBinstance==null) {
+			if(self==null) {
+				try {
+					self=Files.createTempFile("temp", ".doodle").toFile();
+					Log.error("Failed to have a file! "+self.getAbsolutePath());
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			File parent = self.getAbsoluteFile().getParentFile();
+			if(!parent.exists()) {
+				parent.mkdirs();
+			}
+			File db = new File(parent.getAbsolutePath() + delim() + "CSGdatabase.json");
+			if (!db.exists())
+				try {
+					db.createNewFile();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			setCsgDBinstance(new CSGDatabaseInstance(db));
+		}
 		return csgDBinstance;
 	}
 
