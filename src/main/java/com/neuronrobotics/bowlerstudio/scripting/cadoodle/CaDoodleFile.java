@@ -732,7 +732,7 @@ public class CaDoodleFile {
 						+ " opperation! " + c.getName());
 			names.add(c.getName());
 			CSG cachedVer = cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(getCsgDBinstance(), c)
-					.setName(c.getName()).setRegenerate(c.getRegenerate());
+					.setName(c.getName()).setRegenerate(c.getRegenerate()).setID(c);
 			if (cachedVer.isHole() != c.isHole() || cachedVer.isHide() != c.isHide()) {
 				throw new RuntimeException("Lost properties");
 			}
