@@ -8,6 +8,7 @@ import java.util.Set;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
@@ -37,6 +38,7 @@ public class CaDoodleVitamin {
 	}
 	public boolean isVitamin(CSG c) {
 		for(String s:instance.getParameters(c)) {
+			Log.debug("Checking "+s);
 			if(s.contains("_CaDoodle_Vitamin_") && s.contains(c.getName())) {
 				return true;
 			}
@@ -109,8 +111,13 @@ public class CaDoodleVitamin {
 						name2=name;
 					//com.neuronrobotics.sdk.common.Log.debug("Regenerating source \n\t"+name+" on part \n\t"+name2);
 					ArrayList<Object> ar = new ArrayList<>();
-					ar.addAll(args);
-					ar.set(0, previous.getName());
+					HashMap<String, Object> object = (HashMap<String, Object>) args.get(1);
+					HashMap<String, Object> objectNew = new HashMap<String, Object>();
+					String name3 = previous.getName();
+					objectNew.put("name", name3);
+					objectNew.put("PreventBomAdd", object.get("PreventBomAdd"));
+					ar.add( name3);
+					ar.add( objectNew);
 					Parameter s = instance.get(name2+"_CaDoodle_Vitamin_Size");
 					Parameter t = instance.get(name2+"_CaDoodle_Vitamin_Type");
 					if(t==null) {
