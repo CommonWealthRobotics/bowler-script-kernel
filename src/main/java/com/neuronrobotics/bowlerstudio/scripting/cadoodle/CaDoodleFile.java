@@ -131,7 +131,7 @@ public class CaDoodleFile {
 //		for (CaDoodleOperation op : cache.keySet()) {
 //			clearCache(op);
 //		}
-//		cache.clear();
+		cache.clear();
 		clearListeners();
 		toProcess.clear();
 		img = null;
@@ -177,7 +177,7 @@ public class CaDoodleFile {
 	}
 
 	private void memoryCheck() {
-		if (getFreeMemory() > 45) {
+		if (getFreeMemory() > 85) {
 			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
 			CaDoodleOperation op = getCurrentOpperation();
 			List<CSG> back = cache.get(op);
@@ -199,9 +199,11 @@ public class CaDoodleFile {
 			back.clear();
 		cache.put(op, cachedCopy);
 		File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opToIndex(op)+".csg");
-		if (!cacheFile.exists())
+		if (cacheFile.exists() && !isInitialized())
+			return;
 		executor.submit(()->{
-
+			if (cacheFile.exists() )
+				cacheFile.delete();
 			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
 				oos.writeObject(cachedCopy);
 				Log.debug("Saved " + cacheFile.getAbsolutePath());
