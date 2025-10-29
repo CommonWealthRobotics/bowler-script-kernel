@@ -20,6 +20,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 
 public class Paste extends AbstractAddFrom  {
@@ -96,14 +97,20 @@ public class Paste extends AbstractAddFrom  {
 		CSG clone = c.clone();
 		clone.setRegenerate(c.getRegenerate()).setName(name);
 		clone.getStorage().set("PreviousName", prevName);
+		CSGDatabaseInstance db = getDb();
+		clone.syncParameter(db, c);
 		Transform nrToCSG = MoveCenter.getTotalOffset(c);
-
 		Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 		CSG newOne = null;
-		if (new CaDoodleVitamin(getCaDoodleFile().getCsgDBinstance()).isVitamin(c)) {
-			CSG regenerate = clone.getRegenerate().regenerate(clone);
+		CaDoodleVitamin caDoodleVitamin = new CaDoodleVitamin(db);
+		if (caDoodleVitamin.isVitamin(c)) {
+			CSG regenerate = c.getRegenerate().regenerate(clone);
 			newOne = regenerate.transformed(nrToCSG).transformed(nrToCSG2);
-			newOne.setRegenerate(regenerate.getRegenerate());
+			newOne.setRegenerate(regenerate.getRegenerate()).setName(name);
+			newOne.setID(regenerate);
+			if(!caDoodleVitamin.isVitamin(newOne)) {
+				throw new RuntimeException("Failed to create the vitamin");
+			}
 		}else {
 			newOne = clone.transformed(nrToCSG2);
 			newOne.setRegenerate(c.getRegenerate());
