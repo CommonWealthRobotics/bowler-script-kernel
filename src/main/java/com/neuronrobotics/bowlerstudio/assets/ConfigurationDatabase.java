@@ -1,5 +1,7 @@
 package com.neuronrobotics.bowlerstudio.assets;
 
+import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.delim;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -185,7 +187,7 @@ public class ConfigurationDatabase {
 	}
 
 	public static File loadFile() {
-		Path appDataDirectory = getAppDataDirectory();
+		Path appDataDirectory =  new File(ScriptingEngine.getWorkspace().getAbsolutePath() + delim()).toPath();//getAppDataDirectory();
 		File dir = appDataDirectory.toFile();
 		if(!dir.exists()) {
 			dir.mkdirs();
