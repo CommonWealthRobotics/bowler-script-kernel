@@ -159,21 +159,21 @@ public class CaDoodleFile {
 			new RuntimeException("This should not be called from the UI thread!").printStackTrace();
 			;
 		}
-		if (cache.get(op) == null && isInitialized()) {
-			try {
-				int opIndex = opToIndex(op);
-				File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opIndex + ".csg");
-				if (cacheFile.exists()) {
-					Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
-					// Log.error(new Exception());
-					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
-					cache.put(op, (List<CSG>) ois.readObject());
-					ois.close();
-				}
-			} catch (Exception ex) {
-				Log.error(ex);
-			}
-		}
+//		if (cache.get(op) == null && isInitialized()) {
+//			try {
+//				int opIndex = opToIndex(op);
+//				File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opIndex + ".csg");
+//				if (cacheFile.exists()) {
+//					Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
+//					// Log.error(new Exception());
+//					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
+//					cache.put(op, (List<CSG>) ois.readObject());
+//					ois.close();
+//				}
+//			} catch (Exception ex) {
+//				Log.error(ex);
+//			}
+//		}
 		return cache.get(op);
 	}
 
@@ -201,18 +201,18 @@ public class CaDoodleFile {
 		List<CSG> cachedCopy=new ArrayList<>(cachedCopyIn);
 		cache.put(op, cachedCopy);
 		//executor.submit(() -> {
-			File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opToIndex(op) + ".csg");
-			if (cacheFile.exists() && !isInitialized())
-				return;
-			if (cacheFile.exists())
-				cacheFile.delete();
-			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
-				oos.writeObject(cachedCopy);
-				Log.debug("Saved " + cacheFile.getAbsolutePath());
-			} catch (Exception ex) {
-				Log.error(ex);
-				throw new RuntimeException(ex);
-			}
+//			File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opToIndex(op) + ".csg");
+//			if (cacheFile.exists() && !isInitialized())
+//				return;
+//			if (cacheFile.exists())
+//				cacheFile.delete();
+//			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+//				oos.writeObject(cachedCopy);
+//				Log.debug("Saved " + cacheFile.getAbsolutePath());
+//			} catch (Exception ex) {
+//				Log.error(ex);
+//				throw new RuntimeException(ex);
+//			}
 		//});
 
 	}
