@@ -257,9 +257,9 @@ public class CaDoodleFile {
 			getObjectDir();
 			getCsgDBinstance();// initialize the instance on initialize
 			// CSGDatabase.setInstance(getCsgDBinstance());
-			bom = CaDoodleFile.getBillOfMaterials(this);
-			bom.clear();
-			bom.save();
+			
+			getBom().clear();
+			getBom().save();
 		}
 		int indexStarting = getCurrentIndex();
 		if (indexStarting == 0) {
@@ -301,15 +301,16 @@ public class CaDoodleFile {
 		initializing = false;
 	}
 
-	private void updateBoM() {
+	public void updateBoM() {
 		if (bom == null)
 			return;
-		bom.clear();
-		bom.save();
+		getBom().clear();
+		getBom().save();
 		for (CSG c : getCurrentState()) {
 			String type = null;
 			String size = null;
-			for (String param : c.getParameters(getCsgDBinstance())) {
+			Set<String> parameters = c.getParameters(getCsgDBinstance());
+			for (String param : parameters) {
 				if (!param.contains(c.getName()))
 					continue;
 				if (param.contains("_CaDoodle_Vitamin_Type")) {
@@ -321,12 +322,13 @@ public class CaDoodleFile {
 					size = p.getStrValue();
 				}
 				if (type != null && size != null) {
-					bom.addVitamin(new VitaminLocation(false, c.getName(), type, size, new TransformNR()));
+					getBom().addVitamin(new VitaminLocation(false, c.getName(), type, size, new TransformNR()));
 					break;
 				}
 			}
+			
 		}
-		bom.save();
+		getBom().save();
 	}
 
 	public static VitaminBomManager getBillOfMaterials(CaDoodleFile cf) {
@@ -1057,15 +1059,21 @@ public class CaDoodleFile {
 					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 		}
-		if (bom != null)
-			bom.save();
+		if (getBom() != null)
+			getBom().save();
 		if (isTimelineOpen())
 			getSaveUpdate().renderSplashFrame(100, "Doodle save Done ");
 		fireTimelineUpdate(num);
 		// System.gc();
 		return getSelf();
 	}
+	public File getBomFile() {
+		return getBom().getBomFile();
+	}
 
+	public File getBomCsv() {
+		return getBom().getBomCsv();
+	}
 	public File getSTLThumbnailFile() {
 		File back = new File(getSTLThumbnailLocation());
 		return back;
@@ -1416,5 +1424,11 @@ public class CaDoodleFile {
 		return imageCacheDir;
 	}
 
+	public VitaminBomManager getBom() {
+		if(bom==null) {
+			bom=CaDoodleFile.getBillOfMaterials(this);
+		}
+		return bom;
+	}
 
 }

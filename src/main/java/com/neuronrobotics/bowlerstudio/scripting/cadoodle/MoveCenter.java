@@ -99,7 +99,10 @@ public class MoveCenter extends CaDoodleOperation{
 				if(incoming.isMotionLock()) {
 					nrToCSG2=new Transform();
 				}
-				CSG tmpToAdd = incoming.transformed(nrToCSG2).syncProperties(getCaDoodleFile().getCsgDBinstance(),incoming).setName(incoming.getName());
+				CSG tmpToAdd = incoming.transformed(nrToCSG2)
+						.syncProperties(getCaDoodleFile().getCsgDBinstance(),incoming)
+						.setName(incoming.getName())
+						.setID(incoming);
 				ArrayList<CSG> b = new ArrayList<>();
 				b.add(tmpToAdd);
 				set(getName(), tmpToAdd, location);
