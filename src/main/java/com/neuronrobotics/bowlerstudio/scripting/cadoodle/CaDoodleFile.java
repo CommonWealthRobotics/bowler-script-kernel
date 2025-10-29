@@ -112,8 +112,8 @@ public class CaDoodleFile {
 	private HashMap<String, MobileBaseBuilder> robots = new HashMap<String, MobileBaseBuilder>();
 	private CSGDatabaseInstance csgDBinstance;
 	private File objectDir;
-    private ExecutorService executor = Executors.newFixedThreadPool(5);
-
+	private ExecutorService executor = Executors.newFixedThreadPool(5);
+	private File imageCacheDir;
 
 	public ArrayList<MobileBase> getMobileBases() {
 		ArrayList<MobileBase> back = new ArrayList<MobileBase>();
@@ -150,19 +150,20 @@ public class CaDoodleFile {
 
 	private boolean inCache(CaDoodleOperation op) {
 		int opIndex = opToIndex(op);
-		File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex);
+		File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opIndex);
 		return cacheFile.exists();
 	}
 
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
 		if (Platform.isFxApplicationThread()) {
-			new RuntimeException("This should not be called from the UI thread!").printStackTrace();;
+			new RuntimeException("This should not be called from the UI thread!").printStackTrace();
+			;
 		}
-		if (cache.get(op) == null && objectDir !=null) {
+		if (cache.get(op) == null && isInitialized()) {
 			try {
 				int opIndex = opToIndex(op);
-				File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex+".csg");
-				if(cacheFile.exists()) {
+				File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opIndex + ".csg");
+				if (cacheFile.exists()) {
 					Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
 					// Log.error(new Exception());
 					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
@@ -181,7 +182,7 @@ public class CaDoodleFile {
 			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
 			CaDoodleOperation op = getCurrentOpperation();
 			List<CSG> back = cache.get(op);
-			
+
 			cache.clear();
 			cache.put(op, back);
 			System.gc();
@@ -191,18 +192,19 @@ public class CaDoodleFile {
 		}
 	}
 
-	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopy) {
+	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopyIn) {
 		memoryCheck();
 		// clear the stale cache value
 		List<CSG> back = cache.remove(op);
 		if (back != null)
 			back.clear();
+		List<CSG> cachedCopy=new ArrayList<>(cachedCopyIn);
 		cache.put(op, cachedCopy);
-		File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opToIndex(op)+".csg");
-		if (cacheFile.exists() && !isInitialized())
-			return;
-		executor.submit(()->{
-			if (cacheFile.exists() )
+		//executor.submit(() -> {
+			File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opToIndex(op) + ".csg");
+			if (cacheFile.exists() && !isInitialized())
+				return;
+			if (cacheFile.exists())
 				cacheFile.delete();
 			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
 				oos.writeObject(cachedCopy);
@@ -211,13 +213,13 @@ public class CaDoodleFile {
 				Log.error(ex);
 				throw new RuntimeException(ex);
 			}
-		});
+		//});
 
 	}
 
 	private void clearCache(CaDoodleOperation key) {
 		int opIndex = opToIndex(key);
-		File cacheFile = new File(objectDir.getAbsolutePath() + delim() + opIndex);
+		File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opIndex);
 		if (cacheFile.exists())
 			cacheFile.delete();
 
@@ -251,13 +253,8 @@ public class CaDoodleFile {
 		if (timeCreated < 0)
 			timeCreated = System.currentTimeMillis();
 		if (self != null) {
-			File parent = self.getAbsoluteFile().getParentFile();
-			File imageCacheDir = new File(parent.getAbsolutePath() + delim() + "timeline");
-			if (!imageCacheDir.exists())
-				imageCacheDir.mkdir();
-			objectDir = new File(parent.getAbsolutePath() + delim() + "timeline" + delim() + "objectCache");
-			if (!objectDir.exists())
-				objectDir.mkdir();
+			getImageCacheDir();
+			getObjectDir();
 			getCsgDBinstance();// initialize the instance on initialize
 			// CSGDatabase.setInstance(getCsgDBinstance());
 			bom = CaDoodleFile.getBillOfMaterials(this);
@@ -277,7 +274,7 @@ public class CaDoodleFile {
 			CaDoodleOperation op = getOpperations().get(i);
 			if (op == null)
 				continue;
-			//op.setCaDoodleFile(this);
+			op.setCaDoodleFile(this);
 			setPercentInitialized(((double) i) / (double) getOpperations().size());
 			// if(!inCache(op))
 			try {
@@ -643,7 +640,7 @@ public class CaDoodleFile {
 		immutable.addAll(back);
 		for (int i = 0; i < immutable.size(); i++) {
 			CSG csg = immutable.get(i);
-			if ( csg==null || csg.isLock())
+			if (csg == null || csg.isLock())
 				continue;
 			// boolean inGroup = csg.isInGroup();
 			boolean thisCSGIsInGroupNamedAfterTarget = csg.checkGroupMembership(targetName);
@@ -688,8 +685,7 @@ public class CaDoodleFile {
 	}
 
 	public File getTimelineImageFile(int i) {
-		File parent = getSelf().getAbsoluteFile().getParentFile();
-		File file = new File(parent.getAbsolutePath() + delim() + "timeline" + delim() + (i + 1) + ".png");
+		File file = new File(getImageCacheDir().getAbsolutePath() + delim() + (i + 1) + ".png");
 		return file;
 	}
 
@@ -1009,7 +1005,7 @@ public class CaDoodleFile {
 	}
 
 	public File save() throws IOException {
-		if(!isInitialized())
+		if (!isInitialized())
 			return null;// do not save during initialize
 		if (timeCreated < 0)
 			timeCreated = System.currentTimeMillis();
@@ -1053,7 +1049,7 @@ public class CaDoodleFile {
 					if (isTimelineOpen())
 						getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i + ".png");
 					else
-						Log.debug(percent+ " Save Timeline Image " + i + ".png");
+						Log.debug(percent + " Save Timeline Image " + i + ".png");
 					setSaveImage(process, op);
 
 				} catch (IOException e) {
@@ -1093,10 +1089,8 @@ public class CaDoodleFile {
 //		if(currentIndex2==0)
 //			return;
 		File parent = getSelf().getAbsoluteFile().getParentFile();
-		File imageFolder = new File(parent.getAbsolutePath() + delim() + "timeline" + delim());
-		if (!imageFolder.exists())
-			imageFolder.mkdirs();
-		File imageCache = new File(parent.getAbsolutePath() + delim() + "timeline" + delim() + currentIndex2 + ".png");
+
+		File imageCache = new File(getImageCacheDir().getAbsolutePath() + delim() + currentIndex2 + ".png");
 		File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
 
 		if (imageCache.exists())
@@ -1345,7 +1339,7 @@ public class CaDoodleFile {
 	}
 
 	public void setTimelineVisable(boolean timelineOpen) {
-		Log.debug("Setting timeline state "+timelineOpen);
+		Log.debug("Setting timeline state " + timelineOpen);
 		this.timelineOpen = timelineOpen;
 	}
 
@@ -1372,18 +1366,18 @@ public class CaDoodleFile {
 	}
 
 	public CSGDatabaseInstance getCsgDBinstance() {
-		if(csgDBinstance==null) {
-			if(self==null) {
+		if (csgDBinstance == null) {
+			if (self == null) {
 				try {
-					self=Files.createTempFile("temp", ".doodle").toFile();
-					Log.error("Failed to have a file! "+self.getAbsolutePath());
+					self = Files.createTempFile("temp", ".doodle").toFile();
+					Log.error("Failed to have a file! " + self.getAbsolutePath());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 			File parent = self.getAbsoluteFile().getParentFile();
-			if(!parent.exists()) {
+			if (!parent.exists()) {
 				parent.mkdirs();
 			}
 			File db = new File(parent.getAbsolutePath() + delim() + "CSGdatabase.json");
@@ -1402,4 +1396,25 @@ public class CaDoodleFile {
 	private void setCsgDBinstance(CSGDatabaseInstance csgDBinstance) {
 		this.csgDBinstance = csgDBinstance;
 	}
+
+	public File getObjectDir() {
+		if (objectDir == null) {
+			objectDir = new File(getImageCacheDir().getAbsolutePath() + delim() + "objectCache");
+			if (!getObjectDir().exists())
+				getObjectDir().mkdir();
+		}
+		return objectDir;
+	}
+
+	public File getImageCacheDir() {
+		if (imageCacheDir == null) {
+			File parent = getSelf().getAbsoluteFile().getParentFile();
+			imageCacheDir=(new File(parent.getAbsolutePath() + delim() + "timeline"));
+			if (!imageCacheDir.exists())
+				imageCacheDir.mkdir();
+		}
+		return imageCacheDir;
+	}
+
+
 }
