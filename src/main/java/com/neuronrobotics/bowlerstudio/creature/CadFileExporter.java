@@ -170,7 +170,8 @@ public class CadFileExporter {
 		File stl = new File(nameBase + ".stl");
 //		boolean manifold=CSG.isPreventNonManifoldTriangles();
 //		CSG.setPreventNonManifoldTriangles(false);
-		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
+		String stlString = tmp.toStlString();
+		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlString);
 		//CSG.setPreventNonManifoldTriangles(manifold);
 		com.neuronrobotics.sdk.common.Log.debug("Writing "+stl.getAbsolutePath());
 		return stl;

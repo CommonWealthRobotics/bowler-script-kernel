@@ -275,7 +275,7 @@ public class CaDoodleFile {
 			CaDoodleOperation op = getOpperations().get(i);
 			if (op == null)
 				continue;
-			op.setCaDoodleFile(this);
+			//op.setCaDoodleFile(this);
 			setPercentInitialized(((double) i) / (double) getOpperations().size());
 			// if(!inCache(op))
 			try {
