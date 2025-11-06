@@ -1430,5 +1430,30 @@ public class CaDoodleFile {
 		}
 		return bom;
 	}
-
+	public File getIgnoreFile() {
+		return new File(getSelf().getParent()+delim()+"ignoreMeInProjectManager");
+	}
+	public boolean isIgnore() {
+		return getIgnoreFile().exists();
+	}
+	public void setIgnore() {
+		File f=getIgnoreFile();
+		if(!f.exists())
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
+	public void clearIgnore() {
+		File f=getIgnoreFile();
+		if(f.exists())
+			try {
+				f.delete();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
 }
