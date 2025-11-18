@@ -168,7 +168,7 @@ public class AssetFactory {
 		com.neuronrobotics.sdk.common.Log.info("Loading assets");
 		List<String> files;
 		try {
-			files = ScriptingEngine.filesInGit(gitSource, StudioBuildInfo.getVersion(), null);
+			files = ScriptingEngine.filesInGit(gitSource, null, null);
 		} catch (Exception ex) {
 			files = ScriptingEngine.filesInGit(getGitSource());
 		}

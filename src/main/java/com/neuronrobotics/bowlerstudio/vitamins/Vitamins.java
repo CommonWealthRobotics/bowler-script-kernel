@@ -688,12 +688,6 @@ public class Vitamins {
 //				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
 //			}
 			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
-			try {
-				ScriptingEngine.pull(gitRpoDatabase);
-			} catch (IOException | GitAPIException e) {
-				ScriptingEngine.deleteRepo(gitRpoDatabase);
-				ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
-			}
 
 		}
 		return gitRpoDatabase;
