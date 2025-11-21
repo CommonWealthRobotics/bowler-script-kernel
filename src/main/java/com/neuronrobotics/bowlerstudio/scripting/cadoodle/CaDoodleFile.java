@@ -874,7 +874,7 @@ public class CaDoodleFile {
 	public File getSelf() {
 		if (self == null) {
 			try {
-				self = File.createTempFile(DownloadManager.sanitizeString(projectName), ".doodle");
+				self = File.createTempFile(DownloadManager.sanitizeString(getMyProjectName()), ".doodle");
 			} catch (IOException e) {
 				// Auto-generated catch block
 				com.neuronrobotics.sdk.common.Log.error(e);
