@@ -76,7 +76,7 @@ public class CaDoodleWorkflowTest {
 		double distaance =10;
 		MoveCenter move = new MoveCenter()
 				.setLocation(new TransformNR(distaance,0,0))
-				.setNames(Arrays.asList(nameTwo))
+				.setNames(Arrays.asList(nameTwo),cf)
 				;
 		cf.addOpperation(move).join();;
 		back=cf.getCurrentState();
@@ -106,11 +106,11 @@ public class CaDoodleWorkflowTest {
 		loaded.back();
 		MoveCenter move2 = new MoveCenter()
 				.setLocation(new TransformNR(distaance,distaance,0))
-				.setNames(Arrays.asList(nameOne))
+				.setNames(Arrays.asList(nameOne),loaded)
 				;
 		MoveCenter move3 = new MoveCenter()
 				.setLocation(new TransformNR(0,0,0,new RotationNR(0,45,0)))
-				.setNames(Arrays.asList(nameOne))
+				.setNames(Arrays.asList(nameOne),loaded)
 				;
 		loaded.addOpperation(move3).join();;
 		back=loaded.getCurrentState();

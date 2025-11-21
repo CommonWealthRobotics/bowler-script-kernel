@@ -126,7 +126,17 @@ public class MoveCenter extends CaDoodleOperation{
 		return names;
 	}
 
-	public MoveCenter setNames(List<String> names) {
+	public MoveCenter setNames(List<String> names,CaDoodleFile f) {
+		
+		for(String s:names) {
+			boolean found=false;
+			for(CSG c:f.getCurrentState()) {
+				if(c.getName().contentEquals(s))
+					found=true;
+			}
+			if(!found)
+				throw new RuntimeException("Set a name that does not exist!!");
+		}
 		this.names = names;
 		return this;
 	}

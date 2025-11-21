@@ -626,7 +626,7 @@ public class CaDoodleFile {
 					continue;
 			} catch (Exception ex) {
 				com.neuronrobotics.sdk.common.Log.error(ex);
-				continue;
+				//continue;
 			}
 			applyToAllConstituantElements(addRet, s, back, p, depth, appliedMemory);
 		}
