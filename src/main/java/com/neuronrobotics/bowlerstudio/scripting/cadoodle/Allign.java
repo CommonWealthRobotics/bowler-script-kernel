@@ -8,10 +8,12 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.scene.transform.Affine;
 
 public class Allign extends CaDoodleOperation{
@@ -25,10 +27,15 @@ public class Allign extends CaDoodleOperation{
 	public Allignment x=null;
 	@Expose (serialize = true, deserialize = true)
 	private TransformNR workplane=null;
+	@Deprecated
 	@Expose (serialize = true, deserialize = true)
 	public StoragbeBounds bounds=null;
+	@Expose (serialize = true, deserialize = true)
+	private List<String> boundNames = null;
+	
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
+
 	public String getName() {
 		if (name == null) {
 			setName(RandomStringFactory.generateRandomString());
@@ -58,12 +65,8 @@ public class Allign extends CaDoodleOperation{
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 
-		Bounds bounds2 ;//
-		if(bounds!=null) {
-			bounds2=bounds.getBounds();
-		}else {
-			throw new RuntimeException("Allign can not be initialized without bounds!");
-		}
+		Bounds bounds2 =getBounds(incoming);//
+		
 		HashMap<String,TransformNR> moves= new HashMap<>();
 		HashMap<String,CSG> objects = new HashMap<String, CSG>();
 		for(String name :names) {
@@ -194,13 +197,83 @@ public class Allign extends CaDoodleOperation{
 		return this;
 	}
 
-	public Bounds getBounds() {
-		return bounds.getBounds();
+	public Bounds getBounds(List<CSG> incoming) {
+		if(bounds!=null) {
+			Log.error("Depricated Bounds in the allign step!");
+			return bounds.getBounds();
+		}if(boundNames!=null) {
+			List<CSG> selectedCSG = getSelectedCSG(boundNames,incoming);
+			return Allign.getBounds(selectedCSG, workplane, new HashMap<CSG, Bounds>());
+		}
+		else {
+			throw new RuntimeException("Allign can not be initialized without bounds!");
+		}
+		
 	}
-
-	public Allign setBounds(Bounds bounds) {
-		this.bounds = new StoragbeBounds(bounds);
+	public List<CSG> getSelectedCSG(Iterable<String> sele,List<CSG> incoming) {
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		for (String sel : sele) {
+			CSG t = getSelectedCSG(sel,incoming);
+			if (t != null) {
+				back.add(t);
+			}
+		}
+		return back;
+	}
+	private CSG getSelectedCSG(String string,List<CSG> incoming) {
+		for (CSG c :incoming) {
+			if (c.getName().contentEquals(string))
+				return c;
+		}
+		return null;
+	}
+	public Allign setBounds(List<String> boundNames) {
+		this.boundNames=boundNames;
 		return this;
 	}
+	public static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache) {
+		if (cache == null)
+			cache = new HashMap<>();
+		Vector3d min = null;
+		Vector3d max = null;
+		// TickToc.tic("getSellectedBounds "+incoming.size());
 
+		for (CSG csg : incoming) {
+			if (cache.get(csg) == null) {
+				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
+				Affine af = csg.getManipulator();
+				if(af!=null) {
+					TransformNR afNR = TransformFactory.affineToNr(af);
+					inverse = TransformFactory.nrToCSG(afNR.inverse().times(frame)).inverse();
+				}
+				cache.put(csg, csg.transformed(inverse).getBounds());
+			}
+			Bounds b = cache.get(csg);
+			Vector3d min2 = b.getMin().clone();
+			Vector3d max2 = b.getMax().clone();
+			if (min == null)
+				min = min2;
+			if (max == null)
+				max = max2;
+			if (min2.x < min.x)
+				min.x = min2.x;
+			if (min2.y < min.y)
+				min.y = min2.y;
+			if (min2.z < min.z)
+				min.z = min2.z;
+			if (max.x < max2.x)
+				max.x = max2.x;
+			if (max.y < max2.y)
+				max.y = max2.y;
+			if (max.z < max2.z)
+				max.z = max2.z;
+			// TickToc.tic("Bounds for "+c.getName());
+			if(min==null || max ==null) {
+				Log.error("Failed to find bounds!");
+				throw new RuntimeException("Failed to find bounds!!");
+			}
+		}
+
+		return new Bounds(min, max);
+	}
 }
