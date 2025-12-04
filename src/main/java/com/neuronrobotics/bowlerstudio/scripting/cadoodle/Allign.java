@@ -229,6 +229,7 @@ public class Allign extends CaDoodleOperation{
 	}
 	public Allign setBounds(List<String> boundNames) {
 		this.boundNames=boundNames;
+		bounds=null;
 		return this;
 	}
 	public static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache) {
