@@ -16,15 +16,15 @@ import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.scene.transform.Affine;
 
-public class Allign extends CaDoodleOperation{
+public class Align extends CaDoodleOperation{
 	@Expose (serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose (serialize = true, deserialize = true)
-	public Allignment z=null;
+	public Alignment z=null;
 	@Expose (serialize = true, deserialize = true)
-	public Allignment y=null;
+	public Alignment y=null;
 	@Expose (serialize = true, deserialize = true)
-	public Allignment x=null;
+	public Alignment x=null;
 	@Expose (serialize = true, deserialize = true)
 	private TransformNR workplane=null;
 	@Deprecated
@@ -48,7 +48,7 @@ public class Allign extends CaDoodleOperation{
 	}
 	@Override
 	public String getType() {
-		return "Allign";
+		return "Align";
 	}
 	
 	@Override
@@ -173,11 +173,11 @@ public class Allign extends CaDoodleOperation{
 		return names;
 	}
 
-	public Allign setNames(List<String> names) {
+	public Align setNames(List<String> names) {
 		this.names = names;
 		return this;
 	}
-	public Allign setAllignParams(Allignment X, Allignment Y,Allignment Z) {
+	public Align setAlignParams(Alignment X, Alignment Y,Alignment Z) {
 		x=X;
 		y=Y;
 		z=Z;
@@ -192,21 +192,21 @@ public class Allign extends CaDoodleOperation{
 		return afNR.times(workplane);
 	}
 
-	public Allign setWorkplane(TransformNR workplane) {
+	public Align setWorkplane(TransformNR workplane) {
 		this.workplane = workplane;
 		return this;
 	}
 
 	public Bounds getBounds(List<CSG> incoming) {
 		if(bounds!=null) {
-			Log.error("Depricated Bounds in the allign step!");
+			Log.error("Depricated Bounds in the align step!");
 			return bounds.getBounds();
 		}if(boundNames!=null) {
 			List<CSG> selectedCSG = getSelectedCSG(boundNames,incoming);
-			return Allign.getBounds(selectedCSG, workplane, new HashMap<CSG, Bounds>());
+			return Align.getBounds(selectedCSG, workplane, new HashMap<CSG, Bounds>());
 		}
 		else {
-			throw new RuntimeException("Allign can not be initialized without bounds!");
+			throw new RuntimeException("Align can not be initialized without bounds!");
 		}
 		
 	}
@@ -227,7 +227,7 @@ public class Allign extends CaDoodleOperation{
 		}
 		return null;
 	}
-	public Allign setBounds(List<String> boundNames) {
+	public Align setBounds(List<String> boundNames) {
 		this.boundNames=boundNames;
 		bounds=null;
 		return this;

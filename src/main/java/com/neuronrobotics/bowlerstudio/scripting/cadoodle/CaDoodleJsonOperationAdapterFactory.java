@@ -22,7 +22,7 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 		registerType("AddFromScript", AddFromScript.class);
 		registerType("AddRobotController", AddRobotController.class);
 		registerType("AddRobotLimb", AddRobotLimb.class);
-		registerType("Allign", Allign.class);
+		registerType("Align", Align.class);
 		registerType("Delete", Delete.class);
 		registerType("Group", Group.class);
 		registerType("Hide", Hide.class);

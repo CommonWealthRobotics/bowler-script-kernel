@@ -90,12 +90,12 @@ public class Sweep extends AbstractAddFrom {
 		if (angle < 0)
 			angle = -angle;
 		double sprl = spiralStep(name).getMM();
-		Transform centerandAllignedPolygon = new Transform().movex(-b.getMinX()).movey(-b.getMinY());
+		Transform centerandAlignedPolygon = new Transform().movex(-b.getMinX()).movey(-b.getMinY());
 		Transform increment = new Transform().rotY(-angle).movey(z);
 		Transform radiusT = new Transform().movex(radius);
 		Polygon transformedP;
 		try {
-			transformedP = p.transformed(centerandAllignedPolygon);
+			transformedP = p.transformed(centerandAlignedPolygon);
 
 			ITransformProvider pr = (unit, domain) -> {
 				return new Transform().movex(sprl * unit * d);

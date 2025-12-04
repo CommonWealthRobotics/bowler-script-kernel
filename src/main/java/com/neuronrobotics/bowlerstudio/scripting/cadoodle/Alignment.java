@@ -1,6 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
-public enum Allignment {
+public enum Alignment {
 	positive,
 	negative,
 	middle,	
