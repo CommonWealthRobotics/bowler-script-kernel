@@ -151,7 +151,7 @@ public class AssetFactory {
 		}
 	}
 
-	public static String getGitSource() throws Exception {
+	public static String getGitSource() {
 		return gitSource;
 	}
 
@@ -165,6 +165,14 @@ public class AssetFactory {
 	}
 
 	public static void loadAllAssets() throws Exception {
+		List<String> files = cloneAllRepos();
+		for (String file : files) {
+			//com.neuronrobotics.sdk.common.Log.error("Loading asset file: " + file);
+			loadAsset(file);
+		}
+	}
+
+	public static List<String> cloneAllRepos() throws Exception {
 		com.neuronrobotics.sdk.common.Log.info("Loading assets");
 		List<String> files;
 		try {
@@ -172,10 +180,7 @@ public class AssetFactory {
 		} catch (Exception ex) {
 			files = ScriptingEngine.filesInGit(getGitSource());
 		}
-		for (String file : files) {
-			//com.neuronrobotics.sdk.common.Log.error("Loading asset file: " + file);
-			loadAsset(file);
-		}
+		return files;
 	}
 
 	public static String getAssetRepoBranch() {

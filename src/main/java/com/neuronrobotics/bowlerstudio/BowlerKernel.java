@@ -77,7 +77,28 @@ public class BowlerKernel {
 	// private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 	private static boolean kernelMode = true;
-
+	public static void ensureUpdated(boolean check,String ... urls) {
+		for(String s:urls) {
+			
+			if(s==null)
+				continue;
+			try {
+				File wd = ScriptingEngine.getRepositoryCloneDirectory(s);
+				if(check && wd.exists()) {
+					Log.error("Skipping update, clone exists "+s);
+					continue;
+				}
+				Log.debug("Pulling "+s);
+				ScriptingEngine.cloneRepo(s, null);
+				ScriptingEngine.pull(s);
+			} catch (Throwable e) {
+				// Auto-generated catch block
+				e.printStackTrace();
+				//ScriptingEngine.deleteRepo(s);
+				//ScriptingEngine.cloneRepo(s, null);
+			}
+		}
+	}
 	private static void loadHistoryLocal() {
 		historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 		ArrayList<String> history = new ArrayList<>();
