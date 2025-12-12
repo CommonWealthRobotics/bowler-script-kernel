@@ -30,6 +30,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
+import org.python.google.common.io.Files;
 import org.vosk.Model;
 import org.vosk.Recognizer;
 import net.lingala.zip4j.ZipFile;
@@ -109,36 +110,48 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	 */
 	public static void setModelName(String modelName) {
 		VoskLipSync.modelName = modelName;
-		String pathTOModel = ScriptingEngine.getWorkspace().getAbsolutePath() + "/" + getModelName() + ".zip";
-		File zipfile = new File(pathTOModel);
+		String pathTOModel_full = ScriptingEngine.getWorkspace().getAbsolutePath() + "/" + getModelName() + ".zip";
+		String pathTOModel = ScriptingEngine.getWorkspace().getAbsolutePath() + "/" + getModelName() + ".zip_TMP";
+
+		File zipfile = new File(pathTOModel_full);
+		File zipfile_temp = new File(pathTOModel);
+
 		try {
 			if (!zipfile.exists()) {
 
 				String urlStr = "https://alphacephei.com/vosk/models/" + getModelName() + ".zip";
 				URL url = new URL(urlStr);
 				BufferedInputStream bis = new BufferedInputStream(url.openStream());
-				FileOutputStream fis = new FileOutputStream(zipfile);
+				FileOutputStream fis = new FileOutputStream(zipfile_temp);
 				byte[] buffer = new byte[1024];
 				int count = 0;
 				com.neuronrobotics.sdk.common.Log.error("Downloading Vosk Model " + getModelName());
+				
+				long time = System.currentTimeMillis();
+				long total=0;
 				while ((count = bis.read(buffer, 0, 1024)) != -1) {
 					fis.write(buffer, 0, count);
-					System.out.print(".");
+					total+=count;
+					if(System.currentTimeMillis()-time>=1000) {
+						time=System.currentTimeMillis();
+						System.out.println("Vosk Downloaded "+total+" bytes");
+					}
 				}
 				fis.close();
 				bis.close();
-
+				Files.copy(zipfile_temp, zipfile);
 				String source = zipfile.getAbsolutePath();
 				String destination = ScriptingEngine.getWorkspace().getAbsolutePath();
 				com.neuronrobotics.sdk.common.Log.error("Unzipping Vosk Model " + getModelName());
-				ZipFile zipFile = new ZipFile(source);
-				zipFile.extractAll(destination);
+				ZipFile zf = new ZipFile(source);
+				zf.extractAll(destination);
 			}
 			model = new Model(ScriptingEngine.getWorkspace().getAbsolutePath() + "/" + getModelName() + "/");
 		} catch (Throwable t) {
 			t.printStackTrace();
 			model = null;
 		}
+		zipfile_temp.delete();
 	}
 
 	int numBytesRead = 0;
