@@ -143,7 +143,11 @@ public class BowlerKernel {
 	public static void main(String[] args) throws Exception {
 		long startTime = System.currentTimeMillis();
 		loadHistoryLocal();
-		startupProcedures(args);
+		if (args.length == 0) {
+			fail();
+			return;
+		}
+		startupProcedures();
 		runArgumentsAfterStartup(args, startTime);
 	}
 
@@ -409,7 +413,7 @@ public class BowlerKernel {
 		}
 	}
 
-	private static void startupProcedures(String[] args)
+	public static void startupProcedures()
 			throws IOException, InvalidRemoteException, TransportException, GitAPIException, Exception {
 		try {
 			JavaFXInitializer.go();
@@ -418,9 +422,7 @@ public class BowlerKernel {
 			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine availible");
 		}
 		ScriptingEngine.waitForLogin();
-		if (args.length == 0) {
-			fail();
-		}
+
 		CSGDatabase.setInstance(new CSGDatabaseInstance(new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/csgDatabase.json")));
 		File logfile = new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/kernelLog.txt");
 		if(logfile.exists())

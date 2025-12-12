@@ -9,10 +9,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.junit.Before;
 import org.junit.Test;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.ControllerOption;
 import com.neuronrobotics.bowlerstudio.creature.LimbOption;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -41,7 +46,10 @@ import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import javafx.scene.paint.Color;
 
 public class CaDoodleWorkflowTest {
-
+	  @Before
+	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
+		  BowlerKernel.startupProcedures();
+	  }
 	@Test
 	public void test() throws Exception {
 		Log.enableDebugPrint();

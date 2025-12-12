@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Ref;
+import org.junit.Before;
 import org.junit.Test;
 import org.kohsuke.github.GHMyself;
 import org.kohsuke.github.GHOrganization;
@@ -16,11 +20,15 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHTeam;
 import org.kohsuke.github.PagedIterable;
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
 public class GitHub {
-
+	  @Before
+	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
+		  BowlerKernel.startupProcedures();
+	  }
   @Test
   public void test() throws Exception {
 		//ScriptingEngine.login();

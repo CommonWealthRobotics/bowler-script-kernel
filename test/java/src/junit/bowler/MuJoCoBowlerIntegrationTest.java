@@ -3,13 +3,19 @@ package junit.bowler;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.junit.Before;
 import org.junit.Test;
 import org.mujoco.xml.attributetypes.IntegratorType;
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.MuJoCoPhysicsManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -19,7 +25,10 @@ import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 @SuppressWarnings("unchecked")
 public class MuJoCoBowlerIntegrationTest {
-
+	  @Before
+	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
+		  BowlerKernel.startupProcedures();
+	  }
 	@Test
 	public void test() throws Exception {
 //		try {

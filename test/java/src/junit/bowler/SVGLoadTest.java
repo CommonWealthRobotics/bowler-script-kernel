@@ -8,14 +8,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
+import org.junit.Before;
 import org.junit.Test;
+
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.svg.SVGLoad;
 
 public class SVGLoadTest {
-
+	  @Before
+	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
+		  BowlerKernel.startupProcedures();
+	  }
 	@Test
 	public void test() throws IOException {
 		File svg = new File("Test.SVG");
