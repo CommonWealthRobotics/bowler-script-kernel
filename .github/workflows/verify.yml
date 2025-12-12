@@ -55,7 +55,7 @@ jobs:
       run: ./gradlew shadowJar
       
     - name: Test with Gradle 
-      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test --scan
+      run: ./gradlew test
     - name: If Fail
       if: ${{ failure() }}
       run: cat errlog.txt
