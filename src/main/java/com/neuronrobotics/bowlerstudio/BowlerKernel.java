@@ -425,7 +425,8 @@ public class BowlerKernel {
 			fail();
 		}
 		CSGDatabase.setInstance(new CSGDatabaseInstance(new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/csgDatabase.json")));
-
+		Log.setFile(new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/kernelLog.txt"));
+		Log.enableDebugPrint();
 		ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),"https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
 				null);
 		CSG.setPreventNonManifoldTriangles(true);
@@ -435,7 +436,6 @@ public class BowlerKernel {
 					eu.mihosoft.vrl.v3d.CSG intermediateShape) {
 
 			}
-
 		});
 	}
 
