@@ -83,19 +83,16 @@ public class BowlerKernel {
 			if(s==null)
 				continue;
 			try {
-				File wd = ScriptingEngine.getRepositoryCloneDirectory(s);
+				File wd = new File(ScriptingEngine.getRepositoryCloneDirectory(s).getAbsolutePath()+"/.git");
 				if(check && wd.exists()) {
 					Log.error("Skipping update, clone exists "+s);
 					continue;
 				}
-				Log.debug("Pulling "+s);
+				Log.debug("Cloning "+s);
 				ScriptingEngine.cloneRepo(s, null);
 				ScriptingEngine.pull(s);
 			} catch (Throwable e) {
-				// Auto-generated catch block
-				e.printStackTrace();
-				//ScriptingEngine.deleteRepo(s);
-				//ScriptingEngine.cloneRepo(s, null);
+				Log.error(e);
 			}
 		}
 	}
