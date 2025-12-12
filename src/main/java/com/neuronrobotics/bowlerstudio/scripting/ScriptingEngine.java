@@ -1827,6 +1827,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			}
 		}
 		// Assume it is a URL
+
 		File gistDir = getRepositoryCloneDirectory(remoteURI);
 		String localPath = gistDir.getAbsolutePath();
 		File gitRepoFile = new File(localPath + "/.git");
@@ -1835,6 +1836,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (!gitRepoFile.exists()) {
 			if (!hasNetwork())
 				return null;// No login info means there is no way to publish
+			Log.debug("Cloning "+remoteURI);
 			waitForRepo(remoteURI, "cloneRepo");
 			com.neuronrobotics.sdk.common.Log.debug("Cloning files from: " + remoteURI);
 			if (branch != null)
