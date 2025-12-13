@@ -1167,7 +1167,11 @@ public class CaDoodleFile {
 		ArrayList<javafx.scene.image.WritableImage> holder = new ArrayList<WritableImage>();
 		try {
 			BowlerKernel.runLater(() -> {
-				holder.add(ThumbnailImage.get(getCsgDBinstance(), currentState));
+				try {
+					holder.add(ThumbnailImage.get(getCsgDBinstance(), currentState));
+				}catch(Exception ex) {
+					holder.add(new WritableImage(1000, 1000));
+				}
 			});
 		} catch (Throwable ex) {
 			com.neuronrobotics.sdk.common.Log.error(ex);
