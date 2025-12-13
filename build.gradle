@@ -377,7 +377,7 @@ artifacts {
 test {
 	testLogging {
 		// Show standard out and standard error of the test JVM(s) on the console
-		showStandardStreams = true
+		showStandardStreams = false
 
 		// Show which tests are being run
 		events "passed", "skipped", "failed"
