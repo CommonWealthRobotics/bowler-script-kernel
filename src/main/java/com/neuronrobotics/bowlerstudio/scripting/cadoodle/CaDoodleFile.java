@@ -1117,6 +1117,7 @@ public class CaDoodleFile {
 					// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
 					// e.getMessage());
 					com.neuronrobotics.sdk.common.Log.error(e);
+					return;
 				}
 				do {
 					try {
