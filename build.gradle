@@ -127,24 +127,23 @@ repositories {
 	maven { url 'https://repo1.maven.org/maven2/'}
 
 
-//	maven {
-//		url "https://repo.myrobotlab.org/artifactory/myrobotlab/"
-//		content {
-//			includeGroup("de.dfki.mary")
-//		}
-//	}
+	//	maven {
+	//		url "https://repo.myrobotlab.org/artifactory/myrobotlab/"
+	//		content {
+	//			includeGroup("de.dfki.mary")
+	//		}
+	//	}
 	maven { url 'https://maven-central.storage-download.googleapis.com/repos/central/data/'}
 	maven {url 'https://repo.jenkins-ci.org/public/'}
 	maven {
 		url "https://repo.jenkins-ci.org/releases/"
 	}
-	
+
 	maven { url "https://jitpack.io" }
 	maven { url "https://repo.eclipse.org/content/groups/releases/" }
 	maven { url "https://dl.bintray.com/dfki-lt/maven/" }
 	maven { url "https://raw.github.com/marytts/marytts/master/repository/" }
 	maven { url "https://repo.jenkins-ci.org/public/" }
-
 }
 
 dependencies {
@@ -153,7 +152,7 @@ dependencies {
 	api project('JCSG')
 	api project('java-bowler')
 	api project('GithubPasswordManager:GithubPasswordManager')
-	
+
 	//compile group: "de.swirtz", name: "ktsRunner", version: "0.0.7"
 	api 'us.ihmc:jinput:2.0.6-ihmc2'
 	api group: 'us.ihmc', name: 'ihmc-native-library-loader', version: '1.3.1'
@@ -215,11 +214,11 @@ dependencies {
 	testImplementation 'junit:junit:4.10'
 	api group: 'com.github.stephengold', name: 'jbullet', version: '1.0.3'
 
-//	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1') {
-//		exclude group: 'commons-io', module: 'commons-io'
-//		exclude group: 'com.twmacinta', module: 'fast-md5'
-//		exclude group: 'gov.nist.math', module: 'Jampack'
-//	}
+	//	implementation('de.dfki.mary:voice-cmu-slt-hsmm:5.2.1') {
+	//		exclude group: 'commons-io', module: 'commons-io'
+	//		exclude group: 'com.twmacinta', module: 'fast-md5'
+	//		exclude group: 'gov.nist.math', module: 'Jampack'
+	//	}
 	implementation('de.dfki.mary:voice-dfki-poppy-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
@@ -377,7 +376,17 @@ artifacts {
 }
 test {
 	testLogging {
-		exceptionFormat = 'full'
+		// Show standard out and standard error of the test JVM(s) on the console
+		showStandardStreams = true
+
+		// Show which tests are being run
+		events "passed", "skipped", "failed"
+
+		// Show exceptions in full
+		exceptionFormat "full"
+
+		// Show causes of exceptions
+		showCauses true
+		showStackTraces true
 	}
 }
-
