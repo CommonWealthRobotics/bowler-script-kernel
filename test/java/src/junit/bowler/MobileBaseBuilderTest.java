@@ -33,7 +33,7 @@ public class MobileBaseBuilderTest {
 				.setXmlName("RobRobotExample.xml");
 		
 		MobileBase base = builder.build(CSGDatabase.getInstance());
-		
+		base.disconnect();
 		
 	}
 

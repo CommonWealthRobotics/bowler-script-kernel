@@ -33,9 +33,9 @@ public class TTSTest {
 				com.neuronrobotics.sdk.common.Log.error(percentage+" "+status.toString());
 			}
 		};
-		//BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
-		//AudioPlayer.setLambda (com.neuronrobotics.bowlerstudio.lipsync.VoskLipSync.get());
-		//BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
+		BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
+		AudioPlayer.setLambda (com.neuronrobotics.bowlerstudio.lipsync.VoskLipSync.get());
+		BowlerKernel.speak("Coqui one text to speech", 200, 0, 800, 1.0, 1.0,sp);
 
 //		BowlerKernel.speak("Coqui three ", 200, 0, 802, 1.0, 1.0,null);
 //		BowlerKernel.speak("Coqui two text to speech", 200, 0, 801, 1.0, 1.0,null);
