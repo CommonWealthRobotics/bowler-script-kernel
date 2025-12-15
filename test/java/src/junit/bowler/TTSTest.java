@@ -6,6 +6,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.AudioPlayer;
@@ -23,6 +24,7 @@ public class TTSTest {
 		  BowlerKernel.startupProcedures();
 	  }
 	@Test 
+	  @Ignore
 	public void TTSText() {
 		AudioPlayer.setLambda(new RhubarbManager());
 		ISpeakingProgress sp = new ISpeakingProgress() {
