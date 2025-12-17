@@ -770,7 +770,7 @@ public class DownloadManager {
 	 */
 	public static void unzip(File path, String dir) throws Exception {
 		com.neuronrobotics.sdk.common.Log.debug("Unzipping " + path.getName() + " into " + dir);
-		String fileBaseName = FilenameUtils.getBaseName(path.getName().toString());
+		String __fileBaseName__ = FilenameUtils.getBaseName(path.getName().toString());
 		Path destFolderPath = new File(dir).toPath();
 
 		try (ZipFile zipFile = ZipFile.builder().setFile(path).get()) {
@@ -783,28 +783,56 @@ public class DownloadManager {
 						Files.createDirectories(entryPath);
 					} else {
 						Files.createDirectories(entryPath.getParent());
-						try (InputStream in = zipFile.getInputStream(entry)) {
-							try {
-								// ar.setExternalAttributes(entry.extraAttributes);
-								if (entry.isUnixSymlink()) {
-									String text = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))
-											.lines().collect(Collectors.joining("\n"));
-									Path target = Paths.get(".", text);
-									com.neuronrobotics.sdk.common.Log.debug("Creating symlink " + entryPath + " with " + target);
 
-									Files.createSymbolicLink(entryPath, target);
-									continue;
+						// Check timestamps before extracting
+						File targetFile = entryPath.toFile();
+						boolean shouldExtract = false;
+
+						if (!targetFile.exists()) {
+							// File doesn't exist, extract it
+							shouldExtract = true;
+							com.neuronrobotics.sdk.common.Log.debug("Adding new file: " + entryPath);
+						} else {
+							// File exists, compare timestamps
+							long zipTime = entry.getTime();
+							long diskTime = targetFile.lastModified();
+
+							if (zipTime > diskTime) {
+								// Zip file is newer, extract it
+								shouldExtract = true;
+								com.neuronrobotics.sdk.common.Log.debug("Updating file (zip is newer): " + entryPath);
+							} else {
+								// Disk file is newer or same, skip extraction
+								com.neuronrobotics.sdk.common.Log
+										.debug("Skipping file (disk is newer or same): " + entryPath);
+							}
+						}
+
+						if (shouldExtract) {
+							try (InputStream in = zipFile.getInputStream(entry)) {
+								try {
+									// ar.setExternalAttributes(entry.extraAttributes);
+									if (entry.isUnixSymlink()) {
+										String text = new BufferedReader(
+												new InputStreamReader(in, StandardCharsets.UTF_8)).lines()
+												.collect(Collectors.joining("\n"));
+										Path target = Paths.get(".", text);
+										com.neuronrobotics.sdk.common.Log
+												.debug("Creating symlink " + entryPath + " with " + target);
+
+										Files.createSymbolicLink(entryPath, target);
+										continue;
+									}
+								} catch (Exception ex) {
+									com.neuronrobotics.sdk.common.Log.error(ex);
 								}
-							} catch (Exception ex) {
-								com.neuronrobotics.sdk.common.Log.error(ex);;
-							}
-							try (OutputStream out = new FileOutputStream(entryPath.toFile())) {
-								IOUtils.copy(in, out);
-								com.neuronrobotics.sdk.common.Log.debug("Inflating " + entryPath);
-
-							}
-							if (isExecutable(entry)) {
-								entryPath.toFile().setExecutable(true);
+								try (OutputStream out = new FileOutputStream(entryPath.toFile())) {
+									IOUtils.copy(in, out);
+									com.neuronrobotics.sdk.common.Log.debug("Inflating " + entryPath);
+								}
+								if (isExecutable(entry)) {
+									entryPath.toFile().setExecutable(true);
+								}
 							}
 						}
 					}
