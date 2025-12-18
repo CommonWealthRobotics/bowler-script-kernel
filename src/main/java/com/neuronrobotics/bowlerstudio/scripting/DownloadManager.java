@@ -770,7 +770,7 @@ public class DownloadManager {
 	 */
 	public static void unzip(File path, String dir) throws Exception {
 		com.neuronrobotics.sdk.common.Log.debug("Unzipping " + path.getName() + " into " + dir);
-		String __fileBaseName__ = FilenameUtils.getBaseName(path.getName().toString());
+		//String __fileBaseName__ = FilenameUtils.getBaseName(path.getName().toString());
 		Path destFolderPath = new File(dir).toPath();
 
 		try (ZipFile zipFile = ZipFile.builder().setFile(path).get()) {
@@ -791,7 +791,7 @@ public class DownloadManager {
 						if (!targetFile.exists()) {
 							// File doesn't exist, extract it
 							shouldExtract = true;
-							com.neuronrobotics.sdk.common.Log.debug("Adding new file: " + entryPath);
+							Log.debug("Adding new file: " + entryPath);
 						} else {
 							// File exists, compare timestamps
 							long zipTime = entry.getTime();
@@ -800,11 +800,10 @@ public class DownloadManager {
 							if (zipTime > diskTime) {
 								// Zip file is newer, extract it
 								shouldExtract = true;
-								com.neuronrobotics.sdk.common.Log.debug("Updating file (zip is newer): " + entryPath);
+								Log.debug("Updating file (zip is newer): " + entryPath);
 							} else {
 								// Disk file is newer or same, skip extraction
-								com.neuronrobotics.sdk.common.Log
-										.debug("Skipping file (disk is newer or same): " + entryPath);
+								Log.debug("Skipping file (disk is newer or same): " + entryPath);
 							}
 						}
 
