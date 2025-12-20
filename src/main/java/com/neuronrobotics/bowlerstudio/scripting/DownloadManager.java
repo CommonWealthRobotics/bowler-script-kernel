@@ -785,7 +785,9 @@ public class DownloadManager {
 						Files.createDirectories(entryPath.getParent());
 
 						// Check timestamps before extracting
-						File targetFile = entryPath.toFile();
+						File file = entryPath.toFile();
+						file.getParentFile().mkdirs();
+						File targetFile = file;
 						boolean shouldExtract = false;
 
 						if (!targetFile.exists()) {
@@ -800,10 +802,10 @@ public class DownloadManager {
 							if (zipTime > diskTime) {
 								// Zip file is newer, extract it
 								shouldExtract = true;
-								Log.debug("Updating file (zip is newer): " + entryPath);
+								//Log.debug("Updating file (zip is newer): " + entryPath);
 							} else {
 								// Disk file is newer or same, skip extraction
-								Log.debug("Skipping file (disk is newer or same): " + entryPath);
+								//Log.debug("Skipping file (disk is newer or same): " + entryPath);
 							}
 						}
 
@@ -825,12 +827,14 @@ public class DownloadManager {
 								} catch (Exception ex) {
 									com.neuronrobotics.sdk.common.Log.error(ex);
 								}
-								try (OutputStream out = new FileOutputStream(entryPath.toFile())) {
+								try (OutputStream out = new FileOutputStream(file)) {
 									IOUtils.copy(in, out);
 									com.neuronrobotics.sdk.common.Log.debug("Inflating " + entryPath);
+								}catch(Exception ex) {
+									Log.error(ex);
 								}
 								if (isExecutable(entry)) {
-									entryPath.toFile().setExecutable(true);
+									file.setExecutable(true);
 								}
 							}
 						}
