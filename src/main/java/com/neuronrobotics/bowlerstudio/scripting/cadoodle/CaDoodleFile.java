@@ -114,6 +114,10 @@ public class CaDoodleFile {
 	private File objectDir;
 	private ExecutorService executor = Executors.newFixedThreadPool(5);
 	private File imageCacheDir;
+	@Override
+	public String toString(){
+		return projectName;
+	}
 
 	public ArrayList<MobileBase> getMobileBases() {
 		ArrayList<MobileBase> back = new ArrayList<MobileBase>();
