@@ -38,7 +38,7 @@ public class CaDoodleVitamin {
 	}
 	public boolean isVitamin(CSG c) {
 		for(String s:instance.getParameters(c)) {
-			Log.debug("Checking "+s);
+			//Log.debug("Checking "+s);
 			if(s.contains("_CaDoodle_Vitamin_") && s.contains(c.getName())) {
 				return true;
 			}
