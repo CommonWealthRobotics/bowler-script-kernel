@@ -770,7 +770,6 @@ public class DownloadManager {
 	 */
 	public static void unzip(File path, String dir) throws Exception {
 		com.neuronrobotics.sdk.common.Log.debug("Unzipping " + path.getName() + " into " + dir);
-		//String __fileBaseName__ = FilenameUtils.getBaseName(path.getName().toString());
 		Path destFolderPath = new File(dir).toPath();
 
 		try (ZipFile zipFile = ZipFile.builder().setFile(path).get()) {
@@ -829,7 +828,7 @@ public class DownloadManager {
 								}
 								try (OutputStream out = new FileOutputStream(file)) {
 									IOUtils.copy(in, out);
-									com.neuronrobotics.sdk.common.Log.debug("Inflating " + entryPath);
+									//com.neuronrobotics.sdk.common.Log.debug("Inflating " + entryPath);
 								}catch(Exception ex) {
 									//Log.error(ex);
 								}
