@@ -831,7 +831,7 @@ public class DownloadManager {
 									IOUtils.copy(in, out);
 									com.neuronrobotics.sdk.common.Log.debug("Inflating " + entryPath);
 								}catch(Exception ex) {
-									Log.error(ex);
+									//Log.error(ex);
 								}
 								if (isExecutable(entry)) {
 									file.setExecutable(true);
