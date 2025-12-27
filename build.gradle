@@ -16,7 +16,7 @@ buildscript {
 	}
 
 	dependencies {
-		classpath 'com.github.jengelman.gradle.plugins:shadow:5.1.0'
+		classpath 'com.gradleup.shadow:shadow-gradle-plugin:8.3.9'
 	}
 	//	dependencies {
 	//		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -24,7 +24,7 @@ buildscript {
 	//	}commons-io
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.gradleup.shadow'
 
 apply plugin: 'java'
 apply plugin: 'signing'
