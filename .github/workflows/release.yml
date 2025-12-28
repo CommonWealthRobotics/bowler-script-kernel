@@ -20,7 +20,7 @@ jobs:
       
     - name: start xvfb
       run:
-        Xvfb :99 &
+        Xvfb :0 &
 
     - name: initialize the X11 DISPLAY variable
       run:
@@ -30,7 +30,7 @@ jobs:
       run: pwd; ls -la        
 
     - name: Pull a JavaFX JDK
-      run: wget http://static.azul.com/zulu/bin/zulu8.33.0.1-ca-fx-jdk8.0.192-linux_x64.tar.gz
+      run: wget https://cdn.azul.com/zulu/bin/zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
 
     - name: After JDK download, list directory contnts
       run: pwd; ls -la
@@ -38,8 +38,8 @@ jobs:
     - name: Set Java
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
-        jdkFile: ./zulu8.33.0.1-ca-fx-jdk8.0.192-linux_x64.tar.gz
+        java-version: 21
+        jdkFile: zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}   
@@ -49,7 +49,12 @@ jobs:
          echo $'app.name=BowlerScriptKernel' > src/main/resources/com/neuronrobotics/bowlerkernel/build.properties 
          echo "app.version=${{ steps.get_version.outputs.VERSION  }}" >> src/main/resources/com/neuronrobotics/bowlerkernel/build.properties
 
-                
+    - name: initialize the X11 DISPLAY variable
+      run:
+        export DISPLAY=:0
+    - name: Build/Test with Gradle 
+      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test 
+                      
     - name: Build with Gradle 
       run: ./gradlew shadowJar
       

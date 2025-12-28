@@ -34,12 +34,10 @@ jobs:
       run: |
           sudo apt update
           sudo apt install libgtk2.0-0
-    - name: initialize the X11 DISPLAY variable
-      run:
-        export DISPLAY=:0
+
           
     - name: Pull a JavaFX JDK
-      run: wget http://static.azul.com/zulu/bin/zulu8.78.0.19-ca-fx-jdk8.0.412-linux_x64.tar.gz
+      run: wget https://cdn.azul.com/zulu/bin/zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
 
     - name: After JDK download, list directory contnts
       run: pwd; ls -la
@@ -47,17 +45,16 @@ jobs:
     - name: Set Java
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
-        jdkFile: ./zulu8.78.0.19-ca-fx-jdk8.0.412-linux_x64.tar.gz
+        java-version: 21
+        jdkFile: zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
+    - name: Shadow Jar 
+      run: ./gradlew  shadowJar        
+    - name: initialize the X11 DISPLAY variable
+      run:
+        export DISPLAY=:0
+    - name: Build/Test with Gradle 
+      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test 
         
-     
-    - name: Build with Gradle 
-      run: ./gradlew shadowJar
-      
-    - name: Test with Gradle 
-      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew clean test
-
-         
     - name: Test Bezier 
       run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy 
     - name: start xvfb
