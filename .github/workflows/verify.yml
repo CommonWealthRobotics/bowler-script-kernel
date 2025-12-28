@@ -52,7 +52,7 @@ jobs:
         
     - name: Build/Test with Gradle 
       run: ./gradlew clean test 
-    - name: Build/Test with Gradle 
+    - name: Shadow Jar 
       run: ./gradlew  shadowJar         
     - name: Test Bezier 
       run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy 
