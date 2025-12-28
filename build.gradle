@@ -333,7 +333,22 @@ artifacts {
 	archives javadocJar, sourcesJar, jar
 }
 
+//test {
+//    testLogging.showExceptions = true
+//    testLogging.showCauses = true
+//}
 test {
-    testLogging.showExceptions = true
-    testLogging.showCauses = true
+	testLogging {
+		// Show which test is running
+		events "passed", "skipped", "failed", "standardOut", "standardError"
+		
+		// Show standard out and error
+		showStandardStreams = true
+		
+		// Optional: show more details
+		exceptionFormat = "full"
+		showExceptions = true
+		showCauses = true
+		showStackTraces = true
+	}
 }
