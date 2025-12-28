@@ -1,74 +1,33 @@
-buildscript {
-	ext {
-		springBootVersion = '1.2.7.RELEASE'
-	}
-	repositories {
-		[
-			maven {
-				url "https://repo1.maven.org/maven2/"
-			},
-			mavenCentral(),
-			maven {
-				url "https://plugins.gradle.org/m2/"
-			},
-			mavenLocal()
-		]
-	}
-
-	dependencies {
-		classpath 'com.gradleup.shadow:shadow-gradle-plugin:8.3.9'
-	}
-	//	dependencies {
-	//		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-	//		classpath('io.spring.gradle:dependency-management-plugin:0.5.2.RELEASE')
-	//	}commons-io
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'signing'
+    id 'maven-publish'
+    id 'com.gradleup.shadow' version '8.3.9'
 }
 
-apply plugin: 'com.gradleup.shadow'
-
-apply plugin: 'java'
-apply plugin: 'signing'
-if (project == rootProject) {
-	apply plugin: 'maven'
-}
-apply plugin: 'java-library'
-
-
-//apply plugin: 'spring-boot'
-//apply plugin: 'io.spring.dependency-management'
-
-
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-sourceSets {
-
-	test {
-		java {
-			srcDirs = [
-				"test/java/src" ]  // Note @Peter's comment below
-		}
-	}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
+//java {
+//    toolchain {
+//        languageVersion = JavaLanguageVersion.of(17)
+//    }
+//}
 
-// NetBeans will automatically add "run" and "debug" tasks relying on the
-// "mainClass" property. You may however define the property prior executing
-// tasks by passing a "-PmainClass=<QUALIFIED_CLASS_NAME>" argument.
-//
-// Note however, that you may define your own "run" and "debug" task if you
-// prefer. In this case NetBeans will not add these tasks but you may rely on
-// your own implementation.
-
-File buildDir = file(".");
-
-Properties props = new Properties()
-props.load(new FileInputStream(buildDir.getAbsolutePath()+"/src/main/resources/com/neuronrobotics/bowlerkernel/build.properties"))
+def props = new Properties()
+file('src/main/resources/com/neuronrobotics/bowlerkernel/build.properties')
+     .withInputStream { props.load(it) }
 
 boolean is64Bit() {
 	////System.out.println("Arch: "+getOsArch());
 	return getOsArch().startsWith("x86_64") || getOsArch().startsWith("amd64");
 }
+
 boolean isARM() {
 	return getOsArch().startsWith("arm");
+
 }
 boolean isCortexA8(){
 	if(isARM()){
@@ -77,6 +36,7 @@ boolean isCortexA8(){
 	}
 	return false;
 }
+
 boolean isWindows() {
 	////System.out.println("OS name: "+getOsName());
 	return getOsName().toLowerCase().startsWith("windows") ||getOsName().toLowerCase().startsWith("microsoft") || getOsName().toLowerCase().startsWith("ms");
@@ -114,8 +74,6 @@ String getOsArch() {
 	return System.getProperty("os.arch");
 }
 
-
-
 repositories {
 	mavenCentral()
 	maven {
@@ -125,7 +83,6 @@ repositories {
 	maven { url 'https://repo.maven.apache.org/maven2/' }
 
 	maven { url 'https://repo1.maven.org/maven2/'}
-
 
 	//	maven {
 	//		url "https://repo.myrobotlab.org/artifactory/myrobotlab/"
@@ -336,8 +293,6 @@ jar {
 				"Implementation-Title": props."app.name",
 				"Implementation-Version" : props."app.version",
 				"Implementation-Vendor": "CommonWealth Robotics Cooperative"
-
-
 				)
 	}
 }
@@ -346,8 +301,8 @@ shadowJar {
 	zip64 true
 	//mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
 	if (project == rootProject) {
-		baseName = 'bowler-kernel'
-		classifier = ""
+		archiveBaseName = 'bowler-kernel'
+		archiveClassifier = ""
 	}else {
 		archiveBaseName.set('bowler-kernel')
 		archiveClassifier.set('')
@@ -357,36 +312,28 @@ shadowJar {
 }
 
 group = "com.neuronrobotics"
-archivesBaseName = "bowler-script-kernel"
+
+base {
+    archivesName = "bowler-script-kernel"
+}
 
 task javadocJar(type: Jar) {
 	if (project == rootProject)
-		classifier = 'javadoc'
+		archiveClassifier = 'javadoc'
 	from javadoc
 }
 
 task sourcesJar(type: Jar) {
 	if (project == rootProject)
-		classifier = 'sources'
+		archiveClassifier = 'sources'
 	from sourceSets.main.allSource
 }
 
 artifacts {
 	archives javadocJar, sourcesJar, jar
 }
+
 test {
-	testLogging {
-		// Show standard out and standard error of the test JVM(s) on the console
-		showStandardStreams = false
-
-		// Show which tests are being run
-		events "passed", "skipped", "failed"
-
-		// Show exceptions in full
-		exceptionFormat "full"
-
-		// Show causes of exceptions
-		showCauses true
-		showStackTraces true
-	}
+    testLogging.showExceptions = true
+    testLogging.showCauses = true
 }
