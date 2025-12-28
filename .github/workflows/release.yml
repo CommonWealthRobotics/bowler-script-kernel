@@ -38,7 +38,7 @@ jobs:
     - name: Set Java
       uses: actions/setup-java@v1
       with:
-        java-version: 21
+        java-version: 
         jdkFile: zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
     - name: Get the version
       id: get_version
@@ -49,9 +49,11 @@ jobs:
          echo $'app.name=BowlerScriptKernel' > src/main/resources/com/neuronrobotics/bowlerkernel/build.properties 
          echo "app.version=${{ steps.get_version.outputs.VERSION  }}" >> src/main/resources/com/neuronrobotics/bowlerkernel/build.properties
 
-                
+    - name: test with Gradle 
+      run: ./gradlew test
+                      
     - name: Build with Gradle 
-      run: ./gradlew test shadowJar
+      run: ./gradlew shadowJar
       
     - name: release
       uses: actions/create-release@v1
