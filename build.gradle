@@ -1,9 +1,18 @@
+buildscript {
+
+	dependencies {
+		classpath 'com.gradleup.shadow:shadow-gradle-plugin:8.3.9'
+	}
+}
+
 plugins {
     id 'java'
-    id 'java-library'
     id 'signing'
     id 'maven-publish'
-    id 'com.gradleup.shadow' version '8.3.9'
+	id 'java-library'
+}
+if (project == rootProject) {
+	apply plugin: 'com.gradleup.shadow'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -296,7 +305,7 @@ jar {
 				)
 	}
 }
-
+if (project == rootProject) {
 shadowJar {
 	zip64 true
 	//mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
@@ -309,6 +318,7 @@ shadowJar {
 		archiveVersion.set('')
 	}
 	mergeServiceFiles()
+}
 }
 
 group = "com.neuronrobotics"
