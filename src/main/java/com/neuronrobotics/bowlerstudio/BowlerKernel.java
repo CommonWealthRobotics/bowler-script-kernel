@@ -200,7 +200,7 @@ public class BowlerKernel {
 		}
 
 		Object ret = null;
-		File baseWorkspaceFile = null;
+		File baseWorkspaceFile = new File(".").getAbsoluteFile();
 		if (gitRun && gitRepo != null) {
 			String url = null;
 
@@ -227,7 +227,7 @@ public class BowlerKernel {
 					url = gitRepo;
 					baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(url);
 
-					processReturnedObjectsStart(ret, baseWorkspaceFile);
+					processReturnedObjectsStart(ret, baseWorkspaceFile,new File(".").getAbsoluteFile());
 				} catch (Throwable e) {
 					Log.error(e);
 					fail();
@@ -280,7 +280,7 @@ public class BowlerKernel {
 			}
 		}
 		if (startLoadingScripts) {
-			processReturnedObjectsStart(ret, baseWorkspaceFile);
+			processReturnedObjectsStart(ret, baseWorkspaceFile,new File(".").getAbsoluteFile());
 			startLoadingScripts = false;
 			finish(startTime);
 			return;
@@ -301,7 +301,7 @@ public class BowlerKernel {
 			}
 		}
 		if (startLoadingScripts) {
-			processReturnedObjectsStart(ret, new File("."));
+			processReturnedObjectsStart(ret, new File(".").getAbsoluteFile(),new File(".").getAbsoluteFile());
 			finish(startTime);
 			return;
 		}
@@ -403,7 +403,7 @@ public class BowlerKernel {
 					if (ret != null) {
 						com.neuronrobotics.sdk.common.Log.error(ret);
 					}
-					processReturnedObjectsStart(ret, null);
+					processReturnedObjectsStart(ret, null,new File(".").getAbsoluteFile());
 				} catch (Throwable e) {
 					Log.error(e);
 				} 
@@ -448,11 +448,10 @@ public class BowlerKernel {
 		System.exit(0);
 	}
 
-	public static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile) {
-		CSG.setPreventNonManifoldTriangles(true);
+	public static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile, File target) {
 		processUIOpening(ret);
 		if (baseWorkspaceFile != null)
-			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory " + baseWorkspaceFile.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory: \n   " + baseWorkspaceFile.getAbsolutePath()+" \nto "+target.getAbsolutePath());
 
 		if (baseWorkspaceFile != null) {
 
@@ -464,7 +463,7 @@ public class BowlerKernel {
 				if (bomCSV.exists()) {
 
 					File file = new File(
-							baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
+							target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -478,7 +477,7 @@ public class BowlerKernel {
 						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 				if (bom.exists()) {
 					File file = new File(
-							baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
+							target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -503,7 +502,7 @@ public class BowlerKernel {
 			else {
 				com.neuronrobotics.sdk.common.Log.error("Exporting files without print bed");
 			}
-			new CadFileExporter().generateManufacturingParts(csgBits, baseWorkspaceFile);
+			new CadFileExporter().generateManufacturingParts(csgBits, target);
 		} catch (Throwable t) {
 			Log.error(t);
 			fail();
