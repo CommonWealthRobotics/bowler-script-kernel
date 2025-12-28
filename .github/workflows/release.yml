@@ -51,7 +51,7 @@ jobs:
 
                 
     - name: Build with Gradle 
-      run: ./gradlew shadowJar
+      run: ./gradlew test shadowJar
       
     - name: release
       uses: actions/create-release@v1
