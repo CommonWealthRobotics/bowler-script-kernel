@@ -34,9 +34,7 @@ jobs:
       run: |
           sudo apt update
           sudo apt install libgtk2.0-0
-    - name: initialize the X11 DISPLAY variable
-      run:
-        export DISPLAY=:0
+
           
     - name: Pull a JavaFX JDK
       run: wget https://cdn.azul.com/zulu/bin/zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
@@ -51,6 +49,9 @@ jobs:
         jdkFile: ./zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
     - name: Shadow Jar 
       run: ./gradlew  shadowJar        
+    - name: initialize the X11 DISPLAY variable
+      run:
+        export DISPLAY=:0
     - name: Build/Test with Gradle 
       run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test 
         
