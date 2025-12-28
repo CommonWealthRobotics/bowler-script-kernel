@@ -20,7 +20,7 @@ jobs:
       
     - name: start xvfb
       run:
-        Xvfb :99 &
+        Xvfb :0 &
 
     - name: initialize the X11 DISPLAY variable
       run:
@@ -49,8 +49,11 @@ jobs:
          echo $'app.name=BowlerScriptKernel' > src/main/resources/com/neuronrobotics/bowlerkernel/build.properties 
          echo "app.version=${{ steps.get_version.outputs.VERSION  }}" >> src/main/resources/com/neuronrobotics/bowlerkernel/build.properties
 
-    - name: test with Gradle 
-      run: ./gradlew test
+    - name: initialize the X11 DISPLAY variable
+      run:
+        export DISPLAY=:0
+    - name: Build/Test with Gradle 
+      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test 
                       
     - name: Build with Gradle 
       run: ./gradlew shadowJar
