@@ -124,6 +124,12 @@ public class BowlerKernel {
 	}
 
 	private static void fail() {
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		com.neuronrobotics.sdk.common.Log.error(
 				"Usage: \r\njava -jar BowlerScriptKernel.jar -s <file 1> .. <file n> # This will load one script after the next ");
 		com.neuronrobotics.sdk.common.Log.error(
@@ -452,7 +458,9 @@ public class BowlerKernel {
 		processUIOpening(ret);
 		if (baseWorkspaceFile != null)
 			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory: \n   " + baseWorkspaceFile.getAbsolutePath()+" \nto "+target.getAbsolutePath());
-
+		File baseDirForTarget = new File(target.getAbsolutePath() + "/manufacturing/");
+		if(!baseDirForTarget.exists())
+			baseDirForTarget.mkdirs();
 		if (baseWorkspaceFile != null) {
 
 			File baseDirForFiles = new File(baseWorkspaceFile.getAbsolutePath() + "/manufacturing/");
@@ -463,7 +471,7 @@ public class BowlerKernel {
 				if (bomCSV.exists()) {
 
 					File file = new File(
-							target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
+							baseDirForTarget.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -477,7 +485,7 @@ public class BowlerKernel {
 						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 				if (bom.exists()) {
 					File file = new File(
-							target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
+							baseDirForTarget.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -487,8 +495,6 @@ public class BowlerKernel {
 						Log.error(e);
 					}
 				}
-			} else {
-				baseDirForFiles.mkdirs();
 			}
 		}
 		ArrayList<CSG> csgBits = new ArrayList<>();
@@ -502,7 +508,7 @@ public class BowlerKernel {
 			else {
 				com.neuronrobotics.sdk.common.Log.error("Exporting files without print bed");
 			}
-			new CadFileExporter().generateManufacturingParts(csgBits, target);
+			new CadFileExporter().generateManufacturingParts(csgBits, baseDirForTarget);
 		} catch (Throwable t) {
 			Log.error(t);
 			fail();
@@ -614,6 +620,12 @@ public class BowlerKernel {
 				@Override
 				public void highlightException(File fileEngineRunByName, Throwable ex) {
 					Log.error(ex);
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					fail();
 				}
 

@@ -70,6 +70,10 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 			code=code.replace("inlineScriptRun(", "inlineScriptRun(csgdb,");
 			code=code.replace("inlineScriptStringRun(", "inlineScriptStringRun(csgdb,");
 			code=code.replace("gitScriptRun(", "gitScriptRun(((eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance)csgdb),");
+			//getVitaminsDisplay(
+			code=code.replace("getVitaminsDisplay(", "getVitaminsDisplay(csgdb,");
+			code=code.replace("getVitamins(", "getVitamins(csgdb,");
+
 		}
 		
 		Script script;
