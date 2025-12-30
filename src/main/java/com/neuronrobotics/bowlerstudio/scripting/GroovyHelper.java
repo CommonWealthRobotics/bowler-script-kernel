@@ -73,6 +73,18 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 			//getVitaminsDisplay(
 			code=code.replace("getVitaminsDisplay(", "getVitaminsDisplay(csgdb,");
 			code=code.replace("getVitamins(", "getVitamins(csgdb,");
+			//getOriginVitaminsDisplay
+			code=code.replace("getOriginVitaminsDisplay(", "getOriginVitaminsDisplay(csgdb,");
+			//getDefaultVitaminsDisplay
+			code=code.replace("getDefaultVitaminsDisplay(", "getDefaultVitaminsDisplay(csgdb,");
+			//getPreviousLinkVitaminsDisplay
+			code=code.replace("getPreviousLinkVitaminsDisplay(", "getPreviousLinkVitaminsDisplay(csgdb,");
+			//getOriginVitamins
+			code=code.replace("getOriginVitamins(", "getOriginVitamins(csgdb,");
+			//getDefaultVitamins
+			code=code.replace("getDefaultVitamins(", "getDefaultVitamins(csgdb,");
+			//getPreviousLinkVitamins
+			code=code.replace("getPreviousLinkVitamins(", "getPreviousLinkVitamins(csgdb,");
 
 		}
 		
