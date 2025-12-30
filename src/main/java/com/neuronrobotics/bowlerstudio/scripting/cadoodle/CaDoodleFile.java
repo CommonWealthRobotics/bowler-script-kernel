@@ -132,6 +132,7 @@ public class CaDoodleFile {
 		}
 
 		setAccept(oldAccept);
+		fireRegenerateDone();
 	}
 
 	public ArrayList<MobileBase> getMobileBases() {
