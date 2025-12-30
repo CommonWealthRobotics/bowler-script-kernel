@@ -104,4 +104,8 @@ public class AddRobotLimb extends AbstractAddFrom{
 	public void setBuilderName(String builderName) {
 		this.builderName = builderName;
 	}
+	
+	public MobileBaseBuilder getMobilBaseBuilder() {
+		return getRobots().get(getBuilderName());
+	}
 }
