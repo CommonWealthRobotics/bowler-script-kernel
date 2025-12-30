@@ -410,7 +410,8 @@ public class MobileBaseBuilder {
 			if (mobileBase.getLimbByName(limb.getName()) == null) {
 				TransformNR location = limb.getLocation();
 				DHParameterKinematics kin = limb.getLimb().getLimb(db,limb.getName());
-				kin.setRobotToFiducialTransform(location.copy());
+				TransformNR existing = kin.getRobotToFiducialTransform();
+				kin.setRobotToFiducialTransform(location.copy().times(existing));
 				// TODO add the channel mapping here
 				kin.connect();
 				kin.zero();
@@ -458,6 +459,7 @@ public class MobileBaseBuilder {
 		}
 		mods.removeAll(toRemove);
 		getCadManager().render();
+		
 		// Push to git
 		//ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
 		return mobileBase;
