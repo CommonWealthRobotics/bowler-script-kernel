@@ -65,13 +65,13 @@ public class LimbOption {
 	private Image image;
 
 	public DHParameterKinematics getLimb(CSGDatabaseInstance db,String uniqueName) throws Exception {
-		String xmlContent = ScriptingEngine.codeFromGit(url, file)[0];
+		String xmlContent = ScriptingEngine.codeFromGit(getUrl(), getSourceFile())[0];
 		if (!composite) {
 			DHParameterKinematics newLimb = new DHParameterKinematics(null, IOUtils.toInputStream(xmlContent, "UTF-8"));
 			newLimb.setScriptingName(uniqueName);
 			return newLimb;
 		} else {
-			MobileBase base =  RobotHelper.fileToRobot(db,url, file);
+			MobileBase base =  RobotHelper.fileToRobot(db,getUrl(), getSourceFile());
 			DHParameterKinematics newLimb = base.getAllDHChains().get(0);
 			newLimb.setScriptingName(uniqueName);
 			return newLimb;
@@ -96,7 +96,7 @@ public class LimbOption {
 
 	@Override
 	public String toString() {
-		return getType() + " " + getName() + " " + url + "/" + file + "\n\tConsumes:" + getConsumes() + "\n\tProvides:" + getProvides();
+		return getType() + " " + getName() + " " + getUrl() + "/" + getSourceFile() + "\n\tConsumes:" + getConsumes() + "\n\tProvides:" + getProvides();
 	}
 
 	public ControllerFeatures getConsumes() {
@@ -190,5 +190,21 @@ public class LimbOption {
 	}
 	public CSG getIndicator() {
 		return indicator;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getSourceFile() {
+		return file;
+	}
+
+	public void setSourceFile(String file) {
+		this.file = file;
 	}
 }
