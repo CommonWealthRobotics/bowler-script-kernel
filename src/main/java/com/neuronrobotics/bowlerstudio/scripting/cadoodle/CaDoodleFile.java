@@ -119,6 +119,21 @@ public class CaDoodleFile {
 		return projectName;
 	}
 
+	public void deleteTailFromCurrent() {
+		fireRegenerateStart(getCurrentOpperation());
+		IAcceptPruneForward oldAccept = getAccept();
+
+		setAccept(() -> OperationResult.PRUNE);
+
+		try {
+			pruneForward(getCurrentOpperation());
+		} catch (Exception ex) {
+			com.neuronrobotics.sdk.common.Log.error("Failed to prune tail" + ex);
+		}
+
+		setAccept(oldAccept);
+	}
+
 	public ArrayList<MobileBase> getMobileBases() {
 		ArrayList<MobileBase> back = new ArrayList<MobileBase>();
 		for (MobileBaseBuilder b : robots.values()) {
@@ -586,7 +601,7 @@ public class CaDoodleFile {
 		t = new Thread() {
 			public void run() {
 				timeOfLastUpdate = System.currentTimeMillis();
-				this.setName("addOpperation Thread " + toProcess.size());
+				this.setName("deleteOpperation Thread " + toProcess.size());
 				int index = 0;
 				for (int i = 0; i < getOpperations().size(); i++)
 					if (getOpperations().get(i) == op)
