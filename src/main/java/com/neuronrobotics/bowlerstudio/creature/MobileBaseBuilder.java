@@ -1,6 +1,5 @@
 package com.neuronrobotics.bowlerstudio.creature;
 
-import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.scripting.RobotHelper;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotController;
@@ -17,16 +16,8 @@ import com.neuronrobotics.sdk.common.Log;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
-
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,14 +34,14 @@ public class MobileBaseBuilder {
 	// Channel management
 	private Map<String, Map<Integer, Boolean>> deviceChannelMap = new HashMap<>();
 	private CSGDatabaseInstance db;
+	private String name;
 
 	// Constructor for creating a new MobileBase
 	public MobileBaseBuilder(CSGDatabaseInstance db,String gitURL, String name) {
 		this.db=db;
 		this.gitURL = gitURL;
-		this.mobileBase = new MobileBase();
-		this.mobileBase.setScriptingName(name);
-		initializeChannelMap();
+		this.name = name;
+		clear();
 	}
 
 	// Constructor for extending an existing MobileBase
@@ -551,6 +542,15 @@ public class MobileBaseBuilder {
 		mobileBaseCadManager.setAutoRegen(false);
 		mobileBaseCadManager.setConfigurationViewerMode(false);
 		return mobileBaseCadManager;
+	}
+
+	public void clear() {
+		if(mobileBase!=null)
+			mobileBase.disconnect();
+		this.mobileBase = new MobileBase();
+		this.mobileBase.setScriptingName(name);
+		initializeChannelMap();
+		
 	}
 
 }
