@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerkernel.Bezier3d;
 
 import java.util.ArrayList;
 import javafx.scene.paint.Color;
+import javafx.geometry.Point3D;
 import java.util.HashMap;
 import java.util.List;
 
@@ -39,6 +40,70 @@ public class Manipulation {
 	private IFrameProvider frameOfReference = ()->new TransformNR();
 	//private PhongMaterial color;// = new PhongMaterial(getColor());
 	//private PhongMaterial highlight = new PhongMaterial(Color.GOLD);
+
+private double gridOffsetX = 0;
+private double gridOffsetY = 0;
+private double gridOffsetZ = 0;
+private Point3D startingAbsolutePosition;
+
+	public void setStartingAbsolutePosition(Point3D position) {
+
+		gridOffsetX = 0;
+		gridOffsetY = 0;
+		gridOffsetZ = 0;
+
+		try {
+			// Store the raw global position for grid offset calculation
+			
+			// Transform to workplane space for snapping
+			TransformNR global = new TransformNR(position.getX(), position.getY(), position.getZ(), new RotationNR());
+			TransformNR wp = getFrameOfReference().copy();
+			wp.setX(0);
+			wp.setY(0);
+			wp.setZ(0);
+			global = wp.inverse().times(global);
+			
+			double x = global.getX() * orintation.getX();
+			double y = global.getY() * orintation.getY();
+			double z = global.getZ() * orintation.getZ();
+			
+			this.startingAbsolutePosition = new Point3D(x, y, z);
+			
+		} catch(Throwable t) {
+			t.printStackTrace();
+		}
+	}
+
+	public void calculateGridOffsets() {
+
+		if (startingAbsolutePosition != null && increment > 0) {
+			double gridX = Math.round(startingAbsolutePosition.getX() / increment) * increment;
+			double gridY = Math.round(startingAbsolutePosition.getY() / increment) * increment;
+			double gridZ = Math.round(startingAbsolutePosition.getZ() / increment) * increment;
+			
+			gridOffsetX = gridX - startingAbsolutePosition.getX();
+			if (gridOffsetX > increment / 2.0)
+				gridOffsetX -= increment;
+			if (gridOffsetX < -increment / 2.0)
+				gridOffsetX += increment;
+
+			gridOffsetY = gridY - startingAbsolutePosition.getY();
+			if (gridOffsetY > increment / 2.0)
+				gridOffsetY -= increment;
+			if (gridOffsetY < -increment / 2.0)
+				gridOffsetY += increment;
+
+			gridOffsetZ = gridZ - startingAbsolutePosition.getZ();
+			if (gridOffsetZ > increment / 2.0)
+				 gridOffsetZ -= increment;
+			if (gridOffsetZ < -increment / 2.0)
+				gridOffsetZ += increment;
+		}
+	}
+
+	public Point3D getStartingAbsolutePosition() {
+		return startingAbsolutePosition;
+	}
 
 	public enum DragState {
 		IDLE, Dragging
@@ -108,7 +173,6 @@ public class Manipulation {
 		});
 
 		map.put(MouseEvent.ANY, getMouseEvents());
-		
 	}
 
 	public EventHandler<MouseEvent> getMouseEvents() {
@@ -213,8 +277,9 @@ public class Manipulation {
 		if (dragging == false) {
 			startx = event.getScreenX();
 			starty = event.getScreenY();
+			dragging = true;
 		}
-		dragging = true;
+
 		for (Manipulation R : dependants) {
 			R.setDragging(event);
 		}
@@ -223,38 +288,43 @@ public class Manipulation {
 	private void performMove(TransformNR trans, MouseEvent event2) {
 		TransformNR camerFrame = getUi().getCamerFrame();
 		TransformNR globalTMP = new TransformNR(camerFrame.getRotation());
+
 		try {
 			
 			TransformNR global = globalTMP.times(trans);
 			TransformNR wp = getFrameOfReference().copy();
+
 			wp.setX(0);
 			wp.setY(0);
 			wp.setZ(0);
-			global=wp.inverse().times(global);
-			
-			newx = round((global.getX() * orintation.getX() ));
-			newy = round((global.getY() * orintation.getY() ));
-			newz = round((global.getZ() * orintation.getZ() ));
-			
+			global = wp.inverse().times(global);
+
+			calculateGridOffsets(); // Calculate only AFTER the first call!
+	
+			newx = snapToGrid(global.getX() * orintation.getX()) + gridOffsetX * orintation.getX();
+			newy = snapToGrid(global.getY() * orintation.getY()) + gridOffsetY * orintation.getY();  
+			newz = snapToGrid(global.getZ() * orintation.getZ()) + gridOffsetZ * orintation.getZ();
+
 			TransformNR globalTrans = globalPose.copy().setRotation(new RotationNR());
+			
 			global.setX(newx);
 			global.setY(newy);
 			global.setZ(newz);
 			global.setRotation(new RotationNR());
-			TransformNR o =wp.times(global).times(wp.inverse()).setRotation(new RotationNR());
-			global=globalTrans.times(o);
-
+			TransformNR o = wp.times(global).times(wp.inverse()).setRotation(new RotationNR());
+			global = globalTrans.times(o);
 	
 			global.setRotation(new RotationNR());
 			setGlobal(global);
 			//com.neuronrobotics.sdk.common.Log.error(" drag "+global.getX()+" , "+global.getY()+" ,"+global.getZ());
 
-		}catch(Throwable t) {
+		} catch(Throwable t) {
 			t.printStackTrace();
 		}
-		fireMove(trans,event2);
+		fireMove(trans, event2);
 	}
-	private double round(double in) {
+
+	private double snapToGrid(double in) {
 		return Math.round(in / increment) * increment;
 	}
 	
