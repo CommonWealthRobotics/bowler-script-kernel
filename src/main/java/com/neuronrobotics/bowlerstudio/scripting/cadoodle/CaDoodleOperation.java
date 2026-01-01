@@ -46,6 +46,8 @@ public abstract class CaDoodleOperation {
 						MobileBaseBuilder b = getRobots().get(mobileBaseName.get());
 						if(b!=null) {
 							return mobileBaseName.get();
+						}else {
+							throw new RuntimeException("MobilBase name set but builder missing");
 						}
 					}
 				}
