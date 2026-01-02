@@ -14,6 +14,8 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Before;
 import org.junit.Test;
+import org.vosk.Model;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -26,7 +28,9 @@ import java.lang.reflect.Type;
 
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AddFromScript;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleOperation;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Group;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ModelNotes;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Paste;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
@@ -255,6 +259,11 @@ public class CaDoodleWorkflowTest {
 		mr.setNames(selectAll);
 
 		loaded.addOpperation(mr).join();
+		ModelNotes setText = new ModelNotes()
+				.setLocation(new TransformNR(0, 0, 20))
+				.setText("A note is here");
+		loaded.addOpperation(setText).join();
+		
 		loaded.save();
 		ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
 		ArrayList<ControllerOption> controllers = ControllerOption.getOptions();

@@ -29,5 +29,13 @@ public class ModelNotes extends CaDoodleOperation{
 	public List<String> getNamesAddedInThisOperation() {
 		return new ArrayList<String>();
 	}
+	public ModelNotes setLocation(TransformNR tf) {
+		location=tf;
+		return this;
+	}
+	public ModelNotes setText(String tx) {
+		text=tx;
+		return this;
+	}
 
 }
