@@ -19,6 +19,35 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+sourceSets {
+	main {
+		java {
+			srcDirs = ['src/main/java']
+		}
+		resources {
+			srcDirs = ['src/main/resources']
+		}
+		output.classesDirs = files("$buildDir/classes/java/main")
+		output.resourcesDir = file("$buildDir/resources/main")
+	}
+	
+	test {
+		java {
+			srcDirs = ['test/java/src/']
+		}
+		resources {
+			srcDirs = ['test/resources']
+		}
+		output.classesDirs = files("$buildDir/classes/java/test")
+		output.resourcesDir = file("$buildDir/resources/test")
+		
+		// Test compile classpath includes main output
+		compileClasspath += main.output
+		// Test runtime classpath includes main output
+		runtimeClasspath += main.output
+	}
+}
+
 //java {
 //    toolchain {
 //        languageVersion = JavaLanguageVersion.of(17)
