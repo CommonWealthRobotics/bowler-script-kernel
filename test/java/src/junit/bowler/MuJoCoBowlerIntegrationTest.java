@@ -49,7 +49,7 @@ public class MuJoCoBowlerIntegrationTest {
 		terrain= (ArrayList<CSG>) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
 				"https://github.com/madhephaestus/VexHighStakes2024.git",
 				"field.groovy");
-		com.neuronrobotics.sdk.common.Log.error("Parts size = "+parts.size());
+		com.neuronrobotics.sdk.common.Log.debug("Parts size = "+parts.size());
 		//terrain.add(new Cube(10000,10000,100).toCSG().toZMax());
 		free.addAll(parts);
 		MuJoCoPhysicsManager manager = new MuJoCoPhysicsManager(CSGDatabase.getInstance(),"javaCadTest", bases, free, terrain, new File("./physicsTest"));
@@ -68,7 +68,7 @@ public class MuJoCoBowlerIntegrationTest {
 				}
 				fail("Real time broken! "+took+" instead of expected "+manager.getCurrentSimulationTimeSeconds());
 			}else {
-				com.neuronrobotics.sdk.common.Log.error("Time "+now);
+				com.neuronrobotics.sdk.common.Log.debug("Time "+now);
 			}
 			long timeSinceStart = System.currentTimeMillis()-start;
 			double sec = ((double)timeSinceStart)/1000.0;
