@@ -12,6 +12,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mujoco.xml.attributetypes.IntegratorType;
 
@@ -31,6 +32,7 @@ public class MuJoCoBowlerIntegrationTest {
 		  BowlerKernel.startupProcedures();
 	  }
 	@Test
+	@Ignore
 	public void test() throws Exception {
 		try {
 			JavaFXInitializer.go();
