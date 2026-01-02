@@ -27,10 +27,7 @@ import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 @SuppressWarnings("unchecked")
 public class MuJoCoBowlerIntegrationTest {
-	  @Before
-	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-		  BowlerKernel.startupProcedures();
-	  }
+
 	@Test
 	@Ignore
 	public void test() throws Exception {

@@ -7,11 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.lib.Ref;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.kohsuke.github.GHMyself;
@@ -22,15 +25,57 @@ import org.kohsuke.github.PagedIterable;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
+import javafx.application.Platform;
+
 public class GitHub {
-	  @Before
-	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-		  BowlerKernel.startupProcedures();
-	  }
+    private static boolean shutdownInProgress;
+    @Before
+    public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
+  	  BowlerKernel.startupProcedures();
+    }
+	static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (shutdownInProgress) return;
+            shutdownInProgress = true;
+            
+            Log.info("Beginning graceful shutdown...");
+            
+            try {
+                // 1. Stop JavaFX
+                if ( isPlatformInitialized()&&Platform.isFxApplicationThread()) {
+                    Platform.exit();
+                    Thread.sleep(300);
+                }
+
+                
+                // 3. Force GC
+                System.gc();
+                System.runFinalization();
+                
+                // 4. Final wait
+                Thread.sleep(500);
+                
+                Log.info("Shutdown complete");
+            } catch (Exception e) {
+                Log.error( e);
+            }
+        }, "Shutdown-Hook"));
+    }
+    private static boolean isPlatformInitialized() {
+        try {
+            Platform.runLater(() -> {});
+            return true;
+        } catch (IllegalStateException e) {
+            return false;
+        }
+    }
+
   @Test
   public void test() throws Exception {
+	  com.neuronrobotics.sdk.common.Log.debug("Github Test disabled for CI");
 		//ScriptingEngine.login();
 //		String remoteURI = "https://github.com/madhephaestusdemo/WalkTest_madhephaestusdemo.git";
 //		com.neuronrobotics.sdk.common.Log.error(ScriptingEngine.getRepositoryCloneDirectory(remoteURI));
@@ -126,6 +171,18 @@ public class GitHub {
 //		}		
 		com.neuronrobotics.sdk.common.Log.error("Current Branch # " +  ScriptingEngine.getFullBranch(asstsRepo));
 		*/
+  }
+  @AfterClass
+  public static void tearDownJavaFX() throws InterruptedException {
+      CountDownLatch latch = new CountDownLatch(1);
+      Platform.runLater(() -> {
+          Platform.exit();
+          latch.countDown();
+      });
+      latch.await(5, TimeUnit.SECONDS);
+      
+      // Give time for cleanup
+      Thread.sleep(1000);
   }
 
 }
