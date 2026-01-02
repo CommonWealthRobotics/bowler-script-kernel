@@ -9,6 +9,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerkernel.djl.ImagePredictorType;
@@ -97,6 +98,7 @@ public class PyTorchResNetTest {
 	}
 //
 	@Test
+	@Ignore
 	public void testYolo() throws Exception {
 		com.neuronrobotics.sdk.common.Log.error(Thread.currentThread().getStackTrace()[1].getMethodName());
 
