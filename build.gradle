@@ -161,11 +161,9 @@ dependencies {
 	api group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6'
 
 	api group: 'org.reactfx', name: 'reactfx', version: '2.0-SNAPSHOT'
-
-	// https://mvnrepository.com/artifact/org.apache.groovy/groovy
+	
 	api group: 'org.apache.groovy', name: 'groovy', version: '4.0.22'
-	//make grapes work
-	api group: 'org.apache.ivy', name: 'ivy', version: '2.5.1'
+	api group: 'org.apache.ivy', name: 'ivy', version: '2.5.2'
 
 	//compile group: 'org.controlsfx', name: 'controlsfx', version: '8.0.6'
 	api group: 'commons-lang', name: 'commons-lang', version: '2.6'
@@ -218,44 +216,48 @@ dependencies {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
+		exclude group: 'org.codehaus.groovy', module: 'groovy-all'
 	}
 
 	implementation('de.dfki.mary:voice-dfki-prudence-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
+		exclude group: 'org.codehaus.groovy', module: 'groovy-all'
 	}
 	implementation('de.dfki.mary:voice-dfki-spike-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
+		exclude group: 'org.codehaus.groovy', module: 'groovy-all'
 	}
 	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
-
+		exclude group: 'org.codehaus.groovy', module: 'groovy-all'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
 	implementation('de.dfki.mary:voice-dfki-obadiah-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
-
+		exclude group: 'org.codehaus.groovy', module: 'groovy-all'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
 	implementation('de.dfki.mary:voice-cmu-rms-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
-
+		exclude group: 'org.codehaus.groovy', module: 'groovy-all'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
 	implementation('de.dfki.mary:voice-cmu-bdl-hsmm:5.2') {
 		exclude group: 'commons-io', module: 'commons-io'
-
+		exclude group: 'org.codehaus.groovy', module: 'groovy-all'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}
 	implementation('de.dfki.mary:marytts-lang-en:5.2.1') {
 		exclude group: 'commons-io', module: 'commons-io'
+		exclude group: 'org.codehaus.groovy', module: 'groovy-all'
 		exclude group: 'com.twmacinta', module: 'fast-md5'
 		exclude group: 'gov.nist.math', module: 'Jampack'
 	}

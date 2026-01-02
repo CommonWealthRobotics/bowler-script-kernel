@@ -19,10 +19,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import javafx.scene.control.MenuItem;
 
 public class JsonTester {
-	  @Before
-	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-		  BowlerKernel.startupProcedures();
-	  }
+
   @Test
   public void test() throws Exception {
 		/*

@@ -103,6 +103,7 @@ public class CaDoodleWorkflowTest {
 		//com.neuronrobotics.sdk.common.Log.error(jsonContent);
 		cf.save();
 		File self = cf.getSelf();
+		cf.close();
 		if(!self.exists())
 			fail("Doodle file does not exist, save failed! "+self.getAbsolutePath());
 		CaDoodleFile loaded = CaDoodleFile.fromFile(self);
@@ -241,6 +242,7 @@ public class CaDoodleWorkflowTest {
 		loaded.save();
 
 		String before = loaded.toJson();
+		loaded.close();
 		loaded=CaDoodleFile.fromJsonString(before);
 		String after =loaded.toJson();
 		if(!before.contentEquals(after))
@@ -298,6 +300,7 @@ public class CaDoodleWorkflowTest {
 		}
 		System.out.println("Saving");
 		loaded.save();
+		loaded.close();
 		System.out.println("Save finished");
 	}
 

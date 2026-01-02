@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import ai.djl.MalformedModelException;
+import ai.djl.ModelException;
 import ai.djl.engine.Engine;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
@@ -76,10 +77,20 @@ public class PredictorFactory {
 				String MODEL_URL = "https://mlrepo.djl.ai/model/cv/object_detection/ai/djl/onnxruntime/yolo5s/0.0.1/yolov5s.zip";
 
 				Criteria<Image, DetectedObjects> criteria2 = Criteria.builder()
-						.setTypes(Image.class, DetectedObjects.class).optModelUrls(MODEL_URL)
-						.optEngine("OnnxRuntime")
+						.setTypes(Image.class, DetectedObjects.class).optModelUrls(MODEL_URL).optEngine("OnnxRuntime")
 						.optTranslatorFactory(new YoloV5TranslatorFactory()).build();
-				preloaded.put(type, criteria2.loadModel().newPredictor());
+
+				try { 
+					YoloManager ym = new YoloManager(criteria2);
+					preloaded.put(type,ym.predictor());
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ModelException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				break;
 			default:
 				throw new RuntimeException("No Model availible of type " + type);
@@ -105,12 +116,13 @@ public class PredictorFactory {
 		}
 		return features;
 	}
+
 	public static float calculSimilarFaceFeature(float[] feature1, ArrayList<float[]> people) {
 		float ret = 0.0f;
 		float mod1 = 0.0f;
 		float mod2 = 0.0f;
 		int length = feature1.length;
-		for(int j=0;j<people.size();j++) {
+		for (int j = 0; j < people.size(); j++) {
 			float[] feature2 = people.get(j);
 			for (int i = 0; i < length; ++i) {
 				ret += feature1[i] * feature2[i];
@@ -120,6 +132,7 @@ public class PredictorFactory {
 		}
 		return (float) ((ret / Math.sqrt(mod1) / Math.sqrt(mod2) + 1) / 2.0f);
 	}
+
 	public static float calculSimilarFaceFeature(float[] feature1, float[] feature2) {
 		float ret = 0.0f;
 		float mod1 = 0.0f;
