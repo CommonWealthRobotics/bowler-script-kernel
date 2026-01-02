@@ -30,8 +30,9 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 		registerType("Lock", Lock.class);
 		registerType("MakeRobot", MakeRobot.class);
 		registerType("Mirror", Mirror.class);
-		registerType("MoveCenter", MoveCenter.class);
+		registerType("ModelNotes", ModelNotes.class);
 		registerType("ModifyLimb", ModifyLimb.class);
+		registerType("MoveCenter", MoveCenter.class);
 		registerType("Paste", Paste.class);
 		registerType("Resize", Resize.class);
 		registerType("Show", Show.class);
