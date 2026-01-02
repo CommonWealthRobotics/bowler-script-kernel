@@ -14,7 +14,6 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Before;
 import org.junit.Test;
-import org.vosk.Model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
