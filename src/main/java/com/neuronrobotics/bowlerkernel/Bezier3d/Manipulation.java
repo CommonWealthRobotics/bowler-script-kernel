@@ -13,6 +13,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.scene.PerspectiveCamera;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -28,6 +29,12 @@ public class Manipulation {
 	boolean dragging = false;
 	private double increment = 0.000001;
 	private static IInteractiveUIElementProvider ui = new IInteractiveUIElementProvider() {
+
+		@Override
+		public PerspectiveCamera getCamera() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	};
 
 	private ArrayList<EventHandler<MouseEvent>> eventListeners = new ArrayList<>();
