@@ -5,24 +5,17 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.*;
 
-import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
-import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader;
-import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
-import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.common.Log;
 
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebugger {

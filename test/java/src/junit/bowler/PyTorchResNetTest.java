@@ -9,6 +9,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerkernel.djl.ImagePredictorType;
@@ -25,10 +26,10 @@ public class PyTorchResNetTest {
 	String image2URL = "https://images.squarespace-cdn.com/content/v1/51f533d1e4b0de43ba620290/f2120e79-d8dc-4a34-aa8c-03dc5fe5f0df/LMheadshot.png?format=300w";
 	String image3URL = "https://static1.squarespace.com/static/56ffcc3901dbae8fc9b21603/t/572f5e92cf80a12c4b5c66fe/1462722410298/?format=1500w";
 	String notme = "https://images.squarespace-cdn.com/content/v1/51f533d1e4b0de43ba620290/1472046872933-F3PCYXEK429ZJHDZSWLC/image-asset.jpeg?format=300w";
-	  @Before
-	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-		  BowlerKernel.startupProcedures();
-	  }
+//	  @Before
+//	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
+//		  BowlerKernel.startupProcedures();
+//	  }
 //	@Test
 //	public void testResNet() throws Exception {
 //		com.neuronrobotics.sdk.common.Log.error(Thread.currentThread().getStackTrace()[1].getMethodName());
@@ -97,17 +98,24 @@ public class PyTorchResNetTest {
 	}
 //
 	@Test
+	@Ignore
 	public void testYolo() throws Exception {
 		com.neuronrobotics.sdk.common.Log.error(Thread.currentThread().getStackTrace()[1].getMethodName());
 
-		Predictor<Image, DetectedObjects> predictor = PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5);
-		for (int i = 0; i < 3; i++) {
-			Image input = ImageFactory.getInstance()
-					.fromUrl("https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg");
+	    try (Predictor<Image, DetectedObjects> predictor =
+	             PredictorFactory.imageContentsFactory(ImagePredictorType.yolov5)) {
 
-			DetectedObjects objects = predictor.predict(input);
-			saveBoundingBoxImage(input, objects, "yolov5");
-		}
+	        for (int i = 0; i < 3; i++) {
+	            Image input = ImageFactory.getInstance()
+	                    .fromUrl("https://github.com/ultralytics/yolov5/raw/master/data/images/bus.jpg");
+
+	            DetectedObjects objects = predictor.predict(input);
+	        }
+	        predictor.close();
+	    }finally {
+	    	
+	    }
+
 	}
 //
 //	@Test

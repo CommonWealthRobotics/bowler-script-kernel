@@ -3,6 +3,7 @@ package com.neuronrobotics.bowlerkernel.Bezier3d;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import javafx.application.Platform;
+import javafx.scene.PerspectiveCamera;
 
 @SuppressWarnings("restriction")
 public interface IInteractiveUIElementProvider {
@@ -26,5 +27,6 @@ public interface IInteractiveUIElementProvider {
 	default double getCamerDepth() {
 		return -1500;
 	}
+	public PerspectiveCamera getCamera();
 
 }

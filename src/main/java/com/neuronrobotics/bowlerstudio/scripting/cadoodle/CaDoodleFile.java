@@ -177,7 +177,7 @@ public class CaDoodleFile {
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
 		try {
 			if (Platform.isFxApplicationThread()) {
-				new RuntimeException("This should not be called from the UI thread!").printStackTrace();
+				//new RuntimeException("This should not be called from the UI thread!").printStackTrace();
 				;
 			}
 		}catch(Exception ex) {

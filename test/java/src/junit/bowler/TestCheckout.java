@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.sdk.common.Log;
 
 import javafx.application.Platform;
 import javafx.scene.control.MenuItem;
@@ -25,22 +26,22 @@ public class TestCheckout {
 		  BowlerKernel.startupProcedures();
 	  }
 	@Test
-	public void test() throws IOException, GitAPIException {
+	public void test() throws IOException, GitAPIException, InterruptedException {
 		String url = "https://github.com/OperationSmallKat/greycat.git";
 		Collection<Ref> branches = ScriptingEngine.getAllBranches(url);
 		for(Ref select:branches) {
 			try {
 				String []name = select.getName().split("/");
 				String myName = name[name.length-1];
-				com.neuronrobotics.sdk.common.Log.error("Selecting Branch\r\n"+url+" \t\t"+myName);
+				com.neuronrobotics.sdk.common.Log.debug("Selecting Branch\r\n"+url+" \t\t"+myName);
 				String was = ScriptingEngine.getBranch(url);
 				ScriptingEngine.checkout(url, myName);
 				String s = ScriptingEngine.getBranch(url);
 				assertTrue("Changing from "+was+" to "+myName+" got "+s,myName.contains(s));
 				
 			} catch (Exception e) {
-				// Auto-generated catch block
-				e.printStackTrace();
+				Log.error(e);
+				Thread.sleep(1000);
 				fail();
 			}
 		}
