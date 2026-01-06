@@ -64,7 +64,7 @@ public class ThumbnailImage {
 		return new Bounds(min, max);
 	}
 
-	public static WritableImage get(CSGDatabaseInstance instance,List<CSG> c) {
+	public WritableImage get(CSGDatabaseInstance instance,List<CSG> c) {
 		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
 		for(CSG cs:c) {
 			if(cs.hasManipulator()) {
