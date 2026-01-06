@@ -69,6 +69,7 @@ public class LimbOption {
 		if (!composite) {
 			DHParameterKinematics newLimb = new DHParameterKinematics(null, IOUtils.toInputStream(xmlContent, "UTF-8"));
 			newLimb.setScriptingName(uniqueName);
+			MobileBaseLoader.setDefaultDhParameterKinematics(db, newLimb);
 			return newLimb;
 		} else {
 			MobileBase base =  RobotHelper.fileToRobot(db,getUrl(), getSourceFile());

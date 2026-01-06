@@ -49,17 +49,17 @@ public class MobileBaseLoader {
 	public void setGitDhEngine(String gitsId, String file, DHParameterKinematics dh) {
 		dh.setGitDhEngine(new String[] { gitsId, file });
 
-		setDefaultDhParameterKinematics(dh);
+		setDefaultDhParameterKinematics(db,dh);
 
 	}
 
-	public File setDefaultDhParameterKinematics(DHParameterKinematics device) {
+	public static File setDefaultDhParameterKinematics(CSGDatabaseInstance db,DHParameterKinematics device) {
 		File code = null;
 		try {
 			String remoteURI = device.getGitDhEngine()[0];
 			String fileInRepo = device.getGitDhEngine()[1];
 			code = ScriptingEngine.fileFromGit(remoteURI, fileInRepo);
-			DhInverseSolver defaultDHSolver = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(getDb(),code, null);
+			DhInverseSolver defaultDHSolver = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(db,code, null);
 
 			File c = code;
 			FileWatchDeviceWrapper.watch(device, code,new IFileChangeListener() {
@@ -75,10 +75,10 @@ public class MobileBaseLoader {
 
 					try {
 						com.neuronrobotics.sdk.common.Log.error("D-H Solver changed, updating " + device.getScriptingName());
-						DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(getDb(),c, null);
+						DhInverseSolver d = (DhInverseSolver) ScriptingEngine.inlineFileScriptRun(db,c, null);
 						device.setInverseSolver(d);
 					} catch (Exception ex) {
-						MobileBaseCadManager.get(db,base).getUi().highlightException(c, ex);
+						Log.error(ex);
 					}
 				}
 			});
@@ -86,7 +86,7 @@ public class MobileBaseLoader {
 			device.setInverseSolver(defaultDHSolver);
 			return code;
 		} catch (Exception e1) {
-			MobileBaseCadManager.get(db,base).getUi().highlightException(code, e1);
+			Log.error(e1);
 		}
 		return null;
 
@@ -97,7 +97,7 @@ public class MobileBaseLoader {
 			setGitWalkingEngine(device.getGitWalkingEngine()[0], device.getGitWalkingEngine()[1], device);
 		}
 		for (DHParameterKinematics dh : device.getAllDHChains()) {
-			setDefaultDhParameterKinematics(dh);
+			setDefaultDhParameterKinematics(db,dh);
 		}
 	}
 

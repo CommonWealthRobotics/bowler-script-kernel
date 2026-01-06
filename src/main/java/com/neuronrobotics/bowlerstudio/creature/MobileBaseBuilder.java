@@ -226,6 +226,8 @@ public class MobileBaseBuilder {
 					"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", "defaultleg.xml")[0];
 			DHParameterKinematics newLeg = new DHParameterKinematics(null, IOUtils.toInputStream(xmlContent, "UTF-8"));
 			newLeg.setScriptingName(legName);
+			MobileBaseLoader.setDefaultDhParameterKinematics(db, newLeg);
+
 			return addLeg(newLeg);
 		} catch (Exception e) {
 			Log.error("Failed to add default leg: " + e.getMessage());
@@ -248,6 +250,8 @@ public class MobileBaseBuilder {
 					"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", "defaultarm.xml")[0];
 			DHParameterKinematics newArm = new DHParameterKinematics(null, IOUtils.toInputStream(xmlContent, "UTF-8"));
 			newArm.setScriptingName(armName);
+			MobileBaseLoader.setDefaultDhParameterKinematics(db, newArm);
+
 			return addArm(newArm);
 		} catch (Exception e) {
 			Log.error("Failed to add default arm: " + e.getMessage());
@@ -271,6 +275,8 @@ public class MobileBaseBuilder {
 			DHParameterKinematics newWheel = new DHParameterKinematics(null,
 					IOUtils.toInputStream(xmlContent, "UTF-8"));
 			newWheel.setScriptingName(wheelName);
+			MobileBaseLoader.setDefaultDhParameterKinematics(db, newWheel);
+
 			return addSteerableWheel(newWheel);
 		} catch (Exception e) {
 			Log.error("Failed to add default steerable wheel: " + e.getMessage());
@@ -302,6 +308,8 @@ public class MobileBaseBuilder {
 							values.get("scriptFile").toString())[0];
 					DHParameterKinematics newWheel = new DHParameterKinematics(null,
 							IOUtils.toInputStream(xmlContent, "UTF-8"));
+					MobileBaseLoader.setDefaultDhParameterKinematics(db, newWheel);
+
 					return addFixedWheel(newWheel);
 				} else {
 					MobileBase base = RobotHelper.fileToRobot(db, values.get("scriptGit").toString(),
@@ -379,6 +387,7 @@ public class MobileBaseBuilder {
 		if (source.getGitDhEngine() != null) {
 			copy.setGitDhEngine(copyGitFile(source.getGitDhEngine(), gitURL));
 		}
+		MobileBaseLoader.setDefaultDhParameterKinematics(db, copy);
 
 		return copy;
 	}
@@ -408,7 +417,7 @@ public class MobileBaseBuilder {
 							mobileBase.addVitamin(l);
 					} catch (Exception ex) {
 						com.neuronrobotics.sdk.common.Log.error(ex);
-						;
+						
 					}
 				}
 			}
