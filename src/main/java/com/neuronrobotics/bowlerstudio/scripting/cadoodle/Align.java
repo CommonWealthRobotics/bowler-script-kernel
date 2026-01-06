@@ -242,8 +242,9 @@ public class Align extends CaDoodleOperation{
 		for (CSG csg : incoming) {
 			if (cache.get(csg) == null) {
 				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
-				Affine af = csg.getManipulator();
-				if(af!=null) {
+				
+				if(csg.hasManipulator()) {
+					Affine af = csg.getManipulator();
 					TransformNR afNR = TransformFactory.affineToNr(af);
 					inverse = TransformFactory.nrToCSG(afNR.inverse().times(frame)).inverse();
 				}
