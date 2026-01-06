@@ -10,6 +10,7 @@ import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Transform;
 import javafx.scene.transform.Affine;
 
@@ -23,6 +24,7 @@ public class Mirror extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
 	private int index;
+
 	public String getName() {
 		if (name == null) {
 			setName(RandomStringFactory.generateRandomString());
@@ -33,17 +35,16 @@ public class Mirror extends CaDoodleOperation {
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	@Override
 	public String getType() {
 		return "Move Center";
 	}
 
 	private CSG sync(CSG incoming, CSG c) {
-		return c.syncProperties(getCaDoodleFile().getCsgDBinstance(),incoming)
-				.setName(incoming.getName())
-				.setColor(incoming.getColor())
-				.setID(incoming);	
-		}
+		return c.syncProperties(getCaDoodleFile().getCsgDBinstance(), incoming).setName(incoming.getName())
+				.setColor(incoming.getColor()).setID(incoming);
+	}
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
@@ -52,7 +53,7 @@ public class Mirror extends CaDoodleOperation {
 		index = 0;
 		for (String name : names) {
 			for (CSG csg : incoming) {
-				if(!csg.getName().contentEquals(name))
+				if (!csg.getName().contentEquals(name))
 					continue;
 //				if(csg.isNoScale())
 //					continue;
@@ -61,16 +62,16 @@ public class Mirror extends CaDoodleOperation {
 						.movez(base.getCenterZ());
 				Transform sc = new Transform();
 				if (location == MirrorOrentation.x) {
-					sc=new Transform().scaleX(-1);
+					sc = new Transform().scaleX(-1);
 				}
 				if (location == MirrorOrentation.y) {
-					sc=new Transform().scaleY(-1);
+					sc = new Transform().scaleY(-1);
 				}
 				if (location == MirrorOrentation.z) {
-					sc=new Transform().scaleZ(-1);
+					sc = new Transform().scaleZ(-1);
 				}
-				Transform scale=sc;
-				
+				Transform scale = sc;
+
 				CaDoodleFile.applyToAllConstituantElements(false, name, back, (incoming1, depth) -> {
 					ArrayList<CSG> b = new ArrayList<>();
 					Transform inverse = TransformFactory.nrToCSG(getWorkplane(incoming1)).inverse();
@@ -79,18 +80,17 @@ public class Mirror extends CaDoodleOperation {
 					centered = centered.transformed(scale);
 					centered = centered.transformed(mirroringCenter);
 					Transform wp = TransformFactory.nrToCSG(getWorkplane(incoming1));
-					centered = centered.transformed(wp);					
-					CSG tf = centered.setName(name).syncProperties(getCaDoodleFile().getCsgDBinstance(),incoming1);
+					centered = centered.transformed(wp);
+					CSG tf = centered.setName(name).syncProperties(getCaDoodleFile().getCsgDBinstance(), incoming1);
 					sync(incoming1, tf);
-					MoveCenter.set(getName()+(index++) , tf, inverse);
-					MoveCenter.set(getName()+(index++) , tf, mirroringCenter.inverse());
-					MoveCenter.set(getName()+(index++) , tf, scale);
-					MoveCenter.set(getName()+(index++) , tf, mirroringCenter);
-					MoveCenter.set(getName()+(index++) , tf, wp);
+					MoveCenter.set(getName() + (index++), tf, inverse);
+					MoveCenter.set(getName() + (index++), tf, mirroringCenter.inverse());
+					MoveCenter.set(getName() + (index++), tf, scale);
+					MoveCenter.set(getName() + (index++), tf, mirroringCenter);
+					MoveCenter.set(getName() + (index++), tf, wp);
 					b.add(tf);
 					return b;
-				}, 1,new HashSet<String>()
-);
+				}, 1, new HashSet<String>());
 			}
 		}
 		return back;
@@ -128,7 +128,7 @@ public class Mirror extends CaDoodleOperation {
 		}
 		centered = centered.transformed(mirroringCenter);
 		centered = centered.transformed(TransformFactory.nrToCSG(getWorkplane(csg)));
-		return centered.setName(name).syncProperties(getCaDoodleFile().getCsgDBinstance(),csg);
+		return centered.setName(name).syncProperties(getCaDoodleFile().getCsgDBinstance(), csg);
 	}
 
 	public MirrorOrentation getLocation() {
@@ -152,8 +152,20 @@ public class Mirror extends CaDoodleOperation {
 	public TransformNR getWorkplane(CSG c) {
 		if (workplane == null)
 			workplane = new TransformNR();
-		Affine af = c.getManipulator();
-		TransformNR afNR = TransformFactory.affineToNr(af).inverse();
+		Affine af;
+		TransformNR afNR = null;
+		if (c.hasManipulator())
+			try {
+				af = c.getManipulator();
+				afNR = TransformFactory.affineToNr(af).inverse();
+
+			} catch (MissingManipulatorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		else {
+			afNR = new TransformNR();
+		}
 		return afNR.times(workplane);
 	}
 

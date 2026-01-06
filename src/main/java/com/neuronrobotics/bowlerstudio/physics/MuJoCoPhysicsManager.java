@@ -46,6 +46,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Parabola;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.RoundedCylinder;
@@ -115,8 +116,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		}
 	}
 
-	public MuJoCoPhysicsManager(CSGDatabaseInstance db,String name, List<MobileBase> bases, List<CSG> freeObjects, List<CSG> fixedObjects,
-			File workingDir) throws IOException, JAXBException {
+	public MuJoCoPhysicsManager(CSGDatabaseInstance db, String name, List<MobileBase> bases, List<CSG> freeObjects,
+			List<CSG> fixedObjects, File workingDir) throws IOException, JAXBException {
 		this.db = db;
 		this.name = name.trim();
 		if (!(name.length() > 0))
@@ -150,7 +151,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			double target = Math.toRadians(link.getCurrentEngineeringUnits()) * gearRatios.get(link);
 //			double error = target-positions.get(s);
 //			double effort = error * kp;
-			// com.neuronrobotics.sdk.common.Log.error("Actuator "+s+" position "+positions.get(s)+" effort
+			// com.neuronrobotics.sdk.common.Log.error("Actuator "+s+" position
+			// "+positions.get(s)+" effort
 			// "+effort);
 			setEfforts.put(s, target);
 		}
@@ -242,7 +244,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			if (bases.size() > 0) {
 				actuators = builder.addActuator();
 				for (MobileBase cat : bases) {
-					loadBase(db,cat);
+					loadBase(db, cat);
 				}
 			}
 		if (freeObjects != null) {
@@ -344,7 +346,13 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					ArrayList<CSG> mapNameToCSGParts = getMapNameToCSGParts(name);
 					for (int i = 0; i < mapNameToCSGParts.size(); i++) {
 						CSG bodyBall = mapNameToCSGParts.get(i);
-						TransformFactory.nrToAffine(local, bodyBall.getManipulator());
+						if (bodyBall.hasManipulator())
+							try {
+								TransformFactory.nrToAffine(local, bodyBall.getManipulator());
+							} catch (MissingManipulatorException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 					}
 				}
 				poss.clear();
@@ -391,16 +399,15 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		if (fixedObjects == null) {
 			fixedObjects = new ArrayList<>();
 		}
-		boolean hasFloor=false;
-		for(CSG item:fixedObjects) {
-			if(item.getMaxZ()>0)
+		boolean hasFloor = false;
+		for (CSG item : fixedObjects) {
+			if (item.getMaxZ() > 0)
 				continue;
-			hasFloor=true;
+			hasFloor = true;
 		}
-		if(!hasFloor)
+		if (!hasFloor)
 			fixedObjects.add(floor);
 
-		
 	}
 
 	public int getIterations() {
@@ -422,17 +429,17 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	public double computeLowestPoint(MobileBase cat) {
-		MobileBaseCadManager cadMan = MobileBaseCadManager.get(db,cat);
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(db, cat);
 
 		return cadMan.computeLowestPoint().z;
 	}
 
-	public void loadBase(CSGDatabaseInstance db,MobileBase cat) throws IOException {
-		loadBase(db,cat, null, new TransformNR());
+	public void loadBase(CSGDatabaseInstance db, MobileBase cat) throws IOException {
+		loadBase(db, cat, null, new TransformNR());
 	}
 
-	public void loadBase(CSGDatabaseInstance db,MobileBase cat, org.mujoco.xml.BodyarchType.Builder<?> linkBody2, TransformNR offsetGlobal)
-			throws IOException {
+	public void loadBase(CSGDatabaseInstance db, MobileBase cat, org.mujoco.xml.BodyarchType.Builder<?> linkBody2,
+			TransformNR offsetGlobal) throws IOException {
 		if (contacts == null)
 			contacts = builder.addContact();
 		boolean freeBase = cat.getSteerable().size() > 0 || cat.getDrivable().size() > 0 || cat.getLegs().size() > 0;
@@ -440,8 +447,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 
 		// println "\n\nLowest point "+lowestPoint+" \n\n";
 		String bodyName = getMujocoName(cat);
-		MobileBaseCadManager cadMan = MobileBaseCadManager.get(db,cat);
-		loadCadForMobileBase(db,cadMan);
+		MobileBaseCadManager cadMan = MobileBaseCadManager.get(db, cat);
+		loadCadForMobileBase(db, cadMan);
 		double lowestPoint = (-computeLowestPoint(cat)) / 1000.0;
 
 		int bodyParts = 0;
@@ -483,20 +490,30 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			TransformNR center = cat.getCenterOfMassFromCentroid();
 			boolean foundPart = false;
 			for (DHParameterKinematics k : cat.getAllDHChains()) {
-				if (k.getRootListener() == part.getManipulator()) {
-					TransformNR fiducial = k.getRobotToFiducialTransform();
-					TransformNR kfed = fiducial;
-					// center=kfed.times(center);
-					// center=kfed.times(center.inverse());
-					center = new TransformNR();
-					limbBase.put(part, kfed);
-					foundPart = true;
-					break;
+				try {
+					if (k.getRootListener() == part.getManipulator()) {
+						TransformNR fiducial = k.getRobotToFiducialTransform();
+						TransformNR kfed = fiducial;
+						// center=kfed.times(center);
+						// center=kfed.times(center.inverse());
+						center = new TransformNR();
+						limbBase.put(part, kfed);
+						foundPart = true;
+						break;
+					}
+				} catch (MissingManipulatorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 			if (!foundPart) {
-				if (part.getManipulator() != cat.getRootListener())
-					continue;
+				try {
+					if (part.getManipulator() != cat.getRootListener())
+						continue;
+				} catch (MissingManipulatorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				limbBase.put(part, new TransformNR());
 			}
 			baseParts.put(part, center.copy());
@@ -520,7 +537,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			TransformNR offset = limbBase.get(part);
 			double mass = cat.getMassKg() / numPartsWithoutMass;
 			bodyParts++;
-			String nameOfCSG = bodyName + "_CSG_" + bodyParts+"_"+part.getName();
+			String nameOfCSG = bodyName + "_CSG_" + bodyParts + "_" + part.getName();
 
 			CSG transformed = part.transformed(TransformFactory.nrToCSG(center.inverse().times(offset)));
 			CSG hull;
@@ -543,13 +560,12 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					+ center.getRotation().getRotationMatrix2QuaturnionY() + " "
 					+ center.getRotation().getRotationMatrix2QuaturnionZ();
 			geomToSourceCSG.put(geom, part);
-			geom.withPos(centerString)
-				.withQuat(quat);
-			if(part.hasMassSet()) {
+			geom.withPos(centerString).withQuat(quat);
+			if (part.hasMassSet()) {
 				double val = part.getMassKG(mass) * KgtoMujocoMass;
 				geom.withMass(BigDecimal.valueOf(val));
 			} else {
-				com.neuronrobotics.sdk.common.Log.error("\nUsing density for "+part.getName());
+				com.neuronrobotics.sdk.common.Log.error("\nUsing density for " + part.getName());
 			}
 		}
 
@@ -592,7 +608,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					linkBody = loadLink(cat, k, i, parts, linkBody, linkToBulder);
 				MobileBase follower = k.getFollowerMobileBase(link);
 				if (follower != null) {
-					loadBase(db,follower, linkBody, k.getDHStep(i));
+					loadBase(db, follower, linkBody, k.getDHStep(i));
 				}
 			}
 			for (String affineNameMapGet : geomToCSGMap.keySet()) {
@@ -604,20 +620,20 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				for (org.mujoco.xml.body.GeomType.Builder<?> geom : geoms) {
 					// println "Mass of "+affineNameMapGet+" is "+mass
 					CSG csg = geomToSourceCSG.get(geom);
-					if(!csg.getStorage().getValue("massKg").isPresent()) {
+					if (!csg.getStorage().getValue("massKg").isPresent()) {
 						numPartsWithoutMassLink++;
 					}
 				}
-				if(numPartsWithoutMassLink==0)
-					numPartsWithoutMassLink=1;
+				if (numPartsWithoutMassLink == 0)
+					numPartsWithoutMassLink = 1;
 				for (org.mujoco.xml.body.GeomType.Builder<?> geom : geoms) {
 					// println "Mass of "+affineNameMapGet+" is "+mass
 					CSG csg = geomToSourceCSG.get(geom);
-					if(csg.hasMassSet()) {
-						double val = csg.getMassKG(linkMass/numPartsWithoutMassLink) * KgtoMujocoMass;
+					if (csg.hasMassSet()) {
+						double val = csg.getMassKG(linkMass / numPartsWithoutMassLink) * KgtoMujocoMass;
 						geom.withMass(BigDecimal.valueOf(val));
 					} else {
-						com.neuronrobotics.sdk.common.Log.error("\nUsing density for "+csg.getName());
+						com.neuronrobotics.sdk.common.Log.error("\nUsing density for " + csg.getName());
 					}
 				}
 			}
@@ -680,10 +696,10 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				.withRange(ctrlRange) // engineering units range
 				.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
 				.withType(JointtypeType.HINGE) // hinge type
-				.withLimited(true)
-				.withFrictionloss(BigDecimal.valueOf(conf.isPassive()?0.0001:0.01))// experementally determined
+				.withLimited(true).withFrictionloss(BigDecimal.valueOf(conf.isPassive() ? 0.0001 : 0.01))// experementally
+																											// determined
 
-				//.withDamping(BigDecimal.valueOf(0.000001))
+				// .withDamping(BigDecimal.valueOf(0.000001))
 				// .withStiffness(BigDecimal.valueOf(1))
 				.withSolreflimit("4e-3 1").withSolimplimit(".95 .99 1e-3").withName(name);
 		double forceKgCm = 3.5;// mg92b default
@@ -717,18 +733,21 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			CSG part = cad.get(i);
 			if (!checkForPhysics(part))
 				continue;
-			Affine cGetManipulator = part.getManipulator();
-			if (cGetManipulator != null) {
-				String affineNameMapGet = affineNameMap.get(cGetManipulator);
-				if (affineNameMapGet != null) {
-					DHParameterKinematics k = l;
+			Affine cGetManipulator;
+			if (part.hasManipulator())
+				try {
+					cGetManipulator = part.getManipulator();
+					if (cGetManipulator != null) {
+						String affineNameMapGet = affineNameMap.get(cGetManipulator);
+						if (affineNameMapGet != null) {
+							DHParameterKinematics k = l;
 
-					AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
+							AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
 
-					double myposition = link.getCurrentEngineeringUnits();
-					TransformNR myStep = new TransformNR(k.getDhLink(myLink).DhStep(0));
-					CSG transformed = part.transformed(TransformFactory.nrToCSG(myStep));
-					CSG hull;
+							double myposition = link.getCurrentEngineeringUnits();
+							TransformNR myStep = new TransformNR(k.getDhLink(myLink).DhStep(0));
+							CSG transformed = part.transformed(TransformFactory.nrToCSG(myStep));
+							CSG hull;
 //				if(cat.isWheel(myLink)) {
 //					double height = part.getTotalZ();
 //					double radius =( part.getTotalY()+part.getTotalX())/4.0;
@@ -742,53 +761,57 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 //							.movez(transformed.getMinZ())
 //							;
 //				}else
-					try {
-						hull = transformed.hull();
-					} catch (Exception ex) {
-						hull = transformed;
-					}
-					// if(myLink!=link)
-					// hull = part.hull();
-					transformed.setManipulator(new Affine());
-					String geomname = name + "_" + i+"_"+part.getName();
-
-					try {
-						putCSGInAssets(geomname, hull, true);
-						org.mujoco.xml.body.GeomType.Builder<?> geom = linkToBulderMap.get(myLink).addGeom();
-						geomToSourceCSG.put(geom, part);
-
-						ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
-						if (geomToCSGMap.get(affineNameMapGet) == null) {
-							geomToCSGMap.put(affineNameMapGet,
-									new ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>());
-						}
-						geomToCSGMap.get(affineNameMapGet).add(geom);
-						parts.add(transformed);
-						if (cat.isWheel(myLink)) {
-							setWheelMeshToGeom(geomname, geom, part);
-							// default is 1 0.005 0.0001
-							// println "Setting Wheel Friction for "+part.getName()
-	
-							geom.withFriction("2 0.001 0.00005");
-							
-						} else {
-							setCSGMeshToGeom(geomname, geom);
-
-							if (cat.isFoot(myLink)) {
-								// default is 1 0.005 0.0001
-								// println "Setting Foot Friction for "+part.getName()
-								geom.withFriction("1.2 0.001 0.00005");
+							try {
+								hull = transformed.hull();
+							} catch (Exception ex) {
+								hull = transformed;
 							}
+							// if(myLink!=link)
+							// hull = part.hull();
+							transformed.setManipulator(new Affine());
+							String geomname = name + "_" + i + "_" + part.getName();
+
+							try {
+								putCSGInAssets(geomname, hull, true);
+								org.mujoco.xml.body.GeomType.Builder<?> geom = linkToBulderMap.get(myLink).addGeom();
+								geomToSourceCSG.put(geom, part);
+
+								ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
+								if (geomToCSGMap.get(affineNameMapGet) == null) {
+									geomToCSGMap.put(affineNameMapGet,
+											new ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>());
+								}
+								geomToCSGMap.get(affineNameMapGet).add(geom);
+								parts.add(transformed);
+								if (cat.isWheel(myLink)) {
+									setWheelMeshToGeom(geomname, geom, part);
+									// default is 1 0.005 0.0001
+									// println "Setting Wheel Friction for "+part.getName()
+
+									geom.withFriction("2 0.001 0.00005");
+
+								} else {
+									setCSGMeshToGeom(geomname, geom);
+
+									if (cat.isFoot(myLink)) {
+										// default is 1 0.005 0.0001
+										// println "Setting Foot Friction for "+part.getName()
+										geom.withFriction("1.2 0.001 0.00005");
+									}
+								}
+							} catch (IOException e) {
+								// Auto-generated catch block
+								e.printStackTrace();
+							}
+						} else {
+							// println "ERROR! "+name+" for part "+part.getName()+" produced no matching
+							// affine"
 						}
-					} catch (IOException e) {
-						// Auto-generated catch block
-						e.printStackTrace();
 					}
-				} else {
-					// println "ERROR! "+name+" for part "+part.getName()+" produced no matching
-					// affine"
+				} catch (MissingManipulatorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			}
 		}
 		return linkBody;
 	}
@@ -814,32 +837,32 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				continue;
 			;
 //			try {
-				CSG hull = part.moveToCenter();
-	
-				Vector3d center = part.getCenter();
-	
-				nameOfCSG = part.getName();
-				if (nameOfCSG.length() == 0) {
-					nameOfCSG = "Part-" + (count);
-				}
-				nameOfCSG += "-" + count + "-" + "free";
-	
-				if (nameOfBODY == null) {
-					nameOfBODY = nameOfCSG;
-					addBody.addFreejoint();
-					setStartLocation(center, addBody);
-					centerGroup = center;
-					addBody.withName(nameOfBODY);
-				}
-	
-				hull = hull.move(center.minus(centerGroup));
-				hull.setManipulator(new Affine());
-				ArrayList<CSG> parts = getMapNameToCSGParts(nameOfBODY);
-				putCSGInAssets(nameOfCSG, hull, true);
-				org.mujoco.xml.body.GeomType.Builder<?> geom;
-				geom = addBody.addGeom().withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
-				parts.add(hull);
-				setCSGMeshToGeom(nameOfCSG, geom);
+			CSG hull = part.moveToCenter();
+
+			Vector3d center = part.getCenter();
+
+			nameOfCSG = part.getName();
+			if (nameOfCSG.length() == 0) {
+				nameOfCSG = "Part-" + (count);
+			}
+			nameOfCSG += "-" + count + "-" + "free";
+
+			if (nameOfBODY == null) {
+				nameOfBODY = nameOfCSG;
+				addBody.addFreejoint();
+				setStartLocation(center, addBody);
+				centerGroup = center;
+				addBody.withName(nameOfBODY);
+			}
+
+			hull = hull.move(center.minus(centerGroup));
+			hull.setManipulator(new Affine());
+			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfBODY);
+			putCSGInAssets(nameOfCSG, hull, true);
+			org.mujoco.xml.body.GeomType.Builder<?> geom;
+			geom = addBody.addGeom().withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
+			parts.add(hull);
+			setCSGMeshToGeom(nameOfCSG, geom);
 //			}catch(Throwable t) {
 //				t.printStackTrace(System.out);
 //			}
@@ -882,29 +905,21 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	public void setCSGMeshToGeom(String nameOfCSG, org.mujoco.xml.body.GeomType.Builder<?> geom) {
-		geom
-			.withName(nameOfCSG)
-			.withType(GeomtypeType.MESH).withMesh(nameOfCSG)
-			.withCondim(getCondim())
-			.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0))
-			.withMaterial(nameOfCSG)
-			;
+		geom.withName(nameOfCSG).withType(GeomtypeType.MESH).withMesh(nameOfCSG).withCondim(getCondim())
+				.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0)).withMaterial(nameOfCSG);
 	}
 
 	public void setWheelMeshToGeom(String nameOfCSG, org.mujoco.xml.body.GeomType.Builder<?> geom, CSG part) {
 		String fromto = "0 0 " + part.getMinZ() / 1000.0 + " 0 0 " + part.getMaxZ() / 1000.0;
-		geom.withName(nameOfCSG)
-			.withType(GeomtypeType.MESH).withMesh(nameOfCSG)
-			.withCondim(getCondim())
-			.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0))
-			.withMaterial(nameOfCSG)
+		geom.withName(nameOfCSG).withType(GeomtypeType.MESH).withMesh(nameOfCSG).withCondim(getCondim())
+				.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0)).withMaterial(nameOfCSG)
 //			.withType(GeomtypeType.CYLINDER).withSize("" + part.getTotalX() / 2000.0)
 //			.withFromto(fromto)
 //			.withCondim(getCondim())
 //			.withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
 //			.withMaterial(nameOfCSG)
-		
-			;
+
+		;
 	}
 
 	public void setStartLocation(Vector3d center, org.mujoco.xml.BodyarchType.Builder<?> addBody) {
@@ -953,9 +968,9 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 //			InputStream in=new ByteArrayInputStream(obj.getBytes(StandardCharsets.UTF_8));
 //			
 //			ObjImporter importer = new ObjImporter(in);
-			
+
 			Files.write(Paths.get(tempFile.getAbsolutePath()), obj.getBytes());
-			System.out.print(" " + (System.currentTimeMillis() - start+"\n"));
+			System.out.print(" " + (System.currentTimeMillis() - start + "\n"));
 		} else {
 			com.neuronrobotics.sdk.common.Log.error("Loading cache " + tempFile.getName());
 		}
@@ -980,7 +995,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		return cat.getScriptingName().trim() + "_base";
 	}
 
-	public void loadCadForMobileBase(CSGDatabaseInstance db,MobileBaseCadManager cadMan) {
+	public void loadCadForMobileBase(CSGDatabaseInstance db, MobileBaseCadManager cadMan) {
 		cadMan.run();
 		if (!cadMan.isCADstarted() && cadMan.getProcesIndictor().get() < 0.1) {
 			cadMan.generateCad(db);

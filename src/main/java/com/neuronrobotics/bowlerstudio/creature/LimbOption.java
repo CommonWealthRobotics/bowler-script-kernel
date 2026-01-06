@@ -38,6 +38,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.embed.swing.SwingFXUtils;
@@ -185,7 +186,12 @@ public class LimbOption {
 	}
 	CSG get(CSG in) {
 		if(in.hasManipulator())
-			return in.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(in.getManipulator())));
+			try {
+				return in.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(in.getManipulator())));
+			} catch (MissingManipulatorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		return in;
 	}
 	public javafx.scene.image.Image getImage() {

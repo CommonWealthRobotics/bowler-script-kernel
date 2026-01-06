@@ -20,6 +20,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Sphere;
 import eu.mihosoft.vrl.v3d.Vertex;
@@ -43,8 +44,15 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
 		for (int i = 0; i < baseCSG.size(); i++) {
 
-			CSG back = loadCSGToPoints(baseCSG.get(i), adjustCenter, pose, arg0);
-			back.setManipulator(baseCSG.get(i).getManipulator());
+			CSG csg = baseCSG.get(i);
+			CSG back = loadCSGToPoints(csg, adjustCenter, pose, arg0);
+			try {
+				if(csg.hasManipulator())
+					back.setManipulator(csg.getManipulator());
+			} catch (MissingManipulatorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			baseCSG.set(i, back);
 		}
 		CollisionShape fallShape = new com.bulletphysics.collision.shapes.ConvexHullShape(arg0);
