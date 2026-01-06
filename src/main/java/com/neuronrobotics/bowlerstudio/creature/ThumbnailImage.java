@@ -66,7 +66,7 @@ public class ThumbnailImage {
 	public static WritableImage get(CSGDatabaseInstance instance,List<CSG> c) {
 		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
 		for(CSG cs:c) {
-			if(cs.getManipulator()!=null) {
+			if(cs.hasManipulator()) {
 				TransformNR nr = TransformFactory.affineToNr(cs.getManipulator());
 				csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance,cs));
 			}else

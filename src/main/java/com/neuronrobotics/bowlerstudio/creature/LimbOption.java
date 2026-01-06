@@ -184,7 +184,9 @@ public class LimbOption {
 
 	}
 	CSG get(CSG in) {
-		return in.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(in.getManipulator())));
+		if(in.hasManipulator())
+			return in.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(in.getManipulator())));
+		return in;
 	}
 	public javafx.scene.image.Image getImage() {
 		return image;
