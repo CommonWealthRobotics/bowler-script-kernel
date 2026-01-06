@@ -1209,7 +1209,7 @@ public class CaDoodleFile {
 				com.neuronrobotics.sdk.common.Log.error(e);
 				break;
 			}
-			if (System.currentTimeMillis() - start > 25000 && holder.size() == 0) {
+			if (System.currentTimeMillis() - start > 250 && holder.size() == 0) {
 				throw new RuntimeException("Failed to create image");
 			}
 		}
