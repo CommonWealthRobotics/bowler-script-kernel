@@ -40,6 +40,7 @@ import java.nio.file.attribute.*;
 import java.util.*;
 
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
+import com.neuronrobotics.sdk.common.Log;
 
 //  Auto-generated Javadoc
 /**
@@ -292,16 +293,15 @@ public class FileChangeWatcher {
 				}
 				// print out event
 				// System.out.format("%s: %s\n", event.kind().name(), child);
-				com.neuronrobotics.sdk.common.Log.error("File Changed: " + getFileToWatch().getAbsolutePath());
 				for (int i = 0; i < listeners.size(); i++) {
+					com.neuronrobotics.sdk.common.Log.debug((i+1)+" of "+listeners.size()+" kind:"+kind+" event type "+listeners.get(i).getClass()+" File Changed: " + getFileToWatch().getAbsolutePath());
 
 					listeners.get(i).onFileChange(child.toFile(), event);
-					Thread.sleep(50);// pad out the events to avoid file box
+					Thread.sleep(16);// pad out the events to avoid file box
 										// overwrites
 				}
 			} catch (Exception e) {
-				// Auto-generated catch block
-				e.printStackTrace();
+				Log.error(e);
 			}
 
 		}
@@ -361,6 +361,10 @@ public class FileChangeWatcher {
 			e.printStackTrace();
 		}
 		activeListener.remove(fileToWatch.getAbsolutePath());
+	}
+
+	public void removeIFileChangeListeners() {
+		listeners.clear();
 	}
 
 }

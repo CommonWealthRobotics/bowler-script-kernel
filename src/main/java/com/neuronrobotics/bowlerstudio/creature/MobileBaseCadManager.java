@@ -438,7 +438,7 @@ public class MobileBaseCadManager implements Runnable {
 		return lowest;
 	}
 
-	protected void clear() {
+	public void clear() {
 		// Cad generator
 		cadScriptCache.clear();
 		// clear the csgs from the list
@@ -1570,9 +1570,11 @@ public class MobileBaseCadManager implements Runnable {
 			this.allCad.clear();
 		this.allCad = allCad;
 	}
-
+	public static boolean exists(MobileBase device) {
+		return cadmap.get(device) != null;
+	}
 	public static MobileBaseCadManager get(CSGDatabaseInstance csgDatabaseInstance,MobileBase device, IMobileBaseUI ui) {
-		if (cadmap.get(device) == null) {
+		if (!exists(device)) {
 			// new RuntimeException("No Mobile Base Cad Manager UI
 			// specified").printStackTrace();
 			MobileBaseCadManager mbcm = new MobileBaseCadManager(csgDatabaseInstance,device, ui);

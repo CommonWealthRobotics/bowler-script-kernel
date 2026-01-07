@@ -11,6 +11,7 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.parametrics.IParametric;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -60,7 +61,12 @@ public class Group extends AbstractAddFrom {
 						}
 					}
 					if(csg.hasManipulator())
-						manip=csg.getManipulator();
+						try {
+							manip=csg.getManipulator();
+						} catch (MissingManipulatorException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					replace.add(csg);
 					CSG clone = csg.clone();
 					

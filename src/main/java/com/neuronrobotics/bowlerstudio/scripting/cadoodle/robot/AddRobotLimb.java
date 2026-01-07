@@ -28,6 +28,7 @@ public class AddRobotLimb extends AbstractAddFrom{
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names;
 	public boolean forceLoad = false;
+	private DHParameterKinematics kin;
 	@Override
 	public void pruneCleanup() {
 		if (getBuilderName() != null) {
@@ -103,5 +104,15 @@ public class AddRobotLimb extends AbstractAddFrom{
 	}
 	public void setBuilderName(String builderName) {
 		this.builderName = builderName;
+	}
+	
+	public MobileBaseBuilder getMobilBaseBuilder() {
+		return getRobots().get(getBuilderName());
+	}
+	public void setKinematics(DHParameterKinematics kin) {
+		this.kin = kin;
+	}
+	public DHParameterKinematics getKinematics() {
+		return kin;
 	}
 }

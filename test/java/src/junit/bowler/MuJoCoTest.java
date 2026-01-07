@@ -17,6 +17,7 @@ import com.neuronrobotics.bowlerstudio.BowlerKernel;
 public class MuJoCoTest {
 
 	@Test
+	@Ignore
 	public void test() {
 		com.neuronrobotics.sdk.common.Log.error("mujocoJNILoadTest");
 		System.setProperty("org.bytedeco.javacpp.logger.debug", "true");

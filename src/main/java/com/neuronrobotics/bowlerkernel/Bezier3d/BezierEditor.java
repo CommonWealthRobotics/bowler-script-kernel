@@ -192,10 +192,17 @@ public class BezierEditor {
 		ArrayList<Transform> transforms = transforms();
 		for (int i = 0; i < getNumParts(); i++) {
 			TransformNR nr = TransformFactory.csgToNR(transforms.get(i));
-			Affine partsGetGetManipulator = getPartsInternal().get(i).getManipulator();
-			BowlerKernel.runLater(() -> {
-				TransformFactory.nrToAffine(nr, partsGetGetManipulator);
-			});
+			Affine partsGetGetManipulator;
+			try {
+				partsGetGetManipulator = getPartsInternal().get(i).getManipulator();
+				BowlerKernel.runLater(() -> {
+					TransformFactory.nrToAffine(nr, partsGetGetManipulator);
+				});
+			} catch (MissingManipulatorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
 
 		updateLines(start, cp1Manip, cp1Line, cp1LinePose);

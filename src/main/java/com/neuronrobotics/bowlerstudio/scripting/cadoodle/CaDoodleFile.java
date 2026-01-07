@@ -101,6 +101,7 @@ public class CaDoodleFile {
 	private IAcceptPruneForward accept = null;
 	private long timeOfLastUpdate = 0;
 	private OperationResult result = OperationResult.APPEND;
+	private ThumbnailImage imageEngine=null;
 	private ICadoodleSaveStatusUpdate defaultSaver = new ICadoodleSaveStatusUpdate() {
 		@Override
 		public void renderSplashFrame(int percent, String message) {
@@ -1183,13 +1184,13 @@ public class CaDoodleFile {
 	}
 
 	private javafx.scene.image.WritableImage loadingImageFromUIThread(List<CSG> currentState) {
-		if (currentState == null)
+		if (currentState == null || imageEngine==null)
 			throw new RuntimeException("Can not be null");
 		ArrayList<javafx.scene.image.WritableImage> holder = new ArrayList<WritableImage>();
 		try {
 			BowlerKernel.runLater(() -> {
 				try {
-					holder.add(ThumbnailImage.get(getCsgDBinstance(), currentState));
+					holder.add(imageEngine.get(getCsgDBinstance(), currentState));
 				}catch(Exception ex) {
 					holder.add(new WritableImage(1000, 1000));
 				}
@@ -1209,7 +1210,7 @@ public class CaDoodleFile {
 				com.neuronrobotics.sdk.common.Log.error(e);
 				break;
 			}
-			if (System.currentTimeMillis() - start > 25000 && holder.size() == 0) {
+			if (System.currentTimeMillis() - start > 250 && holder.size() == 0) {
 				throw new RuntimeException("Failed to create image");
 			}
 		}
@@ -1484,5 +1485,13 @@ public class CaDoodleFile {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	}
+
+	public ThumbnailImage getImageEngine() {
+		return imageEngine;
+	}
+
+	public void setImageEngine(ThumbnailImage imageEngine) {
+		this.imageEngine = imageEngine;
 	}
 }

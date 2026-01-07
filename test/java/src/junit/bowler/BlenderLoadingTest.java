@@ -19,10 +19,7 @@ import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 
 public class BlenderLoadingTest {
-	  @Before
-	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-		  BowlerKernel.startupProcedures();
-	  }
+
 	@Test
 	public void test() throws Exception {
 		CSG loaded =(CSG)ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),

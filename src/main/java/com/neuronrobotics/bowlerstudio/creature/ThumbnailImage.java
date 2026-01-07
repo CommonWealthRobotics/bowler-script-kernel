@@ -9,6 +9,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
@@ -63,12 +64,18 @@ public class ThumbnailImage {
 		return new Bounds(min, max);
 	}
 
-	public static WritableImage get(CSGDatabaseInstance instance,List<CSG> c) {
+	public WritableImage get(CSGDatabaseInstance instance,List<CSG> c) {
 		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
 		for(CSG cs:c) {
-			if(cs.getManipulator()!=null) {
-				TransformNR nr = TransformFactory.affineToNr(cs.getManipulator());
-				csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance,cs));
+			if(cs.hasManipulator()) {
+				TransformNR nr;
+				try {
+					nr = TransformFactory.affineToNr(cs.getManipulator());
+					csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance,cs));
+				} catch (MissingManipulatorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}else
 				csgList.add(cs);
 		}

@@ -38,6 +38,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.embed.swing.SwingFXUtils;
@@ -65,13 +66,14 @@ public class LimbOption {
 	private Image image;
 
 	public DHParameterKinematics getLimb(CSGDatabaseInstance db,String uniqueName) throws Exception {
-		String xmlContent = ScriptingEngine.codeFromGit(url, file)[0];
+		String xmlContent = ScriptingEngine.codeFromGit(getUrl(), getSourceFile())[0];
 		if (!composite) {
 			DHParameterKinematics newLimb = new DHParameterKinematics(null, IOUtils.toInputStream(xmlContent, "UTF-8"));
 			newLimb.setScriptingName(uniqueName);
+			MobileBaseLoader.setDefaultDhParameterKinematics(db, newLimb);
 			return newLimb;
 		} else {
-			MobileBase base =  RobotHelper.fileToRobot(db,url, file);
+			MobileBase base =  RobotHelper.fileToRobot(db,getUrl(), getSourceFile());
 			DHParameterKinematics newLimb = base.getAllDHChains().get(0);
 			newLimb.setScriptingName(uniqueName);
 			return newLimb;
@@ -96,7 +98,7 @@ public class LimbOption {
 
 	@Override
 	public String toString() {
-		return getType() + " " + getName() + " " + url + "/" + file + "\n\tConsumes:" + getConsumes() + "\n\tProvides:" + getProvides();
+		return getType() + " " + getName() + " " + getUrl() + "/" + getSourceFile() + "\n\tConsumes:" + getConsumes() + "\n\tProvides:" + getProvides();
 	}
 
 	public ControllerFeatures getConsumes() {
@@ -145,25 +147,29 @@ public class LimbOption {
 				f.getCsgDBinstance().delete(s);
 			}
 		}
-		BowlerKernel.runLater(() -> {
-			image = ThumbnailImage.get(f.getCsgDBinstance(),so);
-		});
-		while(image==null) {
+		if(f.getImageEngine()!=null) {
+			BowlerKernel.runLater(() -> {
+				image = f.getImageEngine().get(f.getCsgDBinstance(),so);
+			});
+			long start =System.currentTimeMillis();
+			
+			while(image==null && (System.currentTimeMillis()-start<250)) {
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					com.neuronrobotics.sdk.common.Log.error(e);
+				}
+			}
 			try {
-				Thread.sleep(20);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+				ImageIO.write(bufferedImage, "png", imageFile);
+				System.err.println("Thumbnail saved successfully to " + imageFile.getAbsolutePath());
+			} catch (Exception e) {
+				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
+				// e.getMessage());
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}
-		}
-		try {
-			BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
-			ImageIO.write(bufferedImage, "png", imageFile);
-			System.err.println("Thumbnail saved successfully to " + imageFile.getAbsolutePath());
-		} catch (Exception e) {
-			// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
-			// e.getMessage());
-			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		indicator = get(so.get(0));
 		if (so.size() > 1) {
@@ -183,12 +189,35 @@ public class LimbOption {
 
 	}
 	CSG get(CSG in) {
-		return in.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(in.getManipulator())));
+		if(in.hasManipulator())
+			try {
+				return in.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(in.getManipulator())));
+			} catch (MissingManipulatorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		return in;
 	}
 	public javafx.scene.image.Image getImage() {
 		return image;
 	}
 	public CSG getIndicator() {
 		return indicator;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getSourceFile() {
+		return file;
+	}
+
+	public void setSourceFile(String file) {
+		this.file = file;
 	}
 }

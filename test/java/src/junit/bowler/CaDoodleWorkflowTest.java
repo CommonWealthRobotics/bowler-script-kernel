@@ -250,8 +250,10 @@ public class CaDoodleWorkflowTest {
 		loaded.setSelf(self2);
 
 		com.neuronrobotics.sdk.common.Log.error(after);
-		while(loaded.isForwardAvailible())
+		while(loaded.isForwardAvailible()) {
+			System.out.println("Moving forward the Doodle");
 			loaded.forward();
+		}
 		selectAll = new  ArrayList<String>();
 		for(CSG c:loaded.getCurrentState()) {
 			selectAll.add(c.getName());
@@ -269,11 +271,12 @@ public class CaDoodleWorkflowTest {
 		ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
 		ArrayList<ControllerOption> controllers = ControllerOption.getOptions();
 		for(ControllerOption o:controllers) {
-			System.out.println(o);
+			System.out.println("Adding a Controller: "+o);
 			AddRobotController con = new AddRobotController()
 					.setNames(selectAll)
 					.setController(o);
 			loaded.addOpperation(con).join();
+			System.out.println("Added!");
 		}
 		loaded.save();
 		ScriptingEngine.pull("https://github.com/madhephaestus/carl-the-hexapod.git");

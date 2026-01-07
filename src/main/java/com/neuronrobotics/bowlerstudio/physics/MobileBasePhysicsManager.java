@@ -31,6 +31,7 @@ import com.neuronrobotics.sdk.util.ThreadUtil;
 import Jama.Matrix;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 //import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
 //import eu.mihosoft.vvecmath.Vector3d;
@@ -127,7 +128,14 @@ public class MobileBasePhysicsManager {
 		BowlerKernel.runLater(new Runnable() {
 			@Override
 			public void run() {
-				TransformFactory.bulletToAffine(baseCad.get(0).getManipulator(), start);
+				try {
+					CSG csg = baseCad.get(0);
+					if(csg.hasManipulator())
+						TransformFactory.bulletToAffine(csg.getManipulator(), start);
+				} catch (MissingManipulatorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 		CSG collisionBod;

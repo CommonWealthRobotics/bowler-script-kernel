@@ -15,10 +15,7 @@ import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 public class SSHGitTest {
-	  @Before
-	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-		  BowlerKernel.startupProcedures();
-	  }
+
 	@Test
 	public void test() throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		/*
