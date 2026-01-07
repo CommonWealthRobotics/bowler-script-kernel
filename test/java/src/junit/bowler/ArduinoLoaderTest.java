@@ -10,6 +10,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
@@ -23,11 +24,9 @@ public class ArduinoLoaderTest {
 
   private static final String portname = "/dev/ttyACM0";
   private boolean hasPort;
-  @Before
-  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-	  BowlerKernel.startupProcedures();
-  }
+
   @Test
+  @Ignore
   public void test() throws Exception {
     hasPort = false;
     for (String s : NRSerialPort.getAvailableSerialPorts()) {

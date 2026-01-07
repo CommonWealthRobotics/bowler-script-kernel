@@ -14,10 +14,7 @@ import org.junit.Test;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 
 public class VoiceTest {
-	  @Before
-	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-		  BowlerKernel.startupProcedures();
-	  }
+
   @Test
   @Ignore
   public void test() {

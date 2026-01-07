@@ -32,10 +32,6 @@ import javafx.application.Platform;
 
 public class GitHub {
     private static boolean shutdownInProgress;
-    @Before
-    public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-  	  BowlerKernel.startupProcedures();
-    }
 	static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (shutdownInProgress) return;
@@ -172,17 +168,6 @@ public class GitHub {
 		com.neuronrobotics.sdk.common.Log.error("Current Branch # " +  ScriptingEngine.getFullBranch(asstsRepo));
 		*/
   }
-  @AfterClass
-  public static void tearDownJavaFX() throws InterruptedException {
-      CountDownLatch latch = new CountDownLatch(1);
-      Platform.runLater(() -> {
-          Platform.exit();
-          latch.countDown();
-      });
-      latch.await(5, TimeUnit.SECONDS);
-      
-      // Give time for cleanup
-      Thread.sleep(1000);
-  }
+
 
 }

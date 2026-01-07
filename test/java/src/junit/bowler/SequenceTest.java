@@ -18,10 +18,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 
 public class SequenceTest {
-	  @Before
-	  public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
-		  BowlerKernel.startupProcedures();
-	  }
+
 	@Test
 	public void test() throws Exception {
 //		try {

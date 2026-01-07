@@ -41,7 +41,7 @@ public class TestCheckout {
 				
 			} catch (Exception e) {
 				Log.error(e);
-				Thread.sleep(1000);
+				Thread.sleep(10);
 				fail();
 			}
 		}
