@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.creature;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
@@ -11,7 +12,6 @@ import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Vector3d;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -24,16 +24,17 @@ import javafx.scene.shape.CullFace;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Transform;
 import javafx.scene.PerspectiveCamera;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.transform.Affine;
-import javafx.scene.transform.Rotate;
-import javafx.geometry.Rectangle2D;
 
 public class ThumbnailImage {
-	public static Bounds getSellectedBounds(List<CSG> incoming) {
+	private HashMap<String,CSG> csgs=new HashMap<String, CSG>();
+	private HashMap<String,MeshView> views = new HashMap<String, MeshView>();
+	// Create a group to hold all the meshes
+	private	Group root = new Group();
+	public  Bounds getSellectedBounds() {
 		Vector3d min = null;
 		Vector3d max = null;
-		for (CSG c : incoming) {
+		for (CSG c : csgs.values()) {
 			if(c.isHide())
 				continue;
 			if(c.isInGroup())
@@ -67,6 +68,9 @@ public class ThumbnailImage {
 	public WritableImage get(CSGDatabaseInstance instance,List<CSG> c) {
 		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
 		for(CSG cs:c) {
+			if (csgs.containsKey(cs.getName()))
+				continue;
+			csgs.put(cs.getName(), cs);			
 			if(cs.hasManipulator()) {
 				TransformNR nr;
 				try {
@@ -79,11 +83,26 @@ public class ThumbnailImage {
 			}else
 				csgList.add(cs);
 		}
-		// Create a group to hold all the meshes
-		Group root = new Group();
+		ArrayList<String> toRemove = new ArrayList<String>();
+		for(String s:csgs.keySet()) {
+			boolean exists=false;
+			for(CSG cs:c) {
+				if(cs.getName().contentEquals(s))
+					exists=true;
+			}
+			if(!exists) {
+				toRemove.add(s);
+			}
+		}
+		for(String s:toRemove) {
+			csgs.remove(s);
+			MeshView mv = views.remove(s);
+			root.getChildren().add(mv);
+		}
+
 
 		// Add all meshes to the group
-		Bounds b = getSellectedBounds(csgList);
+		Bounds b = getSellectedBounds();
 
 		double yOffset = (b.getMax().y-b.getMin().y)/2;
 		double xOffset =(b.getMax().x -b.getMin().x)/2;
@@ -95,6 +114,7 @@ public class ThumbnailImage {
 				continue;
 			try {
 				MeshView meshView = csg.movez(-zCenter).getMesh();
+				views.put(csg.getName(), meshView);
 				PhongMaterial material = new PhongMaterial();
 				if (csg.isHole()) {
 					material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
