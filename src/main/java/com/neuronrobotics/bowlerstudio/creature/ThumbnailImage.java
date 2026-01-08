@@ -7,6 +7,7 @@ import java.util.List;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
@@ -27,17 +28,19 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Affine;
 
 public class ThumbnailImage {
-	private HashMap<String,CSG> csgs=new HashMap<String, CSG>();
-	private HashMap<String,MeshView> views = new HashMap<String, MeshView>();
+	private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
+	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
 	// Create a group to hold all the meshes
-	private	Group root = new Group();
-	public  Bounds getSellectedBounds() {
+	private Group root = new Group();
+	private Scene scene;
+
+	public Bounds getSellectedBounds() {
 		Vector3d min = null;
 		Vector3d max = null;
 		for (CSG c : csgs.values()) {
-			if(c.isHide())
+			if (c.isHide())
 				continue;
-			if(c.isInGroup())
+			if (c.isInGroup())
 				continue;
 			Vector3d min2 = c.getBounds().getMin().clone();
 			Vector3d max2 = c.getBounds().getMax().clone();
@@ -58,59 +61,60 @@ public class ThumbnailImage {
 			if (max.z < max2.z)
 				max.z = max2.z;
 		}
-		if(max==null)
-			max=new Vector3d(0,0,0);
-		if(min==null)
-			min=new Vector3d(0,0,0);
+		if (max == null)
+			max = new Vector3d(0, 0, 0);
+		if (min == null)
+			min = new Vector3d(0, 0, 0);
 		return new Bounds(min, max);
 	}
 
-	public WritableImage get(CSGDatabaseInstance instance,List<CSG> c) {
-		ArrayList<CSG> csgList=new ArrayList<CSG>() ;
-		for(CSG cs:c) {
+	public WritableImage get(CSGDatabaseInstance instance, List<CSG> c) {
+		ArrayList<CSG> csgList = new ArrayList<CSG>();
+		for (CSG cs : c) {
 			if (csgs.containsKey(cs.getName()))
 				continue;
-			csgs.put(cs.getName(), cs);			
-			if(cs.hasManipulator()) {
+			csgs.put(cs.getName(), cs);
+			if (cs.hasManipulator()) {
 				TransformNR nr;
 				try {
 					nr = TransformFactory.affineToNr(cs.getManipulator());
-					csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance,cs));
+					csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance, cs));
 				} catch (MissingManipulatorException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}else
+			} else
 				csgList.add(cs);
 		}
 		ArrayList<String> toRemove = new ArrayList<String>();
-		for(String s:csgs.keySet()) {
-			boolean exists=false;
-			for(CSG cs:c) {
-				if(cs.getName().contentEquals(s))
-					exists=true;
+		for (String s : csgs.keySet()) {
+			boolean exists = false;
+			for (CSG cs : c) {
+				if (cs.getName().contentEquals(s))
+					exists = true;
 			}
-			if(!exists) {
+			if (!exists) {
 				toRemove.add(s);
 			}
 		}
-		for(String s:toRemove) {
+		for (String s : toRemove) {
 			csgs.remove(s);
 			MeshView mv = views.remove(s);
-			root.getChildren().add(mv);
+			if (mv != null)
+				root.getChildren().remove(mv);
+			Log.debug("Removing from thumbnail " + s);
 		}
-
 
 		// Add all meshes to the group
 		Bounds b = getSellectedBounds();
 
-		double yOffset = (b.getMax().y-b.getMin().y)/2;
-		double xOffset =(b.getMax().x -b.getMin().x)/2;
-		double zCenter = (b.getMax().z -b.getMin().z)/2;
+		double yOffset = (b.getMax().y - b.getMin().y) / 2;
+		double xOffset = (b.getMax().x - b.getMin().x) / 2;
+		double zCenter = (b.getMax().z - b.getMin().z) / 2;
 		for (CSG csg : csgList) {
-			if(csg.isHide())
+			if (csg.isHide())
 				continue;
-			if(csg.isInGroup())
+			if (csg.isInGroup())
 				continue;
 			try {
 				MeshView meshView = csg.movez(-zCenter).getMesh();
@@ -124,9 +128,14 @@ public class ThumbnailImage {
 				material.setSpecularColor(javafx.scene.paint.Color.WHITE);
 				meshView.setCullFace(CullFace.BACK);
 				root.getChildren().add(meshView);
-			}catch(Throwable t) {
+				Log.debug("Adding to thumbnail " + csg.getName());
+
+			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
 			}
+		}
+		if (root.getChildren().size() == 0) {
+			Log.error("Thumbnail is empty!");
 		}
 
 		// Calculate the bounds of all CSGs combined
@@ -139,29 +148,20 @@ public class ThumbnailImage {
 
 		// Calculate camera position to fit all objects in view
 		double maxDimension = Math.max(totalx, Math.max(totaly, totalz));
-		double cameraDistance = (maxDimension / Math.tan(Math.toRadians(camera.getFieldOfView() / 2)))*0.8 ;
+		double cameraDistance = (maxDimension / Math.tan(Math.toRadians(camera.getFieldOfView() / 2))) * 0.8;
 
 		TransformNR camoffset = new TransformNR(xOffset, yOffset, 0);
 		TransformNR camDist = new TransformNR(0, 0, -cameraDistance);
 		TransformNR rot = new TransformNR(new RotationNR(-150, 45, 0));
-		
+
 		Affine af = TransformFactory.nrToAffine(camoffset.times(rot.times(camDist)));
 		camera.getTransforms().add(af);
-		// Position the camera
-//	    camera.setTranslateX();
-//	    camera.setTranslateY();
-//		camera.setTranslateZ();
-//		   // Apply rotations to the root group instead of the camera
-//	    root.getTransforms().addAll(
-//	            new Rotate(-5, Rotate.Y_AXIS),
-//	            new Rotate(-45, Rotate.X_AXIS)
-//	    );
-		// Create a scene with the group and camera
 		int i = 100;
-		Scene scene = new Scene(root, i, i, true, SceneAntialiasing.BALANCED);
-		scene.setFill(Color.TRANSPARENT);
-		scene.setCamera(camera);
-
+		if (scene == null) {
+			scene = new Scene(root, i, i, true, SceneAntialiasing.BALANCED);
+			scene.setFill(Color.TRANSPARENT);
+			scene.setCamera(camera);
+		}
 		// Set up snapshot parameters
 		SnapshotParameters params = new SnapshotParameters();
 		params.setFill(Color.TRANSPARENT);
@@ -169,9 +169,8 @@ public class ThumbnailImage {
 		params.setDepthBuffer(true);
 		params.setTransform(Transform.scale(1, 1));
 		// Set the near and far clip
-		camera.setNearClip(0.1);  // Set the near clip plane
-		camera.setFarClip(9000.0);  // Set the far clip plane
-
+		camera.setNearClip(0.1); // Set the near clip plane
+		camera.setFarClip(9000.0); // Set the far clip plane
 
 		// Create the WritableImage first
 		WritableImage snapshot = new WritableImage(i, i);
