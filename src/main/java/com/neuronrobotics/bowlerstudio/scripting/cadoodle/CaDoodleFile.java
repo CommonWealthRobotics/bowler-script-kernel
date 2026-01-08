@@ -295,6 +295,7 @@ public class CaDoodleFile {
 		opperations = opperations.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
 		if (indexStarting > opperations.size())
 			indexStarting = opperations.size();
+		ArrayList<CaDoodleOperation> toRem = new ArrayList<CaDoodleOperation>();
 		for (int i = 0; i < getOpperations().size(); i++) {
 			CaDoodleOperation op = getOpperations().get(i);
 			if (op == null)
@@ -306,11 +307,15 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
-				indexStarting = i + 1;
-				break;
-				// opperations.remove(op);
+				//indexStarting = i ;
+				//break;
+				//toRem.add(op);
 			}
 		}
+		//opperations.removeAll(toRem);
+//		if(indexStarting>opperations.size()) {
+//			indexStarting = opperations.size();
+//		}
 		setCurrentIndex(indexStarting);
 		updateCurrentFromCache();
 		loadImageFromFile();
@@ -499,18 +504,31 @@ public class CaDoodleFile {
 
 	}
 
-	private void process(CaDoodleOperation op) {
+	private void process(CaDoodleOperation op) throws Exception{
 		op.setCaDoodleFile(this);
-		List<CSG> process = op.process(getCurrentState());
-		if (MakeRobot.class.isInstance(op)) {
-			MakeRobot mr = (MakeRobot) op;
-			getRobots().put(mr.getName(), mr.getBuilder());
+		List<CSG> process=null;
+		Exception ex=null;
+		try {
+			process= op.process(getCurrentState());
+			if (MakeRobot.class.isInstance(op)) {
+				MakeRobot mr = (MakeRobot) op;
+				getRobots().put(mr.getName(), mr.getBuilder());
+			}
+		}catch(Exception ex1) {
+			ex=ex1;
+		}
+		if(process==null) {
+			process=getCurrentState();
+		}
+		if(process.size()==0) {
+			Log.error("Nothing returned int he process step?");
 		}
 		int currentIndex2 = getCurrentIndex();
 		storeResultInCache(op, process);
 		setCurrentIndex(currentIndex2 + 1);
 		setCurrentState(op, process);
-
+		if(ex!=null)
+			throw ex;
 	}
 
 	public boolean isOperationRunning() {
@@ -569,7 +587,12 @@ public class CaDoodleFile {
 					}
 					if (getResult() == OperationResult.INSERT) {
 						getOpperations().add(getCurrentIndex(), op);
-						process(op);
+						try {
+							process(op);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						try {
 							regenerateFrom(op).join();
 						} catch (InterruptedException e) {
@@ -632,12 +655,12 @@ public class CaDoodleFile {
 		return t;
 	}
 
-	public static CSG getByName(List<CSG> back, String name) {
+	public static CSG getByName(List<CSG> back, String name) throws NameMissingException{
 		for (CSG c : back) {
 			if (c.getName().contentEquals(name))
 				return c;
 		}
-		throw new RuntimeException("Fail! there was no object named " + name);
+		throw new NameMissingException("Fail! there was no object named " + name);
 	}
 
 	public static int applyToAllConstituantElements(boolean addRet, List<String> targetNames, ArrayList<CSG> back,
@@ -649,10 +672,10 @@ public class CaDoodleFile {
 				CSG c = getByName(back, s);
 				if (c.isInGroup())
 					continue;
-			} catch (Exception ex) {
-				com.neuronrobotics.sdk.common.Log.error(ex);
-				//continue;
+			}catch(NameMissingException e) {
+				continue;
 			}
+	
 			applyToAllConstituantElements(addRet, s, back, p, depth, appliedMemory);
 		}
 		return back.size();
@@ -755,8 +778,7 @@ public class CaDoodleFile {
 		HashSet<String> names = new HashSet<>();
 		for (CSG c : process) {
 			if (names.contains(c.getName()))
-				throw new RuntimeException("There can not be 2 objects with the same name after an " + op.getType()
-						+ " opperation! " + c.getName());
+				continue;
 			names.add(c.getName());
 			CSG cachedVer = cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(getCsgDBinstance(), c)
 					.setName(c.getName()).setRegenerate(c.getRegenerate()).setID(c);

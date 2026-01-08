@@ -54,16 +54,31 @@ public class Paste extends AbstractAddFrom  {
 		},1);
 
 		for (String from : cpMap.keySet()) {
-			CSG source =  CaDoodleFile.getByName(back, from);
+			CSG source;
+			try {
+				source = CaDoodleFile.getByName(back, from);
+			} catch (NameMissingException e) {
+				continue;
+			}
 			if (source.isGroupResult()) {
 				ArrayList<String> c = constituants(back, from);
 				if(c.size()<1) {
 					new RuntimeException("A group result must have at least 1 constituants!").printStackTrace();;
 					continue;
 				}
-				String newGroupName =  CaDoodleFile.getByName(back, cpMap.get(from)).getName();
+				String newGroupName;
+				try {
+					newGroupName = CaDoodleFile.getByName(back, cpMap.get(from)).getName();
+				} catch (NameMissingException e) {
+					continue;
+				}
 				for (String s : c) {
-					CSG dest =  CaDoodleFile.getByName(back, s);
+					CSG dest;
+					try {
+						dest = CaDoodleFile.getByName(back, s);
+					} catch (NameMissingException e) {
+						continue;
+					}
 					dest.removeGroupMembership(from);
 					dest.addGroupMembership(newGroupName);
 				}
@@ -75,9 +90,19 @@ public class Paste extends AbstractAddFrom  {
 	private ArrayList<String> constituants(ArrayList<CSG> b, String name) {
 		ArrayList<String> c = new ArrayList<String>();
 		for (String ky:cpMap.keySet()) {
-			CSG byName = CaDoodleFile.getByName(b,ky);
+			CSG byName;
+			try {
+				byName = CaDoodleFile.getByName(b,ky);
+			} catch (NameMissingException e) {
+				continue;
+			}
 			String name2 = cpMap.get(ky);
-			CSG byName2 =  CaDoodleFile.getByName(b,name2);
+			CSG byName2;
+			try {
+				byName2 = CaDoodleFile.getByName(b,name2);
+			} catch (NameMissingException e) {
+				continue;
+			}
 			for(CSG csg:Arrays.asList(byName,byName2)){
 			if (csg.checkGroupMembership(name)) {
 				// only add objects that were created by this operation
