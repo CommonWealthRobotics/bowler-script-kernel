@@ -137,7 +137,7 @@ public class ThumbnailImage {
 //	            new Rotate(-45, Rotate.X_AXIS)
 //	    );
 		// Create a scene with the group and camera
-		int i = 1000;
+		int i = 100;
 		Scene scene = new Scene(root, i, i, true, SceneAntialiasing.BALANCED);
 		scene.setFill(Color.TRANSPARENT);
 		scene.setCamera(camera);
