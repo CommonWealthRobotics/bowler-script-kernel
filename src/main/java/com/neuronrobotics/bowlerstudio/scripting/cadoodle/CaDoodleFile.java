@@ -1139,8 +1139,10 @@ public class CaDoodleFile {
 			return;
 		int currentIndex2 = 0;
 		for (int i = 0; i < getOpperations().size(); i++)
-			if (getOpperations().get(i) == op)
+			if (getOpperations().get(i) == op) {
 				currentIndex2 = i;
+				break;
+			}
 //		if(currentIndex2==0)
 //			return;
 		File parent = getSelf().getAbsoluteFile().getParentFile();
@@ -1214,7 +1216,8 @@ public class CaDoodleFile {
 				try {
 					holder.add(imageEngine.get(getCsgDBinstance(), currentState));
 				}catch(Exception ex) {
-					holder.add(new WritableImage(1000, 1000));
+					ex.printStackTrace();
+					holder.add(new WritableImage(100, 100));
 				}
 			});
 		} catch (Throwable ex) {
@@ -1232,7 +1235,7 @@ public class CaDoodleFile {
 				com.neuronrobotics.sdk.common.Log.error(e);
 				break;
 			}
-			if (System.currentTimeMillis() - start > 250 && holder.size() == 0) {
+			if (System.currentTimeMillis() - start > 2000 && holder.size() == 0) {
 				throw new RuntimeException("Failed to create image");
 			}
 		}
