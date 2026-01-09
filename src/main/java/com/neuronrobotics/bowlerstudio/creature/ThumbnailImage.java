@@ -69,31 +69,36 @@ public class ThumbnailImage {
 		return new Bounds(min, max);
 	}
 
-	public WritableImage get(CSGDatabaseInstance instance, List<CSG> c) {
+	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay) {
 		ArrayList<CSG> csgList = new ArrayList<CSG>();
-		for (CSG cs : c) {
-			boolean containsKey = csgs.containsKey(cs.getName());
-			csgs.put(cs.getName(), cs);
+		for (CSG csg : incomingToDisplay) {
+			boolean containsKey = csgs.containsKey(csg.getName());
+			csgs.put(csg.getName(), csg);
 			if (containsKey)
 				continue;
-			if (cs.hasManipulator()) {
+			if (csg.isHide())
+				continue;
+			if (csg.isInGroup())
+				continue;
+			if (csg.hasManipulator()) {
 				TransformNR nr;
-				if(cs.hasManipulator())
+				if(csg.hasManipulator())
 					try {
-						nr = TransformFactory.affineToNr(cs.getManipulator());
-						csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance, cs));
+						nr = TransformFactory.affineToNr(csg.getManipulator());
+						csgList.add(csg.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance, csg));
 					} catch (MissingManipulatorException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 			} else
-				csgList.add(cs);
+				csgList.add(csg);
 		}
 		ArrayList<String> toRemove = new ArrayList<String>();
 		for (String s : csgs.keySet()) {
 			boolean exists = false;
-			if (!(csgs.get(s).isHide()||csgs.get(s).isInGroup()))
-				for (CSG cs : c) {
+			CSG csg = csgs.get(s);
+			if (!(csg.isHide()||csg.isInGroup()))
+				for (CSG cs : incomingToDisplay) {
 					if (cs.getName().contentEquals(s)) {
 						exists = true;
 					}
