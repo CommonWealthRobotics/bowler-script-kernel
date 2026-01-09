@@ -33,6 +33,8 @@ public class ThumbnailImage {
 	// Create a group to hold all the meshes
 	private Group root = new Group();
 	private Scene scene;
+	private int sizeOfImage = 500;
+;
 
 	public Bounds getSellectedBounds() {
 		Vector3d min = null;
@@ -159,9 +161,8 @@ public class ThumbnailImage {
 
 		Affine af = TransformFactory.nrToAffine(camoffset.times(rot.times(camDist)));
 		camera.getTransforms().add(af);
-		int i = 100;
 		if (scene == null) {
-			scene = new Scene(root, i, i, true, SceneAntialiasing.BALANCED);
+			scene = new Scene(root, sizeOfImage, sizeOfImage, true, SceneAntialiasing.BALANCED);
 			scene.setFill(Color.TRANSPARENT);
 			scene.setCamera(camera);
 		}
@@ -176,7 +177,7 @@ public class ThumbnailImage {
 		camera.setFarClip(9000.0); // Set the far clip plane
 
 		// Create the WritableImage first
-		WritableImage snapshot = new WritableImage(i, i);
+		WritableImage snapshot = new WritableImage(sizeOfImage, sizeOfImage);
 
 		root.snapshot(params, snapshot);
 
