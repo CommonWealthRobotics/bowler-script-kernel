@@ -33,6 +33,7 @@ public class ThumbnailImage {
 	// Create a group to hold all the meshes
 	private Group root = new Group();
 	private Scene scene;
+	private int imageSize=400;
 
 	public Bounds getSellectedBounds() {
 		Vector3d min = null;
@@ -76,13 +77,14 @@ public class ThumbnailImage {
 			csgs.put(cs.getName(), cs);
 			if (cs.hasManipulator()) {
 				TransformNR nr;
-				try {
-					nr = TransformFactory.affineToNr(cs.getManipulator());
-					csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance, cs));
-				} catch (MissingManipulatorException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				if(cs.hasManipulator())
+					try {
+						nr = TransformFactory.affineToNr(cs.getManipulator());
+						csgList.add(cs.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance, cs));
+					} catch (MissingManipulatorException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 			} else
 				csgList.add(cs);
 		}
@@ -156,9 +158,8 @@ public class ThumbnailImage {
 
 		Affine af = TransformFactory.nrToAffine(camoffset.times(rot.times(camDist)));
 		camera.getTransforms().add(af);
-		int i = 100;
 		if (scene == null) {
-			scene = new Scene(root, i, i, true, SceneAntialiasing.BALANCED);
+			scene = new Scene(root, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
 			scene.setFill(Color.TRANSPARENT);
 			scene.setCamera(camera);
 		}
@@ -173,7 +174,7 @@ public class ThumbnailImage {
 		camera.setFarClip(9000.0); // Set the far clip plane
 
 		// Create the WritableImage first
-		WritableImage snapshot = new WritableImage(i, i);
+		WritableImage snapshot = new WritableImage(imageSize, imageSize);
 
 		root.snapshot(params, snapshot);
 
