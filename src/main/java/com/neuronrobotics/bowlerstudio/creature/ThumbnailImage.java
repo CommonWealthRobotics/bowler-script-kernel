@@ -28,17 +28,17 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Affine;
 
 public class ThumbnailImage {
-	private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
+	// private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
 	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
 	// Create a group to hold all the meshes
 	private Group root = new Group();
 	private Scene scene;
-	private int imageSize=400;
+	private int imageSize = 400;
 
-	public Bounds getSellectedBounds() {
+	public Bounds getSellectedBounds(List<CSG> incomingToDisplay) {
 		Vector3d min = null;
 		Vector3d max = null;
-		for (CSG c : csgs.values()) {
+		for (CSG c : incomingToDisplay) {
 			if (c.isHide())
 				continue;
 			if (c.isInGroup())
@@ -71,21 +71,25 @@ public class ThumbnailImage {
 
 	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay) {
 		ArrayList<CSG> csgList = new ArrayList<CSG>();
+		Bounds b = getSellectedBounds(incomingToDisplay);
+		root.getChildren().clear();
 		for (CSG csg : incomingToDisplay) {
-			boolean containsKey = csgs.containsKey(csg.getName());
-			csgs.put(csg.getName(), csg);
-			if (containsKey)
-				continue;
 			if (csg.isHide())
 				continue;
 			if (csg.isInGroup())
 				continue;
+			// boolean containsKey = csgs.containsKey(csg.getName());
+			// csgs.put(csg.getName(), csg);
+//			if (containsKey)
+//				continue;
 			if (csg.hasManipulator()) {
 				TransformNR nr;
-				if(csg.hasManipulator())
+				if (csg.hasManipulator())
 					try {
 						nr = TransformFactory.affineToNr(csg.getManipulator());
-						csgList.add(csg.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance, csg));
+						CSG syncProperties = csg.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance, csg);
+						syncProperties.setName(csg.getName());
+						csgList.add(syncProperties);
 					} catch (MissingManipulatorException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -94,21 +98,19 @@ public class ThumbnailImage {
 				csgList.add(csg);
 		}
 		ArrayList<String> toRemove = new ArrayList<String>();
-		for (String s : csgs.keySet()) {
+		for (String s : views.keySet()) {
 			boolean exists = false;
-			CSG csg = csgs.get(s);
-			if (!(csg.isHide()||csg.isInGroup()))
-				for (CSG cs : incomingToDisplay) {
-					if (cs.getName().contentEquals(s)) {
-						exists = true;
-					}
+			for (CSG cs : incomingToDisplay) {
+				if (cs.getName().contentEquals(s)) {
+					exists = true;
 				}
+			}
 			if (!exists) {
 				toRemove.add(s);
 			}
 		}
 		for (String s : toRemove) {
-			csgs.remove(s);
+			// csgs.remove(s);
 			MeshView mv = views.remove(s);
 			if (mv != null)
 				root.getChildren().remove(mv);
@@ -116,7 +118,6 @@ public class ThumbnailImage {
 		}
 
 		// Add all meshes to the group
-		Bounds b = getSellectedBounds();
 
 		double yOffset = (b.getMax().y - b.getMin().y) / 2;
 		double xOffset = (b.getMax().x - b.getMin().x) / 2;
@@ -127,8 +128,12 @@ public class ThumbnailImage {
 			if (csg.isInGroup())
 				continue;
 			try {
-				MeshView meshView = csg.movez(-zCenter).getMesh();
-				views.put(csg.getName(), meshView);
+				MeshView meshView = null;
+				if (!views.containsKey(csg.getName())) {
+					meshView = csg.movez(-zCenter).getMesh();
+					views.put(csg.getName(), meshView);
+				} else
+					meshView = views.get(csg.getName());
 				PhongMaterial material = new PhongMaterial();
 				if (csg.isHole()) {
 					material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
