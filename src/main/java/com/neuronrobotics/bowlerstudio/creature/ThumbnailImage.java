@@ -72,9 +72,10 @@ public class ThumbnailImage {
 	public WritableImage get(CSGDatabaseInstance instance, List<CSG> c) {
 		ArrayList<CSG> csgList = new ArrayList<CSG>();
 		for (CSG cs : c) {
-			if (csgs.containsKey(cs.getName()))
-				continue;
+			boolean containsKey = csgs.containsKey(cs.getName());
 			csgs.put(cs.getName(), cs);
+			if (containsKey)
+				continue;
 			if (cs.hasManipulator()) {
 				TransformNR nr;
 				if(cs.hasManipulator())
@@ -91,10 +92,12 @@ public class ThumbnailImage {
 		ArrayList<String> toRemove = new ArrayList<String>();
 		for (String s : csgs.keySet()) {
 			boolean exists = false;
-			for (CSG cs : c) {
-				if (cs.getName().contentEquals(s))
-					exists = true;
-			}
+			if (!(csgs.get(s).isHide()||csgs.get(s).isInGroup()))
+				for (CSG cs : c) {
+					if (cs.getName().contentEquals(s)) {
+						exists = true;
+					}
+				}
 			if (!exists) {
 				toRemove.add(s);
 			}
