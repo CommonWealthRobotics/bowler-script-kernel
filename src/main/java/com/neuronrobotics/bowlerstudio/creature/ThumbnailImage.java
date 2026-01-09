@@ -29,11 +29,9 @@ import javafx.scene.transform.Affine;
 
 public class ThumbnailImage {
 	// private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
-	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
-	// Create a group to hold all the meshes
-	private Group root = new Group();
-	private Scene scene;
-	private int imageSize = 400;
+	//private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
+
+	private int imageSize = 200;
 
 	public Bounds getSellectedBounds(List<CSG> incomingToDisplay) {
 		Vector3d min = null;
@@ -72,7 +70,6 @@ public class ThumbnailImage {
 	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay) {
 		ArrayList<CSG> csgList = new ArrayList<CSG>();
 		Bounds b = getSellectedBounds(incomingToDisplay);
-		root.getChildren().clear();
 		for (CSG csg : incomingToDisplay) {
 			if (csg.isHide())
 				continue;
@@ -87,7 +84,8 @@ public class ThumbnailImage {
 				if (csg.hasManipulator())
 					try {
 						nr = TransformFactory.affineToNr(csg.getManipulator());
-						CSG syncProperties = csg.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance, csg);
+						CSG syncProperties = csg.transformed(TransformFactory.nrToCSG(nr)).syncProperties(instance,
+								csg);
 						syncProperties.setName(csg.getName());
 						csgList.add(syncProperties);
 					} catch (MissingManipulatorException e) {
@@ -97,60 +95,56 @@ public class ThumbnailImage {
 			} else
 				csgList.add(csg);
 		}
-		ArrayList<String> toRemove = new ArrayList<String>();
-		for (String s : views.keySet()) {
-			boolean exists = false;
-			for (CSG cs : incomingToDisplay) {
-				if (cs.getName().contentEquals(s)) {
-					exists = true;
-				}
-			}
-			if (!exists) {
-				toRemove.add(s);
-			}
-		}
-		for (String s : toRemove) {
-			// csgs.remove(s);
-			MeshView mv = views.remove(s);
-			if (mv != null)
-				root.getChildren().remove(mv);
-			Log.debug("Removing from thumbnail " + s);
-		}
+//		ArrayList<String> toRemove = new ArrayList<String>();
+//		for (String s : views.keySet()) {
+//			boolean exists = false;
+//			for (CSG cs : incomingToDisplay) {
+//				if (cs.getName().contentEquals(s)) {
+//					exists = true;
+//					break;
+//				}
+//			}
+//			if (!exists) {
+//				toRemove.add(s);
+//			}
+//		}
+//		for (String s : toRemove) {
+//			views.remove(s);
+//			Log.debug("Removing from thumbnail " + s);
+//		}
 
 		// Add all meshes to the group
 
 		double yOffset = (b.getMax().y - b.getMin().y) / 2;
 		double xOffset = (b.getMax().x - b.getMin().x) / 2;
 		double zCenter = (b.getMax().z - b.getMin().z) / 2;
+		// Create a group to hold all the meshes
+		Group root = new Group();
+
 		for (CSG csg : csgList) {
 			if (csg.isHide())
 				continue;
 			if (csg.isInGroup())
 				continue;
 			try {
-				MeshView meshView = null;
-				if (!views.containsKey(csg.getName())) {
-					meshView = csg.movez(-zCenter).getMesh();
-					views.put(csg.getName(), meshView);
-				} else
-					meshView = views.get(csg.getName());
-				PhongMaterial material = new PhongMaterial();
-				if (csg.isHole()) {
-					material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
-					meshView.setMaterial(material);
-					meshView.setOpacity(0.25);
-				}
-				material.setSpecularColor(javafx.scene.paint.Color.WHITE);
-				meshView.setCullFace(CullFace.BACK);
-				root.getChildren().add(meshView);
-				Log.debug("Adding to thumbnail " + csg.getName());
+				//if (!views.containsKey(csg.getName())) {
+					PhongMaterial material = new PhongMaterial();
+					MeshView newMesh = csg.movez(-zCenter).newMesh();
+					if (csg.isHole()) {
+						material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
+						newMesh.setMaterial(material);
+						newMesh.setOpacity(0.25);
+					}
+					material.setSpecularColor(javafx.scene.paint.Color.WHITE);
+					newMesh.setCullFace(CullFace.BACK);
+					//views.put(csg.getName(),  newMesh);
+					Log.debug("Adding to thumbnail " + csg.getName());
+				//}
+				root.getChildren().add(newMesh);
 
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
 			}
-		}
-		if (root.getChildren().size() == 0) {
-			Log.error("Thumbnail is empty!");
 		}
 
 		// Calculate the bounds of all CSGs combined
@@ -171,11 +165,10 @@ public class ThumbnailImage {
 
 		Affine af = TransformFactory.nrToAffine(camoffset.times(rot.times(camDist)));
 		camera.getTransforms().add(af);
-		if (scene == null) {
-			scene = new Scene(root, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
-			scene.setFill(Color.TRANSPARENT);
-			scene.setCamera(camera);
-		}
+		Scene scene = new Scene(root, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
+		scene.setFill(Color.TRANSPARENT);
+		scene.setCamera(camera);
+		
 		// Set up snapshot parameters
 		SnapshotParameters params = new SnapshotParameters();
 		params.setFill(Color.TRANSPARENT);
@@ -190,7 +183,7 @@ public class ThumbnailImage {
 		WritableImage snapshot = new WritableImage(imageSize, imageSize);
 
 		root.snapshot(params, snapshot);
-
+		root.getChildren().clear();
 		return snapshot;
 	}
 }
