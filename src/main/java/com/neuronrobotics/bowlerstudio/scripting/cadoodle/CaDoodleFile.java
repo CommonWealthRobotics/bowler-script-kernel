@@ -1113,7 +1113,7 @@ public class CaDoodleFile {
 			getBom().save();
 		if (isTimelineOpen())
 			getSaveUpdate().renderSplashFrame(100, "Doodle save Done ");
-		fireTimelineUpdate(num);
+		
 		// System.gc();
 		return getSelf();
 	}
@@ -1181,15 +1181,16 @@ public class CaDoodleFile {
 					Files.copy(imageCache.toPath(), image.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				}
 				System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
+				fireTimelineUpdateListeners(currentIndex2,imageCache);
 			}
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 
-	private void fireTimelineUpdate(int number) {
+	private void fireTimelineUpdateListeners(int number,File image) {
 		for (ICaDoodleStateUpdate s : listeners) {
-			s.onTimelineUpdate(number);
+			s.onTimelineUpdate(number, image);
 		}
 	}
 

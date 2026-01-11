@@ -1,5 +1,6 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import java.io.File;
 import java.util.List;
 
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
@@ -14,5 +15,5 @@ public interface ICaDoodleStateUpdate {
 	public void onRegenerateDone();
 	public void onRegenerateStart(CaDoodleOperation source);
 	public void onWorkplaneChange(TransformNR newWP);
-	public void onTimelineUpdate(int numberOfNew);
+	public void onTimelineUpdate(int numberOfNew, File image);
 }

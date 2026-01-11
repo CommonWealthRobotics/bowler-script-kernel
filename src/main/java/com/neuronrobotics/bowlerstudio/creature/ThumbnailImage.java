@@ -176,12 +176,13 @@ public class ThumbnailImage {
 		TransformNR camDist = new TransformNR(0, 0, -cameraDistance);
 		TransformNR rot = new TransformNR(new RotationNR(-150, 45, 0));
 
-		Affine af = TransformFactory.nrToAffine(camoffset.times(rot.times(camDist)));
+		TransformNR times = camoffset.times(rot.times(camDist));
 	
 
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<WritableImage> imageRef = new AtomicReference<>();
 		BowlerKernel.runLater(() -> {
+			Affine af = TransformFactory.nrToAffine(times);
 			try {
 				camera.getTransforms().add(af);
 				Scene scene = new Scene(root, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
