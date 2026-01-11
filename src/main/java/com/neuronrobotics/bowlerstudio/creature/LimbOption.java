@@ -35,6 +35,7 @@ import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
@@ -43,6 +44,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 public class LimbOption {
@@ -163,8 +165,8 @@ public class LimbOption {
 					com.neuronrobotics.sdk.common.Log.error(e);
 				}
 			} catch (NoImageException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.error(e);
+				image=new WritableImage(100, 100);
 			}
 
 		}

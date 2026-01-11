@@ -37,6 +37,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
+import com.neuronrobotics.bowlerstudio.creature.NoImageException;
 import com.neuronrobotics.bowlerstudio.creature.ThumbnailImage;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
@@ -101,7 +102,7 @@ public class CaDoodleFile {
 	private IAcceptPruneForward accept = null;
 	private long timeOfLastUpdate = 0;
 	private OperationResult result = OperationResult.APPEND;
-	private ThumbnailImage imageEngine=null;
+	private ThumbnailImage imageEngine = null;
 	private ICadoodleSaveStatusUpdate defaultSaver = new ICadoodleSaveStatusUpdate() {
 		@Override
 		public void renderSplashFrame(int percent, String message) {
@@ -115,8 +116,9 @@ public class CaDoodleFile {
 	private File objectDir;
 	private ExecutorService executor = Executors.newFixedThreadPool(5);
 	private File imageCacheDir;
+
 	@Override
-	public String toString(){
+	public String toString() {
 		return projectName;
 	}
 
@@ -178,10 +180,11 @@ public class CaDoodleFile {
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
 		try {
 			if (Platform.isFxApplicationThread()) {
-				//new RuntimeException("This should not be called from the UI thread!").printStackTrace();
+				// new RuntimeException("This should not be called from the UI
+				// thread!").printStackTrace();
 				;
 			}
-		}catch(Exception ex) {
+		} catch (Exception ex) {
 			// skipping no toolkit exceptions
 		}
 //		if (cache.get(op) == null && isInitialized()) {
@@ -223,9 +226,9 @@ public class CaDoodleFile {
 		List<CSG> back = cache.remove(op);
 		if (back != null)
 			back.clear();
-		List<CSG> cachedCopy=new ArrayList<>(cachedCopyIn);
+		List<CSG> cachedCopy = new ArrayList<>(cachedCopyIn);
 		cache.put(op, cachedCopy);
-		//executor.submit(() -> {
+		// executor.submit(() -> {
 //			File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opToIndex(op) + ".csg");
 //			if (cacheFile.exists() && !isInitialized())
 //				return;
@@ -238,7 +241,7 @@ public class CaDoodleFile {
 //				Log.error(ex);
 //				throw new RuntimeException(ex);
 //			}
-		//});
+		// });
 
 	}
 
@@ -282,7 +285,7 @@ public class CaDoodleFile {
 			getObjectDir();
 			getCsgDBinstance();// initialize the instance on initialize
 			// CSGDatabase.setInstance(getCsgDBinstance());
-			
+
 			getBom().clear();
 			getBom().save();
 		}
@@ -307,12 +310,12 @@ public class CaDoodleFile {
 				process(op);
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
-				//indexStarting = i ;
-				//break;
-				//toRem.add(op);
+				// indexStarting = i ;
+				// break;
+				// toRem.add(op);
 			}
 		}
-		//opperations.removeAll(toRem);
+		// opperations.removeAll(toRem);
 //		if(indexStarting>opperations.size()) {
 //			indexStarting = opperations.size();
 //		}
@@ -356,7 +359,7 @@ public class CaDoodleFile {
 					break;
 				}
 			}
-			
+
 		}
 		getBom().save();
 	}
@@ -504,30 +507,30 @@ public class CaDoodleFile {
 
 	}
 
-	private void process(CaDoodleOperation op) throws Exception{
+	private void process(CaDoodleOperation op) throws Exception {
 		op.setCaDoodleFile(this);
-		List<CSG> process=null;
-		Exception ex=null;
+		List<CSG> process = null;
+		Exception ex = null;
 		try {
-			process= op.process(getCurrentState());
+			process = op.process(getCurrentState());
 			if (MakeRobot.class.isInstance(op)) {
 				MakeRobot mr = (MakeRobot) op;
 				getRobots().put(mr.getName(), mr.getBuilder());
 			}
-		}catch(Exception ex1) {
-			ex=ex1;
+		} catch (Exception ex1) {
+			ex = ex1;
 		}
-		if(process==null) {
-			process=getCurrentState();
+		if (process == null) {
+			process = getCurrentState();
 		}
-		if(process.size()==0) {
+		if (process.size() == 0) {
 			Log.error("Nothing returned int he process step?");
 		}
 		int currentIndex2 = getCurrentIndex();
 		storeResultInCache(op, process);
 		setCurrentIndex(currentIndex2 + 1);
 		setCurrentState(op, process);
-		if(ex!=null)
+		if (ex != null)
 			throw ex;
 	}
 
@@ -655,7 +658,7 @@ public class CaDoodleFile {
 		return t;
 	}
 
-	public static CSG getByName(List<CSG> back, String name) throws NameMissingException{
+	public static CSG getByName(List<CSG> back, String name) throws NameMissingException {
 		for (CSG c : back) {
 			if (c.getName().contentEquals(name))
 				return c;
@@ -672,10 +675,10 @@ public class CaDoodleFile {
 				CSG c = getByName(back, s);
 				if (c.isInGroup())
 					continue;
-			}catch(NameMissingException e) {
+			} catch (NameMissingException e) {
 				continue;
 			}
-	
+
 			applyToAllConstituantElements(addRet, s, back, p, depth, appliedMemory);
 		}
 		return back.size();
@@ -1114,6 +1117,7 @@ public class CaDoodleFile {
 		// System.gc();
 		return getSelf();
 	}
+
 	public File getBomFile() {
 		return getBom().getBomFile();
 	}
@@ -1121,6 +1125,7 @@ public class CaDoodleFile {
 	public File getBomCsv() {
 		return getBom().getBomCsv();
 	}
+
 	public File getSTLThumbnailFile() {
 		File back = new File(getSTLThumbnailLocation());
 		return back;
@@ -1208,36 +1213,15 @@ public class CaDoodleFile {
 	}
 
 	private javafx.scene.image.WritableImage loadingImageFromUIThread(List<CSG> currentState) {
-		if (currentState == null || imageEngine==null)
+		if (currentState == null || imageEngine == null)
 			throw new RuntimeException("Can not be null");
 		ArrayList<javafx.scene.image.WritableImage> holder = new ArrayList<WritableImage>();
+
 		try {
-			BowlerKernel.runLater(() -> {
-				try {
-					holder.add(imageEngine.get(getCsgDBinstance(), currentState));
-				}catch(Exception ex) {
-					ex.printStackTrace();
-					holder.add(new WritableImage(100, 100));
-				}
-			});
-		} catch (Throwable ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
-			return null;
-		}
-		long start = System.currentTimeMillis();
-		while (holder.size() == 0) {
-			try {
-				Thread.sleep(16);
-				// com.neuronrobotics.sdk.common.Log.error("Waiting for image to write");
-			} catch (InterruptedException e) {
-				// Auto-generated catch block
-				com.neuronrobotics.sdk.common.Log.error(e);
-				break;
-			}
-			if (System.currentTimeMillis() - start > 2000 && holder.size() == 0) {
-				throw new RuntimeException("Failed to create image");
-			}
+			holder.add(imageEngine.get(getCsgDBinstance(), currentState));
+		} catch (NoImageException ex) {
+			Log.error(ex);
+			holder.add(new WritableImage(100, 100));
 		}
 		return holder.get(0);
 	}
@@ -1472,7 +1456,7 @@ public class CaDoodleFile {
 	public File getImageCacheDir() {
 		if (imageCacheDir == null) {
 			File parent = getSelf().getAbsoluteFile().getParentFile();
-			imageCacheDir=(new File(parent.getAbsolutePath() + delim() + "timeline"));
+			imageCacheDir = (new File(parent.getAbsolutePath() + delim() + "timeline"));
 			if (!imageCacheDir.exists())
 				imageCacheDir.mkdir();
 		}
@@ -1480,20 +1464,23 @@ public class CaDoodleFile {
 	}
 
 	public VitaminBomManager getBom() {
-		if(bom==null) {
-			bom=CaDoodleFile.getBillOfMaterials(this);
+		if (bom == null) {
+			bom = CaDoodleFile.getBillOfMaterials(this);
 		}
 		return bom;
 	}
+
 	public File getIgnoreFile() {
-		return new File(getSelf().getParent()+delim()+"ignoreMeInProjectManager");
+		return new File(getSelf().getParent() + delim() + "ignoreMeInProjectManager");
 	}
+
 	public boolean isIgnore() {
 		return getIgnoreFile().exists();
 	}
+
 	public void setIgnore() {
-		File f=getIgnoreFile();
-		if(!f.exists())
+		File f = getIgnoreFile();
+		if (!f.exists())
 			try {
 				f.createNewFile();
 			} catch (IOException e) {
@@ -1501,9 +1488,10 @@ public class CaDoodleFile {
 				e.printStackTrace();
 			}
 	}
+
 	public void clearIgnore() {
-		File f=getIgnoreFile();
-		if(f.exists())
+		File f = getIgnoreFile();
+		if (f.exists())
 			try {
 				f.delete();
 			} catch (Exception e) {
