@@ -24,16 +24,31 @@ public class Build123dLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
-		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl");
-		stl.deleteOnExit();
-		HashMap<String,Double> params=new HashMap<String, Double>();
+		HashMap<String,Object> params=new HashMap<String, Object>();
 		if(args!=null) {
 			Object o = args.get(0);
 			if(HashMap.class.isInstance(o)) {
-				params=(HashMap<String,Double>)o;
+				params=(HashMap<String,Object>)o;
 			}
 		}
-		
+		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl");
+		stl.deleteOnExit();
+		CSG back = toCSG(db, code, stl, params);
+		return back;
+	}
+	public static CSG toCSG(CSGDatabaseInstance db, HashMap<String, Object> params)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		File stl = File.createTempFile("build123d_temp", ".stl");
+		stl.deleteOnExit();
+		return toCSG(db, null, stl, params);
+	}
+	public static CSG toCSG(CSGDatabaseInstance db,  File stl, HashMap<String, Object> params)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		return toCSG(db, null, stl, params);
+	}
+
+	public static CSG toCSG(CSGDatabaseInstance db, File code, File stl, HashMap<String, Object> params)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		toSTLFile(code,stl,params);
 		CSG back = Vitamins.get(db,stl,true);
 		back.setColor(Color.ANTIQUEWHITE);
@@ -60,12 +75,14 @@ public class Build123dLoader implements IScriptingLanguage {
 
 
 
-
-	public static void toSTLFile(File build123dScript,File stlout, HashMap<String,Double> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void toSTLFile(File stlout, HashMap<String,Object> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		toSTLFile(null,stlout,params);
+	}
+	public static void toSTLFile(File build123dScript,File stlout, HashMap<String,Object> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("build123d", null);
 		File dir = getDestinationDir("build123d");
 		if(params==null)
-			params=new HashMap<String, Double>();
+			params=new HashMap<String, Object>();
 		ArrayList<String> args = new ArrayList<>();
 
 		if(stlout.exists())
@@ -77,7 +94,8 @@ public class Build123dLoader implements IScriptingLanguage {
 			args.add("-D");
 			args.add(key+"="+params.get(key));
 		}
-		args.add(build123dScript.getAbsolutePath());
+		if(build123dScript!=null)
+			args.add(build123dScript.getAbsolutePath());
 //		args.add("-o");
 //		args.add(stlout.getAbsolutePath());
 		legacySystemRun(null, dir, System.out, args);
@@ -101,7 +119,7 @@ public class Build123dLoader implements IScriptingLanguage {
 		File testblend = new File("build123dTest.py");
 		if(!testblend.exists())
 			loader.getDefaultContents(testblend);
-		HashMap<String,Double> params = new HashMap<String, Double>();
+		HashMap<String,Object> params = new HashMap<String, Object>();
 		toSTLFile(testblend, new File("build123dTest.py.stl"),params);
 	}
 

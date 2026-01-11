@@ -19,7 +19,6 @@ import com.neuronrobotics.sdk.common.Log;
 public class Build123dTest {
 
 	@Test
-	@Ignore
 	public void test() throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		Build123dLoader loader = new Build123dLoader();
 		Log.enableDebugPrint();
@@ -27,7 +26,7 @@ public class Build123dTest {
 		File testblend = new File("build123dTest.py");
 		if(!testblend.exists())
 			loader.getDefaultContents(testblend);
-		HashMap<String,Double> params = new HashMap<String, Double>();
+		HashMap<String,Object> params = new HashMap<String, Object>();
 		Build123dLoader.toSTLFile(testblend, new File("build123dTest.py.stl"),params);
 		
 		File gears = ScriptingEngine.fileFromGit("https://github.com/GarryBGoode/gggears.git", "examples/examples.py");
