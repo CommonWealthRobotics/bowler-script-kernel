@@ -33,10 +33,10 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Affine;
 
 public class ThumbnailImage {
-	// private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
-	// private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
+	private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
+	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
 
-	private int imageSize = 200;
+	private int imageSize = 80;
 
 	public Bounds getSellectedBounds(List<CSG> incomingToDisplay) {
 		Vector3d min = null;
@@ -72,13 +72,26 @@ public class ThumbnailImage {
 		return new Bounds(min, max);
 	}
 
+	public boolean same(CSG a, CSG b) {
+
+		Bounds bounds = a.getBounds();
+		Bounds bounds2 = b.getBounds();
+		if (!bounds.getMin().epsilonEquals(bounds2.getMin(), 0.01)) {
+			return false;
+		}
+		if (!bounds.getMax().epsilonEquals(bounds2.getMax(), 0.01)) {
+			return false;
+		}
+		return true;
+	}
+
 	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay) throws NoImageException {
 		try {
 			if (Platform.isFxApplicationThread()) {
-				 throw new RuntimeException("This should not be called from the UI thread!");
-				
+				throw new RuntimeException("This should not be called from the UI thread!");
+
 			}
-		}catch(Exception ex) {
+		} catch (Exception ex) {
 			// skipping no toolkit exceptions
 		}
 		ArrayList<CSG> csgList = new ArrayList<CSG>();
@@ -88,10 +101,6 @@ public class ThumbnailImage {
 				continue;
 			if (csg.isInGroup())
 				continue;
-			// boolean containsKey = csgs.containsKey(csg.getName());
-			// csgs.put(csg.getName(), csg);
-//			if (containsKey)
-//				continue;
 			if (csg.hasManipulator()) {
 				TransformNR nr;
 				if (csg.hasManipulator())
@@ -108,23 +117,26 @@ public class ThumbnailImage {
 			} else
 				csgList.add(csg);
 		}
-//		ArrayList<String> toRemove = new ArrayList<String>();
-//		for (String s : views.keySet()) {
-//			boolean exists = false;
-//			for (CSG cs : incomingToDisplay) {
-//				if (cs.getName().contentEquals(s)) {
-//					exists = true;
-//					break;
-//				}
-//			}
-//			if (!exists) {
-//				toRemove.add(s);
-//			}
-//		}
-//		for (String s : toRemove) {
-//			views.remove(s);
-//			Log.debug("Removing from thumbnail " + s);
-//		}
+		ArrayList<String> toRemove = new ArrayList<String>();
+		for (String s : views.keySet()) {
+			boolean exists = false;
+			for (CSG cs : incomingToDisplay) {
+				if (cs.getName().contentEquals(s)) {
+					if (same(cs, csgs.get(s))) {
+						exists = true;
+						break;
+					}
+				}
+			}
+			if (!exists) {
+				toRemove.add(s);
+			}
+		}
+		for (String s : toRemove) {
+			views.remove(s);
+			csgs.remove(s);
+			Log.debug("Removing from thumbnail " + s);
+		}
 
 		// Add all meshes to the group
 
@@ -140,20 +152,21 @@ public class ThumbnailImage {
 			if (csg.isInGroup())
 				continue;
 			try {
-				// if (!views.containsKey(csg.getName())) {
-				PhongMaterial material = new PhongMaterial();
-				MeshView newMesh = csg.movez(-zCenter).newMesh();
-				if (csg.isHole()) {
-					material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
-					newMesh.setMaterial(material);
-					newMesh.setOpacity(0.25);
+				if (!views.containsKey(csg.getName())) {
+					PhongMaterial material = new PhongMaterial();
+					MeshView newMesh = csg.movez(-zCenter).newMesh();
+					if (csg.isHole()) {
+						material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
+						newMesh.setMaterial(material);
+						newMesh.setOpacity(0.25);
+					}
+					material.setSpecularColor(javafx.scene.paint.Color.WHITE);
+					newMesh.setCullFace(CullFace.BACK);
+					views.put(csg.getName(), newMesh);
+					csgs.put(csg.getName(), csg);
+					Log.debug("Adding to thumbnail " + csg.getName());
 				}
-				material.setSpecularColor(javafx.scene.paint.Color.WHITE);
-				newMesh.setCullFace(CullFace.BACK);
-				// views.put(csg.getName(), newMesh);
-				Log.debug("Adding to thumbnail " + csg.getName());
-				// }
-				root.getChildren().add(newMesh);
+				root.getChildren().add(views.get(csg.getName()));
 
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
@@ -177,7 +190,6 @@ public class ThumbnailImage {
 		TransformNR rot = new TransformNR(new RotationNR(-150, 45, 0));
 
 		TransformNR times = camoffset.times(rot.times(camDist));
-	
 
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<WritableImage> imageRef = new AtomicReference<>();
@@ -206,11 +218,11 @@ public class ThumbnailImage {
 				latch.countDown(); // Signal completion
 			}
 		});
-		boolean completed=false;
+		boolean completed = false;
 		try {
 			completed = latch.await(2, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
-			
+
 		}
 
 		if (!completed) {
