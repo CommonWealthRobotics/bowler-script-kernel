@@ -60,12 +60,12 @@ public class LimbOption {
 	ControllerFeatures consumes;
 	@Expose(serialize = true, deserialize = true)
 	ControllerFeatures provides;
-	public static final TransformNR LimbRotationOffset=new TransformNR(new RotationNR(0, 90, -90));
+	public static final TransformNR LimbRotationOffset = new TransformNR(new RotationNR(0, 90, -90));
 
 	private CSG indicator;
 	private Image image;
 
-	public DHParameterKinematics getLimb(CSGDatabaseInstance db,String uniqueName) throws Exception {
+	public DHParameterKinematics getLimb(CSGDatabaseInstance db, String uniqueName) throws Exception {
 		String xmlContent = ScriptingEngine.codeFromGit(getUrl(), getSourceFile())[0];
 		if (!composite) {
 			DHParameterKinematics newLimb = new DHParameterKinematics(null, IOUtils.toInputStream(xmlContent, "UTF-8"));
@@ -73,7 +73,7 @@ public class LimbOption {
 			MobileBaseLoader.setDefaultDhParameterKinematics(db, newLimb);
 			return newLimb;
 		} else {
-			MobileBase base =  RobotHelper.fileToRobot(db,getUrl(), getSourceFile());
+			MobileBase base = RobotHelper.fileToRobot(db, getUrl(), getSourceFile());
 			DHParameterKinematics newLimb = base.getAllDHChains().get(0);
 			newLimb.setScriptingName(uniqueName);
 			return newLimb;
@@ -91,14 +91,16 @@ public class LimbOption {
 			String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 			return gson.fromJson(content, TT_CaDoodleFile);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 			return new ArrayList<LimbOption>();
 		}
 	}
 
 	@Override
 	public String toString() {
-		return getType() + " " + getName() + " " + getUrl() + "/" + getSourceFile() + "\n\tConsumes:" + getConsumes() + "\n\tProvides:" + getProvides();
+		return getType() + " " + getName() + " " + getUrl() + "/" + getSourceFile() + "\n\tConsumes:" + getConsumes()
+				+ "\n\tProvides:" + getProvides();
 	}
 
 	public ControllerFeatures getConsumes() {
@@ -125,21 +127,21 @@ public class LimbOption {
 		File imageFile = new File(absolutePath + delim() + type + name + ".png");
 		File stlFile = new File(absolutePath + delim() + type + name + ".stl");
 		if (imageFile.exists() && stlFile.exists()) {
-			indicator = Vitamins.get(f.getCsgDBinstance(),stlFile);
-			indicator=indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
+			indicator = Vitamins.get(f.getCsgDBinstance(), stlFile);
+			indicator = indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
 			indicator.setColor(Color.WHITE);
 			image = new Image(imageFile.toURI().toString());
 			return;
 		}
-		AddRobotLimb add = new AddRobotLimb().setLimb(this)
-				.setLocation(new TransformNR());
+		AddRobotLimb add = new AddRobotLimb().setLimb(this).setLocation(new TransformNR());
 		add.setCaDoodleFile(f);
-		add.forceLoad=true;
-		MobileBaseBuilder value = new MobileBaseBuilder(f.getCsgDBinstance(),Files.createTempDirectory(name + "-").toFile().getAbsolutePath(), "testfile");
+		add.forceLoad = true;
+		MobileBaseBuilder value = new MobileBaseBuilder(f.getCsgDBinstance(),
+				Files.createTempDirectory(name + "-").toFile().getAbsolutePath(), "testfile");
 		add.setBuilderName("tmp");
 		add.getRobots().put("tmp", value);
 		List<CSG> so = add.process(new ArrayList<>());
-		if(so.size()==0)
+		if (so.size() == 0)
 			throw new RuntimeException("Add limb produced no parts!");
 		add.getRobots().remove("tmp");
 		for (CSG c : so) {
@@ -147,49 +149,45 @@ public class LimbOption {
 				f.getCsgDBinstance().delete(s);
 			}
 		}
-		if(f.getImageEngine()!=null) {
-			BowlerKernel.runLater(() -> {
-				image = f.getImageEngine().get(f.getCsgDBinstance(),so);
-			});
-			long start =System.currentTimeMillis();
-			
-			while(image==null && (System.currentTimeMillis()-start<250)) {
+		if (f.getImageEngine() != null) {
+
+			try {
+				image = f.getImageEngine().get(f.getCsgDBinstance(), so);
 				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+					BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+					ImageIO.write(bufferedImage, "png", imageFile);
+					System.err.println("Thumbnail saved successfully to " + imageFile.getAbsolutePath());
+				} catch (Exception e) {
+					// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
+					// e.getMessage());
 					com.neuronrobotics.sdk.common.Log.error(e);
 				}
+			} catch (NoImageException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			try {
-				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
-				ImageIO.write(bufferedImage, "png", imageFile);
-				System.err.println("Thumbnail saved successfully to " + imageFile.getAbsolutePath());
-			} catch (Exception e) {
-				// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
-				// e.getMessage());
-				com.neuronrobotics.sdk.common.Log.error(e);
-			}
+
 		}
 		indicator = get(so.get(0));
 		if (so.size() > 1) {
-			for(int i=1;i<so.size();i++) {
-				indicator=indicator.dumbUnion(get(so.get(i)));
+			for (int i = 1; i < so.size(); i++) {
+				indicator = indicator.dumbUnion(get(so.get(i)));
 			}
 		}
 		indicator.setColor(Color.WHITE);
 		try {
-			FileUtil.write(Paths.get(stlFile.getAbsolutePath()),indicator.toStlString());
+			FileUtil.write(Paths.get(stlFile.getAbsolutePath()), indicator.toStlString());
 			System.err.println("Indicator STL saved successfully to " + stlFile.getAbsolutePath());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
-		indicator=indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
+		indicator = indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
 
 	}
+
 	CSG get(CSG in) {
-		if(in.hasManipulator())
+		if (in.hasManipulator())
 			try {
 				return in.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(in.getManipulator())));
 			} catch (MissingManipulatorException e) {
@@ -198,9 +196,11 @@ public class LimbOption {
 			}
 		return in;
 	}
+
 	public javafx.scene.image.Image getImage() {
 		return image;
 	}
+
 	public CSG getIndicator() {
 		return indicator;
 	}

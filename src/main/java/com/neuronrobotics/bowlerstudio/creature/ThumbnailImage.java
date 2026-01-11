@@ -3,7 +3,11 @@ package com.neuronrobotics.bowlerstudio.creature;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
@@ -14,6 +18,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
@@ -29,7 +34,7 @@ import javafx.scene.transform.Affine;
 
 public class ThumbnailImage {
 	// private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
-	//private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
+	// private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
 
 	private int imageSize = 200;
 
@@ -67,7 +72,15 @@ public class ThumbnailImage {
 		return new Bounds(min, max);
 	}
 
-	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay) {
+	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay) throws NoImageException {
+		try {
+			if (Platform.isFxApplicationThread()) {
+				 throw new RuntimeException("This should not be called from the UI thread!");
+				
+			}
+		}catch(Exception ex) {
+			// skipping no toolkit exceptions
+		}
 		ArrayList<CSG> csgList = new ArrayList<CSG>();
 		Bounds b = getSellectedBounds(incomingToDisplay);
 		for (CSG csg : incomingToDisplay) {
@@ -127,19 +140,19 @@ public class ThumbnailImage {
 			if (csg.isInGroup())
 				continue;
 			try {
-				//if (!views.containsKey(csg.getName())) {
-					PhongMaterial material = new PhongMaterial();
-					MeshView newMesh = csg.movez(-zCenter).newMesh();
-					if (csg.isHole()) {
-						material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
-						newMesh.setMaterial(material);
-						newMesh.setOpacity(0.25);
-					}
-					material.setSpecularColor(javafx.scene.paint.Color.WHITE);
-					newMesh.setCullFace(CullFace.BACK);
-					//views.put(csg.getName(),  newMesh);
-					Log.debug("Adding to thumbnail " + csg.getName());
-				//}
+				// if (!views.containsKey(csg.getName())) {
+				PhongMaterial material = new PhongMaterial();
+				MeshView newMesh = csg.movez(-zCenter).newMesh();
+				if (csg.isHole()) {
+					material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
+					newMesh.setMaterial(material);
+					newMesh.setOpacity(0.25);
+				}
+				material.setSpecularColor(javafx.scene.paint.Color.WHITE);
+				newMesh.setCullFace(CullFace.BACK);
+				// views.put(csg.getName(), newMesh);
+				Log.debug("Adding to thumbnail " + csg.getName());
+				// }
 				root.getChildren().add(newMesh);
 
 			} catch (Throwable t) {
@@ -164,26 +177,45 @@ public class ThumbnailImage {
 		TransformNR rot = new TransformNR(new RotationNR(-150, 45, 0));
 
 		Affine af = TransformFactory.nrToAffine(camoffset.times(rot.times(camDist)));
-		camera.getTransforms().add(af);
-		Scene scene = new Scene(root, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
-		scene.setFill(Color.TRANSPARENT);
-		scene.setCamera(camera);
-		
-		// Set up snapshot parameters
-		SnapshotParameters params = new SnapshotParameters();
-		params.setFill(Color.TRANSPARENT);
-		params.setCamera(camera);
-		params.setDepthBuffer(true);
-		params.setTransform(Transform.scale(1, 1));
-		// Set the near and far clip
-		camera.setNearClip(0.1); // Set the near clip plane
-		camera.setFarClip(9000.0); // Set the far clip plane
+	
 
-		// Create the WritableImage first
-		WritableImage snapshot = new WritableImage(imageSize, imageSize);
+		CountDownLatch latch = new CountDownLatch(1);
+		AtomicReference<WritableImage> imageRef = new AtomicReference<>();
+		BowlerKernel.runLater(() -> {
+			try {
+				camera.getTransforms().add(af);
+				Scene scene = new Scene(root, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
+				scene.setFill(Color.TRANSPARENT);
+				scene.setCamera(camera);
 
-		root.snapshot(params, snapshot);
-		root.getChildren().clear();
-		return snapshot;
+				// Set up snapshot parameters
+				SnapshotParameters params = new SnapshotParameters();
+				params.setFill(Color.TRANSPARENT);
+				params.setCamera(camera);
+				params.setDepthBuffer(true);
+				params.setTransform(Transform.scale(1, 1));
+				// Set the near and far clip
+				camera.setNearClip(0.1); // Set the near clip plane
+				camera.setFarClip(9000.0); // Set the far clip plane
+				WritableImage snapshot = new WritableImage(imageSize, imageSize);
+				imageRef.set(snapshot);
+				root.snapshot(params, snapshot);
+				root.getChildren().clear();
+			} finally {
+				latch.countDown(); // Signal completion
+			}
+		});
+		boolean completed=false;
+		try {
+			completed = latch.await(2, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			
+		}
+
+		if (!completed) {
+			throw new NoImageException("JavaFX thread did not complete within 2 seconds");
+		}
+
+		return imageRef.get();
 	}
 }
