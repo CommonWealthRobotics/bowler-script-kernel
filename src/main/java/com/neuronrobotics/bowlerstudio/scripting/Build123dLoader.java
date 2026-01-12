@@ -60,6 +60,8 @@ public class Build123dLoader implements IScriptingLanguage {
 			b.setColor(Color.ANTIQUEWHITE);
 			back.add(b);
 		}
+		if(back.size()==0)
+			throw new IOException("Failed to create files");
 		return back;
 	}
 
@@ -86,7 +88,7 @@ public class Build123dLoader implements IScriptingLanguage {
 	public static void toSTLFile(Path stlout, ArrayList<Object> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		toSTLFile(null,stlout,params);
 	}
-	public static void toSTLFile(File build123dScript,Path stlout, ArrayList<Object> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void toSTLFile(File build123dScript,Path stlout, ArrayList<Object> params) throws IOException, InterruptedException {
 		File exe = getConfigExecutable("build123d", null);
 		File dir = getDestinationDir("build123d");
 		if(params==null)
