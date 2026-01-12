@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -16,6 +17,8 @@ import com.neuronrobotics.bowlerstudio.scripting.Build123dLoader;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.common.Log;
 
+import eu.mihosoft.vrl.v3d.CSG;
+
 public class Build123dTest {
 
 	@Test
@@ -23,15 +26,12 @@ public class Build123dTest {
 	public void test() throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		Build123dLoader loader = new Build123dLoader();
 		Log.enableDebugPrint();
-		// create test file
-		File testblend = new File("build123dTest.py");
-		if(!testblend.exists())
-			loader.getDefaultContents(testblend);
-		HashMap<String,Double> params = new HashMap<String, Double>();
-		Build123dLoader.toSTLFile(testblend, new File("build123dTest.py.stl"),params);
-		
-		File gears = ScriptingEngine.fileFromGit("https://github.com/GarryBGoode/gggears.git", "examples/examples.py");
-		Build123dLoader.toSTLFile(gears, new File("gears.stl"),params);
+		//ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
+		ArrayList<CSG > parts = (ArrayList<CSG>)ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(), 
+				"https://github.com/madhephaestus/CaDoodle-Example-Objects.git", "build123d/gggears.groovy");
+
+//		if(parts.size()==0)
+//			throw new IOException("Failed to create files");
 		
 		
 	}
