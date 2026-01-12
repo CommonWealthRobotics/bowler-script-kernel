@@ -60,8 +60,6 @@ public class Build123dLoader implements IScriptingLanguage {
 			b.setColor(Color.ANTIQUEWHITE);
 			back.add(b);
 		}
-		if(back.size()==0)
-			throw new IOException("Failed to create files");
 		return back;
 	}
 
