@@ -3,13 +3,9 @@ package junit.bowler;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -18,12 +14,13 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 
 public class Build123dTest {
 
 	@Test
 	@Ignore
-	public void test() throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public void test() throws Exception {
 		Build123dLoader loader = new Build123dLoader();
 		Log.enableDebugPrint();
 		//ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
