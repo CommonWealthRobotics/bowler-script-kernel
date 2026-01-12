@@ -277,6 +277,7 @@ public class CaDoodleFile {
 //		if (initializing)
 //			throw new RuntimeException("Can not initialize while initializing.");
 		fireInitializationStart();
+		setImageEngine(new ThumbnailImage());
 		initializing = true;
 		if (timeCreated < 0)
 			timeCreated = System.currentTimeMillis();
@@ -1505,7 +1506,7 @@ public class CaDoodleFile {
 		return imageEngine;
 	}
 
-	public void setImageEngine(ThumbnailImage imageEngine) {
+	private void setImageEngine(ThumbnailImage imageEngine) {
 		this.imageEngine = imageEngine;
 	}
 }
