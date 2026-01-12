@@ -3,10 +3,7 @@ package junit.bowler;
 import static org.junit.Assert.*;
 
 import java.io.File;
-<<<<<<< HEAD
 import java.io.IOException;
-=======
->>>>>>> branch 'development' of git@github.com:CommonWealthRobotics/bowler-script-kernel.git
 import java.util.ArrayList;
 import java.util.HashMap;
 
