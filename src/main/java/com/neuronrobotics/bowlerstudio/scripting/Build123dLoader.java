@@ -104,11 +104,11 @@ public class Build123dLoader implements IScriptingLanguage {
 			throw new RuntimeException("Output file should be a directory");
 		args.add(exe.getAbsolutePath());
 		args.add("run");
-		args.add("python");
-		if (build123dScript != null)
+		if (build123dScript != null) {
+			args.add("python");
 			args.add(build123dScript.getAbsolutePath());
-		else
-			args.add(".venv/lib64/python3.12/site-packages/build123d_cli/build123d_cli.py");
+		}else
+			args.add("build123d_cli");
 		for (Object key : params) {
 			args.add(key.toString());
 		}
