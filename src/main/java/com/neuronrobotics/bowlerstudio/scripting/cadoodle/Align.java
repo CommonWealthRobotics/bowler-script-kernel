@@ -301,4 +301,8 @@ public class Align extends CaDoodleOperation {
 
 		return new Bounds(min, max);
 	}
+
+	public Align copy() {
+		return new Align().setBounds(boundNames).setNames(names).setAlignParams(x, y, z).setWorkplane(workplane);
+	}
 }
