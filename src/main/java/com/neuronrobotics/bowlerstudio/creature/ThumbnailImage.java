@@ -36,7 +36,7 @@ public class ThumbnailImage {
 	private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
 	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
 
-	private int imageSize = 80;
+	private int imageSize = 300;
 
 	public Bounds getSellectedBounds(List<CSG> incomingToDisplay) {
 		Vector3d min = null;
@@ -160,7 +160,7 @@ public class ThumbnailImage {
 						newMesh.setMaterial(material);
 						newMesh.setOpacity(0.25);
 					}
-					material.setSpecularColor(javafx.scene.paint.Color.WHITE);
+					material.setSpecularColor(material.getDiffuseColor());
 					newMesh.setCullFace(CullFace.BACK);
 					views.put(csg.getName(), newMesh);
 					csgs.put(csg.getName(), csg);
