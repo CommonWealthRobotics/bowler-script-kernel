@@ -32,42 +32,6 @@ import javafx.application.Platform;
 
 public class GitHub {
     private static boolean shutdownInProgress;
-	static {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (shutdownInProgress) return;
-            shutdownInProgress = true;
-            
-            Log.info("Beginning graceful shutdown...");
-            
-            try {
-                // 1. Stop JavaFX
-                if ( isPlatformInitialized()&&Platform.isFxApplicationThread()) {
-                    Platform.exit();
-                    Thread.sleep(300);
-                }
-
-                
-                // 3. Force GC
-                System.gc();
-                System.runFinalization();
-                
-                // 4. Final wait
-                Thread.sleep(500);
-                
-                Log.info("Shutdown complete");
-            } catch (Exception e) {
-                Log.error( e);
-            }
-        }, "Shutdown-Hook"));
-    }
-    private static boolean isPlatformInitialized() {
-        try {
-            Platform.runLater(() -> {});
-            return true;
-        } catch (IllegalStateException e) {
-            return false;
-        }
-    }
 
   @Test
   public void test() throws Exception {

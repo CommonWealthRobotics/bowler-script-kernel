@@ -3,6 +3,7 @@ package junit.bowler;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -19,16 +20,14 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 public class Build123dTest {
 
 	@Test
-	@Ignore
 	public void test() throws Exception {
-		Build123dLoader loader = new Build123dLoader();
 		Log.enableDebugPrint();
 		//ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
 		ArrayList<CSG > parts = (ArrayList<CSG>)ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(), 
 				"https://github.com/madhephaestus/CaDoodle-Example-Objects.git", "build123d/gggears.groovy");
 
-//		if(parts.size()==0)
-//			throw new IOException("Failed to create files");
+		if(parts.size()==0)
+			throw new IOException("Failed to create files");
 		
 		
 	}
