@@ -1,11 +1,15 @@
 package com.neuronrobotics.bowlerstudio.scripting;
+
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -23,25 +27,50 @@ import javafx.scene.paint.Color;
 public class Build123dLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
-		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl");
-		stl.deleteOnExit();
-		HashMap<String,Double> params=new HashMap<String, Double>();
-		if(args!=null) {
+	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
+		ArrayList<Object> params = new ArrayList<>();
+		if (args != null) {
 			Object o = args.get(0);
-			if(HashMap.class.isInstance(o)) {
-				params=(HashMap<String,Double>)o;
+			if (HashMap.class.isInstance(o)) {
+				params = (ArrayList<Object>) o;
 			}
 		}
-		
-		toSTLFile(code,stl,params);
-		CSG back = Vitamins.get(db,stl,true);
-		back.setColor(Color.ANTIQUEWHITE);
+		Path tempDir = Files.createTempDirectory("build123d-");
+
+		List<CSG> back = toCSG(db, code, tempDir, params);
+		return back;
+	}
+
+	public static List<CSG> toCSG(CSGDatabaseInstance db, ArrayList<Object> params)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		Path tempDir = Files.createTempDirectory("build123d-");
+
+		return toCSG(db, null, tempDir, params);
+	}
+
+	public static List<CSG> toCSG(CSGDatabaseInstance db, Path stl, ArrayList<Object> params)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		return toCSG(db, null, stl, params);
+	}
+
+	public static List<CSG> toCSG(CSGDatabaseInstance db, File code, Path stl, ArrayList<Object> params)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		toSTLFile(code, stl, params);
+
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		for (File f : stl.toFile().listFiles()) {
+			Log.debug("Loading " + f);
+			if (f.getName().toLowerCase().endsWith(".stl")) {
+				CSG b = Vitamins.get(db, f, true);
+				b.setColor(Color.ANTIQUEWHITE);
+				back.add(b);
+			}
+		}
 		return back;
 	}
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(CSGDatabaseInstance db, String code, ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("Build123d can not run from a string");
 	}
 
@@ -58,35 +87,40 @@ public class Build123dLoader implements IScriptingLanguage {
 		return ext;
 	}
 
+	public static void toSTLFile(Path stlout, ArrayList<Object> params)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		toSTLFile(null, stlout, params);
+	}
 
-
-
-	public static void toSTLFile(File build123dScript,File stlout, HashMap<String,Double> params) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void toSTLFile(File build123dScript, Path stlout, ArrayList<Object> params)
+			throws IOException, InterruptedException {
 		File exe = getConfigExecutable("build123d", null);
 		File dir = getDestinationDir("build123d");
-		if(params==null)
-			params=new HashMap<String, Double>();
+		if (params == null)
+			params = new ArrayList<Object>();
 		ArrayList<String> args = new ArrayList<>();
 
-		if(stlout.exists())
-			stlout.delete();
+		if (!stlout.toFile().isDirectory())
+			throw new RuntimeException("Output file should be a directory");
 		args.add(exe.getAbsolutePath());
 		args.add("run");
 		args.add("python");
-		for(String key:params.keySet()) {
-			args.add("-D");
-			args.add(key+"="+params.get(key));
+		if (build123dScript != null)
+			args.add(build123dScript.getAbsolutePath());
+		else
+			args.add(".venv/lib64/python3.12/site-packages/build123d_cli/build123d_cli.py");
+		for (Object key : params) {
+			args.add(key.toString());
 		}
-		args.add(build123dScript.getAbsolutePath());
-//		args.add("-o");
-//		args.add(stlout.getAbsolutePath());
+		
+		args.add("export_directory");
+		args.add(stlout.toFile().getAbsolutePath());
 		legacySystemRun(null, dir, System.out, args);
 	}
+
 	@Override
 	public String getDefaultContents() {
-		return "from build123d import *\n"
-				+ "\n"
-				+ "cube = Box(10, 10, 10)";
+		return "from build123d import *\n" + "\n" + "cube = Box(10, 10, 10)";
 	}
 
 	@Override
@@ -94,15 +128,16 @@ public class Build123dLoader implements IScriptingLanguage {
 		return true;
 	}
 
-	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void main(String[] args)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		Build123dLoader loader = new Build123dLoader();
 		Log.enableDebugPrint();
 		// create test file
 		File testblend = new File("build123dTest.py");
-		if(!testblend.exists())
+		if (!testblend.exists())
 			loader.getDefaultContents(testblend);
-		HashMap<String,Double> params = new HashMap<String, Double>();
-		toSTLFile(testblend, new File("build123dTest.py.stl"),params);
+		ArrayList<Object> params = new ArrayList<Object>();
+		toSTLFile(testblend, new File("build123dTest").toPath(), params);
 	}
 
 }
