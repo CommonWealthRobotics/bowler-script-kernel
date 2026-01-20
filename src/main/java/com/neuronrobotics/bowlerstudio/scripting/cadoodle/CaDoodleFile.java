@@ -1059,12 +1059,9 @@ public class CaDoodleFile {
 	}
 
 	public File save() throws IOException, SaveOverwriteException {
-		if(saveing)
-			throw new SaveOverwriteException();
+		if(saveing||!isInitialized() || initializing)
+			throw new SaveOverwriteException();		
 		saveing=true;
-		
-		if (!isInitialized() || initializing)
-			return null;// do not save during initialize
 		if (timeCreated < 0)
 			timeCreated = System.currentTimeMillis();
 		String contents = toJson();
