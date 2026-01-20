@@ -214,7 +214,9 @@ public class ThumbnailImage {
 				imageRef.set(snapshot);
 				root.snapshot(params, snapshot);
 				root.getChildren().clear();
-			} finally {
+			} catch(Throwable t){
+				Log.error(t);
+			}finally {
 				latch.countDown(); // Signal completion
 			}
 		});
