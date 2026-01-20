@@ -54,7 +54,7 @@ public class VitaminBomManager {
 		File bom = getBomFile();
 		if (!bom.exists()) {
 			if (!bom.getParentFile().exists()) {
-				bom.getParentFile().mkdir();
+				bom.getParentFile().mkdirs();
 			}
 			try {
 				bom.createNewFile();

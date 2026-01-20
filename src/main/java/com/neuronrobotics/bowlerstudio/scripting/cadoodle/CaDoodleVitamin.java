@@ -89,7 +89,7 @@ public class CaDoodleVitamin {
 		try {
 //			com.neuronrobotics.sdk.common.Log.debug("Generating Vitamin "+type+" "+word.getStrValue()+" for vitamin named "+name);
 			part = Vitamins.get(instance,type, word.getStrValue()).setIsHole(true);
-			instance.saveDatabase();
+			//instance.saveDatabase();
 			Set<String> params = part.getParameters(instance);
 
 			part.setParameter(instance,word);

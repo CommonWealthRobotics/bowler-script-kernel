@@ -116,6 +116,7 @@ public class CaDoodleFile {
 	private File objectDir;
 	private ExecutorService executor = Executors.newFixedThreadPool(5);
 	private File imageCacheDir;
+	private boolean saveing;
 
 	@Override
 	public String toString() {
@@ -1057,8 +1058,12 @@ public class CaDoodleFile {
 		return ret;
 	}
 
-	public File save() throws IOException {
-		if (!isInitialized())
+	public File save() throws IOException, SaveOverwriteException {
+		if(saveing)
+			throw new SaveOverwriteException();
+		saveing=true;
+		
+		if (!isInitialized() || initializing)
 			return null;// do not save during initialize
 		if (timeCreated < 0)
 			timeCreated = System.currentTimeMillis();
@@ -1114,8 +1119,13 @@ public class CaDoodleFile {
 			getBom().save();
 		if (isTimelineOpen())
 			getSaveUpdate().renderSplashFrame(100, "Doodle save Done ");
-		
+		try {
+			getCsgDBinstance().saveDatabase();
+		} catch (Exception e) {
+			Log.error(e);
+		}
 		// System.gc();
+		saveing=false;
 		return getSelf();
 	}
 
@@ -1437,14 +1447,14 @@ public class CaDoodleFile {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			setCsgDBinstance(new CSGDatabaseInstance(db));
+			this.csgDBinstance=(new CSGDatabaseInstance(db));
 		}
 		return csgDBinstance;
 	}
 
-	private void setCsgDBinstance(CSGDatabaseInstance csgDBinstance) {
-		this.csgDBinstance = csgDBinstance;
-	}
+//	private void setCsgDBinstance(CSGDatabaseInstance csgDBinstance) {
+//		this.csgDBinstance = csgDBinstance;
+//	}
 
 	public File getObjectDir() {
 		if (objectDir == null) {
