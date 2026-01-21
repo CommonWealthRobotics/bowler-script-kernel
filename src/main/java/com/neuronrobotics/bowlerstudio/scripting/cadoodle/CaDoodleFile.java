@@ -78,9 +78,11 @@ public class CaDoodleFile {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR rulerLocation = new TransformNR();
 	@Expose(serialize = true, deserialize = true)
-
-	// Non Serialised private variables
 	private TransformNR workplane = new TransformNR();
+	@Expose(serialize = true, deserialize = true)
+	private CaDoodleParameters parameters;
+	
+	
 	private File self;
 //	@Expose (serialize = false, deserialize = false)
 //	private List<CSG> currentState = new ArrayList<CSG>();
@@ -1515,5 +1517,12 @@ public class CaDoodleFile {
 
 	private void setImageEngine(ThumbnailImage imageEngine) {
 		this.imageEngine = imageEngine;
+	}
+
+	public CaDoodleParameters getParameters() {
+		if(parameters==null)
+			parameters=new CaDoodleParameters();
+		parameters.setDb(csgDBinstance);
+		return parameters;
 	}
 }
