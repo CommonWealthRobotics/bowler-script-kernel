@@ -11,22 +11,22 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 public class CaDoodleParameters {
 	@Expose(serialize = true, deserialize = true)
-	private ArrayList<AbstractMap.SimpleEntry<String, String>> params;
+	private ArrayList<CaDoodleParameter> params;
 
 	private HashMap<String, Double> values = null;
 
 	private CSGDatabaseInstance db;
 
 	public String getString(String key) {
-		for (AbstractMap.SimpleEntry<String, String> m : getParams()) {
+		for (CaDoodleParameter m : getParams()) {
 			if (m.getKey().contentEquals(key))
 				return m.getValue();
 		}
 		throw new NumberFormatException();
 	}
 	public void delete(String key) {
-		AbstractMap.SimpleEntry<String, String> set = null;
-		for (AbstractMap.SimpleEntry<String, String> m : getParams()) {
+		CaDoodleParameter set = null;
+		for (CaDoodleParameter m : getParams()) {
 			if (m.getKey().contentEquals(key)) {
 				set = m;
 				break;
@@ -36,15 +36,15 @@ public class CaDoodleParameters {
 			params.remove(set);
 	}
 	public void set(String key, Object value) {
-		AbstractMap.SimpleEntry<String, String> set = null;
-		for (AbstractMap.SimpleEntry<String, String> m : getParams()) {
+		CaDoodleParameter set = null;
+		for (CaDoodleParameter m : getParams()) {
 			if (m.getKey().contentEquals(key)) {
 				set = m;
 				break;
 			}
 		}
 		if (set == null) {
-			set =new AbstractMap.SimpleEntry<>(key,value.toString());
+			set =new CaDoodleParameter(key,value.toString());
 			getParams().add(set);
 		}
 		set.setValue(value.toString());
@@ -52,14 +52,14 @@ public class CaDoodleParameters {
 	}
 	public ArrayList<String> keys(){
 		ArrayList<String> keys=new ArrayList<String>();
-		for(AbstractMap.SimpleEntry<String, String> e:getParams()) {
+		for(CaDoodleParameter e:getParams()) {
 			keys.add(e.getKey());
 		}
 		return keys;
 	}
-	private ArrayList<AbstractMap.SimpleEntry<String, String>> getParams() {
+	private ArrayList<CaDoodleParameter> getParams() {
 		if (params == null) {
-			params = new ArrayList<AbstractMap.SimpleEntry<String, String>>();
+			params = new ArrayList<CaDoodleParameter>();
 		}
 		return params;
 	}
@@ -75,7 +75,7 @@ public class CaDoodleParameters {
 			String vars = "";
 			String equs = "";
 
-			for (AbstractMap.SimpleEntry<String, String> m : getParams()) {
+			for (CaDoodleParameter m : getParams()) {
 				// System.out.println(line);
 				String value = m.getValue();
 				String variableName =m.getKey();
