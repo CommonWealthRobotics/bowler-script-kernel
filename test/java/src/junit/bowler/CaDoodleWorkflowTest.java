@@ -70,12 +70,12 @@ public class CaDoodleWorkflowTest {
 		AddFromScript cube2 = new AddFromScript()
 				.set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
 						"sphere.groovy");
-		cf.addOpperation(cube1).join();
+		cf.addOperation(cube1).join();
 		List<CSG>back= cf.getCurrentState();
 		if(back.size()!=1)
 			fail("Adding a cube should have added one!");
 		String nameOne = back.get(0).getName();
-		cf.addOpperation(cube2).join();;
+		cf.addOperation(cube2).join();;
 		back=cf.getCurrentState();
 		if(back.size()!=2)
 			fail("Adding a cube should have added one more!");
@@ -89,7 +89,7 @@ public class CaDoodleWorkflowTest {
 				.setLocation(new TransformNR(distaance,0,0))
 				.setNames(Arrays.asList(nameTwo),cf)
 				;
-		cf.addOpperation(move).join();;
+		cf.addOperation(move).join();;
 		back=cf.getCurrentState();
 		if(back.size()!=2)
 			fail("Same number of objects after");
@@ -106,14 +106,14 @@ public class CaDoodleWorkflowTest {
 		if(!self.exists())
 			fail("Doodle file does not exist, save failed! "+self.getAbsolutePath());
 		CaDoodleFile loaded = CaDoodleFile.fromFile(self);
-		if(!MoveCenter.class.isInstance(loaded.getOpperations().get(2))) {
-			fail("Third Opperation is supposed to be a move");
+		if(!MoveCenter.class.isInstance(loaded.getOperations().get(2))) {
+			fail("Third Operation is supposed to be a move");
 		}
-		if(!AddFromScript.class.isInstance(loaded.getOpperations().get(1))) {
-			fail(" Opperation is supposed to be a AddFromScript");
+		if(!AddFromScript.class.isInstance(loaded.getOperations().get(1))) {
+			fail(" Operation is supposed to be a AddFromScript");
 		}
-		if(!AddFromScript.class.isInstance(loaded.getOpperations().get(0))) {
-			fail(" Opperation is supposed to be a AddFromScript");
+		if(!AddFromScript.class.isInstance(loaded.getOperations().get(0))) {
+			fail(" Operation is supposed to be a AddFromScript");
 		}
 		loaded.back();
 		MoveCenter move2 = new MoveCenter()
@@ -124,9 +124,9 @@ public class CaDoodleWorkflowTest {
 				.setLocation(new TransformNR(0,0,0,new RotationNR(0,45,0)))
 				.setNames(Arrays.asList(nameOne),loaded)
 				;
-		loaded.addOpperation(move3).join();;
+		loaded.addOperation(move3).join();;
 		back=loaded.getCurrentState();
-		loaded.addOpperation(move2).join();;
+		loaded.addOperation(move2).join();;
 		back=loaded.getCurrentState();
 		double centerX2 = back.get(1).getCenterX();
 		if(centerX2!=distaance)
@@ -134,10 +134,10 @@ public class CaDoodleWorkflowTest {
 		if(back.get(1).getCenterY()!=distaance)
 			fail("Move failed ");
 		ToHole hole=  new ToHole().setNames(Arrays.asList(nameOne));
-		loaded.addOpperation(hole).join();;
+		loaded.addOperation(hole).join();;
 		back=loaded.getCurrentState();
 		Group group = new Group().setNames(Arrays.asList(nameOne,nameTwo));
-		loaded.addOpperation(group).join();;
+		loaded.addOperation(group).join();;
 		back=loaded.getCurrentState();
 		if(back.size()!=3)
 			fail("Group Failed ");
@@ -162,15 +162,15 @@ public class CaDoodleWorkflowTest {
 					.setResize(height, leftFront, rightRear)
 					.setNames(Arrays.asList(groupName))
 				;
-		loaded.addOpperation(resize).join();;
+		loaded.addOperation(resize).join();;
 		back=loaded.getCurrentState();
 		ToSolid solid = new ToSolid()
 						.setNames(Arrays.asList(groupName))
 						.setColor(Color.BLUE);
-		loaded.addOpperation(solid).join();;
+		loaded.addOperation(solid).join();;
 		back=loaded.getCurrentState();
 		UnGroup ug = new UnGroup().setNames(Arrays.asList(groupName));
-		loaded.addOpperation(ug).join();;
+		loaded.addOperation(ug).join();;
 		back=loaded.getCurrentState();
 		if(back.get(0).isInGroup()) {
 			fail("THis should not be in a group anymore");
@@ -180,7 +180,7 @@ public class CaDoodleWorkflowTest {
 		}
 		
 
-		loaded.addOpperation(
+		loaded.addOperation(
 				new Group()
 				.setNames(Arrays.asList(nameOne,nameTwo))
 				).join();;
@@ -189,7 +189,7 @@ public class CaDoodleWorkflowTest {
 
 		String newGroupName = cacheOfGroup.get(cacheOfGroup.size()-1).getName();
 		
-		loaded.addOpperation(
+		loaded.addOperation(
 				new Paste().setNames(Arrays.asList(newGroupName))).join();;
 		back=loaded.getCurrentState();
 		ArrayList<String> selectAll = new  ArrayList<String>();
@@ -197,7 +197,7 @@ public class CaDoodleWorkflowTest {
 			if(c.isGroupResult())
 				selectAll.add(c.getName());
 		}
-		loaded.addOpperation(
+		loaded.addOperation(
 				new UnGroup().setNames(selectAll)).join();;
 		back=loaded.getCurrentState();
 		if(back.get(0).isInGroup()) {
@@ -213,7 +213,7 @@ public class CaDoodleWorkflowTest {
 			fail("THis should not be in a group anymore");
 		}
 		ToHole h=  new ToHole().setNames(Arrays.asList(nameTwo));
-		loaded.addOpperation(h).join();;
+		loaded.addOperation(h).join();;
 		back=loaded.getCurrentState();
 		loaded.save();
 		
@@ -261,11 +261,11 @@ public class CaDoodleWorkflowTest {
 		MakeRobot mr = new MakeRobot();
 		mr.setNames(selectAll);
 
-		loaded.addOpperation(mr).join();
+		loaded.addOperation(mr).join();
 		ModelNotes setText = new ModelNotes()
 				.setLocation(new TransformNR(0, 0, 20))
 				.setText("A note is here");
-		loaded.addOpperation(setText).join();
+		loaded.addOperation(setText).join();
 		
 		loaded.save();
 		ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
@@ -275,7 +275,7 @@ public class CaDoodleWorkflowTest {
 			AddRobotController con = new AddRobotController()
 					.setNames(selectAll)
 					.setController(o);
-			loaded.addOpperation(con).join();
+			loaded.addOperation(con).join();
 			System.out.println("Added!");
 		}
 		loaded.save();
@@ -290,7 +290,7 @@ public class CaDoodleWorkflowTest {
 						.setLimb(o)
 						.setNames(selectAll)
 						.setLocation(tf);
-				loaded.addOpperation(limb).join();
+				loaded.addOperation(limb).join();
 			}else {
 				System.out.println("Unsupported limb "+o);
 			}

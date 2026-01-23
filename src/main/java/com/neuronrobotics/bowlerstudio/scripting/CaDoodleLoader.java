@@ -65,7 +65,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 	 */
 	public String getDefaultContents() {
 		return "{\n"
-				+ "  \"opperations\": [],\n"
+				+ "  \"operations\": [],\n"
 				+ "  \"currentIndex\": 0,\n"
 				+ "  \"projectName\": \"A Test Project\"\n"
 				+ "}";
