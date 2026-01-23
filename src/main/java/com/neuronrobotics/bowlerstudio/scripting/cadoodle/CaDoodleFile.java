@@ -68,7 +68,7 @@ import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 public class CaDoodleFile {
 	public static final String NO_NAME = "NoName";
 	@Expose(serialize = true, deserialize = true)
-	private ArrayList<CaDoodleOperation> operations = new ArrayList<CaDoodleOperation>();
+	private ArrayList<CaDoodleOperation> opperations = new ArrayList<CaDoodleOperation>();
 	@Expose(serialize = true, deserialize = true)
 	private int currentIndex = 0;
 	@Expose(serialize = true, deserialize = true)
@@ -167,8 +167,8 @@ public class CaDoodleFile {
 	}
 
 	private int opToIndex(CaDoodleOperation op) {
-		for (int i = 0; i < operations.size(); i++) {
-			if (op == operations.get(i))
+		for (int i = 0; i < opperations.size(); i++) {
+			if (op == opperations.get(i))
 				return i;
 		}
 		throw new IndexOutOfBoundsException();
@@ -295,13 +295,13 @@ public class CaDoodleFile {
 		}
 		int indexStarting = getCurrentIndex();
 		if (indexStarting == 0) {
-			indexStarting = operations.size();
+			indexStarting = opperations.size();
 		}
 		this.currentIndex = 0;
 		setPercentInitialized(0);
-		operations = operations.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
-		if (indexStarting > operations.size())
-			indexStarting = operations.size();
+		opperations = opperations.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
+		if (indexStarting > opperations.size())
+			indexStarting = opperations.size();
 		ArrayList<CaDoodleOperation> toRem = new ArrayList<CaDoodleOperation>();
 		for (int i = 0; i < getOperations().size(); i++) {
 			CaDoodleOperation op = getOperations().get(i);
@@ -880,7 +880,7 @@ public class CaDoodleFile {
 		if (forward) {
 			for (int i = ci; i < ni + 1; i++) {
 				try {
-					CaDoodleOperation op = operations.get(i - 1);
+					CaDoodleOperation op = opperations.get(i - 1);
 					if (ICadoodleOperationUndo.class.isInstance(op)) {
 						ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
 						un.redo();
@@ -891,7 +891,7 @@ public class CaDoodleFile {
 			}
 		} else {
 			for (int i = ni; i < ci + 1; i++) {
-				CaDoodleOperation op = operations.get(i - 1);
+				CaDoodleOperation op = opperations.get(i - 1);
 				if (ICadoodleOperationUndo.class.isInstance(op)) {
 					ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
 					un.undo();
@@ -1095,12 +1095,12 @@ public class CaDoodleFile {
 		FileUtils.write(getSelf(), contents, StandardCharsets.UTF_8, false);
 		// }
 		int num = 0;
-		for (int i = 0; i < operations.size(); i++) {
+		for (int i = 0; i < opperations.size(); i++) {
 			File f = getTimelineImageFile(i);
-			CaDoodleOperation op = operations.get(i);
+			CaDoodleOperation op = opperations.get(i);
 			if (!f.exists() && cache.get(op) != null)
 				try {
-					int percent = (int) (((double) i) / ((double) operations.size()) * 100.0);
+					int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
 					List<CSG> process = getCachedCSGs(op);
 					num++;
 					if (isTimelineOpen())
@@ -1280,11 +1280,11 @@ public class CaDoodleFile {
 	}
 
 	public ArrayList<CaDoodleOperation> getOperations() {
-		return operations;
+		return opperations;
 	}
 
 	public void setOperations(ArrayList<CaDoodleOperation> operations) {
-		this.operations = operations;
+		this.opperations = operations;
 		currentIndex = operations.size();
 	}
 
