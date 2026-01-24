@@ -17,10 +17,12 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+import javafx.scene.paint.Color;
 
 public class AddFromScript extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
@@ -75,6 +77,9 @@ public class AddFromScript extends AbstractAddFrom {
 			}
 			ArrayList<CSG> collect = new ArrayList<>();
 			collect.addAll(flaten);
+			if(collect.size()==0) {
+				collect.add(new Cube(20).toCSG().setColor(Color.PINK));
+			}
 			for(int i=0;i<collect.size();i++) {
 				CSG csg=collect.get(i);
 				if(isDoodle) {
