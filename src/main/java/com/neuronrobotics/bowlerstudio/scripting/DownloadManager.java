@@ -393,6 +393,27 @@ public class DownloadManager {
 							if(new File(string).exists())
 								cmd=string;
 						}
+						String version = vm.get("version").toString();
+						boolean toDelete=false;
+						File versionFile = new File(bindir + targetdir + delim()+"version-cadoodle.txt");
+						if(version!=null) {
+							if(!versionFile.exists()) {
+								toDelete=true;
+							}else {
+								String curVer = Files.readString(Paths.get(versionFile.getAbsolutePath()));
+								if(!curVer.contentEquals(version)) {
+									toDelete=true;
+								}
+							}
+							if(toDelete) {
+								Log.debug("Deleting cached toolchain for version");
+								File directoryToBeDeleted = new File(bindir + targetdir + delim());
+								deleteDirectory(directoryToBeDeleted);
+								directoryToBeDeleted.mkdirs();
+							}
+							Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
+						}
+
 						if (!new File(cmd).exists() && !justChecking) {
 							if(exeType.toLowerCase().contentEquals("freecad")) {
 								//FreecadLoader.update(vm);
