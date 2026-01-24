@@ -414,7 +414,6 @@ public class DownloadManager {
 								deleteDirectory(directoryToBeDeleted);
 								directoryToBeDeleted.mkdirs();
 							}
-							Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
 						}
 
 						if (!new File(cmd).exists() && !justChecking) {
@@ -547,9 +546,10 @@ public class DownloadManager {
 							}
 
 						} else {
-							com.neuronrobotics.sdk.common.Log.error("Not extraction, Application exists " + cmd);
+							com.neuronrobotics.sdk.common.Log.debug("Not extraction, Application exists " + cmd);
 						}
-
+						if(version !=null)
+							Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
 						return new File(cmd);
 					}
 				}
