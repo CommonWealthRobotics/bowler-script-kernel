@@ -393,7 +393,10 @@ public class DownloadManager {
 							if(new File(string).exists())
 								cmd=string;
 						}
-						String version = vm.get("version").toString();
+						Object object = vm.get("version");
+						String version =null;
+						if(object!=null)
+							version=object.toString();
 						boolean toDelete=false;
 						File versionFile = new File(bindir + targetdir + delim()+"version-cadoodle.txt");
 						if(version!=null) {
