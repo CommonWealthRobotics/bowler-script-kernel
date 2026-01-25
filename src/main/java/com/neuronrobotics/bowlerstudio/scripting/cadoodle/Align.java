@@ -258,6 +258,7 @@ public class Align extends CaDoodleOperation {
 
 		for (CSG csg : incoming) {
 			if (cache.get(csg) == null) {
+				Log.debug("Computing bounds for "+csg.getName());
 				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
 
 				if (csg.hasManipulator()) {
