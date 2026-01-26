@@ -425,7 +425,7 @@ public class BowlerKernel {
 			JavaFXInitializer.go();
 		} catch (Throwable t) {
 			t.printStackTrace();
-			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine availible");
+			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine available");
 		}
 		ScriptingEngine.waitForLogin();
 

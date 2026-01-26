@@ -847,7 +847,7 @@ public class CaDoodleFile {
 
 	public void back() {
 		CaDoodleOperation op = getCurrentOperation();
-		if (isBackAvailible())
+		if (isBackAvailable())
 			setCurrentIndex(getCurrentIndex() - 1);
 		updateCurrentFromCache();
 		if (ICadoodleOperationUndo.class.isInstance(op)) {
@@ -858,7 +858,7 @@ public class CaDoodleFile {
 	}
 
 	public void forward() {
-		if (isForwardAvailible())
+		if (isForwardAvailable())
 			setCurrentIndex(getCurrentIndex() + 1);
 		updateCurrentFromCache();
 		CaDoodleOperation op = getCurrentOperation();
@@ -903,7 +903,7 @@ public class CaDoodleFile {
 		fireSaveSuggestion();
 	}
 
-	public boolean isBackAvailible() {
+	public boolean isBackAvailable() {
 		return getCurrentIndex() > 1;
 	}
 
@@ -921,7 +921,7 @@ public class CaDoodleFile {
 		return getOperations().get(getCurrentIndex() - 1);
 	}
 
-	public boolean isForwardAvailible() {
+	public boolean isForwardAvailable() {
 		return getCurrentIndex() < getOperations().size();
 	}
 
@@ -1308,7 +1308,7 @@ public class CaDoodleFile {
 //		if(currentIndex==0)
 //			new Exception("Current Index set to " + currentIndex).printStackTrace();
 		if ((currentIndex - 1) >= getOperations().size())
-			throw new RuntimeException("Fail! Can not set an index greater than the availible operations");
+			throw new RuntimeException("Fail! Can not set an index greater than the available operations");
 		this.currentIndex = currentIndex;
 	}
 

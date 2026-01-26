@@ -26,6 +26,7 @@ import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 @SuppressWarnings("unchecked")
+
 public class MuJoCoBowlerIntegrationTest {
 
 	@Test
@@ -35,10 +36,10 @@ public class MuJoCoBowlerIntegrationTest {
 			JavaFXInitializer.go();
 		} catch (Throwable t) {
 			t.printStackTrace();
-			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine availible");
+			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine available");
 		}
 		ArrayList<MobileBase> bases = new ArrayList<>();
-		ArrayList<CSG> free =new ArrayList<>();
+		ArrayList<CSG> free = new ArrayList<>();
 		ArrayList<CSG> terrain = new ArrayList<>();
 
 
@@ -48,7 +49,7 @@ public class MuJoCoBowlerIntegrationTest {
 		terrain= (ArrayList<CSG>) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
 				"https://github.com/madhephaestus/VexHighStakes2024.git",
 				"field.groovy");
-		com.neuronrobotics.sdk.common.Log.debug("Parts size = "+parts.size());
+		com.neuronrobotics.sdk.common.Log.debug("Parts size = " + parts.size());
 		//terrain.add(new Cube(10000,10000,100).toCSG().toZMax());
 		free.addAll(parts);
 		MuJoCoPhysicsManager manager = new MuJoCoPhysicsManager(CSGDatabase.getInstance(),"javaCadTest", bases, free, terrain, new File("./physicsTest"));
@@ -58,20 +59,20 @@ public class MuJoCoBowlerIntegrationTest {
 		long start = System.currentTimeMillis();
 		double now = 0;
 		boolean first=true;
-		while((now=manager.getCurrentSimulationTimeSeconds())<5) {
+		while ((now=manager.getCurrentSimulationTimeSeconds()) < 5) {
 			long took;
-			if((took = manager.stepAndWait())>(manager.getCurrentSimulationTimeSeconds()*1000.0)) {
-				if(first) {
-					first=false;
+			if ((took = manager.stepAndWait())>(manager.getCurrentSimulationTimeSeconds()*1000.0)) {
+				if (first) {
+					first = false;
 					continue;
 				}
 				fail("Real time broken! "+took+" instead of expected "+manager.getCurrentSimulationTimeSeconds());
-			}else {
+			} else {
 				com.neuronrobotics.sdk.common.Log.debug("Time "+now);
 			}
 			long timeSinceStart = System.currentTimeMillis()-start;
 			double sec = ((double)timeSinceStart)/1000.0;
-			if((sec-1)>now) {
+			if ((sec-1) > now) {
 				fail("Simulation froze and restarted! "+sec+" expected "+now);
 			}
 		}

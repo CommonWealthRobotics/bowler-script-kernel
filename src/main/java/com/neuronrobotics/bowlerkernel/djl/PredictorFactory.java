@@ -93,7 +93,7 @@ public class PredictorFactory {
 				}
 				break;
 			default:
-				throw new RuntimeException("No Model availible of type " + type);
+				throw new RuntimeException("No Model available of type " + type);
 
 			}
 		}

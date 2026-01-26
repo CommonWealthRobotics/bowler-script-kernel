@@ -149,7 +149,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 										setControllerByName(searches);
 										break;
 									} catch (Throwable t) {
-										com.neuronrobotics.sdk.common.Log.error("BowlerJInputDevice Waiting for device to be availible");
+										com.neuronrobotics.sdk.common.Log.error("BowlerJInputDevice Waiting for device to be available");
 										t.printStackTrace();
 										try {
 											Thread.sleep(1000);
@@ -328,7 +328,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 					Thread.sleep(100);
 				com.neuronrobotics.sdk.common.Log.error("Controller clean exit");
 			} catch (Throwable t) {
-				com.neuronrobotics.sdk.common.Log.error("Waiting for device to be availible");
+				com.neuronrobotics.sdk.common.Log.error("Waiting for device to be available");
 				t.printStackTrace();
 				Thread.sleep(1000);
 			}

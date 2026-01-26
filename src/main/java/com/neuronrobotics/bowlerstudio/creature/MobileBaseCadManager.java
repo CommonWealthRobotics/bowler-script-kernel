@@ -657,7 +657,7 @@ public class MobileBaseCadManager implements Runnable {
 								Thread.sleep(32);
 							}
 						} catch (Throwable t) {
-							// rendering not availible
+							// rendering not available
 							com.neuronrobotics.sdk.common.Log
 									.error("Exception for render engine " + base.getScriptingName());
 							com.neuronrobotics.sdk.common.Log.error(t);
@@ -1040,8 +1040,8 @@ public class MobileBaseCadManager implements Runnable {
 			}
 			ArrayList<CSG> arrayList = getDHtoCadMap().get(l);
 			int j = 0;
-			boolean isAvailible = device.isAvailable();
-			if (showingStl || !isAvailible) {
+			boolean isAvailable = device.isAvailable();
+			if (showingStl || !isAvailable) {
 				for (CSG csg : arrayList) {
 					getAllCad().add(csg);
 					getUi().addCsg(csg, getCadScriptFromLimnb(l));

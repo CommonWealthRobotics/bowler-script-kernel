@@ -212,7 +212,7 @@ public class Purchasing {
 
     for (String variant : keys) {
       PurchasingData pd = database.get(variant);
-      if (!variant.endsWith("variant-1"))// exclude the stub generated purhcasing data
+      if (!variant.endsWith("variant-1"))// exclude the stub generated purchasing data
       {
         try {
           URL u = new URL(pd.getAPIUrl());
@@ -229,7 +229,7 @@ public class Purchasing {
           huc.disconnect();
           types.add(variant);
         } catch (java.net.ConnectException ce) {
-          // server or cart is not availible, reject vitamin
+          // server or cart is not available, reject vitamin
         } catch (Exception ex) {
           com.neuronrobotics.sdk.common.Log.error(ex);;
         }

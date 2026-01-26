@@ -219,7 +219,7 @@ public class CadFileExporter {
 
 				com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
 			} catch (Throwable t) {
-				com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine availible for slicing");
+				com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine available for slicing");
 				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 		
