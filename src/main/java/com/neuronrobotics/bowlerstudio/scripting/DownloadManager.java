@@ -393,6 +393,29 @@ public class DownloadManager {
 							if(new File(string).exists())
 								cmd=string;
 						}
+						Object object = vm.get("version");
+						String version =null;
+						if(object!=null)
+							version=object.toString();
+						boolean toDelete=false;
+						File versionFile = new File(bindir + targetdir + delim()+"version-cadoodle.txt");
+						if(version!=null) {
+							if(!versionFile.exists()) {
+								toDelete=true;
+							}else {
+								String curVer = Files.readString(Paths.get(versionFile.getAbsolutePath()));
+								if(!curVer.contentEquals(version)) {
+									toDelete=true;
+								}
+							}
+							if(toDelete) {
+								Log.debug("Deleting cached toolchain for version");
+								File directoryToBeDeleted = new File(bindir + targetdir + delim());
+								deleteDirectory(directoryToBeDeleted);
+								directoryToBeDeleted.mkdirs();
+							}
+						}
+
 						if (!new File(cmd).exists() && !justChecking) {
 							if(exeType.toLowerCase().contentEquals("freecad")) {
 								//FreecadLoader.update(vm);
@@ -523,9 +546,10 @@ public class DownloadManager {
 							}
 
 						} else {
-							com.neuronrobotics.sdk.common.Log.error("Not extraction, Application exists " + cmd);
+							com.neuronrobotics.sdk.common.Log.debug("Not extraction, Application exists " + cmd);
 						}
-
+						if(version !=null)
+							Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
 						return new File(cmd);
 					}
 				}
