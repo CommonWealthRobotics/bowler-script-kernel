@@ -454,24 +454,26 @@ public class BowlerKernel {
 		System.exit(0);
 	}
 
-	public static void processReturnedObjectsStart(Object ret, File baseWorkspaceFile, File target) {
+	public static void processReturnedObjectsStart(Object ret, File sourceDir, File target) {
 		processUIOpening(ret);
-		if (baseWorkspaceFile != null)
-			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory: \n   " + baseWorkspaceFile.getAbsolutePath()+" \nto "+target.getAbsolutePath());
-		File baseDirForTarget = new File(target.getAbsolutePath() + "/manufacturing/");
-		if(!baseDirForTarget.exists())
-			baseDirForTarget.mkdirs();
-		if (baseWorkspaceFile != null) {
+		if (sourceDir != null)
+			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory: \n   " + sourceDir.getAbsolutePath()+" \nto "+target.getAbsolutePath());
+		File targetDir = new File(target.getAbsolutePath() + "/manufacturing/");
+		if(!targetDir.exists())
+			targetDir.mkdirs();
+		if (sourceDir != null) {
 
-			File baseDirForFiles = new File(baseWorkspaceFile.getAbsolutePath() + "/manufacturing/");
+			File baseDirForFiles = new File(sourceDir.getAbsolutePath() + "/manufacturing/");
 			if (baseDirForFiles.exists()) {
 				// baseDirForFiles.mkdir();
 				File bomCSV = new File(
-						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
+						sourceDir.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
+				File t = new File(target.getAbsolutePath());
+				t.mkdirs();
 				if (bomCSV.exists()) {
 
 					File file = new File(
-							baseDirForTarget.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
+							target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -482,10 +484,10 @@ public class BowlerKernel {
 					}
 				}
 				File bom = new File(
-						baseWorkspaceFile.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
+						sourceDir.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 				if (bom.exists()) {
 					File file = new File(
-							baseDirForTarget.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
+							target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 //					if (file.exists())
 //						file.delete();
 					try {
@@ -500,15 +502,15 @@ public class BowlerKernel {
 		ArrayList<CSG> csgBits = new ArrayList<>();
 		try {
 			processReturnedObjects(ret, csgBits);
-			String url = ScriptingEngine.locateGitUrl(baseWorkspaceFile);
+			String url = ScriptingEngine.locateGitUrl(sourceDir);
 			com.neuronrobotics.sdk.common.Log.error("Loading printbed URL  " + url);
-			PrintBedManager printBedManager = new PrintBedManager(baseWorkspaceFile, csgBits);
+			PrintBedManager printBedManager = new PrintBedManager(sourceDir, csgBits);
 			if (printBedManager.hasPrintBed())
 				csgBits = printBedManager.makePrintBeds();
 			else {
 				com.neuronrobotics.sdk.common.Log.error("Exporting files without print bed");
 			}
-			new CadFileExporter().generateManufacturingParts(csgBits, baseDirForTarget);
+			new CadFileExporter().generateManufacturingParts(csgBits, targetDir);
 		} catch (Throwable t) {
 			Log.error(t);
 			fail();
