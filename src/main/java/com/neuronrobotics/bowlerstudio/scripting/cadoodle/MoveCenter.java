@@ -19,7 +19,7 @@ import eu.mihosoft.vrl.v3d.Transform;
 
 public class MoveCenter extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
-	private TransformNR location = new TransformNR();
+	private TransformNR location = null;
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
@@ -94,7 +94,8 @@ public class MoveCenter extends CaDoodleOperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-
+		if(location==null)
+			return back;
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
 			public ArrayList<CSG> process(CSG incoming, int depth) {
