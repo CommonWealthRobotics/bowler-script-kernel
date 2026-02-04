@@ -217,9 +217,9 @@ public class FreecadLoader implements IScriptingLanguage {
 
 			args.add(freecad.getAbsolutePath());
 			args.add(freecadModel.getAbsolutePath());
-			if(isMac())
-				advancedSystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
-			else
+//			if(isMac())
+//				advancedSystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
+//			else
 				legacySystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
 		}catch(Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
