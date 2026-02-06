@@ -816,7 +816,7 @@ public class DownloadManager {
 						if (!targetFile.exists()) {
 							// File doesn't exist, extract it
 							shouldExtract = true;
-							Log.debug("Adding new file: " + entryPath);
+							Log.info("Adding new file: " + entryPath);
 						} else {
 							// File exists, compare timestamps
 							long zipTime = entry.getTime();
@@ -842,7 +842,7 @@ public class DownloadManager {
 												.collect(Collectors.joining("\n"));
 										Path target = Paths.get(".", text);
 										com.neuronrobotics.sdk.common.Log
-												.debug("Creating symlink " + entryPath + " with " + target);
+												.info("Creating symlink " + entryPath + " with " + target);
 
 										Files.createSymbolicLink(entryPath, target);
 										continue;
