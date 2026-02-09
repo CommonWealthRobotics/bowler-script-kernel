@@ -184,7 +184,7 @@ public class TransformFactory {
 		Matrix4d rotation = csg.getInternalMatrix();
 		Quat4d q1 = new Quat4d();
 		rotation.get(q1);
-		Vector3d t1 = new Vector3d();
+		javax.vecmath.Vector3d t1 = new javax.vecmath.Vector3d();
 		rotation.get(t1);
 
 		return new TransformNR(t1.x, t1.y, t1.z, new RotationNR(q1.w, q1.x, q1.y, q1.z));
