@@ -22,7 +22,7 @@ public class Build123dTest {
 	@Test
 	public void test() throws Exception {
 		Log.enableDebugPrint();
-		//ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
+		ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
 		ArrayList<CSG > parts = (ArrayList<CSG>)ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(), 
 				"https://github.com/madhephaestus/CaDoodle-Example-Objects.git", "build123d/gggears.groovy");
 

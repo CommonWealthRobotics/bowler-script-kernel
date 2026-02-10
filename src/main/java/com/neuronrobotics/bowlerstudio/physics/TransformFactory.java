@@ -182,8 +182,7 @@ public class TransformFactory {
 
 	public static TransformNR csgToNR(eu.mihosoft.vrl.v3d.Transform csg) {
 		Matrix4d rotation = csg.getInternalMatrix();
-		Quat4d q1 = new Quat4d();
-		rotation.get(q1);
+		Quat4d q1 = csg.getQuat();
 		javax.vecmath.Vector3d t1 = new javax.vecmath.Vector3d();
 		rotation.get(t1);
 
