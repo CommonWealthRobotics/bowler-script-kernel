@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -477,7 +478,8 @@ public class BowlerKernel {
 //					if (file.exists())
 //						file.delete();
 					try {
-						Files.copy(bomCSV.toPath(), file.toPath());
+						Files.copy(bomCSV.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING,
+								StandardCopyOption.COPY_ATTRIBUTES);
 					} catch (IOException e) {
 						// Auto-generated catch block
 						Log.error(e);
@@ -491,7 +493,8 @@ public class BowlerKernel {
 //					if (file.exists())
 //						file.delete();
 					try {
-						Files.copy(bom.toPath(), file.toPath());
+						Files.copy(bom.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING,
+								StandardCopyOption.COPY_ATTRIBUTES);
 					} catch (IOException e) {
 						// Auto-generated catch block
 						Log.error(e);
