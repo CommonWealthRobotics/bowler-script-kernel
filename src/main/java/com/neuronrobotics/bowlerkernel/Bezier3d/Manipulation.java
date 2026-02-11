@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.*;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
@@ -169,7 +170,11 @@ public class Manipulation {
 	public void fireSave() {
 		new Thread(() -> {
 			for (Runnable R : saveListeners)
-				R.run();
+				try {
+					R.run();
+				}catch(Exception ex) {
+					Log.error(ex);
+				}
 
 		}).start();
 	}
