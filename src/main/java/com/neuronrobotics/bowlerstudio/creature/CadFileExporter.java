@@ -91,6 +91,8 @@ public class CadFileExporter {
 		String freecadName=null;
 		String nameBase ="";
 		for(CSG part: totalAssembly){
+			if(part.getPolygons().size()==0)
+				continue;
 			String name = part.getName();
 			CSG manufactured = part.prepForManufacturing();
 			if( manufactured==null){
