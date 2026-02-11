@@ -54,6 +54,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		stl.deleteOnExit();
 		toSTLFile(code,stl);
 		CSG back = Vitamins.get(db,stl,true);
+		back.snapPoints();
 		back.setColor(Color.BLUE);
 		back.setNoScale(true);
 		return back;
