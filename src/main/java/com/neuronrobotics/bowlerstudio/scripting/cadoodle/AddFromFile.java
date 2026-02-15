@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
+
+import com.neuronrobotics.bowlerstudio.scripting.BlenderLoader;
+import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
@@ -121,7 +124,7 @@ public class AddFromFile extends AbstractAddFrom {
 		return back;
 	}
 
-	public static File copyFileToNewDirectory(File sourceFile, File targetDirectory, String newBaseName)
+	public static File copyFileToNewDirectory(CaDoodleFile cf, File sourceFile, File targetDirectory, String newBaseName)
 			throws IOException {
 		if (!sourceFile.exists()) {
 			throw new IOException("Source file does not exist: " + sourceFile.getAbsolutePath());
@@ -139,6 +142,15 @@ public class AddFromFile extends AbstractAddFrom {
 		if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
 			fileExtension = fileName.substring(dotIndex);
 		}
+//		if(fileExtension.toLowerCase().contains("stl")) {
+//			if(DownloadManager.isDownloadedAlready("blender")) {
+//				Log.debug("Convert STL to Blender for use in model");
+//				String newFileName = newBaseName + ".blend";
+//				File blenderfile = new File(targetDirectory, newFileName);
+//				BlenderLoader.toBlenderFile(cf.getCsgDBinstance(),sourceFile, blenderfile);
+//				return blenderfile;
+//			}
+//		}
 
 		String newFileName = newBaseName + fileExtension;
 		File targetFile = new File(targetDirectory, newFileName);
@@ -168,7 +180,7 @@ public class AddFromFile extends AbstractAddFrom {
 				if (!isDoodle) {
 					File copied;
 					try {
-						copied = copyFileToNewDirectory(file, parentFile, name);
+						copied = copyFileToNewDirectory(cf,file, parentFile, name);
 						file = copied;
 					} catch (IOException e) {
 						// Auto-generated catch block
@@ -292,8 +304,10 @@ public class AddFromFile extends AbstractAddFrom {
 	public static File getFile(String name,CaDoodleFile cf) {
 		String strValue = cf.getSelf().getAbsolutePath();
 		File parentFile = new File(strValue).getParentFile();
+		File stl=null;
 		for (File f : parentFile.listFiles()) {
 			if (f.getName().contains(name)) {
+				
 				if (f.isDirectory()) {
 					// is a doodle file
 					for (File d : f.listFiles()) {
@@ -304,13 +318,18 @@ public class AddFromFile extends AbstractAddFrom {
 				} else {
 					for (String s : ScriptingEngine.getAllExtentions()) {
 						if (f.getName().toLowerCase().endsWith(s.toLowerCase())) {
-							return f;
+							if(s.toLowerCase().contains("stl")){
+								stl=f;// return the stl if no blender file exists
+							}else
+								return f;
 						}
 					}
 				}
 			}
 
 		}
+		if(stl!=null)
+			return stl;
 		throw new RuntimeException("File not found! " + name);
 	}
 //

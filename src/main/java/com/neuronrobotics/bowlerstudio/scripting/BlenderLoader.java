@@ -53,11 +53,11 @@ public class BlenderLoader implements IScriptingLanguage {
 
 
 	public static void toBlenderFile(CSGDatabaseInstance db,File stl,File blenderfile) {
-		com.neuronrobotics.sdk.common.Log.error("Converting to Blender file before loading");
+		com.neuronrobotics.sdk.common.Log.debug("Converting to Blender file before loading");
 		
 		File stlIn;
 		try {
-			stlIn = File.createTempFile(stl.getName(), ".stl");
+			stlIn = File.createTempFile("scaletmp", ".stl");
 		} catch (IOException e) {
 			// Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
