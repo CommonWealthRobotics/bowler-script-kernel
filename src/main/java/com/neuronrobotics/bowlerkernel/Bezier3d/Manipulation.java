@@ -1,38 +1,53 @@
 package com.neuronrobotics.bowlerkernel.Bezier3d;
 
 import java.util.ArrayList;
-import javafx.scene.paint.Color;
+import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
+
 import java.util.HashMap;
 import java.util.List;
 
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.*;
-import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
-import javafx.scene.PerspectiveCamera;
 import javafx.scene.input.MouseEvent;
+//import javafx.scene.Node;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Affine;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.Transform;
 
 public class Manipulation {
-	public HashMap<EventType<MouseEvent>, EventHandler<MouseEvent>> map = new HashMap<>();
-	double startx = 0; // drag X-start position on screen
-	double starty = 0; // drag Y-start position on screen
-	double newx = 0;
-	double newy = 0;
-	double newz = 0;
-	boolean dragging = false;
-	boolean snapGridEnabled = true;
-	private boolean startCorrected = false; // Keep track if starting point was corrected
 
-	public static final double SNAP_GRID_OFF = 0.000001;
+	// For ResizingHandle communication
+	@FunctionalInterface
+	public interface DragCallback {
+		Point3D onDrag(double screenX, double screenY, double snapGridValue);
+	}
+	private DragCallback onDragCallback = null;
+
+	public HashMap<EventType<MouseEvent>, EventHandler<MouseEvent>> map = new HashMap<>();
+	private double startXpix = 0; // drag X-start position on screen
+	private double startYpix = 0; // drag Y-start position on screen
+	private Point3D startingPointWorld = null;
+	private Point3D newWorldPos = new Point3D(0, 0, 0);
+	private boolean zMove = false;
+
+	private double newX = 0;
+	private double newY = 0;
+	private double newZ = 0;
+	private boolean dragging = false;
+	private boolean snapGridEnabled = true;
+	private boolean startCorrected = false; // Keep track if starting point was corrected
 	private double snapGridValue = SNAP_GRID_OFF;
+
+	public static final double SNAP_GRID_OFF = 0.0009;
+
 	private static IInteractiveUIElementProvider ui = new IInteractiveUIElementProvider() {
 
 		@Override
@@ -56,6 +71,31 @@ public class Manipulation {
 	private double gridOffsetZ = 0;
 	private Point3D startingWorkplanePosition = null;
 
+	public Manipulation(Affine mm, Vector3d o, TransformNR p, DragCallback callback, boolean zMove) {
+		this(mm, o, p);
+		this.onDragCallback = callback;
+		this.zMove = zMove;
+	}
+
+	public Manipulation(Affine mm, Vector3d o, TransformNR p) {
+		this.manipulationMatrix = mm;
+		this.orientation = new TransformNR(o.x, o.y, o.z);
+		//this.manip = m;
+		//color = new PhongMaterial(m.getColor());
+		this.setGlobalPose(p);
+		setCurrentPose(p.copy());
+
+		getUi().runLater(() -> {
+			try {
+				TransformFactory.nrToAffine(getGlobalPose(), manipulationMatrix);
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+		});
+
+		map.put(MouseEvent.ANY, getMouseEvents());
+	}
+
 	public boolean isWorkplaneRotated() {
 		TransformNR workplane = getFrameOfReference();
 		RotationNR workplaneRotation = workplane.getRotation();
@@ -64,63 +104,45 @@ public class Manipulation {
 	}
 
 	// Calculate the starting point based on the active work plane
-	public void setStartingWorkplanePosition(Point3D startingPoint) {
+	public void setStartingWorkplanePosition(Point3D startingPointWorld) {
 
+		this.startingPointWorld = startingPointWorld;
+
+		startCorrected = false;
+		snapGridEnabled = true;
 		gridOffsetX = 0;
 		gridOffsetY = 0;
 		gridOffsetZ = 0;
-		snapGridEnabled = true; // Auto reset to enabled, disable lasts only for one drag
-		startCorrected = false;
 
-		try {
+	this.startingWorkplanePosition = startingPointWorld;
 
-			TransformNR workplane = getFrameOfReference();
-			Vector3d origin  = new Vector3d(workplane.getX(), workplane.getY(), workplane.getZ());
-			Vector3d clicked = new Vector3d(startingPoint.getX(), startingPoint.getY(), startingPoint.getZ());
-			Vector3d diff	 = clicked.minus(origin);
-
-			RotationNR workplaneRotation = workplane.getRotation();
-			double[][] rm = workplaneRotation.getRotationMatrix();
-
-			boolean rotated = (Math.abs(rm[0][2]) > 1e-9) || (Math.abs(rm[1][2]) > 1e-9) || (Math.abs(rm[2][2] - 1.0) > 1e-9);
-
-			// Get active work plane axis
-			Vector3d xAxis = new Vector3d(rm[0][0], rm[1][0], rm[2][0]);
-			Vector3d yAxis = new Vector3d(rm[0][1], rm[1][1], rm[2][1]);
-			Vector3d zAxis = new Vector3d(rm[0][2], rm[1][2], rm[2][2]);
-
-			// Get only the perpendicular parts
-			double x = diff.dot(xAxis);
-			double y = diff.dot(yAxis);
-			double z = diff.dot(zAxis);
+	double x = startingPointWorld.getX();
+	double y = startingPointWorld.getY();
+	double z = startingPointWorld.getZ();
 
 			// Don't use XY-offsets on rotated work planes
 			// Or perhaps, use one corner of the object as origin (0, 0)?
-			if (rotated) {
+			if (isWorkplaneRotated()) {
 				x = 0;
 				y = 0;
 			}
 
-			startingWorkplanePosition = new Point3D(x, y, z);
-
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
+			this.startingWorkplanePosition = new Point3D(x, y, z);
 	}
 
 	private void calculateGridOffsets() {
+
 		if ((startingWorkplanePosition == null) || (snapGridValue <= 0))
 			return;
 
-		double gx = Math.round(startingWorkplanePosition.getX() / snapGridValue) * snapGridValue;
-		double gy = Math.round(startingWorkplanePosition.getY() / snapGridValue) * snapGridValue;
-		double gz = Math.round(startingWorkplanePosition.getZ() / snapGridValue) * snapGridValue;
+		double gridX = Math.round(startingWorkplanePosition.getX() / snapGridValue) * snapGridValue;
+		double gridY = Math.round(startingWorkplanePosition.getY() / snapGridValue) * snapGridValue;
+		double gridZ = Math.round(startingWorkplanePosition.getZ() / snapGridValue) * snapGridValue;
 
-		gridOffsetX = (gx - startingWorkplanePosition.getX()) * orientation.getX();
-		gridOffsetY = (gy - startingWorkplanePosition.getY()) * orientation.getY();
-		gridOffsetZ = (gz - startingWorkplanePosition.getZ()) * orientation.getZ();
-		
-		com.neuronrobotics.sdk.common.Log.debug(">>> calculateGridOffsets gridOffsetX:" + gridOffsetX + " Y:" + gridOffsetY + " Z:" + gridOffsetZ);
+		gridOffsetX = (gridX - startingWorkplanePosition.getX()) * orientation.getX();
+		gridOffsetY = (gridY - startingWorkplanePosition.getY()) * orientation.getY();
+		gridOffsetZ = (gridZ - startingWorkplanePosition.getZ()) * orientation.getZ();
+
 	}
 
 	public enum DragState {
@@ -159,7 +181,7 @@ public class Manipulation {
 
 	private void fireMove(TransformNR trans, MouseEvent event2) {
 		for (Manipulation R : dependants)
-			R.performMove(trans,event2);
+			R.performMove(trans, event2);
 
 		//com.neuronrobotics.sdk.common.Log.debug("Mouse event "+event2.getEventType());
 		for (EventHandler<MouseEvent> R : eventListeners)
@@ -170,32 +192,9 @@ public class Manipulation {
 	public void fireSave() {
 		new Thread(() -> {
 			for (Runnable R : saveListeners)
-				try {
-					R.run();
-				}catch(Exception ex) {
-					Log.error(ex);
-				}
+				R.run();
 
 		}).start();
-	}
-
-	public Manipulation(Affine mm, Vector3d o, TransformNR p) {
-		this.manipulationMatrix = mm;
-		this.orientation = new TransformNR(o.x, o.y, o.z);
-		//this.manip = m;
-		//color = new PhongMaterial(m.getColor());
-		this.setGlobalPose(p);
-		setCurrentPose(p.copy());
-
-		getUi().runLater(() -> {
-			try {
-				TransformFactory.nrToAffine(getGlobalPose(), manipulationMatrix);
-			} catch (Throwable t) {
-				t.printStackTrace();
-			}
-		});
-
-		map.put(MouseEvent.ANY, getMouseEvents());
 	}
 
 	public EventHandler<MouseEvent> getMouseEvents() {
@@ -215,7 +214,7 @@ public class Manipulation {
 					break;
 
 				case "MOUSE_DRAGGED":
-					dragged(event,event);
+					dragged(event, event);
 					break;
 
 				case "MOUSE_RELEASED":
@@ -254,8 +253,93 @@ public class Manipulation {
 		}).start();
 	}
 
-	private double getDepthNow() {
-		return -1600 / getUi().getCamerDepth();
+	private void dragged(MouseEvent event, MouseEvent event2) {
+
+		if (resizeAllowed && (getState() == DragState.Dragging)) {
+
+			double x = 0;
+			double y = 0;
+			double z = 0;
+
+			if (onDragCallback != null) {
+
+				// Request new world position based on mouse scene position
+				newWorldPos = onDragCallback.onDrag(event.getSceneX(), event.getSceneY(), snapGridValue);
+
+				if (zMove)
+					z = newWorldPos.getZ() - startingPointWorld.getZ();
+				else {
+					x = newWorldPos.getX() - startingPointWorld.getX();
+					y = newWorldPos.getY() - startingPointWorld.getY();
+				}
+
+				if (Double.isFinite(y) && Double.isFinite(x)) {
+					final TransformNR trans = new TransformNR(x, y, z, new RotationNR());
+
+					getUi().runLater(() -> {
+						setDragging(event);
+						performMoveTranslate(trans, event2);
+					});
+
+				} else
+					com.neuronrobotics.sdk.common.Log.error("ERROR?");
+
+				event.consume();
+			} else { // Fallback, previous mouse maniplation
+
+				double deltaX = (startXpix - event.getScreenX());
+				double deltaY = (startYpix - event.getScreenY());
+				x = deltaX / getDepthNow();
+				y = deltaY / getDepthNow();
+
+				if (Double.isFinite(y) && Double.isFinite(x)) {
+					final TransformNR trans = new TransformNR(x, y, z, new RotationNR());
+
+					getUi().runLater(() -> {
+						setDragging(event);
+						performMove(trans, event2);
+					});
+
+				} else
+					com.neuronrobotics.sdk.common.Log.error("ERROR?");
+
+				event.consume();
+			}
+		}
+	}
+
+	public boolean isMoving() {
+		return (getState() == DragState.Dragging);
+	}
+
+	private void setDragging(MouseEvent event) {
+
+		if (!dragging) {
+			startXpix = event.getScreenX();
+			startYpix = event.getScreenY();
+
+			dragging = true;
+			startCorrected = false;
+		}
+
+		for (Manipulation R : dependants)
+			R.setDragging(event);
+
+	}
+
+	private void mouseRelease(MouseEvent event) {
+
+		if (dragging) {
+			dragging = false;
+			getGlobalPose().setX(newX);
+			getGlobalPose().setY(newY);
+			getGlobalPose().setZ(newZ);
+
+			if (event != null)
+				event.consume();
+
+			fireSave();
+		}
 	}
 
 	private void release(MouseEvent event) {
@@ -267,69 +351,130 @@ public class Manipulation {
 		//manip.getMesh().setMaterial(color);
 	}
 
-	private void dragged(MouseEvent event, MouseEvent event2) {
+	private double getDepthNow() {
+		return -1600 / getUi().getCamerDepth();
+	}
 
-		if (resizeAllowed && (getState() == DragState.Dragging)) {
+//	public void setNewWorldPosition(Point3D newWorldPos) {
+//		System.out.println("%%%%%%%%%%%% MANIPULATION RECEIVED: newWorld" + newWorldPos);
+//		this.newWorldPos = newWorldPos;
+//	}
 
-			getUi().runLater(() -> {
-				setDragging(event);
-				double deltx = (startx - event.getScreenX());
-				double delty = (starty - event.getScreenY());
-				double x = deltx / getDepthNow() ;
-				double y = delty / getDepthNow() ;
+	private void performMoveUnified(TransformNR trans, MouseEvent event2) {
+		try {
+			// Extract translation from the input (ignore any rotation)
+			double xDelta = trans.getX();
+			double yDelta = trans.getY();
+			double zDelta = trans.getZ();
 
-				//com.neuronrobotics.sdk.common.Log.error("Moved "+x+" "+y);
-				if (Double.isFinite(y) && Double.isFinite(x)) {			
-					TransformNR trans = new TransformNR(x, y, 0, new RotationNR());
-					performMove(trans,event2);
-				} else
-					com.neuronrobotics.sdk.common.Log.error("ERROR?");
+			TransformNR wp = getFrameOfReference().copy();
 
-			});
-			event.consume();
+			// Remove translation from workplane, keep only rotation for coordinate transformation
+			wp.setX(0);
+			wp.setY(0);
+			wp.setZ(0);
+
+			// Transform the translation into workplane coordinates
+			TransformNR global = wp.inverse().times(new TransformNR(xDelta, yDelta, zDelta, new RotationNR()));
+
+			if (!startCorrected && dragging) {
+				startCorrected = true;
+				calculateGridOffsets();
+			}
+
+			if (snapGridEnabled) {
+				newX = snapToGrid(global.getX() * orientation.getX()) + gridOffsetX;
+				newY = snapToGrid(global.getY() * orientation.getY()) + gridOffsetY;
+				newZ = snapToGrid(global.getZ() * orientation.getZ()) + gridOffsetZ;
+			} else {
+				newX = global.getX() * orientation.getX();
+				newY = global.getY() * orientation.getY();
+				newZ = global.getZ() * orientation.getZ();
+			}
+
+			// Build final transform with NO rotation
+			TransformNR finalTransform = new TransformNR();
+			finalTransform.setX(newX);
+			finalTransform.setY(newY);
+			finalTransform.setZ(newZ);
+			finalTransform.setRotation(new RotationNR()); // Explicitly no rotation
+
+			// Apply workplane transformation back
+			TransformNR o = wp.times(finalTransform).times(wp.inverse());
+			o.setRotation(new RotationNR()); // Ensure no rotation
+
+			// Combine with existing global pose (translation only)
+			TransformNR globalTrans = globalPose.copy().setRotation(new RotationNR());
+			global = globalTrans.times(o);
+			global.setRotation(new RotationNR()); // Final safety: no rotation
+
+			setGlobal(global);
+
+		} catch(Throwable t) {
+			t.printStackTrace();
 		}
+
+		fireMove(trans, event2);
 	}
 
-	public boolean isMoving() {
-		return (getState() == DragState.Dragging);
-	}
+	private void performMoveTranslate(TransformNR trans, MouseEvent event2) {
+		try {
+			// Extract translation from the input (ignore any rotation)
+			TransformNR wp = getFrameOfReference().copy();
 
-	private void mouseRelease(MouseEvent event) {
+			// Remove translation from workplane, keep only rotation for coordinate transformation
+			wp.setX(0);
+			wp.setY(0);
+			wp.setZ(0);
 
-		if (dragging) {
-			dragging = false;
-			getGlobalPose().setX(newx);
-			getGlobalPose().setY(newy);
-			getGlobalPose().setZ(newz);
+			if (!startCorrected && dragging) {
+				startCorrected = true;
+				calculateGridOffsets();
+			}
 
-			if (event != null)
-				event.consume();
+			if (snapGridEnabled) {
+				newX = snapToGrid(trans.getX() * orientation.getX()) + gridOffsetX;
+				newY = snapToGrid(trans.getY() * orientation.getY()) + gridOffsetY;
+				newZ = snapToGrid(trans.getZ() * orientation.getZ()) + gridOffsetZ;
+			} else {
+				newX = trans.getX() * orientation.getX();
+				newY = trans.getY() * orientation.getY();
+				newZ = trans.getZ() * orientation.getZ();
+			}
 
-			fireSave();
+			// Build final transform with NO rotation
+			TransformNR finalTransform = new TransformNR();
+			finalTransform.setX(newX);
+			finalTransform.setY(newY);
+			finalTransform.setZ(newZ);
+			finalTransform.setRotation(new RotationNR()); // Explicitly no rotation
+
+			// Apply workplane transformation back
+			TransformNR o = wp.times(finalTransform).times(wp.inverse());
+			o.setRotation(new RotationNR()); // Ensure no rotation
+
+			// Combine with existing global pose (translation only)
+			TransformNR globalTrans = globalPose.copy().setRotation(new RotationNR());
+			finalTransform = globalTrans.times(o);
+
+			setGlobal(finalTransform);
+
+		} catch(Throwable t) {
+			t.printStackTrace();
 		}
+
+		fireMove(trans, event2);
 	}
 
-	private void setDragging(MouseEvent event) {
 
-		if (!dragging) {
-			startx = event.getScreenX();
-			starty = event.getScreenY();
-			dragging = true;
-			startCorrected = false;
-		}
-
-		for (Manipulation R : dependants)
-			R.setDragging(event);
-
-	}
-
+	// Original perform move, compensates for rotation
 	private void performMove(TransformNR trans, MouseEvent event2) {
 
 		TransformNR camerFrame = getUi().getCamerFrame();
 		TransformNR globalTMP = new TransformNR(camerFrame.getRotation());
 
 		try {
-			
+
 			TransformNR global = globalTMP.times(trans);
 			TransformNR wp = getFrameOfReference().copy();
 
@@ -338,33 +483,30 @@ public class Manipulation {
 			wp.setZ(0);
 			global = wp.inverse().times(global);
 
-			if (snapGridEnabled) {
-				newx = snapToGrid(global.getX() * orientation.getX()) + gridOffsetX;
-				newy = snapToGrid(global.getY() * orientation.getY()) + gridOffsetY;
-				newz = snapToGrid(global.getZ() * orientation.getZ()) + gridOffsetZ;
-			} else {
-				newx = global.getX() * orientation.getX();
-				newy = global.getY() * orientation.getY();
-				newz = global.getZ() * orientation.getZ();
+			if (!startCorrected && dragging) {
+				startCorrected = true;
+				calculateGridOffsets();
 			}
 
-			if (!startCorrected && dragging) {
-					calculateGridOffsets(); // Calculate only AFTER the first call!
-
-				startx += gridOffsetX;
-				starty += gridOffsetY;
-				startCorrected = true;
+			if (snapGridEnabled) {
+				newX = snapToGrid(global.getX() * orientation.getX()) + gridOffsetX;
+				newY = snapToGrid(global.getY() * orientation.getY()) + gridOffsetY;
+				newZ = snapToGrid(global.getZ() * orientation.getZ()) + gridOffsetZ;
+			} else {
+				newX = global.getX() * orientation.getX();
+				newY = global.getY() * orientation.getY();
+				newZ = global.getZ() * orientation.getZ();
 			}
 
 			TransformNR globalTrans = globalPose.copy().setRotation(new RotationNR());
-			
-			global.setX(newx);
-			global.setY(newy);
-			global.setZ(newz);
+
+			global.setX(newX);
+			global.setY(newY);
+			global.setZ(newZ);
 			global.setRotation(new RotationNR());
 			TransformNR o = wp.times(global).times(wp.inverse()).setRotation(new RotationNR());
 			global = globalTrans.times(o);
-	
+
 			global.setRotation(new RotationNR());
 			setGlobal(global);
 			//com.neuronrobotics.sdk.common.Log.error(" drag "+global.getX()+" , "+global.getY()+" ,"+global.getZ());
@@ -377,12 +519,9 @@ public class Manipulation {
 
 	}
 
-	private double snapToGrid(double in) {
-		if (!snapGridEnabled)
+	public double snapToGrid(double in) {
+		if (!snapGridEnabled || (snapGridValue <= SNAP_GRID_OFF))
 			return in;
-
-		if (snapGridValue <= SNAP_GRID_OFF)
-			snapGridValue = SNAP_GRID_OFF;
 
 		return Math.round(in / snapGridValue) * snapGridValue;
 	}
@@ -392,9 +531,9 @@ public class Manipulation {
 	}
 
 	public void setGlobal(TransformNR global) {
-		getCurrentPose().setX(newx);
-		getCurrentPose().setY(newy);
-		getCurrentPose().setZ(newz);
+		getCurrentPose().setX(newX);
+		getCurrentPose().setY(newY);
+		getCurrentPose().setZ(newZ);
 		getUi().runLater(() -> {
 			TransformFactory.nrToAffine(global, manipulationMatrix);
 		});
@@ -409,33 +548,33 @@ public class Manipulation {
 	}
 
 	public void reset() {
-		newx = 0;
-		newy = 0;
-		newz = 0;
+		newX = 0;
+		newY = 0;
+		newZ = 0;
 		getGlobalPose().setX(0);
 		getGlobalPose().setY(0);
 		getGlobalPose().setZ(0);
 		setGlobal(new TransformNR(0, 0, 0, new RotationNR()));
 	}
 
-	public void set(double newX, double newY, double newZ) {
+	public void set(double nX, double nY, double nZ) {
 
-		newx = newX;
-		newy = newY;
-		newz = newZ;
+		newX = nX;
+		newY = nY;
+		newZ = nZ;
 
-		getGlobalPose().setX(newX);
-		getGlobalPose().setY(newY);
-		getGlobalPose().setZ(newZ);
-		setGlobal(new TransformNR(newX, newY, newZ, new RotationNR()));
+		getGlobalPose().setX(nX);
+		getGlobalPose().setY(nY);
+		getGlobalPose().setZ(nZ);
+		setGlobal(new TransformNR(nX, nY, nZ, new RotationNR()));
 
 		for (EventHandler<MouseEvent> R : eventListeners)
 			R.handle(null);
 
 	}
 
-	public void setInReferenceFrame(double newX, double newY, double newZ) {
-		TransformNR inLocal = new TransformNR(newX,  newY,  newZ);
+	public void setInReferenceFrame(double nX, double nY, double nZ) {
+		TransformNR inLocal = new TransformNR(nX,  nY,  nZ);
 		TransformNR wp = new TransformNR(getFrameOfReference().getRotation());
 		inLocal = wp.times(inLocal);
 		inLocal.setRotation(new RotationNR());
@@ -444,7 +583,6 @@ public class Manipulation {
 
 		for (EventHandler<MouseEvent> R : eventListeners)
 			R.handle(null);
-
 	}
 
 	public TransformNR getGlobalPose() {
@@ -454,7 +592,7 @@ public class Manipulation {
 	public TransformNR getGlobalPoseInReferenceFrame() {
 		TransformNR globalPose = getGlobalPose().copy();
 		TransformNR wp = new TransformNR(getFrameOfReference().getRotation());
-		globalPose=wp.times(globalPose);
+		globalPose = wp.times(globalPose);
 		globalPose.setRotation(new RotationNR());
 		return globalPose;
 	}
@@ -500,7 +638,7 @@ public class Manipulation {
 	}
 
 	public void setUnlocked(boolean resizeAllowed) {
-		this.resizeAllowed = resizeAllowed;		
+		this.resizeAllowed = resizeAllowed;
 	}
 
 	public DragState getState() {
