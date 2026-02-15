@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.*;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
@@ -29,6 +30,7 @@ public class Manipulation {
 	public interface DragCallback {
 		Point3D onDrag(double screenX, double screenY, double snapGridValue);
 	}
+
 	private DragCallback onDragCallback = null;
 
 	public HashMap<EventType<MouseEvent>, EventHandler<MouseEvent>> map = new HashMap<>();
@@ -62,9 +64,9 @@ public class Manipulation {
 	private ArrayList<Manipulation> dependants = new ArrayList<>();
 	private Affine manipulationMatrix;
 	private TransformNR orientation;
-	private TransformNR globalPose  = new TransformNR();
+	private TransformNR globalPose = new TransformNR();
 	private TransformNR currentPose = new TransformNR();
-	private IFrameProvider frameOfReference = ()->new TransformNR();
+	private IFrameProvider frameOfReference = () -> new TransformNR();
 
 	private double gridOffsetX = 0;
 	private double gridOffsetY = 0;
@@ -80,8 +82,8 @@ public class Manipulation {
 	public Manipulation(Affine mm, Vector3d o, TransformNR p) {
 		this.manipulationMatrix = mm;
 		this.orientation = new TransformNR(o.x, o.y, o.z);
-		//this.manip = m;
-		//color = new PhongMaterial(m.getColor());
+		// this.manip = m;
+		// color = new PhongMaterial(m.getColor());
 		this.setGlobalPose(p);
 		setCurrentPose(p.copy());
 
@@ -114,20 +116,20 @@ public class Manipulation {
 		gridOffsetY = 0;
 		gridOffsetZ = 0;
 
-	this.startingWorkplanePosition = startingPointWorld;
+		this.startingWorkplanePosition = startingPointWorld;
 
-	double x = startingPointWorld.getX();
-	double y = startingPointWorld.getY();
-	double z = startingPointWorld.getZ();
+		double x = startingPointWorld.getX();
+		double y = startingPointWorld.getY();
+		double z = startingPointWorld.getZ();
 
-			// Don't use XY-offsets on rotated work planes
-			// Or perhaps, use one corner of the object as origin (0, 0)?
-			if (isWorkplaneRotated()) {
-				x = 0;
-				y = 0;
-			}
+		// Don't use XY-offsets on rotated work planes
+		// Or perhaps, use one corner of the object as origin (0, 0)?
+		if (isWorkplaneRotated()) {
+			x = 0;
+			y = 0;
+		}
 
-			this.startingWorkplanePosition = new Point3D(x, y, z);
+		this.startingWorkplanePosition = new Point3D(x, y, z);
 	}
 
 	private void calculateGridOffsets() {
@@ -183,7 +185,8 @@ public class Manipulation {
 		for (Manipulation R : dependants)
 			R.performMove(trans, event2);
 
-		//com.neuronrobotics.sdk.common.Log.debug("Mouse event "+event2.getEventType());
+		// com.neuronrobotics.sdk.common.Log.debug("Mouse event
+		// "+event2.getEventType());
 		for (EventHandler<MouseEvent> R : eventListeners)
 			R.handle(event2);
 
@@ -201,29 +204,30 @@ public class Manipulation {
 		return new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				String name = event.getEventType().getName();
+				try {
+					String name = event.getEventType().getName();
 
-				if (event.isControlDown())
-					return;
+					if (event.isControlDown())
+						return;
 
-				switch (name) {
+					switch (name) {
 
-				case "MOUSE_PRESSED":
-					if (event.isPrimaryButtonDown())
-						pressed(event);
-					break;
+					case "MOUSE_PRESSED":
+						if (event.isPrimaryButtonDown())
+							pressed(event);
+						break;
 
-				case "MOUSE_DRAGGED":
-					dragged(event, event);
-					break;
+					case "MOUSE_DRAGGED":
+						dragged(event, event);
+						break;
 
-				case "MOUSE_RELEASED":
-					release(event);
-					break;
+					case "MOUSE_RELEASED":
+						release(event);
+						break;
 
-				case "MOUSE_MOVED":
-					// ignore
-					break;
+					case "MOUSE_MOVED":
+						// ignore
+						break;
 //				case "MOUSE_ENTERED":
 //					m.getMesh().setMaterial(highlight);
 //					break;
@@ -231,11 +235,13 @@ public class Manipulation {
 //					if (state == DragState.IDLE)
 //						m.getMesh().setMaterial(color);
 //					break;
-				default:
-					// com.neuronrobotics.sdk.common.Log.error("UNKNOWN! Mouse event "+name);
-					break;
+					default:
+						// com.neuronrobotics.sdk.common.Log.error("UNKNOWN! Mouse event "+name);
+						break;
+					}
+				} catch (Throwable t) {
+					Log.error(t);
 				}
-
 			}
 		};
 	}
@@ -348,7 +354,7 @@ public class Manipulation {
 			R.mouseRelease(event);
 
 		setState(DragState.IDLE);
-		//manip.getMesh().setMaterial(color);
+		// manip.getMesh().setMaterial(color);
 	}
 
 	private double getDepthNow() {
@@ -369,7 +375,8 @@ public class Manipulation {
 
 			TransformNR wp = getFrameOfReference().copy();
 
-			// Remove translation from workplane, keep only rotation for coordinate transformation
+			// Remove translation from workplane, keep only rotation for coordinate
+			// transformation
 			wp.setX(0);
 			wp.setY(0);
 			wp.setZ(0);
@@ -410,7 +417,7 @@ public class Manipulation {
 
 			setGlobal(global);
 
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 
@@ -422,7 +429,8 @@ public class Manipulation {
 			// Extract translation from the input (ignore any rotation)
 			TransformNR wp = getFrameOfReference().copy();
 
-			// Remove translation from workplane, keep only rotation for coordinate transformation
+			// Remove translation from workplane, keep only rotation for coordinate
+			// transformation
 			wp.setX(0);
 			wp.setY(0);
 			wp.setZ(0);
@@ -459,13 +467,12 @@ public class Manipulation {
 
 			setGlobal(finalTransform);
 
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 
 		fireMove(trans, event2);
 	}
-
 
 	// Original perform move, compensates for rotation
 	private void performMove(TransformNR trans, MouseEvent event2) {
@@ -509,9 +516,10 @@ public class Manipulation {
 
 			global.setRotation(new RotationNR());
 			setGlobal(global);
-			//com.neuronrobotics.sdk.common.Log.error(" drag "+global.getX()+" , "+global.getY()+" ,"+global.getZ());
+			// com.neuronrobotics.sdk.common.Log.error(" drag "+global.getX()+" ,
+			// "+global.getY()+" ,"+global.getZ());
 
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
 		}
 
@@ -574,11 +582,12 @@ public class Manipulation {
 	}
 
 	public void setInReferenceFrame(double nX, double nY, double nZ) {
-		TransformNR inLocal = new TransformNR(nX,  nY,  nZ);
+		TransformNR inLocal = new TransformNR(nX, nY, nZ);
 		TransformNR wp = new TransformNR(getFrameOfReference().getRotation());
 		inLocal = wp.times(inLocal);
 		inLocal.setRotation(new RotationNR());
-		//com.neuronrobotics.sdk.common.Log.error("Setting in reference frame:"+inLocal.toSimpleString());
+		// com.neuronrobotics.sdk.common.Log.error("Setting in reference
+		// frame:"+inLocal.toSimpleString());
 		setGlobal(inLocal);
 
 		for (EventHandler<MouseEvent> R : eventListeners)
@@ -629,7 +638,7 @@ public class Manipulation {
 		release(null);
 	}
 
-	public  TransformNR getFrameOfReference() {
+	public TransformNR getFrameOfReference() {
 		return frameOfReference.get();
 	}
 
