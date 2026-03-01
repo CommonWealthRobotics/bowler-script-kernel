@@ -36,9 +36,9 @@ public class RhubarbManager implements IAudioProcessingLambda {
 
 	public void processRaw(File f, String ttsLocation) throws Exception {
 		String os = OSUtil.isLinux() ? "Linux" : OSUtil.isOSX() ? "macOS" : "Windows";
-		String exeExtention = OSUtil.isWindows() ? ".exe" : "";
+		String exeExtension = OSUtil.isWindows() ? ".exe" : "";
 		File exe = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/Rhubarb-Lip-Sync/Rhubarb-Lip-Sync-"
-				+ RhubarbVersion + "-" + os + "/rhubarb" + exeExtention);
+				+ RhubarbVersion + "-" + os + "/rhubarb" + exeExtension);
 		timeCodedVisemes = new ArrayList<>();
 		if (!exe.exists()) {
 			com.neuronrobotics.sdk.common.Log.error("Downloading " + exe.getAbsolutePath());

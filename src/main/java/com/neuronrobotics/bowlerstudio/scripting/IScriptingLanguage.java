@@ -49,8 +49,8 @@ public interface IScriptingLanguage {
 	public abstract String getShellType();
 
 	/**
-	 * Returns the list of supported file extentions Convention is to provide just
-	 * the leters that make up the file extention
+	 * Returns the list of supported file extensions Convention is to provide just
+	 * the leters that make up the file extension
 	 */
 	public abstract ArrayList<String> getFileExtension();
 
