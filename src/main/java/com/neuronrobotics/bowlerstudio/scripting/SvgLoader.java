@@ -67,7 +67,7 @@ public class SvgLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public ArrayList<String> getFileExtenetion() {
+	public ArrayList<String> getFileExtension() {
 		return new ArrayList<>(Arrays.asList("SVG","svg"));
 	}
 

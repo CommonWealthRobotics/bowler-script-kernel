@@ -41,7 +41,7 @@ public class BlenderLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public ArrayList<String> getFileExtenetion() {
+	public ArrayList<String> getFileExtension() {
 		ArrayList<String> ext = new ArrayList<>();
 		ext.add("blend");
 		return ext;

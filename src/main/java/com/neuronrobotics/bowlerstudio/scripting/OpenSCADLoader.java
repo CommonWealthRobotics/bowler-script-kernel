@@ -49,7 +49,7 @@ public class OpenSCADLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public ArrayList<String> getFileExtenetion() {
+	public ArrayList<String> getFileExtension() {
 		ArrayList<String> ext = new ArrayList<>();
 		ext.add("scad");
 		ext.add("SCad");

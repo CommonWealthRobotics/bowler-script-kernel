@@ -2245,7 +2245,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		ArrayList<String> langs = new ArrayList<>();
 		for (String L : getLangaugesMap().keySet()) {
 			IScriptingLanguage lang = getLangaugesMap().get(L);
-			for (String s : lang.getFileExtenetion()) {
+			for (String s : lang.getFileExtension()) {
 				langs.add(s);
 			}
 		}

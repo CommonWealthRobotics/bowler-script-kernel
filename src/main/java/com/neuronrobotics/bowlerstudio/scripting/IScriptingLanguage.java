@@ -52,7 +52,7 @@ public interface IScriptingLanguage {
 	 * Returns the list of supported file extentions Convention is to provide just
 	 * the leters that make up the file extention
 	 */
-	public abstract ArrayList<String> getFileExtenetion();
+	public abstract ArrayList<String> getFileExtension();
 
 	/**
 	 * This function should return true is the filename provided is of a supported
@@ -63,7 +63,7 @@ public interface IScriptingLanguage {
 	 * @return true if the file extension is supported, false otherwise.
 	 */
 	default boolean isSupportedFileExtenetion(String filename) {
-		for (String s : getFileExtenetion()) {
+		for (String s : getFileExtension()) {
 			if (filename.toLowerCase().endsWith(s.toLowerCase())) {
 				return true;
 			}

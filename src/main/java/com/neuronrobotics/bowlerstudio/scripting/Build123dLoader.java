@@ -80,7 +80,7 @@ public class Build123dLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public ArrayList<String> getFileExtenetion() {
+	public ArrayList<String> getFileExtension() {
 		ArrayList<String> ext = new ArrayList<>();
 		ext.add("py");
 		ext.add("build123d");
