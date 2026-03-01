@@ -1059,10 +1059,17 @@ public class CaDoodleFile {
 		}
 		return ret;
 	}
-
 	public File save() throws IOException, SaveOverwriteException {
-		if(saveing||!isInitialized() || initializing)
-			throw new SaveOverwriteException();		
+		return save(false);
+	}
+	
+	public File save(boolean ignoreUninitialized) throws IOException, SaveOverwriteException {
+		if(!isInitialized() &&!ignoreUninitialized )
+			throw new SaveOverwriteException("Uninitialized");	
+		if( initializing &&!ignoreUninitialized )
+			throw new SaveOverwriteException("Still initializing");	
+		if(saveing )
+			throw new SaveOverwriteException("Saving right now");	
 		saveing=true;
 		if (timeCreated < 0)
 			timeCreated = System.currentTimeMillis();
