@@ -72,7 +72,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public ArrayList<String> getFileExtenetion() {
+	public ArrayList<String> getFileExtension() {
 		return new ArrayList<>(Arrays.asList("doodle","cadoodle"));
 	}
 }

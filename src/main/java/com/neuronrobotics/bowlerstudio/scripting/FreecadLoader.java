@@ -71,7 +71,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public ArrayList<String> getFileExtenetion() {
+	public ArrayList<String> getFileExtension() {
 		ArrayList<String> ext = new ArrayList<>();
 		ext.add("FCStd");
 		return ext;

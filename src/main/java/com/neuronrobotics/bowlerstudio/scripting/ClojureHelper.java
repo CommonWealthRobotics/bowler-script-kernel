@@ -104,7 +104,7 @@ public class ClojureHelper implements IScriptingLanguage {
 	}
 
 	@Override
-	public ArrayList<String> getFileExtenetion() {
+	public ArrayList<String> getFileExtension() {
 		// Auto-generated method stub
 		return new ArrayList<>(Arrays.asList("clj", "cljs", "cljc"));
 	}

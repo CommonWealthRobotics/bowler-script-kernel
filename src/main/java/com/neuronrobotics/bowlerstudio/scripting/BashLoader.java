@@ -67,7 +67,7 @@ public class BashLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public ArrayList<String> getFileExtenetion() {
+	public ArrayList<String> getFileExtension() {
 		if (OSUtil.isWindows())
 			return new ArrayList<>();
 		return new ArrayList<>(Arrays.asList(".sh", ".bash"));

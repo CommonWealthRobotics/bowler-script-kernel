@@ -23,9 +23,9 @@ public interface IExternalEditor {
 	
 	Class getSupportedLangauge();
 	
-	default boolean isSupportedByExtention(File file) {
+	default boolean isSupportedByExtension(File file) {
 		if(getSupportedLangauge()!=null)
-			if (getSupportedLangauge().isInstance(ScriptingEngine.getLangaugeByExtention(file.getAbsolutePath()))) {
+			if (getSupportedLangauge().isInstance(ScriptingEngine.getLangaugeByExtension(file.getAbsolutePath()))) {
 				return true;
 			}
 		return false;

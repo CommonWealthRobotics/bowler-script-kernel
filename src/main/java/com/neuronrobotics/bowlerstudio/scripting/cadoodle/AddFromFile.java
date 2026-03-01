@@ -43,7 +43,7 @@ public class AddFromFile extends AbstractAddFrom {
 
 	public AddFromFile set(File source, CaDoodleFile cf) {
 		setCaDoodleFile(cf);
-		for (String s : ScriptingEngine.getAllExtentions()) {
+		for (String s : ScriptingEngine.getAllExtensions()) {
 			if (source.getName().toLowerCase().endsWith(s.toLowerCase())) {
 				toLocal(source, getName(),cf);
 				try {
@@ -56,7 +56,7 @@ public class AddFromFile extends AbstractAddFrom {
 				return this;
 			}
 		}
-		throw new RuntimeException("File Extention not supported: " + source.getName());
+		throw new RuntimeException("File Extension not supported: " + source.getName());
 	}
 
 	@Override
@@ -316,7 +316,7 @@ public class AddFromFile extends AbstractAddFrom {
 						}
 					}
 				} else {
-					for (String s : ScriptingEngine.getAllExtentions()) {
+					for (String s : ScriptingEngine.getAllExtensions()) {
 						if (f.getName().toLowerCase().endsWith(s.toLowerCase())) {
 							if(s.toLowerCase().contains("stl")){
 								stl=f;// return the stl if no blender file exists
