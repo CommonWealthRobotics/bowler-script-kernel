@@ -62,7 +62,7 @@ public interface IScriptingLanguage {
 	 * @param filename the filename of the file to be executed
 	 * @return true if the file extension is supported, false otherwise.
 	 */
-	default boolean isSupportedFileExtenetion(String filename) {
+	default boolean isSupportedFileExtension(String filename) {
 		for (String s : getFileExtension()) {
 			if (filename.toLowerCase().endsWith(s.toLowerCase())) {
 				return true;

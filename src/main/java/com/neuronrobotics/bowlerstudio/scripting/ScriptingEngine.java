@@ -617,7 +617,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static String getShellType(String name) {
 		for (IScriptingLanguage l : langauges.values()) {
-			if (l.isSupportedFileExtenetion(name))
+			if (l.isSupportedFileExtension(name))
 				return l.getShellType();
 		}
 
@@ -846,7 +846,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			} else {
 
 				for (IScriptingLanguage l : langauges.values()) {
-					if (l.isSupportedFileExtenetion(fileEntry.getName())) {
+					if (l.isSupportedFileExtension(fileEntry.getName())) {
 						f.add(findLocalPath(fileEntry, ref));
 						break;
 					}
@@ -2258,7 +2258,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	public static IScriptingLanguage getLangaugeByExtension(String extension) {
 		for (String L : getLangaugesMap().keySet()) {
-			if (langauges.get(L).isSupportedFileExtenetion(extension)) {
+			if (langauges.get(L).isSupportedFileExtension(extension)) {
 				return langauges.get(L);
 			}
 		}
