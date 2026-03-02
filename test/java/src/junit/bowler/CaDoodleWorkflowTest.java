@@ -28,6 +28,7 @@ import java.lang.reflect.Type;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AddFromScript;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleFile;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleOperation;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.CaDoodleParameters;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Group;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ModelNotes;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
@@ -84,6 +85,14 @@ public class CaDoodleWorkflowTest {
 			fail("Names must be unique!");
 		com.neuronrobotics.sdk.common.Log.error("Name one : "+nameOne );
 		com.neuronrobotics.sdk.common.Log.error("Name two : "+nameTwo );
+		CaDoodleParameters params = cf.getParameters();
+		params.set("var1", 10.0);
+		params.set("var2", 1.5);
+		params.set("var3", "var1 + var2 + 0.25");
+		params.set("var4", "(var3 / var2) + 0.25");
+		for(String k:cf.getParameters().keys()){
+			com.neuronrobotics.sdk.common.Log.debug("Key "+k+" value = "+cf.getParameters().getValue(k));
+		}
 		double distaance =10;
 		MoveCenter move = new MoveCenter()
 				.setLocation(new TransformNR(distaance,0,0))
@@ -302,8 +311,19 @@ public class CaDoodleWorkflowTest {
 		}
 		System.out.println("Saving");
 		loaded.save();
+		CaDoodleParameters parameters = loaded.getParameters();
+		for(String k:parameters.keys()){
+			com.neuronrobotics.sdk.common.Log.debug("Key "+k+" value = "+parameters.getValue(k)+" "+parameters.getString(k));
+		}
+		parameters.set("var2", 0.85);
+		for(String k:parameters.keys()){
+			com.neuronrobotics.sdk.common.Log.debug("Key "+k+" value = "+parameters.getValue(k)+" "+parameters.getString(k));
+		}
+		assertEquals(parameters.getValue("var4"), 13.3088235294, 0.0001);
 		loaded.close();
 		System.out.println("Save finished");
+		Thread.sleep(200);
+
 	}
 
 }
