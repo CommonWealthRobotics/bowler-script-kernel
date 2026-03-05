@@ -118,14 +118,19 @@ public class MoveCenter extends CaDoodleOperation {
 	}
 
 	public boolean isWorkplaneNotOrigin(TransformNR w) {
+
 		double epsilon = 0.00001;
-		RotationNR r = w.getRotation();
+
+		// Check for any translation
 		double abst = Math.abs(w.getX());
 		double abs2t = Math.abs(w.getY());
 		double abs3t = Math.abs(w.getZ());
 
 		if ((abst > epsilon) || (abs2t > epsilon) || (abs3t > epsilon))
 			return true;
+
+		// Check for any rotation
+		RotationNR r = w.getRotation();
 
 		double abs = Math.abs(r.getRotationAzimuthDegrees());
 		double abs2 = Math.abs(r.getRotationElevationDegrees());
@@ -139,10 +144,12 @@ public class MoveCenter extends CaDoodleOperation {
 	}
 
 	public MoveCenter setLocation(TransformNR location) throws InvalidLocationMove {
-		if (isWorkplaneNotOrigin(location))
+
+//		if (isWorkplaneNotOrigin(location))
 			this.location = location;
-		else
-			throw new InvalidLocationMove();
+//		else
+//			throw new InvalidLocationMove();
+
 		return this;
 	}
 
