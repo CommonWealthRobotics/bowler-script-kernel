@@ -31,6 +31,13 @@ public class Manipulation {
 		Point3D onDrag(double screenX, double screenY, double snapGridValue);
 	}
 
+	public static final double SNAP_GRID_OFF = 0.0009;
+	private static double snapGridValue = SNAP_GRID_OFF;
+
+	private static double objectHeight = 0;
+	private static double startObjectHeight = 0;
+	private static boolean snapGridEnabled = true;
+	
 	private DragCallback onDragCallback = null;
 
 	public HashMap<EventType<MouseEvent>, EventHandler<MouseEvent>> map = new HashMap<>();
@@ -39,16 +46,12 @@ public class Manipulation {
 	private Point3D startingPointWorld = null;
 	private Point3D newWorldPos = new Point3D(0, 0, 0);
 	private boolean zMove = false;
-
+	private boolean scaleMove = false;
 	private double newX = 0;
 	private double newY = 0;
 	private double newZ = 0;
 	private boolean dragging = false;
-	private boolean snapGridEnabled = true;
 	private boolean startCorrected = false; // Keep track if starting point was corrected
-	private double snapGridValue = SNAP_GRID_OFF;
-
-	public static final double SNAP_GRID_OFF = 0.0009;
 
 	private static IInteractiveUIElementProvider ui = new IInteractiveUIElementProvider() {
 
@@ -73,10 +76,11 @@ public class Manipulation {
 	private double gridOffsetZ = 0;
 	private Point3D startingWorkplanePosition = null;
 
-	public Manipulation(Affine mm, Vector3d o, TransformNR p, DragCallback callback, boolean zMove) {
+	public Manipulation(Affine mm, Vector3d o, TransformNR p, DragCallback callback, boolean zMove, boolean scaleMove) {
 		this(mm, o, p);
 		this.onDragCallback = callback;
 		this.zMove = zMove;
+		this.scaleMove = scaleMove;
 	}
 
 	public Manipulation(Affine mm, Vector3d o, TransformNR p) {
@@ -105,6 +109,11 @@ public class Manipulation {
 		return (Math.abs(rm[0][2]) > 1e-9) || (Math.abs(rm[1][2]) > 1e-9) || (Math.abs(rm[2][2] - 1.0) > 1e-9);
 	}
 
+	public void setObjectHeight(double objectHeight) {
+		this.objectHeight = objectHeight;
+		this.startObjectHeight = objectHeight;
+	}
+
 	// Calculate the starting point based on the active work plane
 	public void setStartingWorkplanePosition(Point3D startingPointWorld) {
 
@@ -115,7 +124,6 @@ public class Manipulation {
 		gridOffsetX = 0;
 		gridOffsetY = 0;
 		gridOffsetZ = 0;
-
 		this.startingWorkplanePosition = startingPointWorld;
 
 		double x = startingPointWorld.getX();
@@ -128,7 +136,6 @@ public class Manipulation {
 			x = 0;
 			y = 0;
 		}
-
 		this.startingWorkplanePosition = new Point3D(x, y, z);
 	}
 
@@ -139,12 +146,21 @@ public class Manipulation {
 
 		double gridX = Math.round(startingWorkplanePosition.getX() / snapGridValue) * snapGridValue;
 		double gridY = Math.round(startingWorkplanePosition.getY() / snapGridValue) * snapGridValue;
-		double gridZ = Math.round(startingWorkplanePosition.getZ() / snapGridValue) * snapGridValue;
+		
+		double gridZ;
+		if (zMove && !scaleMove) {
+			// The Z-arrow is 5mm above the object, snap object bottom to grid
+			double handleOffset = objectHeight + 5.0;
+			double objectBottomZ = startingWorkplanePosition.getZ() - handleOffset;
+			double snappedBottomZ = Math.round(objectBottomZ / snapGridValue) * snapGridValue;
+
+			gridZ = snappedBottomZ + handleOffset;
+		} else
+			gridZ = Math.round(startingWorkplanePosition.getZ() / snapGridValue) * snapGridValue;
 
 		gridOffsetX = (gridX - startingWorkplanePosition.getX()) * orientation.getX();
 		gridOffsetY = (gridY - startingWorkplanePosition.getY()) * orientation.getY();
 		gridOffsetZ = (gridZ - startingWorkplanePosition.getZ()) * orientation.getZ();
-
 	}
 
 	public enum DragState {
@@ -272,8 +288,11 @@ public class Manipulation {
 				// Request new world position based on mouse scene position
 				newWorldPos = onDragCallback.onDrag(event.getSceneX(), event.getSceneY(), snapGridValue);
 
-				if (zMove)
+				if (zMove) {
 					z = newWorldPos.getZ() - startingPointWorld.getZ();
+					if (!scaleMove)
+						z -= 5.0; // Adjust for arrow offset of 5.0mm
+				}
 				else {
 					x = newWorldPos.getX() - startingPointWorld.getX();
 					y = newWorldPos.getY() - startingPointWorld.getY();
@@ -361,68 +380,6 @@ public class Manipulation {
 		return -1600 / getUi().getCamerDepth();
 	}
 
-//	public void setNewWorldPosition(Point3D newWorldPos) {
-//		System.out.println("%%%%%%%%%%%% MANIPULATION RECEIVED: newWorld" + newWorldPos);
-//		this.newWorldPos = newWorldPos;
-//	}
-
-	private void performMoveUnified(TransformNR trans, MouseEvent event2) {
-		try {
-			// Extract translation from the input (ignore any rotation)
-			double xDelta = trans.getX();
-			double yDelta = trans.getY();
-			double zDelta = trans.getZ();
-
-			TransformNR wp = getFrameOfReference().copy();
-
-			// Remove translation from workplane, keep only rotation for coordinate
-			// transformation
-			wp.setX(0);
-			wp.setY(0);
-			wp.setZ(0);
-
-			// Transform the translation into workplane coordinates
-			TransformNR global = wp.inverse().times(new TransformNR(xDelta, yDelta, zDelta, new RotationNR()));
-
-			if (!startCorrected && dragging) {
-				startCorrected = true;
-				calculateGridOffsets();
-			}
-
-			if (snapGridEnabled) {
-				newX = snapToGrid(global.getX() * orientation.getX()) + gridOffsetX;
-				newY = snapToGrid(global.getY() * orientation.getY()) + gridOffsetY;
-				newZ = snapToGrid(global.getZ() * orientation.getZ()) + gridOffsetZ;
-			} else {
-				newX = global.getX() * orientation.getX();
-				newY = global.getY() * orientation.getY();
-				newZ = global.getZ() * orientation.getZ();
-			}
-
-			// Build final transform with NO rotation
-			TransformNR finalTransform = new TransformNR();
-			finalTransform.setX(newX);
-			finalTransform.setY(newY);
-			finalTransform.setZ(newZ);
-			finalTransform.setRotation(new RotationNR()); // Explicitly no rotation
-
-			// Apply workplane transformation back
-			TransformNR o = wp.times(finalTransform).times(wp.inverse());
-			o.setRotation(new RotationNR()); // Ensure no rotation
-
-			// Combine with existing global pose (translation only)
-			TransformNR globalTrans = globalPose.copy().setRotation(new RotationNR());
-			global = globalTrans.times(o);
-			global.setRotation(new RotationNR()); // Final safety: no rotation
-
-			setGlobal(global);
-
-		} catch (Throwable t) {
-			t.printStackTrace();
-		}
-
-		fireMove(trans, event2);
-	}
 
 	private void performMoveTranslate(TransformNR trans, MouseEvent event2) {
 		try {
@@ -449,6 +406,10 @@ public class Manipulation {
 				newY = trans.getY() * orientation.getY();
 				newZ = trans.getZ() * orientation.getZ();
 			}
+
+			// Keep object height updated when manipulating the height
+			if (zMove && scaleMove)
+				objectHeight = startObjectHeight + newZ;
 
 			// Build final transform with NO rotation
 			TransformNR finalTransform = new TransformNR();
