@@ -52,9 +52,9 @@ public class MobileBasePhysicsManager {
 			Vector3f oldavelocity = new Vector3f(0f, 0f, 0f);
 			Vector3f oldvelocity = new Vector3f(0f, 0f, 0f);
 			Vector3f gravity = new Vector3f();
-			private Quat4f orentation = new Quat4f();
+			private Quat4f orientation = new Quat4f();
 			Transform gravTrans = new Transform();
-			Transform orentTrans = new Transform();
+			Transform orientTrans = new Transform();
 			Vector3f avelocity = new Vector3f();
 			Vector3f velocity = new Vector3f();
 
@@ -65,25 +65,25 @@ public class MobileBasePhysicsManager {
 				body.getLinearVelocity(velocity);
 
 				body.getGravity(gravity);
-				body.getOrientation(orentation);
+				body.getOrientation(orientation);
 
 				TransformFactory.nrToBullet(new TransformNR(gravity.x, gravity.y, gravity.z, new RotationNR()),
 						gravTrans);
 				TransformFactory.nrToBullet(
-						new TransformNR(0, 0, 0, orentation.w, orentation.x, orentation.y, orentation.z), orentTrans);
-				orentTrans.inverse();
-				orentTrans.mul(gravTrans);
+						new TransformNR(0, 0, 0, orientation.w, orientation.x, orientation.y, orientation.z), orientTrans);
+				orientTrans.inverse();
+				orientTrans.mul(gravTrans);
 
 				// A=DeltaV / DeltaT
 				Double rotxAcceleration = (double) ((oldavelocity.x - avelocity.x) / timeStep);
 				Double rotyAcceleration = (double) ((oldavelocity.y - avelocity.y) / timeStep);
 				Double rotzAcceleration = (double) ((oldavelocity.z - avelocity.z) / timeStep);
 				Double xAcceleration = (double) (((oldvelocity.x - velocity.x) / timeStep) / PhysicsGravityScalar)
-						+ (orentTrans.origin.x / PhysicsGravityScalar);
+						+ (orientTrans.origin.x / PhysicsGravityScalar);
 				Double yAcceleration = (double) (((oldvelocity.y - velocity.y) / timeStep) / PhysicsGravityScalar)
-						+ (orentTrans.origin.y / PhysicsGravityScalar);
+						+ (orientTrans.origin.y / PhysicsGravityScalar);
 				Double zAcceleration = (double) (((oldvelocity.z - velocity.z) / timeStep) / PhysicsGravityScalar)
-						+ (orentTrans.origin.z / PhysicsGravityScalar);
+						+ (orientTrans.origin.z / PhysicsGravityScalar);
 				// tell the virtual IMU the system updated
 				base.setVirtualState(new IMUUpdate(xAcceleration, yAcceleration, zAcceleration, rotxAcceleration,
 						rotyAcceleration, rotzAcceleration,base.currentTimeMillis()));
