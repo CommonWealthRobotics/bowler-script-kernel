@@ -16,7 +16,7 @@ import javafx.scene.transform.Affine;
 
 public class Mirror extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
-	private MirrorOrentation location;
+	private MirrorOrientation location;
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
@@ -61,13 +61,13 @@ public class Mirror extends CaDoodleOperation {
 				Transform mirroringCenter = new Transform().movex(base.getCenterX()).movey(base.getCenterY())
 						.movez(base.getCenterZ());
 				Transform sc = new Transform();
-				if (location == MirrorOrentation.x) {
+				if (location == MirrorOrientation.x) {
 					sc = new Transform().scaleX(-1);
 				}
-				if (location == MirrorOrentation.y) {
+				if (location == MirrorOrientation.y) {
 					sc = new Transform().scaleY(-1);
 				}
-				if (location == MirrorOrentation.z) {
+				if (location == MirrorOrientation.z) {
 					sc = new Transform().scaleZ(-1);
 				}
 				Transform scale = sc;
@@ -117,13 +117,13 @@ public class Mirror extends CaDoodleOperation {
 		Transform mirroringCenter = new Transform().movex(t.getCenterX()).movex(t.getCenterY()).movez(t.getCenterZ());
 
 		CSG centered = t.transformed(mirroringCenter.inverse());
-		if (location == MirrorOrentation.x) {
+		if (location == MirrorOrientation.x) {
 			centered = centered.mirrorx();
 		}
-		if (location == MirrorOrentation.y) {
+		if (location == MirrorOrientation.y) {
 			centered = centered.mirrory();
 		}
-		if (location == MirrorOrentation.z) {
+		if (location == MirrorOrientation.z) {
 			centered = centered.mirrorz();
 		}
 		centered = centered.transformed(mirroringCenter);
@@ -131,11 +131,11 @@ public class Mirror extends CaDoodleOperation {
 		return centered.setName(name).syncProperties(getCaDoodleFile().getCsgDBinstance(), csg);
 	}
 
-	public MirrorOrentation getLocation() {
+	public MirrorOrientation getLocation() {
 		return location;
 	}
 
-	public Mirror setLocation(MirrorOrentation location) {
+	public Mirror setLocation(MirrorOrientation location) {
 		this.location = location;
 		return this;
 	}
