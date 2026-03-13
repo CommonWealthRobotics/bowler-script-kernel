@@ -10,6 +10,17 @@ plugins {
     id 'signing'
     id 'maven-publish'
 	id 'java-library'
+	id 'com.diffplug.spotless' version '6.25.0'
+}
+spotless {
+	java {
+		// Eclipse formatter with your config file
+        eclipse()  // Uses Eclipse's built-in default profile — no XML needed!		
+		// Optional but recommended additions:
+		removeUnusedImports()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
 }
 if (project == rootProject) {
 	apply plugin: 'com.gradleup.shadow'
@@ -338,6 +349,7 @@ jar {
 }
 if (project == rootProject) {
 shadowJar {
+	dependsOn 'spotlessCheck'
 	zip64 true
 	//mainClassName = 'com.neuronrobotics.bowlerstudio.BowlerKernel'
 	if (project == rootProject) {
