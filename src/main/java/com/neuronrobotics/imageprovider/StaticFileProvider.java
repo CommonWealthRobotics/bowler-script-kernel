@@ -3,32 +3,28 @@ package com.neuronrobotics.imageprovider;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-
-import com.neuronrobotics.sdk.common.BowlerDatagram;
-
 public class StaticFileProvider extends AbstractImageProvider {
-	
+
 	private File file;
 
-	public StaticFileProvider(File file){
+	public StaticFileProvider(File file) {
 		this.file = file;
 	}
 
 	@Override
 	protected boolean captureNewImage(BufferedImage imageData) {
-		AbstractImageProvider.deepCopy( captureNewImage(),imageData);
+		AbstractImageProvider.deepCopy(captureNewImage(), imageData);
 		return true;
 	}
 
 	@Override
 	public void disconnectDeviceImp() {
 		// Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -52,6 +48,5 @@ public class StaticFileProvider extends AbstractImageProvider {
 			return null;
 		}
 	}
-
 
 }

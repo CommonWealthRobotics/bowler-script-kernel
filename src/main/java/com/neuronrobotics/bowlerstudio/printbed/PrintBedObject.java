@@ -22,19 +22,20 @@ public class PrintBedObject {
 	private Manipulation manip;
 	private Affine affine = new Affine();
 	private TransformNR globalPose;
-	public PrintBedObject(String name, CSG part, double xMax, double xMin, double yMax, double yMin, TransformNR startPose){
-		this.part =  part;
-		this.name =  name;
-		this.xMax =  xMax;
-		this.xMin =  xMin;
-		this.yMax =  yMax;
-		this.yMin =  yMin;
+	public PrintBedObject(String name, CSG part, double xMax, double xMin, double yMax, double yMin,
+			TransformNR startPose) {
+		this.part = part;
+		this.name = name;
+		this.xMax = xMax;
+		this.xMin = xMin;
+		this.yMax = yMax;
+		this.yMin = yMin;
 		this.globalPose = startPose;
-		
+
 		manip = new Manipulation(affine, new Vector3d(1, 1, 0), startPose);
-		part.getStorage().set("manipulator",manip.map);
+		part.getStorage().set("manipulator", manip.map);
 		part.setManipulator(affine);
-		manip.addSaveListener(() -> com.neuronrobotics.sdk.common.Log.error("Saving PrintBedObject "+name));
+		manip.addSaveListener(() -> com.neuronrobotics.sdk.common.Log.error("Saving PrintBedObject " + name));
 		checkBounds();
 	}
 	public void addEventListener(EventHandler<MouseEvent> r) {
@@ -60,17 +61,17 @@ public class PrintBedObject {
 		return manip.getCurrentPose().getZ();
 	}
 	public void checkBounds() {
-		double minYTest = part.getMinY()-yMin+globalPose.getY();
-		double maxYTest = part.getMaxY()-yMax+globalPose.getY();
-		double minXTest = part.getMinX()-xMin+globalPose.getX();
-		double maxXTest = part.getMaxX()-xMax+globalPose.getX();
-		if(minYTest<0)
+		double minYTest = part.getMinY() - yMin + globalPose.getY();
+		double maxYTest = part.getMaxY() - yMax + globalPose.getY();
+		double minXTest = part.getMinX() - xMin + globalPose.getX();
+		double maxXTest = part.getMaxX() - xMax + globalPose.getX();
+		if (minYTest < 0)
 			globalPose.translateY(-minYTest);
-		if(minXTest<0)
+		if (minXTest < 0)
 			globalPose.translateX(-minXTest);
-		if(maxYTest>0)
+		if (maxYTest > 0)
 			globalPose.translateY(-maxYTest);
-		if(maxXTest>0)
+		if (maxXTest > 0)
 			globalPose.translateX(-maxXTest);
 		manip.set(globalPose.getX(), globalPose.getY(), globalPose.getZ());
 	}

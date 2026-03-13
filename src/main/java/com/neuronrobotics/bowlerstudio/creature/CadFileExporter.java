@@ -14,133 +14,132 @@ import com.neuronrobotics.bowlerstudio.scripting.FreecadLoader;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
-import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
 import javafx.scene.transform.Affine;
 
 public class CadFileExporter {
-  
-  IMobileBaseUI  ui;
-  public CadFileExporter(IMobileBaseUI myUI){
-    ui=myUI;
-  }
-  public CadFileExporter(){
-    ui=new IMobileBaseUI() {
-      
-      @Override
-      public void setSelectedCsg(Collection<CSG> selectedCsg) {
-        // Auto-generated method stub
-        
-      }
-      
-      @Override
-      public void setAllCSG(Collection<CSG> toAdd, File source) {
-        // Auto-generated method stub
-        
-      }
-      
-      @Override
-      public void highlightException(File fileEngineRunByName, Throwable ex) {
-        // Auto-generated method stub
-        
-      }
-      
-      @Override
-      public Set<CSG> getVisibleCSGs() {
-        // Auto-generated method stub
-        return null;
-      }
-      
-      @Override
-      public void addCSG(Collection<CSG> toAdd, File source) {
-        // Auto-generated method stub
-        
-      }
 
-	@Override
-	public void setSelected(Affine rootListener) {
-		// Auto-generated method stub
-		
+	IMobileBaseUI ui;
+	public CadFileExporter(IMobileBaseUI myUI) {
+		ui = myUI;
 	}
-    };
-  }
-	public ArrayList<File> generateManufacturingParts(List<CSG> totalAssembly , File baseDirForFiles) throws IOException {
+	public CadFileExporter() {
+		ui = new IMobileBaseUI() {
+
+			@Override
+			public void setSelectedCsg(Collection<CSG> selectedCsg) {
+				// Auto-generated method stub
+
+			}
+
+			@Override
+			public void setAllCSG(Collection<CSG> toAdd, File source) {
+				// Auto-generated method stub
+
+			}
+
+			@Override
+			public void highlightException(File fileEngineRunByName, Throwable ex) {
+				// Auto-generated method stub
+
+			}
+
+			@Override
+			public Set<CSG> getVisibleCSGs() {
+				// Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public void addCSG(Collection<CSG> toAdd, File source) {
+				// Auto-generated method stub
+
+			}
+
+			@Override
+			public void setSelected(Affine rootListener) {
+				// Auto-generated method stub
+
+			}
+		};
+	}
+	public ArrayList<File> generateManufacturingParts(List<CSG> totalAssembly, File baseDirForFiles)
+			throws IOException {
 		ArrayList<File> allCadStl = new ArrayList<>();
-		if(!baseDirForFiles.isDirectory()){
+		if (!baseDirForFiles.isDirectory()) {
 			String fileNameWithOutExt = FilenameUtils.removeExtension(baseDirForFiles.getAbsolutePath());
 			baseDirForFiles = new File(fileNameWithOutExt);
 			if (!baseDirForFiles.exists())
 				baseDirForFiles.mkdirs();
 		}
 		File dir;
-		if(!baseDirForFiles.getName().contentEquals("manufacturing")){
-			 dir = new File(baseDirForFiles.getAbsolutePath() + "/manufacturing/");
+		if (!baseDirForFiles.getName().contentEquals("manufacturing")) {
+			dir = new File(baseDirForFiles.getAbsolutePath() + "/manufacturing/");
 			if (!dir.exists())
 				dir.mkdirs();
-		}else{
-			dir=baseDirForFiles;
+		} else {
+			dir = baseDirForFiles;
 		}
-		int index=0;
+		int index = 0;
 		ArrayList<CSG> svgParts = new ArrayList<>();
 		ArrayList<CSG> blendParts = new ArrayList<>();
 		ArrayList<CSG> freecadParts = new ArrayList<>();
-		String svgName =null;
-		String blendName=null;
-		String freecadName=null;
-		String nameBase ="";
-		for(CSG part: totalAssembly){
-			if(part.getPolygons().size()==0)
+		String svgName = null;
+		String blendName = null;
+		String freecadName = null;
+		String nameBase = "";
+		for (CSG part : totalAssembly) {
+			if (part.getPolygons().size() == 0)
 				continue;
 			String name = part.getName();
 			CSG manufactured = part.prepForManufacturing();
-			if( manufactured==null){
-			  continue;
+			if (manufactured == null) {
+				continue;
 			}
 			manufactured.setName(part.getName());
-			if(name.length()==0)
-				name="Part-Num-"+index;
-			nameBase = dir.getAbsolutePath()+"/"+name;
+			if (name.length() == 0)
+				name = "Part-Num-" + index;
+			nameBase = dir.getAbsolutePath() + "/" + name;
 			index++;
-			if(part.getExportFormats()==null){
+			if (part.getExportFormats() == null) {
 				try {
-					allCadStl.add(makeStl(nameBase,manufactured));// default to stl
-				}catch(Throwable t) {
-					com.neuronrobotics.sdk.common.Log.error("Failed to generate "+part.getName());
+					allCadStl.add(makeStl(nameBase, manufactured));// default to stl
+				} catch (Throwable t) {
+					com.neuronrobotics.sdk.common.Log.error("Failed to generate " + part.getName());
 					com.neuronrobotics.sdk.common.Log.error(t);
 				}
-			}else{
+			} else {
 
-				for(String format:part.getExportFormats()){
-					if(format.toLowerCase().contains("obj")){
-						allCadStl.add(makeObj(nameBase,manufactured));//
-						ui.setCsg(manufactured , null);
+				for (String format : part.getExportFormats()) {
+					if (format.toLowerCase().contains("obj")) {
+						allCadStl.add(makeObj(nameBase, manufactured));//
+						ui.setCsg(manufactured, null);
 					}
-					if(format.toLowerCase().contains("stl")){
-						allCadStl.add(makeStl(nameBase,manufactured));// default to stl
-						ui.setCsg(manufactured , null);
+					if (format.toLowerCase().contains("stl")) {
+						allCadStl.add(makeStl(nameBase, manufactured));// default to stl
+						ui.setCsg(manufactured, null);
 					}
-					if(format.toLowerCase().contains("svg")){
-						if(svgName==null){
-							svgName =part.toString();
+					if (format.toLowerCase().contains("svg")) {
+						if (svgName == null) {
+							svgName = part.toString();
 						}
 						svgParts.add(manufactured);
-						ui.setAllCSG(svgParts , null);
+						ui.setAllCSG(svgParts, null);
 					}
-					if(format.toLowerCase().contains("blend")){
-						//allCadStl.add(makeBlender(nameBase,manufactured));// 
-						ui.setCsg(manufactured , null);
-						if(blendName==null){
-							blendName =part.toString();
+					if (format.toLowerCase().contains("blend")) {
+						// allCadStl.add(makeBlender(nameBase,manufactured));//
+						ui.setCsg(manufactured, null);
+						if (blendName == null) {
+							blendName = part.toString();
 						}
 						blendParts.add(manufactured);
 					}
-					if(format.toLowerCase().contains("freecad")){
-						//allCadStl.add(makeBlender(nameBase,manufactured));// 
-						ui.setCsg(manufactured , null);
-						if(freecadName==null){
-							freecadName =part.toString();
+					if (format.toLowerCase().contains("freecad")) {
+						// allCadStl.add(makeBlender(nameBase,manufactured));//
+						ui.setCsg(manufactured, null);
+						if (freecadName == null) {
+							freecadName = part.toString();
 						}
 						freecadParts.add(manufactured);
 					}
@@ -148,84 +147,83 @@ public class CadFileExporter {
 
 			}
 		}
-		if(svgParts.size()>0){
-			allCadStl.add(makeSvg(nameBase,svgParts));// default to stl
+		if (svgParts.size() > 0) {
+			allCadStl.add(makeSvg(nameBase, svgParts));// default to stl
 		}
-		if(blendParts.size()>0){
-			allCadStl.add(makeBlender(nameBase,blendParts));// default to stl
+		if (blendParts.size() > 0) {
+			allCadStl.add(makeBlender(nameBase, blendParts));// default to stl
 		}
-		if(freecadParts.size()>0){
-			allCadStl.add(makeFreecad(nameBase,freecadParts));// default to stl
+		if (freecadParts.size() > 0) {
+			allCadStl.add(makeFreecad(nameBase, freecadParts));// default to stl
 		}
 		com.neuronrobotics.sdk.common.Log.debug("Finished Export!");
 		return allCadStl;
 	}
-	private File makeFreecad(String nameBase,List<CSG>  current ) throws IOException{
+	private File makeFreecad(String nameBase, List<CSG> current) throws IOException {
 		File blend = new File(nameBase + ".FCStd");
-		com.neuronrobotics.sdk.common.Log.debug("Writing "+blend.getAbsolutePath());
-		for(CSG tmp:current)
-			FreecadLoader.addCSGToFreeCAD( blend,tmp);
+		com.neuronrobotics.sdk.common.Log.debug("Writing " + blend.getAbsolutePath());
+		for (CSG tmp : current)
+			FreecadLoader.addCSGToFreeCAD(blend, tmp);
 		return blend;
 	}
-	
-	private File makeStl(String nameBase,CSG tmp ) throws IOException{
+
+	private File makeStl(String nameBase, CSG tmp) throws IOException {
 		File stl = new File(nameBase + ".stl");
-//		boolean manifold=CSG.isPreventNonManifoldTriangles();
-//		CSG.setPreventNonManifoldTriangles(false);
+		// boolean manifold=CSG.isPreventNonManifoldTriangles();
+		// CSG.setPreventNonManifoldTriangles(false);
 		String stlString = tmp.toStlString();
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlString);
-		//CSG.setPreventNonManifoldTriangles(manifold);
-		com.neuronrobotics.sdk.common.Log.debug("Writing "+stl.getAbsolutePath());
+		// CSG.setPreventNonManifoldTriangles(manifold);
+		com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
 		return stl;
 	}
-	private File makeObj(String nameBase,CSG tmp ) throws IOException{
+	private File makeObj(String nameBase, CSG tmp) throws IOException {
 		File stl = new File(nameBase + ".obj");
-		
+
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toObjString());
-		com.neuronrobotics.sdk.common.Log.debug("Writing "+stl.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
 		return stl;
 	}
-	
-	private File makeBlender(String nameBase,List<CSG>  current ) throws IOException{
+
+	private File makeBlender(String nameBase, List<CSG> current) throws IOException {
 		File blend = new File(nameBase + ".blend");
-		com.neuronrobotics.sdk.common.Log.debug("Writing "+blend.getAbsolutePath());
-		for(CSG tmp:current)
-			BlenderLoader.toBlenderFile(null,tmp, blend);
+		com.neuronrobotics.sdk.common.Log.debug("Writing " + blend.getAbsolutePath());
+		for (CSG tmp : current)
+			BlenderLoader.toBlenderFile(null, tmp, blend);
 		return blend;
 	}
-	
+
 	private File makeSvg(String nameBase, List<CSG> currentCsg) throws IOException {
 		File stl = new File(nameBase + ".svg");
 
-		
-			for (CSG csg : currentCsg) {
-				if (csg.getSlicePlanes() == null) {
-					csg.addSlicePlane(new Transform());
-				}
+		for (CSG csg : currentCsg) {
+			if (csg.getSlicePlanes() == null) {
+				csg.addSlicePlane(new Transform());
 			}
+		}
+		try {
 			try {
-				try {
-					SVGExporter.export(currentCsg, stl);
-				} catch (Exception e) {
-					ArrayList<CSG> movedDown = new ArrayList<>();
-					for (CSG csg : currentCsg) {
-						CSG movez = csg.toZMin().movez(-0.01);
-						if (movez.getSlicePlanes() == null)
-							movez.addSlicePlane(new Transform());
-						movez.setName(csg.getName());
-						movedDown.add(movez);
-					}
-					SVGExporter.export(movedDown, stl);
-
+				SVGExporter.export(currentCsg, stl);
+			} catch (Exception e) {
+				ArrayList<CSG> movedDown = new ArrayList<>();
+				for (CSG csg : currentCsg) {
+					CSG movez = csg.toZMin().movez(-0.01);
+					if (movez.getSlicePlanes() == null)
+						movez.addSlicePlane(new Transform());
+					movez.setName(csg.getName());
+					movedDown.add(movez);
 				}
+				SVGExporter.export(movedDown, stl);
 
-				com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
-			} catch (Throwable t) {
-				com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine available for slicing");
-				com.neuronrobotics.sdk.common.Log.error(t);
 			}
-		
+
+			com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
+		} catch (Throwable t) {
+			com.neuronrobotics.sdk.common.Log.error("ERROR, NO pixelization engine available for slicing");
+			com.neuronrobotics.sdk.common.Log.error(t);
+		}
+
 		return stl;
 	}
-	
+
 }

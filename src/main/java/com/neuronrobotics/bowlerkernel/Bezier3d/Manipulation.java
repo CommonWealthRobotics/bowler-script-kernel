@@ -1,27 +1,21 @@
 package com.neuronrobotics.bowlerkernel.Bezier3d;
 
 import java.util.ArrayList;
-import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 
 import java.util.HashMap;
-import java.util.List;
 
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.*;
 import com.neuronrobotics.sdk.common.Log;
 
-import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.scene.input.MouseEvent;
 //import javafx.scene.Node;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Affine;
-import javafx.scene.transform.Transform;
 
 public class Manipulation {
 
@@ -37,7 +31,7 @@ public class Manipulation {
 	private static double objectHeight = 0;
 	private static double startObjectHeight = 0;
 	private static boolean snapGridEnabled = true;
-	
+
 	private DragCallback onDragCallback = null;
 
 	public HashMap<EventType<MouseEvent>, EventHandler<MouseEvent>> map = new HashMap<>();
@@ -146,7 +140,7 @@ public class Manipulation {
 
 		double gridX = Math.round(startingWorkplanePosition.getX() / snapGridValue) * snapGridValue;
 		double gridY = Math.round(startingWorkplanePosition.getY() / snapGridValue) * snapGridValue;
-		
+
 		double gridZ;
 		if (zMove && !scaleMove) {
 			// The Z-arrow is 5mm above the object, snap object bottom to grid
@@ -228,32 +222,32 @@ public class Manipulation {
 
 					switch (name) {
 
-					case "MOUSE_PRESSED":
-						if (event.isPrimaryButtonDown())
-							pressed(event);
-						break;
+						case "MOUSE_PRESSED" :
+							if (event.isPrimaryButtonDown())
+								pressed(event);
+							break;
 
-					case "MOUSE_DRAGGED":
-						dragged(event, event);
-						break;
+						case "MOUSE_DRAGGED" :
+							dragged(event, event);
+							break;
 
-					case "MOUSE_RELEASED":
-						release(event);
-						break;
+						case "MOUSE_RELEASED" :
+							release(event);
+							break;
 
-					case "MOUSE_MOVED":
-						// ignore
-						break;
-//				case "MOUSE_ENTERED":
-//					m.getMesh().setMaterial(highlight);
-//					break;
-//				case "MOUSE_EXITED":
-//					if (state == DragState.IDLE)
-//						m.getMesh().setMaterial(color);
-//					break;
-					default:
-						// com.neuronrobotics.sdk.common.Log.error("UNKNOWN! Mouse event "+name);
-						break;
+						case "MOUSE_MOVED" :
+							// ignore
+							break;
+						// case "MOUSE_ENTERED":
+						// m.getMesh().setMaterial(highlight);
+						// break;
+						// case "MOUSE_EXITED":
+						// if (state == DragState.IDLE)
+						// m.getMesh().setMaterial(color);
+						// break;
+						default :
+							// com.neuronrobotics.sdk.common.Log.error("UNKNOWN! Mouse event "+name);
+							break;
 					}
 				} catch (Throwable t) {
 					Log.error(t);
@@ -292,8 +286,7 @@ public class Manipulation {
 					z = newWorldPos.getZ() - startingPointWorld.getZ();
 					if (!scaleMove)
 						z -= 5.0; // Adjust for arrow offset of 5.0mm
-				}
-				else {
+				} else {
 					x = newWorldPos.getX() - startingPointWorld.getX();
 					y = newWorldPos.getY() - startingPointWorld.getY();
 				}
@@ -379,7 +372,6 @@ public class Manipulation {
 	private double getDepthNow() {
 		return -1600 / getUi().getCamerDepth();
 	}
-
 
 	private void performMoveTranslate(TransformNR trans, MouseEvent event2) {
 		try {

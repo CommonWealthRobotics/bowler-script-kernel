@@ -8,7 +8,7 @@ import com.google.gson.annotations.Expose;
 import eu.mihosoft.vrl.v3d.CSG;
 
 public class Lock extends CaDoodleOperation {
-	@Expose (serialize = true, deserialize = true)
+	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Override
 	public String getType() {
@@ -20,17 +20,18 @@ public class Lock extends CaDoodleOperation {
 		ArrayList<CSG> replace = new ArrayList<CSG>();
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		for(CSG c: incoming) {
-			for(String name:names) {
-				if(name.contentEquals(c.getName())) {
+		for (CSG c : incoming) {
+			for (String name : names) {
+				if (name.contentEquals(c.getName())) {
 					replace.add(c);
-					CSG b=c.clone().setRegenerate(c.getRegenerate()).syncProperties(getCaDoodleFile().getCsgDBinstance(),c);
+					CSG b = c.clone().setRegenerate(c.getRegenerate())
+							.syncProperties(getCaDoodleFile().getCsgDBinstance(), c);
 					b.setIsLock(true);
 					back.add(b);
 				}
 			}
 		}
-		for(CSG c:replace) {
+		for (CSG c : replace) {
 			back.remove(c);
 		}
 		return back;

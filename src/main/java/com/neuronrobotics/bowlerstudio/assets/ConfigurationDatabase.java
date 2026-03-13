@@ -12,20 +12,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
-import org.kohsuke.github.GHMyself;
-import org.kohsuke.github.GHRepository;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
-import com.neuronrobotics.bowlerstudio.scripting.IGithubLoginListener;
-import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 import java.nio.charset.*;
@@ -36,11 +29,13 @@ import java.nio.file.Paths;
 import org.apache.commons.io.*;
 public class ConfigurationDatabase {
 
-	//private static final String repo = "BowlerStudioConfiguration";
-	//private static final String HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT = "https://github.com/CommonWealthRobotics/"
-	//		+ repo + ".git";
+	// private static final String repo = "BowlerStudioConfiguration";
+	// private static final String
+	// HTTPS_GITHUB_COM_NEURON_ROBOTICS_BOWLER_STUDIO_CONFIGURATION_GIT =
+	// "https://github.com/CommonWealthRobotics/"
+	// + repo + ".git";
 
-	//private static String gitSource = null; // madhephaestus
+	// private static String gitSource = null; // madhephaestus
 	private static String dbFile = "database.json";
 	private static boolean checked;
 	private static Map<String, HashMap<String, Object>> database = null;
@@ -49,62 +44,63 @@ public class ConfigurationDatabase {
 	// chreat the gson object, this is the parsing factory
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	private static IssueReportingExceptionHandler reporter = new IssueReportingExceptionHandler();
-	//private static String loggedInAs = null;
+	// private static String loggedInAs = null;
 
 	public static void clear(String key) {
 		getDatabase();
-		synchronized(database){
+		synchronized (database) {
 			getParamMap(key).clear();
 		}
-	
+
 	}
 	public static Set<String> keySet(String name) {
-		Set<String> keySet ;
+		Set<String> keySet;
 		getDatabase();
-		synchronized(database){
-			keySet= ConfigurationDatabase.getParamMap(name).keySet();
+		synchronized (database) {
+			keySet = ConfigurationDatabase.getParamMap(name).keySet();
 		}
 		return keySet;
 	}
 	public static boolean containsKey(String paramsKey, String string) {
 		boolean containsKey = false;
 		getDatabase();
-		synchronized(database){
+		synchronized (database) {
 			containsKey = ConfigurationDatabase.getParamMap(paramsKey).containsKey(string);
 		}
 		return containsKey;
 
 	}
 	public static String getKeyFromValue(String controllerName, String mappedValue) {
-		String ret=null;
+		String ret = null;
 		getDatabase();
-		synchronized(database){
+		synchronized (database) {
 			HashMap<String, Object> paramMap = ConfigurationDatabase.getParamMap(controllerName);
 			for (String key : paramMap.keySet()) {
 				String string = (String) paramMap.get(key);
 				if (string.contentEquals(mappedValue)) {
-					ret= key;
+					ret = key;
 					break;
 				}
 			}
 		}
 		return ret;
 	}
-	public static  Object get(String paramsKey, String objectKey) {
+	public static Object get(String paramsKey, String objectKey) {
 		return getObject(paramsKey, objectKey, null);
 	}
-	public static  Object get(String paramsKey, String objectKey, Object defaultValue) {
+	public static Object get(String paramsKey, String objectKey, Object defaultValue) {
 		return getObject(paramsKey, objectKey, defaultValue);
 	}
-	public static  Object getObject(String paramsKey, String objectKey, Object defaultValue) {
-		Object ret=null;
+	public static Object getObject(String paramsKey, String objectKey, Object defaultValue) {
+		Object ret = null;
 		getDatabase();
-		synchronized(database){
+		synchronized (database) {
 			if (getParamMap(paramsKey).get(objectKey) == null) {
-				//com.neuronrobotics.sdk.common.Log.error("Cant find: " + paramsKey + ":" + objectKey);
+				// com.neuronrobotics.sdk.common.Log.error("Cant find: " + paramsKey + ":" +
+				// objectKey);
 				setObject(paramsKey, objectKey, defaultValue);
 			}
-			ret= getParamMap(paramsKey).get(objectKey);
+			ret = getParamMap(paramsKey).get(objectKey);
 		}
 		return ret;
 	}
@@ -118,12 +114,12 @@ public class ConfigurationDatabase {
 	public static Object put(String paramsKey, String objectKey, Object value) {
 		return setObject(paramsKey, objectKey, value);
 	}
-	
-	public static  Object setObject(String paramsKey, String objectKey, Object value) {
-		Object put =null;
+
+	public static Object setObject(String paramsKey, String objectKey, Object value) {
+		Object put = null;
 		getDatabase();
-		synchronized(database){
-			put=getParamMap(paramsKey).put(objectKey, value);
+		synchronized (database) {
+			put = getParamMap(paramsKey).put(objectKey, value);
 		}
 		save();
 		return put;
@@ -131,69 +127,68 @@ public class ConfigurationDatabase {
 	public static Object remove(String paramsKey, String objectKey) {
 		return removeObject(paramsKey, objectKey);
 	}
-	public static  Object removeObject(String paramsKey, String objectKey) {
-		Object remove=null;
+	public static Object removeObject(String paramsKey, String objectKey) {
+		Object remove = null;
 		getDatabase();
-		synchronized(database){
-			remove= getParamMap(paramsKey).remove(objectKey);
+		synchronized (database) {
+			remove = getParamMap(paramsKey).remove(objectKey);
 		}
 		save();
 		return remove;
 	}
 
-	public static  void save() {
+	public static void save() {
 		String writeOut = null;
 		getDatabase();
-		synchronized(database){
+		synchronized (database) {
 			writeOut = gson.toJson(database, TT_mapStringString);
 		}
-		File f=loadFile();
-		
+		File f = loadFile();
 
 		try (PrintWriter out = new PrintWriter(f.getAbsolutePath())) {
-		    out.println(writeOut);
+			out.println(writeOut);
 		} catch (FileNotFoundException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
 			return;
 		}
-		//com.neuronrobotics.sdk.common.Log.error("Saved "+f.getName());
+		// com.neuronrobotics.sdk.common.Log.error("Saved "+f.getName());
 	}
 
 	@SuppressWarnings("unchecked")
 	public static void getDatabase() {
 		if (database != null) {
-			return ;
+			return;
 		}
 		File loadFile = loadFile();
-		if(loadFile.exists())
+		if (loadFile.exists())
 			try {
-				File parent =loadFile.getParentFile();
-				File db = new File(parent.getAbsolutePath()+DownloadManager.delim()+"CSGdatabase.json");
+				File parent = loadFile.getParentFile();
+				File db = new File(parent.getAbsolutePath() + DownloadManager.delim() + "CSGdatabase.json");
 				CSGDatabaseInstance instance = new CSGDatabaseInstance(db);
-				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(instance,loadFile, null);
+				Object inlineFileScriptRun = ScriptingEngine.inlineFileScriptRun(instance, loadFile, null);
 				database = Collections.synchronizedMap((HashMap<String, HashMap<String, Object>>) inlineFileScriptRun);
-				
+
 			} catch (Exception e) {
 				// databse is empty
 			}
-		
+
 		if (database == null) {
 			database = new HashMap<String, HashMap<String, Object>>();
 			// new Exception().printStackTrace();
 		}
 
-		return ;
+		return;
 	}
 
 	public static File loadFile() {
-		Path appDataDirectory =  new File(ScriptingEngine.getWorkspace().getAbsolutePath() + delim()).toPath();//getAppDataDirectory();
+		Path appDataDirectory = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + delim()).toPath();// getAppDataDirectory();
 		File dir = appDataDirectory.toFile();
-		if(!dir.exists()) {
+		if (!dir.exists()) {
 			dir.mkdirs();
 		}
-		File f = new File(appDataDirectory+"/ConfigurationDatabase.json");
-		if(!f.exists()) {
+		File f = new File(appDataDirectory + "/ConfigurationDatabase.json");
+		if (!f.exists()) {
 			try {
 				f.createNewFile();
 			} catch (IOException e) {
@@ -203,7 +198,7 @@ public class ConfigurationDatabase {
 		return f;
 	}
 	public static Path getAppDataDirectory() {
-		String appName="CaDoodle";
+		String appName = "CaDoodle";
 		String os = System.getProperty("os.name").toLowerCase();
 
 		if (os.contains("win")) {
@@ -274,8 +269,5 @@ public class ConfigurationDatabase {
 			throw new RuntimeException("Failed to create app data directory: " + directory, e);
 		}
 	}
-
-
-
 
 }

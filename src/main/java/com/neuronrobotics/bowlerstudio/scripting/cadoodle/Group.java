@@ -38,44 +38,46 @@ public class Group extends AbstractAddFrom {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		ArrayList<CSG> replace = new ArrayList<CSG>();
 		back.addAll(incoming);
-		String mobileBase=null;
-		boolean noscale=false;
+		String mobileBase = null;
+		boolean noscale = false;
 		Affine manip = null;
-		boolean nomove=false;
+		boolean nomove = false;
 		for (CSG csg : incoming) {
 			if (csg.isLock())
 				continue;
-			
+
 			for (String name : names) {
 				if (name.contentEquals(csg.getName())) {
-					if(csg.isNoScale())
-						noscale=true;
-					if(csg.isMotionLock() )
-						nomove=true;
+					if (csg.isNoScale())
+						noscale = true;
+					if (csg.isMotionLock())
+						nomove = true;
 					Optional<String> mobileBaseName = csg.getMobileBaseName();
-					if(mobileBaseName.isPresent()) {
-						if(mobileBase==null)
-							mobileBase= mobileBaseName.get();
-						if(!mobileBase.contentEquals(mobileBaseName.get())) {
+					if (mobileBaseName.isPresent()) {
+						if (mobileBase == null)
+							mobileBase = mobileBaseName.get();
+						if (!mobileBase.contentEquals(mobileBaseName.get())) {
 							continue;// skip grouping any item that is of a different mobile base;
 						}
 					}
-					if(csg.hasManipulator())
+					if (csg.hasManipulator())
 						try {
-							manip=csg.getManipulator();
+							manip = csg.getManipulator();
 						} catch (MissingManipulatorException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					replace.add(csg);
 					CSG clone = csg.clone();
-					
-					CSG c = clone.syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setRegenerate(csg.getRegenerate()).setName(name);
+
+					CSG c = clone.syncProperties(getCaDoodleFile().getCsgDBinstance(), csg)
+							.setRegenerate(csg.getRegenerate()).setName(name);
 					c.addGroupMembership(getGroupID());
 					back.add(c);
-					if(csg.hasManipulator()) {
-						c=c.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip)))
-								.syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setRegenerate(csg.getRegenerate()).setName(name);
+					if (csg.hasManipulator()) {
+						c = c.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip)))
+								.syncProperties(getCaDoodleFile().getCsgDBinstance(), csg)
+								.setRegenerate(csg.getRegenerate()).setName(name);
 						c.addGroupMembership(getGroupID());
 					}
 					if (csg.isHole()) {
@@ -102,34 +104,35 @@ public class Group extends AbstractAddFrom {
 				if (intersect)
 					holecutter = intersect(holes);
 				else
-					holecutter = holes.size()==1?holes.get(0):CSG.unionAll(holes);
+					holecutter = holes.size() == 1 ? holes.get(0) : CSG.unionAll(holes);
 				if (hull)
 					holecutter = holecutter.hull();
 			}
 			if (intersect)
 				result = intersect(solids);
 			else
-				result =solids.size()==1?solids.get(0).clone(): CSG.unionAll(solids);
+				result = solids.size() == 1 ? solids.get(0).clone() : CSG.unionAll(solids);
 			Color c = result.getColor();
 			if (hull) {
 				result = result.hull();
 			}
 			if (holecutter != null) {
-				if(result.getBounds().isBoundsTouching(holecutter.getBounds())) {
+				if (result.getBounds().isBoundsTouching(holecutter.getBounds())) {
 					result = result.difference(holecutter);
 				}
 			}
-			
+
 			result.setIsHole(false);
 			result.setColor(c);
 		}
-		if(manip!=null) {
-			result=result.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip).inverse()));
+		if (manip != null) {
+			result = result.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip).inverse()));
 			result.setManipulator(manip);
 		}
-		if(mobileBase!=null)
+		if (mobileBase != null)
 			result.setMobileBaseName(mobileBase);
-		HashMap<String, IParametric> mapOfparametrics = result.getMapOfparametrics(getCaDoodleFile().getCsgDBinstance());
+		HashMap<String, IParametric> mapOfparametrics = result
+				.getMapOfparametrics(getCaDoodleFile().getCsgDBinstance());
 		if (mapOfparametrics != null)
 			mapOfparametrics.clear();
 		result.addIsGroupResult(getGroupID());
@@ -144,14 +147,14 @@ public class Group extends AbstractAddFrom {
 
 	private CSG intersect(ArrayList<CSG> solids) {
 		CSG first = solids.get(0);
-		for(int i=1;i<solids.size();i++) {
-			first=first.intersect(solids.get(i));
+		for (int i = 1; i < solids.size(); i++) {
+			first = first.intersect(solids.get(i));
 		}
 		return first;
 	}
 	@Override
 	public List<String> getNamesAddedInThisOperation() {
-		ArrayList<String> n= new ArrayList<String>();
+		ArrayList<String> n = new ArrayList<String>();
 		n.addAll(getNamesAdded());
 		n.addAll(names);
 		return n;

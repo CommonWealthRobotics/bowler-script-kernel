@@ -2,15 +2,8 @@ package junit.bowler;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
-
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.util.GeometrySimplification;
 
@@ -22,17 +15,16 @@ public class BlenderLoadingTest {
 
 	@Test
 	public void test() throws Exception {
-		CSG loaded =(CSG)ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
-				"https://github.com/madhephaestus/TestRepo.git",
-				"TestRepo4.blend");
-		if(loaded.getPolygons().size()!=12)
+		CSG loaded = (CSG) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
+				"https://github.com/madhephaestus/TestRepo.git", "TestRepo4.blend");
+		if (loaded.getPolygons().size() != 12)
 			fail("Failed to load polygon!");
-		com.neuronrobotics.sdk.common.Log.error("Blender file loaded num polys: "+loaded.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("Blender file loaded num polys: " + loaded.getPolygons().size());
 		CSG cube = new Cube(100).toCSG();
-		CSG remeshed = GeometrySimplification.remesh(cube, 10.0,CSGDatabase.getInstance());
-		if(remeshed.getPolygons().size()!=1452)
+		CSG remeshed = GeometrySimplification.remesh(cube, 10.0, CSGDatabase.getInstance());
+		if (remeshed.getPolygons().size() != 1452)
 			fail("Blender failed to remesh");
-		com.neuronrobotics.sdk.common.Log.error("Remeshing produced: "+remeshed.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("Remeshing produced: " + remeshed.getPolygons().size());
 	}
 
 }

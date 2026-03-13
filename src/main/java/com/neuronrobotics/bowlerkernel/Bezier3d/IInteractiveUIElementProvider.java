@@ -9,7 +9,7 @@ import javafx.scene.PerspectiveCamera;
 public interface IInteractiveUIElementProvider {
 
 	default void runLater(Runnable r) {
-		new Thread(()->{
+		new Thread(() -> {
 			Platform.runLater(() -> {
 				try {
 					r.run();

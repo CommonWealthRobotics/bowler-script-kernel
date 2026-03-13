@@ -15,11 +15,11 @@ public class OSUtil {
 	public static String getOsName() {
 		return System.getProperty("os.name");
 	}
-	//getOsArch
+	// getOsArch
 	public static String getOsArch() {
 		return System.getProperty("os.arch");
 	}
-	//OSUtil.is64Bit()
+	// OSUtil.is64Bit()
 	public static boolean is64Bit() {
 		String model = System.getProperty("sun.arch.data.model", System.getProperty("com.ibm.vm.bitmode"));
 		if (model != null) {

@@ -86,7 +86,7 @@ public class MobileBasePhysicsManager {
 						+ (orentTrans.origin.z / PhysicsGravityScalar);
 				// tell the virtual IMU the system updated
 				base.setVirtualState(new IMUUpdate(xAcceleration, yAcceleration, zAcceleration, rotxAcceleration,
-						rotyAcceleration, rotzAcceleration,base.currentTimeMillis()));
+						rotyAcceleration, rotzAcceleration, base.currentTimeMillis()));
 				// update the old variables
 				oldavelocity.set(avelocity);
 				oldvelocity.set(velocity);
@@ -95,12 +95,12 @@ public class MobileBasePhysicsManager {
 		};
 	}
 
-	public MobileBasePhysicsManager(CSGDatabaseInstance db,MobileBase base, ArrayList<CSG> baseCad,
+	public MobileBasePhysicsManager(CSGDatabaseInstance db, MobileBase base, ArrayList<CSG> baseCad,
 			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad) {
-		this(db,base, baseCad, simplecad, PhysicsEngine.get());
+		this(db, base, baseCad, simplecad, PhysicsEngine.get());
 	}
 
-	public MobileBasePhysicsManager(CSGDatabaseInstance db,MobileBase base, ArrayList<CSG> baseCad,
+	public MobileBasePhysicsManager(CSGDatabaseInstance db, MobileBase base, ArrayList<CSG> baseCad,
 			HashMap<LinkConfiguration, ArrayList<CSG>> simplecad, PhysicsCore core) {
 		this.simplecad = simplecad;
 		double minz = 0;
@@ -130,7 +130,7 @@ public class MobileBasePhysicsManager {
 			public void run() {
 				try {
 					CSG csg = baseCad.get(0);
-					if(csg.hasManipulator())
+					if (csg.hasManipulator())
 						TransformFactory.bulletToAffine(csg.getManipulator(), start);
 				} catch (MissingManipulatorException e) {
 					// TODO Auto-generated catch block
@@ -139,18 +139,18 @@ public class MobileBasePhysicsManager {
 			}
 		});
 		CSG collisionBod;
-//		ArrayList<Vector3d> points = new ArrayList<Vector3d>();
-//		try {
-//			for (DHParameterKinematics leg : base.getAllDHChains()) {
-//				TransformNR limbRoot = leg.getRobotToFiducialTransform();
-//				points.add(Vector3d.xyz(limbRoot.getX(), limbRoot.getY(), limbRoot.getZ()));
-//				points.add(Vector3d.xyz(limbRoot.getX(), limbRoot.getY(), Maxz));
-//			}
-//
-//			collisionBod = HullUtil.hull(points);
-//		} catch (Exception ex) {
-			collisionBod = CSG.hullAll(MobileBaseCadManager.getBaseCad(db,base));
-//		}
+		// ArrayList<Vector3d> points = new ArrayList<Vector3d>();
+		// try {
+		// for (DHParameterKinematics leg : base.getAllDHChains()) {
+		// TransformNR limbRoot = leg.getRobotToFiducialTransform();
+		// points.add(Vector3d.xyz(limbRoot.getX(), limbRoot.getY(), limbRoot.getZ()));
+		// points.add(Vector3d.xyz(limbRoot.getX(), limbRoot.getY(), Maxz));
+		// }
+		//
+		// collisionBod = HullUtil.hull(points);
+		// } catch (Exception ex) {
+		collisionBod = CSG.hullAll(MobileBaseCadManager.getBaseCad(db, base));
+		// }
 
 		CSGPhysicsManager baseManager = new CSGPhysicsManager((List<CSG>) Arrays.asList(collisionBod), start,
 				base.getMassKg(), false, core);
@@ -325,7 +325,7 @@ public class MobileBasePhysicsManager {
 	}
 
 	public void clear() {
-		if(simplecad!=null) {
+		if (simplecad != null) {
 			simplecad.clear();
 		}
 		linkListeners.clear();

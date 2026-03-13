@@ -11,7 +11,6 @@ import com.neuronrobotics.bowlerstudio.creature.ControllerOption;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AbstractAddFrom;
-import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Group;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
@@ -46,9 +45,9 @@ public class AddRobotController extends AbstractAddFrom {
 	public String getType() {
 		return "AddRobotController";
 	}
-	
-	public ArrayList<VitaminLocation> getVitamins(String prefix){
-		return controller.getVitamins(location,prefix);
+
+	public ArrayList<VitaminLocation> getVitamins(String prefix) {
+		return controller.getVitamins(location, prefix);
 	}
 
 	public AddRobotController setNames(List<String> names) {
@@ -67,7 +66,7 @@ public class AddRobotController extends AbstractAddFrom {
 		} catch (FileNotFoundException e) {
 		}
 		for (int i = 0; i < controller.getVitaminNumber(); i++) {
-			CSG csg = controller.getVitaminCSG(getCaDoodleFile().getCsgDBinstance(),i).cloneShallow();
+			CSG csg = controller.getVitaminCSG(getCaDoodleFile().getCsgDBinstance(), i).cloneShallow();
 			TransformNR offset = getLocation().times(controller.getVitaminPose(i));
 			Transform nrToCSG = TransformFactory.nrToCSG(offset);
 			String orderedName = getOrderedName();
@@ -77,12 +76,12 @@ public class AddRobotController extends AbstractAddFrom {
 			if (getBuilderName() != null) {
 				csg.setMobileBaseName(getBuilderName());
 			}
-			CSG tmp = csg.transformed(nrToCSG).syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setRegenerate(csg.getRegenerate())
-					.setName(orderedName);
+			CSG tmp = csg.transformed(nrToCSG).syncProperties(getCaDoodleFile().getCsgDBinstance(), csg)
+					.setRegenerate(csg.getRegenerate()).setName(orderedName);
 			back.add(tmp);
 			MoveCenter.set(getName(), tmp, nrToCSG);
 		}
-		if(builderName!=null) {
+		if (builderName != null) {
 			MobileBaseBuilder builder = getRobots().get(getBuilderName());
 			builder.addController(this);
 		}

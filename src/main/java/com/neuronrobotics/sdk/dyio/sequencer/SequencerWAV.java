@@ -8,150 +8,145 @@ import javax.sound.sampled.Clip;
  * The Class SequencerWAV.
  */
 public class SequencerWAV {
-    
-    /** The fn. */
-    private String fn="";
-    
-    /** The player. */
-    // constructor that takes the name of an MP3 file
-    private Clip player;
-    
-    /** The track length. */
-    private int trackLength = 37;
 
-    public SequencerWAV(String filename) {
-    	fn = filename;
-        try {
-        	AudioInputStream audioStream = AudioSystem.getAudioInputStream(new File(fn));
+	/** The fn. */
+	private String fn = "";
 
-        	player = AudioSystem.getClip();
+	/** The player. */
+	// constructor that takes the name of an MP3 file
+	private Clip player;
 
-        	trackLength = (int) (((double)player.getMicrosecondLength())/1000.0);
+	/** The track length. */
+	private int trackLength = 37;
 
-        }
-        catch (Exception e) {
-            com.neuronrobotics.sdk.common.Log.error("Problem playing file " + filename+"\r\n");
-            //e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-    
-    /**
-     * Pause.
-     */
-    public void pause(){
-    	player.stop();
-    }
+	public SequencerWAV(String filename) {
+		fn = filename;
+		try {
+			AudioInputStream audioStream = AudioSystem.getAudioInputStream(new File(fn));
 
-    /**
-     * Close.
-     */
-    public void close() { 
-    	if (player != null) 
-    		player.stop(); 
-    }
+			player = AudioSystem.getClip();
 
-    /**
-     * Checks if is playing.
-     *
-     * @return true, if is playing
-     */
-    public boolean isPlaying() {
-		if(player!=null)
+			trackLength = (int) (((double) player.getMicrosecondLength()) / 1000.0);
+
+		} catch (Exception e) {
+			com.neuronrobotics.sdk.common.Log.error("Problem playing file " + filename + "\r\n");
+			// e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Pause.
+	 */
+	public void pause() {
+		player.stop();
+	}
+
+	/**
+	 * Close.
+	 */
+	public void close() {
+		if (player != null)
+			player.stop();
+	}
+
+	/**
+	 * Checks if is playing.
+	 *
+	 * @return true, if is playing
+	 */
+	public boolean isPlaying() {
+		if (player != null)
 			return (player.isRunning());
 		return false;
 	}
-	
+
 	/**
 	 * Gets the current time.
 	 *
 	 * @return the current time
 	 */
 	public int getCurrentTime() {
-		return (int) (((double) player.getMicrosecondPosition())/1000.0);
+		return (int) (((double) player.getMicrosecondPosition()) / 1000.0);
 	}
-	
+
 	/**
 	 * Sets the current time.
 	 *
-	 * @param time the new current time
+	 * @param time
+	 *            the new current time
 	 */
 	public void setCurrentTime(int time) {
-		player.setMicrosecondPosition(time*1000);;
+		player.setMicrosecondPosition(time * 1000);;
 	}
-	
+
 	/**
 	 * Gets the track length.
 	 *
 	 * @return length in Ms
 	 */
-	public int getTrackLength(){
+	public int getTrackLength() {
 		return trackLength;
 	}
-	
+
 	/**
 	 * Gets the percent.
 	 *
 	 * @return the percent
 	 */
 	private double getPercent() {
-		if(!isPlaying()){
+		if (!isPlaying()) {
 			return 0;
 		}
-		if(player!=null) {
-			double pos =((double) player.getMicrosecondPosition())/1000.0;
-			double len =((double) player.getMicrosecondLength())/1000.0;
-			double percent = pos/len*100.0;
+		if (player != null) {
+			double pos = ((double) player.getMicrosecondPosition()) / 1000.0;
+			double len = ((double) player.getMicrosecondLength()) / 1000.0;
+			double percent = pos / len * 100.0;
 			return percent;
 		}
 		return 0;
 	}
 
-	
 	/**
 	 * Play step.
 	 */
-	public void playStep(){
+	public void playStep() {
 
 		player.start();
-		
+
 	}
 
-    /**
-     * Play.
-     */
-    // play the MP3 file to the sound card
-    public void play() {
+	/**
+	 * Play.
+	 */
+	// play the MP3 file to the sound card
+	public void play() {
 
-        player.start();
-    	
+		player.start();
 
-    }
+	}
 
+	/**
+	 * The main method.
+	 *
+	 * @param args
+	 *            the arguments
+	 */
+	// test client
+	public static void main(String[] args) {
+		SequencerWAV mp3 = new SequencerWAV("track.mp3");
 
-    /**
-     * The main method.
-     *
-     * @param args the arguments
-     */
-    // test client
-    public static void main(String[] args) {
-    	SequencerWAV mp3 = new SequencerWAV("track.mp3");
-    	
 		mp3.play();
-		com.neuronrobotics.sdk.common.Log.error("Track length= "+mp3.getTrackLength());
-		while(mp3.isPlaying() ){
-			com.neuronrobotics.sdk.common.Log.error("Current "+mp3.getCurrentTime() +" Percent = "+mp3.getPercent());
+		com.neuronrobotics.sdk.common.Log.error("Track length= " + mp3.getTrackLength());
+		while (mp3.isPlaying()) {
+			com.neuronrobotics.sdk.common.Log
+					.error("Current " + mp3.getCurrentTime() + " Percent = " + mp3.getPercent());
 			ThreadUtil.wait(100);
 		}
-		com.neuronrobotics.sdk.common.Log.error("Finished "+mp3.getCurrentTime()+" of "+mp3.getTrackLength());
+		com.neuronrobotics.sdk.common.Log.error("Finished " + mp3.getCurrentTime() + " of " + mp3.getTrackLength());
 		System.exit(0);
-		//mediaPlayer.
+		// mediaPlayer.
 
-    }
-
-
-
-	
+	}
 
 }

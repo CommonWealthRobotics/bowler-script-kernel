@@ -1,10 +1,8 @@
 package com.neuronrobotics.bowlerstudio.vitamins;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,10 +14,8 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.ext.openjfx.importers.obj.ObjImporter;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
-import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import javafx.scene.paint.Color;
 
@@ -31,15 +27,12 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 //import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
-import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -48,7 +41,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
@@ -74,7 +66,8 @@ public class Vitamins {
 	private static ConcurrentHashMap<String, Runnable> changeListeners = new ConcurrentHashMap<String, Runnable>();
 
 	public static void clear() {
-		//com.neuronrobotics.sdk.common.Log.error("Vitamins Database Cleraing, reloading files");
+		// com.neuronrobotics.sdk.common.Log.error("Vitamins Database Cleraing,
+		// reloading files");
 		for (String keys : databaseSet.keySet()) {
 			ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> data = databaseSet.get(keys);
 			for (String key2 : data.keySet()) {
@@ -88,45 +81,46 @@ public class Vitamins {
 	}
 	@Deprecated
 	public static CSG get(File resource) {
-		return get(CSGDatabase.getInstance(),resource, false);
+		return get(CSGDatabase.getInstance(), resource, false);
 	}
 	@Deprecated
 	public static CSG get(File resource, boolean forceRefresh) {
-		return get(CSGDatabase.getInstance(), resource,  forceRefresh);
+		return get(CSGDatabase.getInstance(), resource, forceRefresh);
 	}
-	public static CSG get(CSGDatabaseInstance db,File resource) {
-		return get(db,resource, false);
+	public static CSG get(CSGDatabaseInstance db, File resource) {
+		return get(db, resource, false);
 	}
 
-	public static CSG get(CSGDatabaseInstance db,File resource, boolean forceRefresh) {
+	public static CSG get(CSGDatabaseInstance db, File resource, boolean forceRefresh) {
 
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
 			try {
-				if(resource.getName().toLowerCase().endsWith(".stl"))
+				if (resource.getName().toLowerCase().endsWith(".stl"))
 					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
-//				if(resource.getName().toLowerCase().endsWith(".obj"))
-//					fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new FileInputStream(resource)).);
-//				try {
-//					FileChangeWatcher f = FileChangeWatcher.watch(resource);
-//					f.addIFileChangeListener(new IFileChangeListener() {
-//						@Override
-//						public void onFileDelete(File fileThatIsDeleted) {
-//							fileLastLoaded.remove(resource.getAbsolutePath());
-//							f.close();
-//						}
-//						
-//						@Override
-//						public void onFileChange(File fileThatChanged, WatchEvent event) {
-//							fileLastLoaded.remove(resource.getAbsolutePath());	
-//							f.close();
-//						}
-//					});
-//				} catch (IOException e) {
-//					// Auto-generated catch block
-//					com.neuronrobotics.sdk.common.Log.error(e);
-//				}
+				// if(resource.getName().toLowerCase().endsWith(".obj"))
+				// fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new
+				// FileInputStream(resource)).);
+				// try {
+				// FileChangeWatcher f = FileChangeWatcher.watch(resource);
+				// f.addIFileChangeListener(new IFileChangeListener() {
+				// @Override
+				// public void onFileDelete(File fileThatIsDeleted) {
+				// fileLastLoaded.remove(resource.getAbsolutePath());
+				// f.close();
+				// }
+				//
+				// @Override
+				// public void onFileChange(File fileThatChanged, WatchEvent event) {
+				// fileLastLoaded.remove(resource.getAbsolutePath());
+				// f.close();
+				// }
+				// });
+				// } catch (IOException e) {
+				// // Auto-generated catch block
+				// com.neuronrobotics.sdk.common.Log.error(e);
+				// }
 			} catch (IOException e) {
 				// Auto-generated catch block
 				com.neuronrobotics.sdk.common.Log.error(e);
@@ -137,33 +131,34 @@ public class Vitamins {
 		return csg.clone().setRegenerate(csg.getRegenerate());
 	}
 
-//	public static CSG get(String type, String id, String purchasingVariant) throws Exception {
-//		String key = type + id + purchasingVariant;
-//		if (fileLastLoaded.get(key) == null) {
-////			PurchasingData purchasData = Purchasing.get(type, id, purchasingVariant);
-////			for (String variable : purchasData.getVariantParameters().keySet()) {
-////				double data = purchasData.getVariantParameters().get(variable);
-////				LengthParameter parameter = new LengthParameter(variable, data,
-////						(ArrayList<Double>) Arrays.asList(data, data));
-////				parameter.setMM(data);
-////			}
-//
-//			try {
-//				fileLastLoaded.put(key, get(type, id));
-//			} catch (Exception e) {
-//				com.neuronrobotics.sdk.common.Log.error(e);
-//
-//				setGitRepoDatabase(gitRpoDatabase);
-//				clear();
-//				return get(type, id);
-//			}
-//
-//		}
-//
-//		CSG vitToGet = fileLastLoaded.get(type + id);
-//		// com.neuronrobotics.sdk.common.Log.error("Loading "+vitToGet);
-//		return vitToGet;
-//	}
+	// public static CSG get(String type, String id, String purchasingVariant)
+	// throws Exception {
+	// String key = type + id + purchasingVariant;
+	// if (fileLastLoaded.get(key) == null) {
+	//// PurchasingData purchasData = Purchasing.get(type, id, purchasingVariant);
+	//// for (String variable : purchasData.getVariantParameters().keySet()) {
+	//// double data = purchasData.getVariantParameters().get(variable);
+	//// LengthParameter parameter = new LengthParameter(variable, data,
+	//// (ArrayList<Double>) Arrays.asList(data, data));
+	//// parameter.setMM(data);
+	//// }
+	//
+	// try {
+	// fileLastLoaded.put(key, get(type, id));
+	// } catch (Exception e) {
+	// com.neuronrobotics.sdk.common.Log.error(e);
+	//
+	// setGitRepoDatabase(gitRpoDatabase);
+	// clear();
+	// return get(type, id);
+	// }
+	//
+	// }
+	//
+	// CSG vitToGet = fileLastLoaded.get(type + id);
+	// // com.neuronrobotics.sdk.common.Log.error("Loading "+vitToGet);
+	// return vitToGet;
+	// }
 
 	public static boolean isGitURL(String text2) {
 		if (!text2.endsWith(".git"))
@@ -184,37 +179,40 @@ public class Vitamins {
 	public static void flatten(ArrayList<CSG> flat, Object o) {
 		ScriptingEngine.flatten(flat, o);
 	}
-//	public static CSG get(String type, String id) throws Exception {
-//		return get(CSGDatabase.getInstance(),type,id);
-//	}
-	public static CSG get(CSGDatabaseInstance instance,String type, String id) throws Exception {
+	// public static CSG get(String type, String id) throws Exception {
+	// return get(CSGDatabase.getInstance(),type,id);
+	// }
+	public static CSG get(CSGDatabaseInstance instance, String type, String id) throws Exception {
 		if (isGitURL(type)) {
-			Object o = ScriptingEngine.gitScriptRun(instance,type, id);
+			Object o = ScriptingEngine.gitScriptRun(instance, type, id);
 			ArrayList<CSG> flat = new ArrayList<CSG>();
 			Vitamins.flatten(flat, o);
 			return CSG.unionAll(flat);
 		}
-		return get(instance,type, id, 0);
+		return get(instance, type, id, 0);
 	}
 
-	private static CSG get(CSGDatabaseInstance instance,String type, String id, int depthGauge) throws Exception {
+	private static CSG get(CSGDatabaseInstance instance, String type, String id, int depthGauge) throws Exception {
 		String key = type + id;
 		Map<String, Object> script = getMeta(type);
 		Object file = null;
-		Object repostring =null;
+		Object repostring = null;
 		try {
 			CSG newVitamin = null;
-			StringParameter size = new StringParameter(instance,type + " Default", id, Vitamins.listVitaminSizes(type));
+			StringParameter size = new StringParameter(instance, type + " Default", id,
+					Vitamins.listVitaminSizes(type));
 			size.setStrValue(id);
-			 file = script.get("scriptGit");
-			 repostring = script.get("scriptFile");
+			file = script.get("scriptGit");
+			repostring = script.get("scriptFile");
 			Object repo = repostring;
 			if (file != null && repo != null) {
 				ArrayList<Object> servoMeasurments = new ArrayList<Object>();
 				servoMeasurments.add(id);
-				Log.debug("Loading Vitamin "+type+" "+id);
-				newVitamin = (CSG) ScriptingEngine.gitScriptRun(instance,script.get("scriptGit").toString(), // git location of
-																									// the library
+				Log.debug("Loading Vitamin " + type + " " + id);
+				newVitamin = (CSG) ScriptingEngine.gitScriptRun(instance, script.get("scriptGit").toString(), // git
+																												// location
+																												// of
+						// the library
 						repostring.toString(), // file to load
 						servoMeasurments);
 				Map<String, Object> configuration = Vitamins.getConfiguration(type, id);
@@ -241,7 +239,7 @@ public class Vitamins {
 		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error(e);
 			if (depthGauge < 2) {
-				return get(instance,type, id, depthGauge + 1);
+				return get(instance, type, id, depthGauge + 1);
 			} else {
 				return new Cube(20).toCSG().setColor(Color.RED);
 			}
@@ -293,8 +291,8 @@ public class Vitamins {
 
 	public static ConcurrentHashMap<String, Object> getConfiguration(String type, String id) {
 		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
-		if (id== null) {
-			id=Vitamins.listVitaminSizes(type).get(0);
+		if (id == null) {
+			id = Vitamins.listVitaminSizes(type).get(0);
 		}
 
 		ConcurrentHashMap<String, Object> ConcurrentHashMap = database.get(id);
@@ -305,10 +303,10 @@ public class Vitamins {
 				sanatize(key, ConcurrentHashMap);
 			}
 			return ConcurrentHashMap;
-		}catch(Exception ex) {
-			//com.neuronrobotics.sdk.common.Log.error(ex);;
+		} catch (Exception ex) {
+			// com.neuronrobotics.sdk.common.Log.error(ex);;
 		}
-		return new ConcurrentHashMap<String,Object>();
+		return new ConcurrentHashMap<String, Object>();
 	}
 
 	public static void putMeasurment(String type, String size, String measurementName, Object measurmentValue) {
@@ -324,12 +322,12 @@ public class Vitamins {
 	public static ConcurrentHashMap<String, Object> getConfigurationRW(String type, String id) {
 		ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> database = getDatabase(type);
 		if (id == null) {
-			id=Vitamins.listVitaminSizes(type).get(0);
+			id = Vitamins.listVitaminSizes(type).get(0);
 		}
 
 		ConcurrentHashMap<String, Object> ConcurrentHashMap = database.get(id);
-		if(ConcurrentHashMap == null) {
-			ConcurrentHashMap=new ConcurrentHashMap<String, Object> ();
+		if (ConcurrentHashMap == null) {
+			ConcurrentHashMap = new ConcurrentHashMap<String, Object>();
 
 			database.put(id, ConcurrentHashMap);
 		}
@@ -361,9 +359,10 @@ public class Vitamins {
 							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
 																																		// message
 			// com.neuronrobotics.sdk.common.Log.error(jsonString);
-			//com.neuronrobotics.sdk.common.Log.error("Database saved " + getVitaminFile(type, null, false).getAbsolutePath());
+			// com.neuronrobotics.sdk.common.Log.error("Database saved " +
+			// getVitaminFile(type, null, false).getAbsolutePath());
 		} catch (Exception ex) {
-			if(ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
+			if (ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
 				ScriptingEngine.deleteRepo(getGitRepoDatabase());
 				saveDatabase(type);
 				return true;
@@ -374,30 +373,30 @@ public class Vitamins {
 		return true;
 	}
 
-	public static void saveDatabaseForkIfMissing(String type,String username) throws Exception {
+	public static void saveDatabaseForkIfMissing(String type, String username) throws Exception {
 
 		org.kohsuke.github.GitHub github = PasswordManager.getGithub();
 		GHRepository repo = github.getRepository(getSourcerepo());
 		GHRepository newRepo;
 		try {
-			newRepo=github.getRepository(username+"/Hardware-Dimensions");
+			newRepo = github.getRepository(username + "/Hardware-Dimensions");
 			String newURL = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
 			ScriptingEngine.pull(newURL);
 			ArrayList<String> files = ScriptingEngine.filesInGit(newURL);
-			if(type!=null)
+			if (type != null)
 				saveDatabase(type);
 		} catch (Exception ex) {
 			com.neuronrobotics.sdk.common.Log.error(ex);;
-			//com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
+			// com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			newRepo = github.getRepository(getSourcerepo()).fork();
-			while(true) {
+			while (true) {
 				try {
 					Thread.sleep(6000);
 					String newURL = newRepo.getGitTransportUrl().replaceAll("git://", "https://");
 					Vitamins.setGitRepoDatabase(newURL);
 					break;
-				}catch(Exception exc) {
+				} catch (Exception exc) {
 					System.err.println("Waiting for repo to finish forking");
 					com.neuronrobotics.sdk.common.Log.error(exc);
 				}
@@ -405,30 +404,34 @@ public class Vitamins {
 			saveDatabase(type);
 
 		}
-		
-//		try {
-//			GHRepository myrepo = github.getRepository(username+ "/Hardware-Dimensions");
-//			List<GHPullRequest> asList1 = myrepo.queryPullRequests().state(GHIssueState.OPEN)
-//					.head("madhephaestus:master").list().asList();
-//			Thread.sleep(200);// Some asynchronus delay here, not sure why...
-//			if (asList1.size() == 0) {
-//				try {
-//					GHPullRequest request = myrepo.createPullRequest("Update from source", "madhephaestus:master",
-//							"master", "## Upstream add vitamins", false, false);
-//					if (request != null) {
-//						processSelfPR(request);
-//					}
-//				} catch (org.kohsuke.github.HttpException ex) {
-//					// no commits have been made to master
-//				}
-//
-//			} else {
-//				processSelfPR(asList1.get(0));
-//			}
-//
-//		} catch (Exception ex) {
-//			new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
-//		}
+
+		// try {
+		// GHRepository myrepo = github.getRepository(username+ "/Hardware-Dimensions");
+		// List<GHPullRequest> asList1 =
+		// myrepo.queryPullRequests().state(GHIssueState.OPEN)
+		// .head("madhephaestus:master").list().asList();
+		// Thread.sleep(200);// Some asynchronus delay here, not sure why...
+		// if (asList1.size() == 0) {
+		// try {
+		// GHPullRequest request = myrepo.createPullRequest("Update from source",
+		// "madhephaestus:master",
+		// "master", "## Upstream add vitamins", false, false);
+		// if (request != null) {
+		// processSelfPR(request);
+		// }
+		// } catch (org.kohsuke.github.HttpException ex) {
+		// // no commits have been made to master
+		// }
+		//
+		// } else {
+		// processSelfPR(asList1.get(0));
+		// }
+		//
+		// } catch (Exception ex) {
+		// new
+		// IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),
+		// ex);
+		// }
 
 	}
 
@@ -439,8 +442,9 @@ public class Vitamins {
 			if (request.getMergeable()) {
 				request.merge("Auto Merging Master");
 				reLoadDatabaseFromFiles();
-				//com.neuronrobotics.sdk.common.Log.error("Merged Hardware-Dimensions madhephaestus:master into "
-				//		+ PasswordManager.getUsername() + ":master");
+				// com.neuronrobotics.sdk.common.Log.error("Merged Hardware-Dimensions
+				// madhephaestus:master into "
+				// + PasswordManager.getUsername() + ":master");
 			} else {
 				try {
 					BowlerKernel.upenURL(request.getHtmlUrl().toURI());
@@ -513,7 +517,7 @@ public class Vitamins {
 				if (changeListeners.get(type) == null) {
 					changeListeners.put(type, () -> {
 						// If the file changes, clear the database and load the new data
-						//com.neuronrobotics.sdk.common.Log.error("Re-loading " + type);
+						// com.neuronrobotics.sdk.common.Log.error("Re-loading " + type);
 						databaseSet.put(type, null);
 						com.neuronrobotics.sdk.common.Log.error(new RuntimeException());
 					});
@@ -569,10 +573,10 @@ public class Vitamins {
 				getRootFolder() + type + ".json"// File from within the Git repo
 		);
 		if (onChange != null) {
-//			FileChangeWatcher watcher = FileChangeWatcher.watch(f);
-//			watcher.addIFileChangeListener((fileThatChanged, event) -> {
-//				onChange.run();
-//			});
+			// FileChangeWatcher watcher = FileChangeWatcher.watch(f);
+			// watcher.addIFileChangeListener((fileThatChanged, event) -> {
+			// onChange.run();
+			// });
 		}
 		return f;
 	}
@@ -667,26 +671,30 @@ public class Vitamins {
 	public static String getGitRepoDatabase() {
 		if (!checked) {
 			checked = true;
-//			try {
-//				if (PasswordManager.getUsername() != null) {
-//					// ScriptingEngine.setAutoupdate(true);
-//					org.kohsuke.github.GitHub github = PasswordManager.getGithub();
-//					try {
-//						GHRepository repo = github.getRepository(PasswordManager.getLoginID() + "/Hardware-Dimensions");
-//						if (repo != null) {
-//							String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
-//							// com.neuronrobotics.sdk.common.Log.error("Using my version of Viamins: "+myAssets);
-//							setGitRepoDatabase(myAssets);
-//						} else {
-//							throw new org.kohsuke.github.GHFileNotFoundException();
-//						}
-//					} catch (Exception ex) {
-//						setGitRepoDatabase(defaultGit);
-//					}
-//				}
-//			} catch (Exception ex) {
-//				new IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(), ex);
-//			}
+			// try {
+			// if (PasswordManager.getUsername() != null) {
+			// // ScriptingEngine.setAutoupdate(true);
+			// org.kohsuke.github.GitHub github = PasswordManager.getGithub();
+			// try {
+			// GHRepository repo = github.getRepository(PasswordManager.getLoginID() +
+			// "/Hardware-Dimensions");
+			// if (repo != null) {
+			// String myAssets = repo.getGitTransportUrl().replaceAll("git://", "https://");
+			// // com.neuronrobotics.sdk.common.Log.error("Using my version of Viamins:
+			// "+myAssets);
+			// setGitRepoDatabase(myAssets);
+			// } else {
+			// throw new org.kohsuke.github.GHFileNotFoundException();
+			// }
+			// } catch (Exception ex) {
+			// setGitRepoDatabase(defaultGit);
+			// }
+			// }
+			// } catch (Exception ex) {
+			// new
+			// IssueReportingExceptionHandler().uncaughtException(Thread.currentThread(),
+			// ex);
+			// }
 			ScriptingEngine.cloneRepo(gitRpoDatabase, "master");
 
 		}
@@ -714,7 +722,7 @@ public class Vitamins {
 	}
 
 	public static void setGitRepoDatabase(String gitRpoDatabase) {
-		Vitamins.gitRpoDatabase=gitRpoDatabase;
+		Vitamins.gitRpoDatabase = gitRpoDatabase;
 		databaseSet.clear();
 		fileLastLoaded.clear();
 

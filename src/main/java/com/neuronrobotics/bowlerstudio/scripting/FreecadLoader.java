@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.neuronrobotics.bowlerstudio.scripting;
 
@@ -16,7 +16,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,6 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
-import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Slice;
@@ -44,16 +42,17 @@ import eu.mihosoft.vrl.v3d.svg.SVGExporter;
 import javafx.scene.paint.Color;
 
 /**
- * 
+ *
  */
 public class FreecadLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
+			ArrayList<Object> args) throws Exception {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
-		toSTLFile(code,stl);
-		CSG back = Vitamins.get(db,stl,true);
+		toSTLFile(code, stl);
+		CSG back = Vitamins.get(db, stl, true);
 		back.snapPoints();
 		back.setColor(Color.BLUE);
 		back.setNoScale(true);
@@ -61,7 +60,8 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, String code,
+			ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("Freecad file can not be instantiated from a string");
 	}
 
@@ -81,51 +81,50 @@ public class FreecadLoader implements IScriptingLanguage {
 	public boolean getIsTextFile() {
 		return false;
 	}
-	
+
 	@Override
 	public void getDefaultContents(File freecadGenFile) {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
-			File newFile = ScriptingEngine.fileFromGit(
-					"https://github.com/CommonWealthRobotics/freecad-bowler-cli.git", 
+			File newFile = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
 					"newFile.py");
 			ArrayList<String> args = new ArrayList<>();
-	
-			if(freecadGenFile.exists())
+
+			if (freecadGenFile.exists())
 				freecadGenFile.delete();
 			args.add(freecad.getAbsolutePath());
-	
+
 			args.add("-c");
 			args.add(newFile.getAbsolutePath());
 			args.add(freecadGenFile.getAbsolutePath());
 			legacySystemRun(null, freecadGenFile.getAbsoluteFile().getParentFile(), System.out, args);
-		}catch(Throwable t) {
+		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
-		
+
 	}
-	public static void addCSGToFreeCAD(File freecadModel,CSG incoming) throws IOException {
-		addCSGToFreeCAD(freecadModel,incoming,incoming.getSlicePlanes());
+	public static void addCSGToFreeCAD(File freecadModel, CSG incoming) throws IOException {
+		addCSGToFreeCAD(freecadModel, incoming, incoming.getSlicePlanes());
 	}
-	public static void addCSGToFreeCAD(File freecadModel,CSG toSlice, List<Transform> slicePlanes) throws IOException {
-		File tmp =getTmpSTL(toSlice);
+	public static void addCSGToFreeCAD(File freecadModel, CSG toSlice, List<Transform> slicePlanes) throws IOException {
+		File tmp = getTmpSTL(toSlice);
 		String name = toSlice.getName();
-		if(name.length()==0) {
-			name="CSG_TO_FREECAD";
+		if (name.length() == 0) {
+			name = "CSG_TO_FREECAD";
 		}
-		int planes=1;
-		if(slicePlanes!=null)
-			for(Transform pose:slicePlanes) {
+		int planes = 1;
+		if (slicePlanes != null)
+			for (Transform pose : slicePlanes) {
 				List<Polygon> polygons;
 				try {
 					polygons = Slice.slice(toSlice, pose, 0);
 					String svgName = toSlice.getName();
-					if(svgName.length()==0)
-						svgName="SVG_EXPORT";
-					svgName+="_"+planes;
+					if (svgName.length() == 0)
+						svgName = "SVG_EXPORT";
+					svgName += "_" + planes;
 					File svg = File.createTempFile(svgName, ".svg");
 					SVGExporter.export(polygons, svg, false);
-					addSVGToFreeCAD(freecadModel,svg,pose,svgName,name+"_body");
+					addSVGToFreeCAD(freecadModel, svg, pose, svgName, name + "_body");
 					planes++;
 				} catch (ColinearPointsException e) {
 					// TODO Auto-generated catch block
@@ -133,75 +132,72 @@ public class FreecadLoader implements IScriptingLanguage {
 				}
 
 			}
-		addSTLToFreecad(freecadModel,tmp,name);
+		addSTLToFreecad(freecadModel, tmp, name);
 	}
 
-	public static void addSVGToFreeCAD(File freecadModel,File SVG, Transform pose, String name, String bodyName) {
-		TransformNR nr=TransformFactory.csgToNR(pose);
-		RotationNR r=nr.getRotation();
+	public static void addSVGToFreeCAD(File freecadModel, File SVG, Transform pose, String name, String bodyName) {
+		TransformNR nr = TransformFactory.csgToNR(pose);
+		RotationNR r = nr.getRotation();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
-		//SVG=simplifySVG(SVG,0.002);
-		
+		// SVG=simplifySVG(SVG,0.002);
+
 		try {
-			File export = ScriptingEngine.fileFromGit(
-					"https://github.com/CommonWealthRobotics/freecad-bowler-cli.git", 
+			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
 					"importSVGToPose.py");
 			ArrayList<String> args = new ArrayList<>();
 
 			args.add(freecad.getAbsolutePath());
-	
+
 			args.add("-c");
 			args.add(export.getAbsolutePath());
 			args.add(freecadModel.getAbsolutePath());
 			args.add(SVG.getAbsolutePath());
-			args.add("\""+nr.getX()+","+nr.getY()+","+nr.getZ()+"\"");
-			args.add("\""+	Math.toDegrees(r.getRotationAzimuth())+","+
-							Math.toDegrees(r.getRotationElevation())+","+
-							Math.toDegrees(r.getRotationTilt())+"\"");
+			args.add("\"" + nr.getX() + "," + nr.getY() + "," + nr.getZ() + "\"");
+			args.add("\"" + Math.toDegrees(r.getRotationAzimuth()) + "," + Math.toDegrees(r.getRotationElevation())
+					+ "," + Math.toDegrees(r.getRotationTilt()) + "\"");
 			args.add(name);
 			args.add(bodyName);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
-		}catch(Throwable t) {
+		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
-	public static void addSTLToFreecad(File freecadModel, File stlToAdd,String meshName) {
+	public static void addSTLToFreecad(File freecadModel, File stlToAdd, String meshName) {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
-			File export = ScriptingEngine.fileFromGit(
-					"https://github.com/CommonWealthRobotics/freecad-bowler-cli.git", 
+			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
 					"importSTL.py");
 			ArrayList<String> args = new ArrayList<>();
 
 			args.add(freecad.getAbsolutePath());
-	
+
 			args.add("-c");
 			args.add(export.getAbsolutePath());
 			args.add(freecadModel.getAbsolutePath());
 			args.add(stlToAdd.getAbsolutePath());
 			args.add(meshName);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
-		}catch(Throwable t) {
+		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
-	public static void toSTLFile(File freecadModel,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void toSTLFile(File freecadModel, File stlout)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
-			File export = ScriptingEngine.fileFromGit(
-					"https://github.com/CommonWealthRobotics/freecad-bowler-cli.git", 
+			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
 					"export.py");
 			ArrayList<String> args = new ArrayList<>();
 
 			args.add(freecad.getAbsolutePath());
-	
+
 			args.add("-c");
 			args.add(export.getAbsolutePath());
 			args.add(freecadModel.getAbsolutePath());
 			args.add(stlout.getAbsolutePath());
 
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
-		}catch(Throwable t) {
+		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
@@ -211,55 +207,55 @@ public class FreecadLoader implements IScriptingLanguage {
 		try {
 
 			ArrayList<String> args = new ArrayList<>();
-			if(isMac()) {
+			if (isMac()) {
 				args.add("open");
 				args.add("-a");
 			}
 
 			args.add(freecad.getAbsolutePath());
 			args.add(freecadModel.getAbsolutePath());
-//			if(isMac())
-//				advancedSystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
-//			else
-				legacySystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
-		}catch(Throwable t) {
+			// if(isMac())
+			// advancedSystemRun(null, freecadModel.getAbsoluteFile().getParentFile(),
+			// System.out, args);
+			// else
+			legacySystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
+		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 	/**
 	 * @param args
-	 * @throws InterruptedException 
-	 * @throws IOException 
-	 * @throws GitAPIException 
-	 * @throws TransportException 
-	 * @throws InvalidRemoteException 
+	 * @throws InterruptedException
+	 * @throws IOException
+	 * @throws GitAPIException
+	 * @throws TransportException
+	 * @throws InvalidRemoteException
 	 */
-	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void main(String[] args)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		JavaFXInitializer.go();
 		PasswordManager.login();
 		FreecadLoader l = new FreecadLoader();
 		File test = new File("test.FCStd");
 		test.delete();
-		if(!test.exists())
+		if (!test.exists())
 			l.getDefaultContents(test);
-		File stlToImport =ScriptingEngine.fileFromGit(
-				"https://github.com/NeuronRobotics/NASACurisoity.git"
-				, "STL/upper-arm.STL");
-		CSG toSlice = Vitamins.get(null,stlToImport,true);
-//		toSlice=toSlice.union(
-//					new Cube(20).toCSG()
-//						.toXMin()
-//						.toYMin()
-//						.toZMin()
-//					);
-		String name="upperArm";
+		File stlToImport = ScriptingEngine.fileFromGit("https://github.com/NeuronRobotics/NASACurisoity.git",
+				"STL/upper-arm.STL");
+		CSG toSlice = Vitamins.get(null, stlToImport, true);
+		// toSlice=toSlice.union(
+		// new Cube(20).toCSG()
+		// .toXMin()
+		// .toYMin()
+		// .toZMin()
+		// );
+		String name = "upperArm";
 		toSlice.setName(name);
 		toSlice.addSlicePlane(new Transform().rotY(90).movex(30));
-		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ()-0.5));
-		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ()-0.51));
+		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ() - 0.5));
+		toSlice.addSlicePlane(new Transform().movez(toSlice.getMaxZ() - 0.51));
 		toSlice.addSlicePlane(new Transform());
 		FreecadLoader.addCSGToFreeCAD(test, toSlice);
-
 
 		FreecadLoader.open(test);
 		System.exit(0);
@@ -273,7 +269,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		return sb.toString();
 	}
 	public static void update(Map<String, Object> vm) throws MalformedURLException, IOException {
-		String url= "https://api.github.com/repos/FreeCAD/FreeCAD-Bundle/releases/tags/1.0rc2";
+		String url = "https://api.github.com/repos/FreeCAD/FreeCAD-Bundle/releases/tags/1.0rc2";
 		InputStream is = new URL(url).openStream();
 		String type = vm.get("type").toString();
 
@@ -291,41 +287,41 @@ public class FreecadLoader implements IScriptingLanguage {
 			List<Map<String, Object>> assets = (List<Map<String, Object>>) database.get("assets");
 			for (Map<String, Object> key : assets) {
 				String assetName = key.get("name").toString();
-				if(!assetName.endsWith(type))
+				if (!assetName.endsWith(type))
 					continue;
-				if(isLin()) {
-					if(!assetName.toLowerCase().contains("linux"))
+				if (isLin()) {
+					if (!assetName.toLowerCase().contains("linux"))
 						continue;
-					if(isArm() && !assetName.toLowerCase().contains("aarch64"))
+					if (isArm() && !assetName.toLowerCase().contains("aarch64"))
 						continue;
-					if(!isArm() && assetName.toLowerCase().contains("aarch64"))
-						continue;
-				}
-				if(isWin()) {
-					if(!assetName.toLowerCase().contains("windows"))
+					if (!isArm() && assetName.toLowerCase().contains("aarch64"))
 						continue;
 				}
-				if(isMac()) {
-					if(!assetName.toLowerCase().contains("macos"))
-						continue;
-					
-					if(isArm() && !assetName.toLowerCase().contains("arm64"))
-						continue;
-					if(!isArm() && assetName.toLowerCase().contains("arm64"))
+				if (isWin()) {
+					if (!assetName.toLowerCase().contains("windows"))
 						continue;
 				}
-				String name = assetName.replace("."+type, "");
-				com.neuronrobotics.sdk.common.Log.error("Updating Freecad assets to "+name);
-				vm.put("name",name);
-				if(isMac())
+				if (isMac()) {
+					if (!assetName.toLowerCase().contains("macos"))
+						continue;
+
+					if (isArm() && !assetName.toLowerCase().contains("arm64"))
+						continue;
+					if (!isArm() && assetName.toLowerCase().contains("arm64"))
+						continue;
+				}
+				String name = assetName.replace("." + type, "");
+				com.neuronrobotics.sdk.common.Log.error("Updating Freecad assets to " + name);
+				vm.put("name", name);
+				if (isMac())
 					continue;
-				if(isWin()) {
-					vm.put("executable",name+delim()+"bin"+delim()+"freecad.exe");
-					vm.put("configExecutable",name+delim()+"bin"+delim()+"freecad.exe");
+				if (isWin()) {
+					vm.put("executable", name + delim() + "bin" + delim() + "freecad.exe");
+					vm.put("configExecutable", name + delim() + "bin" + delim() + "freecad.exe");
 					continue;
 				}
-				vm.put("executable",name+"."+type);
-				vm.put("configExecutable",name+"."+type);
+				vm.put("executable", name + "." + type);
+				vm.put("configExecutable", name + "." + type);
 			}
 		} finally {
 			is.close();

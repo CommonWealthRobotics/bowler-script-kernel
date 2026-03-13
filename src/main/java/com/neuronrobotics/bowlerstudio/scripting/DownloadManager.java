@@ -39,7 +39,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -53,63 +52,57 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.neuronrobotics.bowlerstudio.BowlerKernel;
-import com.neuronrobotics.bowlerstudio.assets.FontSizeManager;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.video.OSUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
-import javafx.scene.Node;
-import javafx.scene.control.Alert;
 //import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 //import javafx.scene.control.ButtonType;
 //import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
-import javafx.stage.Stage;
 import net.sf.sevenzipjbinding.*;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
 
 public class DownloadManager {
-	private static  String STUDIO_INSTALL = "BowlerStudioInstall";
+	private static String STUDIO_INSTALL = "BowlerStudioInstall";
 	private static String editorsURL = "https://github.com/CommonWealthRobotics/ExternalEditorsBowlerStudio.git";
-	private static String bindir = System.getProperty("user.home") + delim()+"bin"+delim()+getSTUDIO_INSTALL()+delim();
+	private static String bindir = System.getProperty("user.home") + delim() + "bin" + delim() + getSTUDIO_INSTALL()
+			+ delim();
 	private static int ev = 0;
 	private static String cmd = "";
 	private static HashSet<String> failedURLs = new HashSet<String>();
 	private static IDownloadManagerEvents downloadEvents = new IDownloadManagerEvents() {
-		
+
 		@Override
 		public void startDownload() {
 			// Auto-generated method stub
-			
+
 		}
-		
+
 		@Override
 		public void finishDownload() {
 			// Auto-generated method stub
-			
+
 		}
 	};
 	public static String sanitizeString(String s) {
-		if(s.contains(" "))
-			s=s.replace(' ', '_');
+		if (s.contains(" "))
+			s = s.replace(' ', '_');
 		return s;
 	}
 	public static File getTmpSTL(CSG stlIn) throws IOException {
 		String name = stlIn.getName();
-		if(name.length()==0)
-			name="CSG_EXPORT";
+		if (name.length() == 0)
+			name = "CSG_EXPORT";
 		File stl = File.createTempFile(sanitizeString(name), ".stl");
 		stl.deleteOnExit();
-		boolean manifold=CSG.isPreventNonManifoldTriangles();
+		boolean manifold = CSG.isPreventNonManifoldTriangles();
 		CSG.setPreventNonManifoldTriangles(false);
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlIn.toStlString());
 		CSG.setPreventNonManifoldTriangles(manifold);
@@ -119,16 +112,17 @@ public class DownloadManager {
 
 		@Override
 		public boolean get(String name, String url) {
-			com.neuronrobotics.sdk.common.Log.debug("Command line mode, assuming yes to downloading \n" + name + " \nfrom \n" + url);
+			com.neuronrobotics.sdk.common.Log
+					.debug("Command line mode, assuming yes to downloading \n" + name + " \nfrom \n" + url);
 			return true;
 		}
 
 		@Override
 		public void onInstallFail(String url) {
-			com.neuronrobotics.sdk.common.Log.error("Plugin needs to be installed from "+url);
+			com.neuronrobotics.sdk.common.Log.error("Plugin needs to be installed from " + url);
 		}
 		public void notifyOfFailure(String name) {
-			com.neuronrobotics.sdk.common.Log.error("Plugin failed "+name);
+			com.neuronrobotics.sdk.common.Log.error("Plugin failed " + name);
 		}
 	};
 	private static GitLogProgressMonitor psudoSplash = new GitLogProgressMonitor() {
@@ -136,9 +130,9 @@ public class DownloadManager {
 		@Override
 		public void onLogUpdate(String update, Exception e) {
 			// Auto-generated method stub
-			
+
 		}
-		
+
 	};
 	private static String jvmURL;
 
@@ -244,7 +238,7 @@ public class DownloadManager {
 		DefaultExecutor executor = new DefaultExecutor();
 		executor.setWorkingDirectory(dir);
 		Map<String, String> env = EnvironmentUtils.getProcEnvironment();
-		if(envincoming!=null)
+		if (envincoming != null)
 			env.putAll(envincoming);
 
 		PipedOutputStream outPipe = new PipedOutputStream();
@@ -320,30 +314,30 @@ public class DownloadManager {
 		return new HashMap<>();
 	}
 	public static File getRunExecutable(String exeType, IExternalEditor editor) {
-		return getRunExecutable(exeType,editor,false);
+		return getRunExecutable(exeType, editor, false);
 	}
-	public static File getRunExecutable(String exeType, IExternalEditor editor,boolean justChecking) {
+	public static File getRunExecutable(String exeType, IExternalEditor editor, boolean justChecking) {
 		String executable = "executable";
-		retryLoop(exeType, editor, executable,justChecking);
-		return getExecutable(exeType, editor, executable,justChecking);
+		retryLoop(exeType, editor, executable, justChecking);
+		return getExecutable(exeType, editor, executable, justChecking);
 	}
 
 	public static File getConfigExecutable(String exeType, IExternalEditor editor) {
 		String executable = "configExecutable";
-		retryLoop(exeType, editor, executable,false);
-		return getExecutable(exeType, editor, executable,false);
+		retryLoop(exeType, editor, executable, false);
+		return getExecutable(exeType, editor, executable, false);
 	}
-	
-	private static void retryLoop(String exeType, IExternalEditor editor, String executable,boolean justChecking) {
-		if(justChecking)
+
+	private static void retryLoop(String exeType, IExternalEditor editor, String executable, boolean justChecking) {
+		if (justChecking)
 			return;
-		for(int i=0;i<3;i++) {
-			if(getExecutable(exeType, editor, executable,justChecking).exists()) {
+		for (int i = 0; i < 3; i++) {
+			if (getExecutable(exeType, editor, executable, justChecking).exists()) {
 				return;
 			}
 			com.neuronrobotics.sdk.common.Log.error(new RuntimeException("Download or extraction failed, retrying"));
 		}
-		if(!failedURLs.contains(jvmURL)) {
+		if (!failedURLs.contains(jvmURL)) {
 			failedURLs.add(jvmURL);
 			approval.notifyOfFailure(exeType);
 			approval.onInstallFail(jvmURL);
@@ -352,13 +346,13 @@ public class DownloadManager {
 	public static File getDestinationDir(String exeType) {
 		return new File(bindir + exeType);
 	}
-	private static File getExecutable(String exeType, IExternalEditor editor, String executable,boolean justChecking) {
+	private static File getExecutable(String exeType, IExternalEditor editor, String executable, boolean justChecking) {
 		String key = discoverKey();
 
 		try {
 			for (String f : ScriptingEngine.filesInGit(editorsURL)) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
-				Log.debug("Looking at json file "+file.getAbsolutePath());
+				Log.debug("Looking at json file " + file.getAbsolutePath());
 				if (file.getName().toLowerCase().startsWith(exeType.toLowerCase())
 						&& file.getName().toLowerCase().endsWith(".json")) {
 					String jsonText = new String(Files.readAllBytes(file.toPath()));
@@ -373,10 +367,11 @@ public class DownloadManager {
 						String baseURL = vm.get("url").toString();
 						String type = vm.get("type").toString();
 						String name = vm.get("name").toString();
-						String ospath =null;
+						String ospath = null;
 						try {
-							ospath=vm.get("ospath").toString();
-						}catch(Throwable t) {}
+							ospath = vm.get("ospath").toString();
+						} catch (Throwable t) {
+						}
 						String exeInZip = vm.get(executable).toString();
 						String configexe = vm.get("configExecutable").toString();
 						jvmURL = baseURL + name + "." + type;
@@ -388,27 +383,27 @@ public class DownloadManager {
 							environment = new HashMap<>();
 						File dest = new File(bindir + targetdir);
 						String cmd = bindir + targetdir + delim() + exeInZip;
-						if(ospath!=null) {
-							String string = ospath+delim()+exeInZip;
-							if(new File(string).exists())
-								cmd=string;
+						if (ospath != null) {
+							String string = ospath + delim() + exeInZip;
+							if (new File(string).exists())
+								cmd = string;
 						}
 						Object object = vm.get("version");
-						String version =null;
-						if(object!=null)
-							version=object.toString();
-						boolean toDelete=false;
-						File versionFile = new File(bindir + targetdir + delim()+"version-cadoodle.txt");
-						if(version!=null) {
-							if(!versionFile.exists()) {
-								toDelete=true;
-							}else {
+						String version = null;
+						if (object != null)
+							version = object.toString();
+						boolean toDelete = false;
+						File versionFile = new File(bindir + targetdir + delim() + "version-cadoodle.txt");
+						if (version != null) {
+							if (!versionFile.exists()) {
+								toDelete = true;
+							} else {
 								String curVer = Files.readString(Paths.get(versionFile.getAbsolutePath()));
-								if(!curVer.contentEquals(version)) {
-									toDelete=true;
+								if (!curVer.contentEquals(version)) {
+									toDelete = true;
 								}
 							}
-							if(toDelete) {
+							if (toDelete) {
 								Log.debug("Deleting cached toolchain for version");
 								File directoryToBeDeleted = new File(bindir + targetdir + delim());
 								deleteDirectory(directoryToBeDeleted);
@@ -417,23 +412,23 @@ public class DownloadManager {
 						}
 
 						if (!new File(cmd).exists() && !justChecking) {
-							if(exeType.toLowerCase().contentEquals("freecad")) {
-								//FreecadLoader.update(vm);
+							if (exeType.toLowerCase().contentEquals("freecad")) {
+								// FreecadLoader.update(vm);
 								baseURL = vm.get("url").toString();
 								name = vm.get("name").toString();
 								exeInZip = vm.get(executable).toString();
 								configexe = vm.get("configExecutable").toString();
 								jvmURL = baseURL + name + "." + type;
-								 o = vm.get("environment");
+								o = vm.get("environment");
 								if (o != null) {
 									environment = (Map<String, String>) o;
 								} else
 									environment = new HashMap<>();
 								dest = new File(bindir + targetdir);
 								cmd = bindir + targetdir + "/" + exeInZip;
-								saveFile(file,gson.toJson(database));
+								saveFile(file, gson.toJson(database));
 							}
-							
+
 							File jvmArchive = download("", jvmURL, 800000000, bindir, name + "." + type, exeType);
 
 							if (dest.exists()) {
@@ -453,11 +448,8 @@ public class DownloadManager {
 							if (type.toLowerCase().contains("dmg")) {
 								dmgExtract(jvmArchive, bindir + targetdir, exeInZip);
 							}
-							if (	type.toLowerCase().contains("appimage") ||
-									type.toLowerCase().contains("exe") ||
-									type.toLowerCase().contains("msi")||
-									type.toLowerCase().contains("jar")
-									) {
+							if (type.toLowerCase().contains("appimage") || type.toLowerCase().contains("exe")
+									|| type.toLowerCase().contains("msi") || type.toLowerCase().contains("jar")) {
 								standaloneEXE(type, name, targetdir, cmd);
 							}
 							// extract7zArchive
@@ -474,8 +466,9 @@ public class DownloadManager {
 							Object setup = vm.get("setup");
 							if (setup != null) {
 								String setupScript = setup.toString();
-								File setupEXE = new File(getDestinationDir(exeType).getAbsolutePath()+delim()+setupScript);
-								runInstaller(setupEXE,exeType);
+								File setupEXE = new File(
+										getDestinationDir(exeType).getAbsolutePath() + delim() + setupScript);
+								runInstaller(setupEXE, exeType);
 							}
 
 							Object configurations = database.get("Meta-Configuration");
@@ -499,7 +492,7 @@ public class DownloadManager {
 									}
 
 									@Override
-									public void launch(File file, Button advanced,Runnable r) {
+									public void launch(File file, Button advanced, Runnable r) {
 										// Auto-generated method stub
 
 									}
@@ -523,8 +516,8 @@ public class DownloadManager {
 									}
 								};
 								for (int i = 0; i < configs.size(); i++) {
-									com.neuronrobotics.sdk.common.Log.error("Running " + exeType + " Configuration " + (i + 1) + " of "
-											+ configs.size());
+									com.neuronrobotics.sdk.common.Log.error("Running " + exeType + " Configuration "
+											+ (i + 1) + " of " + configs.size());
 									ArrayList<String> toRun = new ArrayList<>();
 									toRun.add(bindir + targetdir + "/" + configexe);
 									String[] conf = configs.get(i).split(" ");
@@ -548,7 +541,7 @@ public class DownloadManager {
 						} else {
 							com.neuronrobotics.sdk.common.Log.debug("Not extraction, Application exists " + cmd);
 						}
-						if(version !=null)
+						if (version != null)
 							Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
 						return new File(cmd);
 					}
@@ -573,43 +566,45 @@ public class DownloadManager {
 	private static void runInstaller(List<String> installerList) {
 		for (String installer : installerList) {
 			File installerFile = getRunExecutable(installer, null);
-			runInstaller( installerFile, installer);
+			runInstaller(installerFile, installer);
 		}
 	}
-	private static void runInstaller(File installerFile,String installer) {
-		
-			if(installerFile.getAbsolutePath().toLowerCase().endsWith("msi")) {
-				 List<String> command = new ArrayList<>();
-			        command.add("msiexec.exe");
-			        command.add("/i");  // Install
-			        command.add(installerFile.getAbsolutePath());
-			        command.add("/qn");  // Quiet mode, no UI
-			        
-			        Thread tcopy = run(null, new File("."), System.out, command);
-					try {
-						tcopy.join();
-					} catch (InterruptedException e) {
-						// Auto-generated catch block
-						com.neuronrobotics.sdk.common.Log.error(e);
-					}
-			}else if(installerFile.getAbsolutePath().toLowerCase().endsWith("sh")) {
-				Thread tcopy = run(null, getDestinationDir(installer), System.out, Arrays.asList("bash",installerFile.getAbsolutePath()));
-				try {
-					tcopy.join();
-				} catch (InterruptedException e) {
-					// Auto-generated catch block
-					com.neuronrobotics.sdk.common.Log.error(e);
-				}
-			}else {
-				Thread tcopy = run(null, getDestinationDir(installer), System.out, Arrays.asList(installerFile.getAbsolutePath()));
-				try {
-					tcopy.join();
-				} catch (InterruptedException e) {
-					// Auto-generated catch block
-					com.neuronrobotics.sdk.common.Log.error(e);
-				}
+	private static void runInstaller(File installerFile, String installer) {
+
+		if (installerFile.getAbsolutePath().toLowerCase().endsWith("msi")) {
+			List<String> command = new ArrayList<>();
+			command.add("msiexec.exe");
+			command.add("/i"); // Install
+			command.add(installerFile.getAbsolutePath());
+			command.add("/qn"); // Quiet mode, no UI
+
+			Thread tcopy = run(null, new File("."), System.out, command);
+			try {
+				tcopy.join();
+			} catch (InterruptedException e) {
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
 			}
-		
+		} else if (installerFile.getAbsolutePath().toLowerCase().endsWith("sh")) {
+			Thread tcopy = run(null, getDestinationDir(installer), System.out,
+					Arrays.asList("bash", installerFile.getAbsolutePath()));
+			try {
+				tcopy.join();
+			} catch (InterruptedException e) {
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
+			}
+		} else {
+			Thread tcopy = run(null, getDestinationDir(installer), System.out,
+					Arrays.asList(installerFile.getAbsolutePath()));
+			try {
+				tcopy.join();
+			} catch (InterruptedException e) {
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
+			}
+		}
+
 	}
 
 	private static boolean deleteDirectory(File directoryToBeDeleted) {
@@ -645,7 +640,7 @@ public class DownloadManager {
 		Set<String> before = Stream.of(listFiles).filter(file -> file.isDirectory()).map(File::getName)
 				.collect(Collectors.toSet());
 		Thread t = run(null, new File("."), System.out,
-				Arrays.asList("hdiutil", "attach","-verbose", jvmArchive.getAbsolutePath()));
+				Arrays.asList("hdiutil", "attach", "-verbose", jvmArchive.getAbsolutePath()));
 		try {
 			t.join();
 			Thread.sleep(2000);// wait for mount to settle
@@ -655,7 +650,8 @@ public class DownloadManager {
 			after.removeAll(before);
 			Object[] array = after.toArray();
 			String newMount = (String) array[0];
-			com.neuronrobotics.sdk.common.Log.debug("Extracted " + jvmArchive.getAbsolutePath() + " is mounted at " + newMount);
+			com.neuronrobotics.sdk.common.Log
+					.debug("Extracted " + jvmArchive.getAbsolutePath() + " is mounted at " + newMount);
 			// asr restore --source "$MOUNT_POINT" --target "$DEST_PATH" --erase --noprompt
 			if (!location.exists()) {
 				location.mkdirs();
@@ -751,7 +747,7 @@ public class DownloadManager {
 			result = inArchive.extractSlow(index, new ISequentialOutStream() {
 				public int write(byte[] data) throws SevenZipException {
 					try {
-						psudoSplash.onLogUpdate("Inflate 7z .. " + outputFile.getName(),null);
+						psudoSplash.onLogUpdate("Inflate 7z .. " + outputFile.getName(), null);
 						fos.write(data);
 					} catch (IOException e) {
 						throw new SevenZipException("Error writing to file: " + e.getMessage());
@@ -770,26 +766,27 @@ public class DownloadManager {
 
 	/*
 	 * public static void extract7zArchive(String archivePath, String outputPath) {
-	 * 
-	 * 
+	 *
+	 *
 	 * File archiveFile = new File(archivePath); File outputDir = new
 	 * File(outputPath);
-	 * 
+	 *
 	 * if (!outputDir.exists()) { outputDir.mkdirs(); }
-	 * 
+	 *
 	 * try (SevenZFile sevenZFile = new
 	 * SevenZFile.Builder().setFile(archiveFile).get()) { SevenZArchiveEntry entry;
 	 * while ((entry = sevenZFile.getNextEntry()) != null) { if
 	 * (entry.isDirectory()) { continue; } File outputFile = new File(outputDir,
 	 * entry.getName()); File parent = outputFile.getParentFile(); if
 	 * (!parent.exists()) { parent.mkdirs(); }
-	 * com.neuronrobotics.sdk.common.Log.error("Inflating 7z "+outputFile.getAbsolutePath()); try
-	 * (FileOutputStream out = new FileOutputStream(outputFile)) { byte[] content =
-	 * new byte[(int) entry.getSize()]; sevenZFile.read(content, 0, content.length);
+	 * com.neuronrobotics.sdk.common.Log.error("Inflating 7z "+outputFile.
+	 * getAbsolutePath()); try (FileOutputStream out = new
+	 * FileOutputStream(outputFile)) { byte[] content = new byte[(int)
+	 * entry.getSize()]; sevenZFile.read(content, 0, content.length);
 	 * out.write(content); } }
-	 * com.neuronrobotics.sdk.common.Log.error("Extraction completed successfully."); } catch
-	 * (IOException e) { e.printStackTrace(System.out); } }
-	 * 
+	 * com.neuronrobotics.sdk.common.Log.error("Extraction completed successfully."
+	 * ); } catch (IOException e) { e.printStackTrace(System.out); } }
+	 *
 	 * }
 	 */
 	public static void unzip(File path, String dir) throws Exception {
@@ -825,10 +822,10 @@ public class DownloadManager {
 							if (zipTime > diskTime) {
 								// Zip file is newer, extract it
 								shouldExtract = true;
-								//Log.debug("Updating file (zip is newer): " + entryPath);
+								// Log.debug("Updating file (zip is newer): " + entryPath);
 							} else {
 								// Disk file is newer or same, skip extraction
-								//Log.debug("Skipping file (disk is newer or same): " + entryPath);
+								// Log.debug("Skipping file (disk is newer or same): " + entryPath);
 							}
 						}
 
@@ -852,9 +849,9 @@ public class DownloadManager {
 								}
 								try (OutputStream out = new FileOutputStream(file)) {
 									IOUtils.copy(in, out);
-									//com.neuronrobotics.sdk.common.Log.debug("Inflating " + entryPath);
-								}catch(Exception ex) {
-									//Log.error(ex);
+									// com.neuronrobotics.sdk.common.Log.debug("Inflating " + entryPath);
+								} catch (Exception ex) {
+									// Log.error(ex);
 								}
 								if (isExecutable(entry)) {
 									file.setExecutable(true);
@@ -887,7 +884,7 @@ public class DownloadManager {
 			Files.createDirectories(outDir);
 		}
 
-		try  {
+		try {
 			FileInputStream fis = new FileInputStream(inputFile);
 			XZCompressorInputStream xzIn = new XZCompressorInputStream(fis);
 			TarArchiveInputStream tarIn = new TarArchiveInputStream(xzIn);
@@ -901,7 +898,8 @@ public class DownloadManager {
 					try {
 						Files.createSymbolicLink(outPath, target);
 					} catch (IOException | UnsupportedOperationException e) {
-						com.neuronrobotics.sdk.common.Log.error("Failed to create symlink " + outPath + ". Copying target instead.");
+						com.neuronrobotics.sdk.common.Log
+								.error("Failed to create symlink " + outPath + ". Copying target instead.");
 						// Fallback: copy the target file instead
 						Path resolvedTarget = outPath.getParent().resolve(target).normalize();
 						if (Files.exists(resolvedTarget)) {
@@ -917,7 +915,7 @@ public class DownloadManager {
 					try (OutputStream out = Files.newOutputStream(outPath)) {
 						byte[] buffer = new byte[1024];
 						int len;
-						psudoSplash.onLogUpdate("Inflate Tar XZ " + outPath.getFileName(),null);
+						psudoSplash.onLogUpdate("Inflate Tar XZ " + outPath.getFileName(), null);
 						while ((len = tarIn.read(buffer)) != -1) {
 							out.write(buffer, 0, len);
 						}
@@ -931,7 +929,7 @@ public class DownloadManager {
 					}
 				}
 			}
-		}catch(Throwable ex) {
+		} catch (Throwable ex) {
 			downloadEvents.finishDownload();
 			com.neuronrobotics.sdk.common.Log.error(ex);;
 			new File(inputFile).delete();
@@ -980,7 +978,7 @@ public class DownloadManager {
 	}
 
 	private static String bits(byte b) {
-		return String.format(Locale.US,"%6s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+		return String.format(Locale.US, "%6s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
 	}
 
 	public static boolean isWin() {
@@ -1031,21 +1029,27 @@ public class DownloadManager {
 		return key;
 	}
 	/**
-	 * 
-	 * @param version  A string indicating version, this will be the folder name
-	 * @param URL The direct URL of the download
-	 * @param sizeOfFile The number of bytes in the file
-	 * @param directoryInWhichFileIsStored The root directory into which this will all be downloaded
-	 * @param filename The resulting filename
-	 * @param downloadName User level name for asking about the download
+	 *
+	 * @param version
+	 *            A string indicating version, this will be the folder name
+	 * @param URL
+	 *            The direct URL of the download
+	 * @param sizeOfFile
+	 *            The number of bytes in the file
+	 * @param directoryInWhichFileIsStored
+	 *            The root directory into which this will all be downloaded
+	 * @param filename
+	 *            The resulting filename
+	 * @param downloadName
+	 *            User level name for asking about the download
 	 * @return
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 * @throws InterruptedException
 	 */
-	public static File download(String version, String URL, long sizeOfFile, String directoryInWhichFileIsStored, String filename,
-			String downloadName)
+	public static File download(String version, String URL, long sizeOfFile, String directoryInWhichFileIsStored,
+			String filename, String downloadName)
 			throws MalformedURLException, IOException, FileNotFoundException, InterruptedException {
 
 		URL url = new URL(URL);
@@ -1059,12 +1063,12 @@ public class DownloadManager {
 			public void process(double percent) {
 				if (System.currentTimeMillis() - timeSinceePrint > 1000) {
 					timeSinceePrint = System.currentTimeMillis();
-					psudoSplash.onLogUpdate((int) (percent * 100)+" % "+filename ,null);
+					psudoSplash.onLogUpdate((int) (percent * 100) + " % " + filename, null);
 				}
-//				if(progress!=null)
-//					Platform.runLater(() -> {
-//						progress.setProgress(percent);
-//					});
+				// if(progress!=null)
+				// Platform.runLater(() -> {
+				// progress.setProgress(percent);
+				// });
 			}
 		});
 		File folder = new File(bindir + version + "/");
@@ -1074,7 +1078,7 @@ public class DownloadManager {
 
 			if (approval.get(downloadName, URL)) {
 				com.neuronrobotics.sdk.common.Log.debug("Start Downloading " + filename);
-				com.neuronrobotics.sdk.common.Log.debug("From "+URL);
+				com.neuronrobotics.sdk.common.Log.debug("From " + URL);
 
 			} else {
 				pis.close();
@@ -1083,7 +1087,7 @@ public class DownloadManager {
 			downloadEvents.startDownload();
 			rawFileDownload(pis, folder, exe);
 			com.neuronrobotics.sdk.common.Log.debug("Finished downloading " + filename);
-			psudoSplash.onLogUpdate((int) (1 * 100)+" %  " +filename , null);
+			psudoSplash.onLogUpdate((int) (1 * 100) + " %  " + filename, null);
 			downloadEvents.finishDownload();
 		} else {
 			com.neuronrobotics.sdk.common.Log.debug("Not downloading, it existst " + filename);
@@ -1124,7 +1128,8 @@ public class DownloadManager {
 	}
 
 	/**
-	 * @param editorsURL the editorsURL to set
+	 * @param editorsURL
+	 *            the editorsURL to set
 	 */
 	public static void setEditorsURL(String editorsURL) {
 		DownloadManager.editorsURL = editorsURL;
@@ -1135,22 +1140,25 @@ public class DownloadManager {
 			return "\\";
 		return "/";
 	}
-//	public static void main(String[] args) {
-//		try {
-//			PasswordManager.login();
-//		} catch (IOException e) {
-//			// Auto-generated catch block
-//			com.neuronrobotics.sdk.common.Log.error(e);
-//		}
-//		File f = getRunExecutable("eclipse",null);
-//		String ws = EclipseExternalEditor.getEclipseWorkspace();
-//		if(f.exists()) {
-//			com.neuronrobotics.sdk.common.Log.error("Executable retrived:\n"+f.getAbsolutePath());
-//			run(getEnvironment("eclipse"),null,f.getParentFile(), System.err,Arrays.asList(f.getAbsolutePath(),"-data", ws));
-//		}
-//		else
-//			com.neuronrobotics.sdk.common.Log.error("Failed to load file!\n"+f.getAbsolutePath());
-//	}
+	// public static void main(String[] args) {
+	// try {
+	// PasswordManager.login();
+	// } catch (IOException e) {
+	// // Auto-generated catch block
+	// com.neuronrobotics.sdk.common.Log.error(e);
+	// }
+	// File f = getRunExecutable("eclipse",null);
+	// String ws = EclipseExternalEditor.getEclipseWorkspace();
+	// if(f.exists()) {
+	// com.neuronrobotics.sdk.common.Log.error("Executable
+	// retrived:\n"+f.getAbsolutePath());
+	// run(getEnvironment("eclipse"),null,f.getParentFile(),
+	// System.err,Arrays.asList(f.getAbsolutePath(),"-data", ws));
+	// }
+	// else
+	// com.neuronrobotics.sdk.common.Log.error("Failed to load
+	// file!\n"+f.getAbsolutePath());
+	// }
 
 	public static IApprovalForDownload getApproval() {
 		return approval;
@@ -1166,7 +1174,7 @@ public class DownloadManager {
 		return downloadEvents;
 	}
 	public static void setDownloadEvents(IDownloadManagerEvents de) {
-		if(downloadEvents!=null)
+		if (downloadEvents != null)
 			downloadEvents = de;
 	}
 	public static String getSTUDIO_INSTALL() {
@@ -1176,7 +1184,7 @@ public class DownloadManager {
 		STUDIO_INSTALL = sTUDIO_INSTALL;
 	}
 	public static boolean isDownloadedAlready(String string) {
-		File f= DownloadManager.getRunExecutable(string, null,true);
+		File f = DownloadManager.getRunExecutable(string, null, true);
 		return f.exists();
 	}
 

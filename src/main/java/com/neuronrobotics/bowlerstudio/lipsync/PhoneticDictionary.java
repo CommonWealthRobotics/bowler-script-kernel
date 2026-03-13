@@ -30,7 +30,7 @@ public class PhoneticDictionary {
 		return result.toString().toLowerCase();
 	}
 
-	private ArrayList<String>  parseEntry(String entry, Map<String, ArrayList<String>> d) {
+	private ArrayList<String> parseEntry(String entry, Map<String, ArrayList<String>> d) {
 		String[] tokens = entry.split(" ");
 		if (tokens.length < 2) {
 			return null;
@@ -40,12 +40,12 @@ public class PhoneticDictionary {
 			return null;
 		}
 		ArrayList<String> mine = new ArrayList<String>();
-		for(int i=1;i<tokens.length;i++) {
+		for (int i = 1; i < tokens.length; i++) {
 			String phonemes = normalizePhonemes(tokens[i].trim());
 			mine.add(phonemes);
 		}
 
-		//println "Adding to dictionary :"+word+" = phoneme "+mine
+		// println "Adding to dictionary :"+word+" = phoneme "+mine
 		d.put(word, mine);
 		return mine;
 	}
@@ -82,74 +82,74 @@ public class PhoneticDictionary {
 	}
 
 	public ArrayList<String> find(String w) {
-		List<String>  extra=null;
-		if(w.endsWith("n't")) {
-			String newW =w.substring(0,w.length()-3);
-			//println "Contraction reduced "+newW+" from "+w
-			w=newW;
-			extra =Arrays.asList("n", "t");
+		List<String> extra = null;
+		if (w.endsWith("n't")) {
+			String newW = w.substring(0, w.length() - 3);
+			// println "Contraction reduced "+newW+" from "+w
+			w = newW;
+			extra = Arrays.asList("n", "t");
 		}
-		if(w.endsWith("'ar")) {
-			String newW =w.substring(0,w.length()-3);
-			//println "Contraction reduced "+newW+" from "+w
-			w=newW;
-			extra =Arrays.asList( "r");
+		if (w.endsWith("'ar")) {
+			String newW = w.substring(0, w.length() - 3);
+			// println "Contraction reduced "+newW+" from "+w
+			w = newW;
+			extra = Arrays.asList("r");
 		}
-		if(w.endsWith("'ll")) {
-			String newW =w.substring(0,w.length()-3);
-			//println "Contraction reduced "+newW+" from "+w
-			w=newW;
-			extra =Arrays.asList("uw", "l");
+		if (w.endsWith("'ll")) {
+			String newW = w.substring(0, w.length() - 3);
+			// println "Contraction reduced "+newW+" from "+w
+			w = newW;
+			extra = Arrays.asList("uw", "l");
 		}
-		if(w.endsWith("'ve")) {
-			String newW =w.substring(0,w.length()-3);
-			//println "Contraction reduced "+newW+" from "+w
-			w=newW;
-			extra =Arrays.asList("v");
+		if (w.endsWith("'ve")) {
+			String newW = w.substring(0, w.length() - 3);
+			// println "Contraction reduced "+newW+" from "+w
+			w = newW;
+			extra = Arrays.asList("v");
 		}
-		if(w.endsWith("'re")) {
-			String newW =w.substring(0,w.length()-3);
-			//println "Contraction reduced "+newW+" from "+w
-			w=newW;
-			extra =Arrays.asList("r");
+		if (w.endsWith("'re")) {
+			String newW = w.substring(0, w.length() - 3);
+			// println "Contraction reduced "+newW+" from "+w
+			w = newW;
+			extra = Arrays.asList("r");
 		}
-		if(w.endsWith("'s")) {
-			String newW =w.substring(0,w.length()-2);
-			//println "Contraction reduced "+newW+" from "+w
-			w=newW;
-			extra =Arrays.asList("s");
+		if (w.endsWith("'s")) {
+			String newW = w.substring(0, w.length() - 2);
+			// println "Contraction reduced "+newW+" from "+w
+			w = newW;
+			extra = Arrays.asList("s");
 		}
-		if(w.endsWith("'d")) {
-			String newW =w.substring(0,w.length()-2);
-			//println "Contraction reduced "+newW+" from "+w
-			w=newW;
-			extra =Arrays.asList("d");
+		if (w.endsWith("'d")) {
+			String newW = w.substring(0, w.length() - 2);
+			// println "Contraction reduced "+newW+" from "+w
+			w = newW;
+			extra = Arrays.asList("d");
 		}
-		ArrayList<String>  phonemes = new ArrayList<String>();
+		ArrayList<String> phonemes = new ArrayList<String>();
 		ArrayList<String> dictionaryGet = dictionary.get(w);
-		if(dictionaryGet==null) {
+		if (dictionaryGet == null) {
 			dictionaryGet = new ArrayList<String>();
 			byte[] bytes = w.getBytes();
-			//println "Sounding out "+w
-			for(int i=0;i<w.length();i++) {
-				String charAt = ((char)bytes[i])+"";
-				//println charAt
-				if(AudioStatus.getFromPhoneme(charAt)!=null) {
+			// println "Sounding out "+w
+			for (int i = 0; i < w.length(); i++) {
+				String charAt = ((char) bytes[i]) + "";
+				// println charAt
+				if (AudioStatus.getFromPhoneme(charAt) != null) {
 					dictionaryGet.add(charAt);
-				}else {
-					for(String s:AudioStatus.getPhonemes() ) {
-						if(s.contains(charAt)) {
+				} else {
+					for (String s : AudioStatus.getPhonemes()) {
+						if (s.contains(charAt)) {
 							dictionaryGet.add(s);
 							break;
 						}
 					}
 				}
 			}
-			//println "New Word: "+w+" "+dictionaryGet
-			dictionary.put(w,dictionaryGet);
+			// println "New Word: "+w+" "+dictionaryGet
+			dictionary.put(w, dictionaryGet);
 		}
 		phonemes.addAll(dictionaryGet);
-		if(extra!=null) {
+		if (extra != null) {
 			phonemes.addAll(extra);
 		}
 		return phonemes;

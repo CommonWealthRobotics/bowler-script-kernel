@@ -8,20 +8,20 @@ import com.google.gson.annotations.Expose;
 import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
 
-public class ToSolid extends CaDoodleOperation{
-	@Expose (serialize = true, deserialize = true)
+public class ToSolid extends CaDoodleOperation {
+	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
-	@Expose (serialize = true, deserialize = true)
-	private double r=1.0;
-	@Expose (serialize = true, deserialize = true)
-	private double g=0;
-	@Expose (serialize = true, deserialize = true)
-	private double b=0;
-	@Expose (serialize = true, deserialize = true)
-	private double a=1.0;
-	@Expose (serialize = true, deserialize = true)
-	private boolean useColor=false;
-	
+	@Expose(serialize = true, deserialize = true)
+	private double r = 1.0;
+	@Expose(serialize = true, deserialize = true)
+	private double g = 0;
+	@Expose(serialize = true, deserialize = true)
+	private double b = 0;
+	@Expose(serialize = true, deserialize = true)
+	private double a = 1.0;
+	@Expose(serialize = true, deserialize = true)
+	private boolean useColor = false;
+
 	@Override
 	public String getType() {
 		return "To Solid";
@@ -32,22 +32,23 @@ public class ToSolid extends CaDoodleOperation{
 		ArrayList<CSG> replace = new ArrayList<CSG>();
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		for(CSG c: incoming) {
-			if(c.isLock())
+		for (CSG c : incoming) {
+			if (c.isLock())
 				continue;
-			for(String name:names) {
-				if(name.contentEquals(c.getName())) {
+			for (String name : names) {
+				if (name.contentEquals(c.getName())) {
 					replace.add(c);
-					CSG t=c.clone().setRegenerate(c.getRegenerate()).syncProperties(getCaDoodleFile().getCsgDBinstance(),c);
+					CSG t = c.clone().setRegenerate(c.getRegenerate())
+							.syncProperties(getCaDoodleFile().getCsgDBinstance(), c);
 					t.setIsHole(false);
-					if(useColor) {
+					if (useColor) {
 						t.setColor(getColor());
 					}
 					back.add(t);
 				}
 			}
 		}
-		for(CSG c:replace) {
+		for (CSG c : replace) {
 			back.remove(c);
 		}
 		return back;
@@ -63,15 +64,15 @@ public class ToSolid extends CaDoodleOperation{
 	}
 
 	public Color getColor() {
-		return new Color(r,g,b,a);
+		return new Color(r, g, b, a);
 	}
 
 	public ToSolid setColor(Color color) {
-		r=color.getRed();
-		g=color.getGreen();
-		b=color.getBlue();
-		a=color.getOpacity();
-		useColor=true;
+		r = color.getRed();
+		g = color.getGreen();
+		b = color.getBlue();
+		a = color.getOpacity();
+		useColor = true;
 		return this;
 	}
 

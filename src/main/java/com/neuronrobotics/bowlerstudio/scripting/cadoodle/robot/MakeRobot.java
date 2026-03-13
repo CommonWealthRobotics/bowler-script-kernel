@@ -9,12 +9,11 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AbstractAddFrom;
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class MakeRobot extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> assignedAsBase = new ArrayList<String>();
-	//@Expose(serialize = true, deserialize = true)
+	// @Expose(serialize = true, deserialize = true)
 	MobileBaseBuilder builder;
 
 	@Override
@@ -26,9 +25,9 @@ public class MakeRobot extends AbstractAddFrom {
 	public List<CSG> process(List<CSG> incoming) {
 		try {
 			getBuilder().build(getDb());
-			for(CSG c:incoming) {
-				for(String s:assignedAsBase) {
-					if(c.getName().contentEquals(s)) {
+			for (CSG c : incoming) {
+				for (String s : assignedAsBase) {
+					if (c.getName().contentEquals(s)) {
 						c.setMobileBaseName(getName());
 					}
 				}
@@ -59,7 +58,7 @@ public class MakeRobot extends AbstractAddFrom {
 	}
 
 	public void setNames(List<String> assignedAsBase) {
-		if(assignedAsBase.size()==0)
+		if (assignedAsBase.size() == 0)
 			throw new RuntimeException("Can not create a robot without specifying a base");
 		this.assignedAsBase = assignedAsBase;
 	}
@@ -72,7 +71,7 @@ public class MakeRobot extends AbstractAddFrom {
 			String strValue = getCaDoodleFile().getSelf().getAbsolutePath();
 			File parentFile = new File(strValue).getParentFile();
 			String source = parentFile.getAbsolutePath();
-			builder = new MobileBaseBuilder(getDb(),source, getName() + "-mobilbase.xml");
+			builder = new MobileBaseBuilder(getDb(), source, getName() + "-mobilbase.xml");
 		}
 		return builder;
 	}

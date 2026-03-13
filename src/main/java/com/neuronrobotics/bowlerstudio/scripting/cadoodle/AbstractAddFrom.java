@@ -8,46 +8,46 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 
-public abstract class AbstractAddFrom  extends CaDoodleOperation implements INamedOperation{
-	@Expose (serialize = false, deserialize = false)
+public abstract class AbstractAddFrom extends CaDoodleOperation implements INamedOperation {
+	@Expose(serialize = false, deserialize = false)
 	protected HashSet<String> namesAdded = new HashSet<>();
-	@Expose (serialize = false, deserialize = false)
+	@Expose(serialize = false, deserialize = false)
 	protected int nameIndex = 0;
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
 	public HashSet<String> getNamesAdded() {
 		return namesAdded;
 	}
-	public List<String> getNamesAddedInThisOperation(){
-		ArrayList<String> names= new ArrayList<String>();
+	public List<String> getNamesAddedInThisOperation() {
+		ArrayList<String> names = new ArrayList<String>();
 		names.addAll(getNamesAdded());
 		return names;
 	}
-	
+
 	public String getName() {
 		if (name == null) {
-			name=(RandomStringFactory.generateRandomString());
+			name = (RandomStringFactory.generateRandomString());
 		}
 		return name;
 	}
 
-//	public void setName(String name) {
-//		this.name = name;
-//	}
-	
+	// public void setName(String name) {
+	// this.name = name;
+	// }
+
 	public String getOrderedName() {
-		String result= getName();
-		if(nameIndex!=0){
-			result+= "_"+nameIndex;
+		String result = getName();
+		if (nameIndex != 0) {
+			result += "_" + nameIndex;
 		}
 		nameIndex++;
 		namesAdded.add(result);
 		return result;
 	}
-	
-	public abstract File getFile()throws NoSuchFileException;
-	@Override 
+
+	public abstract File getFile() throws NoSuchFileException;
+	@Override
 	public String toString() {
-		return getType()+" with name "+getName();
+		return getType() + " with name " + getName();
 	}
 }

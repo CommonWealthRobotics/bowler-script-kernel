@@ -5,16 +5,8 @@ import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
-import com.neuronrobotics.sdk.common.Log;
-import javafx.geometry.Point3D;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
-import javafx.scene.transform.Rotate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -25,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -110,8 +101,7 @@ public class BezierEditor {
 
 		if (!loaded) {
 			end.setX(100);
-			end.setY(100);
-			;
+			end.setY(100);;
 			end.setZ(100);
 			cp1.setX(50);
 			cp1.setY(-50);
@@ -239,7 +229,8 @@ public class BezierEditor {
 
 		TransformNR az = new TransformNR(0, 0, 0, new RotationNR(0, -xyRot, 0));
 		TransformNR reorented = az.times(vect);
-		// com.neuronrobotics.sdk.common.Log.error("CP1 "+reorented.getX()+" "+reorented.getY()+"
+		// com.neuronrobotics.sdk.common.Log.error("CP1 "+reorented.getX()+"
+		// "+reorented.getY()+"
 		// "+reorented.getZ());
 		double xzRot = Math.toDegrees(Math.atan2(reorented.getZ(), reorented.getY()));
 
@@ -264,13 +255,13 @@ public class BezierEditor {
 	public void setStart(double newX, double newY, double newZ) {
 		getStartManip().set(newX, newY, newZ);
 		save();
-		
+
 	}
 
 	public void setCP1(double newX, double newY, double newZ) {
 		cp1Manip.set(newX, newY, newZ);
 		save();
-		
+
 	}
 
 	public void setCP2(double newX, double newY, double newZ) {
@@ -374,9 +365,9 @@ public class BezierEditor {
 		return endManip;
 	}
 
-//	private void setEndManip(CartesianManipulator endManip) {
-//		this.endManip = endManip;
-//	}
+	// private void setEndManip(CartesianManipulator endManip) {
+	// this.endManip = endManip;
+	// }
 	public CartesianManipulator getStartManip() {
 		return start;
 	}

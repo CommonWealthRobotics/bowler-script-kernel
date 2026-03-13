@@ -1,6 +1,5 @@
 package com.neuronrobotics.bowlerkernel.Bezier3d;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,10 +27,10 @@ public class CartesianManipulator {
 		manip2.setMfg(incoming -> null);
 		manip3.setMfg(incoming -> null);
 		manipulationList[0] = new Manipulation(manipulationMatrix, new Vector3d(0, 0, 1), globalPose);
-		manipulationList[1] = new Manipulation(manipulationMatrix, new Vector3d(0, 1, 0),  globalPose);
-		manipulationList[2] = new Manipulation(manipulationMatrix, new Vector3d(1, 0, 0),  globalPose);
-		int i=0;
-		for(CSG manip:Arrays.asList(manip1,manip3,manip2)) {
+		manipulationList[1] = new Manipulation(manipulationMatrix, new Vector3d(0, 1, 0), globalPose);
+		manipulationList[2] = new Manipulation(manipulationMatrix, new Vector3d(1, 0, 0), globalPose);
+		int i = 0;
+		for (CSG manip : Arrays.asList(manip1, manip3, manip2)) {
 			manip.getStorage().set("manipulator", manipulationList[i++].map);
 			manip.setManipulator(manipulationMatrix);
 		}
@@ -69,7 +68,7 @@ public class CartesianManipulator {
 	}
 	public boolean isMoving() {
 		for (int i = 0; i < 3; i++)
-			if(manipulationList[i].isMoving())
+			if (manipulationList[i].isMoving())
 				return true;
 		return false;
 	}
@@ -82,6 +81,6 @@ public class CartesianManipulator {
 
 	public void set(double newX, double newY, double newZ) {
 		for (int i = 0; i < 3; i++)
-			manipulationList[i].set(newX,newY,newZ);
+			manipulationList[i].set(newX, newY, newZ);
 	}
 }

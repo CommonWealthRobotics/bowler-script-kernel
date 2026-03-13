@@ -7,18 +7,20 @@ import java.util.Arrays;
 public class FXMLBowlerLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File xml, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File xml,
+			ArrayList<Object> args) throws Exception {
 		javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(xml.toURI().toURL());
-		javafx.scene.layout.Pane newLoadedPane =  loader.load();
+		javafx.scene.layout.Pane newLoadedPane = loader.load();
 		// Create a tab
 		javafx.scene.control.Tab myTab = new javafx.scene.control.Tab();
-		//set the title of the new tab
+		// set the title of the new tab
 		myTab.setContent(newLoadedPane);
 		return myTab;
 	}
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, String code,
+			ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("This engine only supports files");
 	}
 
@@ -34,7 +36,7 @@ public class FXMLBowlerLoader implements IScriptingLanguage {
 	}
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	public String getDefaultContents() {
@@ -43,7 +45,7 @@ public class FXMLBowlerLoader implements IScriptingLanguage {
 	@Override
 	public ArrayList<String> getFileExtension() {
 		// Auto-generated method stub
-		return new ArrayList<>(Arrays.asList("fxml","FXML","FxML"));
+		return new ArrayList<>(Arrays.asList("fxml", "FXML", "FxML"));
 	}
 
 }

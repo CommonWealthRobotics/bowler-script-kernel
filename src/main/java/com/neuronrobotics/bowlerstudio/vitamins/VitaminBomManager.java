@@ -46,7 +46,7 @@ public class VitaminBomManager {
 	public VitaminBomManager(String url) throws IOException {
 		this(ScriptingEngine.getRepositoryCloneDirectory(url));
 		baseURL = url;
-	
+
 	}
 
 	public VitaminBomManager(File parentFile) {
@@ -86,11 +86,11 @@ public class VitaminBomManager {
 		return new File(baseWorkspaceFile.getAbsolutePath() + "/" + getManufacturingBomJson());
 	}
 	public VitaminLocation getByName(String name) {
-		for(String keys:database.keySet()) {
+		for (String keys : database.keySet()) {
 			ArrayList<VitaminLocation> arrayList = database.get(keys);
 			for (int i = 0; i < arrayList.size(); i++) {
 				VitaminLocation vl = arrayList.get(i);
-				if(vl.getName().contentEquals(name)) {
+				if (vl.getName().contentEquals(name)) {
 					return vl;
 				}
 			}
@@ -98,14 +98,14 @@ public class VitaminBomManager {
 		return null;
 	}
 	public VitaminBomManager addVitamin(VitaminLocation newElement) {
-		return addVitamin(newElement,true);
+		return addVitamin(newElement, true);
 	}
 	public VitaminBomManager addVitamin(VitaminLocation newElement, boolean save) {
-		for(String keys:database.keySet()) {
+		for (String keys : database.keySet()) {
 			ArrayList<VitaminLocation> arrayList = database.get(keys);
 			for (int i = 0; i < arrayList.size(); i++) {
 				VitaminLocation vl = arrayList.get(i);
-				if(vl.getName().contentEquals(newElement.getName())) {
+				if (vl.getName().contentEquals(newElement.getName())) {
 					arrayList.remove(vl);
 					break;
 				}
@@ -121,25 +121,26 @@ public class VitaminBomManager {
 		boolean toAdd = !arrayList.contains(newElement);
 		for (int i = 0; i < arrayList.size(); i++) {
 			VitaminLocation loc = arrayList.get(i);
-			if(loc.getName().contentEquals(newElement.getName())) {
-				arrayList.set(i,newElement);
+			if (loc.getName().contentEquals(newElement.getName())) {
+				arrayList.set(i, newElement);
 				return this;
 			}
 		}
 		if (toAdd)
 			arrayList.add(newElement);
 		// }
-		if(save)save();
+		if (save)
+			save();
 		return this;
 	}
 
-	public CSG get(CSGDatabaseInstance db,String name) {
+	public CSG get(CSGDatabaseInstance db, String name) {
 		VitaminLocation e = getElement(name);
 		if (e == null)
 			throw new RuntimeException("Vitamin must be defined before it is used: " + name);
 
 		try {
-			CSG transformed = MobileBaseCadManager.vitaminMakeCSG(db,e)
+			CSG transformed = MobileBaseCadManager.vitaminMakeCSG(db, e)
 					.transformed(TransformFactory.nrToCSG(e.getLocation()));
 			transformed.setManufacturing(incominng -> {
 				return null;
@@ -239,7 +240,7 @@ public class VitaminBomManager {
 					object = "0.01";
 
 				csv += key + "," + size + "," + URL + "," + object + "\n";
-			} 
+			}
 		}
 		if (baseURL != null)
 			try {
@@ -313,11 +314,11 @@ public class VitaminBomManager {
 	}
 
 	public void remove(VitaminLocation loc) {
-		for(String keys:database.keySet()) {
+		for (String keys : database.keySet()) {
 			ArrayList<VitaminLocation> arrayList = database.get(keys);
 			for (int i = 0; i < arrayList.size(); i++) {
 				VitaminLocation vl = arrayList.get(i);
-				if(vl.getName().contentEquals(loc.getName())) {
+				if (vl.getName().contentEquals(loc.getName())) {
 					arrayList.remove(vl);
 					return;
 				}

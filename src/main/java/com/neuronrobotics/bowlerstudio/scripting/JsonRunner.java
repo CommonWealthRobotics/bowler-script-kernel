@@ -24,16 +24,18 @@ public class JsonRunner implements IScriptingLanguage {
 	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
+			ArrayList<Object> args) throws Exception {
 		String jsonString = null;
 		InputStream inPut = null;
 		inPut = FileUtils.openInputStream(code);
 		jsonString = IOUtils.toString(inPut);
-		return inlineScriptRun( db,jsonString, args);
+		return inlineScriptRun(db, jsonString, args);
 	}
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, String code,
+			ArrayList<Object> args) throws Exception {
 
 		// perfoem the GSON parse
 		HashMap<String, HashMap<String, Object>> database = gson.fromJson(code, TT_mapStringString);
@@ -52,7 +54,7 @@ public class JsonRunner implements IScriptingLanguage {
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	public String getDefaultContents() {

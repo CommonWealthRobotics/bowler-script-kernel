@@ -5,19 +5,20 @@ import java.net.URL;
 
 public class VirtualCameraFactory {
 	private static IVirtualCameraFactory factory = new IVirtualCameraFactory() {
-		
+
 		@Override
 		public AbstractImageProvider getVirtualCamera() {
 			// Auto-generated method stub
 			try {
-				return new URLImageProvider(new URL("http://commonwealthrobotics.com/img/AndrewHarrington/2014-09-15-86.jpg"));
+				return new URLImageProvider(
+						new URL("http://commonwealthrobotics.com/img/AndrewHarrington/2014-09-15-86.jpg"));
 			} catch (MalformedURLException e) {
 				// Auto-generated catch block
-				throw new RuntimeException(e);			
+				throw new RuntimeException(e);
 			}
 		}
-	}; 
-	public static AbstractImageProvider getVirtualCamera(){
+	};
+	public static AbstractImageProvider getVirtualCamera() {
 		return getFactory().getVirtualCamera();
 	}
 	public static IVirtualCameraFactory getFactory() {

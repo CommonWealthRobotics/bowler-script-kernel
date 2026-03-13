@@ -1,17 +1,13 @@
 package com.neuronrobotics.imageprovider;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import com.neuronrobotics.sdk.common.BowlerDatagram;
-
 public class URLImageProvider extends AbstractImageProvider {
-
 
 	private URL url;
 
@@ -22,15 +18,14 @@ public class URLImageProvider extends AbstractImageProvider {
 	@Override
 	protected boolean captureNewImage(BufferedImage imageData) {
 
-		
-		AbstractImageProvider.deepCopy(captureNewImage() ,imageData);
+		AbstractImageProvider.deepCopy(captureNewImage(), imageData);
 		return true;
 	}
 
 	@Override
 	public void disconnectDeviceImp() {
 		// Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -47,9 +42,12 @@ public class URLImageProvider extends AbstractImageProvider {
 
 	@Override
 	public BufferedImage captureNewImage() {
-		/*In the constructor*/
-		try { return ImageIO.read(url ); } catch (IOException e) { return null;}
+		/* In the constructor */
+		try {
+			return ImageIO.read(url);
+		} catch (IOException e) {
+			return null;
+		}
 	}
-
 
 }

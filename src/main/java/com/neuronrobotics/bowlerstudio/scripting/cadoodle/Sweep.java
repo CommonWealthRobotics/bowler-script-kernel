@@ -1,11 +1,7 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,8 +9,6 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
-import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
-import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.Bounds;
@@ -22,13 +16,10 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.Extrude;
-import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.ITransformProvider;
 import eu.mihosoft.vrl.v3d.Vector3d;
-import eu.mihosoft.vrl.v3d.ext.org.poly2tri.PolygonUtil;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
@@ -68,8 +59,7 @@ public class Sweep extends AbstractAddFrom {
 		try {
 			getFile();
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 		}
 		return this;
 	}
@@ -111,7 +101,7 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter radius(String name) {
 		String key = name + "_CaDoodle_Rad";
 		if (rad == null)
-			rad = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefrad(), nopt);
+			rad = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefrad(), nopt);
 		if (rad.getMM() < 0)
 			rad.setMM(0);
 		return rad;
@@ -120,14 +110,14 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter zoffset(String name) {
 		String key = name + "_CaDoodle_Z-per";
 		if (z == null)
-			z = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefz(), nopt);
+			z = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefz(), nopt);
 		return z;
 	}
 
 	public LengthParameter steps(String name) {
 		String key = name + "_CaDoodle_Step";
 		if (step == null)
-			step = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefstep(), nopt);
+			step = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefstep(), nopt);
 		if (step.getMM() < 3)
 			step.setMM(3);
 		return step;
@@ -136,7 +126,7 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter angle(String name) {
 		String key = name + "_CaDoodle_Angle";
 		if (angle == null)
-			angle = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefangle(), nopt);
+			angle = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefangle(), nopt);
 		if (angle.getMM() < 0.001)
 			angle.setMM(0.001);
 		return angle;
@@ -145,7 +135,7 @@ public class Sweep extends AbstractAddFrom {
 	public LengthParameter spiralStep(String name) {
 		String key = name + "_CaDoodle_Spiral";
 		if (spiral == null)
-			spiral = new LengthParameter(getCaDoodleFile().getCsgDBinstance(),key, getDefSpiral(), nopt);
+			spiral = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefSpiral(), nopt);
 		if (spiral.getMM() < 0)
 			spiral.setMM(0);
 		return spiral;
@@ -160,8 +150,8 @@ public class Sweep extends AbstractAddFrom {
 
 		}
 		try {
-//			ArrayList<Object>args = new ArrayList<>();
-//			args.addAll(Arrays.asList(getName() ));
+			// ArrayList<Object>args = new ArrayList<>();
+			// args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
 			com.neuronrobotics.sdk.common.Log.debug("Loading File " + file.getAbsolutePath());
@@ -250,20 +240,20 @@ public class Sweep extends AbstractAddFrom {
 			throw new RuntimeException(e);
 		}
 
-		StringParameter parameter = new StringParameter(getCaDoodleFile().getCsgDBinstance(),name + "_CaDoodle_File", pathname, options);
+		StringParameter parameter = new StringParameter(getCaDoodleFile().getCsgDBinstance(), name + "_CaDoodle_File",
+				pathname, options);
 		Parameter steps = steps(name);
 		Parameter angle = angle(name);
 		Parameter z = zoffset(name);
 		Parameter radius = radius(name);
 		parameter.setStrValue(pathname);
-		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(getCaDoodleFile().getCsgDBinstance(),csg)
+		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(getCaDoodleFile().getCsgDBinstance(), csg)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), parameter)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), steps)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), angle)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), z)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), radius)
-				.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(pathname))
-				.setColor(c).setIsHole(hole)
+				.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(pathname)).setColor(c).setIsHole(hole)
 				.setRegenerate(previous -> {
 					try {
 						File file = getFile();

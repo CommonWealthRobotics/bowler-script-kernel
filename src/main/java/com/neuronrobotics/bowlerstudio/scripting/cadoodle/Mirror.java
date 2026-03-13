@@ -3,7 +3,6 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
@@ -55,8 +54,8 @@ public class Mirror extends CaDoodleOperation {
 			for (CSG csg : incoming) {
 				if (!csg.getName().contentEquals(name))
 					continue;
-//				if(csg.isNoScale())
-//					continue;
+				// if(csg.isNoScale())
+				// continue;
 				CSG base = csg.transformed(TransformFactory.nrToCSG(getWorkplane(csg)).inverse());
 				Transform mirroringCenter = new Transform().movex(base.getCenterX()).movey(base.getCenterY())
 						.movez(base.getCenterZ());
@@ -94,22 +93,22 @@ public class Mirror extends CaDoodleOperation {
 			}
 		}
 		return back;
-//		back.addAll(incoming
-//				.stream()
-//				.map(csg->{
-//					
-//					for(String name:names) {
-//						if(csg.isLock())
-//							continue;
-//						if(csg.getName().contentEquals(name))
-//							return mirror(csg, name)
-//									;
-//					}
-//					return csg;
-//				})
-//			    .collect(Collectors.toCollection(ArrayList::new))
-//			);
-//		return back;
+		// back.addAll(incoming
+		// .stream()
+		// .map(csg->{
+		//
+		// for(String name:names) {
+		// if(csg.isLock())
+		// continue;
+		// if(csg.getName().contentEquals(name))
+		// return mirror(csg, name)
+		// ;
+		// }
+		// return csg;
+		// })
+		// .collect(Collectors.toCollection(ArrayList::new))
+		// );
+		// return back;
 	}
 
 	private CSG mirror(CSG csg, String name) {

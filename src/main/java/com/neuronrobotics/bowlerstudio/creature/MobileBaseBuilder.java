@@ -25,9 +25,10 @@ import java.util.List;
 import java.util.Map;
 
 public class MobileBaseBuilder {
-//	ArrayList<AddRobotController> controllers = new ArrayList<AddRobotController>();
-//	ArrayList<AddRobotLimb> limbs = new ArrayList<AddRobotLimb>();
-//	ArrayList<ModifyLimb> mods = new ArrayList<ModifyLimb>();
+	// ArrayList<AddRobotController> controllers = new
+	// ArrayList<AddRobotController>();
+	// ArrayList<AddRobotLimb> limbs = new ArrayList<AddRobotLimb>();
+	// ArrayList<ModifyLimb> mods = new ArrayList<ModifyLimb>();
 	ArrayList<CaDoodleOperation> operations = new ArrayList<CaDoodleOperation>();
 	private MobileBase mobileBase;
 	private String gitURL;
@@ -98,14 +99,15 @@ public class MobileBaseBuilder {
 		return this;
 	}
 
-//	// Constructor for extending an existing MobileBase with new name
-//	public MobileBaseBuilder(String gitURL, MobileBase existingBase, String newName) {
-//		this.gitURL = gitURL;
-//		this.mobileBase = existingBase;
-//		this.mobileBase.setScriptingName(newName);
-//		initializeChannelMap();
-//		scanExistingChannels();
-//	}
+	// // Constructor for extending an existing MobileBase with new name
+	// public MobileBaseBuilder(String gitURL, MobileBase existingBase, String
+	// newName) {
+	// this.gitURL = gitURL;
+	// this.mobileBase = existingBase;
+	// this.mobileBase.setScriptingName(newName);
+	// initializeChannelMap();
+	// scanExistingChannels();
+	// }
 
 	public MobileBase cloneMobileBase(MobileBase source) {
 		try {
@@ -186,12 +188,12 @@ public class MobileBaseBuilder {
 	}
 
 	public MobileBaseBuilder setGitCadEngine(String gitURL, String filename) {
-		mobileBase.setGitCadEngine(new String[] { gitURL, filename });
+		mobileBase.setGitCadEngine(new String[]{gitURL, filename});
 		return this;
 	}
 
 	public MobileBaseBuilder setGitWalkingEngine(String gitURL, String filename) {
-		mobileBase.setGitWalkingEngine(new String[] { gitURL, filename });
+		mobileBase.setGitWalkingEngine(new String[]{gitURL, filename});
 		return this;
 	}
 
@@ -405,7 +407,7 @@ public class MobileBaseBuilder {
 			mobileBase.connect();
 		this.db = db;
 		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName();
-		mobileBase.setGitSelfSource(new String[] { gitURL, filename });
+		mobileBase.setGitSelfSource(new String[]{gitURL, filename});
 		ArrayList<ModifyLimb> toRemove = new ArrayList<ModifyLimb>();
 		for (int i = 0; i < operations.size(); i++) {
 			CaDoodleOperation op = operations.get(i);
@@ -417,7 +419,7 @@ public class MobileBaseBuilder {
 							mobileBase.addVitamin(l);
 					} catch (Exception ex) {
 						com.neuronrobotics.sdk.common.Log.error(ex);
-						
+
 					}
 				}
 			}
@@ -433,23 +435,23 @@ public class MobileBaseBuilder {
 					kin.zero();
 					limb.setKinematics(kin);
 					switch (limb.getLimb().getType()) {
-					case arm:
-					case flap:
-					case hand:
-					case head:
-						mobileBase.getAppendages().add(kin);
-						break;
-					case leg:
-						mobileBase.getLegs().add(kin);
-						break;
-					case steerable:
-						mobileBase.getSteerable().add(kin);
-						break;
-					case wheel:
-						mobileBase.getFixed().add(kin);
-						break;
-					default:
-						throw new RuntimeException("Unknown limb type in builder! " + limb.getLimb().getType());
+						case arm :
+						case flap :
+						case hand :
+						case head :
+							mobileBase.getAppendages().add(kin);
+							break;
+						case leg :
+							mobileBase.getLegs().add(kin);
+							break;
+						case steerable :
+							mobileBase.getSteerable().add(kin);
+							break;
+						case wheel :
+							mobileBase.getFixed().add(kin);
+							break;
+						default :
+							throw new RuntimeException("Unknown limb type in builder! " + limb.getLimb().getType());
 					}
 				}
 			}
@@ -498,8 +500,7 @@ public class MobileBaseBuilder {
 						try {
 							mobileBase.removeVitamin(l);
 						} catch (Exception ex) {
-							com.neuronrobotics.sdk.common.Log.error(ex);
-							;
+							com.neuronrobotics.sdk.common.Log.error(ex);;
 						}
 					}
 				}
@@ -609,28 +610,28 @@ public class MobileBaseBuilder {
 		} else {
 			while (operations.size() > 0) {
 
-				CaDoodleOperation op =operations.remove(operations.size() - 1);
+				CaDoodleOperation op = operations.remove(operations.size() - 1);
 				if (AddRobotLimb.class.isInstance(op)) {
 					AddRobotLimb c = (AddRobotLimb) op;
 					DHParameterKinematics kin = c.getKinematics();
 					switch (c.getLimb().getType()) {
-					case arm:
-					case flap:
-					case hand:
-					case head:
-						mobileBase.getAppendages().remove(kin);
-						break;
-					case leg:
-						mobileBase.getLegs().remove(kin);
-						break;
-					case steerable:
-						mobileBase.getSteerable().remove(kin);
-						break;
-					case wheel:
-						mobileBase.getFixed().remove(kin);
-						break;
-					default:
-						throw new RuntimeException("Unknown limb type in builder! " + c.getLimb().getType());
+						case arm :
+						case flap :
+						case hand :
+						case head :
+							mobileBase.getAppendages().remove(kin);
+							break;
+						case leg :
+							mobileBase.getLegs().remove(kin);
+							break;
+						case steerable :
+							mobileBase.getSteerable().remove(kin);
+							break;
+						case wheel :
+							mobileBase.getFixed().remove(kin);
+							break;
+						default :
+							throw new RuntimeException("Unknown limb type in builder! " + c.getLimb().getType());
 					}
 				}
 				if (from == op) {
@@ -640,7 +641,7 @@ public class MobileBaseBuilder {
 		}
 		this.mobileBase.setScriptingName(name);
 		initializeChannelMap();
-		if(MobileBaseCadManager.exists(mobileBase)) {
+		if (MobileBaseCadManager.exists(mobileBase)) {
 			MobileBaseCadManager.get(db, mobileBase).clear();
 		}
 	}

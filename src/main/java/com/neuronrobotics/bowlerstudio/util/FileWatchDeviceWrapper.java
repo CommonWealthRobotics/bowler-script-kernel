@@ -7,29 +7,29 @@ import com.neuronrobotics.sdk.common.BowlerAbstractDevice;
 import com.neuronrobotics.sdk.common.IDeviceConnectionEventListener;
 
 public class FileWatchDeviceWrapper {
-	
-	public static FileChangeWatcher watch(BowlerAbstractDevice device, File code,IFileChangeListener cadWatcher){
+
+	public static FileChangeWatcher watch(BowlerAbstractDevice device, File code, IFileChangeListener cadWatcher) {
 		try {
 			FileChangeWatcher watcher = FileChangeWatcher.watch(code);
 			watcher.addIFileChangeListener(cadWatcher);
 			device.addConnectionEventListener(new IDeviceConnectionEventListener() {
-				
+
 				@Override
 				public void onDisconnect(BowlerAbstractDevice arg0) {
 					// Auto-generated method stub
 					watcher.removeIFileChangeListener(cadWatcher);
 				}
-				
+
 				@Override
 				public void onConnect(BowlerAbstractDevice arg0) {
 					// Auto-generated method stub
-					
+
 				}
 			});
 			return watcher;
 		} catch (IOException e) {
 			// Auto-generated catch block
-			//BowlerStudioController.highlightException(code, e);
+			// BowlerStudioController.highlightException(code, e);
 		}
 		return null;
 	}

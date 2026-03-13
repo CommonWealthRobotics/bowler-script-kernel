@@ -10,7 +10,6 @@ import net.java.games.input.Controller;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
 
-import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.NonBowlerDevice;
 import com.neuronrobotics.sdk.util.ThreadUtil;
@@ -42,10 +41,10 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	static {
 		net.java.games.input.ControllerEnvironment.getDefaultEnvironment();
 	}
-	
-	private static ArrayList<Controller> controllers(){
+
+	private static ArrayList<Controller> controllers() {
 		ArrayList<Controller> back = new ArrayList<Controller>();
-		
+
 		ControllerEnvironment defaultEnvironment = ControllerEnvironment.getDefaultEnvironment();
 		Controller[] getDefaultEnvironmentGetControllers = defaultEnvironment.getControllers();
 		for (int i = 0; i < getDefaultEnvironmentGetControllers.length; i++) {
@@ -63,8 +62,8 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		for (int i = 0; i < getDefaultEnvironmentGetControllers.size(); i++) {
 			Controller controller = getDefaultEnvironmentGetControllers.get(i);
 			String name = controller.getName();
-			if(! name.contains("Wacom")){
-				cons.add( name);
+			if (!name.contains("Wacom")) {
+				cons.add(name);
 			}
 		}
 		return cons;
@@ -74,21 +73,21 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	 * Instantiates a new bowler j input device.
 	 */
 	public BowlerJInputDevice(String... names) {
-		
-		setControllerByName(names!=null?Arrays.asList(names):null);
+
+		setControllerByName(names != null ? Arrays.asList(names) : null);
 	}
-	public BowlerJInputDevice( List<String> searches) {
+	public BowlerJInputDevice(List<String> searches) {
 		setControllerByName(searches);
 	}
-	
+
 	private void setControllerByName(List<String> names) {
-		searches =names;
+		searches = names;
 		ArrayList<Controller> getDefaultEnvironmentGetControllers = controllers();
 		int index = 0;
 
 		if (names == null && getDefaultEnvironmentGetControllers.size() > 0) {
 			controller = getDefaultEnvironmentGetControllers.get(index);
-		} else {		
+		} else {
 			for (String n : searches) {
 				for (int i = 0; i < getDefaultEnvironmentGetControllers.size(); i++) {
 					Controller c = getDefaultEnvironmentGetControllers.get(i);
@@ -110,7 +109,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.neuronrobotics.sdk.common.NonBowlerDevice#disconnectDeviceImp()
 	 */
 	@Override
@@ -128,7 +127,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.neuronrobotics.sdk.common.NonBowlerDevice#connectDeviceImp()
 	 */
 	@Override
@@ -140,7 +139,6 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 					setName("Game Controller Poll thread");
 					Log.warning("Starting game Pad Poller");
 
-					
 					try {
 						while (run) {
 							if (controller == null) {
@@ -149,7 +147,8 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 										setControllerByName(searches);
 										break;
 									} catch (Throwable t) {
-										com.neuronrobotics.sdk.common.Log.error("BowlerJInputDevice Waiting for device to be available");
+										com.neuronrobotics.sdk.common.Log
+												.error("BowlerJInputDevice Waiting for device to be available");
 										t.printStackTrace();
 										try {
 											Thread.sleep(1000);
@@ -160,7 +159,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 									}
 								}
 							}
-							
+
 							boolean pollStat = controller.poll();
 							if (!pollStat) {
 								controller = null;
@@ -181,8 +180,8 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 										sendValue((float) 0, "pov-up-down");
 										sendValue((float) 0, "pov-left-right");
 									}
-								}else
-								sendValue(value, n);
+								} else
+									sendValue(value, n);
 							}
 							ThreadUtil.wait(16);
 						}
@@ -224,7 +223,8 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	/**
 	 * Sets the controller.
 	 *
-	 * @param controller the new controller
+	 * @param controller
+	 *            the new controller
 	 */
 	public void setController(Controller controller) {
 		com.neuronrobotics.sdk.common.Log.error("Found! " + controller.getName());
@@ -237,7 +237,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 		}
 		this.controller = controller;
 		recentValue.clear();
-		if(!PersistantControllerMap.areAllAxisMapped(name)) {
+		if (!PersistantControllerMap.areAllAxisMapped(name)) {
 			JogTrainerWidget.run(this);
 		}
 	}
@@ -245,7 +245,8 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	/**
 	 * Removes the listeners.
 	 *
-	 * @param l the l
+	 * @param l
+	 *            the l
 	 */
 	public void removeListeners(IGameControlEvent l) {
 		if (listeners.contains(l))
@@ -263,7 +264,8 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	/**
 	 * Adds the listeners.
 	 *
-	 * @param l the l
+	 * @param l
+	 *            the l
 	 */
 	public void addListeners(IGameControlEvent l) {
 		if (!listeners.contains(l))
@@ -272,7 +274,7 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.neuronrobotics.sdk.common.NonBowlerDevice#getNamespacesImp()
 	 */
 	@Override
@@ -309,17 +311,15 @@ public class BowlerJInputDevice extends NonBowlerDevice {
 	}
 
 	public void map(String controllerVal, String persistantVal) {
-		PersistantControllerMap.map(name,controllerVal, persistantVal);
+		PersistantControllerMap.map(name, controllerVal, persistantVal);
 	}
-
-	
 
 	public static void main(String[] args) throws InterruptedException {
 
 		JavaFXInitializer.go();
 		while (true) {
 			try {
-				BowlerJInputDevice g = new BowlerJInputDevice("X-Box","Gamesir","Dragon"); // 
+				BowlerJInputDevice g = new BowlerJInputDevice("X-Box", "Gamesir", "Dragon"); //
 				g.connect(); // Connect to it.
 				g.addListeners((name, value) -> {
 					com.neuronrobotics.sdk.common.Log.error(g);

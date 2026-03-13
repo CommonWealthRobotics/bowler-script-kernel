@@ -72,7 +72,7 @@ public class RhubarbManager implements IAudioProcessingLambda {
 		boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
 		Process process;
-		String command = exe +" --dialogFile "+ttsLocation+" --machineReadable -f json " + f.getAbsolutePath();
+		String command = exe + " --dialogFile " + ttsLocation + " --machineReadable -f json " + f.getAbsolutePath();
 		com.neuronrobotics.sdk.common.Log.error(command);
 		process = Runtime.getRuntime().exec(command);
 
@@ -96,12 +96,12 @@ public class RhubarbManager implements IAudioProcessingLambda {
 		for (Map<String, Object> cue : cues) {
 			double end = Double.parseDouble(cue.get("end").toString());
 			double start = Double.parseDouble(cue.get("start").toString());
-//			double percent = end / duration * 100.0;
-//
+			// double percent = end / duration * 100.0;
+			//
 			AudioStatus val = AudioStatus.get(cue.get("value").toString().charAt(0));
-//			com.neuronrobotics.sdk.common.Log.error("End at " + percent + " " + val);
-//			HashMap<AudioStatus, Double> map = new HashMap<>();
-//			map.put(val, percent);
+			// com.neuronrobotics.sdk.common.Log.error("End at " + percent + " " + val);
+			// HashMap<AudioStatus, Double> map = new HashMap<>();
+			// map.put(val, percent);
 			TimeCodedViseme map = new TimeCodedViseme(val, start, end, duration);
 			timeCodedVisemes.add(map);
 		}

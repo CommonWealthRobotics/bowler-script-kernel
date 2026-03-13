@@ -10,8 +10,6 @@ import javax.vecmath.Vector3f;
 import com.bulletphysics.collision.shapes.*;
 import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.dynamics.RigidBodyConstructionInfo;
-import com.bulletphysics.dynamics.constraintsolver.HingeConstraint;
-import com.bulletphysics.dynamics.constraintsolver.TypedConstraint;
 import com.bulletphysics.linearmath.DefaultMotionState;
 import com.bulletphysics.linearmath.Transform;
 import com.bulletphysics.util.ObjectArrayList;
@@ -22,10 +20,8 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Polygon;
-import eu.mihosoft.vrl.v3d.Sphere;
 import eu.mihosoft.vrl.v3d.Vertex;
 
-import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
 public class CSGPhysicsManager implements IPhysicsManager {
@@ -36,9 +32,8 @@ public class CSGPhysicsManager implements IPhysicsManager {
 	private Transform updateTransform = new Transform();
 	private IPhysicsUpdate updateManager = null;
 	private PhysicsCore core;
-	
-	public CSGPhysicsManager(List<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter,
-			PhysicsCore core) {
+
+	public CSGPhysicsManager(List<CSG> baseCSG, Transform pose, double mass, boolean adjustCenter, PhysicsCore core) {
 		this.setBaseCSG(baseCSG);// force a hull of the shape to simplify physics
 
 		ObjectArrayList<Vector3f> arg0 = new ObjectArrayList<>();
@@ -47,7 +42,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 			CSG csg = baseCSG.get(i);
 			CSG back = loadCSGToPoints(csg, adjustCenter, pose, arg0);
 			try {
-				if(csg.hasManipulator())
+				if (csg.hasManipulator())
 					back.setManipulator(csg.getManipulator());
 			} catch (MissingManipulatorException e) {
 				// TODO Auto-generated catch block
@@ -88,8 +83,8 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		}
 
 		List<Polygon> polygons = finalCSG.getPolygons();
-		//if(polygons.size()>1000)
-		//	 polygons = getBoundingBox(finalCSG).getPolygons();
+		// if(polygons.size()>1000)
+		// polygons = getBoundingBox(finalCSG).getPolygons();
 		for (Polygon p : polygons) {
 			for (Vertex v : p.getVertices()) {
 				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
@@ -100,15 +95,14 @@ public class CSGPhysicsManager implements IPhysicsManager {
 
 	/**
 	 * Get Bounding box
-	 * 
+	 *
 	 * @return A CSG that completely encapsulates the base CSG, centered around it
 	 */
 	public static CSG getBoundingBox(CSG incoming) {
 		return new Cube((-incoming.getMinX() + incoming.getMaxX()), (-incoming.getMinY() + incoming.getMaxY()),
 				(-incoming.getMinZ() + incoming.getMaxZ())).toCSG().toXMax().movex(incoming.getMaxX()).toYMax()
-						.movey(incoming.getMaxY()).toZMax().movez(incoming.getMaxZ());
+				.movey(incoming.getMaxY()).toZMax().movez(incoming.getMaxZ());
 	}
-
 
 	public void setup(CollisionShape fallShape, Transform pose, double mass, PhysicsCore core) {
 		this.setCore(core);
@@ -121,7 +115,7 @@ public class CSGPhysicsManager implements IPhysicsManager {
 		fallShape.calculateLocalInertia((float) mass, fallInertia);
 		RigidBodyConstructionInfo fallRigidBodyCI = new RigidBodyConstructionInfo((float) mass, fallMotionState,
 				fallShape, fallInertia);
-		
+
 		fallRigidBodyCI.additionalDamping = true;
 		setFallRigidBody(new RigidBody(fallRigidBodyCI));
 		// update(40);

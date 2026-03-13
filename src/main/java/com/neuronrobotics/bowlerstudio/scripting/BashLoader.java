@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import com.neuronrobotics.video.OSUtil;
 
@@ -14,7 +13,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 public class BashLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
 		// List<String> asList = Arrays.asList("bash",code.getAbsolutePath());
 		ArrayList<String> commands = new ArrayList<>();
 		commands.add("bash");
@@ -57,7 +56,7 @@ public class BashLoader implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(CSGDatabaseInstance db, String code, ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("Bash scripts have to be sent as files");
 	}
 
@@ -75,7 +74,7 @@ public class BashLoader implements IScriptingLanguage {
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	public String getDefaultContents() {
