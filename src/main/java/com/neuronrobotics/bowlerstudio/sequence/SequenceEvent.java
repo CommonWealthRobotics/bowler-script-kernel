@@ -6,27 +6,27 @@ import com.neuronrobotics.sdk.addons.kinematics.InterpolationMoveState;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.pid.InterpolationType;
 
-public class SequenceEvent implements IOnInterpolationDone{
+public class SequenceEvent implements IOnInterpolationDone {
 	private TransformNR pose = new TransformNR();
 	private InterpolationType mode = InterpolationType.LINEAR;
-	
-	private double TRAPEZOIDAL_time=0;
-	private double BEZIER_P0=0;
-	private double BEZIER_P1=0;
-	
-	private int msDuration=1;
-	
+
+	private double TRAPEZOIDAL_time = 0;
+	private double BEZIER_P0 = 0;
+	private double BEZIER_P1 = 0;
+
+	private int msDuration = 1;
+
 	public void execute(DHParameterKinematics kin) {
-		double seconds = ((double)msDuration)/1000.0;
-		if(mode==InterpolationType.BEZIER)
-			kin.asyncInterpolatedMove(pose, seconds, mode,this, BEZIER_P0,BEZIER_P1);
-		else if(mode==InterpolationType.TRAPEZOIDAL)
-			kin.asyncInterpolatedMove(pose, seconds, mode,this,  TRAPEZOIDAL_time);
+		double seconds = ((double) msDuration) / 1000.0;
+		if (mode == InterpolationType.BEZIER)
+			kin.asyncInterpolatedMove(pose, seconds, mode, this, BEZIER_P0, BEZIER_P1);
+		else if (mode == InterpolationType.TRAPEZOIDAL)
+			kin.asyncInterpolatedMove(pose, seconds, mode, this, TRAPEZOIDAL_time);
 		else
-			kin.asyncInterpolatedMove(pose, seconds, mode,this);		
+			kin.asyncInterpolatedMove(pose, seconds, mode, this);
 
 	}
-	
+
 	public TransformNR getPose() {
 		return pose;
 	}
@@ -78,6 +78,6 @@ public class SequenceEvent implements IOnInterpolationDone{
 	@Override
 	public void done(InterpolationMoveState state) {
 		// Auto-generated method stub
-		
+
 	}
 }

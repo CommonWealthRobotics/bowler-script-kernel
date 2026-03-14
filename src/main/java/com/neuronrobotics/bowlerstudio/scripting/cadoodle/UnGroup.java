@@ -1,17 +1,14 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
-import java.io.File;
-import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 
-public class UnGroup extends CaDoodleOperation{
+public class UnGroup extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 
@@ -23,7 +20,7 @@ public class UnGroup extends CaDoodleOperation{
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		
+
 		for (CSG csg : incoming) {
 			for (String name : names) {
 				if (csg.isGroupResult())
@@ -34,13 +31,14 @@ public class UnGroup extends CaDoodleOperation{
 					if (csg.checkGroupMembership(name)) {
 						// release this object from the group
 						Transform nrToCSG = MoveCenter.getTotalOffset(csg);
-						CSG transformed=csg;
-						if(new CaDoodleVitamin(getCaDoodleFile().getCsgDBinstance()).isVitamin(csg)) {
+						CSG transformed = csg;
+						if (new CaDoodleVitamin(getCaDoodleFile().getCsgDBinstance()).isVitamin(csg)) {
 							CSG regenerate = csg.getRegenerate().regenerate(csg);
 							transformed = regenerate.transformed(nrToCSG);
 						}
-						CSG readd= transformed.setRegenerate(csg.getRegenerate()).syncProperties(getCaDoodleFile().getCsgDBinstance(),csg).setName(csg.getName());
-						
+						CSG readd = transformed.setRegenerate(csg.getRegenerate())
+								.syncProperties(getCaDoodleFile().getCsgDBinstance(), csg).setName(csg.getName());
+
 						readd.removeGroupMembership(name);
 						back.remove(csg);
 						back.add(readd);

@@ -9,10 +9,8 @@ import java.util.ArrayList;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.util.io.AutoLFInputStream.IsBinaryException;
 
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
-import javafx.scene.Group;
 
 /**
  * Adding additional language support to bowler studio THis interface is for
@@ -24,24 +22,29 @@ import javafx.scene.Group;
  * @author hephaestus
  */
 public interface IScriptingLanguage {
-	
-	/**
-	 * This interface is for adding additional language support.
-	 *
-	 * @param code file content of the code to be executed
-	 * @param args the incoming arguments as a list of objects
-	 * @return the objects returned form the code that ran
-	 */
-	public abstract Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception;
 
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param code the text content of the code to be executed
-	 * @param args the incoming arguments as a list of objects
+	 * @param code
+	 *            file content of the code to be executed
+	 * @param args
+	 *            the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public abstract Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception;
+	public abstract Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception;
+
+	/**
+	 * This interface is for adding additional language support.
+	 *
+	 * @param code
+	 *            the text content of the code to be executed
+	 * @param args
+	 *            the incoming arguments as a list of objects
+	 * @return the objects returned form the code that ran
+	 */
+	public abstract Object inlineScriptRun(CSGDatabaseInstance db, String code, ArrayList<Object> args)
+			throws Exception;
 
 	/**
 	 * Returns the HashMap key for this language
@@ -59,7 +62,8 @@ public interface IScriptingLanguage {
 	 * file extension. This function may never be called if this language is only
 	 * used internally.
 	 *
-	 * @param filename the filename of the file to be executed
+	 * @param filename
+	 *            the filename of the file to be executed
 	 * @return true if the file extension is supported, false otherwise.
 	 */
 	default boolean isSupportedFileExtension(String filename) {
@@ -73,7 +77,7 @@ public interface IScriptingLanguage {
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	default void getDefaultContents(File source) {
@@ -101,7 +105,7 @@ public interface IScriptingLanguage {
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	default String getDefaultContents() {
@@ -111,7 +115,7 @@ public interface IScriptingLanguage {
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @param fileSlug
 	 * @return
 	 */

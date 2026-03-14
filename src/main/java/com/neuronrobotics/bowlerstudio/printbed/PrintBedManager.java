@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -45,29 +44,29 @@ public class PrintBedManager {
 	private HashSet<String> names = new HashSet<String>();
 	private boolean hasPrintBed = false;
 	public PrintBedManager(String url, ArrayList<CSG> parts) {
-		this.url=url;
+		this.url = url;
 		File dir = new File(ScriptingEngine.getRepositoryCloneDirectory(url).getAbsolutePath());
-		init(dir,  parts);
-		
+		init(dir, parts);
+
 	}
-	
+
 	public PrintBedManager(File dir, ArrayList<CSG> parts) {
 		try {
-			this.url=ScriptingEngine.locateGitUrl(dir);
+			this.url = ScriptingEngine.locateGitUrl(dir);
 		} catch (IOException e) {
 			// Auto-generated catch block
 			e.printStackTrace();
 		}
-		setHasPrintBed(init(dir,  parts));
+		setHasPrintBed(init(dir, parts));
 	}
 	public boolean init(File dir, ArrayList<CSG> parts) {
 		this.parts = parts;
 		if (url == null)
 			return false;
 		File f = new File(dir.getAbsolutePath() + "/" + file);
-		com.neuronrobotics.sdk.common.Log.error("Searching for printbed at "+f);
+		com.neuronrobotics.sdk.common.Log.error("Searching for printbed at " + f);
 		if (f.exists()) {
-			com.neuronrobotics.sdk.common.Log.error("Print Bed file found! "+f.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Print Bed file found! " + f.getAbsolutePath());
 			String source;
 			byte[] bytes;
 			try {
@@ -78,8 +77,8 @@ public class PrintBedManager {
 				ex.printStackTrace();
 			}
 
-		}else {
-			com.neuronrobotics.sdk.common.Log.error("Print Bed NOT file found! "+f.getAbsolutePath());
+		} else {
+			com.neuronrobotics.sdk.common.Log.error("Print Bed NOT file found! " + f.getAbsolutePath());
 			return false;
 		}
 		if (database == null) {
@@ -98,10 +97,10 @@ public class PrintBedManager {
 			bed.setColor(colors.get(colorIndex));
 			bedReps.put(index, bed);
 			String name = bit.getName();
-			
+
 			CSG prepedBit = bit.prepForManufacturing();
 			if (prepedBit != null && name.length() > 0) {
-				if(names.contains(name))
+				if (names.contains(name))
 					continue;
 				names.add(name);
 				com.neuronrobotics.sdk.common.Log.error(bit.getName() + " on " + index + " rot " + zrot + " y " + yval);
@@ -130,12 +129,12 @@ public class PrintBedManager {
 			String name = bit.getName();
 			int index = bit.getPrintBedIndex();
 			bit = bit.prepForManufacturing();
-			if (bit != null && name.length()>0) {
-				if(names.contains(name))
+			if (bit != null && name.length() > 0) {
+				if (names.contains(name))
 					continue;
 				names.add(name);
-				if(bit.getMinZ()<0)
-					bit=bit.toZMin();
+				if (bit.getMinZ() < 0)
+					bit = bit.toZMin();
 				if (beds.get(index) == null) {
 					beds.put(index, new ArrayList<CSG>());
 				}
@@ -169,17 +168,16 @@ public class PrintBedManager {
 						bed.addExportFormat(s);
 			}
 			if (bed != null) {
-				//com.neuronrobotics.sdk.common.Log.error("Mesh fixing for "+name);
-				//bed=bed.union(bed);
+				// com.neuronrobotics.sdk.common.Log.error("Mesh fixing for "+name);
+				// bed=bed.union(bed);
 				bed.setName(name);
-			}
-			else {
+			} else {
 				bed = new Cube().toCSG().toZMin();
 				bed.setManufacturing(incoming -> null);
 			}
 			bedsOutputs.add(bed);
 		}
-		
+
 		return bedsOutputs;
 	}
 
@@ -197,9 +195,10 @@ public class PrintBedManager {
 	private synchronized void saveLocal() {
 		String content = gson.toJson(database);
 		try {
-			write(file,content);
-//			ScriptingEngine.commit(url, ScriptingEngine.getBranch(url), file, content, "Save Print Bed Locations",
-//					true);
+			write(file, content);
+			// ScriptingEngine.commit(url, ScriptingEngine.getBranch(url), file, content,
+			// "Save Print Bed Locations",
+			// true);
 		} catch (Exception e) {
 			// Auto-generated catch block
 			e.printStackTrace();
@@ -229,7 +228,8 @@ public class PrintBedManager {
 	}
 
 	/**
-	 * @param hasPrintBed the hasPrintBed to set
+	 * @param hasPrintBed
+	 *            the hasPrintBed to set
 	 */
 	public void setHasPrintBed(boolean hasPrintBed) {
 		this.hasPrintBed = hasPrintBed;

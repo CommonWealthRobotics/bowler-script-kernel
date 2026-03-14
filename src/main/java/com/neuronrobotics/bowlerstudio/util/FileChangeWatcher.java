@@ -70,13 +70,10 @@ public class FileChangeWatcher {
 	private static HashMap<String, FileChangeWatcher> activeListener = new HashMap<String, FileChangeWatcher>();
 	private Thread watcherThread = null;
 
-
-
-
 	/**
 	 * clear the listeners
 	 */
-	public static void clearAll() {	
+	public static void clearAll() {
 		Object[] array = activeListener.keySet().toArray();
 		for (int i = 0; i < array.length; i++) {
 			Object key = array[i];
@@ -84,12 +81,12 @@ public class FileChangeWatcher {
 		}
 		activeListener.clear();
 	}
-	
+
 	public static void notifyOfDelete(File fileToWatch) {
 		String path = fileToWatch.getAbsolutePath();
 		if (activeListener.get(path) != null) {
 			ArrayList<IFileChangeListener> listeners2 = new ArrayList<>();
-			listeners2.addAll(	activeListener.get(path).listeners);
+			listeners2.addAll(activeListener.get(path).listeners);
 			for (int i = 0; i < listeners2.size(); i++) {
 				IFileChangeListener l = listeners2.get(i);
 				l.onFileDelete(fileToWatch);
@@ -104,7 +101,7 @@ public class FileChangeWatcher {
 	}
 	/**
 	 * Start watching a file
-	 * 
+	 *
 	 * @param fileToWatch
 	 *            a file that should be watched
 	 * @return the watcher object for this file
@@ -131,7 +128,8 @@ public class FileChangeWatcher {
 	private FileChangeWatcher(File fileToWatch) throws IOException {
 
 		this.setFileToWatch(fileToWatch);
-		//com.neuronrobotics.sdk.common.Log.error("\n\n\n\tWatching "+fileToWatch.getAbsolutePath()+"\n\n\n");
+		// com.neuronrobotics.sdk.common.Log.error("\n\n\n\tWatching
+		// "+fileToWatch.getAbsolutePath()+"\n\n\n");
 		this.watcher = FileSystems.getDefault().newWatchService();
 		this.keys = new HashMap<WatchKey, Path>();
 		Path dir = Paths.get(fileToWatch.getParent());
@@ -144,13 +142,14 @@ public class FileChangeWatcher {
 		}
 		watcherThread = new Thread() {
 			public void run() {
-				setName("File Watcher Thread "+fileToWatch.getName());
-				//new Exception("Starting File Watcher Thread").printStackTrace();
+				setName("File Watcher Thread " + fileToWatch.getName());
+				// new Exception("Starting File Watcher Thread").printStackTrace();
 				Thread.currentThread().setUncaughtExceptionHandler(new IssueReportingExceptionHandler());
 
 				while (run) {
 					try {
-						//com.neuronrobotics.sdk.common.Log.error("Checking File: " + getFileToWatch().getAbsolutePath());
+						// com.neuronrobotics.sdk.common.Log.error("Checking File: " +
+						// getFileToWatch().getAbsolutePath());
 						watch();
 					} catch (Exception ex) {
 						ex.printStackTrace();
@@ -164,7 +163,7 @@ public class FileChangeWatcher {
 					}
 				}
 
-				//new Exception("File Watcher Thread Died").printStackTrace();
+				// new Exception("File Watcher Thread Died").printStackTrace();
 			}
 		};
 		watcherThread.start();
@@ -192,9 +191,9 @@ public class FileChangeWatcher {
 		if (listeners.contains(l)) {
 			listeners.remove(l);
 		}
-//		if(listeners.size()==0){
-//			close() ;
-//		}
+		// if(listeners.size()==0){
+		// close() ;
+		// }
 	}
 
 	/**
@@ -266,7 +265,7 @@ public class FileChangeWatcher {
 		} catch (Exception x) {
 			return;
 		}
-		if(!run)
+		if (!run)
 			return;
 
 		Path dir = keys.get(key);
@@ -294,7 +293,9 @@ public class FileChangeWatcher {
 				// print out event
 				// System.out.format("%s: %s\n", event.kind().name(), child);
 				for (int i = 0; i < listeners.size(); i++) {
-					com.neuronrobotics.sdk.common.Log.debug((i+1)+" of "+listeners.size()+" kind:"+kind+" event type "+listeners.get(i).getClass()+" File Changed: " + getFileToWatch().getAbsolutePath());
+					com.neuronrobotics.sdk.common.Log.debug((i + 1) + " of " + listeners.size() + " kind:" + kind
+							+ " event type " + listeners.get(i).getClass() + " File Changed: "
+							+ getFileToWatch().getAbsolutePath());
 
 					listeners.get(i).onFileChange(child.toFile(), event);
 					Thread.sleep(16);// pad out the events to avoid file box
@@ -351,10 +352,11 @@ public class FileChangeWatcher {
 	 * Close.
 	 */
 	public void close() {
-		//new Exception("File watcher closed " + fileToWatch.getAbsolutePath()).printStackTrace();
+		// new Exception("File watcher closed " +
+		// fileToWatch.getAbsolutePath()).printStackTrace();
 		this.run = false;
 		try {
-			com.neuronrobotics.sdk.common.Log.error("Closing watcher for "+fileToWatch.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.error("Closing watcher for " + fileToWatch.getAbsolutePath());
 			watcher.close();
 		} catch (IOException e) {
 			// Auto-generated catch block

@@ -32,68 +32,69 @@ public class PredictorFactory {
 		if (preloaded.get(type) == null) {
 
 			switch (type) {
-			case retinaface:
-				double confThreshretinaface = 0.85f;
-				double nmsThreshretinaface = 0.45f;
-				double[] varianceretinaface = { 0.1f, 0.2f };
-				int topKretinaface = 5000;
-				int[][] scalesretinaface = { { 16, 32 }, { 64, 128 }, { 256, 512 } };
-				int[] stepsretinaface = { 8, 16, 32 };
-				FaceDetectionTranslator translatorretinaface = new FaceDetectionTranslator(confThreshretinaface,
-						nmsThreshretinaface, varianceretinaface, topKretinaface, scalesretinaface, stepsretinaface);
+				case retinaface :
+					double confThreshretinaface = 0.85f;
+					double nmsThreshretinaface = 0.45f;
+					double[] varianceretinaface = {0.1f, 0.2f};
+					int topKretinaface = 5000;
+					int[][] scalesretinaface = {{16, 32}, {64, 128}, {256, 512}};
+					int[] stepsretinaface = {8, 16, 32};
+					FaceDetectionTranslator translatorretinaface = new FaceDetectionTranslator(confThreshretinaface,
+							nmsThreshretinaface, varianceretinaface, topKretinaface, scalesretinaface, stepsretinaface);
 
-				Criteria<Image, DetectedObjects> criteriaretinaface = Criteria.builder()
-						.setTypes(Image.class, DetectedObjects.class)
-						.optModelUrls("https://resources.djl.ai/test-models/pytorch/retinaface.zip")
-						// Load model from local file, e.g:
-						.optModelName("retinaface") // specify model file prefix
-						.optTranslator(translatorretinaface).optProgress(new ProgressBar()).optEngine("PyTorch") // Use
-																													// PyTorch
-																													// engine
-						.build();
+					Criteria<Image, DetectedObjects> criteriaretinaface = Criteria.builder()
+							.setTypes(Image.class, DetectedObjects.class)
+							.optModelUrls("https://resources.djl.ai/test-models/pytorch/retinaface.zip")
+							// Load model from local file, e.g:
+							.optModelName("retinaface") // specify model file prefix
+							.optTranslator(translatorretinaface).optProgress(new ProgressBar()).optEngine("PyTorch") // Use
+																														// PyTorch
+																														// engine
+							.build();
 
-				preloaded.put(type, criteriaretinaface.loadModel().newPredictor());
-				break;
-			case ultranet:
-				double confThresh = 0.85f;
-				double nmsThresh = 0.45f;
-				double[] variance = { 0.1f, 0.2f };
-				int topK = 5000;
-				int[][] scales = { { 10, 16, 24 }, { 32, 48 }, { 64, 96 }, { 128, 192, 256 } };
-				int[] steps = { 8, 16, 32, 64 };
-				FaceDetectionTranslator translator = new FaceDetectionTranslator(confThresh, nmsThresh, variance, topK,
-						scales, steps);
+					preloaded.put(type, criteriaretinaface.loadModel().newPredictor());
+					break;
+				case ultranet :
+					double confThresh = 0.85f;
+					double nmsThresh = 0.45f;
+					double[] variance = {0.1f, 0.2f};
+					int topK = 5000;
+					int[][] scales = {{10, 16, 24}, {32, 48}, {64, 96}, {128, 192, 256}};
+					int[] steps = {8, 16, 32, 64};
+					FaceDetectionTranslator translator = new FaceDetectionTranslator(confThresh, nmsThresh, variance,
+							topK, scales, steps);
 
-				Criteria<Image, DetectedObjects> criteria = Criteria.builder()
-						.setTypes(Image.class, DetectedObjects.class)
-						.optModelUrls("https://resources.djl.ai/test-models/pytorch/ultranet.zip")
-						.optTranslator(translator).optProgress(new ProgressBar()).optEngine("PyTorch") // Use PyTorch
-																										// engine
-						.build();
+					Criteria<Image, DetectedObjects> criteria = Criteria.builder()
+							.setTypes(Image.class, DetectedObjects.class)
+							.optModelUrls("https://resources.djl.ai/test-models/pytorch/ultranet.zip")
+							.optTranslator(translator).optProgress(new ProgressBar()).optEngine("PyTorch") // Use
+																											// PyTorch
+																											// engine
+							.build();
 
-				preloaded.put(type, criteria.loadModel().newPredictor());
-				break;
-			case yolov5:
-				String MODEL_URL = "https://mlrepo.djl.ai/model/cv/object_detection/ai/djl/onnxruntime/yolo5s/0.0.1/yolov5s.zip";
+					preloaded.put(type, criteria.loadModel().newPredictor());
+					break;
+				case yolov5 :
+					String MODEL_URL = "https://mlrepo.djl.ai/model/cv/object_detection/ai/djl/onnxruntime/yolo5s/0.0.1/yolov5s.zip";
 
-				Criteria<Image, DetectedObjects> criteria2 = Criteria.builder()
-						.setTypes(Image.class, DetectedObjects.class).optModelUrls(MODEL_URL).optEngine("OnnxRuntime")
-						.optTranslatorFactory(new YoloV5TranslatorFactory()).build();
+					Criteria<Image, DetectedObjects> criteria2 = Criteria.builder()
+							.setTypes(Image.class, DetectedObjects.class).optModelUrls(MODEL_URL)
+							.optEngine("OnnxRuntime").optTranslatorFactory(new YoloV5TranslatorFactory()).build();
 
-				try { 
-					YoloManager ym = new YoloManager(criteria2);
-					preloaded.put(type,ym.predictor());
-					
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ModelException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				break;
-			default:
-				throw new RuntimeException("No Model available of type " + type);
+					try {
+						YoloManager ym = new YoloManager(criteria2);
+						preloaded.put(type, ym.predictor());
+
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ModelException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
+				default :
+					throw new RuntimeException("No Model available of type " + type);
 
 			}
 		}

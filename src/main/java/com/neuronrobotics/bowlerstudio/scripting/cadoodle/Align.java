@@ -100,64 +100,65 @@ public class Align extends CaDoodleOperation {
 		return back;
 	}
 
-//	private void collectToMove(ArrayList<CSG> toMove, ArrayList<CSG> back, String name) {
-//		ArrayList<CSG> toSearch = new ArrayList<CSG>();
-//		toSearch.addAll(back);
-//		for (int i = 0; i < toSearch.size(); i++) {
-//			CSG c = toSearch.get(i);
-//			if(name.contentEquals(c.getName())) {
-//				toMove.add(c);
-//			}
-//		}
-//	}
+	// private void collectToMove(ArrayList<CSG> toMove, ArrayList<CSG> back, String
+	// name) {
+	// ArrayList<CSG> toSearch = new ArrayList<CSG>();
+	// toSearch.addAll(back);
+	// for (int i = 0; i < toSearch.size(); i++) {
+	// CSG c = toSearch.get(i);
+	// if(name.contentEquals(c.getName())) {
+	// toMove.add(c);
+	// }
+	// }
+	// }
 
 	private TransformNR performTransform(Bounds reference, CSG incoming) {
 		// CSG c = incoming;
 		double tx = 0, ty = 0, tz = 0;
 		if (z != null) {
 			switch (z) {
-			case negative:
-				tz = -incoming.getMinZ() + reference.getMinZ();
-				break;
-			case middle:
-				tz = -incoming.getCenterZ() + reference.getCenterZ();
-				break;
-			case positive:
-				tz = -incoming.getMaxZ() + reference.getMaxZ();
-				break;
-			default:
-				break;
+				case negative :
+					tz = -incoming.getMinZ() + reference.getMinZ();
+					break;
+				case middle :
+					tz = -incoming.getCenterZ() + reference.getCenterZ();
+					break;
+				case positive :
+					tz = -incoming.getMaxZ() + reference.getMaxZ();
+					break;
+				default :
+					break;
 			}
 		}
 		if (x != null) {
 			switch (x) {
-			case negative:
-				tx = -incoming.getMinX() + reference.getMinX();
-				break;
-			case middle:
-				tx = -incoming.getCenterX() + reference.getCenterX();
-				break;
-			case positive:
-				tx = -incoming.getMaxX() + reference.getMaxX();
-				break;
-			default:
-				break;
+				case negative :
+					tx = -incoming.getMinX() + reference.getMinX();
+					break;
+				case middle :
+					tx = -incoming.getCenterX() + reference.getCenterX();
+					break;
+				case positive :
+					tx = -incoming.getMaxX() + reference.getMaxX();
+					break;
+				default :
+					break;
 
 			}
 		}
 		if (y != null) {
 			switch (y) {
-			case negative:
-				ty = -incoming.getMinY() + reference.getMinY();
-				break;
-			case middle:
-				ty = -incoming.getCenterY() + reference.getCenterY();
-				break;
-			case positive:
-				ty = -incoming.getMaxY() + reference.getMaxY();
-				break;
-			default:
-				break;
+				case negative :
+					ty = -incoming.getMinY() + reference.getMinY();
+					break;
+				case middle :
+					ty = -incoming.getCenterY() + reference.getCenterY();
+					break;
+				case positive :
+					ty = -incoming.getMaxY() + reference.getMaxY();
+					break;
+				default :
+					break;
 
 			}
 		}
@@ -258,7 +259,7 @@ public class Align extends CaDoodleOperation {
 
 		for (CSG csg : incoming) {
 			if (cache.get(csg) == null) {
-				Log.debug("Computing bounds for "+csg.getName());
+				Log.debug("Computing bounds for " + csg.getName());
 				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
 
 				if (csg.hasManipulator()) {

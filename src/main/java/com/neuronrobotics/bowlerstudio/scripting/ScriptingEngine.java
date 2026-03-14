@@ -1,6 +1,5 @@
 package com.neuronrobotics.bowlerstudio.scripting;
 
-import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.util.ThreadUtil;
@@ -75,13 +74,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 
-import javax.swing.filechooser.FileSystemView;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -108,33 +104,36 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	}
 
-	public static <T> void flatenInterna(CSGDatabaseInstance instance,Object o, Class<T> type, ArrayList<T> flattened) {
+	public static <T> void flatenInterna(CSGDatabaseInstance instance, Object o, Class<T> type,
+			ArrayList<T> flattened) {
 		if (type.isInstance(o))
 			flattened.add((T) o);
 		else if (List.class.isInstance(o)) {
 			for (Object ob : (List) o) {
-				flatenInterna(instance,ob, type, flattened);
+				flatenInterna(instance, ob, type, flattened);
 			}
 		} else if (Map.class.isInstance(o)) {
 			Map m = (Map) o;
 			for (Object key : m.keySet()) {
-				flatenInterna(instance,m.get(key), type, flattened);
-				flatenInterna(instance,key, type, flattened);
+				flatenInterna(instance, m.get(key), type, flattened);
+				flatenInterna(instance, key, type, flattened);
 			}
 		}
 	}
 
-	public static <T> List<T> flaten(CSGDatabaseInstance instance,String git, String file, Class<T> type, ArrayList<Object> args) throws Exception {
+	public static <T> List<T> flaten(CSGDatabaseInstance instance, String git, String file, Class<T> type,
+			ArrayList<Object> args) throws Exception {
 		ArrayList<T> flattened = new ArrayList<T>();
-		Object o = gitScriptRun(instance,git, file, args);
-		flatenInterna(instance,o, type, flattened);
+		Object o = gitScriptRun(instance, git, file, args);
+		flatenInterna(instance, o, type, flattened);
 		return flattened;
 	}
 
-	public static <T> List<T> flaten(CSGDatabaseInstance instance,File f, Class<T> type, ArrayList<Object> args) throws Exception {
+	public static <T> List<T> flaten(CSGDatabaseInstance instance, File f, Class<T> type, ArrayList<Object> args)
+			throws Exception {
 		ArrayList<T> flattened = new ArrayList<T>();
-		Object o = inlineFileScriptRun(instance,f, args);
-		flatenInterna(instance,o, type, flattened);
+		Object o = inlineFileScriptRun(instance, f, args);
+		flatenInterna(instance, o, type, flattened);
 		return flattened;
 	}
 
@@ -142,7 +141,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	private static boolean printProgress = true;
 
-	private static final String[] imports = new String[] { // "haar",
+	private static final String[] imports = new String[]{ // "haar",
 			"java.nio.file", "java.util", "java.awt.image", "javafx.scene.text", "javafx.scene", "javafx.scene.control",
 			"eu.mihosoft.vrl.v3d", "eu.mihosoft.vrl.v3d.svg", "eu.mihosoft.vrl.v3d.samples",
 			"eu.mihosoft.vrl.v3d.parametrics", "com.neuronrobotics.imageprovider",
@@ -156,7 +155,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			"com.neuronrobotics.bowlerstudio.physics", "com.neuronrobotics.bowlerstudio.physics",
 			"com.neuronrobotics.bowlerstudio.vitamins", "com.neuronrobotics.bowlerstudio.creature",
 			"com.neuronrobotics.bowlerstudio.threed", "com.neuronrobotics.sdk.util.ThreadUtil",
-			"eu.mihosoft.vrl.v3d.Transform", "com.neuronrobotics.bowlerstudio.vitamins.Vitamins" };
+			"eu.mihosoft.vrl.v3d.Transform", "com.neuronrobotics.bowlerstudio.vitamins.Vitamins"};
 
 	private static HashMap<String, File> filesRun = new HashMap<>();
 
@@ -267,7 +266,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	/**
 	 * Clone git and start a timeout timer
-	 * 
+	 *
 	 * @param remoteURI
 	 * @param branch
 	 * @param dir
@@ -310,14 +309,15 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 			@Override
 			public void update(int completed) {
-//				for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator(); iterator.hasNext();) {
-//					Git g = iterator.next();
-//					GitTimeoutThread t = gitOpenTimeout.get(g);
-//					if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
-//						t.resetTimer();
-//						break;
-//					}
-//				}
+				// for (Iterator<Git> iterator = gitOpenTimeout.keySet().iterator();
+				// iterator.hasNext();) {
+				// Git g = iterator.next();
+				// GitTimeoutThread t = gitOpenTimeout.get(g);
+				// if (t.ref.toLowerCase().contentEquals(remoteURI.toLowerCase())) {
+				// t.resetTimer();
+				// break;
+				// }
+				// }
 
 				sum += completed;
 				DecimalFormat df = new DecimalFormat("###.#");
@@ -375,7 +375,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	/**
 	 * Open a git object and start a timeout timer for closing it
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
@@ -408,7 +408,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	/**
 	 * Open a git object and start a timeout timer for closing it
-	 * 
+	 *
 	 * @param localRepo
 	 * @return
 	 */
@@ -453,7 +453,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	/**
 	 * Close GIt and disable the timeout timer for this object
-	 * 
+	 *
 	 * @param git
 	 */
 	private static void gitclose(Git git) {
@@ -487,15 +487,17 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 	}
 
-
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param code file content of the code to be executed
-	 * @param args the incoming arguments as a list of objects
+	 * @param code
+	 *            file content of the code to be executed
+	 * @param args
+	 *            the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public static Object inlineScriptRun(CSGDatabaseInstance instance,File code, ArrayList<Object> args, String shellTypeStorage) throws Exception {
+	public static Object inlineScriptRun(CSGDatabaseInstance instance, File code, ArrayList<Object> args,
+			String shellTypeStorage) throws Exception {
 		if (filesRun.get(code.getName()) == null) {
 			filesRun.put(code.getName(), code);
 			// com.neuronrobotics.sdk.common.Log.error("Loading "+code.getAbsolutePath());
@@ -503,7 +505,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		IScriptingLanguage iScriptingLanguage = langauges.get(shellTypeStorage);
 		if (iScriptingLanguage != null) {
-			Object inlineScriptRun = iScriptingLanguage.inlineScriptRun(instance,code, args);
+			Object inlineScriptRun = iScriptingLanguage.inlineScriptRun(instance, code, args);
 			return inlineScriptRun;
 		}
 		return null;
@@ -511,19 +513,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param line the text content of the code to be executed
-	 * @param args the incoming arguments as a list of objects
+	 * @param line
+	 *            the text content of the code to be executed
+	 * @param args
+	 *            the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
-	public static Object inlineScriptStringRun(CSGDatabaseInstance instance, String line, ArrayList<Object> args, String shellTypeStorage)
-			throws Exception {
+	public static Object inlineScriptStringRun(CSGDatabaseInstance instance, String line, ArrayList<Object> args,
+			String shellTypeStorage) throws Exception {
 
 		if (langauges.get(shellTypeStorage) != null) {
-			return langauges.get(shellTypeStorage).inlineScriptRun(instance,line, args);
+			return langauges.get(shellTypeStorage).inlineScriptRun(instance, line, args);
 		}
 		return null;
 	}
-
 
 	public static void addScriptingLanguage(IScriptingLanguage lang) {
 		langauges.put(lang.getShellType(), lang);
@@ -565,22 +568,22 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Files.createSymbolicLink(symlinkPath, appDataDir.toPath());
 		com.neuronrobotics.sdk.common.Log.debug("Symlink created: " + symlinkPath);
 	}
-    private static Path getWindowsAppData(String appName) {
-        // Try APPDATA first, then LOCALAPPDATA, then fallback
-        String appData = System.getenv("APPDATA");
-        if (appData != null) {
-            return Paths.get(appData, appName);
-        }
-        
-        String localAppData = System.getenv("LOCALAPPDATA");
-        if (localAppData != null) {
-            return Paths.get(localAppData, appName);
-        }
-        
-        // Fallback
-        String userHome = System.getProperty("user.home");
-        return Paths.get(userHome, "AppData", "Roaming", appName);
-    }
+	private static Path getWindowsAppData(String appName) {
+		// Try APPDATA first, then LOCALAPPDATA, then fallback
+		String appData = System.getenv("APPDATA");
+		if (appData != null) {
+			return Paths.get(appData, appName);
+		}
+
+		String localAppData = System.getenv("LOCALAPPDATA");
+		if (localAppData != null) {
+			return Paths.get(localAppData, appName);
+		}
+
+		// Fallback
+		String userHome = System.getProperty("user.home");
+		return Paths.get(userHome, "AppData", "Roaming", appName);
+	}
 	public static File getWorkingDirectory() {
 		String relative = Paths.get(System.getProperty("user.home"), "Documents").toString();
 		if (OSUtil.isOSX()) {
@@ -997,23 +1000,23 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throw ex;
 		}
 		try {
-//			if (!desired.getName().contentEquals("csgDatabase.json")) {
-//				String[] gitID = ScriptingEngine.findGitTagFromFile(desired, gitRef);
-//				String remoteURI = gitID[0];
-//				ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI, gitRef);
-//				for (String s : f) {
-//					if (s.contentEquals("csgDatabase.json")) {
-//
-//						File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
-//						if (!CSGDatabase.getDbFile().equals(dbFile))
-//							CSGDatabase.setInstance(new CSGDatabaseInstance(dbFile));
-//						CSGDatabase.saveDatabase();
-//						@SuppressWarnings("resource")
-//						String c = new Scanner(dbFile).useDelimiter("\\Z").next();
-//						commit(remoteURI, branch, s, c, "saving CSG database", false, gitRef);
-//					}
-//				}
-//			}
+			// if (!desired.getName().contentEquals("csgDatabase.json")) {
+			// String[] gitID = ScriptingEngine.findGitTagFromFile(desired, gitRef);
+			// String remoteURI = gitID[0];
+			// ArrayList<String> f = ScriptingEngine.filesInGit(remoteURI, gitRef);
+			// for (String s : f) {
+			// if (s.contentEquals("csgDatabase.json")) {
+			//
+			// File dbFile = ScriptingEngine.fileFromGit(gitID[0], s);
+			// if (!CSGDatabase.getDbFile().equals(dbFile))
+			// CSGDatabase.setInstance(new CSGDatabaseInstance(dbFile));
+			// CSGDatabase.saveDatabase();
+			// @SuppressWarnings("resource")
+			// String c = new Scanner(dbFile).useDelimiter("\\Z").next();
+			// commit(remoteURI, branch, s, c, "saving CSG database", false, gitRef);
+			// }
+			// }
+			// }
 		} catch (Exception e) {
 			// ignore CSG database
 			com.neuronrobotics.sdk.common.Log.error(e);
@@ -1128,7 +1131,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			// Target file is ready to go
 			String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())),
 					StandardCharsets.UTF_8);
-			return new String[] { text, FileName, targetFile.getAbsolutePath() };
+			return new String[]{text, FileName, targetFile.getAbsolutePath()};
 		}
 
 		throw new RuntimeException("File missing! " + targetFile.getAbsolutePath());
@@ -1143,48 +1146,51 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			// Target file is ready to go
 			String text = new String(Files.readAllBytes(Paths.get(targetFile.getAbsolutePath())),
 					StandardCharsets.UTF_8);
-			return new String[] { text, FileName, targetFile.getAbsolutePath() };
+			return new String[]{text, FileName, targetFile.getAbsolutePath()};
 		}
 
 		return null;
 	}
 
-	public static Object inlineFileScriptRun(CSGDatabaseInstance instance,File f, ArrayList<Object> args) throws Exception {
+	public static Object inlineFileScriptRun(CSGDatabaseInstance instance, File f, ArrayList<Object> args)
+			throws Exception {
 
-		return inlineScriptRun(instance,f, args, getShellType(f.getName()));
+		return inlineScriptRun(instance, f, args, getShellType(f.getName()));
 	}
-	public static Object inlineGistScriptRun(CSGDatabaseInstance db,String gistID, String Filename, ArrayList<Object> args) throws Exception {
+	public static Object inlineGistScriptRun(CSGDatabaseInstance db, String gistID, String Filename,
+			ArrayList<Object> args) throws Exception {
 		String[] gistData = codeFromGistID(gistID, Filename);
-		return inlineScriptRun(db,new File(gistData[2]), args, getShellType(gistData[1]));
+		return inlineScriptRun(db, new File(gistData[2]), args, getShellType(gistData[1]));
 	}
 
-	
 	@Deprecated
 	public static Object inlineGistScriptRun(String gistID, String Filename, ArrayList<Object> args) throws Exception {
 		String[] gistData = codeFromGistID(gistID, Filename);
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-		return inlineScriptRun(CSGDatabase.getInstance(),new File(gistData[2]), args, getShellType(gistData[1]));
+		return inlineScriptRun(CSGDatabase.getInstance(), new File(gistData[2]), args, getShellType(gistData[1]));
 	}
 	@Deprecated
 	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception {
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-		return inlineScriptRun(CSGDatabase.getInstance(),f, args, getShellType(f.getName()));
+		return inlineScriptRun(CSGDatabase.getInstance(), f, args, getShellType(f.getName()));
 	}
 	@Deprecated
 	public static Object gitScriptRun(String gitURL, String Filename) throws Exception {
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
 
-		return gitScriptRun(CSGDatabase.getInstance(),gitURL, Filename, null);
+		return gitScriptRun(CSGDatabase.getInstance(), gitURL, Filename, null);
 	}
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param code file content of the code to be executed
-	 * @param args the incoming arguments as a list of objects
+	 * @param code
+	 *            file content of the code to be executed
+	 * @param args
+	 *            the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
 	@Deprecated
-	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception{
+	public static Object inlineScriptRun(File code, ArrayList<Object> args, String shellTypeStorage) throws Exception {
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
 		CSGDatabaseInstance prevDB = CSGDatabase.getInstance();
 		try {
@@ -1192,8 +1198,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				File p = code.getParentFile();
 				for (String s : p.list()) {
 					if (s.toLowerCase().contentEquals("csgdatabase.json")) {
-						prevDB = (new CSGDatabaseInstance(
-								new File(p.getAbsoluteFile() + DownloadManager.delim() + s)));
+						prevDB = (new CSGDatabaseInstance(new File(p.getAbsoluteFile() + DownloadManager.delim() + s)));
 					}
 				}
 			}
@@ -1205,29 +1210,31 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param line the text content of the code to be executed
-	 * @param args the incoming arguments as a list of objects
+	 * @param line
+	 *            the text content of the code to be executed
+	 * @param args
+	 *            the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
 	@Deprecated
 	public static Object inlineScriptStringRun(String line, ArrayList<Object> args, String shellTypeStorage)
 			throws Exception {
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
-		return inlineScriptStringRun(CSGDatabase.getInstance(),line,args,shellTypeStorage);
+		return inlineScriptStringRun(CSGDatabase.getInstance(), line, args, shellTypeStorage);
 	}
 	@Deprecated
 	public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args) throws Exception {
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
 		return gitScriptRun(CSGDatabase.getInstance(), gitURL, Filename, args);
 	}
-	
-	
-	public static Object gitScriptRun(CSGDatabaseInstance db,String gitURL, String Filename) throws Exception {
-		return gitScriptRun(db,gitURL, Filename, null);
+
+	public static Object gitScriptRun(CSGDatabaseInstance db, String gitURL, String Filename) throws Exception {
+		return gitScriptRun(db, gitURL, Filename, null);
 	}
 
-	public static Object gitScriptRun(CSGDatabaseInstance db,String gitURL, String Filename, ArrayList<Object> args) throws Exception {
-		return inlineScriptRun(db,fileFromGit(gitURL, Filename), args, getShellType(Filename));
+	public static Object gitScriptRun(CSGDatabaseInstance db, String gitURL, String Filename, ArrayList<Object> args)
+			throws Exception {
+		return inlineScriptRun(db, fileFromGit(gitURL, Filename), args, getShellType(Filename));
 	}
 	public static File fileFromGit(String[] self)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
@@ -1423,8 +1430,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		String remoteURI = null;
 		for (String remoteName : uriList) {
 			if (remoteURI == null)
-				remoteURI = storedConfig.getString("remote", remoteName, "url");
-			;
+				remoteURI = storedConfig.getString("remote", remoteName, "url");;
 		}
 		long startTime = System.currentTimeMillis();
 		while (System.currentTimeMillis() < (startTime + 2000)) {
@@ -1603,13 +1609,13 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 				PasswordManager.checkInternet();
 				throw e;
-//			try {
-//				closeGit(git);
-//				newBranch(remoteURI, branch);
-//			} catch (GitAPIException e1) {
-//				closeGit(git);
-//				throw new RuntimeException(e1);
-//			}
+				// try {
+				// closeGit(git);
+				// newBranch(remoteURI, branch);
+				// } catch (GitAPIException e1) {
+				// closeGit(git);
+				// throw new RuntimeException(e1);
+				// }
 
 			} catch (TransportException e) {
 				com.neuronrobotics.sdk.common.Log.error(e);
@@ -1836,7 +1842,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		if (!gitRepoFile.exists()) {
 			if (!hasNetwork())
 				return null;// No login info means there is no way to publish
-			Log.debug("Cloning "+remoteURI);
+			Log.debug("Cloning " + remoteURI);
 			waitForRepo(remoteURI, "cloneRepo");
 			com.neuronrobotics.sdk.common.Log.debug("Cloning files from: " + remoteURI);
 			if (branch != null)
@@ -1974,18 +1980,18 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		PasswordManager.setLoginManager(lm);
 	}
 
-//	public static boolean isAutoupdate() {
-//		return autoupdate;
-//	}
-//
-//	public static boolean setAutoupdate(boolean autoupdate) throws IOException {
-//		if (autoupdate && !ScriptingEngine.autoupdate) {
-//			ScriptingEngine.autoupdate = true;// prevents recoursion loop from
-//			// PasswordManager.setAutoupdate(autoupdate);
-//		}
-//		ScriptingEngine.autoupdate = autoupdate;
-//		return ScriptingEngine.autoupdate;
-//	}
+	// public static boolean isAutoupdate() {
+	// return autoupdate;
+	// }
+	//
+	// public static boolean setAutoupdate(boolean autoupdate) throws IOException {
+	// if (autoupdate && !ScriptingEngine.autoupdate) {
+	// ScriptingEngine.autoupdate = true;// prevents recoursion loop from
+	// // PasswordManager.setAutoupdate(autoupdate);
+	// }
+	// ScriptingEngine.autoupdate = autoupdate;
+	// return ScriptingEngine.autoupdate;
+	// }
 
 	@SuppressWarnings("unused")
 	private static File fileFromGistID(String string, String string2)
@@ -2100,8 +2106,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 	/**
 	 * Fork a git repo
-	 * 
-	 * @param sourceURL the URL of the source repo
+	 *
+	 * @param sourceURL
+	 *            the URL of the source repo
 	 * @return the URL of the target repo
 	 * @throws Exception
 	 */
@@ -2319,7 +2326,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				com.neuronrobotics.sdk.common.Log.debug("Opening " + targetFilename + " from " + targetGit);
 				newFileCode = ScriptingEngine.codeFromGit(targetGit, targetFilename);
 				if (newFileCode == null)
-					newFileCode = new String[] { "" };
+					newFileCode = new String[]{""};
 				if (newFileCode[0].length() < 10) {
 					com.neuronrobotics.sdk.common.Log.debug("Copy Content to " + targetGit + "/" + targetFilename);
 					ScriptingEngine.pushCodeToGit(targetGit, ScriptingEngine.getFullBranch(targetGit), targetFilename,
@@ -2333,7 +2340,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throw new RuntimeException(e1);
 		}
 
-		return new String[] { targetGit, targetFilename };
+		return new String[]{targetGit, targetFilename};
 	}
 
 	public static Ref getBranch(String remoteURI, String branch) throws IOException, GitAPIException {
@@ -2402,7 +2409,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				newBranch = newBranch + "-1";
 			}
 		}
-//		
+		//
 		newBranch(url, newBranch, commit);
 		commit(url, branch, "New branch " + branch + " created here");
 	}

@@ -11,10 +11,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 
-import javax.imageio.ImageIO;
-
-import org.eclipse.jgit.api.errors.RefNotFoundException;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -88,7 +84,7 @@ public class AssetFactory {
 	@SuppressWarnings("restriction")
 	public static Image loadAsset(String file) throws Exception {
 		if (cache.get(file) == null) {
-			//com.neuronrobotics.sdk.common.Log.debug("Loading asset " + file);
+			// com.neuronrobotics.sdk.common.Log.debug("Loading asset " + file);
 			File f = loadFile(file);
 			if (f.getName().endsWith(".fxml")) {
 				loadLayout(file);
@@ -167,7 +163,7 @@ public class AssetFactory {
 	public static void loadAllAssets() throws Exception {
 		List<String> files = cloneAllRepos();
 		for (String file : files) {
-			//com.neuronrobotics.sdk.common.Log.error("Loading asset file: " + file);
+			// com.neuronrobotics.sdk.common.Log.error("Loading asset file: " + file);
 			loadAsset(file);
 		}
 	}

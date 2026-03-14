@@ -21,9 +21,8 @@ public class FaceFeatureTranslator implements Translator<Image, float[]> {
 		Pipeline pipeline = new Pipeline();
 		pipeline
 				// .add(new Resize(160))
-				.add(new ToTensor())
-				.add(new Normalize(new float[] { 127.5f / 255.0f, 127.5f / 255.0f, 127.5f / 255.0f },
-						new float[] { 128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f }));
+				.add(new ToTensor()).add(new Normalize(new float[]{127.5f / 255.0f, 127.5f / 255.0f, 127.5f / 255.0f},
+						new float[]{128.0f / 255.0f, 128.0f / 255.0f, 128.0f / 255.0f}));
 
 		return pipeline.transform(new NDList(array));
 	}

@@ -4,33 +4,32 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ProcessingPipeline {
 	private ArrayList<AbstractImageProvider> imageProviders = new ArrayList<AbstractImageProvider>();
-	private ArrayList<IObjectDetector> detectors= new ArrayList<IObjectDetector>();
-	
-	public void addAbstractImageProvider(AbstractImageProvider newIp){
+	private ArrayList<IObjectDetector> detectors = new ArrayList<IObjectDetector>();
+
+	public void addAbstractImageProvider(AbstractImageProvider newIp) {
 		imageProviders.add(newIp);
 	}
-	
-	public BufferedImage getLatestImage(int index,BufferedImage inputImage, BufferedImage displayImage){
-		return imageProviders.get(index).getLatestImage(inputImage,displayImage);
+
+	public BufferedImage getLatestImage(int index, BufferedImage inputImage, BufferedImage displayImage) {
+		return imageProviders.get(index).getLatestImage(inputImage, displayImage);
 	}
-	
-	public List<Detection> getObjects(int index,BufferedImage inputImage, BufferedImage displayImage){
+
+	public List<Detection> getObjects(int index, BufferedImage inputImage, BufferedImage displayImage) {
 		return detectors.get(index).getObjects(inputImage, displayImage);
 	}
-	
-	public void addDetector(IObjectDetector newDetect){
+
+	public void addDetector(IObjectDetector newDetect) {
 		detectors.add(newDetect);
 	}
-	
-	public int getProviderSize(){
+
+	public int getProviderSize() {
 		return imageProviders.size();
 	}
-	
-	public int getDetectorSize(){
+
+	public int getDetectorSize() {
 		return detectors.size();
 	}
-	
+
 }

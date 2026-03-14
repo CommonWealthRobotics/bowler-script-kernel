@@ -14,24 +14,23 @@ import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
-import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 
 public class BlenderLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
-		toSTLFile(db,code,stl);
-		CSG back = Vitamins.get(db,stl,true);
+		toSTLFile(db, code, stl);
+		CSG back = Vitamins.get(db, stl, true);
 		back.setColor(Color.ORANGE);
 		return back;
 	}
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(CSGDatabaseInstance db, String code, ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("Blender can not run from a string");
 	}
 
@@ -46,15 +45,14 @@ public class BlenderLoader implements IScriptingLanguage {
 		ext.add("blend");
 		return ext;
 	}
-	public static void toBlenderFile(CSGDatabaseInstance db,CSG stlIn,File blenderfile) throws IOException {
+	public static void toBlenderFile(CSGDatabaseInstance db, CSG stlIn, File blenderfile) throws IOException {
 		File stl = getTmpSTL(stlIn);
-		toBlenderFile(db,stl, blenderfile);
+		toBlenderFile(db, stl, blenderfile);
 	}
 
-
-	public static void toBlenderFile(CSGDatabaseInstance db,File stl,File blenderfile) {
+	public static void toBlenderFile(CSGDatabaseInstance db, File stl, File blenderfile) {
 		com.neuronrobotics.sdk.common.Log.debug("Converting to Blender file before loading");
-		
+
 		File stlIn;
 		try {
 			stlIn = File.createTempFile("scaletmp", ".stl");
@@ -64,37 +62,37 @@ public class BlenderLoader implements IScriptingLanguage {
 			return;
 		}
 		stlIn.deleteOnExit();
-		scaleStl(db,stl,stlIn,0.001);
+		scaleStl(db, stl, stlIn, 0.001);
 		File dir = stlIn.getAbsoluteFile().getParentFile();
 
 		try {
-			File importFile = ScriptingEngine.fileFromGit(
-					"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
-					"import.py");
-				//blender --background --python import_stl_to_blend.py -- /path/to/input/file.stl /path/to/output/file.blend
-				ArrayList<String> args = new ArrayList<>();
+			File importFile = ScriptingEngine
+					.fileFromGit("https://github.com/CommonWealthRobotics/blender-bowler-cli.git", "import.py");
+			// blender --background --python import_stl_to_blend.py --
+			// /path/to/input/file.stl /path/to/output/file.blend
+			ArrayList<String> args = new ArrayList<>();
 
-				args.add(DownloadManager.getConfigExecutable("blender", null).getAbsolutePath());
+			args.add(DownloadManager.getConfigExecutable("blender", null).getAbsolutePath());
 
-				args.add("--background");
-				args.add("--python");
-				args.add(importFile.getAbsolutePath());
-				args.add("--");
-				args.add(stlIn.getAbsolutePath());
-				args.add(blenderfile.getAbsolutePath());
-				Thread t=run(null, dir, System.out, args);
-				t.join();
-			
+			args.add("--background");
+			args.add("--python");
+			args.add(importFile.getAbsolutePath());
+			args.add("--");
+			args.add(stlIn.getAbsolutePath());
+			args.add(blenderfile.getAbsolutePath());
+			Thread t = run(null, dir, System.out, args);
+			t.join();
+
 		} catch (Exception e) {
 			// Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
 			return;
 		}
 	}
-	public static void scaleStl(CSGDatabaseInstance db,File incoming, File outgoing, double scale) {
-		CSG back = Vitamins.get(db,incoming,true).scale(scale);
+	public static void scaleStl(CSGDatabaseInstance db, File incoming, File outgoing, double scale) {
+		CSG back = Vitamins.get(db, incoming, true).scale(scale);
 		try {
-			boolean manifold=CSG.isPreventNonManifoldTriangles();
+			boolean manifold = CSG.isPreventNonManifoldTriangles();
 			CSG.setPreventNonManifoldTriangles(false);
 			FileUtil.write(Paths.get(outgoing.getAbsolutePath()), back.toStlString());
 
@@ -102,28 +100,29 @@ public class BlenderLoader implements IScriptingLanguage {
 		} catch (IOException e) {
 			// Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
-		}		
+		}
 	}
-	public static CSG remesh(CSGDatabaseInstance db,CSG incoming, double MMVoxel,CSGDatabaseInstance instance) throws Exception {
+	public static CSG remesh(CSGDatabaseInstance db, CSG incoming, double MMVoxel, CSGDatabaseInstance instance)
+			throws Exception {
 		File stl = DownloadManager.getTmpSTL(incoming);
-		remeshSTLFile(db,stl, MMVoxel);
-		CSG back = Vitamins.get(db,stl,true);
-		return back.syncProperties(instance,incoming).setName(incoming.getName());
+		remeshSTLFile(db, stl, MMVoxel);
+		CSG back = Vitamins.get(db, stl, true);
+		return back.syncProperties(instance, incoming).setName(incoming.getName());
 	}
-	public static void remeshSTLFile(CSGDatabaseInstance db,File stlout,double MMVoxel) throws Exception {
+	public static void remeshSTLFile(CSGDatabaseInstance db, File stlout, double MMVoxel) throws Exception {
 		File blend = File.createTempFile(stlout.getName(), ".blend");
 		blend.delete();
-		toBlenderFile(db,stlout, blend);
-		remeshToSTLFile(db,blend, stlout, MMVoxel);
+		toBlenderFile(db, stlout, blend);
+		remeshToSTLFile(db, blend, stlout, MMVoxel);
 	}
-	public static void remeshToSTLFile(CSGDatabaseInstance db,File blenderfile,File stlout,double MMVoxel) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void remeshToSTLFile(CSGDatabaseInstance db, File blenderfile, File stlout, double MMVoxel)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("blender", null);
-		File export = ScriptingEngine.fileFromGit(
-				"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
+		File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/blender-bowler-cli.git",
 				"remesh.py");
 		ArrayList<String> args = new ArrayList<>();
 
-		if(stlout.exists())
+		if (stlout.exists())
 			stlout.delete();
 		args.add(exe.getAbsolutePath());
 
@@ -132,19 +131,19 @@ public class BlenderLoader implements IScriptingLanguage {
 		args.add(export.getAbsolutePath());
 		args.add("--");
 		args.add(blenderfile.getAbsolutePath());
-		args.add(""+(MMVoxel/1000.0));
+		args.add("" + (MMVoxel / 1000.0));
 		args.add(stlout.getAbsolutePath());
 		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
-		scaleStl(db,stlout,stlout,1000.0);
+		scaleStl(db, stlout, stlout, 1000.0);
 	}
-	public static void toSTLFile(CSGDatabaseInstance db,File blenderfile,File stlout) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void toSTLFile(CSGDatabaseInstance db, File blenderfile, File stlout)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("blender", null);
-		File export = ScriptingEngine.fileFromGit(
-				"https://github.com/CommonWealthRobotics/blender-bowler-cli.git", 
+		File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/blender-bowler-cli.git",
 				"export.py");
 		ArrayList<String> args = new ArrayList<>();
 
-		if(stlout.exists())
+		if (stlout.exists())
 			stlout.delete();
 		args.add(exe.getAbsolutePath());
 
@@ -155,26 +154,26 @@ public class BlenderLoader implements IScriptingLanguage {
 		args.add(blenderfile.getAbsolutePath());
 		args.add(stlout.getAbsolutePath());
 		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
-		scaleStl(db,stlout,stlout,1000.0);
+		scaleStl(db, stlout, stlout, 1000.0);
 	}
 	@Override
 	public void getDefaultContents(File source) {
 		File exe = getConfigExecutable("blender", null);
 		String absolutePath = source.getAbsolutePath();
 		File parent = new File(absolutePath).getParentFile();
-		if(source.exists()) {
-			com.neuronrobotics.sdk.common.Log.error("Blender file exists, being overwritten to blank "+absolutePath);
+		if (source.exists()) {
+			com.neuronrobotics.sdk.common.Log.error("Blender file exists, being overwritten to blank " + absolutePath);
 			source.delete();
 		}
 		ArrayList<String> args = new ArrayList<>();
 
-		//blender --background --factory-startup --python-expr ""
+		// blender --background --factory-startup --python-expr ""
 		args.add(exe.getAbsolutePath());
 
 		args.add("--background");
 		args.add("--factory-startup");
 		args.add("--python-expr");
-		args.add("import bpy; bpy.ops.wm.save_as_mainfile(filepath='"+absolutePath+"')");
+		args.add("import bpy; bpy.ops.wm.save_as_mainfile(filepath='" + absolutePath + "')");
 		try {
 			DownloadManager.legacySystemRun(null, parent, System.out, args);
 		} catch (IOException e) {
@@ -184,7 +183,7 @@ public class BlenderLoader implements IScriptingLanguage {
 			// Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
-		
+
 	}
 
 	@Override
@@ -193,14 +192,15 @@ public class BlenderLoader implements IScriptingLanguage {
 		return false;
 	}
 
-	public static void main(String[] args) throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+	public static void main(String[] args)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		BlenderLoader loader = new BlenderLoader();
-		
+
 		// create test file
 		File testblend = new File("test.blend");
-		if(!testblend.exists())
+		if (!testblend.exists())
 			loader.getDefaultContents(testblend);
-		loader.toSTLFile(null,testblend, new File("testBlender.stl"));
+		loader.toSTLFile(null, testblend, new File("testBlender.stl"));
 	}
 
 }

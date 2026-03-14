@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface IObjectDetector {
 	List<Detection> getObjects(BufferedImage inputImage, BufferedImage displayImage);
-	
+
 }

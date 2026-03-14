@@ -7,8 +7,8 @@ import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class ToHole extends CaDoodleOperation{
-	@Expose (serialize = true, deserialize = true)
+public class ToHole extends CaDoodleOperation {
+	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Override
 	public String getType() {
@@ -20,19 +20,20 @@ public class ToHole extends CaDoodleOperation{
 		ArrayList<CSG> replace = new ArrayList<CSG>();
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		for(CSG c: incoming) {
-			if(c.isLock())
+		for (CSG c : incoming) {
+			if (c.isLock())
 				continue;
-			for(String name:names) {
-				if(name.contentEquals(c.getName())) {
+			for (String name : names) {
+				if (name.contentEquals(c.getName())) {
 					replace.add(c);
-					CSG b=c.clone().setRegenerate(c.getRegenerate()).syncProperties(getCaDoodleFile().getCsgDBinstance(),c);
+					CSG b = c.clone().setRegenerate(c.getRegenerate())
+							.syncProperties(getCaDoodleFile().getCsgDBinstance(), c);
 					b.setIsHole(true);
 					back.add(b);
 				}
 			}
 		}
-		for(CSG c:replace) {
+		for (CSG c : replace) {
 			back.remove(c);
 		}
 		return back;

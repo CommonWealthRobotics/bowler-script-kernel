@@ -4,7 +4,6 @@ import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -13,7 +12,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -31,7 +29,6 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.stage.Stage;
@@ -78,18 +75,18 @@ public class BowlerKernel {
 	// private static final String CSG = null;
 	private static File historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 	private static boolean kernelMode = true;
-	public static void ensureUpdated(boolean check,String ... urls) {
-		for(String s:urls) {
-			
-			if(s==null)
+	public static void ensureUpdated(boolean check, String... urls) {
+		for (String s : urls) {
+
+			if (s == null)
 				continue;
 			try {
-				File wd = new File(ScriptingEngine.getRepositoryCloneDirectory(s).getAbsolutePath()+"/.git");
-				if(check && wd.exists()) {
-					Log.error("Skipping update, clone exists "+s);
+				File wd = new File(ScriptingEngine.getRepositoryCloneDirectory(s).getAbsolutePath() + "/.git");
+				if (check && wd.exists()) {
+					Log.error("Skipping update, clone exists " + s);
 					continue;
 				}
-				Log.debug("Cloning "+s);
+				Log.debug("Cloning " + s);
 				ScriptingEngine.cloneRepo(s, null);
 				ScriptingEngine.pull(s);
 			} catch (Throwable e) {
@@ -144,7 +141,8 @@ public class BowlerKernel {
 	}
 
 	/**
-	 * @param args the command line arguments
+	 * @param args
+	 *            the command line arguments
 	 */
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
@@ -189,7 +187,7 @@ public class BowlerKernel {
 				} else {
 					try {
 						port = Integer.parseInt(s);
-					}catch(NumberFormatException ex) {
+					} catch (NumberFormatException ex) {
 						Log.error(ex);
 					}
 				}
@@ -230,11 +228,11 @@ public class BowlerKernel {
 			}
 			if (gitFile != null)
 				try {
-					ret = ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),gitRepo, gitFile, null);
+					ret = ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(), gitRepo, gitFile, null);
 					url = gitRepo;
 					baseWorkspaceFile = ScriptingEngine.getRepositoryCloneDirectory(url);
 
-					processReturnedObjectsStart(ret, baseWorkspaceFile,new File(".").getAbsoluteFile());
+					processReturnedObjectsStart(ret, baseWorkspaceFile, new File(".").getAbsoluteFile());
 				} catch (Throwable e) {
 					Log.error(e);
 					fail();
@@ -247,11 +245,14 @@ public class BowlerKernel {
 			}
 			finish(startTime);
 		}
-//		File servo = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
-//							"BowlerStudioVitamins/stl/servo/smallservo.stl");
-//		
-//		ArrayList<CSG>  cad = (ArrayList<CSG> )ScriptingEngine.inlineGistScriptRun("4814b39ee72e9f590757", "javaCad.groovy" , null);
-//		com.neuronrobotics.sdk.common.Log.error(servo.exists()+" exists: "+servo);
+		// File servo =
+		// ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/BowlerStudioVitamins.git",
+		// "BowlerStudioVitamins/stl/servo/smallservo.stl");
+		//
+		// ArrayList<CSG> cad = (ArrayList<CSG>
+		// )ScriptingEngine.inlineGistScriptRun("4814b39ee72e9f590757", "javaCad.groovy"
+		// , null);
+		// com.neuronrobotics.sdk.common.Log.error(servo.exists()+" exists: "+servo);
 
 		boolean startLoadingScripts = false;
 		for (String s : args) {
@@ -273,10 +274,11 @@ public class BowlerKernel {
 					}
 					baseWorkspaceFile = new File(location);
 
-					com.neuronrobotics.sdk.common.Log.debug("Using working directory  " + baseWorkspaceFile.getAbsolutePath());
+					com.neuronrobotics.sdk.common.Log
+							.debug("Using working directory  " + baseWorkspaceFile.getAbsolutePath());
 					f = new File(baseWorkspaceFile.getAbsolutePath() + "/" + s);
 					com.neuronrobotics.sdk.common.Log.error("File   " + f.getName());
-					ret = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(),f, null);
+					ret = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(), f, null);
 				} catch (Throwable e) {
 					Log.error(e);
 					fail();
@@ -287,7 +289,7 @@ public class BowlerKernel {
 			}
 		}
 		if (startLoadingScripts) {
-			processReturnedObjectsStart(ret, baseWorkspaceFile,new File(".").getAbsoluteFile());
+			processReturnedObjectsStart(ret, baseWorkspaceFile, new File(".").getAbsoluteFile());
 			startLoadingScripts = false;
 			finish(startTime);
 			return;
@@ -297,7 +299,8 @@ public class BowlerKernel {
 
 			if (startLoadingScripts) {
 				try {
-					ret = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(),new File(s), (ArrayList<Object>) ret);
+					ret = ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(), new File(s),
+							(ArrayList<Object>) ret);
 				} catch (Throwable e) {
 					Log.error(e);
 					fail();
@@ -308,7 +311,7 @@ public class BowlerKernel {
 			}
 		}
 		if (startLoadingScripts) {
-			processReturnedObjectsStart(ret, new File(".").getAbsoluteFile(),new File(".").getAbsoluteFile());
+			processReturnedObjectsStart(ret, new File(".").getAbsoluteFile(), new File(".").getAbsoluteFile());
 			finish(startTime);
 			return;
 		}
@@ -406,14 +409,15 @@ public class BowlerKernel {
 					continue;
 				}
 				try {
-					ret = ScriptingEngine.inlineScriptStringRun(CSGDatabase.getInstance(),line, null, shellTypeStorage);
+					ret = ScriptingEngine.inlineScriptStringRun(CSGDatabase.getInstance(), line, null,
+							shellTypeStorage);
 					if (ret != null) {
 						com.neuronrobotics.sdk.common.Log.error(ret);
 					}
-					processReturnedObjectsStart(ret, null,new File(".").getAbsoluteFile());
+					processReturnedObjectsStart(ret, null, new File(".").getAbsoluteFile());
 				} catch (Throwable e) {
 					Log.error(e);
-				} 
+				}
 			}
 		} catch (Exception e) {
 			Log.error(e);
@@ -430,15 +434,16 @@ public class BowlerKernel {
 		}
 		ScriptingEngine.waitForLogin();
 
-		CSGDatabase.setInstance(new CSGDatabaseInstance(new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/csgDatabase.json")));
+		CSGDatabase.setInstance(new CSGDatabaseInstance(
+				new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/csgDatabase.json")));
 		File logfile = new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/kernelLog.txt");
-		if(logfile.exists())
+		if (logfile.exists())
 			logfile.delete();
 		logfile.createNewFile();
 		Log.setFile(logfile);
 		Log.enableDebugPrint();
-		ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),"https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy",
-				null);
+		ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
+				"https://github.com/CommonWealthRobotics/DeviceProviders.git", "loadAll.groovy", null);
 		CSG.setPreventNonManifoldTriangles(true);
 		CSG.setProgressMoniter(new ICSGProgress() {
 			@Override
@@ -458,25 +463,24 @@ public class BowlerKernel {
 	public static void processReturnedObjectsStart(Object ret, File sourceDir, File target) {
 		processUIOpening(ret);
 		if (sourceDir != null)
-			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory: \n   " + sourceDir.getAbsolutePath()+" \nto "+target.getAbsolutePath());
+			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory: \n   " + sourceDir.getAbsolutePath()
+					+ " \nto " + target.getAbsolutePath());
 		File targetDir = new File(target.getAbsolutePath() + "/manufacturing/");
-		if(!targetDir.exists())
+		if (!targetDir.exists())
 			targetDir.mkdirs();
 		if (sourceDir != null) {
 
 			File baseDirForFiles = new File(sourceDir.getAbsolutePath() + "/manufacturing/");
 			if (baseDirForFiles.exists()) {
 				// baseDirForFiles.mkdir();
-				File bomCSV = new File(
-						sourceDir.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
+				File bomCSV = new File(sourceDir.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
 				File t = new File(target.getAbsolutePath());
 				t.mkdirs();
 				if (bomCSV.exists()) {
 
-					File file = new File(
-							target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
-//					if (file.exists())
-//						file.delete();
+					File file = new File(target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
+					// if (file.exists())
+					// file.delete();
 					try {
 						Files.copy(bomCSV.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING,
 								StandardCopyOption.COPY_ATTRIBUTES);
@@ -485,13 +489,11 @@ public class BowlerKernel {
 						Log.error(e);
 					}
 				}
-				File bom = new File(
-						sourceDir.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
+				File bom = new File(sourceDir.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 				if (bom.exists()) {
-					File file = new File(
-							target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
-//					if (file.exists())
-//						file.delete();
+					File file = new File(target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
+					// if (file.exists())
+					// file.delete();
 					try {
 						Files.copy(bom.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING,
 								StandardCopyOption.COPY_ATTRIBUTES);
@@ -595,7 +597,7 @@ public class BowlerKernel {
 			csgBits.add((CSG) ret);
 		}
 		if (CaDoodleFile.class.isInstance(ret)) {
-			processReturnedObjects(CaDoodleLoader.process((CaDoodleFile) ret,false), csgBits);
+			processReturnedObjects(CaDoodleLoader.process((CaDoodleFile) ret, false), csgBits);
 			return;
 		}
 		if (MobileBase.class.isInstance(ret)) {
@@ -793,16 +795,16 @@ public class BowlerKernel {
 		vocalTractLSE.setParams("amount:" + pitch.intValue());
 
 		// TTS say something that we actually are typing into the first variable
-//	tts.getAudioEffects().stream().forEach(audioEffect -> {
-//		if(audioEffect.getName().contains("Rate")) {
-//		com.neuronrobotics.sdk.common.Log.error("-----Name-----");
-//		com.neuronrobotics.sdk.common.Log.error(audioEffect.getName());
-//		com.neuronrobotics.sdk.common.Log.error("-----Examples-----");
-//		com.neuronrobotics.sdk.common.Log.error(audioEffect.getExampleParameters());
-//		com.neuronrobotics.sdk.common.Log.error("-----Help Text------");
-//		com.neuronrobotics.sdk.common.Log.error(audioEffect.getHelpText() + "\n\n");
-//		}
-//	});
+		// tts.getAudioEffects().stream().forEach(audioEffect -> {
+		// if(audioEffect.getName().contains("Rate")) {
+		// com.neuronrobotics.sdk.common.Log.error("-----Name-----");
+		// com.neuronrobotics.sdk.common.Log.error(audioEffect.getName());
+		// com.neuronrobotics.sdk.common.Log.error("-----Examples-----");
+		// com.neuronrobotics.sdk.common.Log.error(audioEffect.getExampleParameters());
+		// com.neuronrobotics.sdk.common.Log.error("-----Help Text------");
+		// com.neuronrobotics.sdk.common.Log.error(audioEffect.getHelpText() + "\n\n");
+		// }
+		// });
 		String effect = "";
 		if (volume.doubleValue() < 0.5) {
 

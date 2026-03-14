@@ -86,7 +86,7 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 				}
 				TypeAdapter<? extends CaDoodleOperation> delegateAdapter = gson
 						.getDelegateAdapter(CaDoodleJsonOperationAdapterFactory.this, TypeToken.get(clazz));
-				//com.neuronrobotics.sdk.common.Log.error("JSON Parsing " + typeName);
+				// com.neuronrobotics.sdk.common.Log.error("JSON Parsing " + typeName);
 				return (T) delegateAdapter.fromJsonTree(dataElement);
 			}
 		}.nullSafe();

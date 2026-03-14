@@ -2,9 +2,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.creature.IMobileBaseUI;
@@ -154,7 +152,7 @@ public class Resize extends CaDoodleOperation {
 				if (debug != null) {
 					debug.setCsg(resizeUp, null);
 				}
-				resizeUp.syncProperties(getCaDoodleFile().getCsgDBinstance(),starting).setName(name).setID(starting);
+				resizeUp.syncProperties(getCaDoodleFile().getCsgDBinstance(), starting).setName(name).setID(starting);
 				ResizeEvent ev = new ResizeEvent();
 				ev.movex = xMove;
 				ev.movey = yMove;
@@ -186,7 +184,7 @@ public class Resize extends CaDoodleOperation {
 				gc = gc.movez(ev.movez);
 				gc = gc.transformed(ev.scale);
 				gc = gc.movex(ev.movex).movey(ev.movey).transformed(TransformFactory.nrToCSG(getWorkplane()));
-				gc.syncProperties(getCaDoodleFile().getCsgDBinstance(),c).setName(c.getName()).setID(c);
+				gc.syncProperties(getCaDoodleFile().getCsgDBinstance(), c).setName(c.getName()).setID(c);
 				back.set(i, gc);
 				if (c.isGroupResult()) {
 					groupsProcessed.put(c.getName(), ev);
@@ -206,8 +204,8 @@ public class Resize extends CaDoodleOperation {
 		}
 		if (rightRear.getY() >= leftFront.getY() && rightRear.getX() >= leftFront.getX())
 			return setResize(h, rr, lf);// they were swapped, just fix it and move along
-//		if(rightRear.getY()>=leftFront.getY() || rightRear.getX()>=leftFront.getX())
-//			throw new RuntimeException("Scale must be positive!");
+		// if(rightRear.getY()>=leftFront.getY() || rightRear.getX()>=leftFront.getX())
+		// throw new RuntimeException("Scale must be positive!");
 		return this;
 	}
 

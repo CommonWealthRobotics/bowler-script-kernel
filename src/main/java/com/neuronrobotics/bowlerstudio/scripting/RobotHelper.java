@@ -23,12 +23,14 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 public class RobotHelper implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) {
-		return fileToRobot(db,code);
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
+			ArrayList<Object> args) {
+		return fileToRobot(db, code);
 	}
-	public static MobileBase fileToRobot(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String url,String file) {
+	public static MobileBase fileToRobot(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, String url,
+			String file) {
 		try {
-			return fileToRobot(db,ScriptingEngine.fileFromGit(url, file)) ;
+			return fileToRobot(db, ScriptingEngine.fileFromGit(url, file));
 		} catch (InvalidRemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -44,7 +46,7 @@ public class RobotHelper implements IScriptingLanguage {
 		}
 		return null;
 	}
-	public static MobileBase fileToRobot(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code) {
+	public static MobileBase fileToRobot(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code) {
 		byte[] bytes;
 		try {
 			bytes = Files.readAllBytes(code.toPath());
@@ -53,7 +55,7 @@ public class RobotHelper implements IScriptingLanguage {
 			try {
 				mb = new MobileBase(IOUtils.toInputStream(s, "UTF-8"));
 				mb.setGitSelfSource(ScriptingEngine.findGitTagFromFile(code));
-				return MobileBaseLoader.get(db,mb).getBase();
+				return MobileBaseLoader.get(db, mb).getBase();
 			} catch (IOException e) {
 				// Auto-generated catch block
 				com.neuronrobotics.sdk.common.Log.error(e);
@@ -63,12 +65,14 @@ public class RobotHelper implements IScriptingLanguage {
 			// Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e1);
 		}
-		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of type="+ret.getClass()+" value="+ret);
+		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of
+		// type="+ret.getClass()+" value="+ret);
 		return null;
 	}
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, String code,
+			ArrayList<Object> args) {
 
 		MobileBase mb = null;
 		try {
@@ -95,7 +99,7 @@ public class RobotHelper implements IScriptingLanguage {
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	public String getDefaultContents() {
@@ -105,7 +109,7 @@ public class RobotHelper implements IScriptingLanguage {
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	@SuppressWarnings("restriction")
@@ -114,18 +118,19 @@ public class RobotHelper implements IScriptingLanguage {
 		back.setScriptingName(slug);
 		back.setGitSelfSource(Arrays.asList(gitURL, slug + ".xml").toArray(new String[0]));
 		String[] cad = ScriptingEngine.copyGitFile(
-				"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", gitURL, "exampleCad.groovy",slug+"Cad.groovy",true);
+				"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", gitURL, "exampleCad.groovy",
+				slug + "Cad.groovy", true);
 		String[] kin = ScriptingEngine.copyGitFile(
 				"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", gitURL,
-				"exampleKinematics.groovy",slug+"Kinematics.groovy",true);
+				"exampleKinematics.groovy", slug + "Kinematics.groovy", true);
 		String[] walk = ScriptingEngine.copyGitFile(
 				"https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git", gitURL,
-				"exampleWalking.groovy",slug+"Walk.groovy",true);
+				"exampleWalking.groovy", slug + "Walk.groovy", true);
 		back.setGitCadEngine(cad);
 		back.setGitDhEngine(kin);
 		back.setGitWalkingEngine(walk);
 		DHParameterKinematics limb = new DHParameterKinematics();
-		limb.setScriptingName(slug+"-Limb-1");
+		limb.setScriptingName(slug + "-Limb-1");
 		limb.setGitCadEngine(cad);
 		limb.setGitDhEngine(kin);
 		LinkConfiguration newLink = new LinkConfiguration();
@@ -145,13 +150,13 @@ public class RobotHelper implements IScriptingLanguage {
 			IOUtils.write(back.getXml(), out, Charset.defaultCharset());
 			out.close(); // don't swallow close Exception if copy completes
 			// normally
-		} catch(Throwable t){
+		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
-		}finally {
+		} finally {
 			try {
 				out.close();
 			} catch (Exception e) {
-				
+
 			}
 		}
 	}

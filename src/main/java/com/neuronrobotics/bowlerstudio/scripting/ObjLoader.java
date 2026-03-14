@@ -11,13 +11,15 @@ import eu.mihosoft.vrl.v3d.CSG;
 public class ObjLoader implements IScriptingLanguage {
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,File code, ArrayList<Object> args) throws Exception {
-		CSG sllLoaded  = Vitamins.get(db,code);
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
+			ArrayList<Object> args) throws Exception {
+		CSG sllLoaded = Vitamins.get(db, code);
 		return sllLoaded;
 	}
 
 	@Override
-	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db,String code, ArrayList<Object> args) throws Exception {
+	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, String code,
+			ArrayList<Object> args) throws Exception {
 		throw new RuntimeException("This engine only supports files");
 	}
 
@@ -32,7 +34,7 @@ public class ObjLoader implements IScriptingLanguage {
 	}
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	public String getDefaultContents() {
@@ -41,7 +43,7 @@ public class ObjLoader implements IScriptingLanguage {
 	@Override
 	public ArrayList<String> getFileExtension() {
 		// Auto-generated method stub
-		return new ArrayList<>(Arrays.asList("obj","OBJ","Obj"));
+		return new ArrayList<>(Arrays.asList("obj", "OBJ", "Obj"));
 	}
 
 }

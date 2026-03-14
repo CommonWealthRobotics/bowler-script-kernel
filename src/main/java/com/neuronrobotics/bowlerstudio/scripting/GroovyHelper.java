@@ -29,62 +29,67 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 		Binding binding = new Binding();
 
 		binding.setVariable("args", args);
-		if(db2==null) {
+		if (db2 == null) {
 			throw new RuntimeException("Can not send an empty CSG Database to script");
 		}
 		binding.setVariable("csgdb", db2);
 		GroovyShell shell = new GroovyShell(GroovyHelper.class.getClassLoader(), binding, cc);
-		String code=codeIn;
-		if(!code.contains("csgdb")) {
-			//getDefaultVitaminsDisplay(
-			//			MobileBaseLoader.fromGit(
-			code=code.replace("MobileBaseLoader.fromGit(", "MobileBaseLoader.fromGit(csgdb,");
+		String code = codeIn;
+		if (!code.contains("csgdb")) {
+			// getDefaultVitaminsDisplay(
+			// MobileBaseLoader.fromGit(
+			code = code.replace("MobileBaseLoader.fromGit(", "MobileBaseLoader.fromGit(csgdb,");
 
-			code=code.replace("MobileBaseCadManager.getDefaultVitaminsDisplay(", "MobileBaseCadManager.getDefaultVitaminsDisplay(csgdb,");
+			code = code.replace("MobileBaseCadManager.getDefaultVitaminsDisplay(",
+					"MobileBaseCadManager.getDefaultVitaminsDisplay(csgdb,");
 
-			code=code.replace("MobileBaseCadManager.getOriginVitaminsDisplay(", "MobileBaseCadManager.getOriginVitaminsDisplay(csgdb,");
+			code = code.replace("MobileBaseCadManager.getOriginVitaminsDisplay(",
+					"MobileBaseCadManager.getOriginVitaminsDisplay(csgdb,");
 
-			code=code.replace("MobileBaseCadManager.get(", "MobileBaseCadManager.get(csgdb,");
-			code=code.replace("Vitamins.get(", "Vitamins.get(csgdb,");
+			code = code.replace("MobileBaseCadManager.get(", "MobileBaseCadManager.get(csgdb,");
+			code = code.replace("Vitamins.get(", "Vitamins.get(csgdb,");
 
-			code=code.replace("CaDoodleVitamin.", "new CaDoodleVitamin(csgdb).");
-			code=code.replace("StringParameter(", "StringParameter(csgdb,");
-			code=code.replace("LengthParameter(", "LengthParameter(csgdb,");
-			code=code.replace("setParameter(", "setParameter(csgdb,");
+			code = code.replace("CaDoodleVitamin.", "new CaDoodleVitamin(csgdb).");
+			code = code.replace("StringParameter(", "StringParameter(csgdb,");
+			code = code.replace("LengthParameter(", "LengthParameter(csgdb,");
+			code = code.replace("setParameter(", "setParameter(csgdb,");
 
-			code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "MYTMPFINDREPLACETHINGY");
-			code=code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance", "MYTMPFINDREPLACETHINGY2");
-			code=code.replace("CSGDatabase", "csgdb");
-			code=code.replace( "MYTMPFINDREPLACETHINGY","import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase");
-			code=code.replace( "MYTMPFINDREPLACETHINGY2","import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance");
+			code = code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase", "MYTMPFINDREPLACETHINGY");
+			code = code.replace("import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance",
+					"MYTMPFINDREPLACETHINGY2");
+			code = code.replace("CSGDatabase", "csgdb");
+			code = code.replace("MYTMPFINDREPLACETHINGY", "import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase");
+			code = code.replace("MYTMPFINDREPLACETHINGY2",
+					"import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance");
 
-			code=code.replace("inlineGistScriptRun(", "inlineGistScriptRun(csgdb,");
-			code=code.replace("inlineFileScriptRun(", "inlineFileScriptRun(csgdb,");
-			code=code.replace("inlineScriptRun(", "inlineScriptRun(csgdb,");
-			code=code.replace("inlineScriptStringRun(", "inlineScriptStringRun(csgdb,");
-			code=code.replace("gitScriptRun(", "gitScriptRun(((eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance)csgdb),");
-			//getVitaminsDisplay(
-			code=code.replace("getVitaminsDisplay(", "getVitaminsDisplay(csgdb,");
-			code=code.replace("getVitamins(", "getVitamins(csgdb,");
-			//getOriginVitaminsDisplay
-			code=code.replace("getOriginVitaminsDisplay(", "getOriginVitaminsDisplay(csgdb,");
-			//getDefaultVitaminsDisplay
-			code=code.replace("getDefaultVitaminsDisplay(", "getDefaultVitaminsDisplay(csgdb,");
-			//getPreviousLinkVitaminsDisplay
-			code=code.replace("getPreviousLinkVitaminsDisplay(", "getPreviousLinkVitaminsDisplay(csgdb,");
-			//getOriginVitamins
-			code=code.replace("getOriginVitamins(", "getOriginVitamins(csgdb,");
-			//getDefaultVitamins
-			code=code.replace("getDefaultVitamins(", "getDefaultVitamins(csgdb,");
-			//getPreviousLinkVitamins
-			code=code.replace("getPreviousLinkVitamins(", "getPreviousLinkVitamins(csgdb,");
+			code = code.replace("inlineGistScriptRun(", "inlineGistScriptRun(csgdb,");
+			code = code.replace("inlineFileScriptRun(", "inlineFileScriptRun(csgdb,");
+			code = code.replace("inlineScriptRun(", "inlineScriptRun(csgdb,");
+			code = code.replace("inlineScriptStringRun(", "inlineScriptStringRun(csgdb,");
+			code = code.replace("gitScriptRun(",
+					"gitScriptRun(((eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance)csgdb),");
+			// getVitaminsDisplay(
+			code = code.replace("getVitaminsDisplay(", "getVitaminsDisplay(csgdb,");
+			code = code.replace("getVitamins(", "getVitamins(csgdb,");
+			// getOriginVitaminsDisplay
+			code = code.replace("getOriginVitaminsDisplay(", "getOriginVitaminsDisplay(csgdb,");
+			// getDefaultVitaminsDisplay
+			code = code.replace("getDefaultVitaminsDisplay(", "getDefaultVitaminsDisplay(csgdb,");
+			// getPreviousLinkVitaminsDisplay
+			code = code.replace("getPreviousLinkVitaminsDisplay(", "getPreviousLinkVitaminsDisplay(csgdb,");
+			// getOriginVitamins
+			code = code.replace("getOriginVitamins(", "getOriginVitamins(csgdb,");
+			// getDefaultVitamins
+			code = code.replace("getDefaultVitamins(", "getDefaultVitamins(csgdb,");
+			// getPreviousLinkVitamins
+			code = code.replace("getPreviousLinkVitamins(", "getPreviousLinkVitamins(csgdb,");
 
 		}
-		
+
 		Script script;
 		try {
-			script= shell.parse(code);
-		}catch(Throwable t) {
+			script = shell.parse(code);
+		} catch (Throwable t) {
 			Log.error("Compilation error");
 			Log.error(t);
 			throw t;
@@ -100,7 +105,7 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	public String getDefaultContents() {
@@ -141,7 +146,7 @@ public class GroovyHelper implements IScriptingLanguage, IScriptingLanguageDebug
 			@Override
 			public String[] step() {
 				// Auto-generated method stub
-				return new String[] { "fileame.groovy", "345" };
+				return new String[]{"fileame.groovy", "345"};
 			}
 		};
 	}

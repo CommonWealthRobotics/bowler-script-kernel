@@ -33,7 +33,7 @@ public class CaDoodleParameters {
 				break;
 			}
 		}
-		if(set!=null)
+		if (set != null)
 			params.remove(set);
 	}
 	public void set(String key, Object value) {
@@ -45,15 +45,15 @@ public class CaDoodleParameters {
 			}
 		}
 		if (set == null) {
-			set =Map.entry(key,value.toString());
+			set = Map.entry(key, value.toString());
 			getParams().add(set);
 		}
 		set.setValue(value.toString());
-		values=null;
+		values = null;
 	}
-	public ArrayList<String> keys(){
-		ArrayList<String> keys=new ArrayList<String>();
-		for(Entry<String, String> e:getParams()) {
+	public ArrayList<String> keys() {
+		ArrayList<String> keys = new ArrayList<String>();
+		for (Entry<String, String> e : getParams()) {
 			keys.add(e.getKey());
 		}
 		return keys;
@@ -68,7 +68,7 @@ public class CaDoodleParameters {
 	public double getValue(String key) throws Exception {
 		return getValues().get(key).doubleValue();
 	}
-	
+
 	private HashMap<String, Double> getValues() throws Exception {
 		if (values == null) {
 			String code = "HashMap<String,Double> numbers = new HashMap<>()\n";
@@ -78,7 +78,7 @@ public class CaDoodleParameters {
 			for (Map.Entry<String, String> m : getParams()) {
 				// System.out.println(line);
 				String value = m.getValue();
-				String key =m.getKey();
+				String key = m.getKey();
 				String reconstructed = key + "=" + value;
 				try {
 					Double.parseDouble(value);

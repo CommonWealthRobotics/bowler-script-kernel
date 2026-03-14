@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 /**
  * Define the types of mouth shapes
- * 
+ *
  * content from https://github.com/DanielSWolf/rhubarb-lip-sync
- * 
+ *
  * @author hephaestus
  *
  */
@@ -27,7 +27,7 @@ public enum AudioStatus {
 	/*
 	 * Open mouth. This mouth shape is used for vowels like “EH” as in men and “AE”
 	 * as in bat. It’s also used for some consonants, depending on context.
-	 * 
+	 *
 	 * This shape is also used as an in-between when animating from Ⓐ or Ⓑ to Ⓓ. So
 	 * make sure the animations ⒶⒸⒹ and ⒷⒸⒹ look smooth!
 	 */
@@ -39,7 +39,7 @@ public enum AudioStatus {
 	/*
 	 * Slightly rounded mouth. This mouth shape is used for vowels like “AO” as in
 	 * off and “ER” as in bird.
-	 * 
+	 *
 	 * This shape is also used as an in-between when animating from Ⓒ or Ⓓ to Ⓕ.
 	 * Make sure the mouth isn’t wider open than for Ⓒ. Both ⒸⒺⒻ and ⒹⒺⒻ should
 	 * result in smooth animation.
@@ -52,7 +52,7 @@ public enum AudioStatus {
 	F_UW_OW_W_SOUNDS('F'),
 	/*
 	 * Upper teeth touching the lower lip for “F” as in for and “V” as in very.
-	 * 
+	 *
 	 * This extended mouth shape is optional. If your art style is detailed enough,
 	 * it greatly improves the overall look of the animation. If you decide not to
 	 * use it, you can specify so using the extendedShapes option.
@@ -62,7 +62,7 @@ public enum AudioStatus {
 	 * This shape is used for long “L” sounds, with the tongue raised behind the
 	 * upper teeth. The mouth should be at least far open as in Ⓒ, but not quite as
 	 * far as in Ⓓ.
-	 * 
+	 *
 	 * This extended mouth shape is optional. Depending on your art style and the
 	 * angle of the head, the tongue may not be visible at all. In this case, there
 	 * is no point in drawing this extra shape. If you decide not to use it, you can
@@ -74,20 +74,16 @@ public enum AudioStatus {
 	 * the same mouth drawing you use when your character is walking around without
 	 * talking. It is almost identical to Ⓐ, but with slightly less pressure between
 	 * the lips: For Ⓧ, the lips should be closed but relaxed.
-	 * 
+	 *
 	 * This extended mouth shape is optional. Whether there should be any visible
 	 * difference between the rest position Ⓧ and the closed talking mouth Ⓐ depends
 	 * on your art style and personal taste. If you decide not to use it, you can
 	 * specify so using the extendedShapes option.
 	 */
 	X_NO_SOUND('X'),
-	
+
 	// User defined visemes
-	I_user_defined('I'),
-	J_user_defined('J'),
-	K_user_defined('K'),
-	L_user_defined('L'),
-	M_user_defined('M');
+	I_user_defined('I'), J_user_defined('J'), K_user_defined('K'), L_user_defined('L'), M_user_defined('M');
 
 	private static final Map<Character, AudioStatus> lookup = new HashMap<>();
 	private static Map<String, AudioStatus> ArpabetToBlair;
@@ -145,17 +141,15 @@ public enum AudioStatus {
 		ArpabetToBlair.put("y", AudioStatus.B_KST_SOUNDS);
 		ArpabetToBlair.put("z", AudioStatus.B_KST_SOUNDS);
 		ArpabetToBlair.put("zh", AudioStatus.B_KST_SOUNDS);
-		
 
-		//rhubarb docs
+		// rhubarb docs
 		AudioStatus.ArpabetToBlair.put("ao", AudioStatus.E_AO_ER_SOUNDS);
 		AudioStatus.ArpabetToBlair.put("er", AudioStatus.E_AO_ER_SOUNDS);
 		AudioStatus.ArpabetToBlair.put("ae", AudioStatus.C_EH_AE_SOUNDS);
 		AudioStatus.ArpabetToBlair.put("eh", AudioStatus.C_EH_AE_SOUNDS);
 		AudioStatus.ArpabetToBlair.put("q", AudioStatus.B_KST_SOUNDS);
 
-
-		//fn opinion
+		// fn opinion
 		AudioStatus.ArpabetToBlair.put("hh", AudioStatus.D_AA_SOUNDS);
 		AudioStatus.ArpabetToBlair.put("uh", AudioStatus.F_UW_OW_W_SOUNDS);
 		AudioStatus.ArpabetToBlair.put("aa", AudioStatus.C_EH_AE_SOUNDS);
@@ -175,7 +169,7 @@ public enum AudioStatus {
 		return lookup.get(code);
 	}
 	public static AudioStatus get(String code) {
-		return lookup.get((char)code.getBytes()[0]);
+		return lookup.get((char) code.getBytes()[0]);
 	}
 	public static AudioStatus getFromPhoneme(String code) {
 		return ArpabetToBlair.get(code);
@@ -183,41 +177,41 @@ public enum AudioStatus {
 	public static Set<String> getPhonemes() {
 		return ArpabetToBlair.keySet();
 	}
-	
+
 	public double mouthOpenVector() {
-		switch(this) {
-		case B_KST_SOUNDS:
-			return 0.3;
-		case C_EH_AE_SOUNDS:
-			return 0.6;
-		case D_AA_SOUNDS:
-			return 1;
-		case E_AO_ER_SOUNDS:
-			return 0.6;
-		case F_UW_OW_W_SOUNDS:
-			return 0.2;
-		case G_F_V_SOUNDS:
-			return 0.1;
-		case H_L_SOUNDS:
-			return 0.9;
-		case A_PBM_SOUNDS:
-			return 0.05;
-		case X_NO_SOUND:
-		default:
-			break;
+		switch (this) {
+			case B_KST_SOUNDS :
+				return 0.3;
+			case C_EH_AE_SOUNDS :
+				return 0.6;
+			case D_AA_SOUNDS :
+				return 1;
+			case E_AO_ER_SOUNDS :
+				return 0.6;
+			case F_UW_OW_W_SOUNDS :
+				return 0.2;
+			case G_F_V_SOUNDS :
+				return 0.1;
+			case H_L_SOUNDS :
+				return 0.9;
+			case A_PBM_SOUNDS :
+				return 0.05;
+			case X_NO_SOUND :
+			default :
+				break;
 		}
 		return 0;
 	}
-	
+
 	public boolean isOpen() {
-		switch(this) {
-		case B_KST_SOUNDS:
-		case C_EH_AE_SOUNDS:
-		case D_AA_SOUNDS:
-		case E_AO_ER_SOUNDS:
-		case H_L_SOUNDS:
-			return true;
-		
+		switch (this) {
+			case B_KST_SOUNDS :
+			case C_EH_AE_SOUNDS :
+			case D_AA_SOUNDS :
+			case E_AO_ER_SOUNDS :
+			case H_L_SOUNDS :
+				return true;
+
 		}
 		return false;
 	}

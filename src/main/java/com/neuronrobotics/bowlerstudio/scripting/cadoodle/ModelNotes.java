@@ -8,12 +8,12 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class ModelNotes extends CaDoodleOperation{
-	@Expose (serialize = true, deserialize = true)
-	TransformNR location=null;
-	@Expose (serialize = true, deserialize = true)
-	String text=null;
-	
+public class ModelNotes extends CaDoodleOperation {
+	@Expose(serialize = true, deserialize = true)
+	TransformNR location = null;
+	@Expose(serialize = true, deserialize = true)
+	String text = null;
+
 	@Override
 	public String getType() {
 		return "ModelNotes";
@@ -30,11 +30,11 @@ public class ModelNotes extends CaDoodleOperation{
 		return new ArrayList<String>();
 	}
 	public ModelNotes setLocation(TransformNR tf) {
-		location=tf;
+		location = tf;
 		return this;
 	}
 	public ModelNotes setText(String tx) {
-		text=tx;
+		text = tx;
 		return this;
 	}
 

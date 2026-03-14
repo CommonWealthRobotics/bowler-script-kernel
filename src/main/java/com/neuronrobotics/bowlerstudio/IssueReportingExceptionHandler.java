@@ -1,14 +1,11 @@
 package com.neuronrobotics.bowlerstudio;
 
-import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHIssueBuilder;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHRepository;
@@ -80,12 +77,13 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 			}
 			exceptionCounter.put(source, exceptionCounter.get(source) + 1);
 			if (exceptionCounter.get(source) > 1) {
-//				Alert alert = new Alert(AlertType.CONFIRMATION);
-//				alert.setTitle("IRRECOVERABLE FAULT");
-//				alert.setHeaderText("Its just gunna crash, sorry...");
-//				alert.setContentText("I can wait till you hit yes, buts its basically done...");
-//				Optional<ButtonType> result = alert.showAndWait();
-//				System.exit(-1);
+				// Alert alert = new Alert(AlertType.CONFIRMATION);
+				// alert.setTitle("IRRECOVERABLE FAULT");
+				// alert.setHeaderText("Its just gunna crash, sorry...");
+				// alert.setContentText("I can wait till you hit yes, buts its basically
+				// done...");
+				// Optional<ButtonType> result = alert.showAndWait();
+				// System.exit(-1);
 				return;// maybe just swallowing after 5 reports is good enough??
 			}
 			if (element != null)
@@ -241,8 +239,8 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 		}
 		if (Platform.isFxApplicationThread()) {
 			com.neuronrobotics.sdk.common.Log.error("Exception in Javafx thread! \n"
-						+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
-			//throw new RuntimeException(t);
+					+ org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(t));
+			// throw new RuntimeException(t);
 			return;
 		}
 
@@ -256,8 +254,9 @@ public class IssueReportingExceptionHandler implements UncaughtExceptionHandler 
 
 	private boolean checkIgnoreExceptions(Throwable t) {
 		try {
-			return t.getStackTrace()[0].getClassName().contains("DropHandler") || t.getMessage().contains("Key already associated with a running event loop");
-		}catch(Throwable tf) {
+			return t.getStackTrace()[0].getClassName().contains("DropHandler")
+					|| t.getMessage().contains("Key already associated with a running event loop");
+		} catch (Throwable tf) {
 			return false;
 		}
 	}

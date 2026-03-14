@@ -15,7 +15,7 @@ public abstract class CaDoodleOperation {
 	public abstract List<CSG> process(List<CSG> incoming);
 	public abstract List<String> getNamesAddedInThisOperation();
 	public void pruneCleanup() {
-		
+
 	}
 	public CSGDatabaseInstance getDb() {
 		return cf.getCsgDBinstance();
@@ -31,22 +31,22 @@ public abstract class CaDoodleOperation {
 	/**
 	 * @return the robots
 	 */
-	public HashMap<String,MobileBaseBuilder> getRobots() {
+	public HashMap<String, MobileBaseBuilder> getRobots() {
 		return cf.getRobots();
 	}
-	
+
 	public String getBuilder(List<String> selected, List<CSG> state) {
-		if(selected==null)
+		if (selected == null)
 			return null;
-		for(CSG c: state) {
-			for(String s:selected) {
-				if(s.contentEquals(c.getName())) {
-					Optional<String> mobileBaseName= c.getMobileBaseName();
-					if(mobileBaseName.isPresent()) {
+		for (CSG c : state) {
+			for (String s : selected) {
+				if (s.contentEquals(c.getName())) {
+					Optional<String> mobileBaseName = c.getMobileBaseName();
+					if (mobileBaseName.isPresent()) {
 						MobileBaseBuilder b = getRobots().get(mobileBaseName.get());
-						if(b!=null) {
+						if (b != null) {
 							return mobileBaseName.get();
-						}else {
+						} else {
 							throw new RuntimeException("MobilBase name set but builder missing");
 						}
 					}
@@ -56,16 +56,16 @@ public abstract class CaDoodleOperation {
 		return null;
 	}
 	public String getLimbName(List<String> selected, List<CSG> state) {
-		if(selected==null)
+		if (selected == null)
 			return null;
-		for(CSG c: state) {
-			for(String s:selected) {
-				if(s.contentEquals(c.getName())) {
-					Optional<String> limbNameOption= c.getLimbName();
-					if(limbNameOption.isPresent()) {
+		for (CSG c : state) {
+			for (String s : selected) {
+				if (s.contentEquals(c.getName())) {
+					Optional<String> limbNameOption = c.getLimbName();
+					if (limbNameOption.isPresent()) {
 						MobileBaseBuilder b = getRobots().get(c.getMobileBaseName().get());
-						if(b!=null) {
-							if(b.getMobileBase().getLimbByName(limbNameOption.get())!=null)
+						if (b != null) {
+							if (b.getMobileBase().getLimbByName(limbNameOption.get()) != null)
 								return limbNameOption.get();
 						}
 					}

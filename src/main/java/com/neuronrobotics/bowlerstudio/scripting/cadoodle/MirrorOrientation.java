@@ -1,5 +1,5 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
-public enum MirrorOrientation {
-	x,y,z;
+public enum MirrorOrentation {
+	x, y, z;
 }

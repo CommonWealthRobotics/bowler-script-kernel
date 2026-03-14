@@ -17,12 +17,10 @@ import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -94,7 +92,7 @@ public class TimeSequence {
 
 	public void runSequence() throws Exception {
 		com.neuronrobotics.sdk.common.Log.error("Initialize Sequence");
-		ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),getUrl(), getFile());
+		ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(), getUrl(), getFile());
 
 		HashMap<String, AbstractKinematicsNR> devices = getDevices();
 		long start = System.currentTimeMillis();
@@ -138,8 +136,8 @@ public class TimeSequence {
 				t.interrupt();
 			}
 		}
-		com.neuronrobotics.sdk.common.Log.error(
-				"Running complete, took " + (System.currentTimeMillis() - start) + " expcted " + getDuration());
+		com.neuronrobotics.sdk.common.Log
+				.error("Running complete, took " + (System.currentTimeMillis() - start) + " expcted " + getDuration());
 	}
 
 	private void addWavFileRun(ArrayList<Thread> threads) throws InvalidRemoteException, TransportException,
@@ -166,7 +164,8 @@ public class TimeSequence {
 					while (audioClip.isRunning() && !Thread.interrupted()) {
 						double pos = (double) audioClip.getMicrosecondPosition() / 1000.0;
 						double percent = pos / len * 100.0;
-						// com.neuronrobotics.sdk.common.Log.error("Current " + pos + " Percent = " + percent);
+						// com.neuronrobotics.sdk.common.Log.error("Current " + pos + " Percent = " +
+						// percent);
 						ThreadUtil.wait(10);
 					}
 				} catch (Throwable t) {
@@ -175,7 +174,7 @@ public class TimeSequence {
 				audioClip.stop();
 				audioClip.close();
 				((AudioInputStream) audioStream).close();
-				com.neuronrobotics.sdk.common.Log.error("Audio clip exited "+getWavurl()+" : "+getWavfile());
+				com.neuronrobotics.sdk.common.Log.error("Audio clip exited " + getWavurl() + " : " + getWavfile());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

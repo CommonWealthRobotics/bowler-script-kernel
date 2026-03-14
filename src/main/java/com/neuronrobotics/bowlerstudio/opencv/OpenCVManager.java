@@ -26,10 +26,10 @@ public class OpenCVManager extends NonBowlerDevice {
 			throw new RuntimeException("OpenCV library failed to load");
 		connect();
 	}
-	
+
 	public static OpenCVManager get(int index) {
-		return (OpenCVManager)DeviceManager.getSpecificDevice("opencv_"+index, () -> new  OpenCVManager(index));
-		
+		return (OpenCVManager) DeviceManager.getSpecificDevice("opencv_" + index, () -> new OpenCVManager(index));
+
 	}
 
 	@Override
@@ -64,7 +64,8 @@ public class OpenCVManager extends NonBowlerDevice {
 	}
 
 	/**
-	 * @param capture the capture to set
+	 * @param capture
+	 *            the capture to set
 	 */
 	private void setCapture(VideoCapture capture) {
 		this.capture = capture;

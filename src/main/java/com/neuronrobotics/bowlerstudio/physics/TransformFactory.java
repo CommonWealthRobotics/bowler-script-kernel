@@ -19,82 +19,89 @@ import javafx.scene.transform.Affine;
  */
 @SuppressWarnings("restriction")
 public class TransformFactory {
-	
+
 	/**
 	 * Gets the transform.
 	 *
-	 * @param x the x
-	 * @param y the y
-	 * @param z the z
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param z
+	 *            the z
 	 * @return the transform
 	 */
-	public static Affine newAffine(double x, double y, double z){
+	public static Affine newAffine(double x, double y, double z) {
 		return nrToAffine(new TransformNR(x, y, z, new RotationNR()));
 	}
-	
+
 	/**
 	 * Gets the transform.
 	 *
-	 * @param input the input
+	 * @param input
+	 *            the input
 	 * @return the transform
 	 */
-	public static Affine nrToAffine(TransformNR input){
-		Affine rotations =new Affine();
-		return nrToAffine( input , rotations);
+	public static Affine nrToAffine(TransformNR input) {
+		Affine rotations = new Affine();
+		return nrToAffine(input, rotations);
 	}
-	
+
 	/**
 	 * Gets the transform.
 	 *
-	 * @param input the input
+	 * @param input
+	 *            the input
 	 * @return the transform
 	 */
-	public static TransformNR affineToNr(Affine input){
-		TransformNR rotations =new TransformNR();
-		return affineToNr( rotations,input  );
+	public static TransformNR affineToNr(Affine input) {
+		TransformNR rotations = new TransformNR();
+		return affineToNr(rotations, input);
 	}
 	/**
 	 * Gets the transform.
 	 *
-	 * @param outputValue the input
-	 * @param rotations the rotations
+	 * @param outputValue
+	 *            the input
+	 * @param rotations
+	 *            the rotations
 	 * @return the transform
 	 */
-	public static TransformNR affineToNr(TransformNR outputValue ,Affine rotations){
-		double[][] poseRot = outputValue
-				.getRotationMatrixArray();
-		
-		poseRot[0][0]=rotations.getMxx();
-		poseRot[0][1]=rotations.getMxy();
-		poseRot[0][2]=rotations.getMxz();
-		poseRot[1][0]=rotations.getMyx();
-		poseRot[1][1]=rotations.getMyy();
-		poseRot[1][2]=rotations.getMyz();
-		poseRot[2][0]=rotations.getMzx();
-		poseRot[2][1]=rotations.getMzy();
-		poseRot[2][2]=rotations.getMzz();
-		
-		outputValue.set(rotations.getTx(),rotations.getTy(),rotations.getTz(),poseRot);
+	public static TransformNR affineToNr(TransformNR outputValue, Affine rotations) {
+		double[][] poseRot = outputValue.getRotationMatrixArray();
+
+		poseRot[0][0] = rotations.getMxx();
+		poseRot[0][1] = rotations.getMxy();
+		poseRot[0][2] = rotations.getMxz();
+		poseRot[1][0] = rotations.getMyx();
+		poseRot[1][1] = rotations.getMyy();
+		poseRot[1][2] = rotations.getMyz();
+		poseRot[2][0] = rotations.getMzx();
+		poseRot[2][1] = rotations.getMzy();
+		poseRot[2][2] = rotations.getMzz();
+
+		outputValue.set(rotations.getTx(), rotations.getTy(), rotations.getTz(), poseRot);
 		return outputValue;
 	}
-	
+
 	/**
 	 * Gets the transform.
 	 *
-	 * @param input the input
-	 * @param rotations the rotations
+	 * @param input
+	 *            the input
+	 * @param rotations
+	 *            the rotations
 	 * @return the transform
 	 */
-	public static Affine nrToAffine(TransformNR input ,Affine rotations){
-	    if (!Platform.isFxApplicationThread()) {
-	    	new RuntimeException("This method must be in UI thread!").printStackTrace();
-	    }
-	    if(input==null )
-	    	return rotations;
-	    if( rotations==null)
-	    	rotations=new Affine();
-		double[][] poseRot = input
-				.getRotationMatrixArray();
+	public static Affine nrToAffine(TransformNR input, Affine rotations) {
+		if (!Platform.isFxApplicationThread()) {
+			new RuntimeException("This method must be in UI thread!").printStackTrace();
+		}
+		if (input == null)
+			return rotations;
+		if (rotations == null)
+			rotations = new Affine();
+		double[][] poseRot = input.getRotationMatrixArray();
 		try {
 			rotations.setMxx(poseRot[0][0]);
 			rotations.setMxy(poseRot[0][1]);
@@ -108,7 +115,7 @@ public class TransformFactory {
 			rotations.setTx(input.getX());
 			rotations.setTy(input.getY());
 			rotations.setTz(input.getZ());
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return rotations;
@@ -129,8 +136,8 @@ public class TransformFactory {
 
 	public static void bulletToAffine(Affine affine, com.bulletphysics.linearmath.Transform bullet) {
 		if (!Platform.isFxApplicationThread()) {
-	    	new RuntimeException("This method must be in UI thread!").printStackTrace();
-	    }
+			new RuntimeException("This method must be in UI thread!").printStackTrace();
+		}
 		// synchronized(out){
 		double[][] vals = bulletToNr(bullet).getRotationMatrix().getRotationMatrix();
 		// we explicitly test norm against one here, saving a division

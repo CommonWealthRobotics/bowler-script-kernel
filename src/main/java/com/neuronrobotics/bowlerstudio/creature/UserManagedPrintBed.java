@@ -3,26 +3,17 @@ package com.neuronrobotics.bowlerstudio.creature;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.printbed.PrintBedManager;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
-import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Cube;
-import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
 import java.lang.reflect.Type;
-import java.nio.file.Path;
 
 public class UserManagedPrintBed implements IgenerateBed {
 
@@ -34,7 +25,7 @@ public class UserManagedPrintBed implements IgenerateBed {
 	private String source;
 	public UserManagedPrintBed(File printArrangment, MobileBaseCadManager mobileBaseCadManager) throws IOException {
 		this.mobileBaseCadManager = mobileBaseCadManager;
-		source= mobileBaseCadManager.getMobileBase().getGitSelfSource()[0];
+		source = mobileBaseCadManager.getMobileBase().getGitSelfSource()[0];
 	}
 
 	@Override

@@ -63,30 +63,30 @@ public class ControllerOption {
 	ControllerFeatures provides;
 	@Expose(serialize = true, deserialize = true)
 	ControllerFeatures consumes;
-	
+
 	// Internal variables
-	private boolean built=false;
+	private boolean built = false;
 	javafx.scene.image.Image image = null;
 	CSG indicator = null;
 	File stlFile = null;
 	private ArrayList<VitaminLocation> back;
 	private String baseName;
-	
+
 	public void build(CaDoodleFile f) {
-		if(built)
+		if (built)
 			return;
-		built=true;
-		image =  new Image(getImageFile().toURI().toString());
+		built = true;
+		image = new Image(getImageFile().toURI().toString());
 		String absolutePath = ScriptingEngine.getWorkspace().getAbsolutePath() + delim() + "uicache";
 		File dir = new File(absolutePath);
 		if (!dir.exists())
 			dir.mkdirs();
 		stlFile = new File(absolutePath + delim() + type + ".stl");
-		if ( stlFile.exists()) {
-			indicator = Vitamins.get(f.getCsgDBinstance(),stlFile);
+		if (stlFile.exists()) {
+			indicator = Vitamins.get(f.getCsgDBinstance(), stlFile);
 			getIndicator().setColor(Color.WHITE);
 			return;
-		}else {
+		} else {
 			AddRobotController arc = new AddRobotController().setController(this);
 			arc.setCaDoodleFile(f);
 			List<CSG> so = arc.process(new ArrayList<>());
@@ -97,8 +97,8 @@ public class ControllerOption {
 			}
 			indicator = so.get(0);
 			if (so.size() > 1) {
-				for(int i=1;i<so.size();i++) {
-					indicator=getIndicator().dumbUnion(so.get(i));
+				for (int i = 1; i < so.size(); i++) {
+					indicator = getIndicator().dumbUnion(so.get(i));
 				}
 			}
 			getIndicator().setColor(Color.WHITE);
@@ -122,7 +122,7 @@ public class ControllerOption {
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
-		throw new RuntimeException(imageGit+"/"+ imageFile);
+		throw new RuntimeException(imageGit + "/" + imageFile);
 	}
 
 	public void runLinkLoader() throws FileNotFoundException {
@@ -131,7 +131,7 @@ public class ControllerOption {
 			return;
 		}
 		try {
-			ScriptingEngine.inlineGistScriptRun(CSGDatabase.getInstance(),linkLoaderGit, linkLoaderFile, null);
+			ScriptingEngine.inlineGistScriptRun(CSGDatabase.getInstance(), linkLoaderGit, linkLoaderFile, null);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
@@ -182,9 +182,9 @@ public class ControllerOption {
 	public String getLinkDeviceName() {
 		return linkDeviceName;
 	}
-	public CSG getVitaminCSG(CSGDatabaseInstance instance,int index) {
+	public CSG getVitaminCSG(CSGDatabaseInstance instance, int index) {
 		try {
-			return Vitamins.get(instance,vitaminType.get(index), vitaminSize.get(index));
+			return Vitamins.get(instance, vitaminType.get(index), vitaminSize.get(index));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -210,7 +210,7 @@ public class ControllerOption {
 		return getVitaminPose().get(index);
 	}
 	public List<TransformNR> getVitaminPose() {
-		if(vitaminPose==null)
+		if (vitaminPose == null)
 			return new ArrayList<>(Arrays.asList(new TransformNR()));
 		return vitaminPose;
 	}
@@ -228,13 +228,13 @@ public class ControllerOption {
 	}
 
 	public ArrayList<VitaminLocation> getVitamins(TransformNR location, String baseName) {
-		if(back==null ) {
+		if (back == null) {
 			this.baseName = baseName;
 			back = new ArrayList<VitaminLocation>();
 			for (int i = 0; i < getVitaminNumber(); i++) {
 				TransformNR offset = location.times(getVitaminPose(i));
-				back.add(new VitaminLocation(false,baseName+"_"+i, vitaminType.get(i), vitaminSize.get(i), offset)
-						);
+				back.add(
+						new VitaminLocation(false, baseName + "_" + i, vitaminType.get(i), vitaminSize.get(i), offset));
 			}
 		}
 		return back;

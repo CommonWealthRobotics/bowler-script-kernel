@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +18,6 @@ import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.FileUtil;
-import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 
@@ -107,12 +104,12 @@ public class Build123dLoader implements IScriptingLanguage {
 		if (build123dScript != null) {
 			args.add("python");
 			args.add(build123dScript.getAbsolutePath());
-		}else
+		} else
 			args.add("build123d_cli");
 		for (Object key : params) {
 			args.add(key.toString());
 		}
-		
+
 		args.add("export_directory");
 		args.add(stlout.toFile().getAbsolutePath());
 		legacySystemRun(null, dir, System.out, args);

@@ -1,6 +1,5 @@
 package com.neuronrobotics.sdk.addons.gamepad;
 
-
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 
 /**
@@ -13,7 +12,6 @@ import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 import com.neuronrobotics.bowlerstudio.assets.FontSizeManager;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -23,8 +21,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -37,17 +33,15 @@ import java.util.ResourceBundle;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 
 public class JogTrainerWidget extends Application implements IGameControlEvent {
 
 	@FXML // ResourceBundle that was given to the FXMLLoader
 	private ResourceBundle resources;
-	
-    @FXML // fx:id="controllername"
-    private Label controllername; // Value injected by FXMLLoader
+
+	@FXML // fx:id="controllername"
+	private Label controllername; // Value injected by FXMLLoader
 
 	@FXML // URL location of the FXML file that was given to the FXMLLoader
 	private URL location;
@@ -56,59 +50,61 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 	private GridPane grid; // Value injected by FXMLLoader
 	private int mappingIndex = 0;
 	private HashMap<Integer, TextField> fields = new HashMap<>();
-	private String axisWaiting=null;
-	private ArrayList<String> listOfMappedAxis =new ArrayList<>();
+	private String axisWaiting = null;
+	private ArrayList<String> listOfMappedAxis = new ArrayList<>();
 	private Button save;
 	private Stage primaryStage;
-	private HashMap<String,Float> values=new HashMap<>();
-	private HashMap<String,Long> timeOfLastAxisSet = new HashMap<>();
+	private HashMap<String, Float> values = new HashMap<>();
+	private HashMap<String, Long> timeOfLastAxisSet = new HashMap<>();
 	private BowlerJInputDevice gameController;
 
 	@FXML // This method is called by the FXMLLoader when initialization is complete
 	void initialize() {
 		assert grid != null : "fx:id=\"grid\" was not injected: check your FXML file 'jogTrainerWidget.fxml'.";
 		assert gameController != null : "Game controller missing!";
-		//assert primaryStage != null : "Stage missing!";
-		assert controllername!= null: "fx:id=\"grid\" was not injected: check your FXML file 'jogTrainerWidget.fxml'.";
-		
+		// assert primaryStage != null : "Stage missing!";
+		assert controllername != null
+				: "fx:id=\"grid\" was not injected: check your FXML file 'jogTrainerWidget.fxml'.";
+
 		controllername.setText(gameController.getName());
 		save = new Button("Save Mapping");
 		Button reset = new Button("Reset");
 		reset.setOnAction(event -> {
 			PersistantControllerMap.clearMapping(gameController.getName());
-			for(Integer key:fields.keySet()) {
+			for (Integer key : fields.keySet()) {
 				fields.get(key).setText("");
 			}
 			reset();
 		});
 		save.setOnAction(new EventHandler<ActionEvent>() {
- 
-            @Override
-            public void handle(ActionEvent event) {	
-            	new Thread(()->{
-            		List<String> maps = PersistantControllerMap.getDefaultMaps();
-            		for (int i = 0; i < maps.size(); i++) 
-            			ConfigurationDatabase.setObject(gameController.getName(), fields.get(i).getText(), maps.get(i));
-            		ConfigurationDatabase.save();
-            	}).start();
-            	if(primaryStage!=null)
-            		primaryStage.hide();
-            }
-        });
+
+			@Override
+			public void handle(ActionEvent event) {
+				new Thread(() -> {
+					List<String> maps = PersistantControllerMap.getDefaultMaps();
+					for (int i = 0; i < maps.size(); i++)
+						ConfigurationDatabase.setObject(gameController.getName(), fields.get(i).getText(), maps.get(i));
+					ConfigurationDatabase.save();
+				}).start();
+				if (primaryStage != null)
+					primaryStage.hide();
+			}
+		});
 
 		List<String> maps = PersistantControllerMap.getDefaultMaps();
 		int i = 0;
-		com.neuronrobotics.sdk.common.Log.error("There are "+maps.size()+" rows");
+		com.neuronrobotics.sdk.common.Log.error("There are " + maps.size() + " rows");
 		for (i = 0; i < maps.size(); i++) {
 			String map = maps.get(i);
 
 			Label name = new Label(map);
 			Label setto = new Label("set to");
 			TextField toBeMapped = new TextField();
-			if(PersistantControllerMap.isMapedAxis(gameController.getName(), map)) {
-				toBeMapped.setText(PersistantControllerMap.getHardwareAxisFromMappedValue(gameController.getName(), map));
+			if (PersistantControllerMap.isMapedAxis(gameController.getName(), map)) {
+				toBeMapped
+						.setText(PersistantControllerMap.getHardwareAxisFromMappedValue(gameController.getName(), map));
 			}
-			if(i!=0)
+			if (i != 0)
 				toBeMapped.setDisable(true);
 			grid.add(name, 0, i);
 			grid.add(setto, 1, i);
@@ -118,25 +114,24 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		grid.add(save, 2, i);
 		grid.add(reset, 1, i);
 		reset();
-		if(PersistantControllerMap.areAllAxisMapped(gameController.getName())) {
-			BowlerKernel.runLater(() ->fields.get(0).setDisable(true));
+		if (PersistantControllerMap.areAllAxisMapped(gameController.getName())) {
+			BowlerKernel.runLater(() -> fields.get(0).setDisable(true));
 			gameController.removeListeners(this);
-		}else {
+		} else {
 			gameController.addListeners(this);
 		}
 	}
 
-
 	public JogTrainerWidget(BowlerJInputDevice gameController) {
 		this.gameController = gameController;
-		
+
 	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		this.primaryStage = primaryStage;
 		File fxmlFIle = AssetFactory.loadFile("layout/jogTrainerWidget.fxml");
-	    URL fileURL = fxmlFIle.toURI().toURL();
+		URL fileURL = fxmlFIle.toURI().toURL();
 		FXMLLoader loader = new FXMLLoader(fileURL);
 		loader.setLocation(fileURL);
 		Parent root;
@@ -144,13 +139,13 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 		// This is needed when loading on MAC
 		loader.setClassLoader(getClass().getClassLoader());
 		root = loader.load();
-		FontSizeManager.addListener(fontNum->{
-			int tmp = fontNum-10;
-			if(tmp<12)
-				tmp=12;
-			root.setStyle("-fx-font-size: "+tmp+"pt");
+		FontSizeManager.addListener(fontNum -> {
+			int tmp = fontNum - 10;
+			if (tmp < 12)
+				tmp = 12;
+			root.setStyle("-fx-font-size: " + tmp + "pt");
 		});
-		
+
 		BowlerKernel.runLater(() -> {
 			primaryStage.setTitle("Configure the controller");
 
@@ -161,92 +156,90 @@ public class JogTrainerWidget extends Application implements IGameControlEvent {
 			primaryStage.show();
 
 		});
-		
+
 	}
 
 	public void reset() {
 		listOfMappedAxis.clear();
-		mappingIndex=0;
-		BowlerKernel.runLater(() ->fields.get(mappingIndex).setDisable(false));
+		mappingIndex = 0;
+		BowlerKernel.runLater(() -> fields.get(mappingIndex).setDisable(false));
 		gameController.addListeners(this);
-		BowlerKernel.runLater(() ->controllername.setText(gameController.getName()));	
+		BowlerKernel.runLater(() -> controllername.setText(gameController.getName()));
 		save.setDisable(true);
 	}
 
-
-
 	@Override
 	public void onEvent(String name, float value) {
-		if(Math.abs(value)<0.1)
-			value=0;
+		if (Math.abs(value) < 0.1)
+			value = 0;
 
-		if(values.get(name)==null) {
+		if (values.get(name) == null) {
 			values.put(name, value);
 			timeOfLastAxisSet.put(name, System.currentTimeMillis());
 			return;
 		}
-		if(System.currentTimeMillis()-timeOfLastAxisSet.get(name)<100) {
+		if (System.currentTimeMillis() - timeOfLastAxisSet.get(name) < 100) {
 			return;// wait for a value to settle
 		}
 		Float float1 = values.get(name);
-		float abs = Math.abs(float1-value);
-		if(	abs <0.5) {
-			values.put(name,value);
+		float abs = Math.abs(float1 - value);
+		if (abs < 0.5) {
+			values.put(name, value);
 			timeOfLastAxisSet.put(name, System.currentTimeMillis());
-			if(abs>0.2)
-				com.neuronrobotics.sdk.common.Log.error("value for "+name+" seems noisy "+value+" most recent was "+values.get(name));
+			if (abs > 0.2)
+				com.neuronrobotics.sdk.common.Log
+						.error("value for " + name + " seems noisy " + value + " most recent was " + values.get(name));
 			return;
-		}else {
-			com.neuronrobotics.sdk.common.Log.error("Value changed! "+name+" "+float1+" to "+value);
+		} else {
+			com.neuronrobotics.sdk.common.Log.error("Value changed! " + name + " " + float1 + " to " + value);
 			values.put(name, value);
 			timeOfLastAxisSet.put(name, System.currentTimeMillis());
 		}
-			
-		
-		for(String s:listOfMappedAxis) {
-			if(s.contentEquals(name)) {
-				com.neuronrobotics.sdk.common.Log.error("mapping skipped for "+name);
+
+		for (String s : listOfMappedAxis) {
+			if (s.contentEquals(name)) {
+				com.neuronrobotics.sdk.common.Log.error("mapping skipped for " + name);
 				com.neuronrobotics.sdk.common.Log.error(gameController);
 				return;// This axis name is already mapped and will not be mapped again
 			}
 		}
-		for(String s:PersistantControllerMap.getDefaultMaps()) {
-			if(name.contentEquals(s))
+		for (String s : PersistantControllerMap.getDefaultMaps()) {
+			if (name.contentEquals(s))
 				return;// Do not use maped axis for re-mapping
 		}
 
-		axisWaiting=name;
-		com.neuronrobotics.sdk.common.Log.error("Adding Axis "+name);
-		
+		axisWaiting = name;
+		com.neuronrobotics.sdk.common.Log.error("Adding Axis " + name);
+
 		listOfMappedAxis.add(name);
-		timeOfLastAxisSet.put(name,System.currentTimeMillis());
+		timeOfLastAxisSet.put(name, System.currentTimeMillis());
 		BowlerKernel.runLater(() -> {
 			TextField textField = fields.get(mappingIndex);
 			textField.setText(name);
-			
+
 			textField.setDisable(true);
 			mappingIndex++;
-			if(mappingIndex==PersistantControllerMap.getDefaultMaps().size()) {
+			if (mappingIndex == PersistantControllerMap.getDefaultMaps().size()) {
 				save.setDisable(false);
 				gameController.removeListeners(this);
-			}else
+			} else
 				fields.get(mappingIndex).setDisable(false);
 		});
 
 	}
 
 	public static void run(BowlerJInputDevice c) {
-		//com.neuronrobotics.sdk.common.Log.error("Launching Controller mapping");
+		// com.neuronrobotics.sdk.common.Log.error("Launching Controller mapping");
 		BowlerKernel.runLater(new Runnable() {
 			@Override
 			public void run() {
-				//com.neuronrobotics.sdk.common.Log.error("Creating stage");
+				// com.neuronrobotics.sdk.common.Log.error("Creating stage");
 				Stage s = new Stage();
 				new Thread() {
 					public void run() {
 						JogTrainerWidget controller = new JogTrainerWidget(c);
 						try {
-							//com.neuronrobotics.sdk.common.Log.error("Loading FXML");
+							// com.neuronrobotics.sdk.common.Log.error("Loading FXML");
 							controller.start(s);
 						} catch (Exception e) {
 							e.printStackTrace();

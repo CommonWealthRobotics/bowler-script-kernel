@@ -1,6 +1,5 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,18 +10,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
-import com.neuronrobotics.bowlerstudio.scripting.BlenderLoader;
-import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
-import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 
@@ -30,14 +23,13 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class AddFromFile extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
-	//private ArrayList<String> options = new ArrayList<String>();
+	// private ArrayList<String> options = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM = false;
 
@@ -45,7 +37,7 @@ public class AddFromFile extends AbstractAddFrom {
 		setCaDoodleFile(cf);
 		for (String s : ScriptingEngine.getAllExtensions()) {
 			if (source.getName().toLowerCase().endsWith(s.toLowerCase())) {
-				toLocal(source, getName(),cf);
+				toLocal(source, getName(), cf);
 				try {
 					getFile();
 				} catch (NoSuchFileException e) {
@@ -74,8 +66,8 @@ public class AddFromFile extends AbstractAddFrom {
 		}
 		CSGDatabaseInstance instance = getCaDoodleFile().getCsgDBinstance();
 		try {
-//			ArrayList<Object>args = new ArrayList<>();
-//			args.addAll(Arrays.asList(getName() ));
+			// ArrayList<Object>args = new ArrayList<>();
+			// args.addAll(Arrays.asList(getName() ));
 			ArrayList<CSG> collect = new ArrayList<>();
 			File file = getFile();
 			if (!file.exists()) {
@@ -89,43 +81,45 @@ public class AddFromFile extends AbstractAddFrom {
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
 			boolean isDoodle = file.getName().toLowerCase().endsWith(".doodle");
-//			if(isDoodle) {
-//				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
-//				instance=(new CSGDatabaseInstance(tempFile.toFile()));
-//			}
+			// if(isDoodle) {
+			// Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
+			// instance=(new CSGDatabaseInstance(tempFile.toFile()));
+			// }
 			List<CSG> flattenedCSGs;
 			try {
-				flattenedCSGs = ScriptingEngine.flaten(instance,file, CSG.class, args);
-			}catch(Throwable t) {
+				flattenedCSGs = ScriptingEngine.flaten(instance, file, CSG.class, args);
+			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
-				flattenedCSGs=new ArrayList<CSG>();
+				flattenedCSGs = new ArrayList<CSG>();
 				flattenedCSGs.add(new Cube(10).toCSG().setColor(javafx.scene.paint.Color.HOTPINK));
 			}
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
-				if(isDoodle && csg.isInGroup())
+				if (isDoodle && csg.isInGroup())
 					continue;
 				try {
-					CSG processedCSG = processGiven(csg, i, getOrderedName(),file,name,getLocation(),getCaDoodleFile().getCsgDBinstance());
+					CSG processedCSG = processGiven(csg, i, getOrderedName(), file, name, getLocation(),
+							getCaDoodleFile().getCsgDBinstance());
 					collect.add(processedCSG);
 				} catch (Exception ex) {
 					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 			}
-			//CSGDatabase.setInstance(instance);
-			for(CSG csg1:collect)
-				csg1.setParameter(getCaDoodleFile().getCsgDBinstance(),getFileLocationparam(getCaDoodleFile().getCsgDBinstance(),file,name));
+			// CSGDatabase.setInstance(instance);
+			for (CSG csg1 : collect)
+				csg1.setParameter(getCaDoodleFile().getCsgDBinstance(),
+						getFileLocationparam(getCaDoodleFile().getCsgDBinstance(), file, name));
 			back.addAll(collect);
 		} catch (Exception e) {
-			//CSGDatabase.setInstance(instance);
+			// CSGDatabase.setInstance(instance);
 			Log.error(e);
 			throw new RuntimeException(e);
 		}
 		return back;
 	}
 
-	public static File copyFileToNewDirectory(CaDoodleFile cf, File sourceFile, File targetDirectory, String newBaseName)
-			throws IOException {
+	public static File copyFileToNewDirectory(CaDoodleFile cf, File sourceFile, File targetDirectory,
+			String newBaseName) throws IOException {
 		if (!sourceFile.exists()) {
 			throw new IOException("Source file does not exist: " + sourceFile.getAbsolutePath());
 		}
@@ -142,15 +136,15 @@ public class AddFromFile extends AbstractAddFrom {
 		if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
 			fileExtension = fileName.substring(dotIndex);
 		}
-//		if(fileExtension.toLowerCase().contains("stl")) {
-//			if(DownloadManager.isDownloadedAlready("blender")) {
-//				Log.debug("Convert STL to Blender for use in model");
-//				String newFileName = newBaseName + ".blend";
-//				File blenderfile = new File(targetDirectory, newFileName);
-//				BlenderLoader.toBlenderFile(cf.getCsgDBinstance(),sourceFile, blenderfile);
-//				return blenderfile;
-//			}
-//		}
+		// if(fileExtension.toLowerCase().contains("stl")) {
+		// if(DownloadManager.isDownloadedAlready("blender")) {
+		// Log.debug("Convert STL to Blender for use in model");
+		// String newFileName = newBaseName + ".blend";
+		// File blenderfile = new File(targetDirectory, newFileName);
+		// BlenderLoader.toBlenderFile(cf.getCsgDBinstance(),sourceFile, blenderfile);
+		// return blenderfile;
+		// }
+		// }
 
 		String newFileName = newBaseName + fileExtension;
 		File targetFile = new File(targetDirectory, newFileName);
@@ -162,8 +156,8 @@ public class AddFromFile extends AbstractAddFrom {
 		return targetFile;
 	}
 
-	public static File toLocal(File file, String name,CaDoodleFile cf ) {
-		if(cf==null)
+	public static File toLocal(File file, String name, CaDoodleFile cf) {
+		if (cf == null)
 			return file;
 		File parentFileIncoming = file.getParentFile();
 		String strValue = cf.getSelf().getAbsolutePath();
@@ -180,7 +174,7 @@ public class AddFromFile extends AbstractAddFrom {
 				if (!isDoodle) {
 					File copied;
 					try {
-						copied = copyFileToNewDirectory(cf,file, parentFile, name);
+						copied = copyFileToNewDirectory(cf, file, parentFile, name);
 						file = copied;
 					} catch (IOException e) {
 						// Auto-generated catch block
@@ -191,11 +185,11 @@ public class AddFromFile extends AbstractAddFrom {
 					File doodleParent = file.getParentFile();
 					File targetParent = new File(parentFile.getAbsoluteFile() + delim() + name);
 					targetParent.mkdirs();
-					recursiveCopy(doodleParent.getAbsolutePath(),targetParent.getAbsolutePath());
-					file = new File(targetParent.getAbsolutePath()+delim()+file.getName());
+					recursiveCopy(doodleParent.getAbsolutePath(), targetParent.getAbsolutePath());
+					file = new File(targetParent.getAbsolutePath() + delim() + file.getName());
 					try {
 						CaDoodleFile f = CaDoodleFile.fromFile(file);
-						f.setProjectName(cf.getMyProjectName()+"->"+f.getMyProjectName());
+						f.setProjectName(cf.getMyProjectName() + "->" + f.getMyProjectName());
 						f.save();
 					} catch (Exception e) {
 						com.neuronrobotics.sdk.common.Log.error(e);
@@ -210,9 +204,11 @@ public class AddFromFile extends AbstractAddFrom {
 	/**
 	 * Recursively copies all files and folders from the source directory to the
 	 * target directory.
-	 * 
-	 * @param sourceDir The source directory path
-	 * @param targetDir The target directory path
+	 *
+	 * @param sourceDir
+	 *            The source directory path
+	 * @param targetDir
+	 *            The target directory path
 	 * @return true if the copy operation was successful, false otherwise
 	 */
 	public static boolean recursiveCopy(String sourceDir, String targetDir) {
@@ -229,7 +225,7 @@ public class AddFromFile extends AbstractAddFrom {
 			System.err.println("Error: Source '" + sourceDir + "' is not a directory.");
 			return false;
 		}
-		if(source.getName().contentEquals("timeline"))
+		if (source.getName().contentEquals("timeline"))
 			return true;
 
 		// Create target directory if it doesn't exist
@@ -251,11 +247,14 @@ public class AddFromFile extends AbstractAddFrom {
 
 	/**
 	 * Helper method to copy a directory recursively.
-	 * 
-	 * @param sourceDir The source directory
-	 * @param targetDir The target directory
+	 *
+	 * @param sourceDir
+	 *            The source directory
+	 * @param targetDir
+	 *            The target directory
 	 * @return true if the copy operation was successful
-	 * @throws IOException If an I/O error occurs
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	private static boolean copyDirectory(File sourceDir, File targetDir) throws IOException {
 		// Get all files and directories in the source directory
@@ -301,13 +300,13 @@ public class AddFromFile extends AbstractAddFrom {
 		return true;
 	}
 
-	public static File getFile(String name,CaDoodleFile cf) {
+	public static File getFile(String name, CaDoodleFile cf) {
 		String strValue = cf.getSelf().getAbsolutePath();
 		File parentFile = new File(strValue).getParentFile();
-		File stl=null;
+		File stl = null;
 		for (File f : parentFile.listFiles()) {
 			if (f.getName().contains(name)) {
-				
+
 				if (f.isDirectory()) {
 					// is a doodle file
 					for (File d : f.listFiles()) {
@@ -318,9 +317,9 @@ public class AddFromFile extends AbstractAddFrom {
 				} else {
 					for (String s : ScriptingEngine.getAllExtensions()) {
 						if (f.getName().toLowerCase().endsWith(s.toLowerCase())) {
-							if(s.toLowerCase().contains("stl")){
-								stl=f;// return the stl if no blender file exists
-							}else
+							if (s.toLowerCase().contains("stl")) {
+								stl = f;// return the stl if no blender file exists
+							} else
 								return f;
 						}
 					}
@@ -328,57 +327,58 @@ public class AddFromFile extends AbstractAddFrom {
 			}
 
 		}
-		if(stl!=null)
+		if (stl != null)
 			return stl;
 		throw new RuntimeException("File not found! " + name);
 	}
-//
-//	private String getStrValue() {
-//		
-//		return getParameter("UnKnown").getStrValue();
-//	}
+	//
+	// private String getStrValue() {
+	//
+	// return getParameter("UnKnown").getStrValue();
+	// }
 
-	private static CSG processGiven(CSG csg, int i, String name, File f,String task,TransformNR location,CSGDatabaseInstance instance) {
+	private static CSG processGiven(CSG csg, int i, String name, File f, String task, TransformNR location,
+			CSGDatabaseInstance instance) {
 		Transform nrToCSG = TransformFactory.nrToCSG(location);
 		boolean isDoodle = f.getName().toLowerCase().endsWith(".doodle");
-		if(isDoodle) {
+		if (isDoodle) {
 			csg.setStorage(new PropertyStorage());
 		}
-		
-		CSG processedCSG = csg
-				.transformed(nrToCSG).syncProperties(instance,csg).setRegenerate(previous -> {
-					try {
-						File file =f;
-						//CSGDatabaseInstance instance = CSGDatabase.getInstance();
-						CSGDatabaseInstance instancetmp = null;
 
-						if(isDoodle) {
-							Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
-							instancetmp = new CSGDatabaseInstance(tempFile.toFile());
-							//CSGDatabase.setInstance(instancetmp);
-						}
-						String fileLocation = file.getAbsolutePath();
-						com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
-						List<CSG> flattenedCSGs = ScriptingEngine.flaten(instancetmp,file, CSG.class, null);
-						
-						CSG csg1 = flattenedCSGs.get(i);
-						if(isDoodle) {
-							csg1.setStorage(new PropertyStorage());
-						}
-						//CSGDatabase.setInstance(instance);
-						csg1.setParameter(instance,getFileLocationparam(instance,f,task));
-						return processGiven(csg1, i, name,f,task,location,instance);
-					} catch (Exception e) {
-						com.neuronrobotics.sdk.common.Log.error(e);
-					}
-					return previous;
-				}).setName(name);
+		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(instance, csg).setRegenerate(previous -> {
+			try {
+				File file = f;
+				// CSGDatabaseInstance instance = CSGDatabase.getInstance();
+				CSGDatabaseInstance instancetmp = null;
+
+				if (isDoodle) {
+					Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
+					instancetmp = new CSGDatabaseInstance(tempFile.toFile());
+					// CSGDatabase.setInstance(instancetmp);
+				}
+				String fileLocation = file.getAbsolutePath();
+				com.neuronrobotics.sdk.common.Log.error("Regenerating " + fileLocation);
+				List<CSG> flattenedCSGs = ScriptingEngine.flaten(instancetmp, file, CSG.class, null);
+
+				CSG csg1 = flattenedCSGs.get(i);
+				if (isDoodle) {
+					csg1.setStorage(new PropertyStorage());
+				}
+				// CSGDatabase.setInstance(instance);
+				csg1.setParameter(instance, getFileLocationparam(instance, f, task));
+				return processGiven(csg1, i, name, f, task, location, instance);
+			} catch (Exception e) {
+				com.neuronrobotics.sdk.common.Log.error(e);
+			}
+			return previous;
+		}).setName(name);
 		MoveCenter.set(task, processedCSG, nrToCSG);
 		return processedCSG;
 	}
 
-	private static StringParameter getFileLocationparam(CSGDatabaseInstance instance, File pathname,String task) {
-		StringParameter stringParameter = new StringParameter(instance,task + "_CaDoodle_File", pathname.getAbsolutePath(), new ArrayList<String>());
+	private static StringParameter getFileLocationparam(CSGDatabaseInstance instance, File pathname, String task) {
+		StringParameter stringParameter = new StringParameter(instance, task + "_CaDoodle_File",
+				pathname.getAbsolutePath(), new ArrayList<String>());
 		stringParameter.setStrValue(pathname.getAbsolutePath());
 		return stringParameter;
 	}
@@ -405,6 +405,6 @@ public class AddFromFile extends AbstractAddFrom {
 
 	@Override
 	public File getFile() throws NoSuchFileException {
-		return getFile(name,getCaDoodleFile());
+		return getFile(name, getCaDoodleFile());
 	}
 }

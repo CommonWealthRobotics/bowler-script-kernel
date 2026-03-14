@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.gson.annotations.Expose;
-import com.neuronrobotics.bowlerstudio.creature.LimbOption;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AbstractAddFrom;
@@ -85,7 +84,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 			redo();
 			MobileBaseCadManager manager = builder.getCadManager();
 			if (elbow != null) {
-				ArrayList<CSG> limbCad = manager.generateCad(getCaDoodleFile().getCsgDBinstance(),getLimb());
+				ArrayList<CSG> limbCad = manager.generateCad(getCaDoodleFile().getCsgDBinstance(), getLimb());
 				for (CSG c : incoming) {
 					Optional<String> limbName2 = c.getLimbName();
 					if (limbName2.isPresent())
@@ -122,7 +121,8 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param base the base to set
+	 * @param base
+	 *            the base to set
 	 */
 	public ModifyLimb setBase(TransformNR base) {
 		this.base = base;
@@ -137,7 +137,8 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param tip the tip to set
+	 * @param tip
+	 *            the tip to set
 	 */
 	public ModifyLimb setTip(TransformNR tip) {
 		this.tip = tip;
@@ -152,7 +153,8 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param elbow the elbow to set
+	 * @param elbow
+	 *            the elbow to set
 	 */
 	public ModifyLimb setElbow(TransformNR elbow) {
 		this.elbow = elbow;
@@ -172,7 +174,8 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param newLimb the newLimb to set
+	 * @param newLimb
+	 *            the newLimb to set
 	 */
 	public ModifyLimb setLimb(DHParameterKinematics newLimb) {
 		this.newLimb = newLimb;
@@ -185,7 +188,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	public void undo() {
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
 		setUndo(true);
-		//com.neuronrobotics.sdk.common.Log.debug("Undo ModifyLimb");
+		// com.neuronrobotics.sdk.common.Log.debug("Undo ModifyLimb");
 		try {
 			builder.build(getDb());
 		} catch (Exception e) {
@@ -198,7 +201,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	public void redo() {
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
 		setUndo(false);
-		//com.neuronrobotics.sdk.common.Log.debug("Redo ModifyLimb");
+		// com.neuronrobotics.sdk.common.Log.debug("Redo ModifyLimb");
 		try {
 			builder.build(getDb());
 		} catch (Exception e) {
@@ -215,7 +218,8 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param undo the undo to set
+	 * @param undo
+	 *            the undo to set
 	 */
 	public void setUndo(boolean undo) {
 		this.undo = undo;

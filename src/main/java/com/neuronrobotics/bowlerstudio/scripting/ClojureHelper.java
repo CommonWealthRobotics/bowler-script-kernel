@@ -63,22 +63,23 @@ public class ClojureHelper implements IScriptingLanguage {
 	}
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,File code, ArrayList<Object> args) {
+	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) {
 		byte[] bytes;
 		try {
 			bytes = Files.readAllBytes(code.toPath());
 			String s = new String(bytes, "UTF-8");
-			return inlineScriptRun( db,s, args);
+			return inlineScriptRun(db, s, args);
 		} catch (IOException e1) {
 			// Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e1);
 		}
-		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of type="+ret.getClass()+" value="+ret);
+		// com.neuronrobotics.sdk.common.Log.error("Clojure returned of
+		// type="+ret.getClass()+" value="+ret);
 		return null;
 	}
 
 	@Override
-	public Object inlineScriptRun(CSGDatabaseInstance db,String code, ArrayList<Object> args) {
+	public Object inlineScriptRun(CSGDatabaseInstance db, String code, ArrayList<Object> args) {
 
 		return ClojureHelper.eval(code);
 	}
@@ -96,7 +97,7 @@ public class ClojureHelper implements IScriptingLanguage {
 
 	/**
 	 * Get the contents of an empty file
-	 * 
+	 *
 	 * @return
 	 */
 	public String getDefaultContents() {

@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
-import com.neuronrobotics.bowlerstudio.opencv.OpenCVManager;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.common.DeviceManager;
 import com.neuronrobotics.sdk.common.NonBowlerDevice;
@@ -39,12 +38,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 public class UniquePersonFactory extends NonBowlerDevice {
@@ -72,7 +69,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 		HBox box = new HBox();
 		TextField name = new TextField();
 		Label percent = new Label();
-		UniquePersonUI(){
+		UniquePersonUI() {
 			box.getChildren().addAll(name);
 			box.getChildren().addAll(percent);
 		}
@@ -119,7 +116,7 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	public void clear() {
-		while(isProcessFlag()) {
+		while (isProcessFlag()) {
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
@@ -164,7 +161,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	/**
-	 * @param confidence the confidence to set
+	 * @param confidence
+	 *            the confidence to set
 	 */
 	public static void setConfidence(double confidence) {
 		UniquePersonFactory.confidence = confidence;
@@ -178,7 +176,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	/**
-	 * @param timeout the timeout to set
+	 * @param timeout
+	 *            the timeout to set
 	 */
 	public static void setTimeout(long timeout) {
 		UniquePersonFactory.timeout = timeout;
@@ -192,7 +191,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	/**
-	 * @param numberOfTrainingHashes the numberOfTrainingHashes to set
+	 * @param numberOfTrainingHashes
+	 *            the numberOfTrainingHashes to set
 	 */
 	public static void setNumberOfTrainingHashes(int numberOfTrainingHashes) {
 		UniquePersonFactory.numberOfTrainingHashes = numberOfTrainingHashes;
@@ -280,7 +280,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 					try {
 						id = features.predict(cmp);
 					} catch (Throwable ex) {
-						com.neuronrobotics.sdk.common.Log.error("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
+						com.neuronrobotics.sdk.common.Log
+								.error("Image failed h=" + imgBuff.getHeight() + " w=" + imgBuff.getWidth());
 						// ex.printStackTrace();
 						continue;
 					}
@@ -435,12 +436,13 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	/**
-	 * @param workingMemory the workingMemory to set
+	 * @param workingMemory
+	 *            the workingMemory to set
 	 */
 	public void setWorkingMemory(VBox workingMemory) {
 		if (this.workingMemory != null) {
 			this.workingMemory.getChildren().clear();
-			for(UniquePersonUI ui:uiElelments.values()) {
+			for (UniquePersonUI ui : uiElelments.values()) {
 				ui.box.getChildren().clear();
 			}
 			uiElelments.clear();
@@ -471,7 +473,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	/**
-	 * @param database the database to set
+	 * @param database
+	 *            the database to set
 	 */
 	public void setDatabase(File database) {
 		this.database = database;
@@ -504,7 +507,8 @@ public class UniquePersonFactory extends NonBowlerDevice {
 	}
 
 	/**
-	 * @param processFlag the processFlag to set
+	 * @param processFlag
+	 *            the processFlag to set
 	 */
 	public void setProcessFlag() {
 		if (isProcessFlag()) {

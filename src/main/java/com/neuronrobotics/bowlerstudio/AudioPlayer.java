@@ -19,7 +19,7 @@ import marytts.util.data.audio.StereoAudioInputStream;
 
 /**
  * A single Thread Audio Player Once used it has to be initialised again
- * 
+ *
  * @author GOXR3PLUS
  *
  */
@@ -69,28 +69,28 @@ public class AudioPlayer extends Thread {
 			}
 			double val = (currentRollingAverage + index) / 2 * currentDerivitiveTerm;
 			switch (currentStatus) {
-			case B_KST_SOUNDS:
-				if (val > AudioPlayer.getThreshhold()) {
-					currentStatus = AudioStatus.D_AA_SOUNDS;
-				}
-				break;
-			case G_F_V_SOUNDS:
-				if (val < AudioPlayer.getLowerThreshhold()) {
-					currentStatus = AudioStatus.X_NO_SOUND;
-				}
-				break;
-			case X_NO_SOUND:
-				if (val > AudioPlayer.getThreshhold()) {
-					currentStatus = AudioStatus.B_KST_SOUNDS;
-				}
-				break;
-			case D_AA_SOUNDS:
-				if (val < AudioPlayer.getLowerThreshhold()) {
-					currentStatus = AudioStatus.G_F_V_SOUNDS;
-				}
-				break;
-			default:
-				break;
+				case B_KST_SOUNDS :
+					if (val > AudioPlayer.getThreshhold()) {
+						currentStatus = AudioStatus.D_AA_SOUNDS;
+					}
+					break;
+				case G_F_V_SOUNDS :
+					if (val < AudioPlayer.getLowerThreshhold()) {
+						currentStatus = AudioStatus.X_NO_SOUND;
+					}
+					break;
+				case X_NO_SOUND :
+					if (val > AudioPlayer.getThreshhold()) {
+						currentStatus = AudioStatus.B_KST_SOUNDS;
+					}
+					break;
+				case D_AA_SOUNDS :
+					if (val < AudioPlayer.getLowerThreshhold()) {
+						currentStatus = AudioStatus.G_F_V_SOUNDS;
+					}
+					break;
+				default :
+					break;
 			}
 			return currentStatus;
 		}
@@ -104,17 +104,17 @@ public class AudioPlayer extends Thread {
 
 	/**
 	 * The status of the player
-	 * 
+	 *
 	 * @author GOXR3PLUS
 	 *
 	 */
 	public enum Status {
 		/**
-		 * 
+		 *
 		 */
 		WAITING,
 		/**
-		* 
+		*
 		*/
 		PLAYING;
 	}
@@ -125,7 +125,7 @@ public class AudioPlayer extends Thread {
 	 *
 	 */
 	public AudioPlayer(String tts) {
-		TTSString=tts;
+		TTSString = tts;
 	}
 
 	/**
@@ -190,17 +190,22 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * 
-	 * @param audioFile    audiofile
-	 * @param line         line
-	 * @param lineListener lineListener
-	 * @param outputMode   if MONO, force output to be mono; if STEREO, force output
-	 *                     to be STEREO; if LEFT_ONLY, play a mono signal over the
-	 *                     left channel of a stereo output, or mute the right
-	 *                     channel of a stereo signal; if RIGHT_ONLY, do the same
-	 *                     with the right output channel.
-	 * @throws IOException                   IOException
-	 * @throws UnsupportedAudioFileException UnsupportedAudioFileException
+	 *
+	 * @param audioFile
+	 *            audiofile
+	 * @param line
+	 *            line
+	 * @param lineListener
+	 *            lineListener
+	 * @param outputMode
+	 *            if MONO, force output to be mono; if STEREO, force output to be
+	 *            STEREO; if LEFT_ONLY, play a mono signal over the left channel of
+	 *            a stereo output, or mute the right channel of a stereo signal; if
+	 *            RIGHT_ONLY, do the same with the right output channel.
+	 * @throws IOException
+	 *             IOException
+	 * @throws UnsupportedAudioFileException
+	 *             UnsupportedAudioFileException
 	 */
 	public AudioPlayer(File audioFile, SourceDataLine line, LineListener lineListener, int outputMode)
 			throws IOException, UnsupportedAudioFileException {
@@ -211,15 +216,18 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * 
-	 * @param ais          ais
-	 * @param line         line
-	 * @param lineListener lineListener
-	 * @param outputMode   if MONO, force output to be mono; if STEREO, force output
-	 *                     to be STEREO; if LEFT_ONLY, play a mono signal over the
-	 *                     left channel of a stereo output, or mute the right
-	 *                     channel of a stereo signal; if RIGHT_ONLY, do the same
-	 *                     with the right output channel.
+	 *
+	 * @param ais
+	 *            ais
+	 * @param line
+	 *            line
+	 * @param lineListener
+	 *            lineListener
+	 * @param outputMode
+	 *            if MONO, force output to be mono; if STEREO, force output to be
+	 *            STEREO; if LEFT_ONLY, play a mono signal over the left channel of
+	 *            a stereo output, or mute the right channel of a stereo signal; if
+	 *            RIGHT_ONLY, do the same with the right output channel.
 	 */
 	public AudioPlayer(AudioInputStream ais, SourceDataLine line, LineListener lineListener, int outputMode) {
 		this.ais = ais;
@@ -265,7 +273,7 @@ public class AudioPlayer extends Thread {
 	/**
 	 * Sets Gain value. Line should be opened before calling this method. Linear
 	 * scale 0.0 1.0 Threshold Coef. : 1/2 to avoid saturation.
-	 * 
+	 *
 	 * @param fGain
 	 */
 	public void setGain(float fGain) {
@@ -292,7 +300,7 @@ public class AudioPlayer extends Thread {
 	public void run() {
 
 		status = Status.PLAYING;
-		ais = lambda.startProcessing(ais,TTSString);
+		ais = lambda.startProcessing(ais, TTSString);
 		AudioFormat audioFormat = ais.getFormat();
 		if (audioFormat.getChannels() == 1) {
 			if (outputMode != 0) {
@@ -351,11 +359,11 @@ public class AudioPlayer extends Thread {
 		Double previousValue = null;
 		try {
 			while ((nRead != -1) && (!exitRequested) && (!Thread.interrupted())) {
-//			try {
-//				Thread.sleep(0,1);
-//			} catch (InterruptedException e) {
-//				break;
-//			}
+				// try {
+				// Thread.sleep(0,1);
+				// } catch (InterruptedException e) {
+				// break;
+				// }
 				try {
 					nRead = ais.read(abData, 0, abData.length);
 				} catch (IOException ex) {
@@ -473,7 +481,8 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * @param speakProgress the speakProgress to set
+	 * @param speakProgress
+	 *            the speakProgress to set
 	 */
 	public void setSpeakProgress(ISpeakingProgress speakProgress) {
 		this.speakProgress = speakProgress;
@@ -487,7 +496,8 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * @param threshhold the threshhold to set
+	 * @param threshhold
+	 *            the threshhold to set
 	 */
 	public static void setThreshhold(double t) {
 
@@ -502,7 +512,8 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * @param lowerThreshhold the lowerThreshhold to set
+	 * @param lowerThreshhold
+	 *            the lowerThreshhold to set
 	 */
 	public static void setLowerThreshhold(double lt) {
 
@@ -517,7 +528,8 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * @param integralDepth the integralDepth to set
+	 * @param integralDepth
+	 *            the integralDepth to set
 	 */
 	public static void setIntegralDepth(int integralDepth) {
 		AudioPlayer.integralDepth = integralDepth;
@@ -539,7 +551,8 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * @param integralGain the integralGain to set
+	 * @param integralGain
+	 *            the integralGain to set
 	 */
 	public static void setIntegralGain(double integralGain) {
 		AudioPlayer.integralGain = integralGain;
@@ -553,7 +566,8 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * @param derivitiveGain the derivitiveGain to set
+	 * @param derivitiveGain
+	 *            the derivitiveGain to set
 	 */
 	public static void setDerivitiveGain(double derivitiveGain) {
 		AudioPlayer.derivitiveGain = derivitiveGain;
@@ -567,7 +581,8 @@ public class AudioPlayer extends Thread {
 	}
 
 	/**
-	 * @param lambda the lambda to set
+	 * @param lambda
+	 *            the lambda to set
 	 */
 	public static void setLambda(IAudioProcessingLambda lambda) {
 		AudioPlayer.lambda = lambda;

@@ -1,11 +1,8 @@
 package com.neuronrobotics.bowlerstudio.physics;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -13,9 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import javax.vecmath.Color3b;
 import javax.xml.bind.JAXBException;
 
 import org.mujoco.IMujocoController;
@@ -34,7 +29,6 @@ import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
-import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
@@ -42,19 +36,13 @@ import com.neuronrobotics.sdk.addons.kinematics.imu.IMUUpdate;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.time.ITimeProvider;
-import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
-import eu.mihosoft.vrl.v3d.Parabola;
 import eu.mihosoft.vrl.v3d.Polygon;
-import eu.mihosoft.vrl.v3d.RoundedCylinder;
-import eu.mihosoft.vrl.v3d.Sphere;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
-import eu.mihosoft.vrl.v3d.ext.openjfx.importers.obj.ObjImporter;
-import eu.mihosoft.vrl.v3d.ext.quickhull3d.HullUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -149,8 +137,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			if (link.getLinkConfiguration().isPassive())
 				continue;
 			double target = Math.toRadians(link.getCurrentEngineeringUnits()) * gearRatios.get(link);
-//			double error = target-positions.get(s);
-//			double effort = error * kp;
+			// double error = target-positions.get(s);
+			// double effort = error * kp;
 			// com.neuronrobotics.sdk.common.Log.error("Actuator "+s+" position
 			// "+positions.get(s)+" effort
 			// "+effort);
@@ -519,11 +507,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			baseParts.put(part, center.copy());
 
 		}
-//		if (baseParts.size() == 0) {
-//			CSG CoM = new Sphere(2).toCSG();
-//			baseParts.put(CoM, cat.getCenterOfMassFromCentroid().copy());
-//			limbBase.put(CoM, new TransformNR());
-//		}
+		// if (baseParts.size() == 0) {
+		// CSG CoM = new Sphere(2).toCSG();
+		// baseParts.put(CoM, cat.getCenterOfMassFromCentroid().copy());
+		// limbBase.put(CoM, new TransformNR());
+		// }
 		int numPartsWithoutMass = 0;
 		for (CSG part : baseParts.keySet()) {
 			if (!part.getStorage().getValue("massKg").isPresent()) {
@@ -727,7 +715,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			// control signal to match the limits
 		}
 
-//	
+		//
 
 		for (int i = 0; i < cad.size(); i++) {
 			CSG part = cad.get(i);
@@ -748,19 +736,19 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 							TransformNR myStep = new TransformNR(k.getDhLink(myLink).DhStep(0));
 							CSG transformed = part.transformed(TransformFactory.nrToCSG(myStep));
 							CSG hull;
-//				if(cat.isWheel(myLink)) {
-//					double height = part.getTotalZ();
-//					double radius =( part.getTotalY()+part.getTotalX())/4.0;
-//					double contact =5;
-//					if(contact>height)
-//						contact=contact/2;
-//					CSG cone = Parabola.cone(radius, height/2-contact/2).movez(contact/2);
-//					cone=cone.union(cone.rotx(180)).hull();
-//					hull = cone
-//							.toZMin()
-//							.movez(transformed.getMinZ())
-//							;
-//				}else
+							// if(cat.isWheel(myLink)) {
+							// double height = part.getTotalZ();
+							// double radius =( part.getTotalY()+part.getTotalX())/4.0;
+							// double contact =5;
+							// if(contact>height)
+							// contact=contact/2;
+							// CSG cone = Parabola.cone(radius, height/2-contact/2).movez(contact/2);
+							// cone=cone.union(cone.rotx(180)).hull();
+							// hull = cone
+							// .toZMin()
+							// .movez(transformed.getMinZ())
+							// ;
+							// }else
 							try {
 								hull = transformed.hull();
 							} catch (Exception ex) {
@@ -834,9 +822,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		Vector3d centerGroup = null;
 		for (CSG part : partsIn) {
 			if (!checkForPhysics(part))
-				continue;
-			;
-//			try {
+				continue;;
+			// try {
 			CSG hull = part.moveToCenter();
 
 			Vector3d center = part.getCenter();
@@ -863,9 +850,9 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			geom = addBody.addGeom().withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
 			parts.add(hull);
 			setCSGMeshToGeom(nameOfCSG, geom);
-//			}catch(Throwable t) {
-//				t.printStackTrace(System.out);
-//			}
+			// }catch(Throwable t) {
+			// t.printStackTrace(System.out);
+			// }
 		}
 	}
 
@@ -874,8 +861,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		String nameOfCSG = null;
 		for (CSG part : partsIn) {
 			if (!checkForPhysics(part))
-				continue;
-			;
+				continue;;
 			CSG hull = part.moveToCenter();
 
 			Vector3d center = part.getCenter();
@@ -913,11 +899,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		String fromto = "0 0 " + part.getMinZ() / 1000.0 + " 0 0 " + part.getMaxZ() / 1000.0;
 		geom.withName(nameOfCSG).withType(GeomtypeType.MESH).withMesh(nameOfCSG).withCondim(getCondim())
 				.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0)).withMaterial(nameOfCSG)
-//			.withType(GeomtypeType.CYLINDER).withSize("" + part.getTotalX() / 2000.0)
-//			.withFromto(fromto)
-//			.withCondim(getCondim())
-//			.withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
-//			.withMaterial(nameOfCSG)
+		// .withType(GeomtypeType.CYLINDER).withSize("" + part.getTotalX() / 2000.0)
+		// .withFromto(fromto)
+		// .withCondim(getCondim())
+		// .withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
+		// .withMaterial(nameOfCSG)
 
 		;
 	}
@@ -965,9 +951,10 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				}
 			}
 			String obj = hull.toObjString();
-//			InputStream in=new ByteArrayInputStream(obj.getBytes(StandardCharsets.UTF_8));
-//			
-//			ObjImporter importer = new ObjImporter(in);
+			// InputStream in=new
+			// ByteArrayInputStream(obj.getBytes(StandardCharsets.UTF_8));
+			//
+			// ObjImporter importer = new ObjImporter(in);
 
 			Files.write(Paths.get(tempFile.getAbsolutePath()), obj.getBytes());
 			System.out.print(" " + (System.currentTimeMillis() - start + "\n"));
@@ -1028,14 +1015,16 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	/**
-	 * @param timestep the timestep to set
+	 * @param timestep
+	 *            the timestep to set
 	 */
 	public void setTimestep(double timestep) {
 		this.timestep = timestep;
 	}
 
 	/**
-	 * @param iterations the iterations to set
+	 * @param iterations
+	 *            the iterations to set
 	 */
 	public void setIterations(int iterations) {
 		this.iterations = iterations;
@@ -1059,18 +1048,18 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	 */
 	public void setCondim(int condim) {
 		switch (condim) {
-		case 1:
-		case 3:
-		case 4:
-		case 6:
-			this.condim = condim;
-			return;
-		default:
-			throw new RuntimeException("	 * condim\n" + "		1 Frictionless contact.\n"
-					+ "		3 Regular frictional contact, opposing slip in the tangent plane.\n"
-					+ "		4 Frictional contact, opposing slip in the tangent plane and rotation around the contact normal. This is useful for modeling soft contacts (independent of contact penetration).\n"
-					+ "		6 Frictional contact, opposing slip in the tangent plane, rotation around the contact normal and rotation around the two axes of the tangent plane. The latter frictional effects are useful for preventing objects from indefinite rolling.\n"
-					+ "");
+			case 1 :
+			case 3 :
+			case 4 :
+			case 6 :
+				this.condim = condim;
+				return;
+			default :
+				throw new RuntimeException("	 * condim\n" + "		1 Frictionless contact.\n"
+						+ "		3 Regular frictional contact, opposing slip in the tangent plane.\n"
+						+ "		4 Frictional contact, opposing slip in the tangent plane and rotation around the contact normal. This is useful for modeling soft contacts (independent of contact penetration).\n"
+						+ "		6 Frictional contact, opposing slip in the tangent plane, rotation around the contact normal and rotation around the two axes of the tangent plane. The latter frictional effects are useful for preventing objects from indefinite rolling.\n"
+						+ "");
 		}
 	}
 
@@ -1089,7 +1078,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	/**
-	 * @param mRuntime the mRuntime to set
+	 * @param mRuntime
+	 *            the mRuntime to set
 	 */
 	public void setmRuntime(MuJoCoModelManager mRuntime) {
 		this.mRuntime = mRuntime;
@@ -1118,7 +1108,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	/**
-	 * @param integratorType the integratorType to set
+	 * @param integratorType
+	 *            the integratorType to set
 	 */
 	public void setIntegratorType(IntegratorType integratorType) {
 		this.integratorType = integratorType;

@@ -3,7 +3,6 @@ package com.neuronrobotics.bowlerstudio.lipsync;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
@@ -106,7 +105,8 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	}
 
 	/**
-	 * @param modelName the modelName to set
+	 * @param modelName
+	 *            the modelName to set
 	 */
 	public static void setModelName(String modelName) {
 		VoskLipSync.modelName = modelName;
@@ -126,15 +126,15 @@ public class VoskLipSync implements IAudioProcessingLambda {
 				byte[] buffer = new byte[1024];
 				int count = 0;
 				com.neuronrobotics.sdk.common.Log.error("Downloading Vosk Model " + getModelName());
-				
+
 				long time = System.currentTimeMillis();
-				long total=0;
+				long total = 0;
 				while ((count = bis.read(buffer, 0, 1024)) != -1) {
 					fis.write(buffer, 0, count);
-					total+=count;
-					if(System.currentTimeMillis()-time>=1000) {
-						time=System.currentTimeMillis();
-						System.out.println("Vosk Downloaded "+total+" bytes");
+					total += count;
+					if (System.currentTimeMillis() - time >= 1000) {
+						time = System.currentTimeMillis();
+						System.out.println("Vosk Downloaded " + total + " bytes");
 					}
 				}
 				fis.close();
@@ -426,7 +426,8 @@ public class VoskLipSync implements IAudioProcessingLambda {
 			}
 			// rhubarb!
 			processRaw(audio, text.getAbsolutePath());
-			com.neuronrobotics.sdk.common.Log.error("Vosk Lip Sync Done writing! took " + (System.currentTimeMillis() - start));
+			com.neuronrobotics.sdk.common.Log
+					.error("Vosk Lip Sync Done writing! took " + (System.currentTimeMillis() - start));
 		} catch (Exception e) {
 			// Auto-generated catch block
 			e.printStackTrace();
@@ -523,8 +524,8 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	}
 
 	/**
-	 * @param percentageTimeOfLipSyncReadahead the percentageTimeOfLipSyncReadahead
-	 *                                         to set
+	 * @param percentageTimeOfLipSyncReadahead
+	 *            the percentageTimeOfLipSyncReadahead to set
 	 */
 	public static void setPercentageTimeOfLipSyncReadahead(double percentageTimeOfLipSyncReadahead) {
 		PercentageTimeOfLipSyncReadahead = percentageTimeOfLipSyncReadahead;
@@ -538,7 +539,8 @@ public class VoskLipSync implements IAudioProcessingLambda {
 	}
 
 	/**
-	 * @param timeLeadLag the timeLeadLag to set
+	 * @param timeLeadLag
+	 *            the timeLeadLag to set
 	 */
 	public void setTimeLeadLag(double timeLeadLag) {
 		this.timeLeadLag = timeLeadLag;

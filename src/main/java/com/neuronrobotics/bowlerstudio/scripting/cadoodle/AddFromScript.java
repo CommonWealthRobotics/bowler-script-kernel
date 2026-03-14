@@ -20,7 +20,6 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 
@@ -31,7 +30,7 @@ public class AddFromScript extends AbstractAddFrom {
 	private String fileRel = "";
 
 	@Expose(serialize = true, deserialize = true)
-	private TransformNR location =null;
+	private TransformNR location = null;
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM = false;
 
@@ -66,32 +65,29 @@ public class AddFromScript extends AbstractAddFrom {
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
 			CSGDatabaseInstance instance = getCaDoodleFile().getCsgDBinstance();
-			if(isDoodle || instance ==null) {
+			if (isDoodle || instance == null) {
 				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
-				instance=(new CSGDatabaseInstance(tempFile.toFile()));
+				instance = (new CSGDatabaseInstance(tempFile.toFile()));
 			}
-			List<CSG> flaten = ScriptingEngine.flaten(instance,gitULR, fileName, CSG.class, args);
-			for(CSG c:flaten)
-			for(String s:c.getParameters(instance)) {
-				Log.debug("Parameter added "+s);
-			}
+			List<CSG> flaten = ScriptingEngine.flaten(instance, gitULR, fileName, CSG.class, args);
+			for (CSG c : flaten)
+				for (String s : c.getParameters(instance)) {
+					Log.debug("Parameter added " + s);
+				}
 			ArrayList<CSG> collect = new ArrayList<>();
 			collect.addAll(flaten);
-			if(collect.size()==0) {
+			if (collect.size() == 0) {
 				collect.add(new Cube(20).toCSG().setColor(Color.PINK));
 			}
-			for(int i=0;i<collect.size();i++) {
-				CSG csg=collect.get(i);
-				if(isDoodle) {
+			for (int i = 0; i < collect.size(); i++) {
+				CSG csg = collect.get(i);
+				if (isDoodle) {
 					csg.setStorage(new PropertyStorage());
 				}
-				Transform nrToCSG = TransformFactory.nrToCSG( getLocation() );
+				Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
 				String orderedName = getOrderedName();
-				CSG tmp=csg
-						.transformed(nrToCSG)
-						.syncProperties(getCaDoodleFile().getCsgDBinstance(),csg)
-						.setRegenerate(csg.getRegenerate())
-						.setName(orderedName);
+				CSG tmp = csg.transformed(nrToCSG).syncProperties(getCaDoodleFile().getCsgDBinstance(), csg)
+						.setRegenerate(csg.getRegenerate()).setName(orderedName);
 				collect.set(i, tmp);
 				MoveCenter.set(getName(), tmp, nrToCSG);
 			}
@@ -108,8 +104,8 @@ public class AddFromScript extends AbstractAddFrom {
 	}
 
 	public TransformNR getLocation() {
-		if(location==null)
-			location=new TransformNR();
+		if (location == null)
+			location = new TransformNR();
 		return location;
 	}
 

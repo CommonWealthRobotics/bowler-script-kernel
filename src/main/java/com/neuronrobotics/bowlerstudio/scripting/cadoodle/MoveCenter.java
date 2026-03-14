@@ -1,15 +1,11 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
-import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
-import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
@@ -81,8 +77,7 @@ public class MoveCenter extends CaDoodleOperation {
 					Transform transTmp = new Transform().apply((Transform) storage.getValue(s).get());
 					start = transTmp.apply(start);
 				} catch (Exception ex) {
-					com.neuronrobotics.sdk.common.Log.error(ex);
-					;
+					com.neuronrobotics.sdk.common.Log.error(ex);;
 				}
 			}
 			nrToCSG = start;
@@ -94,7 +89,7 @@ public class MoveCenter extends CaDoodleOperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		if(location==null)
+		if (location == null)
 			return back;
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
@@ -145,10 +140,10 @@ public class MoveCenter extends CaDoodleOperation {
 
 	public MoveCenter setLocation(TransformNR location) throws InvalidLocationMove {
 
-//		if (isWorkplaneNotOrigin(location))
-			this.location = location;
-//		else
-//			throw new InvalidLocationMove();
+		// if (isWorkplaneNotOrigin(location))
+		this.location = location;
+		// else
+		// throw new InvalidLocationMove();
 
 		return this;
 	}

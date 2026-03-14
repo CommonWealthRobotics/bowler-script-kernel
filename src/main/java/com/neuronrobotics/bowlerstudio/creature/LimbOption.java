@@ -24,7 +24,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
-import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.RobotHelper;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -40,7 +39,6 @@ import com.neuronrobotics.sdk.common.Log;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
@@ -93,8 +91,7 @@ public class LimbOption {
 			String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 			return gson.fromJson(content, TT_CaDoodleFile);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			return new ArrayList<LimbOption>();
 		}
 	}
@@ -166,7 +163,7 @@ public class LimbOption {
 				}
 			} catch (NoImageException e) {
 				Log.error(e);
-				image=new WritableImage(100, 100);
+				image = new WritableImage(100, 100);
 			}
 
 		}
