@@ -228,11 +228,11 @@ public class BezierEditor {
 		double xyRot = Math.toDegrees(Math.atan2(cp1Ydiff, cp1XDiff)) - 90;
 
 		TransformNR az = new TransformNR(0, 0, 0, new RotationNR(0, -xyRot, 0));
-		TransformNR reorented = az.times(vect);
-		// com.neuronrobotics.sdk.common.Log.error("CP1 "+reorented.getX()+"
-		// "+reorented.getY()+"
-		// "+reorented.getZ());
-		double xzRot = Math.toDegrees(Math.atan2(reorented.getZ(), reorented.getY()));
+		TransformNR reoriented = az.times(vect);
+		// com.neuronrobotics.sdk.common.Log.error("CP1 "+reoriented.getX()+"
+		// "+reoriented.getY()+"
+		// "+reoriented.getZ());
+		double xzRot = Math.toDegrees(Math.atan2(reoriented.getZ(), reoriented.getY()));
 
 		TransformNR pose = new TransformNR(0, 0, 0, new RotationNR(xzRot, xyRot, 0));
 
