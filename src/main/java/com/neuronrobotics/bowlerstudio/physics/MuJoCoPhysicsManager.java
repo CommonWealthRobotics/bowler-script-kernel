@@ -154,9 +154,9 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				String s = iterator.next();
 				if (bodyName.contentEquals(s)) {
 					TransformNR tf = mujocoToTransformNR(manager.getBodyPose(s));
-					Double xAcceleration = Math.toDegrees(tf.getRotation().getRotationTilt());
-					Double yAcceleration = Math.toDegrees(tf.getRotation().getRotationAzimuth());
-					Double zAcceleration = Math.toDegrees(tf.getRotation().getRotationElevation());
+					Double xAcceleration = Math.toDegrees(tf.getRotation().getRotationTiltRadians());
+					Double yAcceleration = Math.toDegrees(tf.getRotation().getRotationAzimuthRadians());
+					Double zAcceleration = Math.toDegrees(tf.getRotation().getRotationElevationRadians());
 
 					Double rotxAcceleration = 0.0;
 					Double rotyAcceleration = 0.0;

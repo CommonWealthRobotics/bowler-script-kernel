@@ -70,7 +70,8 @@ public class MobileBasePhysicsManager {
 				TransformFactory.nrToBullet(new TransformNR(gravity.x, gravity.y, gravity.z, new RotationNR()),
 						gravTrans);
 				TransformFactory.nrToBullet(
-						new TransformNR(0, 0, 0, orientation.w, orientation.x, orientation.y, orientation.z), orientTrans);
+						new TransformNR(0, 0, 0, orientation.w, orientation.x, orientation.y, orientation.z),
+						orientTrans);
 				orientTrans.inverse();
 				orientTrans.mul(gravTrans);
 

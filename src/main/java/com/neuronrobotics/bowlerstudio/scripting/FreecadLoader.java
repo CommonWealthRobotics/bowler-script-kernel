@@ -153,8 +153,9 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadModel.getAbsolutePath());
 			args.add(SVG.getAbsolutePath());
 			args.add("\"" + nr.getX() + "," + nr.getY() + "," + nr.getZ() + "\"");
-			args.add("\"" + Math.toDegrees(r.getRotationAzimuth()) + "," + Math.toDegrees(r.getRotationElevation())
-					+ "," + Math.toDegrees(r.getRotationTilt()) + "\"");
+			args.add("\"" + Math.toDegrees(r.getRotationAzimuthRadians()) + ","
+					+ Math.toDegrees(r.getRotationElevationRadians()) + "," + Math.toDegrees(r.getRotationTiltRadians())
+					+ "\"");
 			args.add(name);
 			args.add(bodyName);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);

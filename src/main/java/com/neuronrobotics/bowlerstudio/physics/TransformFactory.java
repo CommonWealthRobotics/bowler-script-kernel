@@ -182,9 +182,9 @@ public class TransformFactory {
 
 	public static TransformNR scale(TransformNR incoming, double scale) {
 		return new TransformNR(incoming.getX() * scale, incoming.getY() * scale, incoming.getZ() * scale,
-				new RotationNR(Math.toDegrees(incoming.getRotation().getRotationTilt()) * scale,
-						Math.toDegrees(incoming.getRotation().getRotationAzimuth()) * scale,
-						Math.toDegrees(incoming.getRotation().getRotationElevation()) * scale));
+				new RotationNR(Math.toDegrees(incoming.getRotation().getRotationTiltRadians()) * scale,
+						Math.toDegrees(incoming.getRotation().getRotationAzimuthRadians()) * scale,
+						Math.toDegrees(incoming.getRotation().getRotationElevationRadians()) * scale));
 	}
 
 	public static TransformNR csgToNR(eu.mihosoft.vrl.v3d.Transform csg) {
