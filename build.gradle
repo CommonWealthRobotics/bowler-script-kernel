@@ -150,6 +150,8 @@ repositories {
 	maven { url "https://dl.bintray.com/dfki-lt/maven/" }
 	maven { url "https://raw.github.com/marytts/marytts/master/repository/" }
 	maven { url "https://repo.jenkins-ci.org/public/" }
+	maven { url "https://clojars.org/repo" }
+	
 }
 
 dependencies {
