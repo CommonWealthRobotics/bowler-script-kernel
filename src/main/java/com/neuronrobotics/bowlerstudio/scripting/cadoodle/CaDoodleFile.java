@@ -424,7 +424,9 @@ public class CaDoodleFile {
 							// clearCache(op);
 							try {
 								op.setCaDoodleFile(cf);
-								List<CSG> process = op.process(getPreviouState());
+								List<CSG> previouState = getPreviouState();
+								
+								List<CSG> process = op.process(previouState);
 								storeResultInCache(op, process);
 								setCurrentState(op, process);
 							} catch (Throwable tr) {
