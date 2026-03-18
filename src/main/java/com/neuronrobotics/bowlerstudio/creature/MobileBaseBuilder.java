@@ -188,12 +188,12 @@ public class MobileBaseBuilder {
 	}
 
 	public MobileBaseBuilder setGitCadEngine(String gitURL, String filename) {
-		mobileBase.setGitCadEngine(new String[]{gitURL, filename});
+		mobileBase.setGitCadEngine(new String[] { gitURL, filename });
 		return this;
 	}
 
 	public MobileBaseBuilder setGitWalkingEngine(String gitURL, String filename) {
-		mobileBase.setGitWalkingEngine(new String[]{gitURL, filename});
+		mobileBase.setGitWalkingEngine(new String[] { gitURL, filename });
 		return this;
 	}
 
@@ -407,7 +407,7 @@ public class MobileBaseBuilder {
 			mobileBase.connect();
 		this.db = db;
 		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName();
-		mobileBase.setGitSelfSource(new String[]{gitURL, filename});
+		mobileBase.setGitSelfSource(new String[] { gitURL, filename });
 		ArrayList<ModifyLimb> toRemove = new ArrayList<ModifyLimb>();
 		for (int i = 0; i < operations.size(); i++) {
 			CaDoodleOperation op = operations.get(i);
@@ -435,23 +435,23 @@ public class MobileBaseBuilder {
 					kin.zero();
 					limb.setKinematics(kin);
 					switch (limb.getLimb().getType()) {
-						case arm :
-						case flap :
-						case hand :
-						case head :
-							mobileBase.getAppendages().add(kin);
-							break;
-						case leg :
-							mobileBase.getLegs().add(kin);
-							break;
-						case steerable :
-							mobileBase.getSteerable().add(kin);
-							break;
-						case wheel :
-							mobileBase.getFixed().add(kin);
-							break;
-						default :
-							throw new RuntimeException("Unknown limb type in builder! " + limb.getLimb().getType());
+					case arm:
+					case flap:
+					case hand:
+					case head:
+						mobileBase.getAppendages().add(kin);
+						break;
+					case leg:
+						mobileBase.getLegs().add(kin);
+						break;
+					case steerable:
+						mobileBase.getSteerable().add(kin);
+						break;
+					case wheel:
+						mobileBase.getFixed().add(kin);
+						break;
+					default:
+						throw new RuntimeException("Unknown limb type in builder! " + limb.getLimb().getType());
 					}
 				}
 			}
@@ -500,7 +500,8 @@ public class MobileBaseBuilder {
 						try {
 							mobileBase.removeVitamin(l);
 						} catch (Exception ex) {
-							com.neuronrobotics.sdk.common.Log.error(ex);;
+							com.neuronrobotics.sdk.common.Log.error(ex);
+							;
 						}
 					}
 				}
@@ -550,8 +551,29 @@ public class MobileBaseBuilder {
 		if (!checkOptionSupported(consumes) && !forceLoad) {
 			throw new RuntimeException("Robot doesnt have enough resources to support " + controller.getLimb());
 		}
-		if (!operations.contains(controller))
-			operations.add(controller);
+		if (operations.contains(controller)) {
+			DHParameterKinematics kin = mobileBase.getLimbByName(controller.getName());
+			switch (controller.getLimb().getType()) {
+			case arm:
+			case flap:
+			case hand:
+			case head:
+				mobileBase.getAppendages().remove(kin);
+				break;
+			case leg:
+				mobileBase.getLegs().remove(kin);
+				break;
+			case steerable:
+				mobileBase.getSteerable().remove(kin);
+				break;
+			case wheel:
+				mobileBase.getFixed().remove(kin);
+				break;
+			default:
+				throw new RuntimeException("Unknown limb type in builder! " + controller.getLimb().getType());
+			}
+		}
+		operations.add(controller);
 	}
 
 	public boolean checkOptionSupported(LimbOption consumes) {
@@ -615,23 +637,23 @@ public class MobileBaseBuilder {
 					AddRobotLimb c = (AddRobotLimb) op;
 					DHParameterKinematics kin = c.getKinematics();
 					switch (c.getLimb().getType()) {
-						case arm :
-						case flap :
-						case hand :
-						case head :
-							mobileBase.getAppendages().remove(kin);
-							break;
-						case leg :
-							mobileBase.getLegs().remove(kin);
-							break;
-						case steerable :
-							mobileBase.getSteerable().remove(kin);
-							break;
-						case wheel :
-							mobileBase.getFixed().remove(kin);
-							break;
-						default :
-							throw new RuntimeException("Unknown limb type in builder! " + c.getLimb().getType());
+					case arm:
+					case flap:
+					case hand:
+					case head:
+						mobileBase.getAppendages().remove(kin);
+						break;
+					case leg:
+						mobileBase.getLegs().remove(kin);
+						break;
+					case steerable:
+						mobileBase.getSteerable().remove(kin);
+						break;
+					case wheel:
+						mobileBase.getFixed().remove(kin);
+						break;
+					default:
+						throw new RuntimeException("Unknown limb type in builder! " + c.getLimb().getType());
 					}
 				}
 				if (from == op) {
