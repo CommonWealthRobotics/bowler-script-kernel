@@ -36,6 +36,8 @@ public class Align extends CaDoodleOperation {
 
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
+	
+	private HashMap<CSG, Bounds> cache=null;
 
 	public String getName() {
 		if (name == null) {
@@ -67,7 +69,7 @@ public class Align extends CaDoodleOperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 
-		Bounds bounds2 = getBounds(incoming,null);//
+		Bounds bounds2 = getBounds(incoming,cache);//
 
 		HashMap<String, TransformNR> moves = new HashMap<>();
 		HashMap<String, CSG> objects = new HashMap<String, CSG>();
@@ -262,7 +264,7 @@ public class Align extends CaDoodleOperation {
 		for (CSG csg : incoming) {
 			if (cache.get(csg) == null) {
 				Log.debug("Computing bounds for " + csg.getName());
-				Log.error(new RuntimeException("Bounds computed here"));
+				//Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
 				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
 
 				if (csg.hasManipulator()) {
@@ -308,6 +310,15 @@ public class Align extends CaDoodleOperation {
 	}
 
 	public Align copy() {
-		return new Align().setBounds(boundNames).setNames(names).setAlignParams(x, y, z).setWorkplane(workplane);
+		return new Align().setBounds(boundNames).setNames(names).setAlignParams(x, y, z).setWorkplane(workplane).setCache(cache);
+	}
+
+	public HashMap<CSG, Bounds> getCache() {
+		return cache;
+	}
+
+	public Align setCache(HashMap<CSG, Bounds> cache) {
+		this.cache = cache;
+		return this;
 	}
 }
