@@ -67,7 +67,7 @@ public class Align extends CaDoodleOperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 
-		Bounds bounds2 = getBounds(incoming);//
+		Bounds bounds2 = getBounds(incoming,null);//
 
 		HashMap<String, TransformNR> moves = new HashMap<>();
 		HashMap<String, CSG> objects = new HashMap<String, CSG>();
@@ -211,14 +211,16 @@ public class Align extends CaDoodleOperation {
 		return this;
 	}
 
-	public Bounds getBounds(List<CSG> incoming) {
+	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) {
 		if (bounds != null) {
 			Log.error("Depricated Bounds in the align step!");
 			return bounds.getBounds();
 		}
 		if (boundNames != null) {
+			if(inWorkplaneBounds==null)
+				inWorkplaneBounds=new HashMap<CSG, Bounds>();
 			List<CSG> selectedCSG = getSelectedCSG(boundNames, incoming);
-			return Align.getBounds(selectedCSG, workplane, new HashMap<CSG, Bounds>());
+			return Align.getBounds(selectedCSG, workplane, inWorkplaneBounds);
 		} else {
 			throw new RuntimeException("Align can not be initialized without bounds!");
 		}
@@ -260,6 +262,7 @@ public class Align extends CaDoodleOperation {
 		for (CSG csg : incoming) {
 			if (cache.get(csg) == null) {
 				Log.debug("Computing bounds for " + csg.getName());
+				Log.error(new RuntimeException("Bounds computed here"));
 				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
 
 				if (csg.hasManipulator()) {
