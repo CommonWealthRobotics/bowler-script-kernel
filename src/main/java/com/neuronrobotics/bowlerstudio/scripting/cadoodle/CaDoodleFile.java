@@ -1360,8 +1360,8 @@ public class CaDoodleFile {
 	public void setRulerLocation(TransformNR rulerLocation) {
 		rulerLocation.setRotation(new RotationNR());
 		this.rulerLocation = rulerLocation;
-		com.neuronrobotics.sdk.common.Log.debug("Setting Ruler Location "+rulerLocation);
-		//com.neuronrobotics.sdk.common.Log.error(new Exception());
+		com.neuronrobotics.sdk.common.Log.debug("Setting Ruler Location " + rulerLocation);
+		// com.neuronrobotics.sdk.common.Log.error(new Exception());
 		fireWorkplaneChange();
 		fireSaveSuggestion();
 	}
