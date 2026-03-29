@@ -5,6 +5,8 @@ import javafx.geometry.Point3D;
 
 import java.util.HashMap;
 
+import org.apache.sshd.common.util.OsUtils;
+
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.*;
 import com.neuronrobotics.sdk.common.Log;
@@ -12,6 +14,7 @@ import com.neuronrobotics.sdk.common.Log;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 //import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
@@ -217,7 +220,7 @@ public class Manipulation {
 				try {
 					String name = event.getEventType().getName();
 
-					if (event.isControlDown())
+					if (isControlOrCommandPressed(event))
 						return;
 
 					switch (name) {
@@ -255,7 +258,12 @@ public class Manipulation {
 			}
 		};
 	}
-
+	public static boolean isControlOrCommandPressed(MouseEvent event) {
+		return OsUtils.isOSX() ? event.isMetaDown() : event.isControlDown();
+	}
+	public static boolean isControlOrCommandPressed(KeyEvent event) {
+		return OsUtils.isOSX() ? event.isMetaDown() : event.isControlDown();
+	}
 	private void pressed(MouseEvent event) {
 		setState(DragState.Dragging);
 
