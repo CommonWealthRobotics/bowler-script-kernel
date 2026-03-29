@@ -12,6 +12,7 @@ public enum OperationResult {
 		}
 		throw new IllegalArgumentException("No enum constant OperationResult with name: " + name);
 	}
+
 	@Override
 	public String toString() {
 		return name(); // Or name().toLowerCase(), etc.

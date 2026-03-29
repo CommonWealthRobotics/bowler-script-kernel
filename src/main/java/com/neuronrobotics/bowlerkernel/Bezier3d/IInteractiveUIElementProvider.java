@@ -27,6 +27,7 @@ public interface IInteractiveUIElementProvider {
 	default double getCamerDepth() {
 		return -1500;
 	}
+
 	public PerspectiveCamera getCamera();
 
 }

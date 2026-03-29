@@ -79,14 +79,17 @@ public class Vitamins {
 		databaseSet.clear();
 		fileLastLoaded.clear();
 	}
+
 	@Deprecated
 	public static CSG get(File resource) {
 		return get(CSGDatabase.getInstance(), resource, false);
 	}
+
 	@Deprecated
 	public static CSG get(File resource, boolean forceRefresh) {
 		return get(CSGDatabase.getInstance(), resource, forceRefresh);
 	}
+
 	public static CSG get(CSGDatabaseInstance db, File resource) {
 		return get(db, resource, false);
 	}
@@ -179,6 +182,7 @@ public class Vitamins {
 	public static void flatten(ArrayList<CSG> flat, Object o) {
 		ScriptingEngine.flatten(flat, o);
 	}
+
 	// public static CSG get(String type, String id) throws Exception {
 	// return get(CSGDatabase.getInstance(),type,id);
 	// }
@@ -210,8 +214,8 @@ public class Vitamins {
 				servoMeasurments.add(id);
 				Log.debug("Loading Vitamin " + type + " " + id);
 				newVitamin = (CSG) ScriptingEngine.gitScriptRun(instance, script.get("scriptGit").toString(), // git
-																												// location
-																												// of
+						// location
+						// of
 						// the library
 						repostring.toString(), // file to load
 						servoMeasurments);
@@ -357,10 +361,10 @@ public class Vitamins {
 					jsonString, // content of the file
 					"Making changes to " + type + " by " + PasswordManager.getUsername()
 							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
-																																		// message
-			// com.neuronrobotics.sdk.common.Log.error(jsonString);
-			// com.neuronrobotics.sdk.common.Log.error("Database saved " +
-			// getVitaminFile(type, null, false).getAbsolutePath());
+																																																			// message
+																																																			// com.neuronrobotics.sdk.common.Log.error(jsonString);
+																																																			// com.neuronrobotics.sdk.common.Log.error("Database saved " +
+																																																			// getVitaminFile(type, null, false).getAbsolutePath());
 		} catch (Exception ex) {
 			if (ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
 				ScriptingEngine.deleteRepo(getGitRepoDatabase());

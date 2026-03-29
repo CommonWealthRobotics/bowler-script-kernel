@@ -18,6 +18,7 @@ public class CaDoodleVitamin {
 	public CaDoodleVitamin(CSGDatabaseInstance myinstance) {
 		instance = myinstance;
 	}
+
 	public CSG get(String typencoming, ArrayList<Object> args) {
 		String name = args.get(0).toString();
 		ArrayList<String> types = new ArrayList<>();
@@ -32,6 +33,7 @@ public class CaDoodleVitamin {
 			throw ex;
 		}
 	}
+
 	public boolean isVitamin(CSG c) {
 		for (String s : instance.getParameters(c)) {
 			// Log.debug("Checking "+s);
@@ -41,6 +43,7 @@ public class CaDoodleVitamin {
 		}
 		return false;
 	}
+
 	public CSG get(String typencoming, String defaultValue, ArrayList<Object> args) {
 		String name = args.get(0).toString();
 

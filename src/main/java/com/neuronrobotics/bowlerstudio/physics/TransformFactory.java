@@ -58,6 +58,7 @@ public class TransformFactory {
 		TransformNR rotations = new TransformNR();
 		return affineToNr(rotations, input);
 	}
+
 	/**
 	 * Gets the transform.
 	 *
@@ -120,6 +121,7 @@ public class TransformFactory {
 		}
 		return rotations;
 	}
+
 	public static void nrToBullet(TransformNR nr, com.bulletphysics.linearmath.Transform bullet) {
 		bullet.origin.set((float) nr.getX(), (float) nr.getY(), (float) nr.getZ());
 		bullet.setRotation(new Quat4f((float) nr.getRotation().getRotationMatrix2QuaturnionX(),

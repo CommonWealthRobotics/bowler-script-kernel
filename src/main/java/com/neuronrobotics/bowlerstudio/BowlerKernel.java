@@ -94,6 +94,7 @@ public class BowlerKernel {
 			}
 		}
 	}
+
 	private static void loadHistoryLocal() {
 		historyFile = new File(ScriptingEngine.getWorkspace().getAbsolutePath() + "/bowler.history");
 		ArrayList<String> history = new ArrayList<>();

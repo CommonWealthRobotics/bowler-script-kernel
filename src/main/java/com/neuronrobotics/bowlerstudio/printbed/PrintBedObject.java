@@ -38,6 +38,7 @@ public class PrintBedObject {
 		manip.addSaveListener(() -> com.neuronrobotics.sdk.common.Log.error("Saving PrintBedObject " + name));
 		checkBounds();
 	}
+
 	public void addEventListener(EventHandler<MouseEvent> r) {
 		manip.addEventListener(r);
 	}
@@ -45,6 +46,7 @@ public class PrintBedObject {
 	public void addSaveListener(Runnable r) {
 		manip.addSaveListener(r);
 	}
+
 	public List<CSG> get() {
 		return Arrays.asList(part);
 	}
@@ -60,6 +62,7 @@ public class PrintBedObject {
 	public double getZ() {
 		return manip.getCurrentPose().getZ();
 	}
+
 	public void checkBounds() {
 		double minYTest = part.getMinY() - yMin + globalPose.getY();
 		double maxYTest = part.getMaxY() - yMax + globalPose.getY();

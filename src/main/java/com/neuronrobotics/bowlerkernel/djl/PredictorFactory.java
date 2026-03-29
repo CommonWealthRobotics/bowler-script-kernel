@@ -48,8 +48,8 @@ public class PredictorFactory {
 							// Load model from local file, e.g:
 							.optModelName("retinaface") // specify model file prefix
 							.optTranslator(translatorretinaface).optProgress(new ProgressBar()).optEngine("PyTorch") // Use
-																														// PyTorch
-																														// engine
+							// PyTorch
+							// engine
 							.build();
 
 					preloaded.put(type, criteriaretinaface.loadModel().newPredictor());
@@ -68,8 +68,8 @@ public class PredictorFactory {
 							.setTypes(Image.class, DetectedObjects.class)
 							.optModelUrls("https://resources.djl.ai/test-models/pytorch/ultranet.zip")
 							.optTranslator(translator).optProgress(new ProgressBar()).optEngine("PyTorch") // Use
-																											// PyTorch
-																											// engine
+							// PyTorch
+							// engine
 							.build();
 
 					preloaded.put(type, criteria.loadModel().newPredictor());
@@ -109,8 +109,8 @@ public class PredictorFactory {
 					.optModelUrls("https://resources.djl.ai/test-models/pytorch/face_feature.zip")
 					.optModelName("face_feature") // specify model file prefix
 					.optTranslator(new FaceFeatureTranslator()).optProgress(new ProgressBar()).optEngine("PyTorch") // Use
-																													// PyTorch
-																													// engine
+					// PyTorch
+					// engine
 					.build();
 			ZooModel<Image, float[]> model = criteria.loadModel();
 			features = model.newPredictor();

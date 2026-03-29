@@ -96,6 +96,7 @@ public class DownloadManager {
 			s = s.replace(' ', '_');
 		return s;
 	}
+
 	public static File getTmpSTL(CSG stlIn) throws IOException {
 		String name = stlIn.getName();
 		if (name.length() == 0)
@@ -121,6 +122,7 @@ public class DownloadManager {
 		public void onInstallFail(String url) {
 			com.neuronrobotics.sdk.common.Log.error("Plugin needs to be installed from " + url);
 		}
+
 		public void notifyOfFailure(String name) {
 			com.neuronrobotics.sdk.common.Log.error("Plugin failed " + name);
 		}
@@ -276,6 +278,7 @@ public class DownloadManager {
 			}
 		}).start();
 	}
+
 	@SuppressWarnings("unchecked")
 	public static Map<String, String> getEnvironment(String exeType) {
 		String key = discoverKey();
@@ -313,9 +316,11 @@ public class DownloadManager {
 		}
 		return new HashMap<>();
 	}
+
 	public static File getRunExecutable(String exeType, IExternalEditor editor) {
 		return getRunExecutable(exeType, editor, false);
 	}
+
 	public static File getRunExecutable(String exeType, IExternalEditor editor, boolean justChecking) {
 		String executable = "executable";
 		retryLoop(exeType, editor, executable, justChecking);
@@ -343,9 +348,11 @@ public class DownloadManager {
 			approval.onInstallFail(jvmURL);
 		}
 	}
+
 	public static File getDestinationDir(String exeType) {
 		return new File(bindir + exeType);
 	}
+
 	private static File getExecutable(String exeType, IExternalEditor editor, String executable, boolean justChecking) {
 		String key = discoverKey();
 
@@ -563,12 +570,14 @@ public class DownloadManager {
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
+
 	private static void runInstaller(List<String> installerList) {
 		for (String installer : installerList) {
 			File installerFile = getRunExecutable(installer, null);
 			runInstaller(installerFile, installer);
 		}
 	}
+
 	private static void runInstaller(File installerFile, String installer) {
 
 		if (installerFile.getAbsolutePath().toLowerCase().endsWith("msi")) {
@@ -1028,6 +1037,7 @@ public class DownloadManager {
 		}
 		return key;
 	}
+
 	/**
 	 *
 	 * @param version
@@ -1094,6 +1104,7 @@ public class DownloadManager {
 		}
 		return exe;
 	}
+
 	private static void rawFileDownload(ProcessInputStream pis, File folder, File output)
 			throws IOException, FileNotFoundException {
 		folder.mkdirs();
@@ -1167,22 +1178,28 @@ public class DownloadManager {
 	public static void setApproval(IApprovalForDownload approval) {
 		DownloadManager.approval = approval;
 	}
+
 	public static void addLogListener(GitLogProgressMonitor psudoSplash) {
 		DownloadManager.psudoSplash = psudoSplash;
 	}
+
 	public static IDownloadManagerEvents getDownloadEvents() {
 		return downloadEvents;
 	}
+
 	public static void setDownloadEvents(IDownloadManagerEvents de) {
 		if (downloadEvents != null)
 			downloadEvents = de;
 	}
+
 	public static String getSTUDIO_INSTALL() {
 		return STUDIO_INSTALL;
 	}
+
 	public static void setSTUDIO_INSTALL(String sTUDIO_INSTALL) {
 		STUDIO_INSTALL = sTUDIO_INSTALL;
 	}
+
 	public static boolean isDownloadedAlready(String string) {
 		File f = DownloadManager.getRunExecutable(string, null, true);
 		return f.exists();

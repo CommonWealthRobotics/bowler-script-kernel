@@ -197,8 +197,8 @@ public class MobileBasePhysicsManager {
 					// object
 					Affine manipulator = new Affine();// make a new affine for the physics engine to service. the
 														// manipulaters in the CSG will not conflict for resources here
-					// The DH chain calculated the starting location of the link
-					// in its current configuration
+														// The DH chain calculated the starting location of the link
+														// in its current configuration
 					TransformNR localLink;
 					if (i > 0)
 						localLink = cached.get(i - 1);

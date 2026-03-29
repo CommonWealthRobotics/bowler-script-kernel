@@ -111,6 +111,7 @@ public class ArduinoLoader implements IScriptingLanguage {
 	public static void setDefaultBoard(String defaultBoard) {
 		ArduinoLoader.defaultBoard = defaultBoard;
 	}
+
 	/**
 	 * Get the contents of an empty file
 	 *

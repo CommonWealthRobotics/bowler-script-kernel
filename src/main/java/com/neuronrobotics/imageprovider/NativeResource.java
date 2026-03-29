@@ -43,6 +43,7 @@ public class NativeResource {
 		}
 
 	}
+
 	@SuppressWarnings("rawtypes")
 	public static File inJarLoad(Class inputClass, String name) throws IOException {
 		InputStream resourceSource = inputClass.getResourceAsStream(name);
@@ -53,6 +54,7 @@ public class NativeResource {
 		copyResource(resourceSource, resourceLocation);
 		return resourceLocation;
 	}
+
 	public static File inJarLoad(InputStream inputStream, String name) throws IOException {
 		InputStream resourceSource = inputStream;
 		File resourceLocation = prepResourceLocation(name);
@@ -62,6 +64,7 @@ public class NativeResource {
 		copyResource(resourceSource, resourceLocation);
 		return resourceLocation;
 	}
+
 	private void loadLib(String name) throws NativeResourceException {
 
 		inJarLoad(name);
@@ -195,9 +198,11 @@ public class NativeResource {
 		//// com.neuronrobotics.sdk.common.Log.error("Arch: "+getOsArch());
 		return getOsArch().startsWith("x86_64") || getOsArch().startsWith("amd64");
 	}
+
 	public static boolean isARM() {
 		return getOsArch().startsWith("arm");
 	}
+
 	public static boolean isCortexA8() {
 		if (isARM()) {
 			// TODO check for cortex a8 vs arm9 generic
@@ -205,6 +210,7 @@ public class NativeResource {
 		}
 		return false;
 	}
+
 	public static boolean isWindows() {
 		//// com.neuronrobotics.sdk.common.Log.error("OS name: "+getOsName());
 		return getOsName().toLowerCase().startsWith("windows") || getOsName().toLowerCase().startsWith("microsoft")

@@ -182,6 +182,7 @@ public class ControllerOption {
 	public String getLinkDeviceName() {
 		return linkDeviceName;
 	}
+
 	public CSG getVitaminCSG(CSGDatabaseInstance instance, int index) {
 		try {
 			return Vitamins.get(instance, vitaminType.get(index), vitaminSize.get(index));
@@ -189,12 +190,15 @@ public class ControllerOption {
 			throw new RuntimeException(e);
 		}
 	}
+
 	public List<String> getVitaminType() {
 		return vitaminType;
 	}
+
 	public int getVitaminNumber() {
 		return vitaminSize.size();
 	}
+
 	public List<String> getVitaminSize() {
 		return vitaminSize;
 	}
@@ -206,9 +210,11 @@ public class ControllerOption {
 	public javafx.scene.image.Image getImage() {
 		return image;
 	}
+
 	public TransformNR getVitaminPose(int index) {
 		return getVitaminPose().get(index);
 	}
+
 	public List<TransformNR> getVitaminPose() {
 		if (vitaminPose == null)
 			return new ArrayList<>(Arrays.asList(new TransformNR()));

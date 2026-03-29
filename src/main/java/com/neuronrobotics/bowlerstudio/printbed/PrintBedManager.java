@@ -59,6 +59,7 @@ public class PrintBedManager {
 		}
 		setHasPrintBed(init(dir, parts));
 	}
+
 	public boolean init(File dir, ArrayList<CSG> parts) {
 		this.parts = parts;
 		if (url == null)
@@ -204,6 +205,7 @@ public class PrintBedManager {
 			e.printStackTrace();
 		}
 	}
+
 	private void write(String file, String content)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		File f = ScriptingEngine.fileFromGit(url, file);
@@ -214,6 +216,7 @@ public class PrintBedManager {
 		writer.write(content);
 		writer.close();
 	}
+
 	private void save() {
 		new Thread(() -> {
 			saveLocal();

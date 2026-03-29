@@ -685,7 +685,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
 				.withType(JointtypeType.HINGE) // hinge type
 				.withLimited(true).withFrictionloss(BigDecimal.valueOf(conf.isPassive() ? 0.0001 : 0.01))// experementally
-																											// determined
+				// determined
 
 				// .withDamping(BigDecimal.valueOf(0.000001))
 				// .withStiffness(BigDecimal.valueOf(1))

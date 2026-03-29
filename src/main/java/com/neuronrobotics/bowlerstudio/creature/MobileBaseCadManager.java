@@ -1570,9 +1570,11 @@ public class MobileBaseCadManager implements Runnable {
 			this.allCad.clear();
 		this.allCad = allCad;
 	}
+
 	public static boolean exists(MobileBase device) {
 		return cadmap.get(device) != null;
 	}
+
 	public static MobileBaseCadManager get(CSGDatabaseInstance csgDatabaseInstance, MobileBase device,
 			IMobileBaseUI ui) {
 		if (!exists(device)) {
@@ -1723,11 +1725,13 @@ public class MobileBaseCadManager implements Runnable {
 		// Auto-generated method stub
 		return cadGenerating;
 	}
+
 	public static MobileBaseCadManager get(CSGDatabaseInstance db, IVitaminHolder holder) {
 		if (MobileBase.class.isInstance(holder))
 			return get(db, (MobileBase) holder);
 		return searchForCadManager(holder);
 	}
+
 	public static MobileBaseCadManager searchForCadManager(IVitaminHolder holder) {
 		Set<MobileBase> keySet = cadmap.keySet();
 		for (MobileBase b : keySet) {

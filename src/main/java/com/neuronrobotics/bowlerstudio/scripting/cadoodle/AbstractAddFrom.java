@@ -18,6 +18,7 @@ public abstract class AbstractAddFrom extends CaDoodleOperation implements IName
 	public HashSet<String> getNamesAdded() {
 		return namesAdded;
 	}
+
 	public List<String> getNamesAddedInThisOperation() {
 		ArrayList<String> names = new ArrayList<String>();
 		names.addAll(getNamesAdded());
@@ -46,6 +47,7 @@ public abstract class AbstractAddFrom extends CaDoodleOperation implements IName
 	}
 
 	public abstract File getFile() throws NoSuchFileException;
+
 	@Override
 	public String toString() {
 		return getType() + " with name " + getName();

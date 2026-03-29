@@ -12,11 +12,15 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 public abstract class CaDoodleOperation {
 	private CaDoodleFile cf = null;
 	public abstract String getType();
+
 	public abstract List<CSG> process(List<CSG> incoming);
+
 	public abstract List<String> getNamesAddedInThisOperation();
+
 	public void pruneCleanup() {
 
 	}
+
 	public CSGDatabaseInstance getDb() {
 		return cf.getCsgDBinstance();
 	}
@@ -28,6 +32,7 @@ public abstract class CaDoodleOperation {
 	public void setCaDoodleFile(CaDoodleFile cf) {
 		this.cf = cf;
 	}
+
 	/**
 	 * @return the robots
 	 */
@@ -55,6 +60,7 @@ public abstract class CaDoodleOperation {
 		}
 		return null;
 	}
+
 	public String getLimbName(List<String> selected, List<CSG> state) {
 		if (selected == null)
 			return null;

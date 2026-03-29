@@ -48,6 +48,7 @@ public class StoragbeBounds {
 		maxy = b.getMax().y;
 		maxz = b.getMax().z;
 	}
+
 	public Bounds getBounds() {
 		Vector3d min = new Vector3d(minx, miny, minz);
 		Vector3d max = new Vector3d(maxx, maxy, maxz);

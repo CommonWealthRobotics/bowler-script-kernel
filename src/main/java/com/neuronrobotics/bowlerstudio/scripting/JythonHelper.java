@@ -92,6 +92,7 @@ public class JythonHelper implements IScriptingLanguage {
 	public String getShellType() {
 		return "Jython";
 	}
+
 	/**
 	 * Get the contents of an empty file
 	 *
@@ -100,6 +101,7 @@ public class JythonHelper implements IScriptingLanguage {
 	public String getDefaultContents() {
 		return "print( 'Hello World')";
 	}
+
 	@Override
 	public boolean getIsTextFile() {
 		// Auto-generated method stub

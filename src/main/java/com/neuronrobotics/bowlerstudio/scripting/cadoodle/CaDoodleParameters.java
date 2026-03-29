@@ -25,6 +25,7 @@ public class CaDoodleParameters {
 		}
 		throw new NumberFormatException();
 	}
+
 	public void delete(String key) {
 		Map.Entry<String, String> set = null;
 		for (Map.Entry<String, String> m : getParams()) {
@@ -36,6 +37,7 @@ public class CaDoodleParameters {
 		if (set != null)
 			params.remove(set);
 	}
+
 	public void set(String key, Object value) {
 		Map.Entry<String, String> set = null;
 		for (Map.Entry<String, String> m : getParams()) {
@@ -51,6 +53,7 @@ public class CaDoodleParameters {
 		set.setValue(value.toString());
 		values = null;
 	}
+
 	public ArrayList<String> keys() {
 		ArrayList<String> keys = new ArrayList<String>();
 		for (Entry<String, String> e : getParams()) {
@@ -58,6 +61,7 @@ public class CaDoodleParameters {
 		}
 		return keys;
 	}
+
 	private ArrayList<Map.Entry<String, String>> getParams() {
 		if (params == null) {
 			params = new ArrayList<Map.Entry<String, String>>();

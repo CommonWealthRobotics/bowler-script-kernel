@@ -20,6 +20,7 @@ public class TTSTest {
 	public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
 		BowlerKernel.startupProcedures();
 	}
+
 	@Test
 	@Ignore
 	public void TTSText() {

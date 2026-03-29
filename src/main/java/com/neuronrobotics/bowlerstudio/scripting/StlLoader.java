@@ -28,11 +28,13 @@ public class StlLoader implements IScriptingLanguage {
 		// Auto-generated method stub
 		return "Stl";
 	}
+
 	@Override
 	public boolean getIsTextFile() {
 		// Auto-generated method stub
 		return false;
 	}
+
 	/**
 	 * Get the contents of an empty file
 	 *
@@ -41,6 +43,7 @@ public class StlLoader implements IScriptingLanguage {
 	public String getDefaultContents() {
 		return null;
 	}
+
 	@Override
 	public ArrayList<String> getFileExtension() {
 		// Auto-generated method stub

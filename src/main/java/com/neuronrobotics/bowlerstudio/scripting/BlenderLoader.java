@@ -45,6 +45,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		ext.add("blend");
 		return ext;
 	}
+
 	public static void toBlenderFile(CSGDatabaseInstance db, CSG stlIn, File blenderfile) throws IOException {
 		File stl = getTmpSTL(stlIn);
 		toBlenderFile(db, stl, blenderfile);
@@ -89,6 +90,7 @@ public class BlenderLoader implements IScriptingLanguage {
 			return;
 		}
 	}
+
 	public static void scaleStl(CSGDatabaseInstance db, File incoming, File outgoing, double scale) {
 		CSG back = Vitamins.get(db, incoming, true).scale(scale);
 		try {
@@ -102,6 +104,7 @@ public class BlenderLoader implements IScriptingLanguage {
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 	}
+
 	public static CSG remesh(CSGDatabaseInstance db, CSG incoming, double MMVoxel, CSGDatabaseInstance instance)
 			throws Exception {
 		File stl = DownloadManager.getTmpSTL(incoming);
@@ -109,12 +112,14 @@ public class BlenderLoader implements IScriptingLanguage {
 		CSG back = Vitamins.get(db, stl, true);
 		return back.syncProperties(instance, incoming).setName(incoming.getName());
 	}
+
 	public static void remeshSTLFile(CSGDatabaseInstance db, File stlout, double MMVoxel) throws Exception {
 		File blend = File.createTempFile(stlout.getName(), ".blend");
 		blend.delete();
 		toBlenderFile(db, stlout, blend);
 		remeshToSTLFile(db, blend, stlout, MMVoxel);
 	}
+
 	public static void remeshToSTLFile(CSGDatabaseInstance db, File blenderfile, File stlout, double MMVoxel)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("blender", null);
@@ -136,6 +141,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
 		scaleStl(db, stlout, stlout, 1000.0);
 	}
+
 	public static void toSTLFile(CSGDatabaseInstance db, File blenderfile, File stlout)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File exe = getConfigExecutable("blender", null);
@@ -156,6 +162,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
 		scaleStl(db, stlout, stlout, 1000.0);
 	}
+
 	@Override
 	public void getDefaultContents(File source) {
 		File exe = getConfigExecutable("blender", null);

@@ -27,6 +27,7 @@ public class SVGLoadTest {
 		run(s);
 		// fail("Not yet implemented");
 	}
+
 	private ArrayList<Object> run(SVGLoad s) {
 
 		ArrayList<Object> polys = new ArrayList<>();

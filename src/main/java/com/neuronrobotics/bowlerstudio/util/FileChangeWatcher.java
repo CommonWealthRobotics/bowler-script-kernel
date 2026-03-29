@@ -93,12 +93,14 @@ public class FileChangeWatcher {
 			}
 		}
 	}
+
 	public static void close(File fileToWatch) {
 		String path = fileToWatch.getAbsolutePath();
 		if (activeListener.get(path) != null) {
 			activeListener.get(path).close();
 		}
 	}
+
 	/**
 	 * Start watching a file
 	 *

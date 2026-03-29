@@ -153,6 +153,7 @@ public class BezierEditor {
 		update();
 		save();
 	}
+
 	public ArrayList<CSG> getCSG() {
 
 		ArrayList<CSG> back = new ArrayList<>();
@@ -164,6 +165,7 @@ public class BezierEditor {
 
 		return back;
 	}
+
 	public ArrayList<Object> get() {
 
 		ArrayList<Object> back = new ArrayList<>();

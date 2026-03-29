@@ -29,11 +29,13 @@ public class FXMLBowlerLoader implements IScriptingLanguage {
 		// Auto-generated method stub
 		return "fxml";
 	}
+
 	@Override
 	public boolean getIsTextFile() {
 		// Auto-generated method stub
 		return true;
 	}
+
 	/**
 	 * Get the contents of an empty file
 	 *
@@ -42,6 +44,7 @@ public class FXMLBowlerLoader implements IScriptingLanguage {
 	public String getDefaultContents() {
 		return "";
 	}
+
 	@Override
 	public ArrayList<String> getFileExtension() {
 		// Auto-generated method stub

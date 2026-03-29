@@ -126,6 +126,7 @@ public abstract class AbstractImageProvider extends NonBowlerDevice {
 		int h = (int) (in.getHeight() * scale);
 		return toGrayScale(in, w, h);
 	}
+
 	/**
 	 * @param bf
 	 * @return conversion to javafx i mage
@@ -141,6 +142,7 @@ public abstract class AbstractImageProvider extends NonBowlerDevice {
 		ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 		return new javafx.scene.image.Image(in);
 	}
+
 	/**
 	 * @return image as Javafx
 	 */

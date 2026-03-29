@@ -53,6 +53,7 @@ public class ConfigurationDatabase {
 		}
 
 	}
+
 	public static Set<String> keySet(String name) {
 		Set<String> keySet;
 		getDatabase();
@@ -61,6 +62,7 @@ public class ConfigurationDatabase {
 		}
 		return keySet;
 	}
+
 	public static boolean containsKey(String paramsKey, String string) {
 		boolean containsKey = false;
 		getDatabase();
@@ -70,6 +72,7 @@ public class ConfigurationDatabase {
 		return containsKey;
 
 	}
+
 	public static String getKeyFromValue(String controllerName, String mappedValue) {
 		String ret = null;
 		getDatabase();
@@ -85,12 +88,15 @@ public class ConfigurationDatabase {
 		}
 		return ret;
 	}
+
 	public static Object get(String paramsKey, String objectKey) {
 		return getObject(paramsKey, objectKey, null);
 	}
+
 	public static Object get(String paramsKey, String objectKey, Object defaultValue) {
 		return getObject(paramsKey, objectKey, defaultValue);
 	}
+
 	public static Object getObject(String paramsKey, String objectKey, Object defaultValue) {
 		Object ret = null;
 		getDatabase();
@@ -111,6 +117,7 @@ public class ConfigurationDatabase {
 		}
 		return database.get(paramsKey);
 	}
+
 	public static Object put(String paramsKey, String objectKey, Object value) {
 		return setObject(paramsKey, objectKey, value);
 	}
@@ -124,9 +131,11 @@ public class ConfigurationDatabase {
 		save();
 		return put;
 	}
+
 	public static Object remove(String paramsKey, String objectKey) {
 		return removeObject(paramsKey, objectKey);
 	}
+
 	public static Object removeObject(String paramsKey, String objectKey) {
 		Object remove = null;
 		getDatabase();
@@ -197,6 +206,7 @@ public class ConfigurationDatabase {
 		}
 		return f;
 	}
+
 	public static Path getAppDataDirectory() {
 		String appName = "CaDoodle";
 		String os = System.getProperty("os.name").toLowerCase();

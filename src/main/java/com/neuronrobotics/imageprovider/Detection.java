@@ -17,6 +17,7 @@ public class Detection {
 		Size = size;
 		this.setConfidence(1.0);
 	}
+
 	/**
 	 *
 	 * @param x
@@ -46,6 +47,7 @@ public class Detection {
 	public double getX() {
 		return X;
 	}
+
 	public String toString() {
 		return "X pos =" + X + " Y pos=" + Y + " size=" + Size;
 	}
@@ -57,9 +59,11 @@ public class Detection {
 	public void setConfidence(double confidence) {
 		this.confidence = confidence;
 	}
+
 	public TransformNR getDetectionLocation() {
 		return detectionLocation;
 	}
+
 	public void setDetectionLocation(TransformNR detectionLocation) {
 		this.detectionLocation = detectionLocation;
 	}

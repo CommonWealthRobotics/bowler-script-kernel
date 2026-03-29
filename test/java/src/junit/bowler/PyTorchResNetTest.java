@@ -91,6 +91,7 @@ public class PyTorchResNetTest {
 		img.save(Files.newOutputStream(imagePath), "png");
 		com.neuronrobotics.sdk.common.Log.error("Face detection result image has been saved in: {} " + imagePath);
 	}
+
 	//
 	@Test
 	@Ignore

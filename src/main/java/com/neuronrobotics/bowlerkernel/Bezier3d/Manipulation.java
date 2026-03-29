@@ -258,12 +258,15 @@ public class Manipulation {
 			}
 		};
 	}
+
 	public static boolean isControlOrCommandPressed(MouseEvent event) {
 		return OsUtils.isOSX() ? event.isMetaDown() : event.isControlDown();
 	}
+
 	public static boolean isControlOrCommandPressed(KeyEvent event) {
 		return OsUtils.isOSX() ? event.isMetaDown() : event.isControlDown();
 	}
+
 	private void pressed(MouseEvent event) {
 		setState(DragState.Dragging);
 

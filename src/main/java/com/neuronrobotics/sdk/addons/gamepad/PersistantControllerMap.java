@@ -22,10 +22,12 @@ public class PersistantControllerMap {
 		}
 		return true;
 	}
+
 	public static void clearMapping(String controllerName) {
 		ConfigurationDatabase.clear(controllerName);
 
 	}
+
 	public static String getMappedAxisName(String controllerName, String incomingName) {
 		Object object = ConfigurationDatabase.getObject(controllerName, incomingName, incomingName);
 		if (object == null)

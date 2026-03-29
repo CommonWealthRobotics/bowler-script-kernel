@@ -79,12 +79,15 @@ public class VitaminBomManager {
 			save();
 		}
 	}
+
 	public File getBomCsv() {
 		return new File(baseWorkspaceFile.getAbsolutePath() + "/" + getManufacturingBomCsv());
 	}
+
 	public File getBomFile() {
 		return new File(baseWorkspaceFile.getAbsolutePath() + "/" + getManufacturingBomJson());
 	}
+
 	public VitaminLocation getByName(String name) {
 		for (String keys : database.keySet()) {
 			ArrayList<VitaminLocation> arrayList = database.get(keys);
@@ -97,9 +100,11 @@ public class VitaminBomManager {
 		}
 		return null;
 	}
+
 	public VitaminBomManager addVitamin(VitaminLocation newElement) {
 		return addVitamin(newElement, true);
 	}
+
 	public VitaminBomManager addVitamin(VitaminLocation newElement, boolean save) {
 		for (String keys : database.keySet()) {
 			ArrayList<VitaminLocation> arrayList = database.get(keys);

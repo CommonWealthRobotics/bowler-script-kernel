@@ -21,9 +21,11 @@ public class VirtualCameraFactory {
 	public static AbstractImageProvider getVirtualCamera() {
 		return getFactory().getVirtualCamera();
 	}
+
 	public static IVirtualCameraFactory getFactory() {
 		return factory;
 	}
+
 	public static void setFactory(IVirtualCameraFactory factory) {
 		VirtualCameraFactory.factory = factory;
 	}

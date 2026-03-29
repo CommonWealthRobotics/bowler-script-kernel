@@ -24,6 +24,7 @@ public class CadFileExporter {
 	public CadFileExporter(IMobileBaseUI myUI) {
 		ui = myUI;
 	}
+
 	public CadFileExporter() {
 		ui = new IMobileBaseUI() {
 
@@ -64,6 +65,7 @@ public class CadFileExporter {
 			}
 		};
 	}
+
 	public ArrayList<File> generateManufacturingParts(List<CSG> totalAssembly, File baseDirForFiles)
 			throws IOException {
 		ArrayList<File> allCadStl = new ArrayList<>();
@@ -159,6 +161,7 @@ public class CadFileExporter {
 		com.neuronrobotics.sdk.common.Log.debug("Finished Export!");
 		return allCadStl;
 	}
+
 	private File makeFreecad(String nameBase, List<CSG> current) throws IOException {
 		File blend = new File(nameBase + ".FCStd");
 		com.neuronrobotics.sdk.common.Log.debug("Writing " + blend.getAbsolutePath());
@@ -177,6 +180,7 @@ public class CadFileExporter {
 		com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
 		return stl;
 	}
+
 	private File makeObj(String nameBase, CSG tmp) throws IOException {
 		File stl = new File(nameBase + ".obj");
 

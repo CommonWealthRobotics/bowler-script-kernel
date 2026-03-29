@@ -103,9 +103,11 @@ public class FreecadLoader implements IScriptingLanguage {
 		}
 
 	}
+
 	public static void addCSGToFreeCAD(File freecadModel, CSG incoming) throws IOException {
 		addCSGToFreeCAD(freecadModel, incoming, incoming.getSlicePlanes());
 	}
+
 	public static void addCSGToFreeCAD(File freecadModel, CSG toSlice, List<Transform> slicePlanes) throws IOException {
 		File tmp = getTmpSTL(toSlice);
 		String name = toSlice.getName();
@@ -163,6 +165,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
+
 	public static void addSTLToFreecad(File freecadModel, File stlToAdd, String meshName) {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
@@ -182,6 +185,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
+
 	public static void toSTLFile(File freecadModel, File stlout)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
@@ -202,6 +206,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
+
 	public static void open(File freecadModel) {
 		File freecad = DownloadManager.getRunExecutable("freecad", null);
 
@@ -224,6 +229,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
+
 	/**
 	 * @param args
 	 * @throws InterruptedException
@@ -261,6 +267,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		FreecadLoader.open(test);
 		System.exit(0);
 	}
+
 	private static String readAll(Reader rd) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		int cp;
@@ -269,6 +276,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		}
 		return sb.toString();
 	}
+
 	public static void update(Map<String, Object> vm) throws MalformedURLException, IOException {
 		String url = "https://api.github.com/repos/FreeCAD/FreeCAD-Bundle/releases/tags/1.0rc2";
 		InputStream is = new URL(url).openStream();

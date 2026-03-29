@@ -33,6 +33,7 @@ public class AddRobotLimb extends AbstractAddFrom {
 			builder.removeLimb(this);
 		}
 	}
+
 	@Override
 	public File getFile() throws NoSuchFileException {
 		throw new NoSuchFileException("");
@@ -76,29 +77,36 @@ public class AddRobotLimb extends AbstractAddFrom {
 		}
 		return back;
 	}
+
 	public AddRobotLimb setLimb(LimbOption o) {
 		limb = o;
 		return this;
 	}
+
 	public AddRobotLimb setNames(List<String> names) {
 		this.names = names;
 		return this;
 	}
+
 	public LimbOption getLimb() {
 		return limb;
 	}
+
 	public AddRobotLimb setLocation(TransformNR location) {
 		this.location = location.copy();
 		return this;
 	}
+
 	public TransformNR getLocation() {
 		if (location == null)
 			location = new TransformNR();
 		return location;
 	}
+
 	public String getBuilderName() {
 		return builderName;
 	}
+
 	public void setBuilderName(String builderName) {
 		this.builderName = builderName;
 	}
@@ -106,9 +114,11 @@ public class AddRobotLimb extends AbstractAddFrom {
 	public MobileBaseBuilder getMobilBaseBuilder() {
 		return getRobots().get(getBuilderName());
 	}
+
 	public void setKinematics(DHParameterKinematics kin) {
 		this.kin = kin;
 	}
+
 	public DHParameterKinematics getKinematics() {
 		return kin;
 	}

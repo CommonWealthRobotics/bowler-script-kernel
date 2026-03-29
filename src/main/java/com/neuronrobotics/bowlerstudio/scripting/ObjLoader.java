@@ -27,11 +27,13 @@ public class ObjLoader implements IScriptingLanguage {
 	public String getShellType() {
 		return "obj";
 	}
+
 	@Override
 	public boolean getIsTextFile() {
 		// Auto-generated method stub
 		return false;
 	}
+
 	/**
 	 * Get the contents of an empty file
 	 *
@@ -40,6 +42,7 @@ public class ObjLoader implements IScriptingLanguage {
 	public String getDefaultContents() {
 		return null;
 	}
+
 	@Override
 	public ArrayList<String> getFileExtension() {
 		// Auto-generated method stub

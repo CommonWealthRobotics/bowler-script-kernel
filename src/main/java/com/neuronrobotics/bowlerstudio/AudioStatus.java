@@ -168,12 +168,15 @@ public enum AudioStatus {
 	public static AudioStatus get(char code) {
 		return lookup.get(code);
 	}
+
 	public static AudioStatus get(String code) {
 		return lookup.get((char) code.getBytes()[0]);
 	}
+
 	public static AudioStatus getFromPhoneme(String code) {
 		return ArpabetToBlair.get(code);
 	}
+
 	public static Set<String> getPhonemes() {
 		return ArpabetToBlair.keySet();
 	}

@@ -13,10 +13,12 @@ public class FontSizeManager {
 	public static double getImageScale() {
 		return ((double) getDefaultSize()) / (18.0);
 	}
+
 	public static int getDefaultSize() {
 		return ((Number) ConfigurationDatabase.getObject("BowlerStudioConfigs", "fontsize", systemDefaultFontSize))
 				.intValue();
 	}
+
 	public static void setFontSize(int myFoneNum) {
 		ConfigurationDatabase.setObject("BowlerStudioConfigs", "fontsize", myFoneNum);
 		for (IFontSizeReciver r : listeners) {
@@ -31,12 +33,14 @@ public class FontSizeManager {
 		}).start();
 
 	}
+
 	public static void addListener(IFontSizeReciver r) {
 		if (listeners.contains(r))
 			return;
 		listeners.add(r);
 		r.fontSizeChange(getDefaultSize());
 	}
+
 	public static void removeListener(IFontSizeReciver r) {
 		if (listeners.contains(r))
 			listeners.remove(r);

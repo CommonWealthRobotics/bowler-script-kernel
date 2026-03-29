@@ -659,6 +659,7 @@ public class CoreScheduler {
 			}
 			return run;
 		}
+
 		// public void setRun(boolean run) {
 		// this.run = run;
 		/**

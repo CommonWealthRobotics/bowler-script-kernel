@@ -16,6 +16,7 @@ public class UnGroup extends CaDoodleOperation {
 	public String getType() {
 		return "Un-Group";
 	}
+
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();

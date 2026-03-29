@@ -75,6 +75,7 @@ public class OpenSCADLoader implements IScriptingLanguage {
 		args.add(openscadfile.getAbsolutePath());
 		legacySystemRun(null, stlout.getAbsoluteFile().getParentFile(), System.out, args);
 	}
+
 	@Override
 	public String getDefaultContents() {
 		return "cube([30, 20, 10]);";

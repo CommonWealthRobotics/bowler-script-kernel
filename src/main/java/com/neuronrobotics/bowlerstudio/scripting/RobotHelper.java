@@ -27,6 +27,7 @@ public class RobotHelper implements IScriptingLanguage {
 			ArrayList<Object> args) {
 		return fileToRobot(db, code);
 	}
+
 	public static MobileBase fileToRobot(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, String url,
 			String file) {
 		try {
@@ -46,6 +47,7 @@ public class RobotHelper implements IScriptingLanguage {
 		}
 		return null;
 	}
+
 	public static MobileBase fileToRobot(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code) {
 		byte[] bytes;
 		try {

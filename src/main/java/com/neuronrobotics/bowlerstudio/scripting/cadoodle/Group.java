@@ -152,6 +152,7 @@ public class Group extends AbstractAddFrom {
 		}
 		return first;
 	}
+
 	@Override
 	public List<String> getNamesAddedInThisOperation() {
 		ArrayList<String> n = new ArrayList<String>();

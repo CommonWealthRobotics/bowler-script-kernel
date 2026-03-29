@@ -510,6 +510,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		return null;
 	}
+
 	/**
 	 * This interface is for adding additional language support.
 	 *
@@ -568,6 +569,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Files.createSymbolicLink(symlinkPath, appDataDir.toPath());
 		com.neuronrobotics.sdk.common.Log.debug("Symlink created: " + symlinkPath);
 	}
+
 	private static Path getWindowsAppData(String appName) {
 		// Try APPDATA first, then LOCALAPPDATA, then fallback
 		String appData = System.getenv("APPDATA");
@@ -584,6 +586,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		String userHome = System.getProperty("user.home");
 		return Paths.get(userHome, "AppData", "Roaming", appName);
 	}
+
 	public static File getWorkingDirectory() {
 		String relative = Paths.get(System.getProperty("user.home"), "Documents").toString();
 		if (OSUtil.isOSX()) {
@@ -1157,6 +1160,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		return inlineScriptRun(instance, f, args, getShellType(f.getName()));
 	}
+
 	public static Object inlineGistScriptRun(CSGDatabaseInstance db, String gistID, String Filename,
 			ArrayList<Object> args) throws Exception {
 		String[] gistData = codeFromGistID(gistID, Filename);
@@ -1169,17 +1173,20 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
 		return inlineScriptRun(CSGDatabase.getInstance(), new File(gistData[2]), args, getShellType(gistData[1]));
 	}
+
 	@Deprecated
 	public static Object inlineFileScriptRun(File f, ArrayList<Object> args) throws Exception {
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
 		return inlineScriptRun(CSGDatabase.getInstance(), f, args, getShellType(f.getName()));
 	}
+
 	@Deprecated
 	public static Object gitScriptRun(String gitURL, String Filename) throws Exception {
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
 
 		return gitScriptRun(CSGDatabase.getInstance(), gitURL, Filename, null);
 	}
+
 	/**
 	 * This interface is for adding additional language support.
 	 *
@@ -1207,6 +1214,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		return inlineScriptRun(prevDB, code, args, shellTypeStorage);
 	}
+
 	/**
 	 * This interface is for adding additional language support.
 	 *
@@ -1222,6 +1230,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
 		return inlineScriptStringRun(CSGDatabase.getInstance(), line, args, shellTypeStorage);
 	}
+
 	@Deprecated
 	public static Object gitScriptRun(String gitURL, String Filename, ArrayList<Object> args) throws Exception {
 		Log.error(new Exception("Depricated script mode, use CSGDatabaseInstance"));
@@ -1236,10 +1245,12 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			throws Exception {
 		return inlineScriptRun(db, fileFromGit(gitURL, Filename), args, getShellType(Filename));
 	}
+
 	public static File fileFromGit(String[] self)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		return fileFromGit(self[0], null, self[1]);
 	}
+
 	public static File fileFromGit(String remoteURI, String fileInRepo)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException {
 		return fileFromGit(remoteURI, null, fileInRepo);

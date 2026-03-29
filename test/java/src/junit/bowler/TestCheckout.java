@@ -21,6 +21,7 @@ public class TestCheckout {
 	public void setup() throws InvalidRemoteException, TransportException, IOException, GitAPIException, Exception {
 		BowlerKernel.startupProcedures();
 	}
+
 	@Test
 	public void test() throws IOException, GitAPIException, InterruptedException {
 		String url = "https://github.com/OperationSmallKat/greycat.git";
