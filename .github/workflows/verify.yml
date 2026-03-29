@@ -48,7 +48,7 @@ jobs:
         java-version: 21
         jdkFile: zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
     - name: Shadow Jar 
-      run: ./gradlew  shadowJar        
+      run: ./gradlew spotlessCheck shadowJar        
     - name: initialize the X11 DISPLAY variable
       run:
         export DISPLAY=:0
