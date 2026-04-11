@@ -438,7 +438,8 @@ public class CaDoodleFile {
 							updateCurrentFromCache();
 						}
 					} catch (Exception ex) {
-						com.neuronrobotics.sdk.common.Log.error(ex);;
+						com.neuronrobotics.sdk.common.Log.error(ex);
+						;
 					}
 					setPercentInitialized(1);
 					updateBoM();
@@ -581,7 +582,8 @@ public class CaDoodleFile {
 							getOperations().add(op);
 							process(op);
 						} catch (Exception ex) {
-							com.neuronrobotics.sdk.common.Log.error(ex);;
+							com.neuronrobotics.sdk.common.Log.error(ex);
+							;
 						}
 					}
 					if (getResult() == OperationResult.INSERT) {
@@ -812,7 +814,8 @@ public class CaDoodleFile {
 			try {
 				collect.add(p);
 			} catch (Exception ex) {
-				com.neuronrobotics.sdk.common.Log.error(ex);;
+				com.neuronrobotics.sdk.common.Log.error(ex);
+				;
 			}
 		}
 		csg.setPolygons(collect);
@@ -1063,66 +1066,73 @@ public class CaDoodleFile {
 		if (saveing)
 			throw new SaveOverwriteException("Saving right now");
 		saveing = true;
-		if (timeCreated < 0)
-			timeCreated = System.currentTimeMillis();
-		String contents = toJson();
-		List<CSG> currentState = getCurrentState();
-		CSG thumb = null;
-		for (CSG c : currentState) {
-			if (c.isInGroup())
-				continue;
-			if (c.isHide())
-				continue;
-			if (thumb == null)
-				thumb = c;
-			else {
-				thumb = thumb.dumbUnion(c);
-			}
-		}
-		String string = getSTLThumbnailLocation();
-		int currentIndex2 = getCurrentIndex();
-		if (isTimelineOpen())
-			getSaveUpdate().renderSplashFrame(1, "Save Doodle to " + getSelf().getName());
-		if (thumb != null) {
-			boolean manif = CSG.isPreventNonManifoldTriangles();
-			if (manif)
-				CSG.setPreventNonManifoldTriangles(false);
-			FileUtil.write(Paths.get(string), thumb.toStlString());
-			if (manif)
-				CSG.setPreventNonManifoldTriangles(true);
-		}
-		FileUtils.write(getSelf(), contents, StandardCharsets.UTF_8, false);
-		// }
-		int num = 0;
-		for (int i = 0; i < opperations.size(); i++) {
-			File f = getTimelineImageFile(i);
-			CaDoodleOperation op = opperations.get(i);
-			if (!f.exists() && cache.get(op) != null)
-				try {
-					int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
-					List<CSG> process = getCachedCSGs(op);
-					num++;
-					if (isTimelineOpen())
-						getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i + ".png");
-					else
-						Log.debug(percent + " Save Timeline Image " + i + ".png");
-					setSaveImage(process, op);
-
-				} catch (IOException e) {
-					// Auto-generated catch block
-					com.neuronrobotics.sdk.common.Log.error(e);
-				}
-		}
-		if (getBom() != null)
-			getBom().save();
-		if (isTimelineOpen())
-			getSaveUpdate().renderSplashFrame(100, "Doodle save Done ");
 		try {
-			getCsgDBinstance().saveDatabase();
-		} catch (Exception e) {
-			Log.error(e);
+			if (timeCreated < 0)
+				timeCreated = System.currentTimeMillis();
+			String contents = toJson();
+			FileUtils.write(getSelf(), contents, StandardCharsets.UTF_8, false);
+			try {
+				getCsgDBinstance().saveDatabase();
+			} catch (Exception e) {
+				Log.error(e);
+			}
+			if (getBom() != null)
+				getBom().save();
+			List<CSG> currentState = getCurrentState();
+			CSG thumb = null;
+			for (CSG c : currentState) {
+				if (c.isInGroup())
+					continue;
+				if (c.isHide())
+					continue;
+				if (thumb == null)
+					thumb = c;
+				else {
+					thumb = thumb.dumbUnion(c);
+				}
+			}
+			String string = getSTLThumbnailLocation();
+			int currentIndex2 = getCurrentIndex();
+			if (isTimelineOpen())
+				getSaveUpdate().renderSplashFrame(1, "Save Doodle to " + getSelf().getName());
+			if (thumb != null) {
+				boolean manif = CSG.isPreventNonManifoldTriangles();
+				if (manif)
+					CSG.setPreventNonManifoldTriangles(false);
+				FileUtil.write(Paths.get(string), thumb.toStlString());
+				if (manif)
+					CSG.setPreventNonManifoldTriangles(true);
+			}
+			// }
+			int num = 0;
+			for (int i = 0; i < opperations.size(); i++) {
+				File f = getTimelineImageFile(i);
+				CaDoodleOperation op = opperations.get(i);
+				if (!f.exists() && cache.get(op) != null)
+					try {
+						int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
+						List<CSG> process = getCachedCSGs(op);
+						num++;
+						if (isTimelineOpen())
+							getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i + ".png");
+						else
+							Log.debug(percent + " Save Timeline Image " + i + ".png");
+						setSaveImage(process, op);
+
+					} catch (IOException e) {
+						// Auto-generated catch block
+						com.neuronrobotics.sdk.common.Log.error(e);
+					}
+			}
+
+			if (isTimelineOpen())
+				getSaveUpdate().renderSplashFrame(100, "Doodle save Done ");
+
+		} catch (Throwable t) {
+			Log.error(t);
+			saveing = false;
+			throw t;
 		}
-		// System.gc();
 		saveing = false;
 		return getSelf();
 	}
