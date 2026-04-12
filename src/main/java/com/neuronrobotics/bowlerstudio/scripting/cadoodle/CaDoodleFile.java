@@ -43,7 +43,6 @@ import com.neuronrobotics.sdk.common.TickToc;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.FileUtil;
-import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
@@ -804,7 +803,7 @@ public class CaDoodleFile {
 
 	private CSG cloneCSG(CSG dyingCSG) {
 		CSG csg = dyingCSG.clone();
-		
+
 		Set<String> params = dyingCSG.getParameters(getCsgDBinstance());
 		for (String param : params) {
 			boolean existing = false;

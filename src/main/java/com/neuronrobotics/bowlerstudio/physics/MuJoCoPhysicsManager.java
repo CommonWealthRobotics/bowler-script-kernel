@@ -823,8 +823,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		Vector3d centerGroup = null;
 		for (CSG part : partsIn) {
 			if (!checkForPhysics(part))
-				continue;
-			;
+				continue;;
 			// try {
 			CSG hull = part.moveToCenter();
 
@@ -863,8 +862,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		String nameOfCSG = null;
 		for (CSG part : partsIn) {
 			if (!checkForPhysics(part))
-				continue;
-			;
+				continue;;
 			CSG hull = part.moveToCenter();
 
 			Vector3d center = part.getCenter();
@@ -1059,18 +1057,18 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	 */
 	public void setCondim(int condim) {
 		switch (condim) {
-		case 1:
-		case 3:
-		case 4:
-		case 6:
-			this.condim = condim;
-			return;
-		default:
-			throw new RuntimeException("	 * condim\n" + "		1 Frictionless contact.\n"
-					+ "		3 Regular frictional contact, opposing slip in the tangent plane.\n"
-					+ "		4 Frictional contact, opposing slip in the tangent plane and rotation around the contact normal. This is useful for modeling soft contacts (independent of contact penetration).\n"
-					+ "		6 Frictional contact, opposing slip in the tangent plane, rotation around the contact normal and rotation around the two axes of the tangent plane. The latter frictional effects are useful for preventing objects from indefinite rolling.\n"
-					+ "");
+			case 1 :
+			case 3 :
+			case 4 :
+			case 6 :
+				this.condim = condim;
+				return;
+			default :
+				throw new RuntimeException("	 * condim\n" + "		1 Frictionless contact.\n"
+						+ "		3 Regular frictional contact, opposing slip in the tangent plane.\n"
+						+ "		4 Frictional contact, opposing slip in the tangent plane and rotation around the contact normal. This is useful for modeling soft contacts (independent of contact penetration).\n"
+						+ "		6 Frictional contact, opposing slip in the tangent plane, rotation around the contact normal and rotation around the two axes of the tangent plane. The latter frictional effects are useful for preventing objects from indefinite rolling.\n"
+						+ "");
 		}
 	}
 

@@ -120,7 +120,7 @@ public class CadFileExporter {
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-						}//
+						} //
 						ui.setCsg(manufactured, null);
 					}
 					if (format.toLowerCase().contains("stl")) {
