@@ -1057,7 +1057,8 @@ public class CaDoodleFile {
 			String contents = toJson();
 			FileUtils.write(getSelf(), contents, StandardCharsets.UTF_8, false);
 			try {
-				getCsgDBinstance().saveDatabase();
+				if (getCsgDBinstance().getDatabase().size() > 0)
+					getCsgDBinstance().saveDatabase();
 			} catch (Exception e) {
 				Log.error(e);
 			}
@@ -1212,7 +1213,7 @@ public class CaDoodleFile {
 			}
 		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error("Error loading image: " + e.getMessage());
-			com.neuronrobotics.sdk.common.Log.error(e);
+			//com.neuronrobotics.sdk.common.Log.error(e);
 		}
 		return img;
 	}
