@@ -17,14 +17,14 @@ public class BlenderLoadingTest {
 	public void test() throws Exception {
 		CSG loaded = (CSG) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
 				"https://github.com/madhephaestus/TestRepo.git", "TestRepo4.blend");
-		if (loaded.getPolygons().size() != 12)
+		if (loaded.getNumberOfTriangles() != 12)
 			fail("Failed to load polygon!");
-		com.neuronrobotics.sdk.common.Log.error("Blender file loaded num polys: " + loaded.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("Blender file loaded num polys: " + loaded.getNumberOfTriangles());
 		CSG cube = new Cube(100).toCSG();
 		CSG remeshed = GeometrySimplification.remesh(cube, 10.0, CSGDatabase.getInstance());
-		if (remeshed.getPolygons().size() != 1452)
+		if (remeshed.getNumberOfTriangles() != 1452)
 			fail("Blender failed to remesh");
-		com.neuronrobotics.sdk.common.Log.error("Remeshing produced: " + remeshed.getPolygons().size());
+		com.neuronrobotics.sdk.common.Log.error("Remeshing produced: " + remeshed.getNumberOfTriangles());
 	}
 
 }

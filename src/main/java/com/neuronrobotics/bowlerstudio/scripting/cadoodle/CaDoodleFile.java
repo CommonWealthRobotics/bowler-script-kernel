@@ -803,19 +803,8 @@ public class CaDoodleFile {
 	}
 
 	private CSG cloneCSG(CSG dyingCSG) {
-		CSG csg = new CSG();
-
-		ArrayList<Polygon> collect = new ArrayList<Polygon>();
-		for (Polygon p : dyingCSG.getPolygons()) {
-			if (p == null)
-				continue;
-			try {
-				collect.add(p);
-			} catch (Exception ex) {
-				com.neuronrobotics.sdk.common.Log.error(ex);;
-			}
-		}
-		csg.setPolygons(collect);
+		CSG csg = dyingCSG.clone();
+		
 		Set<String> params = dyingCSG.getParameters(getCsgDBinstance());
 		for (String param : params) {
 			boolean existing = false;

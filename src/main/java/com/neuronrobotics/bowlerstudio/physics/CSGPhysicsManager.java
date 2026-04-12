@@ -17,6 +17,7 @@ import com.bulletphysics.util.ObjectArrayList;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Polygon;
@@ -82,14 +83,21 @@ public class CSGPhysicsManager implements IPhysicsManager {
 			TransformFactory.nrToBullet(poseToMove, pose);
 		}
 
-		List<Polygon> polygons = finalCSG.getPolygons();
-		// if(polygons.size()>1000)
-		// polygons = getBoundingBox(finalCSG).getPolygons();
-		for (Polygon p : polygons) {
-			for (Vertex v : p.getVertices()) {
-				arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
+		List<Polygon> polygons;
+		try {
+			polygons = finalCSG.generatePolygonsFromMesh();
+			// if(polygons.size()>1000)
+			// polygons = getBoundingBox(finalCSG).getPolygons();
+			for (Polygon p : polygons) {
+				for (Vertex v : p.getVertices()) {
+					arg0.add(new Vector3f((float) v.getX(), (float) v.getY(), (float) v.getZ()));
+				}
 			}
+		} catch (ColinearPointsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 		return finalCSG;
 	}
 

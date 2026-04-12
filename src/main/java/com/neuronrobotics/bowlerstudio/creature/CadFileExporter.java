@@ -92,7 +92,7 @@ public class CadFileExporter {
 		String freecadName = null;
 		String nameBase = "";
 		for (CSG part : totalAssembly) {
-			if (part.getPolygons().size() == 0)
+			if (part.getNumberOfTriangles() == 0)
 				continue;
 			String name = part.getName();
 			CSG manufactured = part.prepForManufacturing();
@@ -115,7 +115,12 @@ public class CadFileExporter {
 
 				for (String format : part.getExportFormats()) {
 					if (format.toLowerCase().contains("obj")) {
-						allCadStl.add(makeObj(nameBase, manufactured));//
+						try {
+							allCadStl.add(makeObj(nameBase, manufactured));
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}//
 						ui.setCsg(manufactured, null);
 					}
 					if (format.toLowerCase().contains("stl")) {
@@ -181,7 +186,7 @@ public class CadFileExporter {
 		return stl;
 	}
 
-	private File makeObj(String nameBase, CSG tmp) throws IOException {
+	private File makeObj(String nameBase, CSG tmp) throws Exception {
 		File stl = new File(nameBase + ".obj");
 
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toObjString());

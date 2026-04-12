@@ -38,6 +38,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.addons.kinematics.time.ITimeProvider;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Polygon;
@@ -822,7 +823,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		Vector3d centerGroup = null;
 		for (CSG part : partsIn) {
 			if (!checkForPhysics(part))
-				continue;;
+				continue;
+			;
 			// try {
 			CSG hull = part.moveToCenter();
 
@@ -861,7 +863,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		String nameOfCSG = null;
 		for (CSG part : partsIn) {
 			if (!checkForPhysics(part))
-				continue;;
+				continue;
+			;
 			CSG hull = part.moveToCenter();
 
 			Vector3d center = part.getCenter();
@@ -941,23 +944,31 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			long start = System.currentTimeMillis();
 			System.out.print("\nWriting " + tempFile.getName());
 			ArrayList<Vector3d> points = new ArrayList<>();
-			List<Polygon> polygons = hull.getPolygons();
-			for (int j = 0; j < polygons.size(); j++) {
-				Polygon p = polygons.get(j);
-				List<Vector3d> points2 = p.getPoints();
-				for (int i = 0; i < points2.size(); i++) {
-					Vector3d v = points2.get(i);
-					points.add(v);
+			List<Polygon> polygons;
+			try {
+				polygons = hull.generatePolygonsFromMesh();
+				for (int j = 0; j < polygons.size(); j++) {
+					Polygon p = polygons.get(j);
+					List<Vector3d> points2 = p.getPoints();
+					for (int i = 0; i < points2.size(); i++) {
+						Vector3d v = points2.get(i);
+						points.add(v);
+					}
 				}
-			}
-			String obj = hull.toObjString();
-			// InputStream in=new
-			// ByteArrayInputStream(obj.getBytes(StandardCharsets.UTF_8));
-			//
-			// ObjImporter importer = new ObjImporter(in);
+				String obj = hull.toObjString();
 
-			Files.write(Paths.get(tempFile.getAbsolutePath()), obj.getBytes());
-			System.out.print(" " + (System.currentTimeMillis() - start + "\n"));
+				// InputStream in=new
+				// ByteArrayInputStream(obj.getBytes(StandardCharsets.UTF_8));
+				//
+				// ObjImporter importer = new ObjImporter(in);
+
+				Files.write(Paths.get(tempFile.getAbsolutePath()), obj.getBytes());
+				System.out.print(" " + (System.currentTimeMillis() - start + "\n"));
+			} catch (ColinearPointsException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		} else {
 			com.neuronrobotics.sdk.common.Log.error("Loading cache " + tempFile.getName());
 		}
@@ -1048,18 +1059,18 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	 */
 	public void setCondim(int condim) {
 		switch (condim) {
-			case 1 :
-			case 3 :
-			case 4 :
-			case 6 :
-				this.condim = condim;
-				return;
-			default :
-				throw new RuntimeException("	 * condim\n" + "		1 Frictionless contact.\n"
-						+ "		3 Regular frictional contact, opposing slip in the tangent plane.\n"
-						+ "		4 Frictional contact, opposing slip in the tangent plane and rotation around the contact normal. This is useful for modeling soft contacts (independent of contact penetration).\n"
-						+ "		6 Frictional contact, opposing slip in the tangent plane, rotation around the contact normal and rotation around the two axes of the tangent plane. The latter frictional effects are useful for preventing objects from indefinite rolling.\n"
-						+ "");
+		case 1:
+		case 3:
+		case 4:
+		case 6:
+			this.condim = condim;
+			return;
+		default:
+			throw new RuntimeException("	 * condim\n" + "		1 Frictionless contact.\n"
+					+ "		3 Regular frictional contact, opposing slip in the tangent plane.\n"
+					+ "		4 Frictional contact, opposing slip in the tangent plane and rotation around the contact normal. This is useful for modeling soft contacts (independent of contact penetration).\n"
+					+ "		6 Frictional contact, opposing slip in the tangent plane, rotation around the contact normal and rotation around the two axes of the tangent plane. The latter frictional effects are useful for preventing objects from indefinite rolling.\n"
+					+ "");
 		}
 	}
 
