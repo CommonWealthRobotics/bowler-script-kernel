@@ -385,7 +385,17 @@ task sourcesJar(type: Jar) {
 artifacts {
 	archives javadocJar, sourcesJar, jar
 }
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs += ['--enable-preview']
+}
 
+tasks.withType(Test).configureEach {
+	jvmArgs '--enable-preview'
+}
+
+tasks.withType(JavaExec).configureEach {
+	jvmArgs '--enable-preview'
+}
 //test {
 //    testLogging.showExceptions = true
 //    testLogging.showCauses = true
