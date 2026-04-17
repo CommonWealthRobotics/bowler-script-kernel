@@ -56,6 +56,7 @@ import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.CSG.OptType;
 import eu.mihosoft.vrl.v3d.CSGServer;
 import eu.mihosoft.vrl.v3d.ICSGProgress;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
@@ -434,7 +435,7 @@ public class BowlerKernel {
 			com.neuronrobotics.sdk.common.Log.error("ERROR No UI engine available");
 		}
 		ScriptingEngine.waitForLogin();
-
+		CSG.setDefaultOptType(OptType.Manifold3d);
 		CSGDatabase.setInstance(new CSGDatabaseInstance(
 				new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/csgDatabase.json")));
 		File logfile = new File(ScriptingEngine.getWorkspace().getAbsoluteFile() + "/kernelLog.txt");
