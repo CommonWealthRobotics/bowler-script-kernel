@@ -56,17 +56,17 @@ jobs:
       run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test 
         
     - name: Test Bezier 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy 
+      run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy 
     - name: start xvfb
       run:
         Xvfb :0 &
     - name: Test Local 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
+      run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
       
     - name: Clean Cad 
       run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
     - name: build Cad 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
+      run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
      
       
