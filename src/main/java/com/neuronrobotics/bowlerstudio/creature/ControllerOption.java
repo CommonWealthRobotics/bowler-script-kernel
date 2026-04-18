@@ -180,8 +180,7 @@ public class ControllerOption {
 			String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 			return gson.fromJson(content, TT_CaDoodleFile);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			return new ArrayList<ControllerOption>();
 		}
 	}

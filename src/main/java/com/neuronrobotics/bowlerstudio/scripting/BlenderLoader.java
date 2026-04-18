@@ -26,7 +26,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
 		toSTLFile(db, code, stl);
-		CSG back = Vitamins.get(db, true,stl, true);
+		CSG back = Vitamins.get(db, true, stl, true);
 		back.setColor(Color.ORANGE);
 		return back;
 	}
@@ -96,7 +96,7 @@ public class BlenderLoader implements IScriptingLanguage {
 	public static void scaleStl(CSGDatabaseInstance db, File incoming, File outgoing, double scale) {
 		CSG back;
 		try {
-			back = Vitamins.get(db,false, incoming, true).scale(scale);
+			back = Vitamins.get(db, false, incoming, true).scale(scale);
 			try {
 				boolean manifold = CSG.isPreventNonManifoldTriangles();
 				CSG.setPreventNonManifoldTriangles(false);
@@ -118,7 +118,7 @@ public class BlenderLoader implements IScriptingLanguage {
 			throws Exception {
 		File stl = DownloadManager.getTmpSTL(incoming);
 		remeshSTLFile(db, stl, MMVoxel);
-		CSG back = Vitamins.get(db,true, stl, true);
+		CSG back = Vitamins.get(db, true, stl, true);
 		return back.syncProperties(instance, incoming).setName(incoming.getName());
 	}
 

@@ -15,7 +15,6 @@ import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import javafx.scene.paint.Color;
@@ -83,18 +82,20 @@ public class Vitamins {
 	}
 
 
-	public static CSG get(CSGDatabaseInstance db,boolean fix, File resource) throws NonManifoldShapeError, ColinearPointsException {
-		return get(db,fix, resource, false);
+	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource)
+			throws NonManifoldShapeError, ColinearPointsException {
+		return get(db, fix, resource, false);
 	}
 
-	public static CSG get(CSGDatabaseInstance db, boolean fix,File resource, boolean forceRefresh ) throws NonManifoldShapeError, ColinearPointsException {
+	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource, boolean forceRefresh)
+			throws NonManifoldShapeError, ColinearPointsException {
 
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
 			try {
 				if (resource.getName().toLowerCase().endsWith(".stl"))
-					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath(),fix));
+					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath(), fix));
 				// if(resource.getName().toLowerCase().endsWith(".obj"))
 				// fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new
 				// FileInputStream(resource)).);
