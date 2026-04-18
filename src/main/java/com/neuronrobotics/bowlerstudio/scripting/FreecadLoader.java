@@ -29,6 +29,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
@@ -52,7 +53,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
 		toSTLFile(code, stl);
-		CSG back = Vitamins.get(db, stl, true);
+		CSG back = Vitamins.get(db,true, stl, true);
 		//back.snapPoints();
 		back.setColor(Color.BLUE);
 		back.setNoScale(true);
@@ -237,9 +238,11 @@ public class FreecadLoader implements IScriptingLanguage {
 	 * @throws GitAPIException
 	 * @throws TransportException
 	 * @throws InvalidRemoteException
+	 * @throws ColinearPointsException 
+	 * @throws NonManifoldShapeError 
 	 */
 	public static void main(String[] args)
-			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException, NonManifoldShapeError, ColinearPointsException {
 		JavaFXInitializer.go();
 		PasswordManager.login();
 		FreecadLoader l = new FreecadLoader();
@@ -249,7 +252,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			l.getDefaultContents(test);
 		File stlToImport = ScriptingEngine.fileFromGit("https://github.com/NeuronRobotics/NASACurisoity.git",
 				"STL/upper-arm.STL");
-		CSG toSlice = Vitamins.get(null, stlToImport, true);
+		CSG toSlice = Vitamins.get(null,true, stlToImport, true);
 		// toSlice=toSlice.union(
 		// new Cube(20).toCSG()
 		// .toXMin()

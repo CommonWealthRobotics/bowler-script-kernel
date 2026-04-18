@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -27,6 +28,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 //import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
+import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -80,28 +82,19 @@ public class Vitamins {
 		fileLastLoaded.clear();
 	}
 
-	@Deprecated
-	public static CSG get(File resource) {
-		return get(CSGDatabase.getInstance(), resource, false);
+
+	public static CSG get(CSGDatabaseInstance db,boolean fix, File resource) throws NonManifoldShapeError, ColinearPointsException {
+		return get(db,fix, resource, false);
 	}
 
-	@Deprecated
-	public static CSG get(File resource, boolean forceRefresh) {
-		return get(CSGDatabase.getInstance(), resource, forceRefresh);
-	}
-
-	public static CSG get(CSGDatabaseInstance db, File resource) {
-		return get(db, resource, false);
-	}
-
-	public static CSG get(CSGDatabaseInstance db, File resource, boolean forceRefresh) {
+	public static CSG get(CSGDatabaseInstance db, boolean fix,File resource, boolean forceRefresh ) throws NonManifoldShapeError, ColinearPointsException {
 
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
 			try {
 				if (resource.getName().toLowerCase().endsWith(".stl"))
-					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
+					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath(),fix));
 				// if(resource.getName().toLowerCase().endsWith(".obj"))
 				// fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new
 				// FileInputStream(resource)).);

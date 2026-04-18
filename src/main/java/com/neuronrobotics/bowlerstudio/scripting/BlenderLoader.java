@@ -11,8 +11,10 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
@@ -24,7 +26,7 @@ public class BlenderLoader implements IScriptingLanguage {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
 		toSTLFile(db, code, stl);
-		CSG back = Vitamins.get(db, stl, true);
+		CSG back = Vitamins.get(db, true,stl, true);
 		back.setColor(Color.ORANGE);
 		return back;
 	}
@@ -92,24 +94,31 @@ public class BlenderLoader implements IScriptingLanguage {
 	}
 
 	public static void scaleStl(CSGDatabaseInstance db, File incoming, File outgoing, double scale) {
-		CSG back = Vitamins.get(db, incoming, true).scale(scale);
+		CSG back;
 		try {
-			boolean manifold = CSG.isPreventNonManifoldTriangles();
-			CSG.setPreventNonManifoldTriangles(false);
-			FileUtil.write(Paths.get(outgoing.getAbsolutePath()), back.toStlString());
+			back = Vitamins.get(db,false, incoming, true).scale(scale);
+			try {
+				boolean manifold = CSG.isPreventNonManifoldTriangles();
+				CSG.setPreventNonManifoldTriangles(false);
+				FileUtil.write(Paths.get(outgoing.getAbsolutePath()), back.toStlString());
 
-			CSG.setPreventNonManifoldTriangles(manifold);
-		} catch (IOException e) {
-			// Auto-generated catch block
-			com.neuronrobotics.sdk.common.Log.error(e);
+				CSG.setPreventNonManifoldTriangles(manifold);
+			} catch (IOException e) {
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
+			}
+		} catch (NonManifoldShapeError | ColinearPointsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 	}
 
 	public static CSG remesh(CSGDatabaseInstance db, CSG incoming, double MMVoxel, CSGDatabaseInstance instance)
 			throws Exception {
 		File stl = DownloadManager.getTmpSTL(incoming);
 		remeshSTLFile(db, stl, MMVoxel);
-		CSG back = Vitamins.get(db, stl, true);
+		CSG back = Vitamins.get(db,true, stl, true);
 		return back.syncProperties(instance, incoming).setName(incoming.getName());
 	}
 
