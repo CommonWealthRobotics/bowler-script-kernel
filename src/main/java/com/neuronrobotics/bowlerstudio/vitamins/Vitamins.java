@@ -81,10 +81,19 @@ public class Vitamins {
 		fileLastLoaded.clear();
 	}
 
+	public static CSG get(CSGDatabaseInstance db, File resource) throws NonManifoldShapeError, ColinearPointsException {
+		return get(db, true, resource, false);
+	}
 
 	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource)
 			throws NonManifoldShapeError, ColinearPointsException {
 		return get(db, fix, resource, false);
+	}
+
+	public static CSG get(CSGDatabaseInstance db, File resource, boolean forceRefresh)
+			throws NonManifoldShapeError, ColinearPointsException {
+		return get(db, true, resource, forceRefresh);
+
 	}
 
 	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource, boolean forceRefresh)
@@ -357,8 +366,13 @@ public class Vitamins {
 							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
 																																																			// message
 																																																			// com.neuronrobotics.sdk.common.Log.error(jsonString);
-																																																			// com.neuronrobotics.sdk.common.Log.error("Database saved " +
-																																																			// getVitaminFile(type, null, false).getAbsolutePath());
+																																																			// com.neuronrobotics.sdk.common.Log.error("Database
+																																																			// saved
+																																																			// "
+																																																			// +
+																																																			// getVitaminFile(type,
+																																																			// null,
+																																																			// false).getAbsolutePath());
 		} catch (Exception ex) {
 			if (ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
 				ScriptingEngine.deleteRepo(getGitRepoDatabase());
