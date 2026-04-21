@@ -15,9 +15,11 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 
@@ -39,26 +41,29 @@ public class Build123dLoader implements IScriptingLanguage {
 	}
 
 	public static List<CSG> toCSG(CSGDatabaseInstance db, ArrayList<Object> params)
-			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException,
+			NonManifoldShapeError, ColinearPointsException {
 		Path tempDir = Files.createTempDirectory("build123d-");
 
 		return toCSG(db, null, tempDir, params);
 	}
 
 	public static List<CSG> toCSG(CSGDatabaseInstance db, Path stl, ArrayList<Object> params)
-			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException,
+			NonManifoldShapeError, ColinearPointsException {
 		return toCSG(db, null, stl, params);
 	}
 
 	public static List<CSG> toCSG(CSGDatabaseInstance db, File code, Path stl, ArrayList<Object> params)
-			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException,
+			NonManifoldShapeError, ColinearPointsException {
 		toSTLFile(code, stl, params);
 
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		for (File f : stl.toFile().listFiles()) {
 			Log.debug("Loading " + f);
 			if (f.getName().toLowerCase().endsWith(".stl")) {
-				CSG b = Vitamins.get(db, f, true);
+				CSG b = Vitamins.get(db, true, f, true);
 				b.setColor(Color.ANTIQUEWHITE);
 				back.add(b);
 			}

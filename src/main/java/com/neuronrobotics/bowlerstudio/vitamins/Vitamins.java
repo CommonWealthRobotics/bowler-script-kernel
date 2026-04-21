@@ -11,10 +11,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import javafx.scene.paint.Color;
@@ -27,6 +27,7 @@ import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
 //import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
 //import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
+import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -80,28 +81,30 @@ public class Vitamins {
 		fileLastLoaded.clear();
 	}
 
-	@Deprecated
-	public static CSG get(File resource) {
-		return get(CSGDatabase.getInstance(), resource, false);
+	public static CSG get(CSGDatabaseInstance db, File resource) throws NonManifoldShapeError, ColinearPointsException {
+		return get(db, true, resource, false);
 	}
 
-	@Deprecated
-	public static CSG get(File resource, boolean forceRefresh) {
-		return get(CSGDatabase.getInstance(), resource, forceRefresh);
+	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource)
+			throws NonManifoldShapeError, ColinearPointsException {
+		return get(db, fix, resource, false);
 	}
 
-	public static CSG get(CSGDatabaseInstance db, File resource) {
-		return get(db, resource, false);
+	public static CSG get(CSGDatabaseInstance db, File resource, boolean forceRefresh)
+			throws NonManifoldShapeError, ColinearPointsException {
+		return get(db, true, resource, forceRefresh);
+
 	}
 
-	public static CSG get(CSGDatabaseInstance db, File resource, boolean forceRefresh) {
+	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource, boolean forceRefresh)
+			throws NonManifoldShapeError, ColinearPointsException {
 
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
 			try {
 				if (resource.getName().toLowerCase().endsWith(".stl"))
-					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
+					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath(), fix));
 				// if(resource.getName().toLowerCase().endsWith(".obj"))
 				// fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new
 				// FileInputStream(resource)).);
@@ -363,8 +366,13 @@ public class Vitamins {
 							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
 																																																			// message
 																																																			// com.neuronrobotics.sdk.common.Log.error(jsonString);
-																																																			// com.neuronrobotics.sdk.common.Log.error("Database saved " +
-																																																			// getVitaminFile(type, null, false).getAbsolutePath());
+																																																			// com.neuronrobotics.sdk.common.Log.error("Database
+																																																			// saved
+																																																			// "
+																																																			// +
+																																																			// getVitaminFile(type,
+																																																			// null,
+																																																			// false).getAbsolutePath());
 		} catch (Exception ex) {
 			if (ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
 				ScriptingEngine.deleteRepo(getGitRepoDatabase());

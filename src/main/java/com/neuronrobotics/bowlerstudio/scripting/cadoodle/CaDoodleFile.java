@@ -1286,6 +1286,8 @@ public class CaDoodleFile {
 	public TransformNR getWorkplane() {
 		if (workplane == null)
 			workplane = new TransformNR();
+		RotationNR r = workplane.getRotation();
+		r.normalize();
 		return workplane;
 	}
 

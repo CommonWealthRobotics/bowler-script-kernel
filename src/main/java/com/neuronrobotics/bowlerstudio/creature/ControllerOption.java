@@ -26,6 +26,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotControll
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
@@ -83,26 +84,31 @@ public class ControllerOption {
 			dir.mkdirs();
 		stlFile = new File(absolutePath + delim() + type + ".stl");
 		if (stlFile.exists()) {
-			indicator = Vitamins.get(f.getCsgDBinstance(), stlFile);
-			getIndicator().setColor(Color.WHITE);
-			return;
-		} else {
-			AddRobotController arc = new AddRobotController().setController(this);
-			arc.setCaDoodleFile(f);
-			List<CSG> so = arc.process(new ArrayList<>());
-			for (CSG c : so) {
-				for (String s : c.getParameters(f.getCsgDBinstance())) {
-					f.getCsgDBinstance().delete(s);
-				}
+			try {
+				indicator = Vitamins.get(f.getCsgDBinstance(), false, stlFile);
+				getIndicator().setColor(Color.WHITE);
+				return;
+			} catch (Exception e) {
+				Log.error(e);
+				stlFile.delete();
 			}
-			indicator = so.get(0);
-			if (so.size() > 1) {
-				for (int i = 1; i < so.size(); i++) {
-					indicator = getIndicator().dumbUnion(so.get(i));
-				}
-			}
-			getIndicator().setColor(Color.WHITE);
+
 		}
+		AddRobotController arc = new AddRobotController().setController(this);
+		arc.setCaDoodleFile(f);
+		List<CSG> so = arc.process(new ArrayList<>());
+		for (CSG c : so) {
+			for (String s : c.getParameters(f.getCsgDBinstance())) {
+				f.getCsgDBinstance().delete(s);
+			}
+		}
+		indicator = so.get(0);
+		if (so.size() > 1) {
+			for (int i = 1; i < so.size(); i++) {
+				indicator = getIndicator().dumbUnion(so.get(i));
+			}
+		}
+		getIndicator().setColor(Color.WHITE);
 
 	}
 

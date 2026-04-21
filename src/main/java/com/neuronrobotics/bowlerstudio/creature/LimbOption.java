@@ -126,11 +126,17 @@ public class LimbOption {
 		File imageFile = new File(absolutePath + delim() + type + name + ".png");
 		File stlFile = new File(absolutePath + delim() + type + name + ".stl");
 		if (imageFile.exists() && stlFile.exists()) {
-			indicator = Vitamins.get(f.getCsgDBinstance(), stlFile);
-			indicator = indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
-			indicator.setColor(Color.WHITE);
-			image = new Image(imageFile.toURI().toString());
-			return;
+			try {
+				indicator = Vitamins.get(f.getCsgDBinstance(), false, stlFile);
+				indicator = indicator.transformed(TransformFactory.nrToCSG(LimbRotationOffset));
+				indicator.setColor(Color.WHITE);
+				image = new Image(imageFile.toURI().toString());
+				return;
+			} catch (Exception e) {
+				Log.error("Failed to load cached STL, deleting " + stlFile.getAbsolutePath());
+				Log.error(e);
+				stlFile.delete();
+			}
 		}
 		AddRobotLimb add = new AddRobotLimb().setLimb(this).setLocation(new TransformNR());
 		add.setCaDoodleFile(f);
