@@ -133,7 +133,7 @@ public class LimbOption {
 				image = new Image(imageFile.toURI().toString());
 				return;
 			} catch (Exception e) {
-				Log.error("Failed to load cached STL, deleting "+stlFile.getAbsolutePath());
+				Log.error("Failed to load cached STL, deleting " + stlFile.getAbsolutePath());
 				Log.error(e);
 				stlFile.delete();
 			}
