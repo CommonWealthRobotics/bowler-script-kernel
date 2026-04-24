@@ -166,6 +166,7 @@ public class Manipulation {
 
 	private DragState state = DragState.IDLE;
 	private boolean resizeAllowed = true;
+	private TransformNR setGlobalPose;
 
 	public void addEventListener(EventHandler<MouseEvent> r) {
 		if (eventListeners.contains(r))
@@ -503,6 +504,7 @@ public class Manipulation {
 	}
 
 	public void setGlobal(TransformNR global) {
+		this.setSetGlobalPose(global);
 		getCurrentPose().setX(newX);
 		getCurrentPose().setY(newY);
 		getCurrentPose().setZ(newZ);
@@ -620,6 +622,14 @@ public class Manipulation {
 
 	public void setState(DragState state) {
 		this.state = state;
+	}
+
+	public TransformNR getSetGlobalPose() {
+		return setGlobalPose;
+	}
+
+	public void setSetGlobalPose(TransformNR setGlobalPose) {
+		this.setGlobalPose = setGlobalPose;
 	}
 
 }
