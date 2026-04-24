@@ -65,7 +65,7 @@ public class Manipulation {
 	private Affine manipulationMatrix;
 	private TransformNR orientation;
 	private TransformNR globalPose = new TransformNR();
-	private TransformNR currentPose = new TransformNR();
+	private TransformNR currentPoseNR = new TransformNR();
 	private IFrameProvider frameOfReference = () -> new TransformNR();
 
 	private double gridOffsetX = 0;
@@ -504,10 +504,9 @@ public class Manipulation {
 	}
 
 	public void setGlobal(TransformNR global) {
-		this.setSetGlobalPose(global);
-		getCurrentPose().setX(newX);
-		getCurrentPose().setY(newY);
-		getCurrentPose().setZ(newZ);
+		currentPoseNR.setX(newX);
+		currentPoseNR.setY(newY);
+		currentPoseNR.setZ(newZ);
 		getUi().runLater(() -> {
 			TransformFactory.nrToAffine(global, manipulationMatrix);
 		});
@@ -525,9 +524,9 @@ public class Manipulation {
 		newX = 0;
 		newY = 0;
 		newZ = 0;
-		getGlobalPose().setX(0);
-		getGlobalPose().setY(0);
-		getGlobalPose().setZ(0);
+		globalPose.setX(0);
+		globalPose.setY(0);
+		globalPose.setZ(0);
 		setGlobal(new TransformNR(0, 0, 0, new RotationNR()));
 	}
 
@@ -537,9 +536,9 @@ public class Manipulation {
 		newY = nY;
 		newZ = nZ;
 
-		getGlobalPose().setX(nX);
-		getGlobalPose().setY(nY);
-		getGlobalPose().setZ(nZ);
+		globalPose.setX(nX);
+		globalPose.setY(nY);
+		globalPose.setZ(nZ);
 		setGlobal(new TransformNR(nX, nY, nZ, new RotationNR()));
 
 		for (EventHandler<MouseEvent> R : eventListeners)
@@ -593,11 +592,11 @@ public class Manipulation {
 	}
 
 	public TransformNR getCurrentPose() {
-		return currentPose;
+		return currentPoseNR;
 	}
 
 	public void setCurrentPose(TransformNR currentPose) {
-		this.currentPose = currentPose;
+		this.currentPoseNR = currentPose;
 	}
 
 	public void cancel() {
@@ -624,12 +623,5 @@ public class Manipulation {
 		this.state = state;
 	}
 
-	public TransformNR getSetGlobalPose() {
-		return setGlobalPose;
-	}
-
-	public void setSetGlobalPose(TransformNR setGlobalPose) {
-		this.setGlobalPose = setGlobalPose;
-	}
 
 }
