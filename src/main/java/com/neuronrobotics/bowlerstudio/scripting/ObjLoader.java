@@ -7,13 +7,20 @@ import java.util.Arrays;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import javafx.scene.paint.Color;
 
 public class ObjLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
 			ArrayList<Object> args) throws Exception {
-		CSG sllLoaded = Vitamins.get(db, true, code);
+		CSG sllLoaded;
+		try {
+			sllLoaded = Vitamins.get(db, true, code);
+		} catch (Throwable e) {
+			sllLoaded = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
+
+		}
 		return sllLoaded;
 	}
 

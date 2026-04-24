@@ -11,10 +11,8 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
-import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
@@ -26,8 +24,16 @@ public class BlenderLoader implements IScriptingLanguage {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
 		toSTLFile(db, code, stl);
-		CSG back = Vitamins.get(db, true, stl, true);
-		back.setColor(Color.ORANGE);
+		CSG back;
+		try {
+			back = Vitamins.get(db, true, stl, true);
+			back.setColor(Color.ORANGE);
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			back = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
+		}
+
 		return back;
 	}
 
@@ -107,7 +113,7 @@ public class BlenderLoader implements IScriptingLanguage {
 				// Auto-generated catch block
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}
-		} catch (NonManifoldShapeError | ColinearPointsException e) {
+		} catch (Throwable e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -118,7 +124,14 @@ public class BlenderLoader implements IScriptingLanguage {
 			throws Exception {
 		File stl = DownloadManager.getTmpSTL(incoming);
 		remeshSTLFile(db, stl, MMVoxel);
-		CSG back = Vitamins.get(db, true, stl, true);
+		CSG back;
+		try {
+			back = Vitamins.get(db, true, stl, true);
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			back = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
+		}
 		return back.syncProperties(instance, incoming).setName(incoming.getName());
 	}
 

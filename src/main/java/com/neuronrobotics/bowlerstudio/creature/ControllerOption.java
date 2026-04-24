@@ -88,7 +88,7 @@ public class ControllerOption {
 				indicator = Vitamins.get(f.getCsgDBinstance(), false, stlFile);
 				getIndicator().setColor(Color.WHITE);
 				return;
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				Log.error(e);
 				stlFile.delete();
 			}

@@ -132,7 +132,7 @@ public class LimbOption {
 				indicator.setColor(Color.WHITE);
 				image = new Image(imageFile.toURI().toString());
 				return;
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				Log.error("Failed to load cached STL, deleting " + stlFile.getAbsolutePath());
 				Log.error(e);
 				stlFile.delete();

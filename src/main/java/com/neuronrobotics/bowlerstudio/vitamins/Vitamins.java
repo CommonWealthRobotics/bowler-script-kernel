@@ -11,7 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -24,10 +23,6 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
-//import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
-//import com.neuronrobotics.bowlerstudio.util.IFileChangeListener;
-//import com.neuronrobotics.bowlerstudio.util.FileChangeWatcher;
-import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -81,23 +76,20 @@ public class Vitamins {
 		fileLastLoaded.clear();
 	}
 
-	public static CSG get(CSGDatabaseInstance db, File resource) throws NonManifoldShapeError, ColinearPointsException {
+	public static CSG get(CSGDatabaseInstance db, File resource) throws Throwable {
 		return get(db, true, resource, false);
 	}
 
-	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource)
-			throws NonManifoldShapeError, ColinearPointsException {
+	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource) throws Throwable {
 		return get(db, fix, resource, false);
 	}
 
-	public static CSG get(CSGDatabaseInstance db, File resource, boolean forceRefresh)
-			throws NonManifoldShapeError, ColinearPointsException {
+	public static CSG get(CSGDatabaseInstance db, File resource, boolean forceRefresh) throws Throwable {
 		return get(db, true, resource, forceRefresh);
 
 	}
 
-	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource, boolean forceRefresh)
-			throws NonManifoldShapeError, ColinearPointsException {
+	public static CSG get(CSGDatabaseInstance db, boolean fix, File resource, boolean forceRefresh) throws Throwable {
 
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an

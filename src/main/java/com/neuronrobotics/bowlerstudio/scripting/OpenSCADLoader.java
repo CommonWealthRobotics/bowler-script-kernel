@@ -31,8 +31,13 @@ public class OpenSCADLoader implements IScriptingLanguage {
 		}
 
 		toSTLFile(code, stl, params);
-		CSG back = Vitamins.get(db, true, stl, true);
-		back.setColor(Color.YELLOW);
+		CSG back;
+		try {
+			back = Vitamins.get(db, true, stl, true);
+			back.setColor(Color.YELLOW);
+		} catch (Throwable e) {
+			back = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
+		}
 		return back;
 	}
 

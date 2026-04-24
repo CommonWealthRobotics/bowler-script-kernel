@@ -63,8 +63,15 @@ public class Build123dLoader implements IScriptingLanguage {
 		for (File f : stl.toFile().listFiles()) {
 			Log.debug("Loading " + f);
 			if (f.getName().toLowerCase().endsWith(".stl")) {
-				CSG b = Vitamins.get(db, true, f, true);
-				b.setColor(Color.ANTIQUEWHITE);
+				CSG b;
+				try {
+					b = Vitamins.get(db, true, f, true);
+					b.setColor(Color.ANTIQUEWHITE);
+				} catch (Throwable e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					b = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
+				}
 				back.add(b);
 			}
 		}

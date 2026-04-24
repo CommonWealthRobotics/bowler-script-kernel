@@ -53,9 +53,15 @@ public class FreecadLoader implements IScriptingLanguage {
 		File stl = File.createTempFile(code.getName(), ".stl");
 		stl.deleteOnExit();
 		toSTLFile(code, stl);
-		CSG back = Vitamins.get(db, true, stl, true);
+		CSG back;
+		try {
+			back = Vitamins.get(db, true, stl, true);
+
+			back.setColor(Color.BLUE);
+		} catch (Throwable e) {
+			back = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
+		}
 		//back.snapPoints();
-		back.setColor(Color.BLUE);
 		back.setNoScale(true);
 		return back;
 	}
@@ -252,7 +258,14 @@ public class FreecadLoader implements IScriptingLanguage {
 			l.getDefaultContents(test);
 		File stlToImport = ScriptingEngine.fileFromGit("https://github.com/NeuronRobotics/NASACurisoity.git",
 				"STL/upper-arm.STL");
-		CSG toSlice = Vitamins.get(null, true, stlToImport, true);
+		CSG toSlice;
+		try {
+			toSlice = Vitamins.get(null, true, stlToImport, true);
+		} catch (Throwable e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			toSlice = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
+		}
 		// toSlice=toSlice.union(
 		// new Cube(20).toCSG()
 		// .toXMin()
