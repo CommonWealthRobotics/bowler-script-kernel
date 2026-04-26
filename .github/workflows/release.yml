@@ -30,7 +30,7 @@ jobs:
       run: pwd; ls -la        
 
     - name: Pull a JavaFX JDK
-      run: wget https://cdn.azul.com/zulu/bin/zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
+      run: wget https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
 
     - name: After JDK download, list directory contnts
       run: pwd; ls -la
@@ -39,7 +39,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 21
-        jdkFile: zulu21.46.19-ca-fx-jdk21.0.9-linux_x64.tar.gz
+        jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}   
