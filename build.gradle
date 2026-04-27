@@ -196,7 +196,7 @@ dependencies {
 	api 'commons-io:commons-io:2.6'
 	api group:'org.python',name:'jython',version:'2.5.3'
 	api group:'org.python',name:'jython-standalone',version:'2.5.2'
-	api 'org.clojure:clojure:1.8.0'
+	api 'org.clojure:clojure:1.12.0'
 	// jetty server
 	api "org.eclipse.jetty:jetty-server:9.0.2.v20130417"
 	api "org.eclipse.jetty:jetty-servlet:9.0.2.v20130417"
