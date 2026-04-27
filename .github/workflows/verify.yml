@@ -45,7 +45,7 @@ jobs:
     - name: Set Java
       uses: actions/setup-java@v1
       with:
-        java-version: 21
+        java-version: 25
         jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
     - name: Shadow Jar 
       run: ./gradlew spotlessCheck shadowJar        
