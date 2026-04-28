@@ -94,35 +94,9 @@ public class Vitamins {
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
-			try {
-				if (resource.getName().toLowerCase().endsWith(".stl"))
-					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath(), fix));
-				// if(resource.getName().toLowerCase().endsWith(".obj"))
-				// fileLastLoaded.put(resource.getAbsolutePath(), new ObjImporter(new
-				// FileInputStream(resource)).);
-				// try {
-				// FileChangeWatcher f = FileChangeWatcher.watch(resource);
-				// f.addIFileChangeListener(new IFileChangeListener() {
-				// @Override
-				// public void onFileDelete(File fileThatIsDeleted) {
-				// fileLastLoaded.remove(resource.getAbsolutePath());
-				// f.close();
-				// }
-				//
-				// @Override
-				// public void onFileChange(File fileThatChanged, WatchEvent event) {
-				// fileLastLoaded.remove(resource.getAbsolutePath());
-				// f.close();
-				// }
-				// });
-				// } catch (IOException e) {
-				// // Auto-generated catch block
-				// com.neuronrobotics.sdk.common.Log.error(e);
-				// }
-			} catch (IOException e) {
-				// Auto-generated catch block
-				com.neuronrobotics.sdk.common.Log.error(e);
-			}
+			if (resource.getName().toLowerCase().endsWith(".stl"))
+				fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath(), fix));
+
 		}
 		CSG csg = fileLastLoaded.get(resource.getAbsolutePath());
 
@@ -167,7 +141,8 @@ public class Vitamins {
 			new java.net.URL(text2);
 		} catch (Exception ex) {
 			if (!text2.startsWith("git@")) {
-				com.neuronrobotics.sdk.common.Log.error(ex);;
+				com.neuronrobotics.sdk.common.Log.error(ex);
+				;
 				return false;
 			}
 		}
@@ -371,7 +346,8 @@ public class Vitamins {
 				saveDatabase(type);
 				return true;
 			}
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 			throw ex;
 		}
 		return true;
@@ -390,7 +366,8 @@ public class Vitamins {
 			if (type != null)
 				saveDatabase(type);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 			// com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			newRepo = github.getRepository(getSourcerepo()).fork();
@@ -458,7 +435,8 @@ public class Vitamins {
 				}
 			}
 		} catch (java.lang.NullPointerException ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 		}
 	}
 
