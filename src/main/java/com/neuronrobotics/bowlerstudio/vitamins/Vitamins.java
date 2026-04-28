@@ -141,8 +141,7 @@ public class Vitamins {
 			new java.net.URL(text2);
 		} catch (Exception ex) {
 			if (!text2.startsWith("git@")) {
-				com.neuronrobotics.sdk.common.Log.error(ex);
-				;
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 				return false;
 			}
 		}
@@ -346,8 +345,7 @@ public class Vitamins {
 				saveDatabase(type);
 				return true;
 			}
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			throw ex;
 		}
 		return true;
@@ -366,8 +364,7 @@ public class Vitamins {
 			if (type != null)
 				saveDatabase(type);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			// com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			newRepo = github.getRepository(getSourcerepo()).fork();
@@ -435,8 +432,7 @@ public class Vitamins {
 				}
 			}
 		} catch (java.lang.NullPointerException ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 		}
 	}
 
