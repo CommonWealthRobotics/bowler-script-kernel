@@ -105,7 +105,7 @@ public class DownloadManager {
 		stl.deleteOnExit();
 		boolean manifold = CSG.isPreventNonManifoldTriangles();
 		CSG.setPreventNonManifoldTriangles(false);
-		FileUtil.write(Paths.get(stl.getAbsolutePath()), stlIn.toStlString());
+		stlIn.toStl(Paths.get(stl.getAbsolutePath()));
 		CSG.setPreventNonManifoldTriangles(manifold);
 		return stl;
 	}

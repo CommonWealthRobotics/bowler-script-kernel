@@ -1085,7 +1085,7 @@ public class CaDoodleFile {
 				boolean manif = CSG.isPreventNonManifoldTriangles();
 				if (manif)
 					CSG.setPreventNonManifoldTriangles(false);
-				FileUtil.write(Paths.get(string), thumb.toStlString());
+				thumb.toStl(Paths.get(string));
 				if (manif)
 					CSG.setPreventNonManifoldTriangles(true);
 			}

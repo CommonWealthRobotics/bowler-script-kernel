@@ -1226,8 +1226,7 @@ public class MobileBaseCadManager implements Runnable {
 									.error("Writing STL for " + name + " to " + stl.getAbsolutePath());
 							boolean manifold = CSG.isPreventNonManifoldTriangles();
 							// CSG.setPreventNonManifoldTriangles(false);
-							FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toStlString());
-
+							tmp.toStl(Paths.get(stl.getAbsolutePath()));
 							CSG.setPreventNonManifoldTriangles(manifold);
 							allCadStl.add(stl);
 							// totalAssembly.add(tmp);
@@ -1268,7 +1267,7 @@ public class MobileBaseCadManager implements Runnable {
 					if (!dir.exists())
 						dir.mkdirs();
 					File stl = new File(dir.getAbsolutePath() + "/" + name + "_Body_part_" + link + ".stl");
-					FileUtil.write(Paths.get(stl.getAbsolutePath()), csg.toStlString());
+					csg.toStl(Paths.get(stl.getAbsolutePath()));
 					allCadStl.add(stl);
 					totalAssembly.add(csg);
 					getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));

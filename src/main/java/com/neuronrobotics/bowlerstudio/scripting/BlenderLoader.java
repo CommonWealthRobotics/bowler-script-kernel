@@ -106,10 +106,9 @@ public class BlenderLoader implements IScriptingLanguage {
 			try {
 				boolean manifold = CSG.isPreventNonManifoldTriangles();
 				CSG.setPreventNonManifoldTriangles(false);
-				FileUtil.write(Paths.get(outgoing.getAbsolutePath()), back.toStlString());
-
+				back.toStl(Paths.get(outgoing.getAbsolutePath()));
 				CSG.setPreventNonManifoldTriangles(manifold);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// Auto-generated catch block
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}

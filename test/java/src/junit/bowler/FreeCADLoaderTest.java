@@ -19,7 +19,7 @@ public class FreeCADLoaderTest {
 	public void test() throws Exception {
 		File model = new File("FreeCADModel.FCStd");
 		CSG back = (CSG) ScriptingEngine.inlineScriptRun(CSGDatabase.getInstance(), model, null, "FreeCAD");
-		FileUtil.write(Paths.get(model.getName() + ".stl"), back.toStlString());
+		back.toStl(Paths.get(model.getName() + ".stl"));
 	}
 
 }

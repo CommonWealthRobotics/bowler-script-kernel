@@ -91,7 +91,8 @@ public class LimbOption {
 			String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 			return gson.fromJson(content, TT_CaDoodleFile);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 			return new ArrayList<LimbOption>();
 		}
 	}
@@ -181,9 +182,9 @@ public class LimbOption {
 		}
 		indicator.setColor(Color.WHITE);
 		try {
-			FileUtil.write(Paths.get(stlFile.getAbsolutePath()), indicator.toStlString());
+			indicator.toStl(Paths.get(stlFile.getAbsolutePath()));
 			System.err.println("Indicator STL saved successfully to " + stlFile.getAbsolutePath());
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
