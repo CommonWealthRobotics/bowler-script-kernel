@@ -10,7 +10,6 @@ import org.junit.Test;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 
 public class FreeCADLoaderTest {

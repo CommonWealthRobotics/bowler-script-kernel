@@ -47,7 +47,6 @@ import com.neuronrobotics.sdk.pid.PIDLimitEvent;
 import com.neuronrobotics.sdk.util.ThreadUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;

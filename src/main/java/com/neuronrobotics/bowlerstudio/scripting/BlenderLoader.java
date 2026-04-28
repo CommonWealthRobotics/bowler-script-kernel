@@ -13,7 +13,6 @@ import org.eclipse.jgit.api.errors.TransportException;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 

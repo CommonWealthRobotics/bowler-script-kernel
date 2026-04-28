@@ -42,7 +42,6 @@ import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;

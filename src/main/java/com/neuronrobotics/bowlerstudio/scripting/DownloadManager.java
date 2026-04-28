@@ -60,7 +60,6 @@ import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.video.OSUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.FileUtil;
 //import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 //import javafx.scene.control.ButtonType;

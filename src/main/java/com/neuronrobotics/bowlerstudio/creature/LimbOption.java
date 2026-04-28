@@ -37,7 +37,6 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.embed.swing.SwingFXUtils;
@@ -91,8 +90,7 @@ public class LimbOption {
 			String content = FileUtils.readFileToString(f, StandardCharsets.UTF_8);
 			return gson.fromJson(content, TT_CaDoodleFile);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			return new ArrayList<LimbOption>();
 		}
 	}
