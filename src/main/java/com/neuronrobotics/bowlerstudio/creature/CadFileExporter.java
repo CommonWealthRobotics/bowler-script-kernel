@@ -2,7 +2,6 @@ package com.neuronrobotics.bowlerstudio.creature;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,11 +89,11 @@ public class CadFileExporter {
 		ArrayList<CSG> svgParts = new ArrayList<>();
 		ArrayList<CSG> blendParts = new ArrayList<>();
 		ArrayList<CSG> freecadParts = new ArrayList<>();
-		ArrayList<CSG> parts3mf= new ArrayList<>();
+		ArrayList<CSG> parts3mf = new ArrayList<>();
 		String svgName = null;
 		String blendName = null;
 		String freecadName = null;
-		String name3mf=null;
+		String name3mf = null;
 		String directoryWherePartsGo = "";
 		for (CSG part : totalAssembly) {
 			if (part.getNumberOfTriangles() == 0)
@@ -188,7 +187,7 @@ public class CadFileExporter {
 			} catch (NonManifoldShapeError e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}// default to stl
+			} // default to stl
 		}
 		com.neuronrobotics.sdk.common.Log.debug("Finished Export!");
 		return allCadStl;
@@ -201,12 +200,15 @@ public class CadFileExporter {
 			FreecadLoader.addCSGToFreeCAD(blend, tmp);
 		return blend;
 	}
-	private File make3mf(String nameBase, List<CSG> current) throws IOException, ColinearPointsException, NonManifoldShapeError {
+
+	private File make3mf(String nameBase, List<CSG> current)
+			throws IOException, ColinearPointsException, NonManifoldShapeError {
 		File blend = new File(nameBase + ".3mf");
 		com.neuronrobotics.sdk.common.Log.debug("3mf Writing " + blend.getAbsolutePath());
 		CSG.toThreeMF(current, true, blend.toPath());
 		return blend;
 	}
+
 	private File makeStl(String nameBase, CSG tmp) throws IOException {
 		File stl = new File(nameBase + ".stl");
 		// boolean manifold=CSG.isPreventNonManifoldTriangles();

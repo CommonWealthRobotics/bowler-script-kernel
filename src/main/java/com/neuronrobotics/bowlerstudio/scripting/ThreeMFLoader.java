@@ -45,7 +45,7 @@ public class ThreeMFLoader implements IScriptingLanguage {
 
 	@Override
 	public void getDefaultContents(File freecadGenFile) {
-	
+
 	}
 
 }
