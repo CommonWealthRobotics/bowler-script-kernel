@@ -200,6 +200,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new OpenSCADLoader());
 		addScriptingLanguage(new CaDoodleLoader());
 		addScriptingLanguage(new ObjLoader());
+		addScriptingLanguage(new ThreeMFLoader());
 	}
 
 	public static void setWorkspace(File file) {
