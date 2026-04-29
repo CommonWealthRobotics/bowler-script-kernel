@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.creature;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,8 +12,10 @@ import org.apache.commons.io.FilenameUtils;
 
 import com.neuronrobotics.bowlerstudio.scripting.BlenderLoader;
 import com.neuronrobotics.bowlerstudio.scripting.FreecadLoader;
+import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.FileUtil;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.svg.SVGExporter;
@@ -87,10 +90,12 @@ public class CadFileExporter {
 		ArrayList<CSG> svgParts = new ArrayList<>();
 		ArrayList<CSG> blendParts = new ArrayList<>();
 		ArrayList<CSG> freecadParts = new ArrayList<>();
+		ArrayList<CSG> parts3mf= new ArrayList<>();
 		String svgName = null;
 		String blendName = null;
 		String freecadName = null;
-		String nameBase = "";
+		String name3mf=null;
+		String directoryWherePartsGo = "";
 		for (CSG part : totalAssembly) {
 			if (part.getNumberOfTriangles() == 0)
 				continue;
@@ -102,11 +107,11 @@ public class CadFileExporter {
 			manufactured.setName(part.getName());
 			if (name.length() == 0)
 				name = "Part-Num-" + index;
-			nameBase = dir.getAbsolutePath() + "/" + name;
+			directoryWherePartsGo = dir.getAbsolutePath() + "/" + name;
 			index++;
 			if (part.getExportFormats() == null) {
 				try {
-					allCadStl.add(makeStl(nameBase, manufactured));// default to stl
+					allCadStl.add(makeStl(directoryWherePartsGo, manufactured));// default to stl
 				} catch (Throwable t) {
 					com.neuronrobotics.sdk.common.Log.error("Failed to generate " + part.getName());
 					com.neuronrobotics.sdk.common.Log.error(t);
@@ -116,7 +121,7 @@ public class CadFileExporter {
 				for (String format : part.getExportFormats()) {
 					if (format.toLowerCase().contains("obj")) {
 						try {
-							allCadStl.add(makeObj(nameBase, manufactured));
+							allCadStl.add(makeObj(directoryWherePartsGo, manufactured));
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -124,7 +129,7 @@ public class CadFileExporter {
 						ui.setCsg(manufactured, null);
 					}
 					if (format.toLowerCase().contains("stl")) {
-						allCadStl.add(makeStl(nameBase, manufactured));// default to stl
+						allCadStl.add(makeStl(directoryWherePartsGo, manufactured));// default to stl
 						ui.setCsg(manufactured, null);
 					}
 					if (format.toLowerCase().contains("svg")) {
@@ -150,18 +155,40 @@ public class CadFileExporter {
 						}
 						freecadParts.add(manufactured);
 					}
+					if (format.toLowerCase().contains("3mf")) {
+						// allCadStl.add(makeBlender(nameBase,manufactured));//
+						ui.setCsg(manufactured, null);
+						if (name3mf == null) {
+							name3mf = part.toString();
+						}
+						parts3mf.add(manufactured);
+					}
 				}
 
 			}
 		}
 		if (svgParts.size() > 0) {
-			allCadStl.add(makeSvg(nameBase, svgParts));// default to stl
+			allCadStl.add(makeSvg(directoryWherePartsGo, svgParts));// default to stl
 		}
 		if (blendParts.size() > 0) {
-			allCadStl.add(makeBlender(nameBase, blendParts));// default to stl
+			allCadStl.add(makeBlender(directoryWherePartsGo, blendParts));// default to stl
 		}
 		if (freecadParts.size() > 0) {
-			allCadStl.add(makeFreecad(nameBase, freecadParts));// default to stl
+			allCadStl.add(makeFreecad(directoryWherePartsGo, freecadParts));// default to stl
+		}
+		if (parts3mf.size() > 0) {
+			try {
+				allCadStl.add(make3mf(directoryWherePartsGo, parts3mf));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ColinearPointsException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NonManifoldShapeError e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}// default to stl
 		}
 		com.neuronrobotics.sdk.common.Log.debug("Finished Export!");
 		return allCadStl;
@@ -169,19 +196,24 @@ public class CadFileExporter {
 
 	private File makeFreecad(String nameBase, List<CSG> current) throws IOException {
 		File blend = new File(nameBase + ".FCStd");
-		com.neuronrobotics.sdk.common.Log.debug("Writing " + blend.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("FreeCAD Writing " + blend.getAbsolutePath());
 		for (CSG tmp : current)
 			FreecadLoader.addCSGToFreeCAD(blend, tmp);
 		return blend;
 	}
-
+	private File make3mf(String nameBase, List<CSG> current) throws IOException, ColinearPointsException, NonManifoldShapeError {
+		File blend = new File(nameBase + ".3mf");
+		com.neuronrobotics.sdk.common.Log.debug("3mf Writing " + blend.getAbsolutePath());
+		CSG.toThreeMF(current, true, blend.toPath());
+		return blend;
+	}
 	private File makeStl(String nameBase, CSG tmp) throws IOException {
 		File stl = new File(nameBase + ".stl");
 		// boolean manifold=CSG.isPreventNonManifoldTriangles();
 		// CSG.setPreventNonManifoldTriangles(false);
 		tmp.toStl(Paths.get(stl.getAbsolutePath()));
 		// CSG.setPreventNonManifoldTriangles(manifold);
-		com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("STL Writing " + stl.getAbsolutePath());
 		return stl;
 	}
 
@@ -189,13 +221,13 @@ public class CadFileExporter {
 		File stl = new File(nameBase + ".obj");
 
 		FileUtil.write(Paths.get(stl.getAbsolutePath()), tmp.toObjString());
-		com.neuronrobotics.sdk.common.Log.debug("Writing " + stl.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Obj Writing " + stl.getAbsolutePath());
 		return stl;
 	}
 
 	private File makeBlender(String nameBase, List<CSG> current) throws IOException {
 		File blend = new File(nameBase + ".blend");
-		com.neuronrobotics.sdk.common.Log.debug("Writing " + blend.getAbsolutePath());
+		com.neuronrobotics.sdk.common.Log.debug("Blender Writing " + blend.getAbsolutePath());
 		for (CSG tmp : current)
 			BlenderLoader.toBlenderFile(null, tmp, blend);
 		return blend;
