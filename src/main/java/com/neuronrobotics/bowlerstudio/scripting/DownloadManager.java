@@ -67,6 +67,14 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import net.sf.sevenzipjbinding.*;
 import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 
 public class DownloadManager {
 	private static String STUDIO_INSTALL = "BowlerStudioInstall";
@@ -90,6 +98,150 @@ public class DownloadManager {
 
 		}
 	};
+
+
+	/**
+	 * Searches for an executable by name.
+	 * <p>
+	 * All platforms: splits PATH and checks every entry.
+	 * macOS only:    also scans /Applications for a *.app whose name
+	 *                matches (case-insensitive) and returns the binary
+	 *                inside its Contents/MacOS directory.
+	 *
+	 * @param executableName bare name, e.g. "inkscape", "blender"
+	 * @return resolved absolute Path, or empty if not found
+	 */
+	public static Optional<Path> findExecutable(String executableName) {
+		// 1. Search PATH (works on all three platforms)
+		Optional<Path> fromPath = searchPath(executableName);
+		if (fromPath.isPresent())
+			return fromPath;
+
+		// 2. macOS fallback: scan /Applications for a matching .app bundle
+		if (isMac()) {
+			return searchApplicationsDir(executableName);
+		}
+
+		return Optional.empty();
+	}
+
+	// -------------------------------------------------------------------------
+	// PATH search
+	// -------------------------------------------------------------------------
+
+	private static Optional<Path> searchPath(String executableName) {
+		String pathEnv = System.getenv("PATH");
+		if (pathEnv == null)
+			return Optional.empty();
+
+		List<String> candidates = candidateNames(executableName);
+
+		for (String entry : pathEnv.split(File.pathSeparator)) {
+			Path dir = Paths.get(entry.trim());
+			if (!Files.isDirectory(dir))
+				continue;
+			for (String candidate : candidates) {
+				Path resolved = dir.resolve(candidate);
+				if (isExecutable(resolved)) {
+					return Optional.of(resolved.toAbsolutePath());
+				}
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	/**
+	 * On Windows, also try .exe / .cmd / .bat suffixes.
+	 * On Unix the bare name is the only candidate.
+	 */
+	private static List<String> candidateNames(String name) {
+		if (isWindows()) {
+			return Arrays.asList(name, name + ".exe", name + ".cmd", name + ".bat");
+		}
+		ArrayList<String> of = new ArrayList();
+		of.add(name);
+		if(name.contains("openscad")) {
+			of.add(name+"-nightly");
+		}
+		return of;
+	}
+
+	// -------------------------------------------------------------------------
+	// macOS /Applications scan
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Walks /Applications looking for a directory whose name, stripped of the
+	 * ".app" suffix and lower-cased, equals the lower-cased executable name.
+	 *
+	 * Matching .app found  →  returns Contents/MacOS/<executableName>
+	 *                         (or the first executable in Contents/MacOS
+	 *                          if the exact name isn't there).
+	 */
+	private static Optional<Path> searchApplicationsDir(String executableName) {
+		Path appsDir = Paths.get("/Applications");
+		if (!Files.isDirectory(appsDir))
+			return Optional.empty();
+
+		String needle = executableName.toLowerCase();
+
+		File[] bundles = appsDir.toFile().listFiles(f -> f.isDirectory() && f.getName().endsWith(".app"));
+		if (bundles == null)
+			return Optional.empty();
+
+		for (File bundle : bundles) {
+			// "Inkscape.app" → "inkscape"
+			String appBaseName = bundle.getName().substring(0, bundle.getName().length() - 4) // strip ".app"
+					.toLowerCase();
+
+			if (!appBaseName.equals(needle))
+				continue;
+
+			// Prefer an exact-name match inside Contents/MacOS
+			Path macOS = bundle.toPath().resolve("Contents/MacOS");
+			if (!Files.isDirectory(macOS))
+				continue;
+
+			Path exact = macOS.resolve(executableName);
+			if (isExecutable(exact))
+				return Optional.of(exact.toAbsolutePath());
+
+			// Fall back to the first executable found in Contents/MacOS
+			File[] execs = macOS.toFile().listFiles(f -> f.isFile() && f.canExecute());
+			if (execs != null && execs.length > 0) {
+				return Optional.of(execs[0].toPath().toAbsolutePath());
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	// -------------------------------------------------------------------------
+	// Helpers
+	// -------------------------------------------------------------------------
+
+	private static boolean isExecutable(Path p) {
+		return Files.isRegularFile(p) && Files.isExecutable(p);
+	}
+
+	private static boolean isWindows() {
+		return System.getProperty("os.name").toLowerCase().contains("win");
+	}
+
+
+	// -------------------------------------------------------------------------
+	// Quick smoke-test
+	// -------------------------------------------------------------------------
+
+	public static void main(String[] args) {
+		for (String name : new String[]{"inkscape", "blender", "freecad", "openscad"}) {
+			Optional<Path> result = findExecutable(name);
+			System.out.printf("%-10s → %s%n", name, result.map(Path::toString).orElse("not found"));
+		}
+	}
+
+
 	public static String sanitizeString(String s) {
 		if (s.contains(" "))
 			s = s.replace(' ', '_');
@@ -100,12 +252,11 @@ public class DownloadManager {
 		String name = stlIn.getName();
 		if (name.length() == 0)
 			name = "CSG_EXPORT";
-		File stl = File.createTempFile(sanitizeString(name), ".stl");
+		Path tempDir = Paths.get(ScriptingEngine.getWorkspace().getAbsolutePath(), "tmp");
+		Files.createDirectories(tempDir);
+		File stl = File.createTempFile(name, ".stl",tempDir.toFile());
 		stl.deleteOnExit();
-		boolean manifold = CSG.isPreventNonManifoldTriangles();
-		CSG.setPreventNonManifoldTriangles(false);
 		stlIn.toStl(Paths.get(stl.getAbsolutePath()));
-		CSG.setPreventNonManifoldTriangles(manifold);
 		return stl;
 	}
 	private static IApprovalForDownload approval = new IApprovalForDownload() {
@@ -358,7 +509,7 @@ public class DownloadManager {
 		try {
 			for (String f : ScriptingEngine.filesInGit(editorsURL)) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
-				Log.debug("Looking at json file " + file.getAbsolutePath());
+				//Log.debug("Looking at json file " + file.getAbsolutePath());
 				if (file.getName().toLowerCase().startsWith(exeType.toLowerCase())
 						&& file.getName().toLowerCase().endsWith(".json")) {
 					String jsonText = new String(Files.readAllBytes(file.toPath()));
@@ -394,6 +545,7 @@ public class DownloadManager {
 							if (new File(string).exists())
 								cmd = string;
 						}
+
 						Object object = vm.get("version");
 						String version = null;
 						if (object != null)
@@ -418,6 +570,9 @@ public class DownloadManager {
 						}
 
 						if (!new File(cmd).exists() && !justChecking) {
+							Optional<Path> onDisk = findExecutable(exeType);
+							if(onDisk.isPresent())
+								return onDisk.get().toFile();
 							if (exeType.toLowerCase().contentEquals("freecad")) {
 								// FreecadLoader.update(vm);
 								baseURL = vm.get("url").toString();
@@ -1084,7 +1239,7 @@ public class DownloadManager {
 		File exe = new File(bindir + version + "/" + filename);
 
 		if (!folder.exists() || !exe.exists()) {
-
+	
 			if (approval.get(downloadName, URL)) {
 				com.neuronrobotics.sdk.common.Log.debug("Start Downloading " + filename);
 				com.neuronrobotics.sdk.common.Log.debug("From " + URL);

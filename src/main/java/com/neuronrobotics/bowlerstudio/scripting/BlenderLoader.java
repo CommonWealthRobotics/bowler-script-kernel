@@ -3,6 +3,8 @@ import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -20,7 +22,9 @@ public class BlenderLoader implements IScriptingLanguage {
 
 	@Override
 	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
-		File stl = File.createTempFile(code.getName(), ".stl");
+		Path tempDir = Paths.get(ScriptingEngine.getWorkspace().getAbsolutePath(), "tmp");
+		Files.createDirectories(tempDir);
+		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl",tempDir.toFile());
 		stl.deleteOnExit();
 		toSTLFile(db, code, stl);
 		CSG back;

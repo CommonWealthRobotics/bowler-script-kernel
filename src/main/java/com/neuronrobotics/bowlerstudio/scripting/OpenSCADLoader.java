@@ -1,8 +1,12 @@
 package com.neuronrobotics.bowlerstudio.scripting;
+
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -11,6 +15,7 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
@@ -20,24 +25,32 @@ public class OpenSCADLoader implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
 			ArrayList<Object> args) throws Exception {
-		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl");
-		stl.deleteOnExit();
+		Path tempDir = Paths.get(ScriptingEngine.getWorkspace().getAbsolutePath(), "tmp");
+		Files.createDirectories(tempDir);
+		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl",tempDir.toFile());
+
 		HashMap<String, Double> params = new HashMap<String, Double>();
-		if (args != null) {
-			Object o = args.get(0);
+		if (args != null) {Object o = args.get(0);
 			if (HashMap.class.isInstance(o)) {
 				params = (HashMap<String, Double>) o;
 			}
 		}
 
 		toSTLFile(code, stl, params);
+
 		CSG back;
-		try {
-			back = Vitamins.get(db, true, stl, true);
-			back.setColor(Color.YELLOW);
-		} catch (Throwable e) {
+		if (!stl.exists())
 			back = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
-		}
+		else
+			try {
+				back = Vitamins.get(db, true, stl, true);
+				back.setColor(Color.YELLOW);
+			} catch (Throwable e) {
+				Log.error(e);
+				back = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.LIGHTPINK);
+
+			}
+		stl.delete();
 		return back;
 	}
 
