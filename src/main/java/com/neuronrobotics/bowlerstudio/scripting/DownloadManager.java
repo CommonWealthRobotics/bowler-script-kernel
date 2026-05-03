@@ -112,6 +112,10 @@ public class DownloadManager {
 	 * @return resolved absolute Path, or empty if not found
 	 */
 	public static Optional<Path> findExecutable(String executableName) {
+        if (executableName.toLowerCase().contains("java")) {
+            Optional<Path> fromJavaHome = searchJavaHome(executableName);
+            if (fromJavaHome.isPresent()) return fromJavaHome;
+        }
 		// 1. Search PATH (works on all three platforms)
 		Optional<Path> fromPath = searchPath(executableName);
 		if (fromPath.isPresent())
@@ -129,6 +133,38 @@ public class DownloadManager {
 	// PATH search
 	// -------------------------------------------------------------------------
 
+	/// -------------------------------------------------------------------------
+
+    /**
+     * Resolves JAVA_HOME from the environment and looks for the executable
+     * in its bin/ sub-directory.
+     *
+     * JAVA_HOME typically points to the JDK/JRE root, e.g.:
+     *   /usr/lib/jvm/java-21-openjdk-amd64   (Linux)
+     *   /Library/Java/JavaVirtualMachines/…/Contents/Home  (macOS)
+     *   C:\Program Files\Eclipse Adoptium\jdk-21…          (Windows)
+     *
+     * The executable lives one level deeper in bin/.
+     */
+    private static Optional<Path> searchJavaHome(String executableName) {
+        String javaHome = System.getenv("JAVA_HOME");
+        if (javaHome == null || javaHome.isBlank()) return Optional.empty();
+
+        Path javaHomePath = Paths.get(javaHome.trim());
+        if (!Files.isDirectory(javaHomePath)) return Optional.empty();
+
+        Path binDir = javaHomePath.resolve("bin");
+        if (!Files.isDirectory(binDir)) return Optional.empty();
+
+        for (String candidate : candidateNames(executableName)) {
+            Path resolved = binDir.resolve(candidate);
+            if (isExecutable(resolved)) {
+                return Optional.of(resolved.toAbsolutePath());
+            }
+        }
+
+        return Optional.empty();
+    }
 	private static Optional<Path> searchPath(String executableName) {
 		String pathEnv = System.getenv("PATH");
 		if (pathEnv == null)
@@ -164,6 +200,9 @@ public class DownloadManager {
 		if(name.contains("openscad")) {
 			of.add(name+"-nightly");
 		}
+		if(name.contains("java"))
+			of.add("java");
+
 		return of;
 	}
 
@@ -505,7 +544,11 @@ public class DownloadManager {
 
 	private static File getExecutable(String exeType, IExternalEditor editor, String executable, boolean justChecking) {
 		String key = discoverKey();
-
+        if (exeType.toLowerCase().contains("java")) {
+            Optional<Path> fromJavaHome = searchJavaHome(exeType);
+            if (fromJavaHome.isPresent()) 
+            	return fromJavaHome.get().toFile();
+        }
 		try {
 			for (String f : ScriptingEngine.filesInGit(editorsURL)) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
