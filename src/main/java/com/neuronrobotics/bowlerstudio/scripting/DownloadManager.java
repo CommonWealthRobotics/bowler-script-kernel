@@ -3,7 +3,6 @@ package com.neuronrobotics.bowlerstudio.scripting;
 import org.apache.commons.exec.*;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 
-import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.sanitizeString;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -112,10 +111,11 @@ public class DownloadManager {
 	 * @return resolved absolute Path, or empty if not found
 	 */
 	public static Optional<Path> findExecutable(String executableName) {
-        if (executableName.toLowerCase().contains("java")) {
-            Optional<Path> fromJavaHome = searchJavaHome(executableName);
-            if (fromJavaHome.isPresent()) return fromJavaHome;
-        }
+		if (executableName.toLowerCase().contains("java")) {
+			Optional<Path> fromJavaHome = searchJavaHome(executableName);
+			if (fromJavaHome.isPresent())
+				return fromJavaHome;
+		}
 		// 1. Search PATH (works on all three platforms)
 		Optional<Path> fromPath = searchPath(executableName);
 		if (fromPath.isPresent())
@@ -135,36 +135,40 @@ public class DownloadManager {
 
 	/// -------------------------------------------------------------------------
 
-    /**
-     * Resolves JAVA_HOME from the environment and looks for the executable
-     * in its bin/ sub-directory.
-     *
-     * JAVA_HOME typically points to the JDK/JRE root, e.g.:
-     *   /usr/lib/jvm/java-21-openjdk-amd64   (Linux)
-     *   /Library/Java/JavaVirtualMachines/…/Contents/Home  (macOS)
-     *   C:\Program Files\Eclipse Adoptium\jdk-21…          (Windows)
-     *
-     * The executable lives one level deeper in bin/.
-     */
-    private static Optional<Path> searchJavaHome(String executableName) {
-        String javaHome = System.getenv("JAVA_HOME");
-        if (javaHome == null || javaHome.isBlank()) return Optional.empty();
+	/**
+	 * Resolves JAVA_HOME from the environment and looks for the executable
+	 * in its bin/ sub-directory.
+	 *
+	 * JAVA_HOME typically points to the JDK/JRE root, e.g.:
+	 *   /usr/lib/jvm/java-21-openjdk-amd64   (Linux)
+	 *   /Library/Java/JavaVirtualMachines/…/Contents/Home  (macOS)
+	 *   C:\Program Files\Eclipse Adoptium\jdk-21…          (Windows)
+	 *
+	 * The executable lives one level deeper in bin/.
+	 */
+	private static Optional<Path> searchJavaHome(String executableName) {
+		String javaHome = System.getenv("JAVA_HOME");
+		if (javaHome == null || javaHome.isBlank())
+			return Optional.empty();
 
-        Path javaHomePath = Paths.get(javaHome.trim());
-        if (!Files.isDirectory(javaHomePath)) return Optional.empty();
+		Path javaHomePath = Paths.get(javaHome.trim());
+		if (!Files.isDirectory(javaHomePath))
+			return Optional.empty();
 
-        Path binDir = javaHomePath.resolve("bin");
-        if (!Files.isDirectory(binDir)) return Optional.empty();
+		Path binDir = javaHomePath.resolve("bin");
+		if (!Files.isDirectory(binDir))
+			return Optional.empty();
 
-        for (String candidate : candidateNames(executableName)) {
-            Path resolved = binDir.resolve(candidate);
-            if (isExecutable(resolved)) {
-                return Optional.of(resolved.toAbsolutePath());
-            }
-        }
+		for (String candidate : candidateNames(executableName)) {
+			Path resolved = binDir.resolve(candidate);
+			if (isExecutable(resolved)) {
+				return Optional.of(resolved.toAbsolutePath());
+			}
+		}
 
-        return Optional.empty();
-    }
+		return Optional.empty();
+	}
+
 	private static Optional<Path> searchPath(String executableName) {
 		String pathEnv = System.getenv("PATH");
 		if (pathEnv == null)
@@ -197,10 +201,10 @@ public class DownloadManager {
 		}
 		ArrayList<String> of = new ArrayList();
 		of.add(name);
-		if(name.contains("openscad")) {
-			of.add(name+"-nightly");
+		if (name.contains("openscad")) {
+			of.add(name + "-nightly");
 		}
-		if(name.contains("java"))
+		if (name.contains("java"))
 			of.add("java");
 
 		return of;
@@ -293,7 +297,7 @@ public class DownloadManager {
 			name = "CSG_EXPORT";
 		Path tempDir = Paths.get(ScriptingEngine.getWorkspace().getAbsolutePath(), "tmp");
 		Files.createDirectories(tempDir);
-		File stl = File.createTempFile(name, ".stl",tempDir.toFile());
+		File stl = File.createTempFile(name, ".stl", tempDir.toFile());
 		stl.deleteOnExit();
 		stlIn.toStl(Paths.get(stl.getAbsolutePath()));
 		return stl;
@@ -544,11 +548,11 @@ public class DownloadManager {
 
 	private static File getExecutable(String exeType, IExternalEditor editor, String executable, boolean justChecking) {
 		String key = discoverKey();
-        if (exeType.toLowerCase().contains("java")) {
-            Optional<Path> fromJavaHome = searchJavaHome(exeType);
-            if (fromJavaHome.isPresent()) 
-            	return fromJavaHome.get().toFile();
-        }
+		if (exeType.toLowerCase().contains("java")) {
+			Optional<Path> fromJavaHome = searchJavaHome(exeType);
+			if (fromJavaHome.isPresent())
+				return fromJavaHome.get().toFile();
+		}
 		try {
 			for (String f : ScriptingEngine.filesInGit(editorsURL)) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
@@ -614,7 +618,7 @@ public class DownloadManager {
 
 						if (!new File(cmd).exists() && !justChecking) {
 							Optional<Path> onDisk = findExecutable(exeType);
-							if(onDisk.isPresent())
+							if (onDisk.isPresent())
 								return onDisk.get().toFile();
 							if (exeType.toLowerCase().contentEquals("freecad")) {
 								// FreecadLoader.update(vm);
@@ -1282,7 +1286,7 @@ public class DownloadManager {
 		File exe = new File(bindir + version + "/" + filename);
 
 		if (!folder.exists() || !exe.exists()) {
-	
+
 			if (approval.get(downloadName, URL)) {
 				com.neuronrobotics.sdk.common.Log.debug("Start Downloading " + filename);
 				com.neuronrobotics.sdk.common.Log.debug("From " + URL);

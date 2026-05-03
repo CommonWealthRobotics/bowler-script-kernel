@@ -27,10 +27,11 @@ public class OpenSCADLoader implements IScriptingLanguage {
 			ArrayList<Object> args) throws Exception {
 		Path tempDir = Paths.get(ScriptingEngine.getWorkspace().getAbsolutePath(), "tmp");
 		Files.createDirectories(tempDir);
-		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl",tempDir.toFile());
+		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl", tempDir.toFile());
 
 		HashMap<String, Double> params = new HashMap<String, Double>();
-		if (args != null) {Object o = args.get(0);
+		if (args != null) {
+			Object o = args.get(0);
 			if (HashMap.class.isInstance(o)) {
 				params = (HashMap<String, Double>) o;
 			}

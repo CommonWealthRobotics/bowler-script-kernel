@@ -24,7 +24,7 @@ public class BlenderLoader implements IScriptingLanguage {
 	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
 		Path tempDir = Paths.get(ScriptingEngine.getWorkspace().getAbsolutePath(), "tmp");
 		Files.createDirectories(tempDir);
-		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl",tempDir.toFile());
+		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl", tempDir.toFile());
 		stl.deleteOnExit();
 		toSTLFile(db, code, stl);
 		CSG back;
