@@ -42,7 +42,7 @@ public class AddFromScript extends AbstractAddFrom {
 
 	@Override
 	public String getType() {
-		return "Add Object";
+		return "AddFromScript";
 	}
 
 	@Override

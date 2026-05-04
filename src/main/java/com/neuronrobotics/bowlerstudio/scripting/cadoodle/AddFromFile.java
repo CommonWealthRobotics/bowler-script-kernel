@@ -53,7 +53,7 @@ public class AddFromFile extends AbstractAddFrom {
 
 	@Override
 	public String getType() {
-		return "Add Object";
+		return "AddFromFile";
 	}
 
 	@Override
