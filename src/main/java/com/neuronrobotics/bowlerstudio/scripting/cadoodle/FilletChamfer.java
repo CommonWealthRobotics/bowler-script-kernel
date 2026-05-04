@@ -1,28 +1,20 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
-import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
-import eu.mihosoft.vrl.v3d.Cube;
-import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
-import javafx.scene.paint.Color;
 
 public class FilletChamfer extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
@@ -49,10 +41,10 @@ public class FilletChamfer extends AbstractAddFrom {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		try {
-			for(CSG csg:incoming) {
-				for(String name:toFillet) {
-					if(name.contentEquals(csg.getName())) {
-						CSG fillet= makeFillet(csg);
+			for (CSG csg : incoming) {
+				for (String name : toFillet) {
+					if (name.contentEquals(csg.getName())) {
+						CSG fillet = makeFillet(csg);
 						back.add(fillet);
 					}
 				}
@@ -68,26 +60,25 @@ public class FilletChamfer extends AbstractAddFrom {
 		return back;
 	}
 
-	public CSG makeFillet(CSG csgin)  {
+	public CSG makeFillet(CSG csgin) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		CSG fillet;
 		try {
 			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(csgin.transformed(nrToCSG.inverse()), radius, outer, faces);
 		} catch (ColinearPointsException e) {
 			e.printStackTrace();
-			fillet=new CSG();
+			fillet = new CSG();
 		}
 		if (fillet.getNumberOfTriangles() == 0)
 			return fillet;
 		if (!up)
 			fillet = fillet.mirrorz();
 		String orderedName = getOrderedName();
-		CSG tmp = fillet.transformed(nrToCSG)
-				.setRegenerate(previous ->{
-					return makeFillet(previous);
-				}).setName(orderedName);
-		LengthParameter rad = new LengthParameter(getDb(), 
-				orderedName+"_CaDoodle_Fillet Size", 2.0, new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
+		CSG tmp = fillet.transformed(nrToCSG).setRegenerate(previous -> {
+			return makeFillet(previous);
+		}).setName(orderedName);
+		LengthParameter rad = new LengthParameter(getDb(), orderedName + "_CaDoodle_Fillet Size", 2.0,
+				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
 		tmp.setParameter(getDb(), rad);
 		MoveCenter.set(getName(), tmp, nrToCSG);
 		return tmp;
