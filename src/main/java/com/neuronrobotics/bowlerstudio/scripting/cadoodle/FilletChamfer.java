@@ -46,7 +46,7 @@ public class FilletChamfer extends AbstractAddFrom {
 					if (name.contentEquals(csg.getName())) {
 						String orderedName = getOrderedName();
 
-						CSG fillet = makeFillet(csg,orderedName);
+						CSG fillet = makeFillet(csg, orderedName);
 						back.add(fillet);
 					}
 				}
@@ -62,19 +62,16 @@ public class FilletChamfer extends AbstractAddFrom {
 		return back;
 	}
 
-	public CSG makeFillet(CSG csgin,String orderedName) {
+	public CSG makeFillet(CSG csgin, String orderedName) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		CSG fillet;
 		LengthParameter rad = new LengthParameter(getDb(), orderedName + "_CaDoodle_Fillet Size", radius,
 				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
-	
+
 		try {
-			
-			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(
-					csgin.transformed(nrToCSG.inverse()).movez(0.001),
-					rad.getMM(), 
-					outer, 
-					faces);
+
+			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(csgin.transformed(nrToCSG.inverse()).movez(0.001), rad.getMM(),
+					outer, faces);
 		} catch (ColinearPointsException e) {
 			e.printStackTrace();
 			fillet = new CSG();
@@ -84,7 +81,7 @@ public class FilletChamfer extends AbstractAddFrom {
 		if (!up)
 			fillet = fillet.mirrorz();
 		CSG tmp = fillet.transformed(nrToCSG).setRegenerate(previous -> {
-			return makeFillet(previous,orderedName);
+			return makeFillet(previous, orderedName);
 		}).setName(orderedName);
 		tmp.setParameter(getDb(), rad);
 		MoveCenter.set(getName(), tmp, nrToCSG);
