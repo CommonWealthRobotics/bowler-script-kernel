@@ -44,7 +44,9 @@ public class FilletChamfer extends AbstractAddFrom {
 			for (CSG csg : incoming) {
 				for (String name : toFillet) {
 					if (name.contentEquals(csg.getName())) {
-						CSG fillet = makeFillet(csg);
+						String orderedName = getOrderedName();
+
+						CSG fillet = makeFillet(csg,orderedName);
 						back.add(fillet);
 					}
 				}
@@ -60,11 +62,19 @@ public class FilletChamfer extends AbstractAddFrom {
 		return back;
 	}
 
-	public CSG makeFillet(CSG csgin) {
+	public CSG makeFillet(CSG csgin,String orderedName) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		CSG fillet;
+		LengthParameter rad = new LengthParameter(getDb(), orderedName + "_CaDoodle_Fillet Size", radius,
+				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
+	
 		try {
-			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(csgin.transformed(nrToCSG.inverse()), radius, outer, faces);
+			
+			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(
+					csgin.transformed(nrToCSG.inverse()).movez(0.001),
+					rad.getMM(), 
+					outer, 
+					faces);
 		} catch (ColinearPointsException e) {
 			e.printStackTrace();
 			fillet = new CSG();
@@ -73,12 +83,9 @@ public class FilletChamfer extends AbstractAddFrom {
 			return fillet;
 		if (!up)
 			fillet = fillet.mirrorz();
-		String orderedName = getOrderedName();
 		CSG tmp = fillet.transformed(nrToCSG).setRegenerate(previous -> {
-			return makeFillet(previous);
+			return makeFillet(previous,orderedName);
 		}).setName(orderedName);
-		LengthParameter rad = new LengthParameter(getDb(), orderedName + "_CaDoodle_Fillet Size", 2.0,
-				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
 		tmp.setParameter(getDb(), rad);
 		MoveCenter.set(getName(), tmp, nrToCSG);
 		return tmp;
@@ -104,40 +111,48 @@ public class FilletChamfer extends AbstractAddFrom {
 		return toFillet;
 	}
 
-	public void setToFillet(Set<String> toFillet) {
+	public FilletChamfer setToFillet(Set<String> toFillet) {
 		this.toFillet = toFillet;
+		return this;
 	}
 
 	public int getFaces() {
 		return faces;
 	}
 
-	public void setFaces(int faces) {
+	public FilletChamfer setFaces(int faces) {
 		this.faces = faces;
+		return this;
 	}
 
 	public boolean isOuter() {
 		return outer;
 	}
 
-	public void setOuter(boolean outer) {
+	public FilletChamfer setOuter(boolean outer) {
 		this.outer = outer;
+		return this;
+
 	}
 
 	public double getRadius() {
 		return radius;
 	}
 
-	public void setRadius(double radius) {
+	public FilletChamfer setRadius(double radius) {
 		this.radius = radius;
+		return this;
+
 	}
 
 	public boolean isUp() {
 		return up;
 	}
 
-	public void setUp(boolean up) {
+	public FilletChamfer setUp(boolean up) {
 		this.up = up;
+		return this;
+
 	}
 
 
