@@ -1,14 +1,12 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import org.eclipse.jgit.api.errors.GitAPIException;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
@@ -116,7 +114,6 @@ public class Fillet extends AbstractAddFrom {
 	public File getFile() {
 		return null;// no files for fillet
 	}
-
 
 
 }
