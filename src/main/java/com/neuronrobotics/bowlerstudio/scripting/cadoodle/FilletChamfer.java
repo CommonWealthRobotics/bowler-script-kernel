@@ -58,23 +58,21 @@ public class FilletChamfer extends AbstractAddFrom {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		ArrayList<CSG> fillet;
 		LengthParameter faceCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Faces", 8.0,
-				new ArrayList<>(Arrays.asList(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0)));
-		
+				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
+						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
+
 		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Fillet Size", 2.0,
 				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
 		StringParameter upPm = new StringParameter(getDb(), getName() + "_CaDoodle_Up/Down", "up",
-				new ArrayList<>(Arrays.asList("up","down")));
-		boolean up =upPm.getStrValue().contentEquals("up");
+				new ArrayList<>(Arrays.asList("up", "down")));
+		boolean up = upPm.getStrValue().contentEquals("up");
 		StringParameter outerPm = new StringParameter(getDb(), getName() + "_CaDoodle_Inner/Outer", "inner",
-				new ArrayList<>(Arrays.asList("inner","outer")));
-		boolean outer =outerPm.getStrValue().contentEquals("outer");
+				new ArrayList<>(Arrays.asList("inner", "outer")));
+		boolean outer = outerPm.getStrValue().contentEquals("outer");
 		try {
 
-			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(
-					csgin.transformed(nrToCSG.inverse()).movez(0.001), 
-					rad.getMM(),
-					outer, 
-					(int)faceCount.getMM());
+			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(csgin.transformed(nrToCSG.inverse()).movez(0.001), rad.getMM(),
+					outer, (int) faceCount.getMM());
 		} catch (ColinearPointsException e) {
 			e.printStackTrace();
 			fillet = new ArrayList<CSG>();
@@ -109,6 +107,7 @@ public class FilletChamfer extends AbstractAddFrom {
 		this.workplane = workplane;
 		return this;
 	}
+
 	@Override
 	public File getFile() {
 		return null;// no files for fillet
