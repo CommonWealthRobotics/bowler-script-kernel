@@ -15,16 +15,10 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
+import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class FilletChamfer extends AbstractAddFrom {
-	@Expose(serialize = true, deserialize = true)
-	private boolean up = true;
-	@Expose(serialize = true, deserialize = true)
-	private double radius = 2;
-	@Expose(serialize = true, deserialize = true)
-	private boolean outer = true;
-	@Expose(serialize = true, deserialize = true)
-	private int faces = 12;
+
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR workplane = null;
 	@Expose(serialize = true, deserialize = true)
@@ -63,13 +57,24 @@ public class FilletChamfer extends AbstractAddFrom {
 	public ArrayList<CSG> makeFillet(CSG csgin, String on) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		ArrayList<CSG> fillet;
-		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Fillet Size", radius,
+		LengthParameter faceCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Faces", 8.0,
+				new ArrayList<>(Arrays.asList(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0)));
+		
+		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Fillet Size", 2.0,
 				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
-
+		StringParameter upPm = new StringParameter(getDb(), getName() + "_CaDoodle_Up/Down", "up",
+				new ArrayList<>(Arrays.asList("up","down")));
+		boolean up =upPm.getStrValue().contentEquals("up");
+		StringParameter outerPm = new StringParameter(getDb(), getName() + "_CaDoodle_Inner/Outer", "inner",
+				new ArrayList<>(Arrays.asList("inner","outer")));
+		boolean outer =outerPm.getStrValue().contentEquals("outer");
 		try {
 
-			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(csgin.transformed(nrToCSG.inverse()).movez(0.001), rad.getMM(),
-					outer, faces);
+			fillet = eu.mihosoft.vrl.v3d.Fillet.fillet(
+					csgin.transformed(nrToCSG.inverse()).movez(0.001), 
+					rad.getMM(),
+					outer, 
+					(int)faceCount.getMM());
 		} catch (ColinearPointsException e) {
 			e.printStackTrace();
 			fillet = new ArrayList<CSG>();
@@ -85,6 +90,9 @@ public class FilletChamfer extends AbstractAddFrom {
 				return makeFillet(csgin, orderedName).get(myIndex);
 			}).setName(orderedName);
 			tmp.setParameter(getDb(), rad);
+			tmp.setParameter(getDb(), faceCount);
+			tmp.setParameter(getDb(), upPm);
+			tmp.setParameter(getDb(), outerPm);
 			MoveCenter.set(getName(), tmp, nrToCSG);
 			fillet.set(i, tmp);
 		}
@@ -101,7 +109,6 @@ public class FilletChamfer extends AbstractAddFrom {
 		this.workplane = workplane;
 		return this;
 	}
-
 	@Override
 	public File getFile() {
 		return null;// no files for fillet
@@ -115,45 +122,4 @@ public class FilletChamfer extends AbstractAddFrom {
 		this.toFillet = toFillet;
 		return this;
 	}
-
-	public int getFaces() {
-		return faces;
-	}
-
-	public FilletChamfer setFaces(int faces) {
-		this.faces = faces;
-		return this;
-	}
-
-	public boolean isOuter() {
-		return outer;
-	}
-
-	public FilletChamfer setOuter(boolean outer) {
-		this.outer = outer;
-		return this;
-
-	}
-
-	public double getRadius() {
-		return radius;
-	}
-
-	public FilletChamfer setRadius(double radius) {
-		this.radius = radius;
-		return this;
-
-	}
-
-	public boolean isUp() {
-		return up;
-	}
-
-	public FilletChamfer setUp(boolean up) {
-		this.up = up;
-		return this;
-
-	}
-
-
 }
