@@ -44,10 +44,8 @@ public class FilletChamfer extends AbstractAddFrom {
 			for (CSG csg : incoming) {
 				for (String name : toFillet) {
 					if (name.contentEquals(csg.getName())) {
-						String orderedName = getOrderedName();
 
-						CSG fillet = makeFillet(csg, orderedName);
-						back.add(fillet);
+						back.addAll(makeFillet(csg, null));
 					}
 				}
 			}
@@ -62,10 +60,10 @@ public class FilletChamfer extends AbstractAddFrom {
 		return back;
 	}
 
-	public CSG makeFillet(CSG csgin, String orderedName) {
+	public ArrayList<CSG> makeFillet(CSG csgin, String on) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
-		CSG fillet;
-		LengthParameter rad = new LengthParameter(getDb(), orderedName + "_CaDoodle_Fillet Size", radius,
+		ArrayList<CSG> fillet;
+		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Fillet Size", radius,
 				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
 
 		try {
@@ -74,18 +72,23 @@ public class FilletChamfer extends AbstractAddFrom {
 					outer, faces);
 		} catch (ColinearPointsException e) {
 			e.printStackTrace();
-			fillet = new CSG();
+			fillet = new ArrayList<CSG>();
 		}
-		if (fillet.getNumberOfTriangles() == 0)
-			return fillet;
-		if (!up)
-			fillet = fillet.mirrorz();
-		CSG tmp = fillet.transformed(nrToCSG).setRegenerate(previous -> {
-			return makeFillet(previous, orderedName);
-		}).setName(orderedName);
-		tmp.setParameter(getDb(), rad);
-		MoveCenter.set(getName(), tmp, nrToCSG);
-		return tmp;
+
+		for (int i = 0; i < fillet.size(); i++) {
+			String orderedName = (on == null ? getOrderedName() : on);
+			int myIndex = i;
+			CSG mine = fillet.get(i);
+			if (!up)
+				mine = mine.mirrorz();
+			CSG tmp = mine.transformed(nrToCSG).setRegenerate(previous -> {
+				return makeFillet(csgin, orderedName).get(myIndex);
+			}).setName(orderedName);
+			tmp.setParameter(getDb(), rad);
+			MoveCenter.set(getName(), tmp, nrToCSG);
+			fillet.set(i, tmp);
+		}
+		return fillet;
 	}
 
 	public TransformNR getWorkplane() {
