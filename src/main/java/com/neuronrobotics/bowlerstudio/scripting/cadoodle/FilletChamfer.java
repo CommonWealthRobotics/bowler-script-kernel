@@ -58,15 +58,16 @@ public class FilletChamfer extends AbstractAddFrom {
 	public ArrayList<CSG> makeFillet(CSG csgin, String on) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		ArrayList<CSG> fillet;
-		int numberOfSidesInt = Integer.parseInt(ConfigurationDatabase.get("CaDoodle", "DefaultNumberOfSides", "16").toString())/4;
+		int numberOfSidesInt = Integer
+				.parseInt(ConfigurationDatabase.get("CaDoodle", "DefaultNumberOfSides", "16").toString()) / 4;
 
-		LengthParameter faceCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Faces", (double)numberOfSidesInt,
-				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
-						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
+		LengthParameter faceCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Faces",
+				(double) numberOfSidesInt, new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0,
+						10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
 
 		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Fillet Size", 2.0,
 				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
-		StringParameter upPm = new StringParameter(getDb(), getName() + "_CaDoodle_Up/Down", "up",
+		StringParameter upPm = new StringParameter(getDb(), getName() + "_CaDoodle_Up/Down", "down",
 				new ArrayList<>(Arrays.asList("up", "down")));
 		boolean up = upPm.getStrValue().contentEquals("up");
 		StringParameter outerPm = new StringParameter(getDb(), getName() + "_CaDoodle_Inner/Outer", "inner",
@@ -94,6 +95,8 @@ public class FilletChamfer extends AbstractAddFrom {
 			tmp.setParameter(getDb(), faceCount);
 			tmp.setParameter(getDb(), upPm);
 			tmp.setParameter(getDb(), outerPm);
+			if (!outer)
+				tmp.setIsHole(true);
 			MoveCenter.set(getName(), tmp, nrToCSG);
 			fillet.set(i, tmp);
 		}
