@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gson.annotations.Expose;
+import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
@@ -57,7 +58,9 @@ public class FilletChamfer extends AbstractAddFrom {
 	public ArrayList<CSG> makeFillet(CSG csgin, String on) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		ArrayList<CSG> fillet;
-		LengthParameter faceCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Faces", 8.0,
+		int numberOfSidesInt = Integer.parseInt(ConfigurationDatabase.get("CaDoodle", "DefaultNumberOfSides", "16").toString())/4;
+
+		LengthParameter faceCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Faces", (double)numberOfSidesInt,
 				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
 						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
 
