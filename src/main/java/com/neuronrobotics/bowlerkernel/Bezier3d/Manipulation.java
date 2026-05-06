@@ -232,7 +232,8 @@ public class Manipulation {
 							break;
 
 						case "MOUSE_DRAGGED" :
-							dragged(event, event);
+							if (event.isPrimaryButtonDown())
+								dragged(event, event);
 							break;
 
 						case "MOUSE_RELEASED" :
@@ -270,15 +271,15 @@ public class Manipulation {
 
 	private void pressed(MouseEvent event) {
 		setState(DragState.Dragging);
+		event.consume();
+		dragging = false;
 
-		new Thread(() -> {
-			event.consume();
-			dragging = false;
+		for (Manipulation R : dependants)
+			R.dragging = false;
 
-			for (Manipulation R : dependants)
-				R.dragging = false;
-
-		}).start();
+//		new Thread(() -> {
+//
+//		}).start();
 	}
 
 	private void dragged(MouseEvent event, MouseEvent event2) {
