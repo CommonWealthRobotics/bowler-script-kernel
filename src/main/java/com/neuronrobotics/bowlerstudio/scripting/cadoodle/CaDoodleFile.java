@@ -1078,8 +1078,8 @@ public class CaDoodleFile {
 			}
 			String string = getSTLThumbnailLocation();
 			int currentIndex2 = getCurrentIndex();
-			if (isTimelineOpen())
-				getSaveUpdate().renderSplashFrame(1, "Save Doodle to " + getSelf().getName());
+			//			if (isTimelineOpen())
+			//				getSaveUpdate().renderSplashFrame(1, "Save Doodle to " + getSelf().getName());
 			if (thumb != null) {
 				boolean manif = CSG.isPreventNonManifoldTriangles();
 				if (manif)
@@ -1098,10 +1098,10 @@ public class CaDoodleFile {
 						int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
 						List<CSG> process = getCachedCSGs(op);
 						num++;
-						if (isTimelineOpen())
-							getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i + ".png");
-						else
-							Log.debug(percent + " Save Timeline Image " + i + ".png");
+						//						if (isTimelineOpen())
+						//							getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i + ".png");
+						//						else
+						Log.debug(percent + " Save Timeline Image " + i + ".png");
 						setSaveImage(process, op);
 
 					} catch (IOException e) {
@@ -1110,8 +1110,8 @@ public class CaDoodleFile {
 					}
 			}
 
-			if (isTimelineOpen())
-				getSaveUpdate().renderSplashFrame(100, "Doodle save Done ");
+			//			if (isTimelineOpen())
+			//				getSaveUpdate().renderSplashFrame(100, "Doodle save Done ");
 
 		} catch (Throwable t) {
 			Log.error(t);
