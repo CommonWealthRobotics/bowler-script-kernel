@@ -277,9 +277,9 @@ public class Manipulation {
 		for (Manipulation R : dependants)
 			R.dragging = false;
 
-//		new Thread(() -> {
-//
-//		}).start();
+		//		new Thread(() -> {
+		//
+		//		}).start();
 	}
 
 	private void dragged(MouseEvent event, MouseEvent event2) {
