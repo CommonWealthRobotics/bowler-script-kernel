@@ -305,7 +305,8 @@ public class Align extends CaDoodleOperation {
 				throw new RuntimeException("Failed to find bounds!!");
 			}
 		}
-
+		if(min==null || max == null)
+			throw new RuntimeException("Failed to get bounds for objects: "+incoming);
 		return new Bounds(min, max);
 	}
 
