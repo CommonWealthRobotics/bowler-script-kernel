@@ -529,9 +529,11 @@ public class Manipulation {
 		globalPose.setZ(0);
 		setGlobal(new TransformNR(0, 0, 0, new RotationNR()));
 	}
+
 	public void set(TransformNR tf) {
-		set(tf.getX(),tf.getY(),tf.getZ());
+		set(tf.getX(), tf.getY(), tf.getZ());
 	}
+
 	public void set(double nX, double nY, double nZ) {
 
 		newX = nX;
@@ -547,9 +549,11 @@ public class Manipulation {
 			R.handle(null);
 
 	}
+
 	public void setInReferenceFrame(TransformNR tf) {
-		setInReferenceFrame(tf.getX(),tf.getY(),tf.getZ());
+		setInReferenceFrame(tf.getX(), tf.getY(), tf.getZ());
 	}
+
 	public void setInReferenceFrame(double nX, double nY, double nZ) {
 		TransformNR inLocal = new TransformNR(nX, nY, nZ);
 		TransformNR wp = new TransformNR(getFrameOfReference().getRotation());
