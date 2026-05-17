@@ -21,7 +21,7 @@ public class SetUserDefinedName extends CaDoodleOperation {
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
 		for (CSG c : incoming) {
-			if (target.contentEquals(c.getName())) {
+			if (getTarget().contentEquals(c.getName())) {
 				c.setUserDefinedName(getNewUserDefinedName());
 			}
 		}
@@ -38,6 +38,15 @@ public class SetUserDefinedName extends CaDoodleOperation {
 
 	public SetUserDefinedName setNewUserDefinedName(String newUserDefinedName) {
 		this.newUserDefinedName = newUserDefinedName;
+		return this;
+	}
+
+	public String getTarget() {
+		return target;
+	}
+
+	public SetUserDefinedName setTarget(String target) {
+		this.target = target;
 		return this;
 	}
 
