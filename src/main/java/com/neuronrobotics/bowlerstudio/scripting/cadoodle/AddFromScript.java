@@ -66,7 +66,7 @@ public class AddFromScript extends AbstractAddFrom {
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
 			CSGDatabaseInstance instance = getCaDoodleFile().getCsgDBinstance();
-			
+
 			if (isDoodle || instance == null) {
 				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
 				instance = (new CSGDatabaseInstance(tempFile.toFile()));

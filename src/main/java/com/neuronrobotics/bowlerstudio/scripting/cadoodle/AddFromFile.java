@@ -102,7 +102,7 @@ public class AddFromFile extends AbstractAddFrom {
 					continue;
 				try {
 					CSG processedCSG = processGiven(csg, i, getOrderedName(), file, name, getLocation(),
-							getCaDoodleFile().getCsgDBinstance(),filenamePart);
+							getCaDoodleFile().getCsgDBinstance(), filenamePart);
 					collect.add(processedCSG);
 				} catch (Exception ex) {
 					com.neuronrobotics.sdk.common.Log.error(ex);;
@@ -341,7 +341,7 @@ public class AddFromFile extends AbstractAddFrom {
 	// }
 
 	private static CSG processGiven(CSG csg, int i, String name, File f, String task, TransformNR location,
-			CSGDatabaseInstance instance,String filenamePart) {
+			CSGDatabaseInstance instance, String filenamePart) {
 		Transform nrToCSG = TransformFactory.nrToCSG(location);
 		boolean isDoodle = f.getName().toLowerCase().endsWith(".doodle");
 		if (isDoodle) {
@@ -369,7 +369,7 @@ public class AddFromFile extends AbstractAddFrom {
 				}
 				// CSGDatabase.setInstance(instance);
 				csg1.setParameter(instance, getFileLocationparam(instance, f, task));
-				return processGiven(csg1, i, name, f, task, location, instance,filenamePart);
+				return processGiven(csg1, i, name, f, task, location, instance, filenamePart);
 			} catch (Exception e) {
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}
@@ -412,7 +412,7 @@ public class AddFromFile extends AbstractAddFrom {
 	}
 
 	public String getFilenamePart() throws NoSuchFileException {
-		if(filenamePart==null)
+		if (filenamePart == null)
 			setFilenamePart(getFile().getName().split("\\.")[1]);
 		return filenamePart;
 	}
