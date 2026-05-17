@@ -56,8 +56,9 @@ public class AddFromScript extends AbstractAddFrom {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		boolean isDoodle = fileName.toLowerCase().endsWith(".doodle");
-
 		try {
+			File toRun = ScriptingEngine.fileFromGit(gitULR, fileRel);
+			String filenamePart = toRun.getName().split("\\.")[0];
 			ArrayList<Object> args = new ArrayList<>();
 			args.addAll(Arrays.asList(getName()));
 			HashMap<String, Object> configs = new HashMap<String, Object>();
@@ -65,6 +66,7 @@ public class AddFromScript extends AbstractAddFrom {
 			configs.put("PreventBomAdd", preventBoM);
 			args.add(configs);
 			CSGDatabaseInstance instance = getCaDoodleFile().getCsgDBinstance();
+			
 			if (isDoodle || instance == null) {
 				Path tempFile = Files.createTempFile("CSGDatabase", ".tmp");
 				instance = (new CSGDatabaseInstance(tempFile.toFile()));
@@ -87,7 +89,7 @@ public class AddFromScript extends AbstractAddFrom {
 				Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
 				String orderedName = getOrderedName();
 				CSG tmp = csg.transformed(nrToCSG).syncProperties(getCaDoodleFile().getCsgDBinstance(), csg)
-						.setRegenerate(csg.getRegenerate()).setName(orderedName);
+						.setRegenerate(csg.getRegenerate()).setName(orderedName).setUserDefinedName(filenamePart);
 				collect.set(i, tmp);
 				MoveCenter.set(getName(), tmp, nrToCSG);
 			}

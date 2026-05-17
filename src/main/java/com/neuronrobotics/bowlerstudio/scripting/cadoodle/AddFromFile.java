@@ -32,8 +32,11 @@ public class AddFromFile extends AbstractAddFrom {
 	// private ArrayList<String> options = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
 	private Boolean preventBoM = false;
+	@Expose(serialize = true, deserialize = true)
+	private String filenamePart = null;;
 
 	public AddFromFile set(File source, CaDoodleFile cf) {
+		setFilenamePart(source.getName().split("\\.")[0]);
 		setCaDoodleFile(cf);
 		for (String s : ScriptingEngine.getAllExtensions()) {
 			if (source.getName().toLowerCase().endsWith(s.toLowerCase())) {
@@ -99,7 +102,7 @@ public class AddFromFile extends AbstractAddFrom {
 					continue;
 				try {
 					CSG processedCSG = processGiven(csg, i, getOrderedName(), file, name, getLocation(),
-							getCaDoodleFile().getCsgDBinstance());
+							getCaDoodleFile().getCsgDBinstance(),filenamePart);
 					collect.add(processedCSG);
 				} catch (Exception ex) {
 					com.neuronrobotics.sdk.common.Log.error(ex);;
@@ -338,7 +341,7 @@ public class AddFromFile extends AbstractAddFrom {
 	// }
 
 	private static CSG processGiven(CSG csg, int i, String name, File f, String task, TransformNR location,
-			CSGDatabaseInstance instance) {
+			CSGDatabaseInstance instance,String filenamePart) {
 		Transform nrToCSG = TransformFactory.nrToCSG(location);
 		boolean isDoodle = f.getName().toLowerCase().endsWith(".doodle");
 		if (isDoodle) {
@@ -366,12 +369,12 @@ public class AddFromFile extends AbstractAddFrom {
 				}
 				// CSGDatabase.setInstance(instance);
 				csg1.setParameter(instance, getFileLocationparam(instance, f, task));
-				return processGiven(csg1, i, name, f, task, location, instance);
+				return processGiven(csg1, i, name, f, task, location, instance,filenamePart);
 			} catch (Exception e) {
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 			return previous;
-		}).setName(name);
+		}).setName(name).setUserDefinedName(filenamePart);
 		MoveCenter.set(task, processedCSG, nrToCSG);
 		return processedCSG;
 	}
@@ -406,5 +409,15 @@ public class AddFromFile extends AbstractAddFrom {
 	@Override
 	public File getFile() throws NoSuchFileException {
 		return getFile(name, getCaDoodleFile());
+	}
+
+	public String getFilenamePart() throws NoSuchFileException {
+		if(filenamePart==null)
+			setFilenamePart(getFile().getName().split("\\.")[1]);
+		return filenamePart;
+	}
+
+	private void setFilenamePart(String filenamePart) {
+		this.filenamePart = filenamePart;
 	}
 }
