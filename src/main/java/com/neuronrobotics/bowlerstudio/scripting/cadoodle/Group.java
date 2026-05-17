@@ -137,6 +137,7 @@ public class Group extends AbstractAddFrom {
 			mapOfparametrics.clear();
 		result.addIsGroupResult(getGroupID());
 		result.setName(getGroupID());
+		result.setUserDefinedName("Group of " + names.size());
 		result.setNoScale(noscale);
 		result.setIsMotionLock(nomove);
 		result.setIsAlwaysShow(false);
