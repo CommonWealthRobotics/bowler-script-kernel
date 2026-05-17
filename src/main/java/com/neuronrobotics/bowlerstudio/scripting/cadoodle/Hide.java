@@ -38,7 +38,7 @@ public class Hide extends CaDoodleOperation {
 	}
 
 	public List<String> getNamesAddedInThisOperation() {
-		return names;
+		return new ArrayList<String>();
 	}
 
 	public Hide setNames(List<String> names) {
