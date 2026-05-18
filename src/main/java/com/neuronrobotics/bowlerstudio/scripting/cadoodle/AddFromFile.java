@@ -102,7 +102,7 @@ public class AddFromFile extends AbstractAddFrom {
 					continue;
 				try {
 					CSG processedCSG = processGiven(csg, i, getOrderedName(), file, name, getLocation(),
-							getCaDoodleFile().getCsgDBinstance(), filenamePart);
+							getCaDoodleFile().getCsgDBinstance(), getFilenamePart());
 					collect.add(processedCSG);
 				} catch (Exception ex) {
 					com.neuronrobotics.sdk.common.Log.error(ex);;
