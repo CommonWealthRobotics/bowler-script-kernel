@@ -7,12 +7,15 @@ import com.google.gson.annotations.Expose;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class Hide extends CaDoodleOperation {
+public class WireMeshView extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
+	@Expose(serialize = true, deserialize = true)
+	private boolean toMesh=false;
+	
 	@Override
 	public String getType() {
-		return "Hide";
+		return "WireMeshView";
 	}
 
 	@Override
@@ -26,7 +29,7 @@ public class Hide extends CaDoodleOperation {
 					replace.add(c);
 					CSG b = c.clone().setRegenerate(c.getRegenerate())
 							.syncProperties(getCaDoodleFile().getCsgDBinstance(), c);
-					b.setIsHide(true);
+					b.setIsWireFrame(isToMesh());
 					back.add(b);
 				}
 			}
@@ -41,8 +44,17 @@ public class Hide extends CaDoodleOperation {
 		return names;
 	}
 
-	public Hide setNames(List<String> names) {
+	public WireMeshView setNames(List<String> names) {
 		this.names = names;
+		return this;
+	}
+
+	public boolean isToMesh() {
+		return toMesh;
+	}
+
+	public WireMeshView setToMesh(boolean toMesh) {
+		this.toMesh = toMesh;
 		return this;
 	}
 
