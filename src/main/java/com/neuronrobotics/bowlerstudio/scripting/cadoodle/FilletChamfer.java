@@ -90,7 +90,7 @@ public class FilletChamfer extends AbstractAddFrom {
 				mine = mine.mirrorz();
 			CSG tmp = mine.transformed(nrToCSG).setRegenerate(previous -> {
 				return makeFillet(csgin, orderedName).get(myIndex);
-			}).setName(orderedName);
+			}).setName(orderedName).setUserDefinedName("fillet_"+(i+1));
 			tmp.setParameter(getDb(), rad);
 			tmp.setParameter(getDb(), faceCount);
 			tmp.setParameter(getDb(), upPm);
