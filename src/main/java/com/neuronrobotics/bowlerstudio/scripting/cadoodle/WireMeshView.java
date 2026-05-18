@@ -11,8 +11,8 @@ public class WireMeshView extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
-	private boolean toMesh=false;
-	
+	private boolean toMesh = false;
+
 	@Override
 	public String getType() {
 		return "WireMeshView";
