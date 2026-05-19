@@ -62,7 +62,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 			CSG base = csgin.transformed(nrToCSG.inverse()).movez(0.001);
 			List<Polygon> polys = Slice.slice(base);
 			for (Polygon p : polys) {
-				boolean hole = p.isHole();
+				boolean hole = !Extrude.isCCW(p);
 				if (hole)
 					p = new Polygon(p.getVertices().reversed());
 				CSG extrude = Extrude.extrude(new Vector3d(0, 0, 20), p);
