@@ -25,6 +25,7 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 		registerType("Align", Align.class);
 		registerType("Allign", Align.class);// Legacy spelling mistake
 		registerType("Delete", Delete.class);
+		registerType("ExtrudeSurface", ExtrudeSurface.class);
 		registerType("Fillet", FilletChamfer.class);
 		registerType("Group", Group.class);
 		registerType("Hide", Hide.class);
