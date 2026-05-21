@@ -103,35 +103,6 @@ public class Vitamins {
 		return csg.clone().setRegenerate(csg.getRegenerate());
 	}
 
-	// public static CSG get(String type, String id, String purchasingVariant)
-	// throws Exception {
-	// String key = type + id + purchasingVariant;
-	// if (fileLastLoaded.get(key) == null) {
-	//// PurchasingData purchasData = Purchasing.get(type, id, purchasingVariant);
-	//// for (String variable : purchasData.getVariantParameters().keySet()) {
-	//// double data = purchasData.getVariantParameters().get(variable);
-	//// LengthParameter parameter = new LengthParameter(variable, data,
-	//// (ArrayList<Double>) Arrays.asList(data, data));
-	//// parameter.setMM(data);
-	//// }
-	//
-	// try {
-	// fileLastLoaded.put(key, get(type, id));
-	// } catch (Exception e) {
-	// com.neuronrobotics.sdk.common.Log.error(e);
-	//
-	// setGitRepoDatabase(gitRpoDatabase);
-	// clear();
-	// return get(type, id);
-	// }
-	//
-	// }
-	//
-	// CSG vitToGet = fileLastLoaded.get(type + id);
-	// // com.neuronrobotics.sdk.common.Log.error("Loading "+vitToGet);
-	// return vitToGet;
-	// }
-
 	public static boolean isGitURL(String text2) {
 		if (!text2.endsWith(".git"))
 			return false;
@@ -152,9 +123,6 @@ public class Vitamins {
 		ScriptingEngine.flatten(flat, o);
 	}
 
-	// public static CSG get(String type, String id) throws Exception {
-	// return get(CSGDatabase.getInstance(),type,id);
-	// }
 	public static CSG get(CSGDatabaseInstance instance, String type, String id) throws Exception {
 		if (isGitURL(type)) {
 			Object o = ScriptingEngine.gitScriptRun(instance, type, id);
