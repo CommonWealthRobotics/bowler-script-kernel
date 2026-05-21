@@ -69,7 +69,7 @@ public class RadialDistribution extends AbstractAddFrom {
 			if (source.isGroupResult()) {
 				ArrayList<String> c = constituants(back, from);
 				if (c.size() < 1) {
-					new RuntimeException("A group result must have at least 1 constituants!").printStackTrace();;
+					new RuntimeException("A radial distribution must have at least 1 constituants!").printStackTrace();;
 					continue;
 				}
 				String newGroupName;
@@ -141,7 +141,10 @@ public class RadialDistribution extends AbstractAddFrom {
 				throw new RuntimeException("Failed to create the vitamin");
 			}
 		} else {
-			newOne = clone.transformed(nrToCSG2);
+			newOne = clone
+					.transformed(nrToCSG.inverse())
+					.transformed(nrToCSG2)
+					.transformed(nrToCSG);
 			newOne.setRegenerate(c.getRegenerate());
 		}
 		newOne.syncProperties(getCaDoodleFile().getCsgDBinstance(), c).setName(name);
