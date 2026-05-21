@@ -270,7 +270,7 @@ public class CaDoodleWorkflowTest {
 		}
 		System.out.println("Saving");
 		loaded.save();
-		
+
 		AddFromScript heart = new AddFromScript().set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
 				"heart.SVG");
 		loaded.addOperation(heart).join();
@@ -278,9 +278,9 @@ public class CaDoodleWorkflowTest {
 		RadialDistribution dist = new RadialDistribution().setNames(new ArrayList<String>(HeartNames));
 		loaded.addOperation(dist).join();
 		HashSet<String> boltPatternNames = dist.getNamesAdded();
-		if(boltPatternNames.size()!=3)
+		if (boltPatternNames.size() != 3)
 			fail();
-		System.out.println("patterened hearts = "+boltPatternNames);
+		System.out.println("patterened hearts = " + boltPatternNames);
 	}
 
 }

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.google.gson.annotations.Expose;
-import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
@@ -44,9 +43,9 @@ public class RadialDistribution extends AbstractAddFrom {
 		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Radius", 2.0,
 				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
 		for (int i = 0; i < objectCount.getMM(); i++) {
-			double angle = 360/objectCount.getMM();
-			TransformNR tf = new TransformNR(rad.getMM(),0,0);
-			TransformNR rot= new TransformNR(new RotationNR(0, angle, 0));
+			double angle = 360 / objectCount.getMM();
+			TransformNR tf = new TransformNR(rad.getMM(), 0, 0);
+			TransformNR rot = new TransformNR(new RotationNR(0, angle, 0));
 			TransformNR loc = tf.times(rot);
 			CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 				@Override
@@ -70,8 +69,7 @@ public class RadialDistribution extends AbstractAddFrom {
 			if (source.isGroupResult()) {
 				ArrayList<String> c = constituants(back, from);
 				if (c.size() < 1) {
-					new RuntimeException("A group result must have at least 1 constituants!").printStackTrace();
-					;
+					new RuntimeException("A group result must have at least 1 constituants!").printStackTrace();;
 					continue;
 				}
 				String newGroupName;
