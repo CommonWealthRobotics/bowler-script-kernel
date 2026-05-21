@@ -45,7 +45,9 @@ public class RadialDistribution extends AbstractAddFrom {
 				new ArrayList<>(Arrays.asList(0.1, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)));
 		for (int i = 0; i < objectCount.getMM(); i++) {
 			double angle = 360/objectCount.getMM();
-			TransformNR loc = new TransformNR(rad.getMM(),0,0,new RotationNR(0, angle, 0));
+			TransformNR tf = new TransformNR(rad.getMM(),0,0);
+			TransformNR rot= new TransformNR(new RotationNR(0, angle, 0));
+			TransformNR loc = tf.times(rot);
 			CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 				@Override
 				public ArrayList<CSG> process(CSG ic, int depth) {

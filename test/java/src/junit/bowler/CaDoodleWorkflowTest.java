@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -25,6 +26,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Group;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ModelNotes;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Paste;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.RadialDistribution;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToSolid;
@@ -268,8 +270,17 @@ public class CaDoodleWorkflowTest {
 		}
 		System.out.println("Saving");
 		loaded.save();
-		loaded.close();
-		System.out.println("Save finished");
+		
+		AddFromScript heart = new AddFromScript().set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
+				"heart.SVG");
+		loaded.addOperation(heart).join();
+		HashSet<String> HeartNames = heart.getNamesAdded();
+		RadialDistribution dist = new RadialDistribution().setNames(new ArrayList<String>(HeartNames));
+		loaded.addOperation(dist).join();
+		HashSet<String> boltPatternNames = dist.getNamesAdded();
+		if(boltPatternNames.size()!=3)
+			fail();
+		System.out.println("patterened hearts = "+boltPatternNames);
 	}
 
 }
