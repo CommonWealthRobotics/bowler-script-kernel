@@ -20,6 +20,8 @@ import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 public class RadialDistribution extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR workplane = new TransformNR();
 
 	// @Expose(serialize = true, deserialize = true)
 	// public double offset = 10;
@@ -181,5 +183,14 @@ public class RadialDistribution extends AbstractAddFrom {
 	@Override
 	public File getFile() throws NoSuchFileException {
 		throw new NoSuchFileException(null);
+	}
+
+	public TransformNR getWorkplane() {
+		return workplane;
+	}
+
+	public RadialDistribution setWorkplane(TransformNR workplane) {
+		this.workplane = workplane;
+		return this;
 	}
 }
