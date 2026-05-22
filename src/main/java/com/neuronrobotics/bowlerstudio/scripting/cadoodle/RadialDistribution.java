@@ -11,7 +11,9 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
+import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
@@ -49,10 +51,12 @@ public class RadialDistribution extends AbstractAddFrom {
 			TransformNR tf = new TransformNR(rad.getMM(), 0, 0);
 			TransformNR rot = new TransformNR(new RotationNR(0, angle, 0));
 			TransformNR loc = rot.times(tf);
+			Bounds b = getBounds(incoming, getCaDoodleFile().getBoundsCache()) ;
+			
 			CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 				@Override
 				public ArrayList<CSG> process(CSG ic, int depth) {
-					ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, loc);
+					ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, loc,b);
 					for (CSG c : copyPasteMoved) {
 						c.setParameter(getDb(), rad);
 						c.setParameter(getDb(), objectCount);
@@ -122,7 +126,7 @@ public class RadialDistribution extends AbstractAddFrom {
 		return c;
 	}
 
-	private ArrayList<CSG> copyPasteMoved(CSG c, int depth, TransformNR location) {
+	private ArrayList<CSG> copyPasteMoved(CSG c, int depth, TransformNR location, Bounds b2) {
 		String prevName = c.getName();
 		String name = getName() + (index == 0 ? "" : "_" + index);
 		CSG clone = c.clone();
@@ -130,7 +134,8 @@ public class RadialDistribution extends AbstractAddFrom {
 		clone.getStorage().set("PreviousName", prevName);
 		CSGDatabaseInstance db = getDb();
 		clone.syncParameter(db, c);
-		Transform nrToCSG = MoveCenter.getTotalOffset(c);
+		TransformNR center = new TransformNR(b2.getCenterX(),b2.getCenterY(),b2.getMinZ());
+		Transform nrToCSG = TransformFactory.nrToCSG(center);
 		Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 		CSG newOne = null;
 		CaDoodleVitamin caDoodleVitamin = new CaDoodleVitamin(db);
@@ -161,8 +166,37 @@ public class RadialDistribution extends AbstractAddFrom {
 		cpMap.put(c.getName(), newOne.getName());
 		return b;
 	}
+	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) {
 
+		if (names != null) {
+			if (inWorkplaneBounds == null)
+				inWorkplaneBounds = new HashMap<CSG, Bounds>();
+			List<CSG> selectedCSG = getSelectedCSG(names, incoming);
+			return Align.getBounds(selectedCSG, workplane, inWorkplaneBounds);
+		} else {
+			throw new RuntimeException("Align can not be initialized without bounds!");
+		}
 
+	}
+	public List<CSG> getSelectedCSG(Iterable<String> sele, List<CSG> incoming) {
+		ArrayList<CSG> back = new ArrayList<CSG>();
+		for (String sel : sele) {
+			CSG t = getSelectedCSG(sel, incoming);
+			if (t != null) {
+				back.add(t);
+			}
+		}
+		return back;
+	}
+	private CSG getSelectedCSG(String string, List<CSG> incoming) {
+		for (CSG c : incoming) {
+			if (c.getName().contentEquals(string))
+				return c;
+		}
+		return null;
+	}
+
+	
 	public List<String> getNamesAddedInThisOperation() {
 		ArrayList<String> n = new ArrayList<String>();
 		n.addAll(getNamesAdded());
