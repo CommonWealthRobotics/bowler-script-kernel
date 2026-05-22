@@ -175,10 +175,6 @@ public class RadialDistribution extends AbstractAddFrom {
 		return this;
 	}
 
-	// public Paste setOffset(double offset) {
-	// this.offset = offset;
-	// return this;
-	// }
 
 	@Override
 	public File getFile() throws NoSuchFileException {
