@@ -134,7 +134,7 @@ public class RadialDistribution extends AbstractAddFrom {
 		CSGDatabaseInstance db = getDb();
 		clone.syncParameter(db, c);
 		TransformNR center = new TransformNR(b2.getCenterX(), b2.getCenterY(), b2.getMinZ());
-		Transform nrToCSG = TransformFactory.nrToCSG(center);
+		Transform nrToCSG = TransformFactory.nrToCSG(center.times(getWorkplane()));
 		Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 		CSG newOne = null;
 		CaDoodleVitamin caDoodleVitamin = new CaDoodleVitamin(db);
