@@ -41,6 +41,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
 
+import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
@@ -66,7 +67,7 @@ public class CaDoodleFile {
 	private TransformNR workplane = new TransformNR();
 	@Expose(serialize = true, deserialize = true)
 	private CaDoodleParameters parameters;
-
+	private HashMap<CSG, Bounds> boundsCache = new HashMap<CSG, Bounds>();
 	private File self;
 	// @Expose (serialize = false, deserialize = false)
 	// private List<CSG> currentState = new ArrayList<CSG>();
@@ -1523,5 +1524,9 @@ public class CaDoodleFile {
 			parameters = new CaDoodleParameters();
 		parameters.setDb(csgDBinstance);
 		return parameters;
+	}
+
+	public HashMap<CSG, Bounds> getBoundsCache() {
+		return boundsCache;
 	}
 }
