@@ -67,6 +67,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 					p = new Polygon(p.getVertices().reversed());
 				CSG extrude = Extrude.extrude(new Vector3d(0, 0, 20), p);
 				extrude.setIsHole(hole);
+				extrude.setColor(base.getColor());
 				fillet.add(extrude);
 			}
 		} catch (ColinearPointsException e) {
