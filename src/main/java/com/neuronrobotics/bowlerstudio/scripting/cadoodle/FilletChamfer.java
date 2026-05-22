@@ -95,6 +95,7 @@ public class FilletChamfer extends AbstractAddFrom {
 			tmp.setParameter(getDb(), faceCount);
 			tmp.setParameter(getDb(), upPm);
 			tmp.setParameter(getDb(), outerPm);
+			tmp.setColor(csgin.getColor());
 			if (!outer)
 				tmp.setIsHole(true);
 			MoveCenter.set(getName(), tmp, nrToCSG);
