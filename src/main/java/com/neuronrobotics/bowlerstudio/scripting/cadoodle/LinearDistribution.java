@@ -17,6 +17,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
+import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 
 public class LinearDistribution extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
@@ -40,13 +41,19 @@ public class LinearDistribution extends AbstractAddFrom {
 		back.addAll(incoming);
 		index = 1;
 		cpMap.clear();
-		LengthParameter objectCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Object", (double) 3,
+		LengthParameter objectX = new LengthParameter(getDb(), getName() + "_CaDoodle_X", (double) 3,
 				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
-						15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 100.0)));
-		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Radius", 20.0,
+						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
+		LengthParameter objectY= new LengthParameter(getDb(), getName() + "_CaDoodle_Y", (double) 3,
+				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
+						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
+		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Spacing", 20.0,
 				new ArrayList<>(Arrays.asList(0.001, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 500.0)));
-		for (int i = 0; i < objectCount.getMM(); i++) {
-			double angle = 360.0 / objectCount.getMM() * ((double) i);
+		StringParameter hexLin = new StringParameter(getDb(), getName() + "_CaDoodle_Hex/Lin", "inner",
+				new ArrayList<>(Arrays.asList("Honeycomb", "Linear")));
+		boolean hex = hexLin.getStrValue().contentEquals("Honeycomb");
+		for (int i = 0; i < objectX.getMM(); i++) {
+			double angle = 360.0 / objectX.getMM() * ((double) i);
 			TransformNR tf = new TransformNR(rad.getMM(), 0, 0);
 			TransformNR rot = new TransformNR(new RotationNR(0, angle, 0));
 			TransformNR loc = rot.times(tf);
@@ -58,7 +65,9 @@ public class LinearDistribution extends AbstractAddFrom {
 					ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, loc, b);
 					for (CSG c : copyPasteMoved) {
 						c.setParameter(getDb(), rad);
-						c.setParameter(getDb(), objectCount);
+						c.setParameter(getDb(), objectX);
+						c.setParameter(getDb(), objectY);
+						c.setParameter(getDb(), hexLin);
 					}
 					return copyPasteMoved;
 				}
