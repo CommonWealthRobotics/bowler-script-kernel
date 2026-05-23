@@ -44,34 +44,46 @@ public class LinearDistribution extends AbstractAddFrom {
 		LengthParameter objectX = new LengthParameter(getDb(), getName() + "_CaDoodle_X", (double) 3,
 				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
 						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
-		LengthParameter objectY= new LengthParameter(getDb(), getName() + "_CaDoodle_Y", (double) 3,
+		LengthParameter objectY = new LengthParameter(getDb(), getName() + "_CaDoodle_Y", (double) 3,
 				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
 						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
-		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Spacing", 20.0,
-				new ArrayList<>(Arrays.asList(0.001, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 500.0)));
-		StringParameter hexLin = new StringParameter(getDb(), getName() + "_CaDoodle_Hex/Lin", "inner",
+		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Spacing", 18.0, new ArrayList<>(
+				Arrays.asList(0.001, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 20.0, 30.0, 40.0)));
+		StringParameter hexLin = new StringParameter(getDb(), getName() + "_CaDoodle_Hex/Lin", "Honeycomb",
 				new ArrayList<>(Arrays.asList("Honeycomb", "Linear")));
 		boolean hex = hexLin.getStrValue().contentEquals("Honeycomb");
+		double x = rad.getMM();
+		double y = (((rad.getMM() / Math.sqrt(3))))*2 ;
+		if (!hex) {
+			x = rad.getMM();
+			y = rad.getMM();
+		}
 		for (int i = 0; i < objectX.getMM(); i++) {
-			double angle = 360.0 / objectX.getMM() * ((double) i);
-			TransformNR tf = new TransformNR(rad.getMM(), 0, 0);
-			TransformNR rot = new TransformNR(new RotationNR(0, angle, 0));
-			TransformNR loc = rot.times(tf);
-			Bounds b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
+			boolean isSkipRow = i % 2 != 0 && hex;
 
-			CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
-				@Override
-				public ArrayList<CSG> process(CSG ic, int depth) {
-					ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, loc, b);
-					for (CSG c : copyPasteMoved) {
-						c.setParameter(getDb(), rad);
-						c.setParameter(getDb(), objectX);
-						c.setParameter(getDb(), objectY);
-						c.setParameter(getDb(), hexLin);
+			for (int j = (i == 0 ? 1 : 0); j < (isSkipRow?objectY.getMM()-1:objectY.getMM()); j++) {
+				double y2 = y * j;
+				double x2 = x * i;
+				if (isSkipRow)
+					y2 += y/ 2;
+				TransformNR tf = new TransformNR(x2, y2, 0);
+
+				Bounds b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
+
+				CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
+					@Override
+					public ArrayList<CSG> process(CSG ic, int depth) {
+						ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, tf, b);
+						for (CSG c : copyPasteMoved) {
+							c.setParameter(getDb(), rad);
+							c.setParameter(getDb(), objectX);
+							c.setParameter(getDb(), objectY);
+							c.setParameter(getDb(), hexLin);
+						}
+						return copyPasteMoved;
 					}
-					return copyPasteMoved;
-				}
-			}, 1);
+				}, 1);
+			}
 		}
 		for (String from : cpMap.keySet()) {
 			CSG source;
@@ -83,7 +95,8 @@ public class LinearDistribution extends AbstractAddFrom {
 			if (source.isGroupResult()) {
 				ArrayList<String> c = constituants(back, from);
 				if (c.size() < 1) {
-					new RuntimeException("A radial distribution must have at least 1 constituants!").printStackTrace();;
+					new RuntimeException("A radial distribution must have at least 1 constituants!").printStackTrace();
+					;
 					continue;
 				}
 				String newGroupName;
@@ -204,7 +217,6 @@ public class LinearDistribution extends AbstractAddFrom {
 		return null;
 	}
 
-
 	public List<String> getNamesAddedInThisOperation() {
 		ArrayList<String> n = new ArrayList<String>();
 		n.addAll(getNamesAdded());
@@ -216,7 +228,6 @@ public class LinearDistribution extends AbstractAddFrom {
 		this.names = names;
 		return this;
 	}
-
 
 	@Override
 	public File getFile() throws NoSuchFileException {
