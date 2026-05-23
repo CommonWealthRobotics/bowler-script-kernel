@@ -52,11 +52,14 @@ public class LinearDistribution extends AbstractAddFrom {
 		StringParameter hexLin = new StringParameter(getDb(), getName() + "_CaDoodle_Hex/Lin", "Honeycomb",
 				new ArrayList<>(Arrays.asList("Honeycomb", "Linear")));
 		boolean hex = hexLin.getStrValue().contentEquals("Honeycomb");
-		double x = rad.getMM();
-		double y = (((rad.getMM() / Math.sqrt(3))))*2 ;
+		double mm = rad.getMM();
+		if(hex)
+			mm=mm* Math.sqrt(3)/2;
+		double x = mm;
+		double y = (((mm / Math.sqrt(3))))*2 ;
 		if (!hex) {
-			x = rad.getMM();
-			y = rad.getMM();
+			x = mm;
+			y = mm;
 		}
 		for (int i = 0; i < objectX.getMM(); i++) {
 			boolean isSkipRow = i % 2 != 0 && hex;
