@@ -9,7 +9,6 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
-import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.Bounds;
@@ -53,10 +52,10 @@ public class LinearDistribution extends AbstractAddFrom {
 				new ArrayList<>(Arrays.asList("Honeycomb", "Linear")));
 		boolean hex = hexLin.getStrValue().contentEquals("Honeycomb");
 		double mm = rad.getMM();
-		if(hex)
-			mm=mm* Math.sqrt(3)/2;
+		if (hex)
+			mm = mm * Math.sqrt(3) / 2;
 		double x = mm;
-		double y = (((mm / Math.sqrt(3))))*2 ;
+		double y = (((mm / Math.sqrt(3)))) * 2;
 		if (!hex) {
 			x = mm;
 			y = mm;
@@ -64,11 +63,11 @@ public class LinearDistribution extends AbstractAddFrom {
 		for (int i = 0; i < objectX.getMM(); i++) {
 			boolean isSkipRow = i % 2 != 0 && hex;
 
-			for (int j = (i == 0 ? 1 : 0); j < (isSkipRow?objectY.getMM()-1:objectY.getMM()); j++) {
+			for (int j = (i == 0 ? 1 : 0); j < (isSkipRow ? objectY.getMM() - 1 : objectY.getMM()); j++) {
 				double y2 = y * j;
 				double x2 = x * i;
 				if (isSkipRow)
-					y2 += y/ 2;
+					y2 += y / 2;
 				TransformNR tf = new TransformNR(x2, y2, 0);
 
 				Bounds b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
@@ -98,8 +97,7 @@ public class LinearDistribution extends AbstractAddFrom {
 			if (source.isGroupResult()) {
 				ArrayList<String> c = constituants(back, from);
 				if (c.size() < 1) {
-					new RuntimeException("A radial distribution must have at least 1 constituants!").printStackTrace();
-					;
+					new RuntimeException("A radial distribution must have at least 1 constituants!").printStackTrace();;
 					continue;
 				}
 				String newGroupName;
