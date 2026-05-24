@@ -620,7 +620,7 @@ public class DownloadManager {
 						if (onDisk.isPresent() && b)
 							return onDisk.get().toFile();
 						if (b && !justChecking) {
-							
+
 
 							if (exeType.toLowerCase().contentEquals("freecad")) {
 								// FreecadLoader.update(vm);
