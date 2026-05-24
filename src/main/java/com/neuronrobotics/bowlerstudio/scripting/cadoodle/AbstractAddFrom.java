@@ -15,7 +15,7 @@ public abstract class AbstractAddFrom extends CaDoodleOperation implements IName
 	protected int nameIndex = 0;
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
-	
+
 	HashSet<String> getNamesAdded() {
 		return namesAdded;
 	}
