@@ -40,11 +40,11 @@ import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
+import com.piro.bezier.BezierPath;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
-import eu.mihosoft.vrl.v3d.TextExtrude;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import javafx.application.Platform;
@@ -59,7 +59,7 @@ public class CaDoodleFile {
 	@Expose(serialize = true, deserialize = true)
 	private int currentIndex = 0;
 	@Expose(serialize = true, deserialize = true)
-	private int TextResolutionPoints = 10;
+	private double TextResolutionPoints = 0.5;
 	@Expose(serialize = true, deserialize = true)
 	private long timeCreated = -1;
 	@Expose(serialize = true, deserialize = true)
@@ -273,7 +273,7 @@ public class CaDoodleFile {
 		// if (initializing)
 		// throw new RuntimeException("Can not initialize while initializing.");
 		fireInitializationStart();
-		TextExtrude.setTextResolutionPoints(getTextResolutionPoints());
+		BezierPath.setMaximumInterpolationStep(TextResolutionPoints);
 		setImageEngine(new ThumbnailImage());
 		initializing = true;
 		if (timeCreated < 0)
@@ -376,6 +376,11 @@ public class CaDoodleFile {
 	//
 	// return get;
 	// }
+	public Thread regenerateAll() {
+		if (opperations.size() > 0)
+			return regenerateFrom(opperations.get(0));
+		return null;
+	}
 
 	public Thread regenerateFrom(CaDoodleOperation source) {
 		if (initializing)
@@ -1534,12 +1539,13 @@ public class CaDoodleFile {
 		return boundsCache;
 	}
 
-	public int getTextResolutionPoints() {
+	public double getTextResolutionPoints() {
 		return TextResolutionPoints;
 	}
 
-	public void setTextResolutionPoints(int textResolutionPoints) {
+	public void setTextResolutionPoints(double textResolutionPoints) {
 		TextResolutionPoints = textResolutionPoints;
-		TextExtrude.setTextResolutionPoints(getTextResolutionPoints());
+		BezierPath.setMaximumInterpolationStep((double) getTextResolutionPoints());
+		Log.debug("Setting path resolution to " + TextResolutionPoints);
 	}
 }
