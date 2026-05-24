@@ -196,13 +196,6 @@ public class RadialDistribution extends AbstractAddFrom {
 	}
 
 
-	public List<String> getNamesAddedInThisOperation() {
-		ArrayList<String> n = new ArrayList<String>();
-		n.addAll(getNamesAdded());
-		//n.addAll(names);
-		return n;
-	}
-
 	public RadialDistribution setNames(List<String> names) {
 		this.names = names;
 		return this;

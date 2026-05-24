@@ -218,13 +218,6 @@ public class LinearDistribution extends AbstractAddFrom {
 		return null;
 	}
 
-	public List<String> getNamesAddedInThisOperation() {
-		ArrayList<String> n = new ArrayList<String>();
-		n.addAll(getNamesAdded());
-		//n.addAll(names);
-		return n;
-	}
-
 	public LinearDistribution setNames(List<String> names) {
 		this.names = names;
 		return this;
