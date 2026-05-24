@@ -10,19 +10,22 @@ import com.google.gson.annotations.Expose;
 
 public abstract class AbstractAddFrom extends CaDoodleOperation implements INamedOperation {
 	@Expose(serialize = false, deserialize = false)
-	protected HashSet<String> namesAdded = new HashSet<>();
+	protected HashSet<String> na = new HashSet<>();
 	@Expose(serialize = false, deserialize = false)
 	protected int nameIndex = 0;
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
 
-	HashSet<String> getNamesAdded() {
-		return namesAdded;
+	//	HashSet<String> getNamesAdded() {
+	//		return namesAdded;
+	//	}
+	public void addNameInThisOperation(String name) {
+		na.add(name);
 	}
 
 	public List<String> getNamesAddedInThisOperation() {
 		ArrayList<String> names = new ArrayList<String>();
-		names.addAll(getNamesAdded());
+		names.addAll(na);
 		return names;
 	}
 
@@ -43,7 +46,7 @@ public abstract class AbstractAddFrom extends CaDoodleOperation implements IName
 			result += "_" + nameIndex;
 		}
 		nameIndex++;
-		namesAdded.add(result);
+		addNameInThisOperation(result);
 		return result;
 	}
 

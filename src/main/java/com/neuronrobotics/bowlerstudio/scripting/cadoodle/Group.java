@@ -141,7 +141,7 @@ public class Group extends AbstractAddFrom {
 		result.setNoScale(noscale);
 		result.setIsMotionLock(nomove);
 		result.setIsAlwaysShow(false);
-		namesAdded.add(result.getName());
+		addNameInThisOperation(result.getName());
 		back.add(result);
 		return back;
 	}
@@ -154,13 +154,6 @@ public class Group extends AbstractAddFrom {
 		return first;
 	}
 
-	@Override
-	public List<String> getNamesAddedInThisOperation() {
-		ArrayList<String> n = new ArrayList<String>();
-		n.addAll(getNamesAdded());
-		n.addAll(names);
-		return n;
-	}
 
 	public Group setNames(List<String> names) {
 		this.names = names;

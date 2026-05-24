@@ -133,7 +133,10 @@ public class Paste extends AbstractAddFrom {
 		newOne.syncProperties(getCaDoodleFile().getCsgDBinstance(), c).setName(name);
 		MoveCenter.set(name, newOne, location);
 		index++;
-		getNamesAdded().add(name);
+		addNameInThisOperation(name);
+		for (String s : c.getParameters(db)) {
+			newOne.removeParameter(db, s);
+		}
 		ArrayList<CSG> b = new ArrayList<>();
 		b.add(c);
 		b.add(newOne);

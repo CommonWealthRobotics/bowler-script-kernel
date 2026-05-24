@@ -3,7 +3,6 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 import java.util.Random;
 
 import com.google.gson.annotations.Expose;
-import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase;
 
 public class RandomStringFactory {
 	@Expose(serialize = false, deserialize = false)
@@ -36,15 +35,10 @@ public class RandomStringFactory {
 			"Maglev", "Aerosled", "Cybertooth", "Ifrit", "Warpod", "Elemental", "Hoversled", "Goliath", "Warpcraft",
 			"Juggernaut", "Vortexer"};
 
-	private static int index = ((Double) ConfigurationDatabase.get("CaDoodle", "projectNameIndex",
-			(Math.random() * creaturesMachines.length))).intValue();
 
 	public static String getNextRandomName() {
-		index++;
-		if (index >= creaturesMachines.length)
-			index = 0;
-		ConfigurationDatabase.put("CaDoodle", "projectNameIndex", index);
-		return adjectives[(int) (Math.random() * adjectives.length)] + "_" + creaturesMachines[index];
+		return adjectives[(int) (Math.random() * adjectives.length)] + "_"
+				+ creaturesMachines[(int) (Math.random() * creaturesMachines.length)];
 	}
 
 	public static String generateRandomString() {
