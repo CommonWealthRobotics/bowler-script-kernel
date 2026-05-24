@@ -615,11 +615,13 @@ public class DownloadManager {
 								directoryToBeDeleted.mkdirs();
 							}
 						}
+						boolean b = !new File(cmd).exists();
+						Optional<Path> onDisk = findExecutable(exeType);
+						if (onDisk.isPresent() && b)
+							return onDisk.get().toFile();
+						if (b && !justChecking) {
+							
 
-						if (!new File(cmd).exists() && !justChecking) {
-							Optional<Path> onDisk = findExecutable(exeType);
-							if (onDisk.isPresent())
-								return onDisk.get().toFile();
 							if (exeType.toLowerCase().contentEquals("freecad")) {
 								// FreecadLoader.update(vm);
 								baseURL = vm.get("url").toString();
