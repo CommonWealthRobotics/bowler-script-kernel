@@ -44,6 +44,7 @@ import com.neuronrobotics.sdk.common.TickToc;
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
+import eu.mihosoft.vrl.v3d.TextExtrude;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import javafx.application.Platform;
@@ -57,6 +58,8 @@ public class CaDoodleFile {
 	private ArrayList<CaDoodleOperation> opperations = new ArrayList<CaDoodleOperation>();
 	@Expose(serialize = true, deserialize = true)
 	private int currentIndex = 0;
+	@Expose(serialize = true, deserialize = true)
+	private int TextResolutionPoints = 10;
 	@Expose(serialize = true, deserialize = true)
 	private long timeCreated = -1;
 	@Expose(serialize = true, deserialize = true)
@@ -270,6 +273,7 @@ public class CaDoodleFile {
 		// if (initializing)
 		// throw new RuntimeException("Can not initialize while initializing.");
 		fireInitializationStart();
+		TextExtrude.setTextResolutionPoints(getTextResolutionPoints());
 		setImageEngine(new ThumbnailImage());
 		initializing = true;
 		if (timeCreated < 0)
@@ -1528,5 +1532,14 @@ public class CaDoodleFile {
 
 	public HashMap<CSG, Bounds> getBoundsCache() {
 		return boundsCache;
+	}
+
+	public int getTextResolutionPoints() {
+		return TextResolutionPoints;
+	}
+
+	public void setTextResolutionPoints(int textResolutionPoints) {
+		TextResolutionPoints = textResolutionPoints;
+		TextExtrude.setTextResolutionPoints(getTextResolutionPoints());
 	}
 }
