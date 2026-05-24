@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -274,10 +273,10 @@ public class CaDoodleWorkflowTest {
 		AddFromScript heart = new AddFromScript().set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
 				"heart.SVG");
 		loaded.addOperation(heart).join();
-		HashSet<String> HeartNames = heart.getNamesAdded();
+		List<String> HeartNames = heart.getNamesAddedInThisOperation();
 		RadialDistribution dist = new RadialDistribution().setNames(new ArrayList<String>(HeartNames));
 		loaded.addOperation(dist).join();
-		HashSet<String> boltPatternNames = dist.getNamesAdded();
+		List<String> boltPatternNames = dist.getNamesAddedInThisOperation();
 		if (boltPatternNames.size() != 3)
 			fail();
 		System.out.println("patterened hearts = " + boltPatternNames);
