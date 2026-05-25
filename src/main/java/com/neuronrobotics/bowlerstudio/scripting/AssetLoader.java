@@ -4,10 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
-
-import eu.mihosoft.vrl.v3d.CSG;
-import javafx.scene.paint.Color;
 
 public class AssetLoader implements IScriptingLanguage {
 
@@ -48,7 +44,7 @@ public class AssetLoader implements IScriptingLanguage {
 	@Override
 	public ArrayList<String> getFileExtension() {
 		// Auto-generated method stub
-		return new ArrayList<>(Arrays.asList("css", "png", "jpg","jpeg","html","js"));
+		return new ArrayList<>(Arrays.asList("css", "png", "jpg", "jpeg", "html", "js"));
 	}
 
 }
