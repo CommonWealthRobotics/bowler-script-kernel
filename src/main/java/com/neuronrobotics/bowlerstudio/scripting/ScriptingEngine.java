@@ -201,6 +201,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		addScriptingLanguage(new CaDoodleLoader());
 		addScriptingLanguage(new ObjLoader());
 		addScriptingLanguage(new ThreeMFLoader());
+		addScriptingLanguage(new AssetLoader());
 	}
 
 	public static void setWorkspace(File file) {
