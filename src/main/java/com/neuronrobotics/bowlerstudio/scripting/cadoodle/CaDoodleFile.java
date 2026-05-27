@@ -452,8 +452,7 @@ public class CaDoodleFile {
 							updateCurrentFromCache();
 						}
 					} catch (Exception ex) {
-						com.neuronrobotics.sdk.common.Log.error(ex);
-						;
+						com.neuronrobotics.sdk.common.Log.error(ex);;
 					}
 					setPercentInitialized(1);
 					updateBoM();
@@ -596,8 +595,7 @@ public class CaDoodleFile {
 								getOperations().add(op);
 								process(op);
 							} catch (Exception ex) {
-								com.neuronrobotics.sdk.common.Log.error(ex);
-								;
+								com.neuronrobotics.sdk.common.Log.error(ex);;
 							}
 						}
 						if (getResult() == OperationResult.INSERT) {
