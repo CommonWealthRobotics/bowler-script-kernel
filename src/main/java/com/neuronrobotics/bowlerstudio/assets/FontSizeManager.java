@@ -3,9 +3,9 @@ package com.neuronrobotics.bowlerstudio.assets;
 import java.util.ArrayList;
 
 public class FontSizeManager {
-	private static int[] fonts = new int[]{6, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 48};
+	private static int[] fonts = new int[]{8, 10, 12, 14, 16, 18, 20};
 	private static ArrayList<IFontSizeReciver> listeners = new ArrayList<IFontSizeReciver>();
-	public static final int systemDefaultFontSize = 12;
+	public static final int systemDefaultFontSize = 14;
 	public static int[] getFontOptions() {
 		return fonts;
 	}
