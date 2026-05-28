@@ -43,8 +43,8 @@ public class RadialDistribution extends AbstractAddFrom {
 		LengthParameter objectCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Object", (double) 3,
 				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
 						15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 100.0)));
-		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Radius", 20.0,
-				new ArrayList<>(Arrays.asList(0.001, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 500.0)));
+		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Radius", 20.0, new ArrayList<>(Arrays
+				.asList(0.001, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 20.0, 30.0, 40.0, 50.0, 500.0)));
 		for (int i = 0; i < objectCount.getMM(); i++) {
 			double angle = 360.0 / objectCount.getMM() * ((double) i);
 			TransformNR tf = new TransformNR(rad.getMM(), 0, 0);
