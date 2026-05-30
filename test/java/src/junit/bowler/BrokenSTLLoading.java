@@ -7,12 +7,10 @@ import java.io.File;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
-import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.CSG.OptType;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
-import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 import eu.mihosoft.vrl.v3d.thumbnail.ThumbnailImageCSG;
 import javafx.scene.shape.CullFace;
@@ -23,7 +21,9 @@ public class BrokenSTLLoading {
 		CSG.setDefaultOptType(OptType.Manifold3d);
 		String filename = "hourglass.stl";
 		File file = new File(filename);
-
+		File fixed = new File(file.getAbsolutePath() + "_admesh_fix.stl");
+		if (fixed.exists())
+			fixed.delete();
 		CSG loaded = Vitamins.get(CSGDatabase.getInstance(), file);
 		try {
 			JavaFXInitializer.go();

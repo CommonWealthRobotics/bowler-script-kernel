@@ -10,7 +10,8 @@ public class ADMesh {
 	public static void fix(File in, File out) {
 		ArrayList<String> args = new ArrayList<>();
 
-		File configExecutable = DownloadManager.getConfigExecutable("admesh", null);
+		File configExecutable = DownloadManager.getRunExecutable("admesh", null);
+		configExecutable.setExecutable(true, true);
 		args.add(configExecutable.getAbsolutePath());
 
 		args.add("-fudvb");

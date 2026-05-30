@@ -30,7 +30,6 @@ import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -104,8 +103,8 @@ public class Vitamins {
 			} catch (NonManifoldShapeError | ColinearPointsException t) {
 				if (afi != null) {
 					if (afi.tryToFix(resource, t)) {
-						File fixed = new File(resource.getAbsolutePath()+"_admesh_fix.stl");
-						if(!fixed.exists())
+						File fixed = new File(resource.getAbsolutePath() + "_admesh_fix.stl");
+						if (!fixed.exists())
 							ADMesh.fix(resource, fixed);
 						fileLastLoaded.put(resource.getAbsolutePath(), STL.file(fixed.toPath()));
 					} else
