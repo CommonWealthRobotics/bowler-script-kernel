@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.STL;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -23,6 +24,7 @@ import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -97,7 +99,7 @@ public class Vitamins {
 			try {
 				if (resource.getName().toLowerCase().endsWith(".stl"))
 					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
-			} catch (Throwable t) {
+			} catch (NonManifoldShapeError | ColinearPointsException t) {
 				if (afi != null) {
 					if (afi.tryToFix(resource, t)) {
 						// TODO apply fix here
