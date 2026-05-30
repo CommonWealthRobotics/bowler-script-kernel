@@ -63,37 +63,40 @@ public class RadialDistribution extends AbstractAddFrom {
 					return copyPasteMoved;
 				}
 			}, 1);
-		}
-		for (String from : cpMap.keySet()) {
-			CSG source;
-			try {
-				source = CaDoodleFile.getByName(back, from);
-			} catch (NameMissingException e) {
-				continue;
-			}
-			if (source.isGroupResult()) {
-				ArrayList<String> c = constituants(back, from);
-				if (c.size() < 1) {
-					new RuntimeException("A radial distribution must have at least 1 constituants!").printStackTrace();;
-					continue;
-				}
-				String newGroupName;
+			for (String from : cpMap.keySet()) {
+				CSG source;
 				try {
-					newGroupName = CaDoodleFile.getByName(back, cpMap.get(from)).getName();
+					source = CaDoodleFile.getByName(back, from);
 				} catch (NameMissingException e) {
 					continue;
 				}
-				for (String s : c) {
-					CSG dest;
+				if (source.isGroupResult()) {
+					ArrayList<String> c = constituants(back, from);
+					if (c.size() < 1) {
+						new RuntimeException("A radial distribution must have at least 1 constituants!")
+								.printStackTrace();
+						;
+						continue;
+					}
+					String newGroupName;
 					try {
-						dest = CaDoodleFile.getByName(back, s);
+						newGroupName = CaDoodleFile.getByName(back, cpMap.get(from)).getName();
 					} catch (NameMissingException e) {
 						continue;
 					}
-					dest.removeGroupMembership(from);
-					dest.addGroupMembership(newGroupName);
+					for (String s : c) {
+						CSG dest;
+						try {
+							dest = CaDoodleFile.getByName(back, s);
+						} catch (NameMissingException e) {
+							continue;
+						}
+						dest.removeGroupMembership(from);
+						dest.addGroupMembership(newGroupName);
+					}
 				}
 			}
+
 		}
 		return back;
 	}
@@ -198,12 +201,10 @@ public class RadialDistribution extends AbstractAddFrom {
 		return null;
 	}
 
-
 	public RadialDistribution setNames(List<String> names) {
 		this.names = names;
 		return this;
 	}
-
 
 	@Override
 	public File getFile() throws NoSuchFileException {
