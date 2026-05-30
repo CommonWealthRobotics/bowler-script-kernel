@@ -45,7 +45,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class Vitamins {
-
+	private static AskToFixInterface afi = null;
 	private static String jsonRootDir = "json/";
 	private static final Map<String, CSG> fileLastLoaded = new ConcurrentHashMap<String, CSG>();
 	private static final Map<String, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>> databaseSet = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>>();
@@ -94,12 +94,22 @@ public class Vitamins {
 		if (fileLastLoaded.get(resource.getAbsolutePath()) == null || forceRefresh) {
 			// forces the first time the files is accessed by the application tou pull an
 			// update
-			if (resource.getName().toLowerCase().endsWith(".stl"))
-				fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath(), fix));
+			try {
+				if (resource.getName().toLowerCase().endsWith(".stl"))
+					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
+			} catch (Throwable t) {
+				if(afi!=null) {
+					if(afi.tryToFix(resource, t)) {
+						// apply fix
+						fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
+					}else
+						throw t;
+				}else
+					throw t;
+			}
 
 		}
 		CSG csg = fileLastLoaded.get(resource.getAbsolutePath());
-
 		return csg.clone().setRegenerate(csg.getRegenerate());
 	}
 
@@ -112,7 +122,8 @@ public class Vitamins {
 			new java.net.URL(text2);
 		} catch (Exception ex) {
 			if (!text2.startsWith("git@")) {
-				com.neuronrobotics.sdk.common.Log.error(ex);;
+				com.neuronrobotics.sdk.common.Log.error(ex);
+				;
 				return false;
 			}
 		}
@@ -298,22 +309,23 @@ public class Vitamins {
 					jsonString, // content of the file
 					"Making changes to " + type + " by " + PasswordManager.getUsername()
 							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
-																																																			// message
-																																																			// com.neuronrobotics.sdk.common.Log.error(jsonString);
-																																																			// com.neuronrobotics.sdk.common.Log.error("Database
-																																																			// saved
-																																																			// "
-																																																			// +
-																																																			// getVitaminFile(type,
-																																																			// null,
-																																																			// false).getAbsolutePath());
+																																		// message
+																																		// com.neuronrobotics.sdk.common.Log.error(jsonString);
+																																		// com.neuronrobotics.sdk.common.Log.error("Database
+																																		// saved
+																																		// "
+																																		// +
+																																		// getVitaminFile(type,
+																																		// null,
+																																		// false).getAbsolutePath());
 		} catch (Exception ex) {
 			if (ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
 				ScriptingEngine.deleteRepo(getGitRepoDatabase());
 				saveDatabase(type);
 				return true;
 			}
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 			throw ex;
 		}
 		return true;
@@ -332,7 +344,8 @@ public class Vitamins {
 			if (type != null)
 				saveDatabase(type);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 			// com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			newRepo = github.getRepository(getSourcerepo()).fork();
@@ -400,7 +413,8 @@ public class Vitamins {
 				}
 			}
 		} catch (java.lang.NullPointerException ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 		}
 	}
 
@@ -685,6 +699,14 @@ public class Vitamins {
 
 	public static String getSourcerepo() {
 		return sourceRepo;
+	}
+
+	public AskToFixInterface getAskToFix() {
+		return afi;
+	}
+
+	public void setAskToFix(AskToFixInterface afi) {
+		this.afi = afi;
 	}
 
 }
