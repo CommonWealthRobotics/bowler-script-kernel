@@ -21,6 +21,7 @@ import javafx.scene.paint.Color;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.IssueReportingExceptionHandler;
+import com.neuronrobotics.bowlerstudio.scripting.ADMesh;
 import com.neuronrobotics.bowlerstudio.scripting.PasswordManager;
 //import com.neuronrobotics.bowlerstudio.BowlerStudio;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -29,6 +30,7 @@ import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -47,7 +49,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 public class Vitamins {
-	private static AskToFixInterface afi = null;
+	private static AskToFixInterface afi = (f, t) -> true;
 	private static String jsonRootDir = "json/";
 	private static final Map<String, CSG> fileLastLoaded = new ConcurrentHashMap<String, CSG>();
 	private static final Map<String, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>> databaseSet = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, Object>>>();
@@ -102,8 +104,10 @@ public class Vitamins {
 			} catch (NonManifoldShapeError | ColinearPointsException t) {
 				if (afi != null) {
 					if (afi.tryToFix(resource, t)) {
-						// TODO apply fix here
-						fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
+						File fixed = new File(resource.getAbsolutePath()+"_admesh_fix.stl");
+						if(!fixed.exists())
+							ADMesh.fix(resource, fixed);
+						fileLastLoaded.put(resource.getAbsolutePath(), STL.file(fixed.toPath()));
 					} else
 						throw t;
 				} else
