@@ -100,7 +100,7 @@ public class Vitamins {
 			} catch (Throwable t) {
 				if (afi != null) {
 					if (afi.tryToFix(resource, t)) {
-						// apply fix
+						// TODO apply fix here
 						fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
 					} else
 						throw t;
