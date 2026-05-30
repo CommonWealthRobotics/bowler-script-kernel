@@ -98,8 +98,7 @@ public class LinearDistribution extends AbstractAddFrom {
 						ArrayList<String> c = constituants(back, from);
 						if (c.size() < 1) {
 							new RuntimeException("A radial distribution must have at least 1 constituants!")
-									.printStackTrace();
-							;
+									.printStackTrace();;
 							continue;
 						}
 						String newGroupName;
