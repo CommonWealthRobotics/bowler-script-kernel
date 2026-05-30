@@ -46,12 +46,13 @@ public class Group extends AbstractAddFrom {
 		for (CSG csg : incoming) {
 			if (csg.isLock())
 				continue;
-			if (csg.isInGroup()) {
-				Log.error(new Exception("Groups can not be made with objects that are within groups"));
-				continue;
-			}
+
 			for (String name : names) {
 				if (name.contentEquals(csg.getName())) {
+					if (csg.isInGroup()) {
+						Log.error(new Exception("Groups can not be made with objects that are within groups"));
+						continue;
+					}
 					if (csg.isNoScale())
 						noscale = true;
 					if (csg.isMotionLock())
