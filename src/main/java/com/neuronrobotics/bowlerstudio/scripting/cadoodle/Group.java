@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
@@ -45,7 +46,10 @@ public class Group extends AbstractAddFrom {
 		for (CSG csg : incoming) {
 			if (csg.isLock())
 				continue;
-
+			if(csg.isInGroup()) {
+				Log.error(new Exception("Groups can not be made with objects that are within groups"));
+				continue;
+			}
 			for (String name : names) {
 				if (name.contentEquals(csg.getName())) {
 					if (csg.isNoScale())
