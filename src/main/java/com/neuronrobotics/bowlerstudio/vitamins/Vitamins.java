@@ -98,13 +98,13 @@ public class Vitamins {
 				if (resource.getName().toLowerCase().endsWith(".stl"))
 					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
 			} catch (Throwable t) {
-				if(afi!=null) {
-					if(afi.tryToFix(resource, t)) {
+				if (afi != null) {
+					if (afi.tryToFix(resource, t)) {
 						// apply fix
 						fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
-					}else
+					} else
 						throw t;
-				}else
+				} else
 					throw t;
 			}
 
@@ -122,8 +122,7 @@ public class Vitamins {
 			new java.net.URL(text2);
 		} catch (Exception ex) {
 			if (!text2.startsWith("git@")) {
-				com.neuronrobotics.sdk.common.Log.error(ex);
-				;
+				com.neuronrobotics.sdk.common.Log.error(ex);;
 				return false;
 			}
 		}
@@ -309,23 +308,22 @@ public class Vitamins {
 					jsonString, // content of the file
 					"Making changes to " + type + " by " + PasswordManager.getUsername()
 							+ "\n\nAuto-save inside com.neuronrobotics.bowlerstudio.vitamins.Vitamins inside bowler-scripting-kernel");// commit
-																																		// message
-																																		// com.neuronrobotics.sdk.common.Log.error(jsonString);
-																																		// com.neuronrobotics.sdk.common.Log.error("Database
-																																		// saved
-																																		// "
-																																		// +
-																																		// getVitaminFile(type,
-																																		// null,
-																																		// false).getAbsolutePath());
+																																																			// message
+																																																			// com.neuronrobotics.sdk.common.Log.error(jsonString);
+																																																			// com.neuronrobotics.sdk.common.Log.error("Database
+																																																			// saved
+																																																			// "
+																																																			// +
+																																																			// getVitaminFile(type,
+																																																			// null,
+																																																			// false).getAbsolutePath());
 		} catch (Exception ex) {
 			if (ex.getMessage().contains("Cannot commit on a repo with state: MERGING")) {
 				ScriptingEngine.deleteRepo(getGitRepoDatabase());
 				saveDatabase(type);
 				return true;
 			}
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			throw ex;
 		}
 		return true;
@@ -344,8 +342,7 @@ public class Vitamins {
 			if (type != null)
 				saveDatabase(type);
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			// com.neuronrobotics.sdk.common.Log.error("Forked repo is missing!");
 
 			newRepo = github.getRepository(getSourcerepo()).fork();
@@ -413,8 +410,7 @@ public class Vitamins {
 				}
 			}
 		} catch (java.lang.NullPointerException ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 		}
 	}
 
@@ -701,12 +697,12 @@ public class Vitamins {
 		return sourceRepo;
 	}
 
-	public AskToFixInterface getAskToFix() {
+	public static AskToFixInterface getAskToFix() {
 		return afi;
 	}
 
-	public void setAskToFix(AskToFixInterface afi) {
-		this.afi = afi;
+	public static void setAskToFix(AskToFixInterface a) {
+		afi = a;
 	}
 
 }
