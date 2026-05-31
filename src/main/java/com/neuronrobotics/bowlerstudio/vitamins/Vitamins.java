@@ -103,7 +103,7 @@ public class Vitamins {
 			} catch (NonManifoldShapeError | ColinearPointsException t) {
 				if (afi != null) {
 					File fixed = new File(resource.getAbsolutePath() + "_admesh_fix.stl");
-					if (fixed.exists()||afi.tryToFix(resource, t) ) {
+					if (fixed.exists() || afi.tryToFix(resource, t)) {
 						if (!fixed.exists())
 							ADMesh.fix(resource, fixed);
 						fileLastLoaded.put(resource.getAbsolutePath(), STL.file(fixed.toPath()));
