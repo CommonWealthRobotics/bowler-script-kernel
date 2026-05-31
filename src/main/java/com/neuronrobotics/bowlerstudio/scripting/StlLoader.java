@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import javafx.scene.paint.Color;
@@ -18,6 +19,7 @@ public class StlLoader implements IScriptingLanguage {
 		try {
 			sllLoaded = Vitamins.get(db, true, code);
 		} catch (Throwable e) {
+			Log.error(e);
 			sllLoaded = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
 		}
 		return sllLoaded;
