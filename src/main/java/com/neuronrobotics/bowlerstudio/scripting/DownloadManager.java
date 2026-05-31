@@ -553,8 +553,16 @@ public class DownloadManager {
 			if (fromJavaHome.isPresent())
 				return fromJavaHome.get().toFile();
 		}
+		ArrayList<String> filesInGit = null;;
 		try {
-			for (String f : ScriptingEngine.filesInGit(editorsURL)) {
+			filesInGit = ScriptingEngine.filesInGit(editorsURL);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		try {
+			for (String f : filesInGit) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
 				//Log.debug("Looking at json file " + file.getAbsolutePath());
 				if (file.getName().toLowerCase().startsWith(exeType.toLowerCase())
@@ -762,7 +770,8 @@ public class DownloadManager {
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
 
-		throw new RuntimeException("Executable for OS: " + key + " has no entry for " + exeType);
+		throw new RuntimeException("Executable for OS: " + key + " has no entry for " + exeType + " from " + filesInGit
+				+ " in " + editorsURL);
 	}
 
 	private static void saveFile(File file, String json) {
