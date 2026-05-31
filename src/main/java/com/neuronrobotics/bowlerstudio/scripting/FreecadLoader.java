@@ -32,6 +32,7 @@ import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
@@ -59,6 +60,7 @@ public class FreecadLoader implements IScriptingLanguage {
 
 			back.setColor(Color.BLUE);
 		} catch (Throwable e) {
+			Log.error(e);
 			back = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
 		}
 		//back.snapPoints();
