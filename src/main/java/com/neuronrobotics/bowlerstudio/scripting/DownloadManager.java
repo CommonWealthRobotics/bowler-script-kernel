@@ -560,7 +560,7 @@ public class DownloadManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		String errorTxt="";
+		String errorTxt = "";
 		try {
 			for (String f : filesInGit) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
@@ -763,18 +763,18 @@ public class DownloadManager {
 							Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
 						return new File(cmd);
 					}
-					errorTxt+=("Failed to find key in matching file "+exeType+" for OS "+key+"\n");
-					errorTxt+=(jsonText+"\n");
-					errorTxt+=(vm+"\n");
+					errorTxt += ("Failed to find key in matching file " + exeType + " for OS " + key + "\n");
+					errorTxt += (jsonText + "\n");
+					errorTxt += (vm + "\n");
 				}
-				
+
 			}
-			errorTxt+=exeType+".json not found!\n";
+			errorTxt += exeType + ".json not found!\n";
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		errorTxt+="\nExecutable for OS: " + key + " has no entry for " + exeType + " from " + filesInGit
-				+ " in " + editorsURL;
+		errorTxt += "\nExecutable for OS: " + key + " has no entry for " + exeType + " from " + filesInGit + " in "
+				+ editorsURL;
 		throw new RuntimeException(errorTxt);
 	}
 
