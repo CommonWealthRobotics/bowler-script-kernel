@@ -763,7 +763,11 @@ public class DownloadManager {
 							Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
 						return new File(cmd);
 					}
+					Log.error("Failed to find key in matching file "+exeType+" for OS "+key);
+					Log.error(jsonText);
+					Log.error(vm);
 				}
+				
 			}
 		} catch (Exception e) {
 			// Auto-generated catch block
