@@ -11,7 +11,7 @@ public class ADMesh {
 		ArrayList<String> args = new ArrayList<>();
 
 		File configExecutable = DownloadManager.getRunExecutable("admesh", null);
-		configExecutable.setExecutable(true, true);
+		// configExecutable.setExecutable(true, true);
 		args.add(configExecutable.getAbsolutePath());
 
 		args.add("-fudvb");
