@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -682,10 +683,14 @@ public class CaDoodleFile {
 		}
 		throw new NameMissingException("Fail! there was no object named " + name);
 	}
-
 	public static int applyToAllConstituantElements(boolean addRet, List<String> targetNames, ArrayList<CSG> back,
 			ICadoodleRecursiveEvent p, int depth) {
 		HashSet<String> appliedMemory = new HashSet<String>();
+		return applyToAllConstituantElements(addRet, targetNames, back, p, depth, appliedMemory);
+	}
+	public static int applyToAllConstituantElements(boolean addRet, List<String> targetNames, ArrayList<CSG> back,
+			ICadoodleRecursiveEvent p, int depth,HashSet<String> appliedMemory) {
+		
 		for (CSG c : back) {
 			c.getStorage().delete("applyToAllConstituantElements");
 		}
@@ -699,15 +704,19 @@ public class CaDoodleFile {
 				continue;
 			}
 
-			applyToAllConstituantElements(addRet, s, back, p, depth, appliedMemory);
+			applyToAllConstituantElementsInternal(addRet, s, back, p, depth, appliedMemory);
 		}
 		for (CSG c : back) {
 			c.getStorage().delete("applyToAllConstituantElements");
 		}
 		return back.size();
 	}
-
 	public static int applyToAllConstituantElements(boolean addRet, String targetName, ArrayList<CSG> back,
+			ICadoodleRecursiveEvent p, int depth, HashSet<String> appliedMemory) {
+		List<String> targetNames =Arrays.asList(targetName);
+		return applyToAllConstituantElements(addRet, targetNames, back, p, depth, appliedMemory);
+	}
+	private static int applyToAllConstituantElementsInternal(boolean addRet, String targetName, ArrayList<CSG> back,
 			ICadoodleRecursiveEvent p, int depth, HashSet<String> appliedMemory) {
 		if (appliedMemory.contains(targetName))
 			return back.size();
