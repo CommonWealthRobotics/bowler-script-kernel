@@ -161,12 +161,16 @@ public class CaDoodleWorkflowTest {
 
 		loaded.addOperation(new Group().setNames(Arrays.asList(nameOne, nameTwo))).join();;
 		back = loaded.getCurrentState();
+		if (back.size() != 3)
+			fail("Group failed create new shape");
 		List<CSG> cacheOfGroup = loaded.getCurrentState();
 
 		String newGroupName = cacheOfGroup.get(cacheOfGroup.size() - 1).getName();
 
 		loaded.addOperation(new Paste().setNames(Arrays.asList(newGroupName))).join();;
 		back = loaded.getCurrentState();
+		if (back.size() != 6)
+			fail("Paste failed to copy the grouped object and all of ists constituants");
 		ArrayList<String> selectAll = new ArrayList<String>();
 		for (CSG c : back) {
 			if (c.isGroupResult())
