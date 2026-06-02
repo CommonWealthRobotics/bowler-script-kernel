@@ -39,7 +39,6 @@ public class LinearDistribution extends AbstractAddFrom {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 		index = 1;
-		cpMap.clear();
 		LengthParameter objectX = new LengthParameter(getDb(), getName() + "_CaDoodle_X", (double) 3,
 				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
 						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
@@ -65,6 +64,7 @@ public class LinearDistribution extends AbstractAddFrom {
 			boolean isSkipRow = i % 2 != 0 && hex;
 
 			for (int j = (i == 0 ? 1 : 0); j < (isSkipRow ? objectY.getMM() - 1 : objectY.getMM()); j++) {
+
 				double y2 = y * j;
 				double x2 = x * i;
 				if (isSkipRow)
@@ -72,7 +72,7 @@ public class LinearDistribution extends AbstractAddFrom {
 				TransformNR tf = new TransformNR(x2, y2, 0);
 
 				Bounds b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
-
+				cpMap.clear();
 				CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 					@Override
 					public ArrayList<CSG> process(CSG ic, int depth) {
