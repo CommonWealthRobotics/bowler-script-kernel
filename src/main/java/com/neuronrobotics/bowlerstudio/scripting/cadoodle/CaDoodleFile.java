@@ -693,24 +693,24 @@ public class CaDoodleFile {
 	public static int applyToAllConstituantElements(boolean addRet, List<String> targetNames, ArrayList<CSG> back,
 			ICadoodleRecursiveEvent p, int depth, HashSet<String> appliedMemory) {
 
-		for (CSG c : back) {
-			c.getStorage().delete("applyToAllConstituantElements");
-		}
+		//		for (CSG c : back) {
+		//			c.getStorage().delete("applyToAllConstituantElements");
+		//		}
 		for (int i = 0; i < targetNames.size(); i++) {
 			String s = targetNames.get(i);
 			try {
 				CSG c = getByName(back, s);
-				if (c.isInGroup())
-					continue;
+				//				if (c.isInGroup())
+				//					continue;
 			} catch (NameMissingException e) {
 				continue;
 			}
 
 			applyToAllConstituantElementsInternal(addRet, s, back, p, depth, appliedMemory);
 		}
-		for (CSG c : back) {
-			c.getStorage().delete("applyToAllConstituantElements");
-		}
+		//		for (CSG c : back) {
+		//			c.getStorage().delete("applyToAllConstituantElements");
+		//		}
 		return back.size();
 	}
 
@@ -732,10 +732,10 @@ public class CaDoodleFile {
 
 			if (csg == null || csg.isLock())
 				continue;
-			if (csg.getStorage().getValue("applyToAllConstituantElements").isPresent()) {
-				Log.error(new Exception("Can not apply op to leaf node twice!"));
-				continue;
-			}
+			//			if (csg.getStorage().getValue("applyToAllConstituantElements").isPresent()) {
+			//				Log.error(new Exception("Can not apply op to leaf node twice!"));
+			//				continue;
+			//			}
 			// boolean inGroup = csg.isInGroup();
 			boolean thisCSGIsInGroupNamedAfterTarget = csg.checkGroupMembership(targetName);
 			String thisCSGName = csg.getName();
@@ -745,7 +745,7 @@ public class CaDoodleFile {
 			if (thisCSGIsTheTarget) {
 				// move it
 				ArrayList<CSG> tmpToAdd = p.process(csg, depth);
-				csg.getStorage().set("applyToAllConstituantElements", true);
+				//				csg.getStorage().set("applyToAllConstituantElements", true);
 				if (addRet) {
 					back.addAll(tmpToAdd);
 				} else {
