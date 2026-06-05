@@ -283,10 +283,10 @@ public class Align extends CaDoodleOperation {
 			Bounds b = cache.get(csg);
 			Vector3d min2 = b.getMin().clone();
 			Vector3d max2 = b.getMax().clone();
-			if (min == null)
-				min = min2;
-			if (max == null)
-				max = max2;
+			if (min == null && min2 != null)
+				min = min2.clone();
+			if (max == null && max2 != null)
+				max = max2.clone();
 			if (min2.x < min.x)
 				min.x = min2.x;
 			if (min2.y < min.y)
