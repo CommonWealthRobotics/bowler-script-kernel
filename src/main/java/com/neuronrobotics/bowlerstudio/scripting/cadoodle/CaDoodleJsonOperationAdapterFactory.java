@@ -39,6 +39,7 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 		registerType("Paste", Paste.class);
 		registerType("RadialDistribution", RadialDistribution.class);
 		registerType("Resize", Resize.class);
+		registerType("SetMaterial", SetMaterial.class);
 		registerType("SetUserDefinedName", SetUserDefinedName.class);
 		registerType("Show", Show.class);
 		registerType("ToHole", ToHole.class);

@@ -27,6 +27,7 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.MoveCenter;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Paste;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.RadialDistribution;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.Resize;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.SetMaterial;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToHole;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ToSolid;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.UnGroup;
@@ -284,6 +285,56 @@ public class CaDoodleWorkflowTest {
 		if (boltPatternNames.size() != 3)
 			fail();
 		System.out.println("patterened hearts = " + boltPatternNames);
+	}
+
+	@Test
+	public void testSetMaterial() throws Exception {
+		Log.enableDebugPrint();
+		JavaFXInitializer.go();
+		CaDoodleFile cf = new CaDoodleFile().setSelf(new File("doodle/TestMaterial.doodle"))
+				.setProjectName("Material Test");
+		cf.initialize();
+
+		AddFromScript cube1 = new AddFromScript().set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
+				"sphere.groovy");
+		cf.addOperation(cube1).join();
+		List<CSG> back = cf.getCurrentState();
+		if (back.size() != 1)
+			fail("Adding a cube should have added one!");
+		String nameOne = back.get(0).getName();
+
+		SetMaterial setMat = new SetMaterial().setNames(Arrays.asList(nameOne)).setMaterialType("FDM")
+				.setMaterial("PLA").setInfillPercent(20);
+		cf.addOperation(setMat).join();
+		back = cf.getCurrentState();
+		if (back.size() != 1)
+			fail("SetMaterial should not change object count");
+
+		CSG c = back.get(0);
+		if (!c.getMaterialType().isPresent() || !c.getMaterialType().get().equals("FDM"))
+			fail("Material type not set correctly, got: " + c.getMaterialType());
+		if (!c.getMaterial().isPresent() || !c.getMaterial().get().equals("PLA"))
+			fail("Material not set correctly, got: " + c.getMaterial());
+		if (!c.getMateriaInfillPercent().isPresent() || c.getMateriaInfillPercent().get() != 20)
+			fail("Infill percent not set correctly, got: " + c.getMateriaInfillPercent());
+
+		cf.save();
+		File self = cf.getSelf();
+		cf.close();
+		if (!self.exists())
+			fail("Doodle file does not exist, save failed! " + self.getAbsolutePath());
+
+		CaDoodleFile loaded = CaDoodleFile.fromFile(self);
+		if (!SetMaterial.class.isInstance(loaded.getOperations().get(1)))
+			fail("Second operation should be SetMaterial");
+		back = loaded.getCurrentState();
+		c = back.get(0);
+		if (!c.getMaterialType().isPresent() || !c.getMaterialType().get().equals("FDM"))
+			fail("Material type not preserved after reload, got: " + c.getMaterialType());
+		if (!c.getMaterial().isPresent() || !c.getMaterial().get().equals("PLA"))
+			fail("Material not preserved after reload, got: " + c.getMaterial());
+		if (!c.getMateriaInfillPercent().isPresent() || c.getMateriaInfillPercent().get() != 20)
+			fail("Infill percent not preserved after reload, got: " + c.getMateriaInfillPercent());
 	}
 
 }
