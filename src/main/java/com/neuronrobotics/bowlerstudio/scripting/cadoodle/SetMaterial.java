@@ -12,13 +12,15 @@ public class SetMaterial extends CaDoodleOperation {
 	private List<String> names = new ArrayList<String>();
 
 	@Expose(serialize = true, deserialize = true)
-	private String materialType = "";
+	private String materialType = null;
 
 	@Expose(serialize = true, deserialize = true)
-	private String material = "";
+	private String material = null;
 
 	@Expose(serialize = true, deserialize = true)
 	private double infillPercent = -1;
+	@Expose(serialize = true, deserialize = true)
+	private double density = -1;
 
 	@Override
 	public String getType() {
@@ -44,6 +46,8 @@ public class SetMaterial extends CaDoodleOperation {
 						b.setMaterial(material);
 					if (infillPercent > 0)
 						b.setMaterialInfillPercent(infillPercent);
+					if (density > 0)
+						b.setMaterialDensity(density);
 					back.add(b);
 				}
 			}
@@ -64,12 +68,21 @@ public class SetMaterial extends CaDoodleOperation {
 	}
 
 	public SetMaterial setMaterialType(String materialType) {
+		if (materialType.length() == 0)
+			throw new RuntimeException("Can not set empty");
 		this.materialType = materialType;
 		return this;
 	}
 
 	public SetMaterial setMaterial(String material) {
+		if (material.length() == 0)
+			throw new RuntimeException("Can not set empty");
 		this.material = material;
+		return this;
+	}
+
+	public SetMaterial setDensity(double Density) {
+		this.density = Density;
 		return this;
 	}
 
