@@ -347,8 +347,12 @@ public class AddFromFile extends AbstractAddFrom {
 		if (isDoodle) {
 			csg.setStorage(new PropertyStorage());
 		}
-
-		CSG processedCSG = csg.transformed(nrToCSG).syncProperties(instance, csg).setRegenerate(previous -> {
+		CSG sized = csg;
+		double volume = csg.getVolume();
+		if (volume < 0.01) {
+			sized = csg.scale(1000);
+		}
+		CSG processedCSG = sized.transformed(nrToCSG).syncProperties(instance, csg).setRegenerate(previous -> {
 			try {
 				File file = f;
 				// CSGDatabaseInstance instance = CSGDatabase.getInstance();
