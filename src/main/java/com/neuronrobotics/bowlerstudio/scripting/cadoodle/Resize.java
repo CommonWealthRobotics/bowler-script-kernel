@@ -232,23 +232,9 @@ public class Resize extends CaDoodleOperation {
 		return names;
 	}
 
-	public Resize setNames(List<String> names, Iterable<CSG> linkedHashSet) {
+	public Resize setNames(List<String> names) {
 		this.names = names;
-		ArrayList<CSG> selected = new ArrayList<CSG>();
-		for (CSG c : linkedHashSet) {
-			if (c.isLock())
-				continue;
-			if (c.isNoScale())
-				continue;
-			for (String name : names) {
-				if (c.getName().contentEquals(name)) {
-					selected.add(c);
-				}
-			}
-		}
-		if (selected.size() > 0) {
-			referenceBounds = getSellectedBounds(selected);
-		}
+
 		return this;
 	}
 
