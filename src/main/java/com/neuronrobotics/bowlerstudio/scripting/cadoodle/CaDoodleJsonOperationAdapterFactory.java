@@ -9,6 +9,8 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.ModifyLimb;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +59,44 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 
 	@Override
 	public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+		if (type.getRawType() == Vector3d.class) {
+			@SuppressWarnings("unchecked")
+			TypeAdapter<T> adapter = (TypeAdapter<T>) new TypeAdapter<Vector3d>() {
+				@Override
+				public void write(JsonWriter out, Vector3d v) throws IOException {
+					out.beginObject();
+					out.name("x").value(v.x);
+					out.name("y").value(v.y);
+					out.name("z").value(v.z);
+					out.endObject();
+				}
+
+				@Override
+				public Vector3d read(JsonReader in) throws IOException {
+					Vector3d v = new Vector3d(0, 0, 0);
+					in.beginObject();
+					while (in.hasNext()) {
+						switch (in.nextName()) {
+							case "x" :
+								v.x = in.nextDouble();
+								break;
+							case "y" :
+								v.y = in.nextDouble();
+								break;
+							case "z" :
+								v.z = in.nextDouble();
+								break;
+							default :
+								in.skipValue();
+						}
+					}
+					in.endObject();
+					return v;
+				}
+			}.nullSafe();
+			return adapter;
+		}
+
 		if (!CaDoodleOperation.class.isAssignableFrom(type.getRawType())) {
 			return null;
 		}

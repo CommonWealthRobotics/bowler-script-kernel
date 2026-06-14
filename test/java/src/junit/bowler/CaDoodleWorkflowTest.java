@@ -144,7 +144,8 @@ public class CaDoodleWorkflowTest {
 		TransformNR height = new TransformNR(0, 0, 40);
 		TransformNR leftFront = new TransformNR(40, 80, 0);
 		TransformNR rightRear = new TransformNR(-10, 10, 0);
-		Resize resize = new Resize().setResize(height, leftFront, rightRear).setNames(Arrays.asList(groupName));
+		Resize resize = new Resize().setResize(height, leftFront, rightRear).setNames(Arrays.asList(groupName),
+				loaded.getCurrentState());
 		loaded.addOperation(resize).join();;
 		back = loaded.getCurrentState();
 		ToSolid solid = new ToSolid().setNames(Arrays.asList(groupName)).setColor(Color.BLUE);

@@ -8,6 +8,7 @@ import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.creature.IMobileBaseUI;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
@@ -29,6 +30,8 @@ public class Resize extends CaDoodleOperation {
 	private TransformNR workplane = new TransformNR();
 	@Expose(serialize = false, deserialize = false)
 	private IMobileBaseUI debug;
+	@Expose(serialize = true, deserialize = true)
+	private Bounds referenceBounds = null;
 
 	@Override
 	public String getType() {
@@ -93,9 +96,11 @@ public class Resize extends CaDoodleOperation {
 			}
 		}
 		if (selected.size() > 0) {
-			Bounds b = getSellectedBounds(selected);
+			if (referenceBounds == null)
+				referenceBounds = getSellectedBounds(selected);
+
 			for (String name : names) {
-				resizeByName(name, back, groupsProcessed, b);
+				resizeByName(name, back, groupsProcessed, referenceBounds);
 			}
 		}
 		return back;
@@ -114,14 +119,22 @@ public class Resize extends CaDoodleOperation {
 				if (debug != null) {
 					debug.setCsg(transformed, null);
 				}
-				CSG resizeUp = transformed.transformed(scaleZ);
-				if (debug != null) {
-					debug.setCsg(resizeUp, null);
-				}
-				double zMove = -(bounds.getMin().z * scalez) + bounds.getMin().z;
-				resizeUp = resizeUp.movez(zMove);
-				if (debug != null) {
-					debug.setCsg(resizeUp, null);
+				CSG resizeUp = transformed;
+				double zMove = 0;
+				Transform scale = new Transform();
+				try {
+					resizeUp = transformed.transformed(scaleZ);
+					if (debug != null) {
+						debug.setCsg(resizeUp, null);
+					}
+
+					zMove = -(bounds.getMin().z * scalez) + bounds.getMin().z;
+					resizeUp = resizeUp.movez(zMove);
+					if (debug != null) {
+						debug.setCsg(resizeUp, null);
+					}
+				} catch (Exception e) {
+					Log.error(e);
 				}
 				double xdimen = Math.abs(leftFront.getX() - rightRear.getX());
 				double ydimen = Math.abs(leftFront.getY() - rightRear.getY());
@@ -136,17 +149,23 @@ public class Resize extends CaDoodleOperation {
 				if (leftFront.getY() < y) {
 					scaley = -scaley;
 				}
-				Transform scale = new Transform().scale(scalex, scaley, 1);
-				resizeUp = resizeUp.transformed(scale);
-				if (debug != null) {
-					debug.setCsg(resizeUp, null);
-				}
+				double xMove = 0;
+				double yMove = 0;
+				try {
+					scale = new Transform().scale(scalex, scaley, 1);
+					resizeUp = resizeUp.transformed(scale);
+					if (debug != null) {
+						debug.setCsg(resizeUp, null);
+					}
 
-				double xMove = -(bounds.getMin().x * scalex) + x;
-				double yMove = -(bounds.getMin().y * scaley) + y;
-				resizeUp = resizeUp.movex(xMove).movey(yMove);
-				if (debug != null) {
-					debug.setCsg(resizeUp, null);
+					xMove = -(bounds.getMin().x * scalex) + x;
+					yMove = -(bounds.getMin().y * scaley) + y;
+					resizeUp = resizeUp.movex(xMove).movey(yMove);
+					if (debug != null) {
+						debug.setCsg(resizeUp, null);
+					}
+				} catch (Exception e) {
+					Log.error(e);
 				}
 				resizeUp = resizeUp.transformed(TransformFactory.nrToCSG(getWorkplane()));
 				if (debug != null) {
@@ -213,8 +232,23 @@ public class Resize extends CaDoodleOperation {
 		return names;
 	}
 
-	public Resize setNames(List<String> names) {
+	public Resize setNames(List<String> names, Iterable<CSG> linkedHashSet) {
 		this.names = names;
+		ArrayList<CSG> selected = new ArrayList<CSG>();
+		for (CSG c : linkedHashSet) {
+			if (c.isLock())
+				continue;
+			if (c.isNoScale())
+				continue;
+			for (String name : names) {
+				if (c.getName().contentEquals(name)) {
+					selected.add(c);
+				}
+			}
+		}
+		if (selected.size() > 0) {
+			referenceBounds = getSellectedBounds(selected);
+		}
 		return this;
 	}
 
