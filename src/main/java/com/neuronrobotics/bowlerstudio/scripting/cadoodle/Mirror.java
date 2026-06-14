@@ -37,7 +37,7 @@ public class Mirror extends CaDoodleOperation {
 
 	@Override
 	public String getType() {
-		return "Move Center";
+		return "Mirror";
 	}
 
 	private CSG sync(CSG incoming, CSG c) {
