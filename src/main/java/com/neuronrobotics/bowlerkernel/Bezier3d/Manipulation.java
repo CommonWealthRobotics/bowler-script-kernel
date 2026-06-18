@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.apache.sshd.common.util.OsUtils;
 
+import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.*;
 import com.neuronrobotics.sdk.common.Log;
@@ -88,7 +89,7 @@ public class Manipulation {
 		this.setGlobalPose(p);
 		setCurrentPose(p.copy());
 
-		getUi().runLater(() -> {
+		BowlerKernel.runLater(() -> {
 			try {
 				TransformFactory.nrToAffine(getGlobalPose(), manipulationMatrix);
 			} catch (Throwable t) {
@@ -209,10 +210,16 @@ public class Manipulation {
 
 	public void fireSave() {
 		new Thread(() -> {
-			for (Runnable R : saveListeners)
-				R.run();
+			fireSaveSynchronous();
 
 		}).start();
+	}
+
+	public void fireSaveSynchronous() {
+
+		for (Runnable R : saveListeners)
+			R.run();
+
 	}
 
 	public EventHandler<MouseEvent> getMouseEvents() {
@@ -307,7 +314,7 @@ public class Manipulation {
 				if (Double.isFinite(y) && Double.isFinite(x)) {
 					final TransformNR trans = new TransformNR(x, y, z, new RotationNR());
 
-					getUi().runLater(() -> {
+					BowlerKernel.runLater(() -> {
 						setDragging(event);
 						performMoveTranslate(trans, event2);
 					});
@@ -326,7 +333,7 @@ public class Manipulation {
 				if (Double.isFinite(y) && Double.isFinite(x)) {
 					final TransformNR trans = new TransformNR(x, y, z, new RotationNR());
 
-					getUi().runLater(() -> {
+					BowlerKernel.runLater(() -> {
 						setDragging(event);
 						performMove(trans, event2);
 					});
@@ -509,7 +516,7 @@ public class Manipulation {
 		currentPoseNR.setY(newY);
 		currentPoseNR.setZ(newZ);
 		setInLocal(global);
-		getUi().runLater(() -> {
+		BowlerKernel.runLater(() -> {
 			TransformFactory.nrToAffine(global, manipulationMatrix);
 		});
 	}
@@ -650,6 +657,5 @@ public class Manipulation {
 	public void setInLocal(TransformNR inLocal) {
 		this.inLocal = inLocal;
 	}
-
 
 }
