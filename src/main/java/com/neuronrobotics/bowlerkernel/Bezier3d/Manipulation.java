@@ -167,6 +167,7 @@ public class Manipulation {
 	private DragState state = DragState.IDLE;
 	private boolean resizeAllowed = true;
 	private TransformNR setGlobalPose;
+	private TransformNR inLocal;
 
 	public void addEventListener(EventHandler<MouseEvent> r) {
 		if (eventListeners.contains(r))
@@ -507,6 +508,7 @@ public class Manipulation {
 		currentPoseNR.setX(newX);
 		currentPoseNR.setY(newY);
 		currentPoseNR.setZ(newZ);
+		setInLocal(global);
 		getUi().runLater(() -> {
 			TransformFactory.nrToAffine(global, manipulationMatrix);
 		});
@@ -555,13 +557,13 @@ public class Manipulation {
 	}
 
 	public void setInReferenceFrame(double nX, double nY, double nZ) {
-		TransformNR inLocal = new TransformNR(nX, nY, nZ);
+		setInLocal(new TransformNR(nX, nY, nZ));
 		TransformNR wp = new TransformNR(getFrameOfReference().getRotation());
-		inLocal = wp.times(inLocal);
-		inLocal.setRotation(new RotationNR());
+		setInLocal(wp.times(getInLocal()));
+		getInLocal().setRotation(new RotationNR());
 		// com.neuronrobotics.sdk.common.Log.error("Setting in reference
 		// frame:"+inLocal.toSimpleString());
-		setGlobal(inLocal);
+		setGlobal(getInLocal());
 
 		for (EventHandler<MouseEvent> R : eventListeners)
 			R.handle(null);
@@ -629,6 +631,16 @@ public class Manipulation {
 
 	public void setState(DragState state) {
 		this.state = state;
+	}
+
+	public TransformNR getInLocal() {
+		if(inLocal==null)
+			inLocal= TransformFactory.affineToNr(manipulationMatrix);
+		return inLocal;
+	}
+
+	public void setInLocal(TransformNR inLocal) {
+		this.inLocal = inLocal;
 	}
 
 
