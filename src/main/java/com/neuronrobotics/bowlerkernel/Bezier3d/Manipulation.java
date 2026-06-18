@@ -590,7 +590,7 @@ public class Manipulation {
 	}
 
 	public TransformNR getinLocalInReferenceFrame() {
-		TransformNR globalPose = inLocal.copy();
+		TransformNR globalPose = getInLocal().copy();
 		TransformNR wp = new TransformNR(getFrameOfReference().getRotation());
 		globalPose = wp.times(globalPose);
 		globalPose.setRotation(new RotationNR());
