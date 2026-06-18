@@ -634,8 +634,8 @@ public class Manipulation {
 	}
 
 	public TransformNR getInLocal() {
-		if(inLocal==null)
-			inLocal= TransformFactory.affineToNr(manipulationMatrix);
+		if (inLocal == null)
+			inLocal = TransformFactory.affineToNr(manipulationMatrix);
 		return inLocal;
 	}
 
