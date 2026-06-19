@@ -467,7 +467,7 @@ public class BowlerKernel {
 		if (sourceDir != null)
 			com.neuronrobotics.sdk.common.Log.debug("Processing file in directory: \n   " + sourceDir.getAbsolutePath()
 					+ " \nto " + target.getAbsolutePath());
-		File targetDir = new File(target.getAbsolutePath() + "/manufacturing/");
+		File targetDir = new File(target.getAbsolutePath() + "/");
 		if (!targetDir.exists())
 			targetDir.mkdirs();
 		if (sourceDir != null) {
@@ -483,6 +483,8 @@ public class BowlerKernel {
 					File file = new File(target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomCsv());
 					// if (file.exists())
 					// file.delete();
+					if (!file.getParentFile().exists())
+						file.getParentFile().mkdirs();
 					try {
 						Files.copy(bomCSV.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING,
 								StandardCopyOption.COPY_ATTRIBUTES);
@@ -496,6 +498,8 @@ public class BowlerKernel {
 					File file = new File(target.getAbsolutePath() + "/" + VitaminBomManager.getManufacturingBomJson());
 					// if (file.exists())
 					// file.delete();
+					if (!file.getParentFile().exists())
+						file.getParentFile().mkdirs();
 					try {
 						Files.copy(bom.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING,
 								StandardCopyOption.COPY_ATTRIBUTES);

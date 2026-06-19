@@ -23,6 +23,7 @@ import javafx.scene.transform.Affine;
 public class CadFileExporter {
 
 	IMobileBaseUI ui;
+
 	public CadFileExporter(IMobileBaseUI myUI) {
 		ui = myUI;
 	}
@@ -78,13 +79,11 @@ public class CadFileExporter {
 				baseDirForFiles.mkdirs();
 		}
 		File dir;
-		if (!baseDirForFiles.getName().contentEquals("manufacturing")) {
-			dir = new File(baseDirForFiles.getAbsolutePath() + "/manufacturing/");
-			if (!dir.exists())
-				dir.mkdirs();
-		} else {
-			dir = baseDirForFiles;
-		}
+
+		dir = baseDirForFiles;
+		if (!dir.exists())
+			dir.mkdirs();
+
 		int index = 0;
 		ArrayList<CSG> svgParts = new ArrayList<>();
 		ArrayList<CSG> blendParts = new ArrayList<>();
