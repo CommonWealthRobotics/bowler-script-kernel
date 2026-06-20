@@ -142,7 +142,15 @@ jobs:
         which blender || (echo "blender not found on PATH" && exit 1)
         which freecad || (echo "freecad not found on PATH" && exit 1)
         which openscad || (echo "openscad not found on PATH" && exit 1)
-        which meshlab || (echo "meshlab not found on PATH" && exit 1)
+        MESHLAB_BIN=$(find /Applications -maxdepth 1 -iname "meshlab*.app" -exec find {} -type f -iname "meshlab" \; 2>/dev/null | head -n1)
+        if [ -n "$MESHLAB_BIN" ]; then
+          echo "Found MeshLab binary: $MESHLAB_BIN"
+          dirname "$MESHLAB_BIN" >> $GITHUB_PATH
+        else
+          echo "Could not locate a meshlab binary under /Applications. Listing app contents for debugging:"
+          find /Applications -maxdepth 1 -iname "meshlab*.app"
+          find /Applications -maxdepth 1 -iname "meshlab*.app" -exec find {} -maxdepth 4 \; 2>/dev/null
+        fi
         blender --version
         openscad --version
 
