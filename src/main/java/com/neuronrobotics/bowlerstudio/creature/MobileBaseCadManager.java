@@ -1252,7 +1252,7 @@ public class MobileBaseCadManager implements Runnable {
 		}
 
 		int link = 0;
-		ArrayList<CSG> arrayList =new ArrayList<CSG>( getBasetoCadMap().get(base));
+		ArrayList<CSG> arrayList = new ArrayList<CSG>(getBasetoCadMap().get(base));
 		for (int j = 0; j < arrayList.size(); j++) {
 			CSG csg = arrayList.get(j);
 			String name = csg.getName();
