@@ -1,5 +1,5 @@
 # test
-name: Test package 
+name: Test package
 on:
   push:
     branches:
@@ -11,6 +11,10 @@ on:
       - '*'
 
 jobs:
+
+  # ---------------------------------------------------------------------
+  # Original Linux job (unchanged)
+  # ---------------------------------------------------------------------
   build:
     runs-on: ubuntu-latest
 
@@ -20,22 +24,22 @@ jobs:
     - name: Checkout repository and submodules
       uses: actions/checkout@v2
       with:
-         submodules: recursive        
-        
+         submodules: recursive
+
     - name: List directory contents
-      run: pwd; ls -la      
-      
+      run: pwd; ls -la
+
     - name: start xvfb
       run:
         Xvfb :0 &
     - name: After checkout, list directory contnts
-      run: pwd; ls -la        
+      run: pwd; ls -la
     - name: Install libraries
       run: |
           sudo apt update
           sudo apt install libgtk2.0-0
 
-          
+
     - name: Pull a JavaFX JDK
       run: wget https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
 
@@ -47,26 +51,160 @@ jobs:
       with:
         java-version: 25
         jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
-    - name: Shadow Jar 
-      run: ./gradlew spotlessCheck shadowJar        
+    - name: Shadow Jar
+      run: ./gradlew spotlessCheck shadowJar
     - name: initialize the X11 DISPLAY variable
       run:
         export DISPLAY=:0
-    - name: Build/Test with Gradle 
-      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test 
-        
-    - name: Test Bezier 
-      run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy 
+    - name: Build/Test with Gradle
+      run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test
+
+    - name: Test Bezier
+      run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy
     - name: start xvfb
       run:
         Xvfb :0 &
-    - name: Test Local 
+    - name: Test Local
       run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
-      
-    - name: Clean Cad 
+
+    - name: Clean Cad
       run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
-    - name: build Cad 
+    - name: build Cad
       run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
-     
-      
+  # ---------------------------------------------------------------------
+  # Windows: Shadow Jar build verification only
+  # ---------------------------------------------------------------------
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: List directory contents
+      run: Get-Location; Get-ChildItem
+
+    - name: Pull a JavaFX JDK
+      run: Invoke-WebRequest -Uri "https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip" -OutFile "zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip"
+
+    - name: After JDK download, list directory contents
+      run: Get-Location; Get-ChildItem
+
+    - name: Set Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 25
+        jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip
+
+    - name: Shadow Jar
+      run: ./gradlew.bat spotlessCheck shadowJar
+
+    - name: Confirm Shadow Jar exists
+      run: |
+        if (Test-Path "build/libs/bowler-kernel.jar") {
+          Write-Host "Shadow Jar built successfully:"
+          Get-Item build/libs/bowler-kernel.jar
+        } else {
+          Write-Error "Shadow Jar not found at build/libs/bowler-kernel.jar"
+          exit 1
+        }
+
+  # ---------------------------------------------------------------------
+  # macOS ARM (native aarch64 JVM): full build + test suite
+  # ---------------------------------------------------------------------
+  build-macos-arm:
+    runs-on: macos-latest # Apple Silicon (arm64) runner
+
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: List directory contents
+      run: pwd; ls -la
+
+    - name: Pull a JavaFX JDK (macOS arm64)
+      run: curl -L -O https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
+
+    - name: After JDK download, list directory contents
+      run: pwd; ls -la
+
+    - name: Set Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 25
+        jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
+
+    - name: Shadow Jar
+      run: ./gradlew spotlessCheck shadowJar
+
+    - name: Build/Test with Gradle
+      run: ./gradlew test
+
+    - name: Test Bezier
+      run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git BezierEditorDemo.groovy
+
+    - name: Test Local
+      run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
+
+    - name: Clean Cad
+      run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
+
+    - name: build Cad
+      run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
+
+  # ---------------------------------------------------------------------
+  # macOS ARM runner, running the macOS x64 (Intel) JVM under Rosetta 2:
+  # full build + test suite
+  # ---------------------------------------------------------------------
+  build-macos-arm-x64jvm:
+    runs-on: macos-latest # Apple Silicon (arm64) runner
+
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: List directory contents
+      run: pwd; ls -la
+
+    - name: Ensure Rosetta 2 is installed
+      run: softwareupdate --install-rosetta --agree-to-license || true
+
+    - name: Pull a JavaFX JDK (macOS x64 / Intel)
+      run: curl -L -O https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-macosx_x64.tar.gz
+
+    - name: After JDK download, list directory contents
+      run: pwd; ls -la
+
+    - name: Set Java (x64 JDK, will run via Rosetta)
+      uses: actions/setup-java@v1
+      with:
+        java-version: 25
+        jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-macosx_x64.tar.gz
+
+    - name: Verify JVM is running under Rosetta as x86_64
+      run: arch -x86_64 java -version
+
+    - name: Shadow Jar
+      run: arch -x86_64 ./gradlew spotlessCheck shadowJar
+
+    - name: Build/Test with Gradle
+      run: arch -x86_64 ./gradlew test
+
+    - name: Test Bezier
+      run: arch -x86_64 java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git BezierEditorDemo.groovy
+
+    - name: Test Local
+      run: arch -x86_64 java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
+
+    - name: Clean Cad
+      run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
+
+    - name: build Cad
+      run: arch -x86_64 java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
