@@ -126,6 +126,25 @@ jobs:
 
     - name: List directory contents
       run: pwd; ls -la
+    - name: Install Blender, FreeCAD, OpenSCAD, MeshLab
+      run: |
+        brew install --cask blender freecad openscad meshlab
+ 
+    - name: Add CAD/3D tool binaries to PATH
+      run: |
+        echo "/Applications/Blender.app/Contents/MacOS" >> $GITHUB_PATH
+        echo "/Applications/FreeCAD.app/Contents/MacOS" >> $GITHUB_PATH
+        echo "/Applications/OpenSCAD.app/Contents/MacOS" >> $GITHUB_PATH
+        echo "/Applications/meshlab.app/Contents/MacOS" >> $GITHUB_PATH
+ 
+    - name: Verify tool installation
+      run: |
+        which blender || (echo "blender not found on PATH" && exit 1)
+        which freecad || (echo "freecad not found on PATH" && exit 1)
+        which openscad || (echo "openscad not found on PATH" && exit 1)
+        which meshlab || (echo "meshlab not found on PATH" && exit 1)
+        blender --version
+        openscad --version
 
     - name: Pull a JavaFX JDK (macOS arm64)
       run: curl -L -O https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
