@@ -1252,8 +1252,9 @@ public class MobileBaseCadManager implements Runnable {
 		}
 
 		int link = 0;
-		// now we genrate the base pieces
-		for (CSG csg : getBasetoCadMap().get(base)) {
+		ArrayList<CSG> arrayList = getBasetoCadMap().get(base);
+		for (int j = 0; j < arrayList.size(); j++) {
+			CSG csg = arrayList.get(j);
 			String name = csg.getName();
 			try {
 				if (!kinematic)
