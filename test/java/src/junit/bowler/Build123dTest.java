@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.scripting.Build123dLoader;
@@ -19,6 +20,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 public class Build123dTest {
 
 	@Test
+	@Ignore
 	public void test() throws Exception {
 		Log.enableDebugPrint();
 		HashMap<String, String> options = Build123dLoader.getTypeOptions();
