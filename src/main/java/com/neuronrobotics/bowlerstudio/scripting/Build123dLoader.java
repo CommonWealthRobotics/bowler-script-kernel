@@ -2,18 +2,25 @@ package com.neuronrobotics.bowlerstudio.scripting;
 
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.util.HashMap;
+import java.lang.reflect.Type;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 
+import com.google.gson.Gson;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 import com.neuronrobotics.sdk.common.Log;
@@ -24,6 +31,8 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.scene.paint.Color;
 
 public class Build123dLoader implements IScriptingLanguage {
+
+	private static HashMap<String, String> map;
 
 	@Override
 	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
@@ -101,6 +110,39 @@ public class Build123dLoader implements IScriptingLanguage {
 		toSTLFile(null, stlout, params);
 	}
 
+	public static HashMap<String, String> getTypeOptions(String... options) {
+		if (map != null)
+			return map;
+		File exe = getConfigExecutable("build123d", null);
+		File dir = getDestinationDir("build123d");
+		ArrayList<String> args = new ArrayList<>();
+		args.add(exe.getAbsolutePath());
+		args.add("run");
+		args.add("build123d_cli");
+		for (String s : options) {
+			args.add(s);
+		}
+		args.add("--json-schema");
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			PrintStream ps = new PrintStream(baos, true, "UTF-8");
+			legacySystemRun(null, dir, ps, args);
+			String result = baos.toString("UTF-8");
+			Log.debug(result);
+			Gson gson = new Gson();
+
+			Type mapType = new TypeToken<HashMap<String, String>>() {
+			}.getType();
+			map = gson.fromJson(result, mapType);
+
+			return map;
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new HashMap<String, String>();
+	}
+
 	public static void toSTLFile(File build123dScript, Path stlout, ArrayList<Object> params)
 			throws IOException, InterruptedException {
 		File exe = getConfigExecutable("build123d", null);
@@ -113,11 +155,7 @@ public class Build123dLoader implements IScriptingLanguage {
 			throw new RuntimeException("Output file should be a directory");
 		args.add(exe.getAbsolutePath());
 		args.add("run");
-		if (build123dScript != null) {
-			args.add("python");
-			args.add(build123dScript.getAbsolutePath());
-		} else
-			args.add("build123d_cli");
+		args.add("build123d_cli");
 		for (Object key : params) {
 			args.add(key.toString());
 		}

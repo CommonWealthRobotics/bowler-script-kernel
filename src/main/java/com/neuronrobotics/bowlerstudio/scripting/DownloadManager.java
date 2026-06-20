@@ -378,11 +378,11 @@ public class DownloadManager {
 		// setting the directory
 		pb.directory(dir);
 		// startinf the process
-		out.println("Running command:\n");
-		out.println(cmd);
+		Log.debug("Running command:\n");
+		Log.debug(cmd);
 
-		out.println("\nIn " + dir.getAbsolutePath());
-		out.println("\n\n");
+		Log.debug("\nIn " + dir.getAbsolutePath());
+		Log.debug("\n\n");
 
 		Process process = pb.start();
 
@@ -397,7 +397,7 @@ public class DownloadManager {
 			if (s != null)
 				out.println(s);
 			if (e != null)
-				out.println(e);
+				Log.error(e);
 			//
 		}
 		process.waitFor();
@@ -409,7 +409,6 @@ public class DownloadManager {
 		while (process.isAlive()) {
 			Thread.sleep(100);
 		}
-		out.println("");
 	}
 
 	public static void advancedSystemRun(Map<String, String> envincoming, File dir, PrintStream out,
@@ -424,11 +423,11 @@ public class DownloadManager {
 			cmd += " " + san;
 			cmdLine.addArgument(san, false);
 		}
-		out.println("Running command:\n");
-		out.println(cmd);
+		Log.debug("Running command:\n");
+		Log.debug(cmd);
 
-		out.println("\nIn " + dir.getAbsolutePath());
-		out.println("\n\n");
+		Log.debug("\nIn " + dir.getAbsolutePath());
+		Log.debug("\n\n");
 
 		DefaultExecutor executor = new DefaultExecutor();
 		executor.setWorkingDirectory(dir);
@@ -444,9 +443,8 @@ public class DownloadManager {
 		PumpStreamHandler streamHandler = new PumpStreamHandler(outPipe, errPipe);
 		executor.setStreamHandler(streamHandler);
 		startOutputReader(outPipeIn, "OUTPUT", out);
-		startOutputReader(errPipeIn, "ERROR", out);
+		startOutputReader(errPipeIn, "ERROR", System.err);
 		ev = executor.execute(cmdLine, env);
-		out.println("");
 	}
 
 	private static String sanitize(String s) {
