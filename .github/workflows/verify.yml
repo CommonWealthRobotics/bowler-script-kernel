@@ -128,8 +128,8 @@ jobs:
       run: pwd; ls -la
     - name: Install Blender, FreeCAD, OpenSCAD, MeshLab
       run: |
-        brew install --cask blender freecad openscad meshlab
- 
+        brew install --cask blender freecad meshlab
+        brew install --cask openscad@snapshot
     - name: Add CAD/3D tool binaries to PATH
       run: |
         echo "/Applications/Blender.app/Contents/MacOS" >> $GITHUB_PATH
