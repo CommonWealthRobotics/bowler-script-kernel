@@ -100,7 +100,7 @@ jobs:
         jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip
 
     - name: Shadow Jar
-      run: ./gradlew.bat spotlessCheck shadowJar
+      run: ./gradlew.bat spotlessCheck test shadowJar
 
     - name: Confirm Shadow Jar exists
       run: |
@@ -140,10 +140,7 @@ jobs:
         jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
 
     - name: Shadow Jar
-      run: ./gradlew spotlessCheck shadowJar
-
-    - name: Build/Test with Gradle
-      run: ./gradlew test
+      run: ./gradlew spotlessCheck test shadowJar
 
     - name: Test Bezier
       run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git BezierEditorDemo.groovy
