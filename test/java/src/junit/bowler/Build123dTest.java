@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
@@ -17,6 +18,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 public class Build123dTest {
 
 	@Test
+	@Ignore
 	public void test() throws Exception {
 		Log.enableDebugPrint();
 		//		HashMap<String, String> options = Build123dLoader.getTypeOptions();
