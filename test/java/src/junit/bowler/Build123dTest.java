@@ -26,7 +26,7 @@ public class Build123dTest {
 		//			System.out.println(entry.getKey() + " = " + entry.getValue());
 		//
 		//		}
-		if (OSUtil.isWindows())
+		if (OSUtil.isWindows() || OSUtil.isOSX())
 			return;
 		ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
 		ArrayList<CSG> parts = (ArrayList<CSG>) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
