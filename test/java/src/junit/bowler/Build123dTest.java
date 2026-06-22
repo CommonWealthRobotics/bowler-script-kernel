@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.neuronrobotics.bowlerstudio.scripting.Build123dLoader;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.common.Log;
+import com.neuronrobotics.video.OSUtil;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
@@ -20,7 +21,6 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 public class Build123dTest {
 
 	@Test
-	@Ignore
 	public void test() throws Exception {
 		Log.enableDebugPrint();
 //		HashMap<String, String> options = Build123dLoader.getTypeOptions();
@@ -29,6 +29,8 @@ public class Build123dTest {
 //			System.out.println(entry.getKey() + " = " + entry.getValue());
 //
 //		}
+		if(OSUtil.isWindows())
+			return;
 		ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
 		ArrayList<CSG> parts = (ArrayList<CSG>) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
 				"https://github.com/madhephaestus/CaDoodle-Example-Objects.git", "build123d/gggears.groovy");
