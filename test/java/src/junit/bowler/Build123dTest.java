@@ -18,7 +18,6 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 public class Build123dTest {
 
 	@Test
-	@Ignore
 	public void test() throws Exception {
 		Log.enableDebugPrint();
 		//		HashMap<String, String> options = Build123dLoader.getTypeOptions();
