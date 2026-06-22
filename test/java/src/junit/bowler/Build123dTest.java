@@ -20,15 +20,15 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
 public class Build123dTest {
 
 	@Test
-	@Ignore
+	
 	public void test() throws Exception {
 		Log.enableDebugPrint();
-		HashMap<String, String> options = Build123dLoader.getTypeOptions();
-		com.neuronrobotics.sdk.common.Log.debug("Build123d Options ");
-		for (Map.Entry<String, String> entry : options.entrySet()) {
-			System.out.println(entry.getKey() + " = " + entry.getValue());
-
-		}
+//		HashMap<String, String> options = Build123dLoader.getTypeOptions();
+//		com.neuronrobotics.sdk.common.Log.debug("Build123d Options ");
+//		for (Map.Entry<String, String> entry : options.entrySet()) {
+//			System.out.println(entry.getKey() + " = " + entry.getValue());
+//
+//		}
 		ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
 		ArrayList<CSG> parts = (ArrayList<CSG>) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
 				"https://github.com/madhephaestus/CaDoodle-Example-Objects.git", "build123d/gggears.groovy");
