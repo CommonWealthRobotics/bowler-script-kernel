@@ -1210,7 +1210,12 @@ public class MobileBaseCadManager implements Runnable {
 									+ Math.abs(csg.getMinY())));
 						else
 							totalAssembly.add(tmp);
-						LinkConfiguration conf = getLinkConfiguration(parts.get(j));
+						LinkConfiguration conf = null;
+						try {
+							conf = getLinkConfiguration(parts.get(j));
+						} catch (Throwable t) {
+							Log.error(t);
+						}
 						if (conf != null) {
 							String linkNum = conf.getLinkIndex() + "_Link_";
 
@@ -1713,8 +1718,7 @@ public class MobileBaseCadManager implements Runnable {
 	}
 
 	/**
-	 * @param configMode
-	 *            the configMode to set
+	 * @param configMode the configMode to set
 	 */
 	public void setConfigMode(boolean configMode) {
 		this.configMode = configMode;
