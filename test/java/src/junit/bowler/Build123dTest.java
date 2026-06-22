@@ -4,13 +4,9 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import com.neuronrobotics.bowlerstudio.scripting.Build123dLoader;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.video.OSUtil;
@@ -23,13 +19,13 @@ public class Build123dTest {
 	@Test
 	public void test() throws Exception {
 		Log.enableDebugPrint();
-//		HashMap<String, String> options = Build123dLoader.getTypeOptions();
-//		com.neuronrobotics.sdk.common.Log.debug("Build123d Options ");
-//		for (Map.Entry<String, String> entry : options.entrySet()) {
-//			System.out.println(entry.getKey() + " = " + entry.getValue());
-//
-//		}
-		if(OSUtil.isWindows())
+		//		HashMap<String, String> options = Build123dLoader.getTypeOptions();
+		//		com.neuronrobotics.sdk.common.Log.debug("Build123d Options ");
+		//		for (Map.Entry<String, String> entry : options.entrySet()) {
+		//			System.out.println(entry.getKey() + " = " + entry.getValue());
+		//
+		//		}
+		if (OSUtil.isWindows())
 			return;
 		ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
 		ArrayList<CSG> parts = (ArrayList<CSG>) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
