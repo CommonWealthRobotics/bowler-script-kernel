@@ -13,6 +13,7 @@ import com.neuronrobotics.sdk.common.Log;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Extrude;
+import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Slice;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -59,8 +60,20 @@ public class ExtrudeSurface extends AbstractAddFrom {
 		ArrayList<CSG> fillet = new ArrayList<CSG>();
 		try {
 
-			CSG base = csgin.transformed(nrToCSG.inverse()).movez(0.001);
+			CSG base = csgin.transformed(nrToCSG.inverse()).movez(Plane.getEPSILON() * 10);
+			CSG offset = csgin.transformed(nrToCSG.inverse()).movez(-Plane.getEPSILON() * 10);
 			List<Polygon> polys = Slice.slice(base);
+			List<Polygon> offsetpolys = Slice.slice(offset, Plane.getEPSILON() * 10000);
+			ArrayList<CSG> cutters = new ArrayList<CSG>();
+			for (Polygon p : offsetpolys) {
+				boolean hole = !Extrude.isCCW(p);
+				if (hole)
+					p = new Polygon(p.getVertices().reversed());
+				CSG extrude = Extrude.extrude(new Vector3d(0, 0, 21), p).movez(-0.5);
+				extrude.setIsHole(hole);
+				extrude.setColor(base.getColor());
+				cutters.add(extrude);
+			}
 			for (Polygon p : polys) {
 				boolean hole = !Extrude.isCCW(p);
 				if (hole)
@@ -68,6 +81,9 @@ public class ExtrudeSurface extends AbstractAddFrom {
 				CSG extrude = Extrude.extrude(new Vector3d(0, 0, 20), p);
 				extrude.setIsHole(hole);
 				extrude.setColor(base.getColor());
+				for (CSG cutter : cutters) {
+					extrude = extrude.difference(cutter);
+				}
 				fillet.add(extrude);
 			}
 		} catch (ColinearPointsException e) {
