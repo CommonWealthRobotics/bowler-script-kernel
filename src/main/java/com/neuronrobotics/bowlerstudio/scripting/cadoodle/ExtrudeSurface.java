@@ -60,17 +60,17 @@ public class ExtrudeSurface extends AbstractAddFrom {
 		ArrayList<CSG> fillet = new ArrayList<CSG>();
 		try {
 
-			CSG base = csgin.transformed(nrToCSG.inverse()).movez(Plane.getEPSILON() * 10);
-			CSG offset = csgin.transformed(nrToCSG.inverse()).movez(-Plane.getEPSILON() * 10);
+			CSG base = csgin.transformed(nrToCSG.inverse()).movez(Plane.getEPSILON() * 100);
+			CSG offset = csgin.transformed(nrToCSG.inverse()).movez(-Plane.getEPSILON() * 1000);
 			List<Polygon> polys = Slice.slice(base);
-			List<Polygon> offsetpolys = Slice.slice(offset, Plane.getEPSILON() * 10000);
+			List<Polygon> offsetpolys = Slice.slice(offset, 0.001);
 			ArrayList<CSG> cutters = new ArrayList<CSG>();
 			for (Polygon p : offsetpolys) {
 				boolean hole = !Extrude.isCCW(p);
 				if (hole)
 					p = new Polygon(p.getVertices().reversed());
 				CSG extrude = Extrude.extrude(new Vector3d(0, 0, 21), p).movez(-0.5);
-				extrude.setIsHole(hole);
+				extrude.setIsHole(true);
 				extrude.setColor(base.getColor());
 				cutters.add(extrude);
 			}
@@ -81,11 +81,14 @@ public class ExtrudeSurface extends AbstractAddFrom {
 				CSG extrude = Extrude.extrude(new Vector3d(0, 0, 20), p);
 				extrude.setIsHole(hole);
 				extrude.setColor(base.getColor());
+				//fillet.add(extrude);
 				for (CSG cutter : cutters) {
 					extrude = extrude.difference(cutter);
 				}
-				fillet.add(extrude);
+				if (extrude.getVertCount() > 0)
+					fillet.add(extrude);
 			}
+			//fillet.addAll(cutters);
 		} catch (ColinearPointsException e) {
 			e.printStackTrace();
 			fillet = new ArrayList<CSG>();
@@ -95,6 +98,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 			String orderedName = (on == null ? getOrderedName() : on);
 			int myIndex = i;
 			CSG mine = fillet.get(i);
+
 
 			CSG tmp = mine.transformed(nrToCSG).setRegenerate(previous -> {
 				return makeExtrusion(csgin, orderedName).get(myIndex);
