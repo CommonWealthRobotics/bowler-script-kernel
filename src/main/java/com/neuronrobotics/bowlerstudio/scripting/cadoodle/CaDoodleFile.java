@@ -319,11 +319,12 @@ public class CaDoodleFile {
 		// if(indexStarting>operations.size()) {
 		// indexStarting = operations.size();
 		// }
+
+		setPercentInitialized(1);
 		try {
 			setCurrentIndex(indexStarting);
 			updateCurrentFromCache();
 			loadImageFromFile();
-			setPercentInitialized(1);
 			for (ICaDoodleStateUpdate l : listeners) {
 				try {
 					l.onInitializationDone();
