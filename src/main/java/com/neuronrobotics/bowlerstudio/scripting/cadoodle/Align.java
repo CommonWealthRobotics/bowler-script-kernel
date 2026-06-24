@@ -262,6 +262,8 @@ public class Align extends CaDoodleOperation {
 		// TickToc.tic("getSellectedBounds "+incoming.size());
 
 		for (CSG csg : incoming) {
+			if (csg.isHide() || csg.isInGroup())
+				continue;
 			if (cache.get(csg) == null) {
 				Log.debug("Computing bounds for " + csg.getName());
 				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
