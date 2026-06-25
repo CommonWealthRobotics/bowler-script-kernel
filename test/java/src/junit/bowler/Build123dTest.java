@@ -4,9 +4,12 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 
+import com.neuronrobotics.bowlerstudio.scripting.Build123dLoader;
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.video.OSUtil;
@@ -18,15 +21,19 @@ public class Build123dTest {
 
 	@Test
 	public void test() throws Exception {
+//		if (OSUtil.isWindows() || OSUtil.isOSX())
+//			return;
 		Log.enableDebugPrint();
-		//		HashMap<String, String> options = Build123dLoader.getTypeOptions();
-		//		com.neuronrobotics.sdk.common.Log.debug("Build123d Options ");
-		//		for (Map.Entry<String, String> entry : options.entrySet()) {
-		//			System.out.println(entry.getKey() + " = " + entry.getValue());
-		//
-		//		}
-		if (OSUtil.isWindows() || OSUtil.isOSX())
-			return;
+		Map<String, Object> options = Build123dLoader.getTypeOptions();
+		com.neuronrobotics.sdk.common.Log.debug("Build123d Options "+options);
+		for (Map.Entry<String, Object> entry : options.entrySet()) {
+			Log.debug("\tCatagories "+entry.getKey() + " = " + entry.getValue());
+			Map<String, Object> types = Build123dLoader.getTypeOptions(entry.getKey());
+			for(String t:types.keySet()) {
+				Log.debug("\t\t Types " +t+ " = " + types.get(t));
+			}
+		}
+
 		ScriptingEngine.pull("https://github.com/madhephaestus/CaDoodle-Example-Objects.git");
 		ArrayList<CSG> parts = (ArrayList<CSG>) ScriptingEngine.gitScriptRun(CSGDatabase.getInstance(),
 				"https://github.com/madhephaestus/CaDoodle-Example-Objects.git", "build123d/gggears.groovy");

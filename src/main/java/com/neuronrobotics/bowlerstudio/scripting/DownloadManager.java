@@ -773,9 +773,18 @@ public class DownloadManager {
 		throw new RuntimeException(errorTxt);
 	}
 
-	private static void sfx(File jvmArchive, String string) {
-		// TODO Auto-generated method stub
-
+	private static void sfx(File sfxAchive, String targetDir) {
+		List<String> command = new ArrayList<>();
+		command.add(sfxAchive.getAbsolutePath());
+		command.add("-y");
+		command.add("-o\""+targetDir+"\"");
+		Thread tcopy = run(null, new File("."), System.out, command);
+		try {
+			tcopy.join();
+		} catch (InterruptedException e) {
+			// Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e);
+		}
 	}
 
 	private static void saveFile(File file, String json) {

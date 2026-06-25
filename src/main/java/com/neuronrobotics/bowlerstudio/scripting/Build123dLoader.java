@@ -9,8 +9,10 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -32,7 +34,7 @@ import javafx.scene.paint.Color;
 
 public class Build123dLoader implements IScriptingLanguage {
 
-	private static HashMap<String, String> map;
+	private static HashMap<String, Object> map;
 
 	@Override
 	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
@@ -110,37 +112,54 @@ public class Build123dLoader implements IScriptingLanguage {
 		toSTLFile(null, stlout, params);
 	}
 
-	public static HashMap<String, String> getTypeOptions(String... options) {
-		if (map != null)
-			return map;
-		File exe = getConfigExecutable("build123d", null);
-		File dir = getDestinationDir("build123d");
-		ArrayList<String> args = new ArrayList<>();
-		args.add(exe.getAbsolutePath());
-		args.add("run");
-		args.add("build123d_cli");
-		for (String s : options) {
-			args.add(s);
-		}
-		args.add("--json-schema");
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			PrintStream ps = new PrintStream(baos, true, "UTF-8");
-			legacySystemRun(null, dir, ps, args);
-			String result = baos.toString("UTF-8");
-			Log.debug(result);
-			Gson gson = new Gson();
+	public static Map<String, Object> getTypeOptions(String... options) {
+		if (map == null) {
+			File exe = getConfigExecutable("build123d", null);
+			File dir = getDestinationDir("build123d");
+			ArrayList<String> args = new ArrayList<>();
+			args.add(exe.getAbsolutePath());
+			args.add("-m");
+			args.add("build123d_cli");
+			for (String s : options) {
+				args.add(s);
+			}
+			args.add("--json-schema");
+			try {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				PrintStream ps = new PrintStream(baos, true, "UTF-8");
+				legacySystemRun(null, dir, ps, args);
+				String result = baos.toString("UTF-8");
+				// Log.debug(result);
+				Gson gson = new Gson();
 
-			Type mapType = new TypeToken<HashMap<String, String>>() {
-			}.getType();
-			map = gson.fromJson(result, mapType);
-
-			return map;
-		} catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+				Type mapType = new TypeToken<HashMap<Object, Object>>() {
+				}.getType();
+				map = gson.fromJson(result, mapType);
+				if (map != null)
+					return map;
+			} catch (IOException | InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			map = new HashMap<String, Object>();
 		}
-		return new HashMap<String, String>();
+		List<String> asList = Arrays.asList(options);
+		if(asList.size()==0) {
+			return map;
+		}
+		Map<String, Object> hashMap = (Map<String, Object>) map.get(asList.get(0));
+		if(asList.size()==1) {
+			if(hashMap!=null)
+				return hashMap;
+		}
+		if(asList.size()>2) {
+			Map<String, Object> hashMap2 = (Map<String, Object>) hashMap.get(asList.get(1));
+			if(asList.size()==2)
+				return hashMap2;
+			return (Map<String, Object>) hashMap2.get(asList.get(2));
+		}
+		
+		return map;
 	}
 
 	public static void toSTLFile(File build123dScript, Path stlout, ArrayList<Object> params)
@@ -154,10 +173,15 @@ public class Build123dLoader implements IScriptingLanguage {
 		if (!stlout.toFile().isDirectory())
 			throw new RuntimeException("Output file should be a directory");
 		args.add(exe.getAbsolutePath());
-		args.add("run");
+		args.add("-m");
 		args.add("build123d_cli");
 		for (Object key : params) {
-			args.add(key.toString());
+			String string = key.toString();
+			if (string.contentEquals("gggears"))
+				string = "py_gearworks";
+			if (string.contentEquals("spurgear"))
+				string = "SpurGear";
+			args.add(string);
 		}
 
 		args.add("export_directory");
