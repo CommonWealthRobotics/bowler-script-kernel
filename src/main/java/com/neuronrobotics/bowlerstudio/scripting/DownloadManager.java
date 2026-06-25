@@ -3,8 +3,8 @@ package com.neuronrobotics.bowlerstudio.scripting;
 import org.apache.commons.exec.*;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 
-
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,7 +44,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.archivers.tar.TarUtils;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -74,7 +73,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-
 public class DownloadManager {
 	private static String STUDIO_INSTALL = "BowlerStudioInstall";
 	private static String editorsURL = "https://github.com/CommonWealthRobotics/ExternalEditorsBowlerStudio.git";
@@ -98,14 +96,12 @@ public class DownloadManager {
 		}
 	};
 
-
 	/**
 	 * Searches for an executable by name.
 	 * <p>
-	 * All platforms: splits PATH and checks every entry.
-	 * macOS only:    also scans /Applications for a *.app whose name
-	 *                matches (case-insensitive) and returns the binary
-	 *                inside its Contents/MacOS directory.
+	 * All platforms: splits PATH and checks every entry. macOS only: also scans
+	 * /Applications for a *.app whose name matches (case-insensitive) and returns
+	 * the binary inside its Contents/MacOS directory.
 	 *
 	 * @param executableName bare name, e.g. "inkscape", "blender"
 	 * @return resolved absolute Path, or empty if not found
@@ -136,13 +132,13 @@ public class DownloadManager {
 	/// -------------------------------------------------------------------------
 
 	/**
-	 * Resolves JAVA_HOME from the environment and looks for the executable
-	 * in its bin/ sub-directory.
+	 * Resolves JAVA_HOME from the environment and looks for the executable in its
+	 * bin/ sub-directory.
 	 *
 	 * JAVA_HOME typically points to the JDK/JRE root, e.g.:
-	 *   /usr/lib/jvm/java-21-openjdk-amd64   (Linux)
-	 *   /Library/Java/JavaVirtualMachines/…/Contents/Home  (macOS)
-	 *   C:\Program Files\Eclipse Adoptium\jdk-21…          (Windows)
+	 * /usr/lib/jvm/java-21-openjdk-amd64 (Linux)
+	 * /Library/Java/JavaVirtualMachines/…/Contents/Home (macOS) C:\Program
+	 * Files\Eclipse Adoptium\jdk-21… (Windows)
 	 *
 	 * The executable lives one level deeper in bin/.
 	 */
@@ -192,8 +188,8 @@ public class DownloadManager {
 	}
 
 	/**
-	 * On Windows, also try .exe / .cmd / .bat suffixes.
-	 * On Unix the bare name is the only candidate.
+	 * On Windows, also try .exe / .cmd / .bat suffixes. On Unix the bare name is
+	 * the only candidate.
 	 */
 	private static List<String> candidateNames(String name) {
 		if (isWindows()) {
@@ -218,9 +214,8 @@ public class DownloadManager {
 	 * Walks /Applications looking for a directory whose name, stripped of the
 	 * ".app" suffix and lower-cased, equals the lower-cased executable name.
 	 *
-	 * Matching .app found  →  returns Contents/MacOS/<executableName>
-	 *                         (or the first executable in Contents/MacOS
-	 *                          if the exact name isn't there).
+	 * Matching .app found → returns Contents/MacOS/<executableName> (or the first
+	 * executable in Contents/MacOS if the exact name isn't there).
 	 */
 	private static Optional<Path> searchApplicationsDir(String executableName) {
 		Path appsDir = Paths.get("/Applications");
@@ -272,7 +267,6 @@ public class DownloadManager {
 		return System.getProperty("os.name").toLowerCase().contains("win");
 	}
 
-
 	// -------------------------------------------------------------------------
 	// Quick smoke-test
 	// -------------------------------------------------------------------------
@@ -283,7 +277,6 @@ public class DownloadManager {
 			System.out.printf("%-10s → %s%n", name, result.map(Path::toString).orElse("not found"));
 		}
 	}
-
 
 	public static String sanitizeString(String s) {
 		if (s.contains(" "))
@@ -302,6 +295,7 @@ public class DownloadManager {
 		stlIn.toStl(Paths.get(stl.getAbsolutePath()));
 		return stl;
 	}
+
 	private static IApprovalForDownload approval = new IApprovalForDownload() {
 
 		@Override
@@ -527,7 +521,7 @@ public class DownloadManager {
 	private static void retryLoop(String exeType, IExternalEditor editor, String executable, boolean justChecking) {
 		if (justChecking)
 			return;
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 1; i++) {
 			if (getExecutable(exeType, editor, executable, justChecking).exists()) {
 				return;
 			}
@@ -562,7 +556,7 @@ public class DownloadManager {
 		try {
 			for (String f : filesInGit) {
 				File file = ScriptingEngine.fileFromGit(editorsURL, f);
-				//Log.debug("Looking at json file " + file.getAbsolutePath());
+				// Log.debug("Looking at json file " + file.getAbsolutePath());
 				if (file.getName().toLowerCase().startsWith(exeType.toLowerCase())
 						&& file.getName().toLowerCase().endsWith(".json")) {
 					String jsonText = new String(Files.readAllBytes(file.toPath()));
@@ -627,7 +621,6 @@ public class DownloadManager {
 							return onDisk.get().toFile();
 						if (b && !justChecking) {
 
-
 							if (exeType.toLowerCase().contentEquals("freecad")) {
 								// FreecadLoader.update(vm);
 								baseURL = vm.get("url").toString();
@@ -656,6 +649,10 @@ public class DownloadManager {
 							}
 							if (type.toLowerCase().contains("tar.gz")) {
 								untar(jvmArchive, bindir + targetdir);
+							}
+							//sfx
+							if (type.toLowerCase().contains("sfx")) {
+								sfx(jvmArchive, bindir + targetdir);
 							}
 							// extractTarXz
 							if (type.toLowerCase().contains("tar.xz")) {
@@ -774,6 +771,11 @@ public class DownloadManager {
 		errorTxt += "\nExecutable for OS: " + key + " has no entry for " + exeType + " from " + filesInGit + " in "
 				+ editorsURL;
 		throw new RuntimeException(errorTxt);
+	}
+
+	private static void sfx(File jvmArchive, String string) {
+		// TODO Auto-generated method stub
+
 	}
 
 	private static void saveFile(File file, String json) {
@@ -1165,39 +1167,72 @@ public class DownloadManager {
 		com.neuronrobotics.sdk.common.Log.debug("Untaring " + tarFile.getName() + " into " + dir);
 
 		File dest = new File(dir);
-		dest.mkdir();
-		TarArchiveInputStream tarIn = null;
-		try {
-			tarIn = new TarArchiveInputStream(
-					new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(tarFile))));
-		} catch (java.io.IOException ex) {
-			tarFile.delete();
-			return;
-		}
-		TarArchiveEntry tarEntry = tarIn.getNextTarEntry();
-		// tarIn is a TarArchiveInputStream
-		while (tarEntry != null) {// create a file with the same name as the tarEntry
-			File destPath = new File(dest.toString() + System.getProperty("file.separator") + tarEntry.getName());
-			com.neuronrobotics.sdk.common.Log.debug("Inflating: " + destPath.getCanonicalPath());
-			if (tarEntry.isDirectory()) {
-				destPath.mkdirs();
-			} else {
-				destPath.createNewFile();
-				FileOutputStream fout = new FileOutputStream(destPath);
-				byte[] b = new byte[(int) tarEntry.getSize()];
-				tarIn.read(b);
-				fout.write(b);
-				fout.close();
-				int mode = tarEntry.getMode();
-				b = new byte[5];
-				TarUtils.formatUnsignedOctalString(mode, b, 0, 4);
-				if (bits(b[1]).endsWith("1")) {
-					destPath.setExecutable(true);
+		dest.mkdirs();
+
+		try (TarArchiveInputStream tarIn = new TarArchiveInputStream(
+				new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(tarFile))))) {
+
+			TarArchiveEntry tarEntry;
+
+			while ((tarEntry = tarIn.getNextTarEntry()) != null) {
+
+				File destPath = new File(dest, tarEntry.getName());
+				com.neuronrobotics.sdk.common.Log.debug("Inflating: " + destPath.getCanonicalPath());
+
+				File parent = destPath.getParentFile();
+				if (parent != null) {
+					parent.mkdirs();
 				}
+
+				if (tarEntry.isDirectory()) {
+					destPath.mkdirs();
+					continue;
+				}
+
+				if (tarEntry.isSymbolicLink()) {
+					java.nio.file.Path link = destPath.toPath();
+					java.nio.file.Path target = java.nio.file.Paths.get(tarEntry.getLinkName());
+
+					try {
+						java.nio.file.Files.deleteIfExists(link);
+						java.nio.file.Files.createSymbolicLink(link, target);
+					} catch (UnsupportedOperationException e) {
+						com.neuronrobotics.sdk.common.Log
+								.error("Symbolic links not supported: " + link + " -> " + target);
+					}
+					continue;
+				}
+
+				if (tarEntry.isLink()) {
+					// Hard link
+					java.nio.file.Path link = destPath.toPath();
+					java.nio.file.Path target = new File(dest, tarEntry.getLinkName()).toPath();
+
+					try {
+						java.nio.file.Files.deleteIfExists(link);
+						java.nio.file.Files.createLink(link, target);
+					} catch (UnsupportedOperationException e) {
+						com.neuronrobotics.sdk.common.Log.error("Hard links not supported: " + link + " -> " + target);
+					}
+					continue;
+				}
+
+				try (OutputStream fout = new BufferedOutputStream(new FileOutputStream(destPath))) {
+					byte[] buffer = new byte[8192];
+					int len;
+					while ((len = tarIn.read(buffer)) != -1) {
+						fout.write(buffer, 0, len);
+					}
+				}
+
+				int mode = tarEntry.getMode();
+				destPath.setExecutable((mode & 0100) != 0, false);
+				destPath.setReadable((mode & 0400) != 0, false);
+				destPath.setWritable((mode & 0200) != 0, false);
 			}
-			tarEntry = tarIn.getNextTarEntry();
+		} catch (IOException ex) {
+			tarFile.delete();
 		}
-		tarIn.close();
 	}
 
 	private static String bits(byte b) {
@@ -1254,18 +1289,15 @@ public class DownloadManager {
 
 	/**
 	 *
-	 * @param version
-	 *            A string indicating version, this will be the folder name
-	 * @param URL
-	 *            The direct URL of the download
-	 * @param sizeOfFile
-	 *            The number of bytes in the file
-	 * @param directoryInWhichFileIsStored
-	 *            The root directory into which this will all be downloaded
-	 * @param filename
-	 *            The resulting filename
-	 * @param downloadName
-	 *            User level name for asking about the download
+	 * @param version                      A string indicating version, this will be
+	 *                                     the folder name
+	 * @param URL                          The direct URL of the download
+	 * @param sizeOfFile                   The number of bytes in the file
+	 * @param directoryInWhichFileIsStored The root directory into which this will
+	 *                                     all be downloaded
+	 * @param filename                     The resulting filename
+	 * @param downloadName                 User level name for asking about the
+	 *                                     download
 	 * @return
 	 * @throws MalformedURLException
 	 * @throws IOException
@@ -1353,8 +1385,7 @@ public class DownloadManager {
 	}
 
 	/**
-	 * @param editorsURL
-	 *            the editorsURL to set
+	 * @param editorsURL the editorsURL to set
 	 */
 	public static void setEditorsURL(String editorsURL) {
 		DownloadManager.editorsURL = editorsURL;
