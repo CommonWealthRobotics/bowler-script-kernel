@@ -19,8 +19,6 @@ public class Build123dTest {
 
 	@Test
 	public void test() throws Exception {
-		//		if (OSUtil.isWindows() || OSUtil.isOSX())
-		//			return;
 		Log.enableDebugPrint();
 		Map<String, Object> options = Build123dLoader.getTypeOptions();
 		com.neuronrobotics.sdk.common.Log.debug("Build123d Options " + options);
