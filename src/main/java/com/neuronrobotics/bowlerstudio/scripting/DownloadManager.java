@@ -777,7 +777,7 @@ public class DownloadManager {
 		List<String> command = new ArrayList<>();
 		command.add(sfxAchive.getAbsolutePath());
 		command.add("-y");
-		command.add("-o\""+targetDir+"\"");
+		command.add("-o\"" + targetDir + "\"");
 		Thread tcopy = run(null, new File("."), System.out, command);
 		try {
 			tcopy.join();
