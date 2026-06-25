@@ -54,7 +54,7 @@ public class TransformFactory {
 	 *            the input
 	 * @return the transform
 	 */
-	public static TransformNR affineToNr(Affine input) {
+	public static TransformNR affineToNr(javafx.scene.transform.Transform input) {
 		TransformNR rotations = new TransformNR();
 		return affineToNr(rotations, input);
 	}
@@ -68,7 +68,7 @@ public class TransformFactory {
 	 *            the rotations
 	 * @return the transform
 	 */
-	public static TransformNR affineToNr(TransformNR outputValue, Affine rotations) {
+	public static TransformNR affineToNr(TransformNR outputValue, javafx.scene.transform.Transform rotations) {
 		double[][] poseRot = outputValue.getRotationMatrixArray();
 
 		poseRot[0][0] = rotations.getMxx();
