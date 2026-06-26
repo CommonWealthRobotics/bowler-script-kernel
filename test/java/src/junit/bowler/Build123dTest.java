@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,23 +24,23 @@ public class Build123dTest {
 		Map<String, Object> options = Build123dLoader.getTypeOptions();
 		//com.neuronrobotics.sdk.common.Log.debug("Build123d Options " + options);
 		for (Map.Entry<String, Object> entry : options.entrySet()) {
-			Log.debug("\tCatagories " + entry.getKey() );
+			Log.debug("\tCatagories " + entry.getKey());
 			Map<String, Object> types = Build123dLoader.getTypeOptions(entry.getKey());
 			for (String t : types.keySet()) {
-				Log.debug("\t\t Types " + t );
-				Map<String, Object> params = Build123dLoader.getTypeOptions(entry.getKey(),t);
+				Log.debug("\t\t Types " + t);
+				Map<String, Object> params = Build123dLoader.getTypeOptions(entry.getKey(), t);
 				for (String p : params.keySet()) {
-					if(p.contentEquals("parameters")) {
-						List<Map<String, Object>> paramList = (List<Map<String,Object>>) params.get(p);
-						for(Map<String, Object> pm:paramList)
-							Log.debug("\t\t\t\t param = "+pm );
+					if (p.contentEquals("parameters")) {
+						List<Map<String, Object>> paramList = (List<Map<String, Object>>) params.get(p);
+						for (Map<String, Object> pm : paramList)
+							Log.debug("\t\t\t\t param = " + pm);
 
-					}else {
-						Log.debug("\t\t\t config  " + p+" = "+params.get(p) );
+					} else {
+						Log.debug("\t\t\t config  " + p + " = " + params.get(p));
 
 					}
 				}
-					
+
 			}
 		}
 
