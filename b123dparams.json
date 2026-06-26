@@ -1,0 +1,3876 @@
+{
+  "py_gearworks": {
+    "BevelGear": {
+      "name": "BevelGear",
+      "description": "A class representing a bevel gear, which is a type of gear with teeth on a conical",
+      "parameters": [
+        {
+          "name": "number_of_teeth",
+          "type": "int",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "cone_angle",
+          "type": "float",
+          "default": 1.5707963267948966,
+          "required": false
+        },
+        {
+          "name": "helix_angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "height",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "center",
+          "type": "ndarray",
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "required": false
+        },
+        {
+          "name": "angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "module",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "enable_undercut",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "root_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_truncation",
+          "type": "float",
+          "default": 0.1,
+          "required": false
+        },
+        {
+          "name": "profile_shift",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "addendum_coefficient",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "dedendum_coefficient",
+          "type": "float",
+          "default": 1.2,
+          "required": false
+        },
+        {
+          "name": "pressure_angle",
+          "type": "float",
+          "default": 0.3490658503988659,
+          "required": false
+        },
+        {
+          "name": "backlash",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "crowning",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "z_anchor",
+          "type": "float",
+          "default": 0,
+          "required": false
+        }
+      ]
+    },
+    "CycloidGear": {
+      "name": "CycloidGear",
+      "description": "Class for a cycloid gear.",
+      "parameters": [
+        {
+          "name": "number_of_teeth",
+          "type": "int",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "height",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "cone_angle",
+          "type": "_empty",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "center",
+          "type": "ndarray",
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "required": false
+        },
+        {
+          "name": "angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "module",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "root_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_truncation",
+          "type": "float",
+          "default": 0.1,
+          "required": false
+        },
+        {
+          "name": "addendum_coefficient",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "dedendum_coefficient",
+          "type": "float",
+          "default": 1.2,
+          "required": false
+        },
+        {
+          "name": "inside_cycloid_coefficient",
+          "type": "float",
+          "default": 0.5,
+          "required": false
+        },
+        {
+          "name": "outside_cycloid_coefficient",
+          "type": "float",
+          "default": 0.5,
+          "required": false
+        },
+        {
+          "name": "helix_angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "backlash",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "crowning",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "inside_teeth",
+          "type": "bool",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "z_anchor",
+          "type": "float",
+          "default": 0,
+          "required": false
+        }
+      ]
+    },
+    "HelicalGear": {
+      "name": "HelicalGear",
+      "description": "Class for a helical gear.",
+      "parameters": [
+        {
+          "name": "number_of_teeth",
+          "type": "int",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "helix_angle",
+          "type": "float",
+          "default": 0.5235987755982988,
+          "required": false
+        },
+        {
+          "name": "herringbone",
+          "type": "bool",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "height",
+          "type": "float",
+          "default": 1,
+          "required": false
+        },
+        {
+          "name": "center",
+          "type": "ndarray",
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "required": false
+        },
+        {
+          "name": "angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "module",
+          "type": "float",
+          "default": 1,
+          "required": false
+        },
+        {
+          "name": "enable_undercut",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "root_fillet",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "tip_fillet",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "tip_truncation",
+          "type": "float",
+          "default": 0.1,
+          "required": false
+        },
+        {
+          "name": "profile_shift",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "addendum_coefficient",
+          "type": "float",
+          "default": 1,
+          "required": false
+        },
+        {
+          "name": "dedendum_coefficient",
+          "type": "float",
+          "default": 1.2,
+          "required": false
+        },
+        {
+          "name": "pressure_angle",
+          "type": "float",
+          "default": 0.3490658503988659,
+          "required": false
+        },
+        {
+          "name": "backlash",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "crowning",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "z_anchor",
+          "type": "float",
+          "default": 0,
+          "required": false
+        }
+      ]
+    },
+    "HelicalRack": {
+      "name": "HelicalRack",
+      "description": "Class for generating rack that meshes with helical gears. Same as involute rack,",
+      "parameters": [
+        {
+          "name": "number_of_teeth",
+          "type": "int",
+          "default": 16,
+          "required": false
+        },
+        {
+          "name": "height",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "pressure_angle",
+          "type": "float",
+          "default": 0.3490658503988659,
+          "required": false
+        },
+        {
+          "name": "position",
+          "type": "ndarray",
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "required": false
+        },
+        {
+          "name": "offset",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "orientation",
+          "type": "ndarray",
+          "default": [
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "required": false
+        },
+        {
+          "name": "module",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "root_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "addendum_coefficient",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "dedendum_coefficient",
+          "type": "float",
+          "default": 1.2,
+          "required": false
+        },
+        {
+          "name": "helix_angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "backlash",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "herringbone",
+          "type": "bool",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    "InvoluteRack": {
+      "name": "InvoluteRack",
+      "description": "Class for generating an involute rack.",
+      "parameters": [
+        {
+          "name": "number_of_teeth",
+          "type": "int",
+          "default": 16,
+          "required": false
+        },
+        {
+          "name": "height",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "pressure_angle",
+          "type": "float",
+          "default": 0.3490658503988659,
+          "required": false
+        },
+        {
+          "name": "position",
+          "type": "ndarray",
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "required": false
+        },
+        {
+          "name": "offset",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "orientation",
+          "type": "ndarray",
+          "default": [
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "required": false
+        },
+        {
+          "name": "module",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "root_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "addendum_coefficient",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "dedendum_coefficient",
+          "type": "float",
+          "default": 1.2,
+          "required": false
+        },
+        {
+          "name": "beta_angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "backlash",
+          "type": "float",
+          "default": 0,
+          "required": false
+        }
+      ]
+    },
+    "SpurGear": {
+      "name": "SpurGear",
+      "description": "Class for a basic spur gear.",
+      "parameters": [
+        {
+          "name": "number_of_teeth",
+          "type": "int",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "height",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "center",
+          "type": "ndarray",
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "required": false
+        },
+        {
+          "name": "angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "module",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "enable_undercut",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "root_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_truncation",
+          "type": "float",
+          "default": 0.1,
+          "required": false
+        },
+        {
+          "name": "profile_shift",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "addendum_coefficient",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "dedendum_coefficient",
+          "type": "float",
+          "default": 1.2,
+          "required": false
+        },
+        {
+          "name": "pressure_angle",
+          "type": "float",
+          "default": 0.3490658503988659,
+          "required": false
+        },
+        {
+          "name": "backlash",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "crowning",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "z_anchor",
+          "type": "float",
+          "default": 0,
+          "required": false
+        }
+      ]
+    },
+    "SpurRingGear": {
+      "name": "SpurRingGear",
+      "description": "A class representing a spur ring gear, which is a type of gear with teeth on the",
+      "parameters": [
+        {
+          "name": "number_of_teeth",
+          "type": "int",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "height",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "center",
+          "type": "ndarray",
+          "default": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "required": false
+        },
+        {
+          "name": "angle",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "module",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "enable_undercut",
+          "type": "bool",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "root_fillet",
+          "type": "float",
+          "default": 0.2,
+          "required": false
+        },
+        {
+          "name": "tip_fillet",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "tip_truncation",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "profile_shift",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "addendum_coefficient",
+          "type": "float",
+          "default": 1.2,
+          "required": false
+        },
+        {
+          "name": "dedendum_coefficient",
+          "type": "float",
+          "default": 1.0,
+          "required": false
+        },
+        {
+          "name": "outside_ring_coefficient",
+          "type": "float",
+          "default": 2.5,
+          "required": false
+        },
+        {
+          "name": "pressure_angle",
+          "type": "float",
+          "default": 0.3490658503988659,
+          "required": false
+        },
+        {
+          "name": "backlash",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "crowning",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "z_anchor",
+          "type": "float",
+          "default": 0,
+          "required": false
+        }
+      ]
+    }
+  },
+  "bd_warehouse": {
+    "HexHeadScrew": {
+      "name": "HexHeadScrew",
+      "description": "Hex Head Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso4014",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "PanHeadScrew": {
+      "name": "PanHeadScrew",
+      "description": "Pan Head Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso14583",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SingleRowAngularContactBallBearing": {
+      "name": "SingleRowAngularContactBallBearing",
+      "description": "Single Row Angular Contact Ball Bearing",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bearing_type",
+          "type": "str",
+          "default": "SKT",
+          "required": false
+        }
+      ]
+    },
+    "SquareNut": {
+      "name": "SquareNut",
+      "description": "Square Nut",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "din557",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "AcmeAntiBacklashNutBlock8mm": {
+      "name": "AcmeAntiBacklashNutBlock8mm",
+      "description": "Part Object: OpenBuilds 8mm Acme Anti Backlash Nut Block",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "LockCollar": {
+      "name": "LockCollar",
+      "description": "Assembly: OpenBuilds LockCollar",
+      "parameters": [
+        {
+          "name": "inside_diameter",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        }
+      ]
+    },
+    "SpacerBlock": {
+      "name": "SpacerBlock",
+      "description": "Part Object: OpenBuilds Spacer Block",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "HexNutWithFlange": {
+      "name": "HexNutWithFlange",
+      "description": "Hex Nut With Flange",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "din1665",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SingleRowCylindricalRollerBearing": {
+      "name": "SingleRowCylindricalRollerBearing",
+      "description": "Single Row Cylindrical Roller Bearings",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bearing_type",
+          "type": "str",
+          "default": "SKT",
+          "required": false
+        }
+      ]
+    },
+    "Flange": {
+      "name": "Flange",
+      "description": "Flange",
+      "parameters": [
+        {
+          "name": "flange_section",
+          "type": "Union",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bcd",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bolt_hole_count",
+          "type": "int",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bolt_hole_diameter",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SpurGear": {
+      "name": "SpurGear",
+      "description": "InvoluteToothProfile",
+      "parameters": [
+        {
+          "name": "module",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "tooth_count",
+          "type": "int",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "pressure_angle",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "thickness",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "root_fillet",
+          "type": "Optional",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "addendum",
+          "type": "Optional",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "dedendum",
+          "type": "Optional",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": "Align.CENTER",
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SocketHeadCapScrew": {
+      "name": "SocketHeadCapScrew",
+      "description": "Socket Head Cap Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso4762",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "CBeamEndMount": {
+      "name": "CBeamEndMount",
+      "description": "CBeamEndMount",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "TrapezoidalThread": {
+      "name": "TrapezoidalThread",
+      "description": "Trapezoidal Thread Base Class",
+      "parameters": [
+        {
+          "name": "diameter",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "pitch",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "thread_angle",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "external",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "starts",
+          "type": "int",
+          "default": 1,
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "end_finishes",
+          "type": "tuple",
+          "default": [
+            "fade",
+            "fade"
+          ],
+          "required": false
+        },
+        {
+          "name": "interference",
+          "type": "float",
+          "default": 0.2,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "XLargeCBeamGantry": {
+      "name": "XLargeCBeamGantry",
+      "description": "XLargeCBeamGantry",
+      "parameters": [
+        {
+          "name": "wheel_count",
+          "type": "Literal",
+          "default": 4,
+          "required": false
+        },
+        {
+          "name": "eccentric_angle",
+          "type": "float",
+          "default": 90,
+          "required": false
+        }
+      ]
+    },
+    "SetScrew": {
+      "name": "SetScrew",
+      "description": "Set Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso4026",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "CBeamGantryPlateXLarge": {
+      "name": "CBeamGantryPlateXLarge",
+      "description": "Part Object: OpenBuilds C-Beam Gantry Plate X-Large",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "ShimWasher": {
+      "name": "ShimWasher",
+      "description": "Part Object: OpenBuilds Shim/Washer",
+      "parameters": [
+        {
+          "name": "shim_type",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "CBeamRiserPlate": {
+      "name": "CBeamRiserPlate",
+      "description": "Part Object: OpenBuilds C-Beam Riser Plate",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "XtremeSolidVWheelAssembly": {
+      "name": "XtremeSolidVWheelAssembly",
+      "description": "Assembly: OpenBuilds Xtreme Solid V Wheel Assembly",
+      "parameters": [
+        {
+          "name": "eccentric",
+          "type": "bool",
+          "default": null,
+          "required": true
+        }
+      ]
+    },
+    "BlindFlange": {
+      "name": "BlindFlange",
+      "description": "BlindFlange",
+      "parameters": [
+        {
+          "name": "nps",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "flange_class",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "face_type",
+          "type": "Literal",
+          "default": "Raised",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "XtremeSolidVWheel": {
+      "name": "XtremeSolidVWheel",
+      "description": "Part Object: OpenBuilds Xtreme Solid V Wheel",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": "Align.CENTER",
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "MetricLeadScrew": {
+      "name": "MetricLeadScrew",
+      "description": "Assembly: OpenBuilds MetricLeadScrew",
+      "parameters": [
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        }
+      ]
+    },
+    "RaisedCounterSunkOvalHeadScrew": {
+      "name": "RaisedCounterSunkOvalHeadScrew",
+      "description": "Raised CounterSunk Oval Head Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso14584",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SingleRowTaperedRollerBearing": {
+      "name": "SingleRowTaperedRollerBearing",
+      "description": "Tapered Roller Bearing",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bearing_type",
+          "type": "str",
+          "default": "SKT",
+          "required": false
+        }
+      ]
+    },
+    "LappedFlangeStub": {
+      "name": "LappedFlangeStub",
+      "description": "LappedFlangeStub",
+      "parameters": [
+        {
+          "name": "nps",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "material",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "pipe_identifier",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "stub_length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "face_type",
+          "type": "Literal",
+          "default": "Raised",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "AluminumSpacer": {
+      "name": "AluminumSpacer",
+      "description": "Part Object: OpenBuilds AluminumSpacer",
+      "parameters": [
+        {
+          "name": "length",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "Sprocket": {
+      "name": "Sprocket",
+      "description": "Create a new sprocket object as defined by the given parameters. The input parameter",
+      "parameters": [
+        {
+          "name": "num_teeth",
+          "type": "int",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "chain_pitch",
+          "type": "float",
+          "default": 12.7,
+          "required": false
+        },
+        {
+          "name": "roller_diameter",
+          "type": "float",
+          "default": 7.9375,
+          "required": false
+        },
+        {
+          "name": "clearance",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "thickness",
+          "type": "float",
+          "default": 2.1336,
+          "required": false
+        },
+        {
+          "name": "bolt_circle_diameter",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "num_mount_bolts",
+          "type": "int",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "mount_bolt_diameter",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "bore_diameter",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "None | build123d.build_enums.Align | tuple[build123d.build_enums.Align, build123d.build_enums.Align, build123d.build_enums.Align]",
+          "default": "Align.CENTER",
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "RaisedCheeseHeadScrew": {
+      "name": "RaisedCheeseHeadScrew",
+      "description": "Raised Cheese Head Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso7045",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "ClearanceHole": {
+      "name": "ClearanceHole",
+      "description": "Part Object: ClearanceHole",
+      "parameters": [
+        {
+          "name": "fastener",
+          "type": "Union",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fit",
+          "type": "Literal",
+          "default": "Normal",
+          "required": false
+        },
+        {
+          "name": "depth",
+          "type": "float",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "counter_sunk",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "captive_nut",
+          "type": "bool",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.SUBTRACT",
+          "required": false
+        }
+      ]
+    },
+    "CBeamLinearRail": {
+      "name": "CBeamLinearRail",
+      "description": "Part Object: OpenBuilds C-Beam Linear Rail",
+      "parameters": [
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "TapHole": {
+      "name": "TapHole",
+      "description": "Part Object: TapHole",
+      "parameters": [
+        {
+          "name": "fastener",
+          "type": "Union",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "material",
+          "type": "Literal",
+          "default": "Soft",
+          "required": false
+        },
+        {
+          "name": "fit",
+          "type": "Literal",
+          "default": "Normal",
+          "required": false
+        },
+        {
+          "name": "depth",
+          "type": "float",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "counter_sunk",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.SUBTRACT",
+          "required": false
+        }
+      ]
+    },
+    "ChamferedWasher": {
+      "name": "ChamferedWasher",
+      "description": "Chamfered Washer",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso7090",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SingleRowCappedDeepGrooveBallBearing": {
+      "name": "SingleRowCappedDeepGrooveBallBearing",
+      "description": "Single Row Capped Deep Groove Ball Bearings",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bearing_type",
+          "type": "str",
+          "default": "SKT",
+          "required": false
+        }
+      ]
+    },
+    "LowProfileScrew": {
+      "name": "LowProfileScrew",
+      "description": "Low Profile Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "OpenBuilds",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "ThreadedHole": {
+      "name": "ThreadedHole",
+      "description": "Part Object: ThreadedHole",
+      "parameters": [
+        {
+          "name": "fastener",
+          "type": "Union",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "material",
+          "type": "Literal",
+          "default": "Soft",
+          "required": false
+        },
+        {
+          "name": "fit",
+          "type": "Literal",
+          "default": "Normal",
+          "required": false
+        },
+        {
+          "name": "depth",
+          "type": "float",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "counter_sunk",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.SUBTRACT",
+          "required": false
+        }
+      ]
+    },
+    "UnchamferedHexagonNut": {
+      "name": "UnchamferedHexagonNut",
+      "description": "Unchamfered Hexagon Nut",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso4036",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "WeldNeckFlange": {
+      "name": "WeldNeckFlange",
+      "description": "Weld Neck Flange",
+      "parameters": [
+        {
+          "name": "nps",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "flange_class",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "face_type",
+          "type": "Literal",
+          "default": "Raised",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "EccentricSpacer": {
+      "name": "EccentricSpacer",
+      "description": "Part Object: OpenBuilds Eccentric Spacer",
+      "parameters": [
+        {
+          "name": "cam_height",
+          "type": "_empty",
+          "default": "typing.Literal['6mm', '1/4in']",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "FlexibleCoupler": {
+      "name": "FlexibleCoupler",
+      "description": "Part Object: OpenBuilds Flexible Coupler",
+      "parameters": [
+        {
+          "name": "shaft_diameter",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "CounterSunkScrew": {
+      "name": "CounterSunkScrew",
+      "description": "CounterSunk Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso10642",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "IsoThread": {
+      "name": "IsoThread",
+      "description": "ISO Standard Thread",
+      "parameters": [
+        {
+          "name": "major_diameter",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "pitch",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "external",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "end_finishes",
+          "type": "Tuple",
+          "default": [
+            "fade",
+            "square"
+          ],
+          "required": false
+        },
+        {
+          "name": "interference",
+          "type": "float",
+          "default": 0.2,
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "LappedFlange": {
+      "name": "LappedFlange",
+      "description": "LappedFlange",
+      "parameters": [
+        {
+          "name": "nps",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "flange_class",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "AcmeThread": {
+      "name": "AcmeThread",
+      "description": "ACME Thread",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "external",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "end_finishes",
+          "type": "tuple",
+          "default": [
+            "fade",
+            "fade"
+          ],
+          "required": false
+        },
+        {
+          "name": "interference",
+          "type": "float",
+          "default": 0.2,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SocketWeldFlange": {
+      "name": "SocketWeldFlange",
+      "description": "SocketWeldFlange",
+      "parameters": [
+        {
+          "name": "nps",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "flange_class",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "face_type",
+          "type": "Literal",
+          "default": "Raised",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "VSlotLinearRail": {
+      "name": "VSlotLinearRail",
+      "description": "Part Object: OpenBuilds V Slot Linear Rail",
+      "parameters": [
+        {
+          "name": "rail_size",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "PressFitHole": {
+      "name": "PressFitHole",
+      "description": "Press Fit Hole",
+      "parameters": [
+        {
+          "name": "bearing",
+          "type": "Bearing",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "interference",
+          "type": "float",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "fit",
+          "type": "Literal",
+          "default": "Normal",
+          "required": false
+        },
+        {
+          "name": "depth",
+          "type": "float",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.SUBTRACT",
+          "required": false
+        }
+      ]
+    },
+    "CheeseHeadScrew": {
+      "name": "CheeseHeadScrew",
+      "description": "Cheese Head Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso7048",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "CheeseHeadWasher": {
+      "name": "CheeseHeadWasher",
+      "description": "Cheese Head Washer",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso7092",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "Pipe": {
+      "name": "Pipe",
+      "description": "Pipe",
+      "parameters": [
+        {
+          "name": "nps",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "material",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "identifier",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "path",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "AcmeAntiBacklashNutBlock8mmAssembly": {
+      "name": "AcmeAntiBacklashNutBlock8mmAssembly",
+      "description": "Assembly: OpenBuilds 8mm Acme Anti Backlash Nut Block Assembly",
+      "parameters": []
+    },
+    "Thread": {
+      "name": "Thread",
+      "description": "Helical thread",
+      "parameters": [
+        {
+          "name": "apex_radius",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "apex_width",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "root_radius",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "root_width",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "pitch",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "apex_offset",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "interference",
+          "type": "float",
+          "default": 0.2,
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "taper_angle",
+          "type": "Optional",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "end_finishes",
+          "type": "Tuple",
+          "default": [
+            "raw",
+            "raw"
+          ],
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "ButtonHeadScrew": {
+      "name": "ButtonHeadScrew",
+      "description": "Button Head Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso7380_1",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "HexHeadWithFlangeScrew": {
+      "name": "HexHeadWithFlangeScrew",
+      "description": "Hex Head With Flange Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "din1662",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "MetricTrapezoidalThread": {
+      "name": "MetricTrapezoidalThread",
+      "description": "Metric Trapezoidal Thread",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "external",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "end_finishes",
+          "type": "tuple",
+          "default": [
+            "fade",
+            "fade"
+          ],
+          "required": false
+        },
+        {
+          "name": "interference",
+          "type": "float",
+          "default": 0.2,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "StepperMotor": {
+      "name": "StepperMotor",
+      "description": "Assembly: OpenBuilds StepperMotors",
+      "parameters": [
+        {
+          "name": "motor_type",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "motor_length",
+          "type": "Optional",
+          "default": null,
+          "required": false
+        }
+      ]
+    },
+    "HexNut": {
+      "name": "HexNut",
+      "description": "Hex Nut",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso4032",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "PanHeadWithCollarScrew": {
+      "name": "PanHeadWithCollarScrew",
+      "description": "Pan Head With Collar Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "din967",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "CBeamGantryPlate": {
+      "name": "CBeamGantryPlate",
+      "description": "Part Object: OpenBuilds C-Beam Gantry Plate",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "PlasticBottleThread": {
+      "name": "PlasticBottleThread",
+      "description": "ASTM D2911 Plastic Bottle Thread",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "external",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "interference",
+          "type": "float",
+          "default": 0.2,
+          "required": false
+        },
+        {
+          "name": "manufacturing_compensation",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "HeatSetNut": {
+      "name": "HeatSetNut",
+      "description": "Heat Set Nut",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "McMaster-Carr",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SlipOnFlange": {
+      "name": "SlipOnFlange",
+      "description": "SlipOnFlange",
+      "parameters": [
+        {
+          "name": "nps",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "flange_class",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "face_type",
+          "type": "Literal",
+          "default": "Raised",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "DomedCapNut": {
+      "name": "DomedCapNut",
+      "description": "Domed Cap Nut",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "din1587",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "InsertHole": {
+      "name": "InsertHole",
+      "description": "Part Object: InsertHole",
+      "parameters": [
+        {
+          "name": "fastener",
+          "type": "HeatSetNut",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fit",
+          "type": "Literal",
+          "default": "Normal",
+          "required": false
+        },
+        {
+          "name": "depth",
+          "type": "float",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "manufacturing_compensation",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.SUBTRACT",
+          "required": false
+        }
+      ]
+    },
+    "PlainWasher": {
+      "name": "PlainWasher",
+      "description": "Plain Washer",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "RouterSpindleMount": {
+      "name": "RouterSpindleMount",
+      "description": "RouterSpindleMount",
+      "parameters": [
+        {
+          "name": "parts",
+          "type": "Literal",
+          "default": "both",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "InternalToothLockWasher": {
+      "name": "InternalToothLockWasher",
+      "description": "Internal Tooth Lock Washer",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "din6797",
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "ButtonHeadWithCollarScrew": {
+      "name": "ButtonHeadWithCollarScrew",
+      "description": "Button Head With Collar Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso7380_2",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SingleRowDeepGrooveBallBearing": {
+      "name": "SingleRowDeepGrooveBallBearing",
+      "description": "Single Row Deep Groove Ball Bearing",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bearing_type",
+          "type": "str",
+          "default": "SKT",
+          "required": false
+        }
+      ]
+    }
+  }
+}
