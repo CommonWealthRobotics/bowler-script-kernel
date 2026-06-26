@@ -152,7 +152,7 @@ public class Build123dLoader implements IScriptingLanguage {
 			if (hashMap != null)
 				return hashMap;
 		}
-		if (asList.size() > 2) {
+		if (asList.size() >=2) {
 			Map<String, Object> hashMap2 = (Map<String, Object>) hashMap.get(asList.get(1));
 			if (asList.size() == 2)
 				return hashMap2;
