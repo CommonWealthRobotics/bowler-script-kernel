@@ -208,3 +208,9 @@ report "${RED}  Failed  : $failed${NC}"
 report "${YELLOW}  Skipped : $skipped${NC}"
 report "========================================"
 report "Report written to: $REPORT"
+
+if [[ $failed -eq 0 && $skipped -eq 0 ]]; then
+    exit 0
+else
+    exit -1
+fi
