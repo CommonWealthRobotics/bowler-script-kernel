@@ -1237,8 +1237,8 @@ public class MobileBaseCadManager implements Runnable {
 							getUi().setAllCSG(totalAssembly, getCadScriptFromMobileBase(base));
 							set(base, i, j);
 						} else {
-							com.neuronrobotics.sdk.common.Log
-									.error("ERROR " + parts.get(j).getName() + " has no link associated ");
+							//							com.neuronrobotics.sdk.common.Log
+							//									.error("ERROR " + parts.get(j).getName() + " has no link associated ");
 						}
 					}
 				} catch (Exception ex) {
