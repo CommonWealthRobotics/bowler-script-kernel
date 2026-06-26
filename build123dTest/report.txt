@@ -1,0 +1,1983 @@
+build123d_cli batch run — Fri Jun 26 10:49:11 AM EDT 2026
+========================================
+
+▶ py_gearworks/BevelGear
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli py_gearworks BevelGear --number-of-teeth 16 --cone-angle 1.5707963267948966 --helix-angle 0 --height 1.0 --angle 0 --module 1.0 --enable-undercut true --root-fillet 0.0 --tip-fillet 0.0 --tip-truncation 0.1 --profile-shift 0 --addendum-coefficient 1.0 --dedendum-coefficient 1.2 --pressure-angle 0.3490658503988659 --backlash 0 --crowning 0 --z-anchor 0 export_directory BevelGear/
+  | WARNING, exporting non-planar shape to 2D format.
+  |   This is probably not what you want.
+  |   3106 points found outside the XY plane.
+  | True
+  ✔ STL: BevelGear/build123d_2026-06-26_10_49_14.stl
+
+▶ py_gearworks/CycloidGear
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli py_gearworks CycloidGear --number-of-teeth 16 --height 1.0 --cone-angle 0 --angle 0 --module 1.0 --root-fillet 0.0 --tip-fillet 0.0 --tip-truncation 0.1 --addendum-coefficient 1.0 --dedendum-coefficient 1.2 --inside-cycloid-coefficient 0.5 --outside-cycloid-coefficient 0.5 --helix-angle 0 --backlash 0 --crowning 0 --inside-teeth false --z-anchor 0 export_directory CycloidGear/
+  | WARNING, exporting non-planar shape to 2D format.
+  |   This is probably not what you want.
+  |   1416 points found outside the XY plane.
+  | True
+  ✔ STL: CycloidGear/build123d_2026-06-26_10_49_22.stl
+
+▶ py_gearworks/HelicalGear
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli py_gearworks HelicalGear --number-of-teeth 16 --helix-angle 0.5235987755982988 --herringbone false --height 1 --angle 0 --module 1 --enable-undercut true --root-fillet 0 --tip-fillet 0 --tip-truncation 0.1 --profile-shift 0 --addendum-coefficient 1 --dedendum-coefficient 1.2 --pressure-angle 0.3490658503988659 --backlash 0 --crowning 0 --z-anchor 0 export_directory HelicalGear/
+  | WARNING, exporting non-planar shape to 2D format.
+  |   This is probably not what you want.
+  |   2880 points found outside the XY plane.
+  | True
+  ✔ STL: HelicalGear/build123d_2026-06-26_10_49_26.stl
+
+▶ py_gearworks/HelicalRack
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli py_gearworks HelicalRack --number-of-teeth 16 --height 1.0 --pressure-angle 0.3490658503988659 --offset 0 --module 1.0 --root-fillet 0.0 --tip-fillet 0.0 --addendum-coefficient 1.0 --dedendum-coefficient 1.2 --helix-angle 0 --backlash 0 --herringbone false export_directory HelicalRack/
+  | WARNING, exporting non-planar shape to 2D format.
+  |   This is probably not what you want.
+  |   408 points found outside the XY plane.
+  | True
+  ✔ STL: HelicalRack/build123d_2026-06-26_10_49_32.stl
+
+▶ py_gearworks/InvoluteRack
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli py_gearworks InvoluteRack --number-of-teeth 16 --height 1.0 --pressure-angle 0.3490658503988659 --offset 0 --module 1.0 --root-fillet 0.0 --tip-fillet 0.0 --addendum-coefficient 1.0 --dedendum-coefficient 1.2 --beta-angle 0 --backlash 0 export_directory InvoluteRack/
+  | WARNING, exporting non-planar shape to 2D format.
+  |   This is probably not what you want.
+  |   408 points found outside the XY plane.
+  | True
+  ✔ STL: InvoluteRack/build123d_2026-06-26_10_49_36.stl
+
+▶ py_gearworks/SpurGear
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli py_gearworks SpurGear --number-of-teeth 16 --height 1.0 --angle 0 --module 1.0 --enable-undercut true --root-fillet 0.0 --tip-fillet 0.0 --tip-truncation 0.1 --profile-shift 0.0 --addendum-coefficient 1.0 --dedendum-coefficient 1.2 --pressure-angle 0.3490658503988659 --backlash 0 --crowning 0 --z-anchor 0 export_directory SpurGear/
+  | WARNING, exporting non-planar shape to 2D format.
+  |   This is probably not what you want.
+  |   1408 points found outside the XY plane.
+  | True
+  ✔ STL: SpurGear/build123d_2026-06-26_10_49_39.stl
+
+▶ py_gearworks/SpurRingGear
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli py_gearworks SpurRingGear --number-of-teeth 16 --height 1.0 --angle 0 --module 1.0 --enable-undercut false --root-fillet 0.2 --tip-fillet 0.0 --tip-truncation 0 --profile-shift 0.0 --addendum-coefficient 1.2 --dedendum-coefficient 1.0 --outside-ring-coefficient 2.5 --pressure-angle 0.3490658503988659 --backlash 0 --crowning 0 --z-anchor 0 export_directory SpurRingGear/
+  | WARNING, exporting non-planar shape to 2D format.
+  |   This is probably not what you want.
+  |   1480 points found outside the XY plane.
+  | True
+  ✔ STL: SpurRingGear/build123d_2026-06-26_10_49_44.stl
+
+▶ bd_warehouse/FlexibleCoupler
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse FlexibleCoupler --shaft-diameter 5 --mode Mode.ADD export_directory FlexibleCoupler/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 784, in __init__
+  |     d2 = valid_diameters[shaft_diameter]
+  |          ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  | KeyError: 5
+  | 
+  | During handling of the above exception, another exception occurred:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 786, in __init__
+  |     raise ValueError(
+  | ValueError: 5 is an invalid shaft diameter, must be one of ('8mm', '1/4in')
+  ✘ FAILED (exit 1): bd_warehouse/FlexibleCoupler
+
+▶ bd_warehouse/CBeamLinearRail
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse CBeamLinearRail --length 10.0 --mode Mode.ADD export_directory CBeamLinearRail/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/CBeamLinearRail
+
+▶ bd_warehouse/SingleRowAngularContactBallBearing
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SingleRowAngularContactBallBearing --size M6-1 --bearing-type SKT export_directory SingleRowAngularContactBallBearing/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 215, in __init__
+  |     isolate_fastener_type(self.bearing_type, self.bearing_data)[
+  | KeyError: 'M6-1'
+  | 
+  | The above exception was the direct cause of the following exception:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 221, in __init__
+  |     raise ValueError(
+  | ValueError: M6-1 invalid, must be one of ['M10-30-9', 'M12-32-10', 'M12-37-12', 'M15-35-11', 'M15-42-13', 'M17-40-12', 'M17-47-14', 'M20-52-15', 'M25-62-17']
+  ✘ FAILED (exit 1): bd_warehouse/SingleRowAngularContactBallBearing
+
+▶ bd_warehouse/XtremeSolidVWheelAssembly
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse XtremeSolidVWheelAssembly --eccentric false export_directory XtremeSolidVWheelAssembly/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/XtremeSolidVWheelAssembly
+
+▶ bd_warehouse/SpacerBlock
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SpacerBlock --mode Mode.ADD export_directory SpacerBlock/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/SpacerBlock
+
+▶ bd_warehouse/SingleRowCylindricalRollerBearing
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SingleRowCylindricalRollerBearing --size M6-1 --bearing-type SKT export_directory SingleRowCylindricalRollerBearing/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 215, in __init__
+  |     isolate_fastener_type(self.bearing_type, self.bearing_data)[
+  | KeyError: 'M6-1'
+  | 
+  | The above exception was the direct cause of the following exception:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 221, in __init__
+  |     raise ValueError(
+  | ValueError: M6-1 invalid, must be one of ['M15-35-11', 'M17-40-12', 'M17-40-16', 'M17-47-14', 'M20-47-14', 'M20-47-18', 'M20-52-15', 'M20-52-21', 'M25-52-15']
+  ✘ FAILED (exit 1): bd_warehouse/SingleRowCylindricalRollerBearing
+  SKIP SKIP: bd_warehouse/Flange — required param 'flange_section' is type 'Union' (object, not scalar)
+
+▶ bd_warehouse/AcmeAntiBacklashNutBlock8mm
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse AcmeAntiBacklashNutBlock8mm --mode Mode.ADD export_directory AcmeAntiBacklashNutBlock8mm/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/AcmeAntiBacklashNutBlock8mm
+
+▶ bd_warehouse/SocketHeadCapScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SocketHeadCapScrew --size M6-1 --length 10.0 --fastener-type iso4762 --hand right --simple true --mode Mode.ADD export_directory SocketHeadCapScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/SocketHeadCapScrew
+
+▶ bd_warehouse/BlindFlange
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse BlindFlange --nps 1 --flange-class 150 --face-type Raised --mode Mode.ADD export_directory BlindFlange/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 569, in __init__
+  |     Flange.inputs_are_valid(nps, flange_class, face_type)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 404, in inputs_are_valid
+  |     raise ValueError(
+  | ValueError: Invalid nps value - the valid values are: ('1/2', '3/4', '1', '1 1/4', '1 1/2', '2', '2 1/2', '3', '4', '5', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24')
+  ✘ FAILED (exit 1): bd_warehouse/BlindFlange
+
+▶ bd_warehouse/AluminumSpacer
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse AluminumSpacer --length 10.0 --mode Mode.ADD export_directory AluminumSpacer/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 227, in __init__
+  |     spacer_length = valid_lengths[length]
+  |                     ~~~~~~~~~~~~~^^^^^^^^
+  | KeyError: 10.0
+  | 
+  | During handling of the above exception, another exception occurred:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 229, in __init__
+  |     raise ValueError(
+  | ValueError: 10.0 is an invalid length, must be one of ('3mm', '1/8in', '6mm', '1/4in', '9mm', '10mm', '13.2mm', '20mm', '35mm', '1-1/2in', '40mm')
+  ✘ FAILED (exit 1): bd_warehouse/AluminumSpacer
+
+▶ bd_warehouse/MetricTrapezoidalThread
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse MetricTrapezoidalThread --size M6-1 --length 10.0 --external true --hand right --interference 0.2 --mode Mode.ADD export_directory MetricTrapezoidalThread/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/thread.py", line 876, in __init__
+  |     raise ValueError(
+  | ValueError: size invalid, must be one of ['8x1.5', '9x1.5', '9x2', '10x1.5', '10x2', '11x2', '11x3', '12x2', '12x3', '14x2', '14x3', '16x2', '16x3', '16x4', '18x2', '18x3', '18x4', '20x2', '20x3', '20x4', '22x3', '22x5', '22x8', '24x3', '24x5', '24x8', '26x3', '26x5', '26x8', '28x3', '28x5', '28x8', '30x3', '30x6', '30x10', '32x3', '32x6', '32x10', '34x3', '34x6', '34x10', '36x3', '36x6', '36x10', '38x3', '38x7', '38x10', '40x3', '40x7', '40x10', '42x3', '42x7', '42x10', '44x3', '44x7', '44x12', '46x3', '46x8', '46x12', '48x3', '48x8', '48x12', '50x3', '50x8', '50x12', '52x3', '52x8', '52x12', '55x3', '55x9', '55x14', '60x3', '60x9', '60x14', '65x4', '65x10', '65x16', '70x4', '70x10', '70x16', '75x4', '75x10', '75x16', '80x4', '80x10', '80x16', '85x4', '85x12', '85x18', '90x4', '90x12', '90x18', '95x4', '95x12', '95x18', '100x4', '100x12', '100x20', '105x4', '105x12', '105x20', '110x4', '110x12', '110x20', '115x6', '115x12', '115x14', '115x22', '120x6', '120x12', '120x14', '120x22', '125x6', '125x12', '125x14', '125x22', '130x6', '130x12', '130x14', '130x22', '135x6', '135x12', '135x14', '135x24', '140x6', '140x12', '140x14', '140x24', '145x6', '145x12', '145x14', '145x24', '150x6', '150x12', '150x16', '150x24', '155x6', '155x12', '155x16', '155x24', '160x6', '160x12', '160x16', '160x28', '165x6', '165x12', '165x16', '165x28', '170x6', '170x12', '170x16', '170x28', '175x8', '175x12', '175x16', '175x28', '180x8', '180x12', '180x18', '180x28', '185x8', '185x12', '185x18', '185x24', '185x32', '190x8', '190x12', '190x18', '190x24', '190x32', '195x8', '195x12', '195x18', '195x24', '195x32', '200x8', '200x12', '200x18', '200x24', '200x32', '205x4', '210x4', '210x8', '210x12', '210x20', '210x24', '210x36', '215x4', '220x4', '220x8', '220x12', '220x20', '220x24', '220x36', '230x4', '230x8', '230x12', '230x20', '230x24', '230x36', '235x4', '240x4', '240x8', '240x12', '240x20', '240x22', '240x24', '240x36', '250x4', '250x12', '250x22', '250x24', '250x40', '260x4', '260x12', '260x20', '260x22', '260x24', '260x40', '270x12', '270x24', '270x40', '275x4', '280x4', '280x12', '280x24', '280x40', '290x4', '290x12', '290x24', '290x44', '295x4', '300x4', '300x12', '300x24', '300x44', '310x5', '315x5']
+  ✘ FAILED (exit 1): bd_warehouse/MetricTrapezoidalThread
+
+▶ bd_warehouse/SetScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SetScrew --size M6-1 --length 10.0 --fastener-type iso4026 --hand right --simple true --mode Mode.ADD export_directory SetScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/SetScrew
+
+▶ bd_warehouse/XLargeCBeamGantry
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse XLargeCBeamGantry --wheel-count 4 --eccentric-angle 90 export_directory XLargeCBeamGantry/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/XLargeCBeamGantry
+
+▶ bd_warehouse/SpurGear
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SpurGear --module 1.0 --tooth-count 16 --pressure-angle 0.3490658503988659 --thickness 5.0 --align Align.CENTER --mode Mode.ADD export_directory SpurGear/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/gear.py", line 248, in __init__
+  |     super().__init__(
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/objects_part.py", line 83, in __init__
+  |     offset = bbox.to_align_offset(align)
+  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/geometry.py", line 1257, in to_align_offset
+  |     return to_align_offset(self.min, self.max, align)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/geometry.py", line 3463, in to_align_offset
+  |     for alignment, min_coord, max_coord, center_coord in zip(
+  |                                                          ^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/enum.py", line 751, in __call__
+  |     return cls.__new__(cls, value)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/enum.py", line 1170, in __new__
+  |     raise ve_exc
+  | ValueError: 'Align.CENTER' is not a valid Align
+  ✘ FAILED (exit 1): bd_warehouse/SpurGear
+
+▶ bd_warehouse/SlipOnFlange
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SlipOnFlange --nps 1 --flange-class 150 --face-type Raised --mode Mode.ADD export_directory SlipOnFlange/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 858, in __init__
+  |     Flange.inputs_are_valid(nps, flange_class, face_type)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 404, in inputs_are_valid
+  |     raise ValueError(
+  | ValueError: Invalid nps value - the valid values are: ('1/2', '3/4', '1', '1 1/4', '1 1/2', '2', '2 1/2', '3', '4', '5', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24')
+  ✘ FAILED (exit 1): bd_warehouse/SlipOnFlange
+
+▶ bd_warehouse/TrapezoidalThread
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse TrapezoidalThread --diameter 6.0 --pitch 1.0 --thread-angle 30.0 --length 10.0 --external true --starts 1 --hand right --interference 0.2 --mode Mode.ADD export_directory TrapezoidalThread/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/TrapezoidalThread
+
+▶ bd_warehouse/HeatSetNut
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse HeatSetNut --size M6-1 --fastener-type McMaster-Carr --hand right --simple true --mode Mode.ADD export_directory HeatSetNut/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 569, in __init__
+  |     isolate_fastener_type(self.fastener_type, self.fastener_data)[
+  | KeyError: 'M6-1'
+  | 
+  | The above exception was the direct cause of the following exception:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 877, in __init__
+  |     super().__init__(size, fastener_type, hand, simple, rotation, align, mode)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 575, in __init__
+  |     raise ValueError(
+  | ValueError: M6-1 invalid, must be one of ['M2-0.4-Short', 'M2-0.4-Standard', 'M3-0.5-Short', 'M3-0.5-Standard', 'M4-0.7-Short', 'M4-0.7-Standard', 'M5-0.8-Standard']
+  ✘ FAILED (exit 1): bd_warehouse/HeatSetNut
+
+▶ bd_warehouse/PanHeadScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse PanHeadScrew --size M6-1 --length 10.0 --fastener-type iso14583 --hand right --simple true --mode Mode.ADD export_directory PanHeadScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/PanHeadScrew
+
+▶ bd_warehouse/RaisedCounterSunkOvalHeadScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse RaisedCounterSunkOvalHeadScrew --size M6-1 --length 10.0 --fastener-type iso14584 --hand right --simple true --mode Mode.ADD export_directory RaisedCounterSunkOvalHeadScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/RaisedCounterSunkOvalHeadScrew
+
+▶ bd_warehouse/LappedFlangeStub
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse LappedFlangeStub --nps 1 --material Soft --pipe-identifier 40 --stub-length 10.0 --face-type Raised --mode Mode.ADD export_directory LappedFlangeStub/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 759, in __init__
+  |     stub_pipe = Pipe(
+  |                 ^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/pipe.py", line 214, in __init__
+  |     section = PipeSection(nps, material, identifier)
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/pipe.py", line 139, in __init__
+  |     raise ValueError(
+  | ValueError: Invalid nps value - the valid values are: ('1/8', '1/4', '3/8', '1/2', '3/4', '1', '1 1/4', '1 1/2', '2', '2 1/2', '3', '4', '5', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24', '30', '32', '34', '36', '42')
+  ✘ FAILED (exit 1): bd_warehouse/LappedFlangeStub
+
+▶ bd_warehouse/SingleRowTaperedRollerBearing
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SingleRowTaperedRollerBearing --size M6-1 --bearing-type SKT export_directory SingleRowTaperedRollerBearing/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 215, in __init__
+  |     isolate_fastener_type(self.bearing_type, self.bearing_data)[
+  | KeyError: 'M6-1'
+  | 
+  | The above exception was the direct cause of the following exception:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 221, in __init__
+  |     raise ValueError(
+  | ValueError: M6-1 invalid, must be one of ['M15-42-14.25', 'M17-40-13.25', 'M17-47-15.25', 'M17-47-20.25', 'M20-42-15', 'M20-47-15.25', 'M20-52-16.25', 'M20-52-22.25', 'M22-44-15', 'M25-47-15', 'M25-52-16.25', 'M25-52-19.25', 'M25-52-22', 'M25-62-18.25', 'M25-62-25.25', 'M28-52-16', 'M28-58-17.25', 'M28-58-20.25', 'M30-55-17', 'M30-62-17.25', 'M30-62-21.25', 'M30-62-25', 'M30-72-20.75', 'M30-72-28.75', 'M32-53-14.5', 'M32-58-17']
+  ✘ FAILED (exit 1): bd_warehouse/SingleRowTaperedRollerBearing
+
+▶ bd_warehouse/Thread
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse Thread --apex-radius 0.3 --apex-width 0.1 --root-radius 0.5 --root-width 0.2 --pitch 1.0 --length 10.0 --apex-offset 0.0 --interference 0.2 --hand right --simple false --mode Mode.ADD export_directory Thread/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/Thread
+
+▶ bd_warehouse/LockCollar
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse LockCollar --inside-diameter 5 export_directory LockCollar/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 872, in __init__
+  |     id, od, h = valid_sizes[inside_diameter]
+  |                 ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  | KeyError: 5
+  | 
+  | During handling of the above exception, another exception occurred:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 874, in __init__
+  |     raise ValueError(
+  | ValueError: 5 is an invalid inside diameter, must be one of ('5mm', '8mm', '1/4in')
+  ✘ FAILED (exit 1): bd_warehouse/LockCollar
+
+▶ bd_warehouse/Sprocket
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse Sprocket --num-teeth 16 --chain-pitch 12.7 --roller-diameter 7.9375 --clearance 0.0 --thickness 2.1336 --bolt-circle-diameter 0.0 --num-mount-bolts 0 --mount-bolt-diameter 0.0 --bore-diameter 0.0 --align Align.CENTER --mode Mode.ADD export_directory Sprocket/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/sprocket.py", line 150, in __init__
+  |     super().__init__(sprocket, rotation, align, mode)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/objects_part.py", line 83, in __init__
+  |     offset = bbox.to_align_offset(align)
+  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/geometry.py", line 1257, in to_align_offset
+  |     return to_align_offset(self.min, self.max, align)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/geometry.py", line 3463, in to_align_offset
+  |     for alignment, min_coord, max_coord, center_coord in zip(
+  |                                                          ^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/enum.py", line 751, in __call__
+  |     return cls.__new__(cls, value)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/enum.py", line 1170, in __new__
+  |     raise ve_exc
+  | ValueError: 'Align.CENTER' is not a valid Align
+  ✘ FAILED (exit 1): bd_warehouse/Sprocket
+
+▶ bd_warehouse/RaisedCheeseHeadScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse RaisedCheeseHeadScrew --size M6-1 --length 10.0 --fastener-type iso7045 --hand right --simple true --mode Mode.ADD export_directory RaisedCheeseHeadScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/RaisedCheeseHeadScrew
+  SKIP SKIP: bd_warehouse/ClearanceHole — required param 'fastener' is type 'Union' (object, not scalar)
+
+▶ bd_warehouse/RouterSpindleMount
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse RouterSpindleMount --parts both --mode Mode.ADD export_directory RouterSpindleMount/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/RouterSpindleMount
+
+▶ bd_warehouse/ChamferedWasher
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse ChamferedWasher --size M6-1 --fastener-type iso7090 --mode Mode.ADD export_directory ChamferedWasher/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 3069, in __init__
+  |     super().__init__(size, fastener_type, rotation, align, mode)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 2932, in __init__
+  |     self.thread_diameter = float(size[1:])
+  |                            ^^^^^^^^^^^^^^^
+  | ValueError: could not convert string to float: '6-1'
+  ✘ FAILED (exit 1): bd_warehouse/ChamferedWasher
+
+▶ bd_warehouse/SingleRowCappedDeepGrooveBallBearing
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SingleRowCappedDeepGrooveBallBearing --size M6-1 --bearing-type SKT export_directory SingleRowCappedDeepGrooveBallBearing/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 215, in __init__
+  |     isolate_fastener_type(self.bearing_type, self.bearing_data)[
+  | KeyError: 'M6-1'
+  | 
+  | The above exception was the direct cause of the following exception:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 221, in __init__
+  |     raise ValueError(
+  | ValueError: M6-1 invalid, must be one of ['M3-10-4', 'M4-9-3.5', 'M4-9-4', 'M4-11-4', 'M4-12-4', 'M4-13-5', 'M4-16-5', 'M5-11-4', 'M5-11-5', 'M5-13-4', 'M5-16-5', 'M5-19-6', 'M6-13-5', 'M6-15-5', 'M6-19-6', 'M7-14-5', 'M7-17-5', 'M7-19-6', 'M8-16-5', 'M8-16-6', 'M8-19-6', 'M8-22-7', 'M8-22-11', 'M8-24-8', 'M8-28-6']
+  ✘ FAILED (exit 1): bd_warehouse/SingleRowCappedDeepGrooveBallBearing
+
+▶ bd_warehouse/LowProfileScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse LowProfileScrew --size M6-1 --length 10.0 --fastener-type OpenBuilds --hand right --simple true --mode Mode.ADD export_directory LowProfileScrew/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 1596, in __init__
+  |     isolate_fastener_type(self.fastener_type, self.fastener_data)[
+  | KeyError: 'M6-1'
+  | 
+  | The above exception was the direct cause of the following exception:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 2808, in __init__
+  |     super().__init__(
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 1602, in __init__
+  |     raise ValueError(
+  | ValueError: M6-1 invalid, must be one of ['M3-0.5', 'M4-0.7', 'M5-0.8']
+  ✘ FAILED (exit 1): bd_warehouse/LowProfileScrew
+
+▶ bd_warehouse/SquareNut
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SquareNut --size M6-1 --fastener-type din557 --hand right --simple true --mode Mode.ADD export_directory SquareNut/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/SquareNut
+  SKIP SKIP: bd_warehouse/ThreadedHole — required param 'fastener' is type 'Union' (object, not scalar)
+
+▶ bd_warehouse/LappedFlange
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse LappedFlange --nps 1 --flange-class 150 --mode Mode.ADD export_directory LappedFlange/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 674, in __init__
+  |     Flange.inputs_are_valid(nps, flange_class, None)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 404, in inputs_are_valid
+  |     raise ValueError(
+  | ValueError: Invalid nps value - the valid values are: ('1/2', '3/4', '1', '1 1/4', '1 1/2', '2', '2 1/2', '3', '4', '5', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24')
+  ✘ FAILED (exit 1): bd_warehouse/LappedFlange
+
+▶ bd_warehouse/AcmeAntiBacklashNutBlock8mmAssembly
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse AcmeAntiBacklashNutBlock8mmAssembly  export_directory AcmeAntiBacklashNutBlock8mmAssembly/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/AcmeAntiBacklashNutBlock8mmAssembly
+
+▶ bd_warehouse/CBeamGantryPlate
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse CBeamGantryPlate --mode Mode.ADD export_directory CBeamGantryPlate/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/CBeamGantryPlate
+
+▶ bd_warehouse/CounterSunkScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse CounterSunkScrew --size M6-1 --length 10.0 --fastener-type iso10642 --hand right --simple true --mode Mode.ADD export_directory CounterSunkScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/CounterSunkScrew
+
+▶ bd_warehouse/CBeamGantryPlateXLarge
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse CBeamGantryPlateXLarge --mode Mode.ADD export_directory CBeamGantryPlateXLarge/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/CBeamGantryPlateXLarge
+
+▶ bd_warehouse/ShimWasher
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse ShimWasher --shim-type M6 --mode Mode.ADD export_directory ShimWasher/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 1109, in __init__
+  |     od, id, thickness = dimensions[shim_type]
+  |                         ~~~~~~~~~~^^^^^^^^^^^
+  | KeyError: 'M6'
+  | 
+  | During handling of the above exception, another exception occurred:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 1111, in __init__
+  |     raise ValueError(
+  | ValueError: Invalid shim_type M6 must be one of ('MiniVWheel', '10x5x1', '12x8x1', 'SlotWasher', 'FlatWasher')
+  ✘ FAILED (exit 1): bd_warehouse/ShimWasher
+
+▶ bd_warehouse/XtremeSolidVWheel
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse XtremeSolidVWheel --align Align.CENTER --mode Mode.ADD export_directory XtremeSolidVWheel/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 1521, in __init__
+  |     super().__init__(
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/objects_part.py", line 83, in __init__
+  |     offset = bbox.to_align_offset(align)
+  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/geometry.py", line 1257, in to_align_offset
+  |     return to_align_offset(self.min, self.max, align)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/geometry.py", line 3463, in to_align_offset
+  |     for alignment, min_coord, max_coord, center_coord in zip(
+  |                                                          ^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/enum.py", line 751, in __call__
+  |     return cls.__new__(cls, value)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/enum.py", line 1170, in __new__
+  |     raise ve_exc
+  | ValueError: 'Align.CENTER' is not a valid Align
+  ✘ FAILED (exit 1): bd_warehouse/XtremeSolidVWheel
+
+▶ bd_warehouse/IsoThread
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse IsoThread --major-diameter 6.0 --pitch 1.0 --length 10.0 --external true --hand right --interference 0.2 --simple false --mode Mode.ADD export_directory IsoThread/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/IsoThread
+
+▶ bd_warehouse/MetricLeadScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse MetricLeadScrew --length 10.0 export_directory MetricLeadScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/MetricLeadScrew
+  SKIP SKIP: bd_warehouse/PressFitHole — required param 'bearing' is type 'Bearing' (object, not scalar)
+
+▶ bd_warehouse/CheeseHeadScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse CheeseHeadScrew --size M6-1 --length 10.0 --fastener-type iso7048 --hand right --simple true --mode Mode.ADD export_directory CheeseHeadScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/CheeseHeadScrew
+
+▶ bd_warehouse/CheeseHeadWasher
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse CheeseHeadWasher --size M6-1 --fastener-type iso7092 --mode Mode.ADD export_directory CheeseHeadWasher/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 3121, in __init__
+  |     super().__init__(size, fastener_type, rotation, align, mode)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 2932, in __init__
+  |     self.thread_diameter = float(size[1:])
+  |                            ^^^^^^^^^^^^^^^
+  | ValueError: could not convert string to float: '6-1'
+  ✘ FAILED (exit 1): bd_warehouse/CheeseHeadWasher
+
+▶ bd_warehouse/EccentricSpacer
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse EccentricSpacer --cam-height typing.Literal['6mm', '1/4in'] --mode Mode.ADD export_directory EccentricSpacer/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 702, in __init__
+  |     cam_length = valid_heights[cam_height]
+  |                  ~~~~~~~~~~~~~^^^^^^^^^^^^
+  | KeyError: "typing.Literal['6mm',"
+  | 
+  | During handling of the above exception, another exception occurred:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/open_builds.py", line 704, in __init__
+  |     raise ValueError(
+  | ValueError: typing.Literal['6mm', is an invalid cam height, must be one of ('6mm', '1/4in')
+  ✘ FAILED (exit 1): bd_warehouse/EccentricSpacer
+
+▶ bd_warehouse/VSlotLinearRail
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse VSlotLinearRail --rail-size 20x20 --length 10.0 --mode Mode.ADD export_directory VSlotLinearRail/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/VSlotLinearRail
+
+▶ bd_warehouse/HexNutWithFlange
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse HexNutWithFlange --size M6-1 --fastener-type din1665 --hand right --simple true --mode Mode.ADD export_directory HexNutWithFlange/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/HexNutWithFlange
+
+▶ bd_warehouse/DomedCapNut
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse DomedCapNut --size M6-1 --fastener-type din1587 --hand right --simple true --mode Mode.ADD export_directory DomedCapNut/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/DomedCapNut
+
+▶ bd_warehouse/HexHeadWithFlangeScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse HexHeadWithFlangeScrew --size M6-1 --length 10.0 --fastener-type din1662 --hand right --simple true --mode Mode.ADD export_directory HexHeadWithFlangeScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/HexHeadWithFlangeScrew
+
+▶ bd_warehouse/ButtonHeadScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse ButtonHeadScrew --size M6-1 --length 10.0 --fastener-type iso7380_1 --hand right --simple true --mode Mode.ADD export_directory ButtonHeadScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/ButtonHeadScrew
+
+▶ bd_warehouse/PlasticBottleThread
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse PlasticBottleThread --size M6-1 --external true --hand right --interference 0.2 --manufacturing-compensation 0.0 --mode Mode.ADD export_directory PlasticBottleThread/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/thread.py", line 1046, in __init__
+  |     raise ValueError(
+  | ValueError: size invalid, must match                     [L|M][diameter(mm)]SP[100|103|110|200|400|410|415:425|444]
+  ✘ FAILED (exit 1): bd_warehouse/PlasticBottleThread
+
+▶ bd_warehouse/PanHeadWithCollarScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse PanHeadWithCollarScrew --size M6-1 --length 10.0 --fastener-type din967 --hand right --simple true --mode Mode.ADD export_directory PanHeadWithCollarScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/PanHeadWithCollarScrew
+
+▶ bd_warehouse/HexNut
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse HexNut --size M6-1 --fastener-type iso4032 --hand right --simple true --mode Mode.ADD export_directory HexNut/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/HexNut
+
+▶ bd_warehouse/AcmeThread
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse AcmeThread --size M6-1 --length 10.0 --external true --hand right --interference 0.2 --mode Mode.ADD export_directory AcmeThread/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/thread.py", line 757, in __init__
+  |     pitch = AcmeThread.acme_pitch[size]
+  |             ~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  | KeyError: 'M6-1'
+  | 
+  | The above exception was the direct cause of the following exception:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/thread.py", line 759, in __init__
+  |     raise ValueError("Invalid screw size") from exc
+  | ValueError: Invalid screw size
+  ✘ FAILED (exit 1): bd_warehouse/AcmeThread
+
+▶ bd_warehouse/Pipe
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse Pipe --nps 1 --material Soft --identifier 40 --mode Mode.ADD export_directory Pipe/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/pipe.py", line 206, in __init__
+  |     raise ValueError("A path must be provided")
+  | ValueError: A path must be provided
+  ✘ FAILED (exit 1): bd_warehouse/Pipe
+
+▶ bd_warehouse/WeldNeckFlange
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse WeldNeckFlange --nps 1 --flange-class 150 --face-type Raised --mode Mode.ADD export_directory WeldNeckFlange/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 1043, in __init__
+  |     Flange.inputs_are_valid(nps, flange_class, face_type)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 404, in inputs_are_valid
+  |     raise ValueError(
+  | ValueError: Invalid nps value - the valid values are: ('1/2', '3/4', '1', '1 1/4', '1 1/2', '2', '2 1/2', '3', '4', '5', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24')
+  ✘ FAILED (exit 1): bd_warehouse/WeldNeckFlange
+
+▶ bd_warehouse/CBeamEndMount
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse CBeamEndMount --mode Mode.ADD export_directory CBeamEndMount/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/CBeamEndMount
+
+▶ bd_warehouse/CBeamRiserPlate
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse CBeamRiserPlate --mode Mode.ADD export_directory CBeamRiserPlate/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/CBeamRiserPlate
+
+▶ bd_warehouse/UnchamferedHexagonNut
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse UnchamferedHexagonNut --size M6-1 --fastener-type iso4036 --hand right --simple true --mode Mode.ADD export_directory UnchamferedHexagonNut/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/UnchamferedHexagonNut
+  SKIP SKIP: bd_warehouse/TapHole — required param 'fastener' is type 'Union' (object, not scalar)
+
+▶ bd_warehouse/StepperMotor
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse StepperMotor --motor-type Nema17 export_directory StepperMotor/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/StepperMotor
+  SKIP SKIP: bd_warehouse/InsertHole — required param 'fastener' is type 'HeatSetNut' (object, not scalar)
+
+▶ bd_warehouse/PlainWasher
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse PlainWasher --size M6-1 --fastener-type iso7091 --mode Mode.ADD export_directory PlainWasher/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 3027, in __init__
+  |     super().__init__(size, fastener_type, rotation, align, mode)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 2932, in __init__
+  |     self.thread_diameter = float(size[1:])
+  |                            ^^^^^^^^^^^^^^^
+  | ValueError: could not convert string to float: '6-1'
+  ✘ FAILED (exit 1): bd_warehouse/PlainWasher
+
+▶ bd_warehouse/InternalToothLockWasher
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse InternalToothLockWasher --size M6-1 --fastener-type din6797 --mode Mode.ADD export_directory InternalToothLockWasher/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 3172, in __init__
+  |     super().__init__(size, fastener_type, rotation, align, mode)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/fastener.py", line 2932, in __init__
+  |     self.thread_diameter = float(size[1:])
+  |                            ^^^^^^^^^^^^^^^
+  | ValueError: could not convert string to float: '6-1'
+  ✘ FAILED (exit 1): bd_warehouse/InternalToothLockWasher
+
+▶ bd_warehouse/ButtonHeadWithCollarScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse ButtonHeadWithCollarScrew --size M6-1 --length 10.0 --fastener-type iso7380_2 --hand right --simple true --mode Mode.ADD export_directory ButtonHeadWithCollarScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/ButtonHeadWithCollarScrew
+
+▶ bd_warehouse/SingleRowDeepGrooveBallBearing
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SingleRowDeepGrooveBallBearing --size M6-1 --bearing-type SKT export_directory SingleRowDeepGrooveBallBearing/
+  | Traceback (most recent call last):
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 215, in __init__
+  |     isolate_fastener_type(self.bearing_type, self.bearing_data)[
+  | KeyError: 'M6-1'
+  | 
+  | The above exception was the direct cause of the following exception:
+  | 
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/bearing.py", line 221, in __init__
+  |     raise ValueError(
+  | ValueError: M6-1 invalid, must be one of ['M3-10-4', 'M4-9-2.5', 'M4-11-4', 'M4-12-4', 'M4-13-5', 'M4-16-5', 'M5-11-3', 'M5-13-4', 'M5-16-5', 'M5-19-6', 'M6-13-3.5', 'M6-15-5', 'M6-19-6', 'M7-14-3.5', 'M7-17-5', 'M7-19-6', 'M7-22-7', 'M8-16-4', 'M8-19-6', 'M8-22-7', 'M8-24-8', 'M9-17-4', 'M9-20-6', 'M9-24-7', 'M9-26-8', 'M10-19-5', 'M10-22-6', 'M10-26-8', 'M10-28-8', 'M10-30-9', 'M10-35-11']
+  ✘ FAILED (exit 1): bd_warehouse/SingleRowDeepGrooveBallBearing
+
+▶ bd_warehouse/SocketWeldFlange
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse SocketWeldFlange --nps 1 --flange-class 150 --face-type Raised --mode Mode.ADD export_directory SocketWeldFlange/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 946, in __init__
+  |     Flange.inputs_are_valid(nps, flange_class, face_type)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/bd_warehouse/flange.py", line 404, in inputs_are_valid
+  |     raise ValueError(
+  | ValueError: Invalid nps value - the valid values are: ('1/2', '3/4', '1', '1 1/4', '1 1/2', '2', '2 1/2', '3', '4', '5', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24')
+  ✘ FAILED (exit 1): bd_warehouse/SocketWeldFlange
+
+▶ bd_warehouse/HexHeadScrew
+  CMD: /home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/bin/python -m build123d_cli bd_warehouse HexHeadScrew --size M6-1 --length 10.0 --fastener-type iso4014 --hand right --simple true --mode Mode.ADD export_directory HexHeadScrew/
+  | Traceback (most recent call last):
+  |   File "<frozen runpy>", line 198, in _run_module_as_main
+  |   File "<frozen runpy>", line 88, in _run_code
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/__main__.py", line 4, in <module>
+  |     main()
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 219, in main
+  |     fire.Fire(cli_groups)
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 97, in patched_fire
+  |     return original_fire(component, *args, **kwargs)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+  |     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+  |     component, remaining_args = _CallAndUpdateTrace(
+  |                                 ^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+  |     component = fn(*varargs, **kwargs)
+  |                 ^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d_cli/build123d_cli.py", line 125, in _export_directory
+  |     export_stl(to_export, directory / base_filename_no_extension.with_suffix(".stl"))
+  |   File "/home/hephaestus/bin/BowlerStudioInstall/build123d/cadoodle-b123d_v0.0.9/py/lib/python3.12/site-packages/build123d/exporters3d.py", line 451, in export_stl
+  |     to_export.wrapped, tolerance, True, angular_tolerance, True
+  |     ^^^^^^^^^^^^^^^^^
+  | AttributeError: 'function' object has no attribute 'wrapped'
+  ✘ FAILED (exit 1): bd_warehouse/HexHeadScrew
+
+========================================
+  Total   : 76
+  Passed  : 7
+  Failed  : 63
+  Skipped : 6
+========================================
+Report written to: report.txt

@@ -788,57 +788,15 @@
     }
   },
   "bd_warehouse": {
-    "SingleRowAngularContactBallBearing": {
-      "name": "SingleRowAngularContactBallBearing",
-      "description": "Single Row Angular Contact Ball Bearing",
+    "FlexibleCoupler": {
+      "name": "FlexibleCoupler",
+      "description": "Part Object: OpenBuilds Flexible Coupler",
       "parameters": [
         {
-          "name": "size",
-          "type": "str",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "bearing_type",
-          "type": "str",
-          "default": "SKT",
-          "required": false
-        }
-      ]
-    },
-    "PanHeadScrew": {
-      "name": "PanHeadScrew",
-      "description": "Pan Head Screw",
-      "parameters": [
-        {
-          "name": "size",
-          "type": "str",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "length",
-          "type": "float",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "fastener_type",
+          "name": "shaft_diameter",
           "type": "Literal",
-          "default": "iso14583",
-          "required": false
-        },
-        {
-          "name": "hand",
-          "type": "Literal",
-          "default": "right",
-          "required": false
-        },
-        {
-          "name": "simple",
-          "type": "bool",
-          "default": true,
-          "required": false
+          "default": null,
+          "required": true
         },
         {
           "name": "rotation",
@@ -864,13 +822,69 @@
         }
       ]
     },
-    "MetricLeadScrew": {
-      "name": "MetricLeadScrew",
-      "description": "Assembly: OpenBuilds MetricLeadScrew",
+    "CBeamLinearRail": {
+      "name": "CBeamLinearRail",
+      "description": "Part Object: OpenBuilds C-Beam Linear Rail",
       "parameters": [
         {
           "name": "length",
           "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "SingleRowAngularContactBallBearing": {
+      "name": "SingleRowAngularContactBallBearing",
+      "description": "Single Row Angular Contact Ball Bearing",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "bearing_type",
+          "type": "str",
+          "default": "SKT",
+          "required": false
+        }
+      ]
+    },
+    "XtremeSolidVWheelAssembly": {
+      "name": "XtremeSolidVWheelAssembly",
+      "description": "Assembly: OpenBuilds Xtreme Solid V Wheel Assembly",
+      "parameters": [
+        {
+          "name": "eccentric",
+          "type": "bool",
           "default": null,
           "required": true
         }
@@ -1006,18 +1020,6 @@
         }
       ]
     },
-    "XtremeSolidVWheelAssembly": {
-      "name": "XtremeSolidVWheelAssembly",
-      "description": "Assembly: OpenBuilds Xtreme Solid V Wheel Assembly",
-      "parameters": [
-        {
-          "name": "eccentric",
-          "type": "bool",
-          "default": null,
-          "required": true
-        }
-      ]
-    },
     "SocketHeadCapScrew": {
       "name": "SocketHeadCapScrew",
       "description": "Socket Head Cap Screw",
@@ -1126,13 +1128,13 @@
         }
       ]
     },
-    "CBeamLinearRail": {
-      "name": "CBeamLinearRail",
-      "description": "Part Object: OpenBuilds C-Beam Linear Rail",
+    "AluminumSpacer": {
+      "name": "AluminumSpacer",
+      "description": "Part Object: OpenBuilds AluminumSpacer",
       "parameters": [
         {
           "name": "length",
-          "type": "float",
+          "type": "Literal",
           "default": null,
           "required": true
         },
@@ -1149,11 +1151,7 @@
         {
           "name": "align",
           "type": "Union",
-          "default": [
-            "Align.CENTER",
-            "Align.CENTER",
-            "Align.MIN"
-          ],
+          "default": null,
           "required": false
         },
         {
@@ -1164,14 +1162,47 @@
         }
       ]
     },
-    "EccentricSpacer": {
-      "name": "EccentricSpacer",
-      "description": "Part Object: OpenBuilds Eccentric Spacer",
+    "MetricTrapezoidalThread": {
+      "name": "MetricTrapezoidalThread",
+      "description": "Metric Trapezoidal Thread",
       "parameters": [
         {
-          "name": "cam_height",
-          "type": "_empty",
-          "default": "typing.Literal['6mm', '1/4in']",
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "external",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "end_finishes",
+          "type": "tuple",
+          "default": [
+            "fade",
+            "fade"
+          ],
+          "required": false
+        },
+        {
+          "name": "interference",
+          "type": "float",
+          "default": 0.2,
           "required": false
         },
         {
@@ -1256,90 +1287,20 @@
         }
       ]
     },
-    "CBeamRiserPlate": {
-      "name": "CBeamRiserPlate",
-      "description": "Part Object: OpenBuilds C-Beam Riser Plate",
+    "XLargeCBeamGantry": {
+      "name": "XLargeCBeamGantry",
+      "description": "XLargeCBeamGantry",
       "parameters": [
         {
-          "name": "rotation",
-          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
-          "default": [
-            0,
-            0,
-            0
-          ],
+          "name": "wheel_count",
+          "type": "Literal",
+          "default": 4,
           "required": false
         },
         {
-          "name": "align",
-          "type": "Union",
-          "default": null,
-          "required": false
-        },
-        {
-          "name": "mode",
-          "type": "Mode",
-          "default": "Mode.ADD",
-          "required": false
-        }
-      ]
-    },
-    "CBeamEndMount": {
-      "name": "CBeamEndMount",
-      "description": "CBeamEndMount",
-      "parameters": [
-        {
-          "name": "rotation",
-          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
-          "default": [
-            0,
-            0,
-            0
-          ],
-          "required": false
-        },
-        {
-          "name": "align",
-          "type": "Union",
-          "default": [
-            "Align.CENTER",
-            "Align.CENTER",
-            "Align.MIN"
-          ],
-          "required": false
-        },
-        {
-          "name": "mode",
-          "type": "Mode",
-          "default": "Mode.ADD",
-          "required": false
-        }
-      ]
-    },
-    "CBeamGantryPlateXLarge": {
-      "name": "CBeamGantryPlateXLarge",
-      "description": "Part Object: OpenBuilds C-Beam Gantry Plate X-Large",
-      "parameters": [
-        {
-          "name": "rotation",
-          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
-          "default": [
-            0,
-            0,
-            0
-          ],
-          "required": false
-        },
-        {
-          "name": "align",
-          "type": "Union",
-          "default": null,
-          "required": false
-        },
-        {
-          "name": "mode",
-          "type": "Mode",
-          "default": "Mode.ADD",
+          "name": "eccentric_angle",
+          "type": "float",
+          "default": 90,
           "required": false
         }
       ]
@@ -1549,34 +1510,6 @@
         }
       ]
     },
-    "CBeamGantryPlate": {
-      "name": "CBeamGantryPlate",
-      "description": "Part Object: OpenBuilds C-Beam Gantry Plate",
-      "parameters": [
-        {
-          "name": "rotation",
-          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
-          "default": [
-            0,
-            0,
-            0
-          ],
-          "required": false
-        },
-        {
-          "name": "align",
-          "type": "Union",
-          "default": null,
-          "required": false
-        },
-        {
-          "name": "mode",
-          "type": "Mode",
-          "default": "Mode.ADD",
-          "required": false
-        }
-      ]
-    },
     "HeatSetNut": {
       "name": "HeatSetNut",
       "description": "Heat Set Nut",
@@ -1629,62 +1562,38 @@
         }
       ]
     },
-    "Sprocket": {
-      "name": "Sprocket",
-      "description": "Create a new sprocket object as defined by the given parameters. The input parameter",
+    "PanHeadScrew": {
+      "name": "PanHeadScrew",
+      "description": "Pan Head Screw",
       "parameters": [
         {
-          "name": "num_teeth",
-          "type": "int",
+          "name": "size",
+          "type": "str",
           "default": null,
           "required": true
         },
         {
-          "name": "chain_pitch",
+          "name": "length",
           "type": "float",
-          "default": 12.7,
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso14583",
           "required": false
         },
         {
-          "name": "roller_diameter",
-          "type": "float",
-          "default": 7.9375,
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
           "required": false
         },
         {
-          "name": "clearance",
-          "type": "float",
-          "default": 0.0,
-          "required": false
-        },
-        {
-          "name": "thickness",
-          "type": "float",
-          "default": 2.1336,
-          "required": false
-        },
-        {
-          "name": "bolt_circle_diameter",
-          "type": "float",
-          "default": 0.0,
-          "required": false
-        },
-        {
-          "name": "num_mount_bolts",
-          "type": "int",
-          "default": 0,
-          "required": false
-        },
-        {
-          "name": "mount_bolt_diameter",
-          "type": "float",
-          "default": 0.0,
-          "required": false
-        },
-        {
-          "name": "bore_diameter",
-          "type": "float",
-          "default": 0.0,
+          "name": "simple",
+          "type": "bool",
+          "default": true,
           "required": false
         },
         {
@@ -1699,44 +1608,14 @@
         },
         {
           "name": "align",
-          "type": "None | build123d.build_enums.Align | tuple[build123d.build_enums.Align, build123d.build_enums.Align, build123d.build_enums.Align]",
-          "default": "Align.CENTER",
+          "type": "Union",
+          "default": null,
           "required": false
         },
         {
           "name": "mode",
           "type": "Mode",
           "default": "Mode.ADD",
-          "required": false
-        }
-      ]
-    },
-    "LockCollar": {
-      "name": "LockCollar",
-      "description": "Assembly: OpenBuilds LockCollar",
-      "parameters": [
-        {
-          "name": "inside_diameter",
-          "type": "Literal",
-          "default": null,
-          "required": true
-        }
-      ]
-    },
-    "XLargeCBeamGantry": {
-      "name": "XLargeCBeamGantry",
-      "description": "XLargeCBeamGantry",
-      "parameters": [
-        {
-          "name": "wheel_count",
-          "type": "Literal",
-          "default": 4,
-          "required": false
-        },
-        {
-          "name": "eccentric_angle",
-          "type": "float",
-          "default": 90,
           "required": false
         }
       ]
@@ -1982,33 +1861,75 @@
         }
       ]
     },
-    "StepperMotor": {
-      "name": "StepperMotor",
-      "description": "Assembly: OpenBuilds StepperMotors",
+    "LockCollar": {
+      "name": "LockCollar",
+      "description": "Assembly: OpenBuilds LockCollar",
       "parameters": [
         {
-          "name": "motor_type",
+          "name": "inside_diameter",
           "type": "Literal",
+          "default": null,
+          "required": true
+        }
+      ]
+    },
+    "Sprocket": {
+      "name": "Sprocket",
+      "description": "Create a new sprocket object as defined by the given parameters. The input parameter",
+      "parameters": [
+        {
+          "name": "num_teeth",
+          "type": "int",
           "default": null,
           "required": true
         },
         {
-          "name": "motor_length",
-          "type": "Optional",
-          "default": null,
+          "name": "chain_pitch",
+          "type": "float",
+          "default": 12.7,
           "required": false
-        }
-      ]
-    },
-    "AluminumSpacer": {
-      "name": "AluminumSpacer",
-      "description": "Part Object: OpenBuilds AluminumSpacer",
-      "parameters": [
+        },
         {
-          "name": "length",
-          "type": "Literal",
-          "default": null,
-          "required": true
+          "name": "roller_diameter",
+          "type": "float",
+          "default": 7.9375,
+          "required": false
+        },
+        {
+          "name": "clearance",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "thickness",
+          "type": "float",
+          "default": 2.1336,
+          "required": false
+        },
+        {
+          "name": "bolt_circle_diameter",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "num_mount_bolts",
+          "type": "int",
+          "default": 0,
+          "required": false
+        },
+        {
+          "name": "mount_bolt_diameter",
+          "type": "float",
+          "default": 0.0,
+          "required": false
+        },
+        {
+          "name": "bore_diameter",
+          "type": "float",
+          "default": 0.0,
+          "required": false
         },
         {
           "name": "rotation",
@@ -2022,42 +1943,8 @@
         },
         {
           "name": "align",
-          "type": "Union",
-          "default": null,
-          "required": false
-        },
-        {
-          "name": "mode",
-          "type": "Mode",
-          "default": "Mode.ADD",
-          "required": false
-        }
-      ]
-    },
-    "ShimWasher": {
-      "name": "ShimWasher",
-      "description": "Part Object: OpenBuilds Shim/Washer",
-      "parameters": [
-        {
-          "name": "shim_type",
-          "type": "Literal",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "rotation",
-          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
-          "default": [
-            0,
-            0,
-            0
-          ],
-          "required": false
-        },
-        {
-          "name": "align",
-          "type": "Union",
-          "default": null,
+          "type": "None | build123d.build_enums.Align | tuple[build123d.build_enums.Align, build123d.build_enums.Align, build123d.build_enums.Align]",
+          "default": "Align.CENTER",
           "required": false
         },
         {
@@ -2178,15 +2065,15 @@
         }
       ]
     },
-    "FlexibleCoupler": {
-      "name": "FlexibleCoupler",
-      "description": "Part Object: OpenBuilds Flexible Coupler",
+    "RouterSpindleMount": {
+      "name": "RouterSpindleMount",
+      "description": "RouterSpindleMount",
       "parameters": [
         {
-          "name": "shaft_diameter",
+          "name": "parts",
           "type": "Literal",
-          "default": null,
-          "required": true
+          "default": "both",
+          "required": false
         },
         {
           "name": "rotation",
@@ -2472,6 +2359,39 @@
         }
       ]
     },
+    "AcmeAntiBacklashNutBlock8mmAssembly": {
+      "name": "AcmeAntiBacklashNutBlock8mmAssembly",
+      "description": "Assembly: OpenBuilds 8mm Acme Anti Backlash Nut Block Assembly",
+      "parameters": []
+    },
+    "CBeamGantryPlate": {
+      "name": "CBeamGantryPlate",
+      "description": "Part Object: OpenBuilds C-Beam Gantry Plate",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
     "CounterSunkScrew": {
       "name": "CounterSunkScrew",
       "description": "CounterSunk Screw",
@@ -2530,15 +2450,43 @@
         }
       ]
     },
-    "RouterSpindleMount": {
-      "name": "RouterSpindleMount",
-      "description": "RouterSpindleMount",
+    "CBeamGantryPlateXLarge": {
+      "name": "CBeamGantryPlateXLarge",
+      "description": "Part Object: OpenBuilds C-Beam Gantry Plate X-Large",
       "parameters": [
         {
-          "name": "parts",
-          "type": "Literal",
-          "default": "both",
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
           "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "ShimWasher": {
+      "name": "ShimWasher",
+      "description": "Part Object: OpenBuilds Shim/Washer",
+      "parameters": [
+        {
+          "name": "shim_type",
+          "type": "Literal",
+          "default": null,
+          "required": true
         },
         {
           "name": "rotation",
@@ -2668,6 +2616,18 @@
           "type": "Mode",
           "default": "Mode.ADD",
           "required": false
+        }
+      ]
+    },
+    "MetricLeadScrew": {
+      "name": "MetricLeadScrew",
+      "description": "Assembly: OpenBuilds MetricLeadScrew",
+      "parameters": [
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
         }
       ]
     },
@@ -2805,79 +2765,14 @@
         }
       ]
     },
-    "TapHole": {
-      "name": "TapHole",
-      "description": "Part Object: TapHole",
+    "EccentricSpacer": {
+      "name": "EccentricSpacer",
+      "description": "Part Object: OpenBuilds Eccentric Spacer",
       "parameters": [
         {
-          "name": "fastener",
-          "type": "Union",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "material",
-          "type": "Literal",
-          "default": "Soft",
-          "required": false
-        },
-        {
-          "name": "fit",
-          "type": "Literal",
-          "default": "Normal",
-          "required": false
-        },
-        {
-          "name": "depth",
-          "type": "float",
-          "default": null,
-          "required": false
-        },
-        {
-          "name": "counter_sunk",
-          "type": "bool",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "mode",
-          "type": "Mode",
-          "default": "Mode.SUBTRACT",
-          "required": false
-        }
-      ]
-    },
-    "AcmeAntiBacklashNutBlock8mmAssembly": {
-      "name": "AcmeAntiBacklashNutBlock8mmAssembly",
-      "description": "Assembly: OpenBuilds 8mm Acme Anti Backlash Nut Block Assembly",
-      "parameters": []
-    },
-    "DomedCapNut": {
-      "name": "DomedCapNut",
-      "description": "Domed Cap Nut",
-      "parameters": [
-        {
-          "name": "size",
-          "type": "str",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "fastener_type",
-          "type": "Literal",
-          "default": "din1587",
-          "required": false
-        },
-        {
-          "name": "hand",
-          "type": "Literal",
-          "default": "right",
-          "required": false
-        },
-        {
-          "name": "simple",
-          "type": "bool",
-          "default": true,
+          "name": "cam_height",
+          "type": "_empty",
+          "default": "typing.Literal['6mm', '1/4in']",
           "required": false
         },
         {
@@ -2894,6 +2789,50 @@
           "name": "align",
           "type": "Union",
           "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "VSlotLinearRail": {
+      "name": "VSlotLinearRail",
+      "description": "Part Object: OpenBuilds V Slot Linear Rail",
+      "parameters": [
+        {
+          "name": "rail_size",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
           "required": false
         },
         {
@@ -2956,9 +2895,9 @@
         }
       ]
     },
-    "ButtonHeadScrew": {
-      "name": "ButtonHeadScrew",
-      "description": "Button Head Screw",
+    "DomedCapNut": {
+      "name": "DomedCapNut",
+      "description": "Domed Cap Nut",
       "parameters": [
         {
           "name": "size",
@@ -2967,15 +2906,9 @@
           "required": true
         },
         {
-          "name": "length",
-          "type": "float",
-          "default": null,
-          "required": true
-        },
-        {
           "name": "fastener_type",
           "type": "Literal",
-          "default": "iso7380_1",
+          "default": "din1587",
           "required": false
         },
         {
@@ -3034,6 +2967,64 @@
           "name": "fastener_type",
           "type": "Literal",
           "default": "din1662",
+          "required": false
+        },
+        {
+          "name": "hand",
+          "type": "Literal",
+          "default": "right",
+          "required": false
+        },
+        {
+          "name": "simple",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "ButtonHeadScrew": {
+      "name": "ButtonHeadScrew",
+      "description": "Button Head Screw",
+      "parameters": [
+        {
+          "name": "size",
+          "type": "str",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "length",
+          "type": "float",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "fastener_type",
+          "type": "Literal",
+          "default": "iso7380_1",
           "required": false
         },
         {
@@ -3307,50 +3298,6 @@
         }
       ]
     },
-    "VSlotLinearRail": {
-      "name": "VSlotLinearRail",
-      "description": "Part Object: OpenBuilds V Slot Linear Rail",
-      "parameters": [
-        {
-          "name": "rail_size",
-          "type": "Literal",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "length",
-          "type": "float",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "rotation",
-          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
-          "default": [
-            0,
-            0,
-            0
-          ],
-          "required": false
-        },
-        {
-          "name": "align",
-          "type": "Union",
-          "default": [
-            "Align.CENTER",
-            "Align.CENTER",
-            "Align.MIN"
-          ],
-          "required": false
-        },
-        {
-          "name": "mode",
-          "type": "Mode",
-          "default": "Mode.ADD",
-          "required": false
-        }
-      ]
-    },
     "Pipe": {
       "name": "Pipe",
       "description": "Pipe",
@@ -3453,6 +3400,66 @@
         }
       ]
     },
+    "CBeamEndMount": {
+      "name": "CBeamEndMount",
+      "description": "CBeamEndMount",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": [
+            "Align.CENTER",
+            "Align.CENTER",
+            "Align.MIN"
+          ],
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "CBeamRiserPlate": {
+      "name": "CBeamRiserPlate",
+      "description": "Part Object: OpenBuilds C-Beam Riser Plate",
+      "parameters": [
+        {
+          "name": "rotation",
+          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "required": false
+        },
+        {
+          "name": "align",
+          "type": "Union",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
     "UnchamferedHexagonNut": {
       "name": "UnchamferedHexagonNut",
       "description": "Unchamfered Hexagon Nut",
@@ -3501,6 +3508,66 @@
           "name": "mode",
           "type": "Mode",
           "default": "Mode.ADD",
+          "required": false
+        }
+      ]
+    },
+    "TapHole": {
+      "name": "TapHole",
+      "description": "Part Object: TapHole",
+      "parameters": [
+        {
+          "name": "fastener",
+          "type": "Union",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "material",
+          "type": "Literal",
+          "default": "Soft",
+          "required": false
+        },
+        {
+          "name": "fit",
+          "type": "Literal",
+          "default": "Normal",
+          "required": false
+        },
+        {
+          "name": "depth",
+          "type": "float",
+          "default": null,
+          "required": false
+        },
+        {
+          "name": "counter_sunk",
+          "type": "bool",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "mode",
+          "type": "Mode",
+          "default": "Mode.SUBTRACT",
+          "required": false
+        }
+      ]
+    },
+    "StepperMotor": {
+      "name": "StepperMotor",
+      "description": "Assembly: OpenBuilds StepperMotors",
+      "parameters": [
+        {
+          "name": "motor_type",
+          "type": "Literal",
+          "default": null,
+          "required": true
+        },
+        {
+          "name": "motor_length",
+          "type": "Optional",
+          "default": null,
           "required": false
         }
       ]
@@ -3556,73 +3623,6 @@
           "type": "Literal",
           "default": null,
           "required": true
-        },
-        {
-          "name": "rotation",
-          "type": "build123d.geometry.Rotation | tuple[float, float, float]",
-          "default": [
-            0,
-            0,
-            0
-          ],
-          "required": false
-        },
-        {
-          "name": "align",
-          "type": "Union",
-          "default": null,
-          "required": false
-        },
-        {
-          "name": "mode",
-          "type": "Mode",
-          "default": "Mode.ADD",
-          "required": false
-        }
-      ]
-    },
-    "MetricTrapezoidalThread": {
-      "name": "MetricTrapezoidalThread",
-      "description": "Metric Trapezoidal Thread",
-      "parameters": [
-        {
-          "name": "size",
-          "type": "str",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "length",
-          "type": "float",
-          "default": null,
-          "required": true
-        },
-        {
-          "name": "external",
-          "type": "bool",
-          "default": true,
-          "required": false
-        },
-        {
-          "name": "hand",
-          "type": "Literal",
-          "default": "right",
-          "required": false
-        },
-        {
-          "name": "end_finishes",
-          "type": "tuple",
-          "default": [
-            "fade",
-            "fade"
-          ],
-          "required": false
-        },
-        {
-          "name": "interference",
-          "type": "float",
-          "default": 0.2,
-          "required": false
         },
         {
           "name": "rotation",
