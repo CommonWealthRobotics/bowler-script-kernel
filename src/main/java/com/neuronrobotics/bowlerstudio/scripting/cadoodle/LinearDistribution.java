@@ -10,6 +10,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
@@ -71,21 +72,27 @@ public class LinearDistribution extends AbstractAddFrom {
 					y2 += y / 2;
 				TransformNR tf = new TransformNR(x2, y2, 0);
 
-				Bounds b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
-				cpMap.clear();
-				CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
-					@Override
-					public ArrayList<CSG> process(CSG ic, int depth) {
-						ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, tf, b);
-						for (CSG c : copyPasteMoved) {
-							c.setParameter(getDb(), rad);
-							c.setParameter(getDb(), objectX);
-							c.setParameter(getDb(), objectY);
-							c.setParameter(getDb(), hexLin);
+				Bounds b;
+				try {
+					b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
+					cpMap.clear();
+					CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
+						@Override
+						public ArrayList<CSG> process(CSG ic, int depth) {
+							ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, tf, b);
+							for (CSG c : copyPasteMoved) {
+								c.setParameter(getDb(), rad);
+								c.setParameter(getDb(), objectX);
+								c.setParameter(getDb(), objectY);
+								c.setParameter(getDb(), hexLin);
+							}
+							return copyPasteMoved;
 						}
-						return copyPasteMoved;
-					}
-				}, 1);
+					}, 1);
+				} catch (BoundsComputFailure e) {
+					Log.error(e);
+				}
+	
 
 				for (String from : cpMap.keySet()) {
 					CSG source;
@@ -192,7 +199,7 @@ public class LinearDistribution extends AbstractAddFrom {
 		return b;
 	}
 
-	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) {
+	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) throws BoundsComputFailure {
 
 		if (names != null) {
 			if (inWorkplaneBounds == null)
@@ -200,7 +207,7 @@ public class LinearDistribution extends AbstractAddFrom {
 			List<CSG> selectedCSG = getSelectedCSG(names, incoming);
 			return Align.getBounds(selectedCSG, workplane, inWorkplaneBounds);
 		} else {
-			throw new RuntimeException("Align can not be initialized without bounds!");
+			throw new BoundsComputFailure("Align can not be initialized without bounds!");
 		}
 
 	}

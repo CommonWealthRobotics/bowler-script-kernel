@@ -69,35 +69,39 @@ public class Align extends CaDoodleOperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 
-		Bounds bounds2 = getBounds(incoming, cache);//
-
-		HashMap<String, TransformNR> moves = new HashMap<>();
-		HashMap<String, CSG> objects = new HashMap<String, CSG>();
-		for (String name : names) {
-			for (CSG tmp : back) {
-				if (!tmp.getName().contentEquals(name))
-					continue;
-				objects.put(name, tmp);
-				CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane(tmp)).inverse());
-				TransformNR tf = performTransform(bounds2, c);
-				moves.put(c.getName(), tf);
+		Bounds bounds2;
+		try {
+			bounds2 = getBounds(incoming, cache);
+			HashMap<String, TransformNR> moves = new HashMap<>();
+			HashMap<String, CSG> objects = new HashMap<String, CSG>();
+			for (String name : names) {
+				for (CSG tmp : back) {
+					if (!tmp.getName().contentEquals(name))
+						continue;
+					objects.put(name, tmp);
+					CSG c = tmp.transformed(TransformFactory.nrToCSG(getWorkplane(tmp)).inverse());
+					TransformNR tf = performTransform(bounds2, c);
+					moves.put(c.getName(), tf);
+				}
 			}
-		}
-		for (String name : moves.keySet()) {
-			TransformNR nr = moves.get(name);
-			TransformNR wp = getWorkplane(objects.get(name));
-			TransformNR wpinv = wp.inverse();
+			for (String name : moves.keySet()) {
+				TransformNR nr = moves.get(name);
+				TransformNR wp = getWorkplane(objects.get(name));
+				TransformNR wpinv = wp.inverse();
 
-			TransformNR times = wp.times(nr.times(wpinv));
-			Transform tf = TransformFactory.nrToCSG(times);
-			CaDoodleFile.applyToAllConstituantElements(false, name, back, (incoming1, depth) -> {
-				ArrayList<CSG> b = new ArrayList<>();
-				CSG c = incoming1.transformed(tf);
-				sync(incoming1, c);
-				MoveCenter.set(getName(), c, times);
-				b.add(c);
-				return b;
-			}, 1, new HashSet<String>());
+				TransformNR times = wp.times(nr.times(wpinv));
+				Transform tf = TransformFactory.nrToCSG(times);
+				CaDoodleFile.applyToAllConstituantElements(false, name, back, (incoming1, depth) -> {
+					ArrayList<CSG> b = new ArrayList<>();
+					CSG c = incoming1.transformed(tf);
+					sync(incoming1, c);
+					MoveCenter.set(getName(), c, times);
+					b.add(c);
+					return b;
+				}, 1, new HashSet<String>());
+			}
+		} catch (BoundsComputFailure e) {
+			Log.error(e);
 		}
 		return back;
 	}
@@ -119,48 +123,48 @@ public class Align extends CaDoodleOperation {
 		double tx = 0, ty = 0, tz = 0;
 		if (z != null) {
 			switch (z) {
-				case negative :
-					tz = -incoming.getMinZ() + reference.getMinZ();
-					break;
-				case middle :
-					tz = -incoming.getCenterZ() + reference.getCenterZ();
-					break;
-				case positive :
-					tz = -incoming.getMaxZ() + reference.getMaxZ();
-					break;
-				default :
-					break;
+			case negative:
+				tz = -incoming.getMinZ() + reference.getMinZ();
+				break;
+			case middle:
+				tz = -incoming.getCenterZ() + reference.getCenterZ();
+				break;
+			case positive:
+				tz = -incoming.getMaxZ() + reference.getMaxZ();
+				break;
+			default:
+				break;
 			}
 		}
 		if (x != null) {
 			switch (x) {
-				case negative :
-					tx = -incoming.getMinX() + reference.getMinX();
-					break;
-				case middle :
-					tx = -incoming.getCenterX() + reference.getCenterX();
-					break;
-				case positive :
-					tx = -incoming.getMaxX() + reference.getMaxX();
-					break;
-				default :
-					break;
+			case negative:
+				tx = -incoming.getMinX() + reference.getMinX();
+				break;
+			case middle:
+				tx = -incoming.getCenterX() + reference.getCenterX();
+				break;
+			case positive:
+				tx = -incoming.getMaxX() + reference.getMaxX();
+				break;
+			default:
+				break;
 
 			}
 		}
 		if (y != null) {
 			switch (y) {
-				case negative :
-					ty = -incoming.getMinY() + reference.getMinY();
-					break;
-				case middle :
-					ty = -incoming.getCenterY() + reference.getCenterY();
-					break;
-				case positive :
-					ty = -incoming.getMaxY() + reference.getMaxY();
-					break;
-				default :
-					break;
+			case negative:
+				ty = -incoming.getMinY() + reference.getMinY();
+				break;
+			case middle:
+				ty = -incoming.getCenterY() + reference.getCenterY();
+				break;
+			case positive:
+				ty = -incoming.getMaxY() + reference.getMaxY();
+				break;
+			default:
+				break;
 
 			}
 		}
@@ -213,7 +217,7 @@ public class Align extends CaDoodleOperation {
 		return this;
 	}
 
-	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) {
+	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) throws BoundsComputFailure {
 		if (bounds != null) {
 			Log.error("Depricated Bounds in the align step!");
 			return bounds.getBounds();
@@ -254,7 +258,8 @@ public class Align extends CaDoodleOperation {
 		return this;
 	}
 
-	public static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache) {
+	public static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache)
+			throws BoundsComputFailure {
 		if (cache == null)
 			cache = new HashMap<>();
 		Vector3d min = null;
@@ -262,8 +267,11 @@ public class Align extends CaDoodleOperation {
 		// TickToc.tic("getSellectedBounds "+incoming.size());
 
 		for (CSG csg : incoming) {
-			if (csg.isHide() || csg.isInGroup())
+			if (csg.isHide() || csg.isInGroup()) {
+				Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() + " in group:"
+						+ csg.isInGroup());
 				continue;
+			}
 			if (cache.get(csg) == null) {
 				Log.debug("Computing bounds for " + csg.getName());
 				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
@@ -304,11 +312,11 @@ public class Align extends CaDoodleOperation {
 			// TickToc.tic("Bounds for "+c.getName());
 			if (min == null || max == null) {
 				Log.error("Failed to find bounds!");
-				throw new RuntimeException("Failed to find bounds!!");
+				throw new BoundsComputFailure("Failed to find bounds!!");
 			}
 		}
 		if (min == null || max == null)
-			throw new RuntimeException("Failed to get bounds for objects: " + incoming);
+			throw new BoundsComputFailure("Failed to get bounds for objects: " + incoming);
 		return new Bounds(min, max);
 	}
 

@@ -50,19 +50,26 @@ public class RadialDistribution extends AbstractAddFrom {
 			TransformNR tf = new TransformNR(rad.getMM(), 0, 0);
 			TransformNR rot = new TransformNR(new RotationNR(0, angle, 0));
 			TransformNR loc = rot.times(tf);
-			Bounds b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
-
-			CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
-				@Override
-				public ArrayList<CSG> process(CSG ic, int depth) {
-					ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, loc, b);
-					for (CSG c : copyPasteMoved) {
-						c.setParameter(getDb(), rad);
-						c.setParameter(getDb(), objectCount);
+			Bounds b;
+			try {
+				b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
+				CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
+					@Override
+					public ArrayList<CSG> process(CSG ic, int depth) {
+						ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, loc, b);
+						for (CSG c : copyPasteMoved) {
+							c.setParameter(getDb(), rad);
+							c.setParameter(getDb(), objectCount);
+						}
+						return copyPasteMoved;
 					}
-					return copyPasteMoved;
-				}
-			}, 1);
+				}, 1);
+			} catch (BoundsComputFailure e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+
 			for (String from : cpMap.keySet()) {
 				CSG source;
 				try {
@@ -168,7 +175,7 @@ public class RadialDistribution extends AbstractAddFrom {
 		return b;
 	}
 
-	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) {
+	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) throws BoundsComputFailure {
 
 		if (names != null) {
 			if (inWorkplaneBounds == null)
