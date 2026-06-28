@@ -63,7 +63,7 @@ public class LimbOption {
 
 	private CSG indicator;
 	private Image image;
-
+	private ThumbnailImage imageengine;
 	public DHParameterKinematics getLimb(CSGDatabaseInstance db, String uniqueName) throws Exception {
 		String xmlContent = ScriptingEngine.codeFromGit(getUrl(), getSourceFile())[0];
 		if (!composite) {
@@ -153,10 +153,10 @@ public class LimbOption {
 				f.getCsgDBinstance().delete(s);
 			}
 		}
-		if (f.getImageEngine() != null) {
+		if (getImageengine() != null) {
 
 			try {
-				image = f.getImageEngine().get(f.getCsgDBinstance(), so);
+				image = getImageengine().get(f.getCsgDBinstance(), so, imageFile);
 				try {
 					BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
 					ImageIO.write(bufferedImage, "png", imageFile);
@@ -223,5 +223,15 @@ public class LimbOption {
 
 	public void setSourceFile(String file) {
 		this.file = file;
+	}
+
+	public ThumbnailImage getImageengine() {
+		if (imageengine == null)
+			imageengine = new ThumbnailImage();
+		return imageengine;
+	}
+
+	public void setImageengine(ThumbnailImage imageengine) {
+		this.imageengine = imageengine;
 	}
 }
