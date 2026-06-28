@@ -1119,31 +1119,10 @@ public class CaDoodleFile {
 			if (getBom() != null)
 				getBom().save();
 			List<CSG> currentState = getCurrentState();
-			CSG thumb = null;
-			for (CSG c : currentState) {
-				if (c.isInGroup())
-					continue;
-				if (c.isHide())
-					continue;
-				if (thumb == null)
-					thumb = c;
-				else {
-					thumb = thumb.dumbUnion(c);
-				}
-			}
-			String string = getSTLThumbnailLocation();
-			int currentIndex2 = getCurrentIndex();
-			// if (isTimelineOpen())
-			// getSaveUpdate().renderSplashFrame(1, "Save Doodle to " +
-			// getSelf().getName());
-			if (thumb != null) {
-				boolean manif = CSG.isPreventNonManifoldTriangles();
-				if (manif)
-					CSG.setPreventNonManifoldTriangles(false);
-				thumb.toStl(Paths.get(string));
-				if (manif)
-					CSG.setPreventNonManifoldTriangles(true);
-			}
+
+			String string = get3mfThumbnailLocation();
+
+			CSG.toThreeMF(currentState, false, Paths.get(string));
 			// }
 			int num = 0;
 			for (int i = 0; i < opperations.size(); i++) {
@@ -1173,7 +1152,7 @@ public class CaDoodleFile {
 		} catch (Throwable t) {
 			Log.error(t);
 			saveing = false;
-			throw t;
+			throw new SaveOverwriteException(t);
 		}
 		saveing = false;
 		return getSelf();
@@ -1187,16 +1166,16 @@ public class CaDoodleFile {
 		return getBom().getBomCsv();
 	}
 
-	public File getSTLThumbnailFile() {
-		File back = new File(getSTLThumbnailLocation());
+	public File get3mfThumbnailFile() {
+		File back = new File(get3mfThumbnailLocation());
 		return back;
 	}
 
-	public String getSTLThumbnailLocation() {
+	public String get3mfThumbnailLocation() {
 		File folder = getSelf().getAbsoluteFile().getParentFile();
 		if (!folder.exists())
 			folder.mkdirs();
-		String string = folder.getAbsolutePath() + delim() + "thumbnail.stl";
+		String string = folder.getAbsolutePath() + delim() + "thumbnail.3mf";
 		return string;
 	}
 
