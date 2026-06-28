@@ -6,4 +6,8 @@ public class SaveOverwriteException extends Exception {
 		super(string);
 	}
 
+	public SaveOverwriteException(Throwable t) {
+		super(t);
+	}
+
 }
