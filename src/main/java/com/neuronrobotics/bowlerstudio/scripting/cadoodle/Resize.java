@@ -221,10 +221,11 @@ public class Resize extends CaDoodleOperation {
 			throw new RuntimeException("The control points of the corners must be at the same Z value \n"
 					+ lf.toSimpleString() + "\n" + rr.toSimpleString());
 		}
-		if (rightRear.getY() >= leftFront.getY() && rightRear.getX() >= leftFront.getX())
-			return setResize(h, rr, lf);// they were swapped, just fix it and move along
-		// if(rightRear.getY()>=leftFront.getY() || rightRear.getX()>=leftFront.getX())
-		// throw new RuntimeException("Scale must be positive!");
+		if (rightRear.getY() >= leftFront.getY() && rightRear.getX() >= leftFront.getX()) {
+			// they were swapped, just fix it and move along
+			leftFront = rr;
+			rightRear = lf;
+		}
 		return this;
 	}
 
