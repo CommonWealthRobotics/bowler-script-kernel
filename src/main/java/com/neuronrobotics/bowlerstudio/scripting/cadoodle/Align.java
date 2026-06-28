@@ -15,6 +15,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
 public class Align extends CaDoodleOperation {
@@ -268,12 +269,15 @@ public class Align extends CaDoodleOperation {
 
 		for (CSG csg : incoming) {
 			if (csg.isHide() || csg.isInGroup()) {
-				Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() + " in group:"
-						+ csg.isInGroup());
+				//				Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() + " in group:"
+				//						+ csg.isInGroup());
 				continue;
 			}
 			if (cache.get(csg) == null) {
-				Log.debug("Computing bounds for " + csg.getName());
+				if (Platform.isFxApplicationThread())
+					Log.error(new Exception("Computed bounds in UI thread!"));
+				else
+					Log.debug("Computing bounds for " + csg.getName());
 				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
 				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
 
