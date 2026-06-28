@@ -508,7 +508,7 @@ public class Manipulation {
 	}
 
 	public void setSnapGridStatus(boolean status) {
-		this.snapGridEnabled = status;
+		snapGridEnabled = status;
 	}
 
 	public void setGlobal(TransformNR global) {
