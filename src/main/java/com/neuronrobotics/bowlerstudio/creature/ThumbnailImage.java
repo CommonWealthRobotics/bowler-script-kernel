@@ -1,11 +1,16 @@
 package com.neuronrobotics.bowlerstudio.creature;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.imageio.ImageIO;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
@@ -19,6 +24,7 @@ import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
@@ -32,7 +38,7 @@ import javafx.scene.transform.Transform;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Affine;
 
-public class ThumbnailImage {
+public class ThumbnailImage implements ImagePorviderInterface {
 	private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
 	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
 
@@ -85,7 +91,14 @@ public class ThumbnailImage {
 		return true;
 	}
 
-	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay) throws NoImageException {
+	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay, File image)
+			throws NoImageException, IOException {
+		if (image.exists()) {
+			BufferedImage bufferedImage = ImageIO.read(image);
+			if (bufferedImage != null) {
+				return SwingFXUtils.toFXImage(bufferedImage, null);
+			}
+		}
 		try {
 			if (Platform.isFxApplicationThread()) {
 				throw new RuntimeException("This should not be called from the UI thread!");
