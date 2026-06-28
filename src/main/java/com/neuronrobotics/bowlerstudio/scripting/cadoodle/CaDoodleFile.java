@@ -29,8 +29,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
+import com.neuronrobotics.bowlerstudio.creature.ImagePorviderInterface;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
-import com.neuronrobotics.bowlerstudio.creature.NoImageException;
 import com.neuronrobotics.bowlerstudio.creature.ThumbnailImage;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
@@ -93,7 +93,7 @@ public class CaDoodleFile {
 	private IAcceptPruneForward accept = null;
 	private long timeOfLastUpdate = 0;
 	private OperationResult result = OperationResult.APPEND;
-	private ThumbnailImage imageEngine = null;
+	private static ImagePorviderInterface imageEngine = null;
 	private ICadoodleSaveStatusUpdate defaultSaver = new ICadoodleSaveStatusUpdate() {
 		@Override
 		public void renderSplashFrame(int percent, String message) {
@@ -276,7 +276,7 @@ public class CaDoodleFile {
 		// throw new RuntimeException("Can not initialize while initializing.");
 		fireInitializationStart();
 		BezierPath.setMaximumInterpolationStep(TextResolutionPoints);
-		setImageEngine(new ThumbnailImage());
+		getImageEngine();
 		initializing = true;
 		if (timeCreated < 0)
 			timeCreated = System.currentTimeMillis();
@@ -1198,7 +1198,7 @@ public class CaDoodleFile {
 		if (imageCache.exists())
 			return;
 		try {
-			WritableImage image2 = loadingImageFromUIThread(currentState);
+			WritableImage image2 = loadingImageFromUIThread(currentState, image);
 			if (image2 != null) {
 				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image2, null);
 				try {
@@ -1238,14 +1238,9 @@ public class CaDoodleFile {
 		try {
 			File parent = getSelf().getAbsoluteFile().getParentFile();
 			File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
-			if (image.exists()) {
-				BufferedImage bufferedImage = ImageIO.read(image);
-				if (bufferedImage != null) {
-					img = SwingFXUtils.toFXImage(bufferedImage, null);
-				}
-			} else {
-				loadingImageFromUIThread(getCurrentState());
-			}
+
+			loadingImageFromUIThread(getCurrentState(), image);
+
 		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error("Error loading image: " + e.getMessage());
 			// com.neuronrobotics.sdk.common.Log.error(e);
@@ -1253,14 +1248,15 @@ public class CaDoodleFile {
 		return img;
 	}
 
-	private javafx.scene.image.WritableImage loadingImageFromUIThread(List<CSG> currentState) {
+	private javafx.scene.image.WritableImage loadingImageFromUIThread(List<CSG> currentState, File destination) {
+
 		if (currentState == null || imageEngine == null)
 			throw new RuntimeException("Can not be null");
 		ArrayList<javafx.scene.image.WritableImage> holder = new ArrayList<WritableImage>();
 
 		try {
-			holder.add(imageEngine.get(getCsgDBinstance(), currentState));
-		} catch (NoImageException ex) {
+			holder.add(imageEngine.get(getCsgDBinstance(), currentState, destination));
+		} catch (Exception ex) {
 			Log.error(ex);
 			holder.add(new WritableImage(100, 100));
 		}
@@ -1545,12 +1541,14 @@ public class CaDoodleFile {
 			}
 	}
 
-	public ThumbnailImage getImageEngine() {
+	public static ImagePorviderInterface getImageEngine() {
+		if (imageEngine == null)
+			setImageEngine(new ThumbnailImage());
 		return imageEngine;
 	}
 
-	private void setImageEngine(ThumbnailImage imageEngine) {
-		this.imageEngine = imageEngine;
+	public static void setImageEngine(ImagePorviderInterface ie) {
+		imageEngine = ie;
 	}
 
 	public CaDoodleParameters getParameters() {
