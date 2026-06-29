@@ -18,6 +18,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.RandomAccessFile;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,6 +33,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -650,7 +652,7 @@ public class DownloadManager {
 							if (type.toLowerCase().contains("tar.gz")) {
 								untar(jvmArchive, bindir + targetdir);
 							}
-							//sfx
+							// sfx
 							if (type.toLowerCase().contains("sfx")) {
 								sfx(jvmArchive, bindir + targetdir);
 							}
@@ -773,18 +775,64 @@ public class DownloadManager {
 		throw new RuntimeException(errorTxt);
 	}
 
-	private static void sfx(File sfxAchive, String targetDir) {
-		List<String> command = new ArrayList<>();
-		command.add(sfxAchive.getAbsolutePath());
-		command.add("-y");
-		command.add("-o\"" + targetDir + "\"");
-		Thread tcopy = run(null, new File("."), System.out, command);
+	private static void sfx(File sfxArchive, String targetDir) throws Exception {
+
+		Path tempDir = Files.createTempDirectory("sfx_extract_");
+
 		try {
-			tcopy.join();
-		} catch (InterruptedException e) {
-			// Auto-generated catch block
-			com.neuronrobotics.sdk.common.Log.error(e);
+			List<String> command = new ArrayList<>();
+			command.add(sfxArchive.getAbsolutePath());
+			command.add("-y");
+			command.add("-o\"" + tempDir.toAbsolutePath() + "\"");
+
+			ProcessBuilder pb = new ProcessBuilder(command);
+			pb.directory(new File("."));
+			pb.inheritIO();
+
+			Process process = pb.start();
+
+			int exit = process.waitFor();
+			if (exit != 0) {
+				throw new IOException("Self-extracting archive failed with exit code " + exit);
+			}
+
+			Path target = Paths.get(targetDir);
+			Files.createDirectories(target);
+
+			copyDirectory(tempDir, target);
+
+		} finally {
+			deleteRecursive(tempDir);
 		}
+	}
+
+	private static void copyDirectory(Path source, Path target) throws IOException {
+		Files.walk(source).forEach(path -> {
+			try {
+				Path dest = target.resolve(source.relativize(path));
+
+				if (Files.isDirectory(path)) {
+					Files.createDirectories(dest);
+				} else {
+					Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+				}
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		});
+	}
+
+	private static void deleteRecursive(Path root) throws IOException {
+		if (!Files.exists(root))
+			return;
+
+		Files.walk(root).sorted(Comparator.reverseOrder()).forEach(path -> {
+			try {
+				Files.deleteIfExists(path);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		});
 	}
 
 	private static void saveFile(File file, String json) {
