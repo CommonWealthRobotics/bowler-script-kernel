@@ -879,6 +879,7 @@ public class BowlerKernel {
 			try {
 				r.run();
 			} catch (Throwable t) {
+				Log.error(r);
 				Log.error(t);
 			}
 		else
