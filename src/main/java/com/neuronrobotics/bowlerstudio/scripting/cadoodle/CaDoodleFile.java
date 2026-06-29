@@ -1221,14 +1221,14 @@ public class CaDoodleFile {
 					Files.copy(imageCache.toPath(), image.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				}
 				System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
-				fireTimelineUpdateListeners(currentIndex2, imageCache);
+				fireTimelineUpdateListeners(currentIndex2, image2);
 			}
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 	}
 
-	private void fireTimelineUpdateListeners(int number, File image) {
+	private void fireTimelineUpdateListeners(int number, WritableImage image) {
 		for (ICaDoodleStateUpdate s : listeners) {
 			s.onTimelineUpdate(number, image);
 		}

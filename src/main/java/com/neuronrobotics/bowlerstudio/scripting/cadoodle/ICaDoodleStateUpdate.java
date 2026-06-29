@@ -1,11 +1,11 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
-import java.io.File;
 import java.util.List;
 
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import javafx.scene.image.WritableImage;
 
 public interface ICaDoodleStateUpdate {
 	public void onUpdate(List<CSG> currentState, CaDoodleOperation source, CaDoodleFile file);
@@ -22,5 +22,5 @@ public interface ICaDoodleStateUpdate {
 
 	public void onWorkplaneChange(TransformNR newWP);
 
-	public void onTimelineUpdate(int numberOfNew, File image);
+	public void onTimelineUpdate(int numberOfNew, WritableImage image);
 }
