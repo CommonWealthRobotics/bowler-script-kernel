@@ -275,7 +275,7 @@ public class Align extends CaDoodleOperation {
 			}
 			if (cache.get(csg) == null) {
 				if (Platform.isFxApplicationThread())
-					Log.error(new Exception("Computed bounds in UI thread!"));
+					throw new RuntimeException("Computed bounds in UI thread!");
 				else
 					Log.debug("Computing bounds for " + csg.getName());
 				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
