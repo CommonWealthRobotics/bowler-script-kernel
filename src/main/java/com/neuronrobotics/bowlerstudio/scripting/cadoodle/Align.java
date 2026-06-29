@@ -227,7 +227,7 @@ public class Align extends CaDoodleOperation {
 			if (inWorkplaneBounds == null)
 				inWorkplaneBounds = new HashMap<CSG, Bounds>();
 			List<CSG> selectedCSG = getSelectedCSG(boundNames, incoming);
-			return Align.getBounds(selectedCSG, workplane, inWorkplaneBounds, null);
+			return CaDoodleFile.getBounds(selectedCSG, workplane, inWorkplaneBounds, null);
 		} else {
 			throw new RuntimeException("Align can not be initialized without bounds!");
 		}
@@ -259,76 +259,7 @@ public class Align extends CaDoodleOperation {
 		return this;
 	}
 
-	public static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache, List<CSG> toClear)
-			throws BoundsComputFailure {
-		if (cache == null)
-			cache = new HashMap<>();
-		Vector3d min = null;
-		Vector3d max = null;
-		// TickToc.tic("getSellectedBounds "+incoming.size());
 
-		for (CSG csg : incoming) {
-			if (csg.isHide() || csg.isInGroup()) {
-				// Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() +
-				// " in group:"
-				// + csg.isInGroup());
-				continue;
-			}
-			boolean forceClear = false;
-			if (toClear != null)
-				for (CSG tc : toClear)
-					if (tc.getName().contentEquals(csg.getName()))
-						forceClear = true;
-			if (cache.get(csg) == null || forceClear) {
-				if (Platform.isFxApplicationThread())
-					throw new RuntimeException("Computed bounds in UI thread!");
-				else
-					Log.debug("Computing bounds for " + csg.getName());
-				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
-				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
-
-				if (csg.hasManipulator()) {
-					Affine af;
-					try {
-						af = csg.getManipulator();
-						TransformNR afNR = TransformFactory.affineToNr(af);
-						inverse = TransformFactory.nrToCSG(afNR.inverse().times(frame)).inverse();
-					} catch (MissingManipulatorException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-				cache.put(csg, csg.transformed(inverse).getBounds());
-			}
-			Bounds b = cache.get(csg);
-			Vector3d min2 = b.getMin().clone();
-			Vector3d max2 = b.getMax().clone();
-			if (min == null && min2 != null)
-				min = min2.clone();
-			if (max == null && max2 != null)
-				max = max2.clone();
-			if (min2.x < min.x)
-				min.x = min2.x;
-			if (min2.y < min.y)
-				min.y = min2.y;
-			if (min2.z < min.z)
-				min.z = min2.z;
-			if (max.x < max2.x)
-				max.x = max2.x;
-			if (max.y < max2.y)
-				max.y = max2.y;
-			if (max.z < max2.z)
-				max.z = max2.z;
-			// TickToc.tic("Bounds for "+c.getName());
-			if (min == null || max == null) {
-				Log.error("Failed to find bounds!");
-				throw new BoundsComputFailure("Failed to find bounds!!");
-			}
-		}
-		if (min == null || max == null)
-			throw new BoundsComputFailure("Failed to get bounds for objects: " + incoming);
-		return new Bounds(min, max);
-	}
 
 	public Align copy() {
 		return new Align().setBounds(boundNames).setNames(names).setAlignParams(x, y, z).setWorkplane(workplane)
