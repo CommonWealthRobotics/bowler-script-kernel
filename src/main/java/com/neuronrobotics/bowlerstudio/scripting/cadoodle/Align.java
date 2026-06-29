@@ -14,8 +14,6 @@ import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Transform;
-import eu.mihosoft.vrl.v3d.Vector3d;
-import javafx.application.Platform;
 import javafx.scene.transform.Affine;
 
 public class Align extends CaDoodleOperation {
@@ -258,7 +256,6 @@ public class Align extends CaDoodleOperation {
 		bounds = null;
 		return this;
 	}
-
 
 
 	public Align copy() {

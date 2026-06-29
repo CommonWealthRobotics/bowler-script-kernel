@@ -1278,11 +1278,11 @@ public class CaDoodleFile {
 		}
 		return img;
 	}
-	public Bounds getBounds(List<CSG> incoming)
-			throws BoundsComputFailure{
-		return getBounds(incoming,getWorkplane(),getBoundsCache(),null);
+
+	public Bounds getBounds(List<CSG> incoming) throws BoundsComputFailure {
+		return getBounds(incoming, getWorkplane(), getBoundsCache(), null);
 	}
-	
+
 	static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache, List<CSG> toClear)
 			throws BoundsComputFailure {
 		if (cache == null)
@@ -1305,7 +1305,7 @@ public class CaDoodleFile {
 						forceClear = true;
 			if (cache.get(csg) == null || forceClear) {
 				if (Platform.isFxApplicationThread())
- 					throw new RuntimeException("Computed bounds in UI thread!");
+					throw new RuntimeException("Computed bounds in UI thread!");
 				else
 					Log.debug("Computing bounds for " + csg.getName());
 				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
