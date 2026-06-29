@@ -1239,11 +1239,20 @@ public class CaDoodleFile {
 			File parent = getSelf().getAbsoluteFile().getParentFile();
 			File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
 
-			loadingImageFromUIThread(getCurrentState(), image);
+			if (image.exists()) {
+				BufferedImage bufferedImage = ImageIO.read(image);
+				if (bufferedImage != null) {
+					img = SwingFXUtils.toFXImage(bufferedImage, null);
+				}
+			}
 
 		} catch (Exception e) {
 			com.neuronrobotics.sdk.common.Log.error("Error loading image: " + e.getMessage());
 			// com.neuronrobotics.sdk.common.Log.error(e);
+		}
+		if (img == null) {
+			img = new WritableImage(10, 10);
+			Log.error("Cadoodle File Image failed to read");
 		}
 		return img;
 	}
