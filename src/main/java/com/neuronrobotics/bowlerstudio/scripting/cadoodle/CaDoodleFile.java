@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javafx.scene.image.WritableImage;
+import javafx.scene.transform.Affine;
+
 import org.apache.commons.io.FileUtils;
 
 import com.google.gson.Gson;
@@ -32,6 +34,7 @@ import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.creature.ImagePorviderInterface;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 import com.neuronrobotics.bowlerstudio.creature.ThumbnailImage;
+import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.MakeRobot;
 import com.neuronrobotics.bowlerstudio.vitamins.VitaminBomManager;
@@ -45,7 +48,10 @@ import com.piro.bezier.BezierPath;
 
 import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
+import eu.mihosoft.vrl.v3d.Transform;
+import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import javafx.application.Platform;
@@ -543,12 +549,13 @@ public class CaDoodleFile {
 			process = getCurrentState();
 		}
 		if (process.size() == 0) {
-			Log.error("Nothing returned int he process step?");
+			Log.error("Nothing returned in the process step?");
 		}
 		int currentIndex2 = getCurrentIndex();
 		storeResultInCache(op, process);
 		setCurrentIndex(currentIndex2 + 1);
 		setCurrentState(op, process);
+
 		if (ex != null)
 			throw ex;
 	}
@@ -882,6 +889,7 @@ public class CaDoodleFile {
 		CaDoodleOperation op = getCurrentOperation();
 		if (isBackAvailable())
 			setCurrentIndex(getCurrentIndex() - 1);
+		boundsCache.clear();
 		updateCurrentFromCache();
 		if (ICadoodleOperationUndo.class.isInstance(op)) {
 			ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
@@ -931,6 +939,7 @@ public class CaDoodleFile {
 				}
 			}
 		}
+		boundsCache.clear();
 		setCurrentIndex(ni);
 		updateCurrentFromCache();
 		fireSaveSuggestion();
@@ -1011,6 +1020,19 @@ public class CaDoodleFile {
 	}
 
 	private void setCurrentState(CaDoodleOperation op, List<CSG> currentState) {
+		ArrayList<CSG> toClear = new ArrayList<CSG>();
+		for (CSG c : getCurrentState()) {
+			for (String s : op.getNamesAddedInThisOperation()) {
+				if (c.getName().contentEquals(s))
+					toClear.add(c);
+			}
+
+		}
+		try {
+			getBounds(getCurrentState(), workplane, boundsCache, toClear);
+		} catch (BoundsComputFailure e) {
+			Log.error(e);
+		}
 		for (ICaDoodleStateUpdate l : listeners) {
 			try {
 				l.onUpdate(currentState, op, this);
@@ -1256,6 +1278,81 @@ public class CaDoodleFile {
 		}
 		return img;
 	}
+	public Bounds getBounds(List<CSG> incoming)
+			throws BoundsComputFailure{
+		return getBounds(incoming,getWorkplane(),getBoundsCache(),null);
+	}
+	
+	static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache, List<CSG> toClear)
+			throws BoundsComputFailure {
+		if (cache == null)
+			cache = new HashMap<>();
+		Vector3d min = null;
+		Vector3d max = null;
+		// TickToc.tic("getSellectedBounds "+incoming.size());
+
+		for (CSG csg : incoming) {
+			if (csg.isHide() || csg.isInGroup()) {
+				// Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() +
+				// " in group:"
+				// + csg.isInGroup());
+				continue;
+			}
+			boolean forceClear = false;
+			if (toClear != null)
+				for (CSG tc : toClear)
+					if (tc.getName().contentEquals(csg.getName()))
+						forceClear = true;
+			if (cache.get(csg) == null || forceClear) {
+				if (Platform.isFxApplicationThread())
+ 					throw new RuntimeException("Computed bounds in UI thread!");
+				else
+					Log.debug("Computing bounds for " + csg.getName());
+				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
+				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
+
+				if (csg.hasManipulator()) {
+					Affine af;
+					try {
+						af = csg.getManipulator();
+						TransformNR afNR = TransformFactory.affineToNr(af);
+						inverse = TransformFactory.nrToCSG(afNR.inverse().times(frame)).inverse();
+					} catch (MissingManipulatorException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				cache.put(csg, csg.transformed(inverse).getBounds());
+			}
+			Bounds b = cache.get(csg);
+			Vector3d min2 = b.getMin().clone();
+			Vector3d max2 = b.getMax().clone();
+			if (min == null && min2 != null)
+				min = min2.clone();
+			if (max == null && max2 != null)
+				max = max2.clone();
+			if (min2.x < min.x)
+				min.x = min2.x;
+			if (min2.y < min.y)
+				min.y = min2.y;
+			if (min2.z < min.z)
+				min.z = min2.z;
+			if (max.x < max2.x)
+				max.x = max2.x;
+			if (max.y < max2.y)
+				max.y = max2.y;
+			if (max.z < max2.z)
+				max.z = max2.z;
+			// TickToc.tic("Bounds for "+c.getName());
+			if (min == null || max == null) {
+				Log.error("Failed to find bounds!");
+				throw new BoundsComputFailure("Failed to find bounds!!");
+			}
+		}
+		if (min == null || max == null)
+			throw new BoundsComputFailure("Failed to get bounds for objects: " + incoming);
+		return new Bounds(min, max);
+	}
 
 	private javafx.scene.image.WritableImage loadingImageFromUIThread(List<CSG> currentState, File destination) {
 
@@ -1333,6 +1430,13 @@ public class CaDoodleFile {
 
 	public void setWorkplane(TransformNR workplane) {
 		this.workplane = workplane;
+		try {
+			// clear all bounds and recompute with the workplane
+			getBounds(getCurrentState(), workplane, boundsCache, getCurrentState());
+		} catch (BoundsComputFailure e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		fireWorkplaneChange();
 		fireSaveSuggestion();
 	}
