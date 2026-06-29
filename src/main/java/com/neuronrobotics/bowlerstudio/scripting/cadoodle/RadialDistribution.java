@@ -181,7 +181,7 @@ public class RadialDistribution extends AbstractAddFrom {
 			if (inWorkplaneBounds == null)
 				inWorkplaneBounds = new HashMap<CSG, Bounds>();
 			List<CSG> selectedCSG = getSelectedCSG(names, incoming);
-			return Align.getBounds(selectedCSG, workplane, inWorkplaneBounds);
+			return Align.getBounds(selectedCSG, workplane, inWorkplaneBounds, null);
 		} else {
 			throw new RuntimeException("Align can not be initialized without bounds!");
 		}

@@ -227,7 +227,7 @@ public class Align extends CaDoodleOperation {
 			if (inWorkplaneBounds == null)
 				inWorkplaneBounds = new HashMap<CSG, Bounds>();
 			List<CSG> selectedCSG = getSelectedCSG(boundNames, incoming);
-			return Align.getBounds(selectedCSG, workplane, inWorkplaneBounds);
+			return Align.getBounds(selectedCSG, workplane, inWorkplaneBounds, null);
 		} else {
 			throw new RuntimeException("Align can not be initialized without bounds!");
 		}
@@ -259,7 +259,7 @@ public class Align extends CaDoodleOperation {
 		return this;
 	}
 
-	public static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache)
+	public static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache, List<CSG> toClear)
 			throws BoundsComputFailure {
 		if (cache == null)
 			cache = new HashMap<>();
@@ -269,11 +269,17 @@ public class Align extends CaDoodleOperation {
 
 		for (CSG csg : incoming) {
 			if (csg.isHide() || csg.isInGroup()) {
-				//				Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() + " in group:"
-				//						+ csg.isInGroup());
+				// Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() +
+				// " in group:"
+				// + csg.isInGroup());
 				continue;
 			}
-			if (cache.get(csg) == null) {
+			boolean forceClear = false;
+			if (toClear != null)
+				for (CSG tc : toClear)
+					if (tc.getName().contentEquals(csg.getName()))
+						forceClear = true;
+			if (cache.get(csg) == null || forceClear) {
 				if (Platform.isFxApplicationThread())
 					throw new RuntimeException("Computed bounds in UI thread!");
 				else
