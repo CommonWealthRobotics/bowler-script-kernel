@@ -14,7 +14,7 @@ public class CaDoodleLoader implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
 		CaDoodleFile loaded = CaDoodleFile.fromFile(code);
-		Object process = process(loaded, false);
+		Object process = filterForDisplay(loaded, false);
 		loaded.close();
 		return process;
 	}
@@ -22,12 +22,12 @@ public class CaDoodleLoader implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(CSGDatabaseInstance db, String code, ArrayList<Object> args) throws Exception {
 		CaDoodleFile loaded = CaDoodleFile.fromJsonString(code);
-		Object process = process(loaded, false);
+		Object process = filterForDisplay(loaded, false);
 		loaded.close();
 		return process;
 	}
 
-	public static Object process(CaDoodleFile loaded, boolean includeAlwaysShow) {
+	public static Object filterForDisplay(CaDoodleFile loaded, boolean includeAlwaysShow) {
 		List<CSG> incoming = loaded.getCurrentState();
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
