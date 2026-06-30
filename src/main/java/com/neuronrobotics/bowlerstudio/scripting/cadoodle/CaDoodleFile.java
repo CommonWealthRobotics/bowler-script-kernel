@@ -468,22 +468,26 @@ public class CaDoodleFile {
 								com.neuronrobotics.sdk.common.Log.error(tr);
 							}
 						}
-						if (getCurrentIndex() != endIndex) {
-							setCurrentIndex(endIndex);
-							fireOnUpdate(getCurrentOperation());
-						}
+						//if (getCurrentIndex() != endIndex) {
+						setCurrentIndex(endIndex);
+						//}
 					} catch (Exception ex) {
 						com.neuronrobotics.sdk.common.Log.error(ex);;
 					}
+
+					setRegenerating(false);
 					setPercentInitialized(1);
 					updateBoM();
 					fireSaveSuggestion();
 					fireRegenerateDone();
+					fireOnUpdate(getCurrentOperation());
 				} catch (Throwable th) {
 					com.neuronrobotics.sdk.common.Log.error(th);
+					setRegenerating(false);
+					fireSaveSuggestion();
+					fireRegenerateDone();
 				}
 				operationRunner.remove(this);
-				setRegenerating(false);
 			}
 
 		};
