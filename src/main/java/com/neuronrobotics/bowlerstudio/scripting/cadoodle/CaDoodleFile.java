@@ -111,7 +111,6 @@ public class CaDoodleFile {
 	private HashMap<String, MobileBaseBuilder> robots = new HashMap<String, MobileBaseBuilder>();
 	private CSGDatabaseInstance csgDBinstance;
 	private File objectDir;
-	private ExecutorService executor = Executors.newFixedThreadPool(5);
 	private File imageCacheDir;
 	private boolean saveing;
 
