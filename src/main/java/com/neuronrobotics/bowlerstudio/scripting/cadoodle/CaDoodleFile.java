@@ -476,8 +476,7 @@ public class CaDoodleFile {
 							fireOnUpdate(getCurrentOperation());
 						}
 					} catch (Exception ex) {
-						com.neuronrobotics.sdk.common.Log.error(ex);
-						;
+						com.neuronrobotics.sdk.common.Log.error(ex);;
 					}
 					setPercentInitialized(1);
 					updateBoM();
@@ -623,8 +622,7 @@ public class CaDoodleFile {
 								process(op);
 								setSaveImage(getCurrentState(), op);
 							} catch (Exception ex) {
-								com.neuronrobotics.sdk.common.Log.error(ex);
-								;
+								com.neuronrobotics.sdk.common.Log.error(ex);;
 							}
 						}
 						if (getResult() == OperationResult.INSERT) {
@@ -801,7 +799,7 @@ public class CaDoodleFile {
 		for (int i = 0; i < getOperations().size(); i++) {
 			CaDoodleOperation key = getOperations().get(i);
 			if (key == test) {
-				File file = getTimelineImageFile(i-1);
+				File file = getTimelineImageFile(i - 1);
 				return file;
 			}
 		}
@@ -1229,7 +1227,7 @@ public class CaDoodleFile {
 		// return;
 		File parent = getSelf().getAbsoluteFile().getParentFile();
 
-		File imageCache =getTimelineImageFile(op);
+		File imageCache = getTimelineImageFile(op);
 		File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
 
 		if (imageCache.exists())
