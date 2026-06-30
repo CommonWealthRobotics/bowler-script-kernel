@@ -161,7 +161,7 @@ public class CaDoodleFile {
 
 	}
 
-	private int opToIndex(CaDoodleOperation op) {
+	public int opToIndex(CaDoodleOperation op) {
 		for (int i = 0; i < opperations.size(); i++) {
 			if (op == opperations.get(i))
 				return i;
@@ -228,7 +228,13 @@ public class CaDoodleFile {
 		List<CSG> back = cache.remove(op);
 		if (back != null)
 			back.clear();
-		List<CSG> cachedCopy = new ArrayList<>(cachedCopyIn);
+		List<CSG> cachedCopy = new ArrayList<CSG>(cachedCopyIn);
+		try {
+			if (cachedCopy.size() > 0)
+				getBounds(cachedCopy, workplane, boundsCache, null);
+		} catch (BoundsComputFailure e) {
+			Log.error(e);
+		}
 		cache.put(op, cachedCopy);
 		// executor.submit(() -> {
 		// File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() +
@@ -251,9 +257,10 @@ public class CaDoodleFile {
 
 	private void clearCache(CaDoodleOperation key) {
 		int opIndex = opToIndex(key);
-		File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opIndex);
-		if (cacheFile.exists())
-			cacheFile.delete();
+		// File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() +
+		// opIndex);
+		// if (cacheFile.exists())
+		// cacheFile.delete();
 
 		List<CSG> back = cache.remove(key);
 		if (back != null)
@@ -314,6 +321,7 @@ public class CaDoodleFile {
 			// if(!inCache(op))
 			try {
 				process(op);
+				setSaveImage(getCurrentState(), op);
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
 				// indexStarting = i ;
@@ -329,7 +337,7 @@ public class CaDoodleFile {
 		setPercentInitialized(1);
 		try {
 			setCurrentIndex(indexStarting);
-			updateCurrentFromCache();
+			fireOnUpdate(getCurrentOperation());
 			loadImageFromFile();
 			for (ICaDoodleStateUpdate l : listeners) {
 				try {
@@ -342,7 +350,6 @@ public class CaDoodleFile {
 		} catch (Throwable t) {
 			Log.error(t);
 		}
-		setPercentInitialized(1);
 		initializing = false;
 	}
 
@@ -422,13 +429,14 @@ public class CaDoodleFile {
 		t = new Thread() {
 			public void run() {
 				this.setName("Regeneration Threads");
+
 				try {
 					try {
 						timeOfLastUpdate = System.currentTimeMillis();
 						setRegenerating(true);
 						// com.neuronrobotics.sdk.common.Log.error("Regenerating Object from
 						// "+source.getType());
-						int opIndex = 0;
+						int opIndex = -1;
 						for (int i = 0; i < size; i++) {
 							CaDoodleOperation op = getOperations().get(i);
 							if (source == op) {
@@ -437,7 +445,7 @@ public class CaDoodleFile {
 							}
 						}
 						setCurrentIndex(opIndex);
-
+						boundsCache.clear();
 						for (; getCurrentIndex() < size;) {
 							int percent = (int) (((double) getCurrentIndex()) / ((double) getOperations().size())
 									* 100.0);
@@ -449,6 +457,7 @@ public class CaDoodleFile {
 							getSaveUpdate().renderSplashFrame(percent,
 									"Regenerating " + op.getType() + " " + currentIndex2);
 							getTimelineImageFile(op).delete();
+
 							// clearCache(op);
 							try {
 								op.setCaDoodleFile(cf);
@@ -456,28 +465,31 @@ public class CaDoodleFile {
 
 								List<CSG> process = op.process(previouState);
 								storeResultInCache(op, process);
-								setCurrentState(op, process);
+								fireOnUpdate(op);
+								setSaveImage(process, op);
 							} catch (Throwable tr) {
 								com.neuronrobotics.sdk.common.Log.error(tr);
 							}
 						}
 						if (getCurrentIndex() != endIndex) {
 							setCurrentIndex(endIndex);
-							updateCurrentFromCache();
+							fireOnUpdate(getCurrentOperation());
 						}
 					} catch (Exception ex) {
-						com.neuronrobotics.sdk.common.Log.error(ex);;
+						com.neuronrobotics.sdk.common.Log.error(ex);
+						;
 					}
 					setPercentInitialized(1);
 					updateBoM();
-					setRegenerating(false);
 					fireSaveSuggestion();
 					fireRegenerateDone();
 				} catch (Throwable th) {
 					com.neuronrobotics.sdk.common.Log.error(th);
 				}
 				operationRunner.remove(this);
+				setRegenerating(false);
 			}
+
 		};
 		operationRunner.add(t);
 		t.start();
@@ -514,7 +526,7 @@ public class CaDoodleFile {
 					TickToc.tic("Get timeline file");
 					storeResultInCache(op, process);
 					TickToc.tic("Stored results in cache");
-					setCurrentState(op, process);
+					fireOnUpdate(op);
 					TickToc.tic("set current state");
 					fireSaveSuggestion();
 					TickToc.tic("Fired save suggestion");
@@ -554,7 +566,7 @@ public class CaDoodleFile {
 		int currentIndex2 = getCurrentIndex();
 		storeResultInCache(op, process);
 		setCurrentIndex(currentIndex2 + 1);
-		setCurrentState(op, process);
+		fireOnUpdate(op);
 
 		if (ex != null)
 			throw ex;
@@ -609,14 +621,17 @@ public class CaDoodleFile {
 							try {
 								getOperations().add(op);
 								process(op);
+								setSaveImage(getCurrentState(), op);
 							} catch (Exception ex) {
-								com.neuronrobotics.sdk.common.Log.error(ex);;
+								com.neuronrobotics.sdk.common.Log.error(ex);
+								;
 							}
 						}
 						if (getResult() == OperationResult.INSERT) {
 							getOperations().add(getCurrentIndex(), op);
 							try {
 								process(op);
+								setSaveImage(getCurrentState(), op);
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -626,10 +641,10 @@ public class CaDoodleFile {
 							} catch (InterruptedException e) {
 								com.neuronrobotics.sdk.common.Log.error(e);
 							}
-							updateCurrentFromCache();
+							fireOnUpdate(getCurrentOperation());
 						}
 						if (getResult() == OperationResult.ABORT) {
-							setCurrentState(getCurrentOperation(), getCurrentState());
+							fireOnUpdate(getCurrentOperation());
 						}
 					}
 					updateBoM();
@@ -676,7 +691,7 @@ public class CaDoodleFile {
 					} catch (InterruptedException e) {
 						com.neuronrobotics.sdk.common.Log.error(e);
 					}
-					updateCurrentFromCache();
+					fireOnUpdate(getCurrentOperation());
 					updateBoM();
 					fireSaveSuggestion();
 				} catch (Throwable t) {
@@ -786,14 +801,14 @@ public class CaDoodleFile {
 		for (int i = 0; i < getOperations().size(); i++) {
 			CaDoodleOperation key = getOperations().get(i);
 			if (key == test) {
-				File file = getTimelineImageFile(i);
+				File file = getTimelineImageFile(i-1);
 				return file;
 			}
 		}
 		throw new RuntimeException("File not found!");
 	}
 
-	public File getTimelineImageFile(int i) {
+	private File getTimelineImageFile(int i) {
 		File file = new File(getImageCacheDir().getAbsolutePath() + delim() + (i + 1) + ".png");
 		return file;
 	}
@@ -890,7 +905,7 @@ public class CaDoodleFile {
 		if (isBackAvailable())
 			setCurrentIndex(getCurrentIndex() - 1);
 		boundsCache.clear();
-		updateCurrentFromCache();
+		fireOnUpdate(getCurrentOperation());
 		if (ICadoodleOperationUndo.class.isInstance(op)) {
 			ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
 			un.undo();
@@ -901,7 +916,8 @@ public class CaDoodleFile {
 	public void forward() {
 		if (isForwardAvailable())
 			setCurrentIndex(getCurrentIndex() + 1);
-		updateCurrentFromCache();
+		boundsCache.clear();
+		fireOnUpdate(getCurrentOperation());
 		CaDoodleOperation op = getCurrentOperation();
 		if (ICadoodleOperationUndo.class.isInstance(op)) {
 			ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
@@ -941,7 +957,7 @@ public class CaDoodleFile {
 		}
 		boundsCache.clear();
 		setCurrentIndex(ni);
-		updateCurrentFromCache();
+		fireOnUpdate(getCurrentOperation());
 		fireSaveSuggestion();
 	}
 
@@ -949,13 +965,14 @@ public class CaDoodleFile {
 		return getCurrentIndex() > 1;
 	}
 
-	private void updateCurrentFromCache() {
-		CaDoodleOperation key = getCurrentOperation();
-		if (key == null)
-			return;
-		com.neuronrobotics.sdk.common.Log.debug("Current operation results: " + key.getType());
-		setCurrentState(key, getCurrentState());
-	}
+	// private void fireCurrentStateOnUpdate() {
+	// CaDoodleOperation key = getCurrentOperation();
+	// if (key == null)
+	// return;
+	// com.neuronrobotics.sdk.common.Log.debug("Current operation results: " +
+	// key.getType());
+	// fireOnUpdate(key, getStateAtOperation(key));
+	// }
 
 	public CaDoodleOperation getCurrentOperation() {
 		if (getCurrentIndex() == 0)
@@ -992,8 +1009,9 @@ public class CaDoodleFile {
 		if (getCurrentIndex() == 0)
 			return new ArrayList<CSG>();
 		List<CSG> list = getCachedCSGs(op);
-		if (list == null)
+		if (list == null) {
 			list = new ArrayList<CSG>();
+		}
 		return list;
 	}
 
@@ -1019,7 +1037,7 @@ public class CaDoodleFile {
 		return getCachedCSGs(key);
 	}
 
-	private void setCurrentState(CaDoodleOperation op, List<CSG> currentState) {
+	private void fireOnUpdate(CaDoodleOperation op) {
 		ArrayList<CSG> toClear = new ArrayList<CSG>();
 		for (CSG c : getCurrentState()) {
 			for (String s : op.getNamesAddedInThisOperation()) {
@@ -1028,11 +1046,13 @@ public class CaDoodleFile {
 			}
 
 		}
-		try {
-			getBounds(getCurrentState(), workplane, boundsCache, toClear);
-		} catch (BoundsComputFailure e) {
-			Log.error(e);
-		}
+		List<CSG> currentState = getStateAtOperation(op);
+		if (currentState.size() > 0)
+			try {
+				getBounds(currentState, workplane, boundsCache, toClear);
+			} catch (BoundsComputFailure e) {
+				Log.error(e);
+			}
 		for (ICaDoodleStateUpdate l : listeners) {
 			try {
 				l.onUpdate(currentState, op, this);
@@ -1204,23 +1224,18 @@ public class CaDoodleFile {
 	private void setSaveImage(List<CSG> currentState, CaDoodleOperation op) throws IOException {
 		if (getSelf() == null)
 			return;
-		int currentIndex2 = 0;
-		for (int i = 0; i < getOperations().size(); i++)
-			if (getOperations().get(i) == op) {
-				currentIndex2 = i;
-				break;
-			}
+		int currentIndex2 = opToIndex(op);
 		// if(currentIndex2==0)
 		// return;
 		File parent = getSelf().getAbsoluteFile().getParentFile();
 
-		File imageCache = new File(getImageCacheDir().getAbsolutePath() + delim() + currentIndex2 + ".png");
+		File imageCache =getTimelineImageFile(op);
 		File image = new File(parent.getAbsolutePath() + delim() + "snapshot.png");
 
 		if (imageCache.exists())
 			return;
 		try {
-			WritableImage image2 = loadingImageFromUIThread(currentState, image);
+			WritableImage image2 = loadingImageFromUIThread(currentState, imageCache);
 			if (image2 != null) {
 				BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image2, null);
 				try {
