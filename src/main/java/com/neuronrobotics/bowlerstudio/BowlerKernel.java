@@ -603,7 +603,7 @@ public class BowlerKernel {
 			csgBits.add((CSG) ret);
 		}
 		if (CaDoodleFile.class.isInstance(ret)) {
-			processReturnedObjects(CaDoodleLoader.process((CaDoodleFile) ret, false), csgBits);
+			processReturnedObjects(CaDoodleLoader.filterForDisplay((CaDoodleFile) ret, false), csgBits);
 			return;
 		}
 		if (MobileBase.class.isInstance(ret)) {
