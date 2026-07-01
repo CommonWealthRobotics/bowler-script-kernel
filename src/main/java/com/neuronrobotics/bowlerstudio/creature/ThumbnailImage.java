@@ -89,6 +89,18 @@ public class ThumbnailImage implements ImagePorviderInterface {
 		if (!bounds.getMax().epsilonEquals(bounds2.getMax(), 0.01)) {
 			return false;
 		}
+		if (a.isHole() != b.isHide())
+			return false;
+		if (a.isWireFrame() != b.isWireFrame())
+			return false;
+		double EPS = 1e-9;
+
+		Color ca = a.getColor();
+		Color cb = b.getColor();
+		if (Math.abs(ca.getRed() - cb.getRed()) >= EPS || Math.abs(ca.getGreen() - cb.getGreen()) >= EPS
+				|| Math.abs(ca.getBlue() - cb.getBlue()) >= EPS || Math.abs(ca.getOpacity() - cb.getOpacity()) >= EPS) {
+			return false;
+		}
 		return true;
 	}
 
