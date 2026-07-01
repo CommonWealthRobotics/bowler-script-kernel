@@ -33,6 +33,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
+import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Transform;
 import javafx.scene.PerspectiveCamera;
@@ -173,6 +174,10 @@ public class ThumbnailImage implements ImagePorviderInterface {
 						newMesh.setMaterial(material);
 						newMesh.setOpacity(0.25);
 					}
+					if (csg.isWireFrame())
+						newMesh.setDrawMode(DrawMode.LINE);
+					else
+						newMesh.setDrawMode(DrawMode.FILL);
 					material.setSpecularColor(material.getDiffuseColor());
 					newMesh.setCullFace(CullFace.BACK);
 					views.put(csg.getName(), newMesh);

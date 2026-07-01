@@ -1284,7 +1284,7 @@ public class CaDoodleFile {
 						forceClear = true;
 			if (cache.get(csg) == null || forceClear) {
 				if (Platform.isFxApplicationThread())
-					throw new RuntimeException("Computed bounds in UI thread!");
+					Log.error(new RuntimeException("Computed bounds in UI thread!"));
 				else
 					Log.debug("Computing bounds for " + csg.getName());
 				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
