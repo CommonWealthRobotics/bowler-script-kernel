@@ -468,9 +468,10 @@ public class CaDoodleFile {
 								com.neuronrobotics.sdk.common.Log.error(tr);
 							}
 						}
-						//if (getCurrentIndex() != endIndex) {
-						setCurrentIndex(endIndex);
-						//}
+						if (getCurrentIndex() != endIndex) {
+							setCurrentIndex(endIndex);
+							fireOnUpdate(getCurrentOperation());
+						}
 					} catch (Exception ex) {
 						com.neuronrobotics.sdk.common.Log.error(ex);;
 					}
@@ -480,7 +481,6 @@ public class CaDoodleFile {
 					updateBoM();
 					fireSaveSuggestion();
 					fireRegenerateDone();
-					fireOnUpdate(getCurrentOperation());
 				} catch (Throwable th) {
 					com.neuronrobotics.sdk.common.Log.error(th);
 					setRegenerating(false);
@@ -505,42 +505,7 @@ public class CaDoodleFile {
 		}
 		CaDoodleOperation op = getCurrentOperation();
 
-		fireRegenerateStart(op);
-		Thread t = null;
-		CaDoodleFile cf = this;
-		t = new Thread() {
-			public void run() {
-				try {
-					timeOfLastUpdate = System.currentTimeMillis();
-
-					// TickToc.setEnabled(true);
-
-					this.setName("regenerateCurrent Thread");
-
-					TickToc.tic("Start regenerate");
-					op.setCaDoodleFile(cf);
-					List<CSG> process = op.process(getPreviouState());
-					TickToc.tic("Finish regenerate");
-					int currentIndex2 = getCurrentIndex();
-					getTimelineImageFile(currentIndex2).delete();
-					TickToc.tic("Get timeline file");
-					storeResultInCache(op, process);
-					TickToc.tic("Stored results in cache");
-					fireOnUpdate(op);
-					TickToc.tic("set current state");
-					fireSaveSuggestion();
-					TickToc.tic("Fired save suggestion");
-					fireRegenerateDone();
-					TickToc.tic("Fired regeneration Done");
-				} catch (Throwable t) {
-					Log.error(t);
-				}
-				operationRunner.remove(this);
-			}
-		};
-		operationRunner.add(t);
-		t.start();
-		return t;
+		return regenerateFrom(op);
 
 	}
 
