@@ -1442,7 +1442,7 @@ public class CaDoodleFile {
 	}
 
 	public boolean isInitialized() {
-		return !(percentInitialized < 1);
+		return !(percentInitialized < 1) && !initializing;
 	}
 
 	/**
