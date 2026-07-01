@@ -30,11 +30,73 @@ import com.neuronrobotics.sdk.common.Log;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
+import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import javafx.scene.paint.Color;
 
 public class Build123dLoader implements IScriptingLanguage {
 
 	private static HashMap<String, Object> map;
+
+	public static Color stringToColor(String text) {
+		if (text == null) {
+			return Color.GRAY;
+		}
+
+		int hash = text.hashCode();
+
+		// Hue in [0, 360)
+		double hue = (hash & 0x7FFFFFFF) % 360;
+
+		// Keep saturation and brightness fixed for pleasant colors.
+		return Color.hsb(hue, 0.75, 0.85);
+	}
+
+	public static List<CSG> getGear(CSGDatabaseInstance csgdb, String typencoming, ArrayList<String> args) {
+		ArrayList<Double> options = new ArrayList<Double>();
+		for (int i = 10; i <= 100; i++) {
+			options.add(Double.valueOf(i));
+		}
+		//		StringParameter type = new StringParameter(csgdb, args.get(0) + "_CaDoodle_gggears_Type", "SpurGear",
+		//				new ArrayList<String>(Arrays.asList("BevelGear", "CycloidGear", "HelicalGear", "HelicalRack",
+		//						"InvoluteRack", "SpurGear", "SpurRingGear")));
+
+		LengthParameter numTeeth = new LengthParameter(csgdb, args.get(0) + "_CaDoodle_gggears_Teeth", 23.0, options);
+		LengthParameter height = new LengthParameter(csgdb, args.get(0) + "_CaDoodle_gggears_Height", 5.0,
+				new ArrayList<Double>(Arrays.asList(1.0, 5.0, 20.0)));
+
+		ArrayList<Double> modOpts = new ArrayList<Double>(Arrays.asList(0.5, 0.75, 0.8, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5,
+				2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 8.0));
+		LengthParameter module = new LengthParameter(csgdb, args.get(0) + "_CaDoodle_gggears_Module", 1.0, modOpts);
+		ArrayList<Object> params = new ArrayList<Object>();
+		params.add("py_gearworks");
+		params.add(typencoming);
+		params.add("--number-of-teeth");
+		params.add((int) numTeeth.getMM());
+		params.add("--height");
+		params.add(height.getMM());
+		params.add("--module");
+		params.add(module.getMM());
+		List<CSG> all;
+		try {
+			all = Build123dLoader.toCSG(csgdb, params);
+			for (int i = 0; i < all.size(); i++) {
+				CSG bin = all.get(i);
+				bin.setNoScale(true);
+				int myIndex = i;
+				bin.setColor(Build123dLoader.stringToColor(typencoming));
+				bin.setParameter(csgdb, numTeeth).setParameter(csgdb, height).setParameter(csgdb, module)
+						.setRegenerate(previous -> getGear(csgdb, typencoming, args).get(myIndex));
+			}
+			return all;
+		} catch (GitAPIException | IOException | InterruptedException | NonManifoldShapeError
+				| ColinearPointsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return new ArrayList<>();
+
+	}
 
 	@Override
 	public Object inlineScriptRun(CSGDatabaseInstance db, File code, ArrayList<Object> args) throws Exception {
