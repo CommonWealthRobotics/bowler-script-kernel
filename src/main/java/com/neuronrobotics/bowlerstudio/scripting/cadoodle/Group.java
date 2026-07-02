@@ -13,6 +13,7 @@ import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.MissingManipulatorException;
+import eu.mihosoft.vrl.v3d.PrepForManufacturing;
 import eu.mihosoft.vrl.v3d.parametrics.IParametric;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
@@ -43,6 +44,9 @@ public class Group extends AbstractAddFrom {
 		boolean noscale = false;
 		Affine manip = null;
 		boolean nomove = false;
+		PrepForManufacturing mfg = null;
+		//		if(c.hasManufacturing())
+		//			cachedVer.setManufacturing(c.getManufacturing());
 		for (CSG csg : incoming) {
 			if (csg.isLock())
 				continue;
@@ -64,6 +68,9 @@ public class Group extends AbstractAddFrom {
 						if (!mobileBase.contentEquals(mobileBaseName.get())) {
 							continue;// skip grouping any item that is of a different mobile base;
 						}
+					}
+					if (csg.hasManufacturing()) {
+						mfg = csg.getManufacturing();
 					}
 					if (csg.hasManipulator())
 						try {
@@ -134,6 +141,8 @@ public class Group extends AbstractAddFrom {
 			result = result.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip).inverse()));
 			result.setManipulator(manip);
 		}
+		if (mfg != null)
+			result.setManufacturing(mfg);
 		if (mobileBase != null)
 			result.setMobileBaseName(mobileBase);
 		HashMap<String, IParametric> mapOfparametrics = result
