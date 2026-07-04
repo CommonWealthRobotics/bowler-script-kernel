@@ -36,7 +36,7 @@ public class Align extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
 
-	private HashMap<CSG, Bounds> cache = null;
+	private HashMap<String, Bounds> cache = null;
 
 	public String getName() {
 		if (name == null) {
@@ -216,14 +216,14 @@ public class Align extends CaDoodleOperation {
 		return this;
 	}
 
-	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) throws BoundsComputFailure {
+	public Bounds getBounds(List<CSG> incoming, HashMap<String, Bounds> inWorkplaneBounds) throws BoundsComputFailure {
 		if (bounds != null) {
 			Log.error("Depricated Bounds in the align step!");
 			return bounds.getBounds();
 		}
 		if (boundNames != null) {
 			if (inWorkplaneBounds == null)
-				inWorkplaneBounds = new HashMap<CSG, Bounds>();
+				inWorkplaneBounds = new HashMap<String, Bounds>();
 			List<CSG> selectedCSG = getSelectedCSG(boundNames, incoming);
 			return CaDoodleFile.getBounds(selectedCSG, workplane, inWorkplaneBounds, null);
 		} else {
@@ -263,11 +263,11 @@ public class Align extends CaDoodleOperation {
 				.setCache(cache);
 	}
 
-	public HashMap<CSG, Bounds> getCache() {
+	public HashMap<String, Bounds> getCache() {
 		return cache;
 	}
 
-	public Align setCache(HashMap<CSG, Bounds> cache) {
+	public Align setCache(HashMap<String, Bounds> cache) {
 		this.cache = cache;
 		return this;
 	}

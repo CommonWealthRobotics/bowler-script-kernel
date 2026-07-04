@@ -75,7 +75,7 @@ public class CaDoodleFile {
 	private TransformNR workplane = new TransformNR();
 	@Expose(serialize = true, deserialize = true)
 	private CaDoodleParameters parameters;
-	private HashMap<CSG, Bounds> boundsCache = new HashMap<CSG, Bounds>();
+	private HashMap<String, Bounds> boundsCache = new HashMap<String, Bounds>();
 	private File self;
 	// @Expose (serialize = false, deserialize = false)
 	// private List<CSG> currentState = new ArrayList<CSG>();
@@ -1264,7 +1264,7 @@ public class CaDoodleFile {
 		return getBounds(incoming, getWorkplane(), getBoundsCache(), null);
 	}
 
-	static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<CSG, Bounds> cache, List<CSG> toClear)
+	static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<String, Bounds> cache, List<CSG> toClear)
 			throws BoundsComputFailure {
 		if (cache == null)
 			cache = new HashMap<>();
@@ -1303,9 +1303,9 @@ public class CaDoodleFile {
 						e.printStackTrace();
 					}
 				}
-				cache.put(csg, csg.transformed(inverse).getBounds());
+				cache.put(csg.getName(), csg.transformed(inverse).getBounds());
 			}
-			Bounds b = cache.get(csg);
+			Bounds b = cache.get(csg.getName());
 			Vector3d min2 = b.getMin().clone();
 			Vector3d max2 = b.getMax().clone();
 			if (min == null && min2 != null)
@@ -1652,7 +1652,7 @@ public class CaDoodleFile {
 		return parameters;
 	}
 
-	public HashMap<CSG, Bounds> getBoundsCache() {
+	public HashMap<String, Bounds> getBoundsCache() {
 		return boundsCache;
 	}
 

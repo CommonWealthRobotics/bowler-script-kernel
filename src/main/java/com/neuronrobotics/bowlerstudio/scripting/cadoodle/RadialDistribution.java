@@ -175,11 +175,11 @@ public class RadialDistribution extends AbstractAddFrom {
 		return b;
 	}
 
-	public Bounds getBounds(List<CSG> incoming, HashMap<CSG, Bounds> inWorkplaneBounds) throws BoundsComputFailure {
+	public Bounds getBounds(List<CSG> incoming, HashMap<String, Bounds> inWorkplaneBounds) throws BoundsComputFailure {
 
 		if (names != null) {
 			if (inWorkplaneBounds == null)
-				inWorkplaneBounds = new HashMap<CSG, Bounds>();
+				inWorkplaneBounds = new HashMap<String, Bounds>();
 			List<CSG> selectedCSG = getSelectedCSG(names, incoming);
 			return CaDoodleFile.getBounds(selectedCSG, workplane, inWorkplaneBounds, null);
 		} else {
