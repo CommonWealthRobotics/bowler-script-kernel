@@ -1267,24 +1267,24 @@ public class CaDoodleFile {
 	static Bounds getBounds(List<CSG> incoming, TransformNR frame, HashMap<String, Bounds> cache, List<CSG> toClear)
 			throws BoundsComputFailure {
 		if (cache == null)
-			cache = new HashMap<>();
+			throw new NullPointerException();
 		Vector3d min = null;
 		Vector3d max = null;
 		// TickToc.tic("getSellectedBounds "+incoming.size());
 
 		for (CSG csg : incoming) {
-			if (csg.isHide() || csg.isInGroup()) {
-				// Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() +
-				// " in group:"
-				// + csg.isInGroup());
-				continue;
-			}
+			//			if (csg.isHide() || csg.isInGroup()) {
+			//				// Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() +
+			//				// " in group:"
+			//				// + csg.isInGroup());
+			//				continue;
+			//			}
 			boolean forceClear = false;
 			if (toClear != null)
 				for (CSG tc : toClear)
 					if (tc.getName().contentEquals(csg.getName()))
 						forceClear = true;
-			if (cache.get(csg) == null || forceClear) {
+			if (cache.get(csg.getName()) == null || forceClear || cache.size() == 0) {
 				if (Platform.isFxApplicationThread())
 					Log.error(new RuntimeException("Computed bounds in UI thread!"));
 				else
