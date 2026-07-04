@@ -160,7 +160,7 @@ public class LimbOption {
 				try {
 					BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
 					ImageIO.write(bufferedImage, "png", imageFile);
-					System.err.println("Thumbnail saved successfully to " + imageFile.getAbsolutePath());
+					Log.debug("Thumbnail saved successfully to " + imageFile.getAbsolutePath());
 				} catch (Exception e) {
 					// com.neuronrobotics.sdk.common.Log.error("Error saving image: " +
 					// e.getMessage());

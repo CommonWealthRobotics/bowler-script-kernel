@@ -1223,7 +1223,7 @@ public class CaDoodleFile {
 				if (getOperations().get(getOperations().size() - 1) == op) {
 					Files.copy(imageCache.toPath(), image.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				}
-				System.err.println("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
+				Log.debug("Thumbnail saved successfully to " + imageCache.getAbsolutePath());
 				fireTimelineUpdateListeners(currentIndex2, image2);
 			}
 		} catch (Throwable t) {
