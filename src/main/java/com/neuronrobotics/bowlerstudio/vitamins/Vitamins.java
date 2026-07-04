@@ -99,10 +99,11 @@ public class Vitamins {
 				if (resource.getName().toLowerCase().endsWith(".stl"))
 					fileLastLoaded.put(resource.getAbsolutePath(), STL.file(resource.toPath()));
 			} catch (Exception t) {
-				Log.error(t);
+
 				if (afi != null) {
 					File fixed = new File(resource.getAbsolutePath() + "_admesh_fix.stl");
 					if (fixed.exists() || afi.tryToFix(resource, t)) {
+						Log.error(t.getMessage() + ", fixing...");
 						if (!fixed.exists())
 							ADMesh.fix(resource, fixed);
 						fileLastLoaded.put(resource.getAbsolutePath(), STL.file(fixed.toPath()));
