@@ -12,6 +12,7 @@ public class UnGroup extends CaDoodleOperation {
 	@Expose(serialize = true, deserialize = true)
 	private List<String> names = new ArrayList<String>();
 
+	private List<String> revived = new ArrayList<String>();
 	@Override
 	public String getType() {
 		return "Un-Group";
@@ -21,7 +22,7 @@ public class UnGroup extends CaDoodleOperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-
+		revived.clear();
 		for (CSG csg : incoming) {
 			for (String name : names) {
 				if (csg.isGroupResult())
@@ -39,7 +40,7 @@ public class UnGroup extends CaDoodleOperation {
 						}
 						CSG readd = transformed.setRegenerate(csg.getRegenerate())
 								.syncProperties(getCaDoodleFile().getCsgDBinstance(), csg).setName(csg.getName());
-
+						revived.add(readd.getName());
 						readd.removeGroupMembership(name);
 						back.remove(csg);
 						back.add(readd);
@@ -53,7 +54,7 @@ public class UnGroup extends CaDoodleOperation {
 	}
 
 	public List<String> getNamesAddedInThisOperation() {
-		return names;
+		return revived;
 	}
 
 	public UnGroup setNames(List<String> names) {
