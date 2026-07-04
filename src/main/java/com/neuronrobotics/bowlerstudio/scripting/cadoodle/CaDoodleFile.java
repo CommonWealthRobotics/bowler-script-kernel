@@ -573,7 +573,7 @@ public class CaDoodleFile {
 						this.setName("addOperation Thread " + toProcess.size());
 						CaDoodleOperation op = toProcess.remove(0);
 						com.neuronrobotics.sdk.common.Log.debug("Adding Operation " + op);
-						if (getCurrentIndex() != getOperations().size()) {
+						if (getCurrentIndex() != getOperations().size() && getOperations().contains(op)) {
 							try {
 								fireRegenerateStart(op);
 								setResult(pruneForward(op));
