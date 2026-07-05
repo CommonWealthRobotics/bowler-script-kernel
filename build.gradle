@@ -2,9 +2,15 @@ buildscript {
 
 	dependencies {
 		classpath 'com.gradleup.shadow:shadow-gradle-plugin:8.3.9'
+		
+		classpath 'org.eclipse.jdt:org.eclipse.jdt.core:3.35.0'
+		classpath 'org.eclipse.platform:org.eclipse.text:3.14.0'
 	}
 }
-
+import groovy.xml.XmlSlurper
+import org.eclipse.jdt.core.ToolFactory
+import org.eclipse.jdt.core.formatter.CodeFormatter
+import org.eclipse.jface.text.Document
 plugins {
 	id 'java'
 	id 'signing'
@@ -15,8 +21,25 @@ plugins {
 spotless {
 	java {
 		lineEndings = com.diffplug.spotless.LineEnding.UNIX
-		// Eclipse formatter with your config file
-		eclipse('4.26').configFile('config/eclipse-formatter.xml')		// Optional but recommended additions:
+		custom('eclipseFormatterDirect') { String source ->
+			def configFile = new File(projectDir, 'config/eclipse-formatter.xml')
+			def options = new HashMap<String, String>()
+			def xml = new XmlSlurper().parse(configFile)
+			xml.profile.setting.each { setting ->
+				options[setting.@id.text()] = setting.@value.text()
+			}
+			def formatter = ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING)
+			def edit = formatter.format(
+					CodeFormatter.K_COMPILATION_UNIT,
+					source, 0, source.length(), 0, System.lineSeparator()
+					)
+			if (edit == null) {
+				throw new GradleException("Eclipse formatter returned null — source may have a syntax error")
+			}
+			def doc = new Document(source)
+			edit.apply(doc)
+			doc.get()
+		}
 		removeUnusedImports()
 		trimTrailingWhitespace()
 		endWithNewline()
