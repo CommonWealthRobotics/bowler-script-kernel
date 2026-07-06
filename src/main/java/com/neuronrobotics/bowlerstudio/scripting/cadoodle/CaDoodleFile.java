@@ -584,10 +584,15 @@ public class CaDoodleFile {
 						}
 						if (getResult() == OperationResult.APPEND || getResult() == OperationResult.PRUNE) {
 							try {
-								CaDoodleOperation prev = getOperations().get(getCurrentIndex() - 1);
+								if (getResult() == OperationResult.PRUNE) {
+									int index = getCurrentIndex() - 1;
+									if (index >= 0) {
+										CaDoodleOperation prev = getOperations().get(index);
+										fireRegenerateStart(prev);
+									}
+								}
 								getOperations().add(op);
-								if (getResult() == OperationResult.PRUNE)
-									fireRegenerateStart(prev);
+
 								process(op);
 								setSaveImage(getCurrentState(), op);
 							} catch (Exception ex) {
@@ -1276,12 +1281,13 @@ public class CaDoodleFile {
 		// TickToc.tic("getSellectedBounds "+incoming.size());
 
 		for (CSG csg : incoming) {
-			//			if (csg.isHide() || csg.isInGroup()) {
-			//				// Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide() +
-			//				// " in group:"
-			//				// + csg.isInGroup());
-			//				continue;
-			//			}
+			// if (csg.isHide() || csg.isInGroup()) {
+			// // Log.debug("Skipping bounds for " + csg.getName() + " hide:" + csg.isHide()
+			// +
+			// // " in group:"
+			// // + csg.isInGroup());
+			// continue;
+			// }
 			boolean forceClear = false;
 			if (toClear != null)
 				for (CSG tc : toClear)
