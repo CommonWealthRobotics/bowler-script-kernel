@@ -20,6 +20,10 @@ public class MoveCenter extends CaDoodleOperation {
 	private List<String> names = new ArrayList<String>();
 	@Expose(serialize = true, deserialize = true)
 	protected String name = null;
+	@Expose(serialize = true, deserialize = true)
+	private TransformNR workplane;
+	@Expose(serialize = true, deserialize = true)
+	private boolean dropMode = false;
 
 	public String getName() {
 		if (name == null) {
@@ -89,12 +93,19 @@ public class MoveCenter extends CaDoodleOperation {
 	public List<CSG> process(List<CSG> incoming) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
-		if (location == null)
+
+		if (location == null && !dropMode)
 			return back;
+		if (dropMode)
+			location = null;
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
 			public ArrayList<CSG> process(CSG incoming, int depth) {
-
+				if (dropMode && location == null) {
+					Transform t = TransformFactory.nrToCSG(workplane);
+					double downMove = -incoming.transformed(t.inverse()).getMinZ();
+					location = workplane.times(new TransformNR(0, 0, downMove)).times(workplane.inverse());
+				}
 				Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 				if (incoming.isMotionLock()) {
 					nrToCSG2 = new Transform();
@@ -164,6 +175,12 @@ public class MoveCenter extends CaDoodleOperation {
 				throw new RuntimeException("Set a name that does not exist!!");
 		}
 		this.names = names;
+		return this;
+	}
+
+	public MoveCenter setDropMode(TransformNR workplane) {
+		this.workplane = workplane;
+		dropMode = true;
 		return this;
 	}
 
