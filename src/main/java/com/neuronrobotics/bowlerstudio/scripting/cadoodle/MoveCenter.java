@@ -94,14 +94,14 @@ public class MoveCenter extends CaDoodleOperation {
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
 
-		if (location == null && !dropMode)
+		if (location == null && !isDropMode())
 			return back;
-		if (dropMode)
+		if (isDropMode())
 			location = null;
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
 			public ArrayList<CSG> process(CSG incoming, int depth) {
-				if (dropMode && location == null) {
+				if (isDropMode() && location == null) {
 					Transform t = TransformFactory.nrToCSG(workplane);
 					double downMove = -incoming.transformed(t.inverse()).getMinZ();
 					location = workplane.times(new TransformNR(0, 0, downMove)).times(workplane.inverse());
@@ -182,6 +182,10 @@ public class MoveCenter extends CaDoodleOperation {
 		this.workplane = workplane;
 		dropMode = true;
 		return this;
+	}
+
+	public boolean isDropMode() {
+		return dropMode;
 	}
 
 }
