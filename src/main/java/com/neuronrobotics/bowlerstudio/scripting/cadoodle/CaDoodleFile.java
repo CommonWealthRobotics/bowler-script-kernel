@@ -584,7 +584,10 @@ public class CaDoodleFile {
 						}
 						if (getResult() == OperationResult.APPEND || getResult() == OperationResult.PRUNE) {
 							try {
+								CaDoodleOperation prev = getOperations().get(getCurrentIndex() - 1);
 								getOperations().add(op);
+								if (getResult() == OperationResult.PRUNE)
+									fireRegenerateStart(prev);
 								process(op);
 								setSaveImage(getCurrentState(), op);
 							} catch (Exception ex) {
