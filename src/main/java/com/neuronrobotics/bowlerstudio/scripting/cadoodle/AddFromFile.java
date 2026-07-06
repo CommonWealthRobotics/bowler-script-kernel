@@ -16,6 +16,7 @@ import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import static com.neuronrobotics.bowlerstudio.scripting.DownloadManager.*;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
+import com.neuronrobotics.bowlerstudio.scripting.SvgLoader;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 
@@ -98,8 +99,10 @@ public class AddFromFile extends AbstractAddFrom {
 			}
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);
-				if (isDoodle && csg.isInGroup())
+				if (isDoodle && csg.isInGroup()) {
+					Log.debug("Not adding to return, " + csg.getName() + " " + csg.getUserDefinedName());
 					continue;
+				}
 				try {
 					CSG processedCSG = processGiven(csg, i, getOrderedName(), file, name, getLocation(),
 							getCaDoodleFile().getCsgDBinstance(), getFilenamePart());
@@ -349,7 +352,7 @@ public class AddFromFile extends AbstractAddFrom {
 		}
 		CSG sized = csg;
 		double volume = csg.getVolume();
-		if (volume < 0.01) {
+		if (volume < SvgLoader.MINIMMUM_VOLUME_MMCUBED) {
 			sized = csg.scale(1000);
 		}
 		CSG processedCSG = sized.transformed(nrToCSG).syncProperties(instance, csg).setRegenerate(previous -> {

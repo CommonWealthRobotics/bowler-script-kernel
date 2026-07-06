@@ -15,6 +15,8 @@ import eu.mihosoft.vrl.v3d.svg.SVGLoad;
 
 public class SvgLoader implements IScriptingLanguage {
 
+	public static final double MINIMMUM_VOLUME_MMCUBED = 0.01;
+
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
 			ArrayList<Object> args) throws Exception {
@@ -55,7 +57,13 @@ public class SvgLoader implements IScriptingLanguage {
 				layerName = "TopLayer";
 			ArrayList<CSG> extrudeLayerToCSG = s.extrudeLayer(depth, layerName);
 			// extrudeLayerToCSG.setColor(Color.web(SVGExporter.colorNames.get(i)));
-			polys.addAll(extrudeLayerToCSG);
+			for (CSG c : extrudeLayerToCSG) {
+				double volume = c.getVolume();
+				if (volume < MINIMMUM_VOLUME_MMCUBED) {
+					continue;// prune extra tiny elements
+				}
+				polys.add(c);
+			}
 			depth -= 5;
 		}
 
