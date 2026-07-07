@@ -44,7 +44,7 @@ public class Sweep extends AbstractAddFrom {
 	@Expose(serialize = true, deserialize = true)
 	private double defrad = 10;
 	@Expose(serialize = true, deserialize = true)
-	private double defstep = 30;
+	private double defstep = 64;
 	@Expose(serialize = true, deserialize = true)
 	private double defangle = 360;
 	@Expose(serialize = true, deserialize = true)
@@ -188,7 +188,7 @@ public class Sweep extends AbstractAddFrom {
 		return back;
 	}
 
-	public Bounds getBounds(HashMap<String, List<Polygon>> polygons) {
+	public static Bounds getBounds(HashMap<String, List<Polygon>> polygons) {
 		Vector3d min = null;
 		Vector3d max = null;
 		// TickToc.tic("getSellectedBounds "+incoming.size());
@@ -216,6 +216,37 @@ public class Sweep extends AbstractAddFrom {
 					max.z = max2.z;
 				// TickToc.tic("Bounds for "+c.getName());
 			}
+
+		return new Bounds(min, max);
+	}
+
+	public static Bounds getBounds(List<Polygon> polygons) {
+		Vector3d min = null;
+		Vector3d max = null;
+
+		for (Polygon csg : polygons) {
+
+			Bounds b = csg.getBounds();
+			Vector3d min2 = b.getMin().clone();
+			Vector3d max2 = b.getMax().clone();
+			if (min == null)
+				min = min2;
+			if (max == null)
+				max = max2;
+			if (min2.x < min.x)
+				min.x = min2.x;
+			if (min2.y < min.y)
+				min.y = min2.y;
+			if (min2.z < min.z)
+				min.z = min2.z;
+			if (max.x < max2.x)
+				max.x = max2.x;
+			if (max.y < max2.y)
+				max.y = max2.y;
+			if (max.z < max2.z)
+				max.z = max2.z;
+			// TickToc.tic("Bounds for "+c.getName());
+		}
 
 		return new Bounds(min, max);
 	}
@@ -253,7 +284,7 @@ public class Sweep extends AbstractAddFrom {
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), angle)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), z)
 				.setParameter(getCaDoodleFile().getCsgDBinstance(), radius)
-				.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(pathname)).setColor(c).setIsHole(hole)
+				.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(name)).setColor(c).setIsHole(hole)
 				.setRegenerate(previous -> {
 					try {
 						File file = getFile();
