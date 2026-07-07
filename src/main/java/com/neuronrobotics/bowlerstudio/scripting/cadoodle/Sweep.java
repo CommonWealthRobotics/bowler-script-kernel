@@ -15,6 +15,7 @@ import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.Cylinder;
 import eu.mihosoft.vrl.v3d.Extrude;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -180,6 +181,10 @@ public class Sweep extends AbstractAddFrom {
 					collect.add(processedCSG);
 				}
 			}
+			// Add a small pin in the center for alignment
+			String orderedName = getOrderedName();
+			CSG processedCSG = processGiven(null, b, j++, orderedName);
+			collect.add(processedCSG);
 
 			back.addAll(collect);
 		} catch (Exception e) {
@@ -257,12 +262,18 @@ public class Sweep extends AbstractAddFrom {
 	}
 
 	private CSG processGiven(Polygon p, Bounds b, int j, String name) {
-		Color c = p.getColor();
-		if (c == null)
-			c = Color.ROSYBROWN;
-		boolean hole = p.isHole();
-		CSG csg = sweep(p, name, b);
-
+		CSG csg = null;
+		Color c = Color.YELLOW;
+		boolean hole = false;
+		if (p != null) {
+			c = p.getColor();
+			if (c == null)
+				c = Color.ROSYBROWN;
+			hole = p.isHole();
+			csg = sweep(p, name, b);
+		} else {
+			csg = new Cylinder(1, 20).toCSG();
+		}
 		Transform nrToCSG = TransformFactory.nrToCSG(getLocation());
 		String pathname;
 		try {
