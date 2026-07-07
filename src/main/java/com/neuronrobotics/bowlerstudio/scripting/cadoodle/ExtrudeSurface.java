@@ -23,7 +23,6 @@ import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
-import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
 import javafx.scene.paint.Color;
 
 public class ExtrudeSurface extends AbstractAddFrom {
@@ -51,7 +50,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 	private LengthParameter step = null;
 	private LengthParameter angle = null;
 	private LengthParameter spiral = null;
-	private StringParameter axis = null;
+	private LengthParameter axis = null;
 	private static ArrayList<Double> nopt = new ArrayList<Double>();
 
 	public double getDefz() {
@@ -135,11 +134,11 @@ public class ExtrudeSurface extends AbstractAddFrom {
 		return spiral;
 	}
 
-	public StringParameter axis(String name) {
-		String key = name + "_CaDoodle_Axis";
+	public LengthParameter axis(String name) {
+		String key = name + "_CaDoodle_Orentation";
 		if (axis == null)
-			axis = new StringParameter(getCaDoodleFile().getCsgDBinstance(), key, "Rear",
-					new ArrayList<String>(Arrays.asList("Rear", "Front", "Left", "Right")));
+			axis = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, 0 - 90.0,
+					new ArrayList<Double>(Arrays.asList(-90.0, 0.0, 90.0, 180.0)));
 
 		return axis;
 	}
@@ -177,6 +176,8 @@ public class ExtrudeSurface extends AbstractAddFrom {
 		double sweepTot = angle(name).getMM();
 		double d = sweepTot / 360;
 		int steps = (int) (steps(name).getMM() * d);
+		if (steps == 0)
+			steps = 1;
 		double angle = sweepTot / steps;
 		Parameter zp = zoffset(name);
 		double z = zp.getMM() * d / steps;
@@ -241,19 +242,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 				}
 				if (extrude.getVertCount() > 0)
 					if (sweep) {
-						axis = axis(name);
-						switch (axis.getStrValue()) {
-							case "Rear" :
-								break;
-							case "Left" :
-								extrude = extrude.rotz(-90);
-								break;
-							case "Right" :
-								extrude = extrude.rotz(90);
-								break;
-							case "Front" :
-								extrude = extrude.rotz(180);
-						}
+						extrude = extrude.rotz(axis(name).getMM());
 						List<Polygon> slice = Slice.slice(extrude);
 						for (Polygon P : slice)
 							P.setHole(hole);
@@ -266,19 +255,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 				Bounds b = Sweep.getBounds(sweeps);
 				for (Polygon ps : sweeps) {
 					CSG csg = sweep(ps, name, b).mirrorz();
-					switch (axis.getStrValue()) {
-						case "Rear" :
-							break;
-						case "Left" :
-							csg = csg.rotz(90);
-							break;
-						case "Right" :
-							csg = csg.rotz(-90);
-							break;
-						case "Front" :
-							csg = csg.rotz(-180);
-							break;
-					}
+					csg = csg.rotz(-axis(name).getMM());
 					csg.setIsHole(ps.isHole());
 					csg.setColor(base.getColor());
 					fillet.add(csg);
