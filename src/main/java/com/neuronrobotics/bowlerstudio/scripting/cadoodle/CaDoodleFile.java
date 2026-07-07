@@ -825,15 +825,21 @@ public class CaDoodleFile {
 		for (CSG c : process) {
 			if (names.contains(c.getName()))
 				continue;
-			names.add(c.getName());
-			CSG cachedVer = cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(getCsgDBinstance(), c)
-					.setName(c.getName()).setRegenerate(c.getRegenerate()).setID(c);
-			if (c.hasManufacturing())
-				cachedVer.setManufacturing(c.getManufacturing());
-			if (cachedVer.isHole() != c.isHole() || cachedVer.isHide() != c.isHide()) {
-				throw new RuntimeException("Lost properties");
+			try {
+				if (c.getVertCount() == 0)
+					continue;
+				CSG cachedVer = cloneCSG(c).setStorage(new PropertyStorage()).syncProperties(getCsgDBinstance(), c)
+						.setName(c.getName()).setRegenerate(c.getRegenerate()).setID(c);
+				if (c.hasManufacturing())
+					cachedVer.setManufacturing(c.getManufacturing());
+				if (cachedVer.isHole() != c.isHole() || cachedVer.isHide() != c.isHide()) {
+					throw new RuntimeException("Lost properties");
+				}
+				names.add(c.getName());
+				cachedCopy.add(cachedVer);
+			} catch (Throwable t) {
+				Log.error(t);
 			}
-			cachedCopy.add(cachedVer);
 			// cachedCopy.add(c);
 		}
 		placeCSGsInCache(op, cachedCopy);
