@@ -137,7 +137,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 	public LengthParameter axis(String name) {
 		String key = name + "_CaDoodle_Orentation";
 		if (axis == null)
-			axis = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, 0 - 90.0,
+			axis = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, 0.0,
 					new ArrayList<Double>(Arrays.asList(-90.0, 0.0, 90.0, 180.0)));
 
 		return axis;
