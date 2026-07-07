@@ -212,12 +212,14 @@ public class ExtrudeSurface extends AbstractAddFrom {
 	public ArrayList<CSG> makeExtrusion(CSG csgin, String on) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		ArrayList<CSG> fillet = new ArrayList<CSG>();
+		double howFarToMove = 0.001;
+
 		try {
 
-			CSG base = csgin.transformed(nrToCSG.inverse()).movez(0.001);
-			CSG offset = csgin.transformed(nrToCSG.inverse()).movez(-0.001);
+			CSG base = csgin.transformed(nrToCSG.inverse()).movez(howFarToMove);
+			CSG offset = csgin.transformed(nrToCSG.inverse()).movez(-howFarToMove);
 			List<Polygon> polys = Slice.slice(base);
-			List<Polygon> offsetpolys = Slice.slice(offset, 0.001);
+			List<Polygon> offsetpolys = Slice.slice(offset, howFarToMove);
 			ArrayList<CSG> cutters = new ArrayList<CSG>();
 			for (Polygon p : offsetpolys) {
 				boolean hole = !Extrude.isCCW(p);
@@ -272,7 +274,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 			int myIndex = i;
 			CSG mine = fillet.get(i);
 
-			CSG tmp = mine.transformed(nrToCSG).setRegenerate(previous -> {
+			CSG tmp = mine.movez(-howFarToMove).transformed(nrToCSG).setRegenerate(previous -> {
 				return makeExtrusion(csgin, orderedName).get(myIndex);
 			}).setName(orderedName).setUserDefinedName("extrude_" + (i + 1));
 			if (sweep) {
