@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -10,14 +11,20 @@ import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 
+import eu.mihosoft.vrl.v3d.Bounds;
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
+import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.Extrude;
-import eu.mihosoft.vrl.v3d.Plane;
+import eu.mihosoft.vrl.v3d.ITransformProvider;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Slice;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
+import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
+import eu.mihosoft.vrl.v3d.parametrics.Parameter;
+import eu.mihosoft.vrl.v3d.parametrics.StringParameter;
+import javafx.scene.paint.Color;
 
 public class ExtrudeSurface extends AbstractAddFrom {
 
@@ -25,6 +32,117 @@ public class ExtrudeSurface extends AbstractAddFrom {
 	private TransformNR workplane = null;
 	@Expose(serialize = true, deserialize = true)
 	private Set<String> toFillet = null;
+	@Expose(serialize = true, deserialize = true)
+	private boolean sweep = false;
+
+	@Expose(serialize = true, deserialize = true)
+	private double defz = 0;
+	@Expose(serialize = true, deserialize = true)
+	private double defrad = 10;
+	@Expose(serialize = true, deserialize = true)
+	private double defstep = 64;
+	@Expose(serialize = true, deserialize = true)
+	private double defangle = 90;
+	@Expose(serialize = true, deserialize = true)
+	private double defSpiral = 0;
+
+	private LengthParameter z = null;
+	private LengthParameter rad = null;
+	private LengthParameter step = null;
+	private LengthParameter angle = null;
+	private LengthParameter spiral = null;
+	private StringParameter axis = null;
+	private static ArrayList<Double> nopt = new ArrayList<Double>();
+
+	public double getDefz() {
+		return defz;
+	}
+
+	public void setDefz(double defz) {
+		this.defz = defz;
+	}
+
+	public double getDefrad() {
+		return defrad;
+	}
+
+	public void setDefrad(double defrad) {
+		this.defrad = defrad;
+	}
+
+	public double getDefstep() {
+		return defstep;
+	}
+
+	public void setDefstep(double defstep) {
+		this.defstep = defstep;
+	}
+
+	public double getDefangle() {
+		return defangle;
+	}
+
+	public void setDefangle(double defangle) {
+		this.defangle = defangle;
+	}
+
+	public double getDefSpiral() {
+		return defSpiral;
+	}
+
+	public void setDefSpiral(double defSpiral) {
+		this.defSpiral = defSpiral;
+	}
+
+	public LengthParameter radius(String name) {
+		String key = name + "_CaDoodle_Rad";
+		if (rad == null)
+			rad = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefrad(), nopt);
+		return rad;
+	}
+
+	public LengthParameter zoffset(String name) {
+		String key = name + "_CaDoodle_Z-per";
+		if (z == null)
+			z = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefz(), nopt);
+		return z;
+	}
+
+	public LengthParameter steps(String name) {
+		String key = name + "_CaDoodle_Step";
+		if (step == null)
+			step = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefstep(), nopt);
+		if (step.getMM() < 3)
+			step.setMM(3);
+		return step;
+	}
+
+	public LengthParameter angle(String name) {
+		String key = name + "_CaDoodle_Angle";
+		if (angle == null)
+			angle = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefangle(), nopt);
+		if (angle.getMM() < 0.001)
+			angle.setMM(0.001);
+		return angle;
+	}
+
+	public LengthParameter spiralStep(String name) {
+		String key = name + "_CaDoodle_Spiral";
+		if (spiral == null)
+			spiral = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, getDefSpiral(), nopt);
+		if (spiral.getMM() < 0)
+			spiral.setMM(0);
+		return spiral;
+	}
+
+	public StringParameter axis(String name) {
+		String key = name + "_CaDoodle_Axis";
+		if (axis == null)
+			axis = new StringParameter(getCaDoodleFile().getCsgDBinstance(), key, "Rear",
+					new ArrayList<String>(Arrays.asList("Rear", "Front", "Left", "Right")));
+
+		return axis;
+	}
 
 	@Override
 	public String getType() {
@@ -55,13 +173,48 @@ public class ExtrudeSurface extends AbstractAddFrom {
 		return back;
 	}
 
+	public CSG sweep(Polygon p, String name, Bounds b) {
+		double sweepTot = angle(name).getMM();
+		double d = sweepTot / 360;
+		int steps = (int) (steps(name).getMM() * d);
+		double angle = sweepTot / steps;
+		Parameter zp = zoffset(name);
+		double z = zp.getMM() * d / steps;
+		double radius = radius(name).getMM();
+		boolean flip = false;
+		if (radius < 0) {
+			radius = -radius;
+			flip = true;
+		}
+		if (angle < 0)
+			angle = -angle;
+		double sprl = spiralStep(name).getMM();
+		Transform centerandAlignedPolygon = new Transform().movex(-b.getMinX()).movey(-b.getMinY());
+		Transform increment = new Transform().rotY(-angle * (flip ? -1.0 : 1.0)).movey(z);
+		Transform radiusT = new Transform().movex(radius);
+		Polygon transformedP;
+		try {
+			transformedP = p.transformed(centerandAlignedPolygon);
+
+			ITransformProvider pr = (unit, domain) -> {
+				return new Transform().movex(sprl * unit * d);
+			};
+			return Extrude.sweep(transformedP, increment, radiusT, steps, pr).setName(name)
+					.transformed(centerandAlignedPolygon.inverse()).movex(-radius);
+		} catch (ColinearPointsException e) {
+			// TODO Auto-generated catch block
+			com.neuronrobotics.sdk.common.Log.error(e);
+		}
+		return new Cube(10).toCSG().setColor(Color.PINK);
+	}
+
 	public ArrayList<CSG> makeExtrusion(CSG csgin, String on) {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		ArrayList<CSG> fillet = new ArrayList<CSG>();
 		try {
 
-			CSG base = csgin.transformed(nrToCSG.inverse()).movez(Plane.getEPSILON() * 100);
-			CSG offset = csgin.transformed(nrToCSG.inverse()).movez(-Plane.getEPSILON() * 1000);
+			CSG base = csgin.transformed(nrToCSG.inverse()).movez(0.001);
+			CSG offset = csgin.transformed(nrToCSG.inverse()).movez(-0.001);
 			List<Polygon> polys = Slice.slice(base);
 			List<Polygon> offsetpolys = Slice.slice(offset, 0.001);
 			ArrayList<CSG> cutters = new ArrayList<CSG>();
@@ -74,6 +227,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 				extrude.setColor(base.getColor());
 				cutters.add(extrude);
 			}
+			ArrayList<Polygon> sweeps = new ArrayList<Polygon>();
 			for (Polygon p : polys) {
 				boolean hole = !Extrude.isCCW(p);
 				if (hole)
@@ -81,14 +235,56 @@ public class ExtrudeSurface extends AbstractAddFrom {
 				CSG extrude = Extrude.extrude(new Vector3d(0, 0, 20), p);
 				extrude.setIsHole(hole);
 				extrude.setColor(base.getColor());
-				//fillet.add(extrude);
+				// fillet.add(extrude);
 				for (CSG cutter : cutters) {
 					extrude = extrude.difference(cutter);
 				}
 				if (extrude.getVertCount() > 0)
-					fillet.add(extrude);
+					if (sweep) {
+						axis = axis(name);
+						switch (axis.getStrValue()) {
+							case "Rear" :
+								break;
+							case "Left" :
+								extrude = extrude.rotz(-90);
+								break;
+							case "Right" :
+								extrude = extrude.rotz(90);
+								break;
+							case "Front" :
+								extrude = extrude.rotz(180);
+						}
+						List<Polygon> slice = Slice.slice(extrude);
+						for (Polygon P : slice)
+							P.setHole(hole);
+						sweeps.addAll(slice);
+					} else {
+						fillet.add(extrude);
+					}
 			}
-			//fillet.addAll(cutters);
+			if (sweep) {
+				Bounds b = Sweep.getBounds(sweeps);
+				for (Polygon ps : sweeps) {
+					CSG csg = sweep(ps, name, b).mirrorz();
+					switch (axis.getStrValue()) {
+						case "Rear" :
+							break;
+						case "Left" :
+							csg = csg.rotz(90);
+							break;
+						case "Right" :
+							csg = csg.rotz(-90);
+							break;
+						case "Front" :
+							csg = csg.rotz(-180);
+							break;
+					}
+					csg.setIsHole(ps.isHole());
+					csg.setColor(base.getColor());
+					fillet.add(csg);
+				}
+			}
+			// fillet.addAll(cutters);
 		} catch (ColinearPointsException e) {
 			e.printStackTrace();
 			fillet = new ArrayList<CSG>();
@@ -99,10 +295,21 @@ public class ExtrudeSurface extends AbstractAddFrom {
 			int myIndex = i;
 			CSG mine = fillet.get(i);
 
-
 			CSG tmp = mine.transformed(nrToCSG).setRegenerate(previous -> {
 				return makeExtrusion(csgin, orderedName).get(myIndex);
 			}).setName(orderedName).setUserDefinedName("extrude_" + (i + 1));
+			if (sweep) {
+				Parameter steps = steps(name);
+				Parameter angle = angle(name);
+				Parameter z = zoffset(name);
+				Parameter radius = radius(name);
+				tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), steps)
+						.setParameter(getCaDoodleFile().getCsgDBinstance(), angle)
+						.setParameter(getCaDoodleFile().getCsgDBinstance(), z)
+						.setParameter(getCaDoodleFile().getCsgDBinstance(), radius)
+						.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(name))
+						.setParameter(getCaDoodleFile().getCsgDBinstance(), axis(name));
+			}
 			MoveCenter.set(getName(), tmp, nrToCSG);
 			fillet.set(i, tmp);
 		}
@@ -131,6 +338,11 @@ public class ExtrudeSurface extends AbstractAddFrom {
 
 	public ExtrudeSurface setToExtrude(Set<String> toFillet) {
 		this.toFillet = toFillet;
+		return this;
+	}
+
+	public ExtrudeSurface setSweep(boolean sweep) {
+		this.sweep = sweep;
 		return this;
 	}
 }
