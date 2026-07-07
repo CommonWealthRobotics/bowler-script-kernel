@@ -262,7 +262,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 						fillet.add(extrude);
 					}
 			}
-			if (sweep&& sweeps.size()>0) {
+			if (sweep && sweeps.size() > 0) {
 				Bounds b = Sweep.getBounds(sweeps);
 				for (Polygon ps : sweeps) {
 					CSG csg = sweep(ps, name, b).mirrorz();
