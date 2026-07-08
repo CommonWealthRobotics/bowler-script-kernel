@@ -1148,24 +1148,7 @@ public class CaDoodleFile {
 			// }
 			int num = 0;
 			for (int i = 0; i < opperations.size(); i++) {
-				File f = getTimelineImageFile(i);
-				CaDoodleOperation op = opperations.get(i);
-				if (!f.exists() && cache.get(op) != null)
-					try {
-						int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
-						List<CSG> process = getCachedCSGs(op);
-						num++;
-						// if (isTimelineOpen())
-						// getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i +
-						// ".png");
-						// else
-						Log.debug(percent + " Save Timeline Image " + i + ".png");
-						setSaveImage(process, op);
-
-					} catch (IOException e) {
-						// Auto-generated catch block
-						com.neuronrobotics.sdk.common.Log.error(e);
-					}
+				num = ensureImageFileExista(num, i);
 			}
 
 			// if (isTimelineOpen())
@@ -1178,6 +1161,32 @@ public class CaDoodleFile {
 		}
 		saveing = false;
 		return getSelf();
+	}
+
+	public void ensureImageFileExists(int i) {
+		ensureImageFileExista(0, i);
+	}
+
+	private int ensureImageFileExista(int num, int i) {
+		File f = getTimelineImageFile(i);
+		CaDoodleOperation op = opperations.get(i);
+		if (!f.exists() && cache.get(op) != null)
+			try {
+				int percent = (int) (((double) i) / ((double) opperations.size()) * 100.0);
+				List<CSG> process = getCachedCSGs(op);
+				num++;
+				// if (isTimelineOpen())
+				// getSaveUpdate().renderSplashFrame(percent, "Save Timeline Image " + i +
+				// ".png");
+				// else
+				Log.debug(percent + " Save Timeline Image " + i + ".png");
+				setSaveImage(process, op);
+
+			} catch (IOException e) {
+				// Auto-generated catch block
+				com.neuronrobotics.sdk.common.Log.error(e);
+			}
+		return num;
 	}
 
 	public File getBomFile() {
