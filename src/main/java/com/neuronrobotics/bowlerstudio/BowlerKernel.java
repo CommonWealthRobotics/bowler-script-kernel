@@ -513,8 +513,13 @@ public class BowlerKernel {
 		ArrayList<CSG> csgBits = new ArrayList<>();
 		try {
 			processReturnedObjects(ret, csgBits);
-			String url = ScriptingEngine.locateGitUrl(sourceDir);
-			com.neuronrobotics.sdk.common.Log.error("Loading printbed URL  " + url);
+			try {
+				String url = ScriptingEngine.locateGitUrl(sourceDir);
+				com.neuronrobotics.sdk.common.Log.error("Loading printbed URL  " + url);
+			} catch (Throwable t) {
+				Log.error("No Git URL in " + sourceDir.getAbsolutePath());
+				// no git for this
+			}
 			PrintBedManager printBedManager = new PrintBedManager(sourceDir, csgBits);
 			if (printBedManager.hasPrintBed())
 				csgBits = printBedManager.makePrintBeds();
