@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -124,7 +125,7 @@ public class CaDoodleFile {
 		setAccept(() -> OperationResult.PRUNE);
 
 		try {
-			pruneForward(getCurrentOperation());
+			getUserPruneAppendDecision(getCurrentOperation());
 		} catch (Exception ex) {
 			com.neuronrobotics.sdk.common.Log.error("Failed to prune tail" + ex);
 		}
@@ -575,8 +576,8 @@ public class CaDoodleFile {
 						com.neuronrobotics.sdk.common.Log.debug("Adding Operation " + op);
 						if (getCurrentIndex() != getOperations().size()) {
 							try {
-								fireRegenerateStart(op);
-								setResult(pruneForward(op));
+								fireRegenerateStart(getCurrentOperation());
+								setResult(getUserPruneAppendDecision(op));
 							} catch (Exception e) {
 								com.neuronrobotics.sdk.common.Log.error(e);
 								break;
@@ -609,7 +610,11 @@ public class CaDoodleFile {
 								e.printStackTrace();
 							}
 							try {
-								regenerateFrom(op).join();
+								Optional<CaDoodleOperation> nextOperation = getNextOperation();
+								if (nextOperation.isPresent()) {
+									CaDoodleOperation newOp = nextOperation.get();
+									regenerateFrom(newOp).join();
+								}
 							} catch (InterruptedException e) {
 								com.neuronrobotics.sdk.common.Log.error(e);
 							}
@@ -785,7 +790,7 @@ public class CaDoodleFile {
 		return file;
 	}
 
-	private OperationResult pruneForward(CaDoodleOperation op) throws Exception {
+	private OperationResult getUserPruneAppendDecision(CaDoodleOperation op) throws Exception {
 		if (op == null)
 			throw new NullPointerException();
 		OperationResult res = OperationResult.INSERT;
@@ -958,6 +963,12 @@ public class CaDoodleFile {
 		if (getCurrentIndex() == 0)
 			return null;
 		return getOperations().get(getCurrentIndex() - 1);
+	}
+
+	public Optional<CaDoodleOperation> getNextOperation() {
+		if (getCurrentIndex() == 0 || getCurrentIndex() == getOperations().size())
+			return Optional.empty();
+		return Optional.ofNullable(getOperations().get(getCurrentIndex()));
 	}
 
 	public boolean isForwardAvailable() {
