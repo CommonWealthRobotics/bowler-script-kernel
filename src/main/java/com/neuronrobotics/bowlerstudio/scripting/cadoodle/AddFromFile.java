@@ -22,7 +22,6 @@ import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
-import eu.mihosoft.vrl.v3d.Extrude;
 import eu.mihosoft.vrl.v3d.PropertyStorage;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
@@ -353,7 +352,7 @@ public class AddFromFile extends AbstractAddFrom {
 		}
 		CSG sized = csg;
 		double volume = csg.getVolume();
-		if(!(volume>0)) {
+		if (!(volume > 0)) {
 			try {
 				csg = CSG.getManifold().calculateAreaAndSurfaceArea(csg);
 			} catch (Throwable e) {
@@ -361,7 +360,7 @@ public class AddFromFile extends AbstractAddFrom {
 				e.printStackTrace();
 			}
 		}
-		if (volume < SvgLoader.MINIMMUM_VOLUME_MMCUBED && volume>0) {
+		if (volume < SvgLoader.MINIMMUM_VOLUME_MMCUBED && volume > 0) {
 			Log.error(new Exception("Re-scaling the object up 1000 fold!"));
 			sized = csg.scale(1000);
 		}
