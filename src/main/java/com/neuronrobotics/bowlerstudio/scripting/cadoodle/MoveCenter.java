@@ -90,22 +90,35 @@ public class MoveCenter extends CaDoodleOperation {
 	}
 
 	@Override
-	public List<CSG> process(List<CSG> incoming) {
+	public List<CSG> process(List<CSG> ic) {
 		ArrayList<CSG> back = new ArrayList<CSG>();
-		back.addAll(incoming);
+		back.addAll(ic);
 
 		if (location == null && !isDropMode())
 			return back;
-		if (isDropMode())
+		if (isDropMode()) {
 			location = null;
+			double targetDown = 0;
+			for (String name : names) {
+				for (CSG incoming : ic) {
+					if (!name.contentEquals(incoming.getName()))
+						continue;
+					if (location != null)
+						continue;
+					Transform t = TransformFactory.nrToCSG(workplane);
+					double downMove = -incoming.transformed(t.inverse()).getMinZ();
+					if (downMove < 0 && downMove < targetDown)
+						targetDown = downMove;
+					if (downMove > 0 && downMove > targetDown)
+						targetDown = downMove;
+				}
+			}
+			location = workplane.times(new TransformNR(0, 0, targetDown)).times(workplane.inverse());
+		}
 		CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
 			@Override
 			public ArrayList<CSG> process(CSG incoming, int depth) {
-				if (isDropMode() && location == null) {
-					Transform t = TransformFactory.nrToCSG(workplane);
-					double downMove = -incoming.transformed(t.inverse()).getMinZ();
-					location = workplane.times(new TransformNR(0, 0, downMove)).times(workplane.inverse());
-				}
+
 				Transform nrToCSG2 = TransformFactory.nrToCSG(location);
 				if (incoming.isMotionLock()) {
 					nrToCSG2 = new Transform();
