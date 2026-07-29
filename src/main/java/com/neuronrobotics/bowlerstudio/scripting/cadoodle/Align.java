@@ -218,7 +218,7 @@ public class Align extends CaDoodleOperation {
 
 	public Bounds getBounds(List<CSG> incoming, HashMap<String, Bounds> inWorkplaneBounds) throws BoundsComputFailure {
 		if (bounds != null) {
-			Log.error("Depricated Bounds in the align step!");
+			// Log.error("Depricated Bounds in the align step!");
 			return bounds.getBounds();
 		}
 		if (boundNames != null) {
