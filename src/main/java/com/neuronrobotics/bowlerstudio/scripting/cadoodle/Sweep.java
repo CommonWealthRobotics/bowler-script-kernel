@@ -306,7 +306,7 @@ public class Sweep extends AbstractAddFrom {
 						com.neuronrobotics.sdk.common.Log.error(e);
 					}
 					return previous;
-				}).setName(name);
+				}).setName(name).setUserDefinedName("sweep_" + (j + 1));
 		MoveCenter.set(getName(), processedCSG, nrToCSG);
 		return processedCSG;
 	}

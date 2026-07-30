@@ -276,7 +276,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 
 			CSG tmp = mine.movez(-howFarToMove).transformed(nrToCSG).setRegenerate(previous -> {
 				return makeExtrusion(csgin, orderedName).get(myIndex);
-			}).setName(orderedName).setUserDefinedName("extrude_" + (i + 1));
+			}).setName(orderedName);
 			if (sweep) {
 				Parameter steps = steps(name);
 				Parameter angle = angle(name);
@@ -288,6 +288,9 @@ public class ExtrudeSurface extends AbstractAddFrom {
 						.setParameter(getCaDoodleFile().getCsgDBinstance(), radius)
 						.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(name))
 						.setParameter(getCaDoodleFile().getCsgDBinstance(), axis(name));
+				tmp.setUserDefinedName("bend_" + (i + 1));
+			}else {
+				tmp.setUserDefinedName("extrude_" + (i + 1));
 			}
 			MoveCenter.set(getName(), tmp, nrToCSG);
 			fillet.set(i, tmp);
