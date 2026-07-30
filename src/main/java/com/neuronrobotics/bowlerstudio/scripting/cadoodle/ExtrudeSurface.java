@@ -289,7 +289,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 						.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(name))
 						.setParameter(getCaDoodleFile().getCsgDBinstance(), axis(name));
 				tmp.setUserDefinedName("bend_" + (i + 1));
-			}else {
+			} else {
 				tmp.setUserDefinedName("extrude_" + (i + 1));
 			}
 			MoveCenter.set(getName(), tmp, nrToCSG);
