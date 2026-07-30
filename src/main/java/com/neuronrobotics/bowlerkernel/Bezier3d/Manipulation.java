@@ -564,12 +564,16 @@ public class Manipulation {
 	}
 
 	public void setInReferenceFrame(double nX, double nY, double nZ) {
-		setInLocal(new TransformNR(nX, nY, nZ));
+		TransformNR inLocal2 = new TransformNR(nX, nY, nZ);
+		setInLocal(inLocal2);
 		TransformNR wp = new TransformNR(getFrameOfReference().getRotation());
-		setInLocal(wp.times(getInLocal()));
+		setInLocal(wp.times(inLocal2));
 		getInLocal().setRotation(new RotationNR());
 		// com.neuronrobotics.sdk.common.Log.error("Setting in reference
 		// frame:"+inLocal.toSimpleString());
+		newX = nX;
+		newY = nY;
+		newZ = nZ;
 		setGlobal(getInLocal());
 
 		for (EventHandler<MouseEvent> R : eventListeners)
