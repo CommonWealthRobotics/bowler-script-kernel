@@ -1448,7 +1448,8 @@ public class CaDoodleFile {
 		this.workplane = workplane;
 		try {
 			// clear all bounds and recompute with the workplane
-			getBounds(getCurrentState(), workplane, boundsCache, getCurrentState());
+			if(!getCurrentState().isEmpty())
+				getBounds(getCurrentState(), workplane, boundsCache, getCurrentState());
 		} catch (BoundsComputFailure e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
