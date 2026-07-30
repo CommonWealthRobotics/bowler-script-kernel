@@ -143,6 +143,15 @@ public class ExtrudeSurface extends AbstractAddFrom {
 		return axis;
 	}
 
+	public LengthParameter inset(String name) {
+		String key = name + "_CaDoodle_Inset";
+		if (axis == null)
+			axis = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, 0.0,
+					new ArrayList<Double>(Arrays.asList(-100.0, 10.0, -1.0, -0.1, 0.0, 0.1, 1.0, 10.0, 100.0)));
+
+		return axis;
+	}
+
 	@Override
 	public String getType() {
 		return "ExtrudeSurface";
@@ -213,7 +222,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		ArrayList<CSG> fillet = new ArrayList<CSG>();
 		double howFarToMove = 0.001;
-
+		double insetDistance = inset(name).getMM();
 		try {
 
 			CSG base = csgin.transformed(nrToCSG.inverse()).movez(howFarToMove);
@@ -242,7 +251,13 @@ public class ExtrudeSurface extends AbstractAddFrom {
 				for (CSG cutter : cutters) {
 					extrude = extrude.difference(cutter);
 				}
-				if (extrude.getVertCount() > 0)
+				if (extrude.getVertCount() > 0) {
+					if (Math.abs(insetDistance) > howFarToMove) {
+						List<Polygon> insetPoly = Slice.slice(extrude, insetDistance);
+						extrude = Extrude.extrude(new Vector3d(0, 0, 20), insetPoly.get(0));
+						extrude.setIsHole(hole);
+						extrude.setColor(base.getColor());
+					}
 					if (sweep) {
 						extrude = extrude.rotz(axis(name).getMM());
 						List<Polygon> slice = Slice.slice(extrude);
@@ -252,6 +267,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 					} else {
 						fillet.add(extrude);
 					}
+				}
 			}
 			if (sweep && sweeps.size() > 0) {
 				Bounds b = Sweep.getBounds(sweeps);
@@ -292,6 +308,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 			} else {
 				tmp.setUserDefinedName("extrude_" + (i + 1));
 			}
+			tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), inset(name));
 			MoveCenter.set(getName(), tmp, nrToCSG);
 			fillet.set(i, tmp);
 		}
