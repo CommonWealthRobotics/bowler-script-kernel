@@ -65,12 +65,12 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
-		if (names == null)
+		if (getNames() == null)
 			throw new RuntimeException("Names can not be null");
 		nameIndex = 0;
 		if (builderName == null)
-			setBuilderName(getBuilder(names, incoming));
-		limbName = getLimbName(names, incoming);
+			setBuilderName(getBuilder(getNames(), incoming));
+		limbName = getLimbName(getNames(), incoming);
 
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
@@ -223,6 +223,10 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	 */
 	public void setUndo(boolean undo) {
 		this.undo = undo;
+	}
+
+	public List<String> getNames() {
+		return names;
 	}
 
 }
