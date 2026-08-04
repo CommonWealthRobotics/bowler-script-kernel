@@ -17,6 +17,7 @@ import eu.mihosoft.vrl.v3d.ColinearPointsException;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.Extrude;
 import eu.mihosoft.vrl.v3d.ITransformProvider;
+import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Polygon;
 import eu.mihosoft.vrl.v3d.Slice;
 import eu.mihosoft.vrl.v3d.Transform;
@@ -24,6 +25,7 @@ import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.LengthParameter;
 import eu.mihosoft.vrl.v3d.parametrics.Parameter;
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Affine;
 
 public class ExtrudeSurface extends AbstractAddFrom {
 
@@ -51,6 +53,7 @@ public class ExtrudeSurface extends AbstractAddFrom {
 	private LengthParameter angle = null;
 	private LengthParameter spiral = null;
 	private LengthParameter axis = null;
+	private LengthParameter inset;
 	private static ArrayList<Double> nopt = new ArrayList<Double>();
 
 	public double getDefz() {
@@ -145,11 +148,11 @@ public class ExtrudeSurface extends AbstractAddFrom {
 
 	public LengthParameter inset(String name) {
 		String key = name + "_CaDoodle_Inset";
-		if (axis == null)
-			axis = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, 0.0,
+		if (inset == null)
+			inset = new LengthParameter(getCaDoodleFile().getCsgDBinstance(), key, 0.0,
 					new ArrayList<Double>(Arrays.asList(-100.0, 10.0, -1.0, -0.1, 0.0, 0.1, 1.0, 10.0, 100.0)));
 
-		return axis;
+		return inset;
 	}
 
 	@Override
@@ -219,7 +222,17 @@ public class ExtrudeSurface extends AbstractAddFrom {
 	}
 
 	public ArrayList<CSG> makeExtrusion(CSG csgin, String on) {
-		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
+		TransformNR manipulator = new TransformNR();
+		Affine manip = null;
+		if (csgin.hasManipulator())
+			try {
+				manip = csgin.getManipulator();
+				manipulator = TransformFactory.affineToNr(manip).inverse();
+			} catch (MissingManipulatorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		Transform nrToCSG = TransformFactory.nrToCSG(manipulator.times(getSlicePlane()));
 		ArrayList<CSG> fillet = new ArrayList<CSG>();
 		double howFarToMove = 0.001;
 		double insetDistance = inset(name).getMM();
@@ -298,30 +311,34 @@ public class ExtrudeSurface extends AbstractAddFrom {
 				Parameter angle = angle(name);
 				Parameter z = zoffset(name);
 				Parameter radius = radius(name);
-				tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), steps)
-						.setParameter(getCaDoodleFile().getCsgDBinstance(), angle)
-						.setParameter(getCaDoodleFile().getCsgDBinstance(), z)
-						.setParameter(getCaDoodleFile().getCsgDBinstance(), radius)
-						.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(name))
-						.setParameter(getCaDoodleFile().getCsgDBinstance(), axis(name));
+				tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), axis(name));
+
+				tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), steps);
+				tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), angle);
+				tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), z);
+				tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), radius);
+				tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), spiralStep(name));
 				tmp.setUserDefinedName("bend_" + (i + 1));
 			} else {
 				tmp.setUserDefinedName("extrude_" + (i + 1));
 			}
 			tmp.setParameter(getCaDoodleFile().getCsgDBinstance(), inset(name));
+			if (manip != null) {
+				tmp.setManipulator(manip);
+			}
 			MoveCenter.set(getName(), tmp, nrToCSG);
 			fillet.set(i, tmp);
 		}
 		return fillet;
 	}
 
-	public TransformNR getWorkplane() {
+	public TransformNR getSlicePlane() {
 		if (workplane == null)
 			workplane = new TransformNR();
 		return workplane;
 	}
 
-	public ExtrudeSurface setWorkplane(TransformNR workplane) {
+	public ExtrudeSurface setSlicePlane(TransformNR workplane) {
 		this.workplane = workplane;
 		return this;
 	}
