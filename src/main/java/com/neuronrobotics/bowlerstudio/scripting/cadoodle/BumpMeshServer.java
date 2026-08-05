@@ -1,11 +1,16 @@
 package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +23,7 @@ public class BumpMeshServer {
 
 	private static final int WS_PORT = 3742;
 	private static final int HTTP_PORT = 8080;
+	private static final String STATUS_PATH = "/api/status";
 	private static final String WS_MAGIC = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 	private final File meshFile;
@@ -42,9 +48,32 @@ public class BumpMeshServer {
 		rh.setDirectoriesListed(true);
 		rh.setResourceBase(webDir.getAbsolutePath());
 		HandlerList handlers = new HandlerList();
-		handlers.setHandlers(new Handler[]{rh, new DefaultHandler()});
+		// Status handler is checked first so it answers /api/status even
+		// though it isn't a file in webDir.
+		handlers.setHandlers(new Handler[]{new StatusHandler(), rh, new DefaultHandler()});
 		jetty.setHandler(handlers);
 		jetty.start();
+	}
+
+	/**
+	 * Serves GET /api/status as a small JSON object reporting whether the mesh file
+	 * and config file currently exist on disk, e.g.: {"mesh":true,"config":false}
+	 */
+	private class StatusHandler extends AbstractHandler {
+		@Override
+		public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+				throws IOException, ServletException {
+			if (!STATUS_PATH.equals(target))
+				return;
+
+			String json = "{\"mesh\":" + meshFile.exists() + ",\"config\":" + configFile.exists() + "}";
+
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			response.setStatus(HttpServletResponse.SC_OK);
+			response.getWriter().write(json);
+			baseRequest.setHandled(true);
+		}
 	}
 
 	private void startWatcher() throws IOException {
