@@ -72,17 +72,20 @@ jobs:
       run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
     - name: Zip BowlerStudioInstall
+      if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir -p artifacts
         zip -r artifacts/BowlerStudioInstall-linux.zip "$HOME/bin/BowlerStudioInstall"
 
     - name: Upload BowlerStudioInstall artifact (Linux)
+      if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-linux
         path: artifacts/BowlerStudioInstall-linux.zip
 
     - name: Upload bowler-kernel.jar artifact
+      if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: bowler-kernel-jar
@@ -129,11 +132,13 @@ jobs:
         }
 
     - name: Zip BowlerStudioInstall
+      if: startsWith(github.ref, 'refs/tags/')
       run: |
         New-Item -ItemType Directory -Force -Path artifacts | Out-Null
         Compress-Archive -Path "$HOME\bin\BowlerStudioInstall\*" -DestinationPath artifacts\BowlerStudioInstall-windows.zip
 
     - name: Upload BowlerStudioInstall artifact (Windows)
+      if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-windows
@@ -208,11 +213,13 @@ jobs:
       run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
     - name: Zip BowlerStudioInstall
+      if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir -p artifacts
         zip -r artifacts/BowlerStudioInstall-macos-arm.zip "$HOME/bin/BowlerStudioInstall"
 
     - name: Upload BowlerStudioInstall artifact (macOS ARM)
+      if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-macos-arm
