@@ -1,10 +1,9 @@
-# test
 name: Test package
 on:
   push:
     branches:
       - '*'
-    tags-ignore:
+    tags:
       - '*'
   pull_request:
     branches:
@@ -72,6 +71,23 @@ jobs:
     - name: build Cad
       run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
+    - name: Zip BowlerStudioInstall
+      run: |
+        mkdir -p artifacts
+        zip -r artifacts/BowlerStudioInstall-linux.zip "$HOME/bin/BowlerStudioInstall"
+
+    - name: Upload BowlerStudioInstall artifact (Linux)
+      uses: actions/upload-artifact@v4
+      with:
+        name: BowlerStudioInstall-linux
+        path: artifacts/BowlerStudioInstall-linux.zip
+
+    - name: Upload bowler-kernel.jar artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: bowler-kernel-jar
+        path: build/libs/bowler-kernel.jar
+
   # ---------------------------------------------------------------------
   # Windows: Shadow Jar build verification only
   # ---------------------------------------------------------------------
@@ -111,6 +127,17 @@ jobs:
           Write-Error "Shadow Jar not found at build/libs/bowler-kernel.jar"
           exit 1
         }
+
+    - name: Zip BowlerStudioInstall
+      run: |
+        New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+        Compress-Archive -Path "$HOME\bin\BowlerStudioInstall\*" -DestinationPath artifacts\BowlerStudioInstall-windows.zip
+
+    - name: Upload BowlerStudioInstall artifact (Windows)
+      uses: actions/upload-artifact@v4
+      with:
+        name: BowlerStudioInstall-windows
+        path: artifacts/BowlerStudioInstall-windows.zip
 
   # ---------------------------------------------------------------------
   # macOS ARM (native aarch64 JVM): full build + test suite
@@ -180,3 +207,100 @@ jobs:
     - name: build Cad
       run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
+    - name: Zip BowlerStudioInstall
+      run: |
+        mkdir -p artifacts
+        zip -r artifacts/BowlerStudioInstall-macos-arm.zip "$HOME/bin/BowlerStudioInstall"
+
+    - name: Upload BowlerStudioInstall artifact (macOS ARM)
+      uses: actions/upload-artifact@v4
+      with:
+        name: BowlerStudioInstall-macos-arm
+        path: artifacts/BowlerStudioInstall-macos-arm.zip
+
+  # ---------------------------------------------------------------------
+  # Release: only runs on tag pushes, once all platform builds succeed
+  # ---------------------------------------------------------------------
+  release:
+    runs-on: ubuntu-latest
+    needs: [build, build-windows, build-macos-arm]
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Download Linux BowlerStudioInstall artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: BowlerStudioInstall-linux
+        path: dist
+
+    - name: Download Windows BowlerStudioInstall artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: BowlerStudioInstall-windows
+        path: dist
+
+    - name: Download macOS ARM BowlerStudioInstall artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: BowlerStudioInstall-macos-arm
+        path: dist
+
+    - name: Download bowler-kernel.jar artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: bowler-kernel-jar
+        path: dist
+
+    - name: List downloaded release assets
+      run: ls -la dist
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Linux BowlerStudioInstall asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/BowlerStudioInstall-linux.zip
+        asset_name: BowlerStudioInstall-linux.zip
+        asset_content_type: application/zip
+
+    - name: Upload Windows BowlerStudioInstall asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/BowlerStudioInstall-windows.zip
+        asset_name: BowlerStudioInstall-windows.zip
+        asset_content_type: application/zip
+
+    - name: Upload macOS ARM BowlerStudioInstall asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/BowlerStudioInstall-macos-arm.zip
+        asset_name: BowlerStudioInstall-macos-arm.zip
+        asset_content_type: application/zip
+
+    - name: Upload bowler-kernel.jar asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/bowler-kernel.jar
+        asset_name: bowler-kernel.jar
+        asset_content_type: application/jar
