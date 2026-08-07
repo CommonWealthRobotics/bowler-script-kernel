@@ -9,6 +9,14 @@ on:
     branches:
       - '*'
 
+# Only one run of this workflow at a time. Any new push (including a
+# tag push that kicks off a release) cancels whatever run is currently
+# in progress, so the latest trigger always wins and old builds/releases
+# don't keep running in the background.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
 
   # ---------------------------------------------------------------------
@@ -19,76 +27,96 @@ jobs:
 
     steps:
     - name: Install updated FreeType
+      timeout-minutes: 30
       run: sudo apt-get update;sudo apt-get install libfreetype6
     - name: Checkout repository and submodules
+      timeout-minutes: 30
       uses: actions/checkout@v2
       with:
          submodules: recursive
 
     - name: List directory contents
+      timeout-minutes: 30
       run: pwd; ls -la
 
     - name: start xvfb
+      timeout-minutes: 30
       run:
         Xvfb :0 &
     - name: After checkout, list directory contnts
+      timeout-minutes: 30
       run: pwd; ls -la
     - name: Install libraries
+      timeout-minutes: 30
       run: |
           sudo apt update
           sudo apt install libgtk2.0-0
 
 
     - name: Pull a JavaFX JDK
+      timeout-minutes: 30
       run: wget https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
 
     - name: After JDK download, list directory contnts
+      timeout-minutes: 30
       run: pwd; ls -la
 
     - name: Set Java
+      timeout-minutes: 30
       uses: actions/setup-java@v1
       with:
         java-version: 25
         jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
     - name: Shadow Jar
+      timeout-minutes: 30
       run: ./gradlew spotlessCheck shadowJar
     - name: initialize the X11 DISPLAY variable
+      timeout-minutes: 30
       run:
         export DISPLAY=:0
     - name: Build/Test with Gradle
+      timeout-minutes: 30
       run: xvfb-run -s '-screen 0 1024x768x24' ./gradlew test
 
     - name: Test Bezier
+      timeout-minutes: 30
       run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git  BezierEditorDemo.groovy
     - name: start xvfb
+      timeout-minutes: 30
       run:
         Xvfb :0 &
     - name: Test Local
+      timeout-minutes: 30
       run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
 
     - name: Clean Cad
+      timeout-minutes: 30
       run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
     - name: build Cad
+      timeout-minutes: 30
       run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
-    - name: Locate BowlerStudioInstall directory
-      if: startsWith(github.ref, 'refs/tags/')
-      id: locate
-      run: echo "dir=$HOME/bin/BowlerStudioInstall" >> "$GITHUB_OUTPUT"
-
-    - name: Remove stray archive files from BowlerStudioInstall root
+    - name: Zip BowlerStudioInstall
+      timeout-minutes: 30
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        find "${{ steps.locate.outputs.dir }}" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
+        mkdir -p artifacts
+        find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
+        cd "$HOME/bin/BowlerStudioInstall"
+        zip -r "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" .
+        cd "$GITHUB_WORKSPACE"
+        mv "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" artifacts/BowlerStudioInstall-linux.zip
 
-    - name: Upload BowlerStudioInstall artifact (Linux, extracted)
+    - name: Upload BowlerStudioInstall artifact (Linux)
+      timeout-minutes: 30
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-linux
-        path: ${{ steps.locate.outputs.dir }}
+        path: artifacts/BowlerStudioInstall-linux.zip
 
     - name: Upload bowler-kernel.jar artifact
+      timeout-minutes: 30
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
@@ -103,29 +131,36 @@ jobs:
 
     steps:
     - name: Checkout repository and submodules
+      timeout-minutes: 30
       uses: actions/checkout@v2
       with:
         submodules: recursive
 
     - name: List directory contents
+      timeout-minutes: 30
       run: Get-Location; Get-ChildItem
 
     - name: Pull a JavaFX JDK
+      timeout-minutes: 30
       run: Invoke-WebRequest -Uri "https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip" -OutFile "zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip"
 
     - name: After JDK download, list directory contents
+      timeout-minutes: 30
       run: Get-Location; Get-ChildItem
 
     - name: Set Java
+      timeout-minutes: 30
       uses: actions/setup-java@v1
       with:
         java-version: 25
         jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip
 
     - name: Shadow Jar
+      timeout-minutes: 30
       run: ./gradlew.bat spotlessCheck test shadowJar
 
     - name: Confirm Shadow Jar exists
+      timeout-minutes: 30
       run: |
         if (Test-Path "build/libs/bowler-kernel.jar") {
           Write-Host "Shadow Jar built successfully:"
@@ -135,22 +170,25 @@ jobs:
           exit 1
         }
 
-    - name: Locate BowlerStudioInstall directory
-      if: startsWith(github.ref, 'refs/tags/')
-      id: locate
-      run: echo "dir=$HOME\bin\BowlerStudioInstall" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-
-    - name: Remove stray archive files from BowlerStudioInstall root
+    - name: Zip BowlerStudioInstall
+      timeout-minutes: 30
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        Get-ChildItem -Path "${{ steps.locate.outputs.dir }}" -File | Where-Object { $_.Extension -in ".zip",".tar",".gz",".tgz",".xz",".7z",".rar" -or $_.Name -match '\.(tar\.gz|tar\.xz)$' } | Remove-Item -Force
+        New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+        Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall" -File | Where-Object { $_.Extension -in ".zip",".tar",".gz",".tgz",".xz",".7z",".rar" -or $_.Name -match '\.(tar\.gz|tar\.xz)$' } | Remove-Item -Force
+        $tempZip = Join-Path $Env:RUNNER_TEMP "BowlerStudioInstall-windows.zip"
+        Push-Location "$HOME\bin\BowlerStudioInstall"
+        Compress-Archive -Path * -DestinationPath $tempZip
+        Pop-Location
+        Move-Item -Force $tempZip "artifacts\BowlerStudioInstall-windows.zip"
 
-    - name: Upload BowlerStudioInstall artifact (Windows, extracted)
+    - name: Upload BowlerStudioInstall artifact (Windows)
+      timeout-minutes: 30
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-windows
-        path: ${{ steps.locate.outputs.dir }}
+        path: artifacts/BowlerStudioInstall-windows.zip
 
   # ---------------------------------------------------------------------
   # macOS ARM (native aarch64 JVM): full build + test suite
@@ -160,16 +198,20 @@ jobs:
 
     steps:
     - name: Checkout repository and submodules
+      timeout-minutes: 30
       uses: actions/checkout@v2
       with:
         submodules: recursive
 
     - name: List directory contents
+      timeout-minutes: 30
       run: pwd; ls -la
     - name: Install Blender, FreeCAD, OpenSCAD, MeshLab
+      timeout-minutes: 30
       run: |
         brew install --cask blender freecad meshlab openscad@snapshot
     - name: Add CAD/3D tool binaries to PATH
+      timeout-minutes: 30
       run: |
         echo "/Applications/Blender.app/Contents/MacOS" >> $GITHUB_PATH
         echo "/Applications/FreeCAD.app/Contents/MacOS" >> $GITHUB_PATH
@@ -177,6 +219,7 @@ jobs:
         echo "/Applications/meshlab.app/Contents/MacOS" >> $GITHUB_PATH
  
     - name: Verify tool installation
+      timeout-minutes: 30
       run: |
         which blender || (echo "blender not found on PATH" && exit 1)
         which freecad || (echo "freecad not found on PATH" && exit 1)
@@ -194,53 +237,64 @@ jobs:
         openscad --version
 
     - name: Pull a JavaFX JDK (macOS arm64)
+      timeout-minutes: 30
       run: curl -L -O https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
 
     - name: After JDK download, list directory contents
+      timeout-minutes: 30
       run: pwd; ls -la
 
     - name: Set Java
+      timeout-minutes: 30
       uses: actions/setup-java@v1
       with:
         java-version: 25
         jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
 
     - name: Shadow Jar
+      timeout-minutes: 30
       run: ./gradlew spotlessCheck test shadowJar
 
     - name: Test Bezier
+      timeout-minutes: 30
       run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://gist.github.com/4aeeaa49bd3a807eed8f8ff3dea84c48.git BezierEditorDemo.groovy
 
     - name: Test Local
+      timeout-minutes: 30
       run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -f kernel-return-test.groovy
 
     - name: Clean Cad
+      timeout-minutes: 30
       run: rm -rf $HOME/bowler-workspace/gitcache/github.com/Hephaestus-Arm/HephaestusArm2
 
     - name: build Cad
+      timeout-minutes: 30
       run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
-    - name: Locate BowlerStudioInstall directory
-      if: startsWith(github.ref, 'refs/tags/')
-      id: locate
-      run: echo "dir=$HOME/bin/BowlerStudioInstall" >> "$GITHUB_OUTPUT"
-
-    - name: Remove stray archive files from BowlerStudioInstall root
+    - name: Zip BowlerStudioInstall
+      timeout-minutes: 30
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        find "${{ steps.locate.outputs.dir }}" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
+        mkdir -p artifacts
+        find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
+        cd "$HOME/bin/BowlerStudioInstall"
+        zip -r "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" .
+        cd "$GITHUB_WORKSPACE"
+        mv "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" artifacts/BowlerStudioInstall-macos-arm.zip
 
-    - name: Upload BowlerStudioInstall artifact (macOS ARM, extracted)
+    - name: Upload BowlerStudioInstall artifact (macOS ARM)
+      timeout-minutes: 30
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-macos-arm
-        path: ${{ steps.locate.outputs.dir }}
+        path: artifacts/BowlerStudioInstall-macos-arm.zip
 
   # ---------------------------------------------------------------------
   # Release: only runs on tag pushes, once all platform builds succeed.
-  # Zips each extracted install directory fresh, right before attaching
-  # it to the release, so nothing gets zipped twice.
+  # Each build job already produced its final zip / jar, so this job
+  # downloads them as-is and attaches them straight to the release —
+  # no re-extracting, no re-zipping.
   # ---------------------------------------------------------------------
   release:
     runs-on: ubuntu-latest
@@ -249,52 +303,39 @@ jobs:
 
     steps:
     - name: Download Linux BowlerStudioInstall artifact
+      timeout-minutes: 30
       uses: actions/download-artifact@v4
       with:
         name: BowlerStudioInstall-linux
-        path: extracted/linux
+        path: dist
 
     - name: Download Windows BowlerStudioInstall artifact
+      timeout-minutes: 30
       uses: actions/download-artifact@v4
       with:
         name: BowlerStudioInstall-windows
-        path: extracted/windows
+        path: dist
 
     - name: Download macOS ARM BowlerStudioInstall artifact
+      timeout-minutes: 30
       uses: actions/download-artifact@v4
       with:
         name: BowlerStudioInstall-macos-arm
-        path: extracted/macos-arm
+        path: dist
 
     - name: Download bowler-kernel.jar artifact
+      timeout-minutes: 30
       uses: actions/download-artifact@v4
       with:
         name: bowler-kernel-jar
         path: dist
 
-    - name: Zip extracted install directories
-      run: |
-        mkdir -p dist
-        cd extracted/linux && zip -r "$GITHUB_WORKSPACE/dist/BowlerStudioInstall-linux.zip" . && cd "$GITHUB_WORKSPACE"
-        cd extracted/windows && zip -r "$GITHUB_WORKSPACE/dist/BowlerStudioInstall-windows.zip" . && cd "$GITHUB_WORKSPACE"
-        cd extracted/macos-arm && zip -r "$GITHUB_WORKSPACE/dist/BowlerStudioInstall-macos-arm.zip" . && cd "$GITHUB_WORKSPACE"
-
-    - name: Unzip bowler-kernel.jar artifact if needed
-      run: |
-        cd dist
-        if file bowler-kernel.jar | grep -qi "zip archive"; then
-          echo "Downloaded artifact is a zip wrapper, extracting the real jar..."
-          mv bowler-kernel.jar bowler-kernel.jar.artifact.zip
-          unzip -o bowler-kernel.jar.artifact.zip -d .
-          rm -f bowler-kernel.jar.artifact.zip
-        fi
-        ls -la bowler-kernel.jar
-        cd "$GITHUB_WORKSPACE"
-
     - name: List release assets
+      timeout-minutes: 30
       run: ls -la dist
 
     - name: Create Release
+      timeout-minutes: 30
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -306,6 +347,7 @@ jobs:
         prerelease: false
 
     - name: Upload Linux BowlerStudioInstall asset
+      timeout-minutes: 30
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -316,6 +358,7 @@ jobs:
         asset_content_type: application/zip
 
     - name: Upload Windows BowlerStudioInstall asset
+      timeout-minutes: 30
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -326,6 +369,7 @@ jobs:
         asset_content_type: application/zip
 
     - name: Upload macOS ARM BowlerStudioInstall asset
+      timeout-minutes: 30
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -336,6 +380,7 @@ jobs:
         asset_content_type: application/zip
 
     - name: Upload bowler-kernel.jar asset
+      timeout-minutes: 30
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
