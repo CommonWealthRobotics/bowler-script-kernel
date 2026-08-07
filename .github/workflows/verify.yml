@@ -77,7 +77,9 @@ jobs:
         mkdir -p artifacts
         find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
         cd "$HOME/bin/BowlerStudioInstall"
-        zip -r "$GITHUB_WORKSPACE/artifacts/BowlerStudioInstall-linux.zip" .
+        zip -r "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" .
+        cd "$GITHUB_WORKSPACE"
+        mv "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" artifacts/BowlerStudioInstall-linux.zip
 
     - name: Upload BowlerStudioInstall artifact (Linux)
       if: startsWith(github.ref, 'refs/tags/')
@@ -138,9 +140,11 @@ jobs:
       run: |
         New-Item -ItemType Directory -Force -Path artifacts | Out-Null
         Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall" -File | Where-Object { $_.Extension -in ".zip",".tar",".gz",".tgz",".7z",".rar" } | Remove-Item -Force
+        $tempZip = Join-Path $Env:RUNNER_TEMP "BowlerStudioInstall-windows.zip"
         Push-Location "$HOME\bin\BowlerStudioInstall"
-        Compress-Archive -Path * -DestinationPath "$Env:GITHUB_WORKSPACE\artifacts\BowlerStudioInstall-windows.zip"
+        Compress-Archive -Path * -DestinationPath $tempZip
         Pop-Location
+        Move-Item -Force $tempZip "artifacts\BowlerStudioInstall-windows.zip"
 
     - name: Upload BowlerStudioInstall artifact (Windows)
       if: startsWith(github.ref, 'refs/tags/')
@@ -165,7 +169,7 @@ jobs:
       run: pwd; ls -la
     - name: Install Blender, FreeCAD, OpenSCAD, MeshLab
       run: |
-        brew install --cask blender freecad meshlab inkscape openscad@snapshot
+        brew install --cask blender freecad meshlab openscad@snapshot
     - name: Add CAD/3D tool binaries to PATH
       run: |
         echo "/Applications/Blender.app/Contents/MacOS" >> $GITHUB_PATH
@@ -223,7 +227,9 @@ jobs:
         mkdir -p artifacts
         find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
         cd "$HOME/bin/BowlerStudioInstall"
-        zip -r "$GITHUB_WORKSPACE/artifacts/BowlerStudioInstall-macos-arm.zip" .
+        zip -r "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" .
+        cd "$GITHUB_WORKSPACE"
+        mv "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" artifacts/BowlerStudioInstall-macos-arm.zip
 
     - name: Upload BowlerStudioInstall artifact (macOS ARM)
       if: startsWith(github.ref, 'refs/tags/')
