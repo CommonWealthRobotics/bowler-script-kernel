@@ -466,9 +466,13 @@ public class MobileBaseBuilder {
 					// com.neuronrobotics.sdk.common.Log.debug("Base set to " + base);
 					kin.setRobotToFiducialTransform(base);
 				}
-				if (mod.getTip() != null) {
+				double[] tip = mod.getTip();
+				if (tip != null) {
 					try {
-						kin.setDesiredTaskSpaceTransform(mod.getTip(), 0);
+
+						double best = kin.getBestTime(tip);
+						kin.setDesiredJointSpaceVector(tip, best);
+						//Thread.sleep((long) (best*1000.0));
 					} catch (Exception ex) {
 						// com.neuronrobotics.sdk.common.Log.error(ex);
 						;

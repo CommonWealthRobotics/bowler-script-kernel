@@ -13,6 +13,8 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AbstractAddFrom;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ICadoodleOperationUndo;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
+import com.neuronrobotics.sdk.common.TickToc;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
@@ -24,15 +26,17 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR tip = null;
 	@Expose(serialize = true, deserialize = true)
+	private double[] jointHomeValues = null;
+	@Expose(serialize = true, deserialize = true)
 	private TransformNR elbow = null;
 
-	@Expose(serialize = true, deserialize = true)
 	boolean undo = false;
 
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR basePrevious = null;
+
 	@Expose(serialize = true, deserialize = true)
-	private TransformNR tipPrevious = null;
+	private double[] jointHomeValuesPrevious = null;
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR elbowPrevious = null;
 	@Expose(serialize = true, deserialize = true)
@@ -121,8 +125,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param base
-	 *            the base to set
+	 * @param base the base to set
 	 */
 	public ModifyLimb setBase(TransformNR base) {
 		this.base = base;
@@ -132,16 +135,35 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	/**
 	 * @return the tip
 	 */
-	public TransformNR getTip() {
-		return !isUndo() ? tip : tipPrevious;
+	public double[] getTip() {
+		if (tip != null) {
+			if (jointHomeValues == null) {
+				TransformNR inverseOffset = newLimb.inverseOffset(tip);
+				TickToc.tic("inverseOffset");
+				try {
+					jointHomeValues = newLimb.inverseKinematics(inverseOffset);
+					tip = null;
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return isUndo() ? jointHomeValuesPrevious : jointHomeValues;
+	}
+
+	public TransformNR getTipTF() {
+		double[] vector = getTip();
+		TransformNR fwd = newLimb.forwardKinematics(vector);
+		return newLimb.forwardOffset(fwd);
 	}
 
 	/**
-	 * @param tip
-	 *            the tip to set
+	 * @param tip the tip to set
 	 */
 	public ModifyLimb setTip(TransformNR tip) {
 		this.tip = tip;
+		getTip();
 		return this;
 	}
 
@@ -153,8 +175,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param elbow
-	 *            the elbow to set
+	 * @param elbow the elbow to set
 	 */
 	public ModifyLimb setElbow(TransformNR elbow) {
 		this.elbow = elbow;
@@ -174,18 +195,20 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param newLimb
-	 *            the newLimb to set
+	 * @param newLimb the newLimb to set
 	 */
 	public ModifyLimb setLimb(DHParameterKinematics newLimb) {
 		this.newLimb = newLimb;
-		basePrevious = newLimb.getRobotToFiducialTransform().copy();
-		tipPrevious = newLimb.getCurrentTaskSpaceTransform().copy();
+		if (basePrevious == null)
+			basePrevious = newLimb.getRobotToFiducialTransform().copy();
+		if (jointHomeValuesPrevious == null)
+			jointHomeValuesPrevious = newLimb.getCurrentJointSpaceTarget();
 		return this;
 	}
 
 	@Override
 	public void undo() {
+		Log.debug("Undo " + name);
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
 		setUndo(true);
 		// com.neuronrobotics.sdk.common.Log.debug("Undo ModifyLimb");
@@ -199,6 +222,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 
 	@Override
 	public void redo() {
+		Log.debug("Redo " + name);
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
 		setUndo(false);
 		// com.neuronrobotics.sdk.common.Log.debug("Redo ModifyLimb");
@@ -218,8 +242,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	}
 
 	/**
-	 * @param undo
-	 *            the undo to set
+	 * @param undo the undo to set
 	 */
 	public void setUndo(boolean undo) {
 		this.undo = undo;
