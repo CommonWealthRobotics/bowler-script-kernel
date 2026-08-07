@@ -75,7 +75,9 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir -p artifacts
-        zip -r artifacts/BowlerStudioInstall-linux.zip "$HOME/bin/BowlerStudioInstall"
+        find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
+        cd "$HOME/bin/BowlerStudioInstall"
+        zip -r "$GITHUB_WORKSPACE/artifacts/BowlerStudioInstall-linux.zip" .
 
     - name: Upload BowlerStudioInstall artifact (Linux)
       if: startsWith(github.ref, 'refs/tags/')
@@ -135,7 +137,10 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       run: |
         New-Item -ItemType Directory -Force -Path artifacts | Out-Null
-        Compress-Archive -Path "$HOME\bin\BowlerStudioInstall\*" -DestinationPath artifacts\BowlerStudioInstall-windows.zip
+        Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall" -File | Where-Object { $_.Extension -in ".zip",".tar",".gz",".tgz",".7z",".rar" } | Remove-Item -Force
+        Push-Location "$HOME\bin\BowlerStudioInstall"
+        Compress-Archive -Path * -DestinationPath "$Env:GITHUB_WORKSPACE\artifacts\BowlerStudioInstall-windows.zip"
+        Pop-Location
 
     - name: Upload BowlerStudioInstall artifact (Windows)
       if: startsWith(github.ref, 'refs/tags/')
@@ -216,7 +221,9 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir -p artifacts
-        zip -r artifacts/BowlerStudioInstall-macos-arm.zip "$HOME/bin/BowlerStudioInstall"
+        find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
+        cd "$HOME/bin/BowlerStudioInstall"
+        zip -r "$GITHUB_WORKSPACE/artifacts/BowlerStudioInstall-macos-arm.zip" .
 
     - name: Upload BowlerStudioInstall artifact (macOS ARM)
       if: startsWith(github.ref, 'refs/tags/')
