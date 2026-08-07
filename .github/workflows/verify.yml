@@ -71,22 +71,22 @@ jobs:
     - name: build Cad
       run:  xvfb-run -s '-screen 0 1024x768x24' java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
-    - name: Zip BowlerStudioInstall
+    - name: Locate BowlerStudioInstall directory
+      if: startsWith(github.ref, 'refs/tags/')
+      id: locate
+      run: echo "dir=$HOME/bin/BowlerStudioInstall" >> "$GITHUB_OUTPUT"
+
+    - name: Remove stray archive files from BowlerStudioInstall root
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        mkdir -p artifacts
-        find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
-        cd "$HOME/bin/BowlerStudioInstall"
-        zip -r "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" .
-        cd "$GITHUB_WORKSPACE"
-        mv "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" artifacts/BowlerStudioInstall-linux.zip
+        find "${{ steps.locate.outputs.dir }}" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
 
-    - name: Upload BowlerStudioInstall artifact (Linux)
+    - name: Upload BowlerStudioInstall artifact (Linux, extracted)
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-linux
-        path: artifacts/BowlerStudioInstall-linux.zip
+        path: ${{ steps.locate.outputs.dir }}
 
     - name: Upload bowler-kernel.jar artifact
       if: startsWith(github.ref, 'refs/tags/')
@@ -135,23 +135,22 @@ jobs:
           exit 1
         }
 
-    - name: Zip BowlerStudioInstall
+    - name: Locate BowlerStudioInstall directory
+      if: startsWith(github.ref, 'refs/tags/')
+      id: locate
+      run: echo "dir=$HOME\bin\BowlerStudioInstall" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+    - name: Remove stray archive files from BowlerStudioInstall root
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        New-Item -ItemType Directory -Force -Path artifacts | Out-Null
-        Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall" -File | Where-Object { $_.Extension -in ".zip",".tar",".gz",".tgz",".xz",".7z",".rar" -or $_.Name -match '\.(tar\.gz|tar\.xz)$' } | Remove-Item -Force
-        $tempZip = Join-Path $Env:RUNNER_TEMP "BowlerStudioInstall-windows.zip"
-        Push-Location "$HOME\bin\BowlerStudioInstall"
-        Compress-Archive -Path * -DestinationPath $tempZip
-        Pop-Location
-        Move-Item -Force $tempZip "artifacts\BowlerStudioInstall-windows.zip"
+        Get-ChildItem -Path "${{ steps.locate.outputs.dir }}" -File | Where-Object { $_.Extension -in ".zip",".tar",".gz",".tgz",".xz",".7z",".rar" -or $_.Name -match '\.(tar\.gz|tar\.xz)$' } | Remove-Item -Force
 
-    - name: Upload BowlerStudioInstall artifact (Windows)
+    - name: Upload BowlerStudioInstall artifact (Windows, extracted)
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-windows
-        path: artifacts/BowlerStudioInstall-windows.zip
+        path: ${{ steps.locate.outputs.dir }}
 
   # ---------------------------------------------------------------------
   # macOS ARM (native aarch64 JVM): full build + test suite
@@ -221,25 +220,27 @@ jobs:
     - name: build Cad
       run: java --enable-preview -Dprism.order=sw -Dprism.verbose=true -jar build/libs/bowler-kernel.jar -g https://github.com/Hephaestus-Arm/HephaestusArm2.git hephaestus.xml
 
-    - name: Zip BowlerStudioInstall
+    - name: Locate BowlerStudioInstall directory
+      if: startsWith(github.ref, 'refs/tags/')
+      id: locate
+      run: echo "dir=$HOME/bin/BowlerStudioInstall" >> "$GITHUB_OUTPUT"
+
+    - name: Remove stray archive files from BowlerStudioInstall root
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        mkdir -p artifacts
-        find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
-        cd "$HOME/bin/BowlerStudioInstall"
-        zip -r "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" .
-        cd "$GITHUB_WORKSPACE"
-        mv "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" artifacts/BowlerStudioInstall-macos-arm.zip
+        find "${{ steps.locate.outputs.dir }}" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
 
-    - name: Upload BowlerStudioInstall artifact (macOS ARM)
+    - name: Upload BowlerStudioInstall artifact (macOS ARM, extracted)
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
         name: BowlerStudioInstall-macos-arm
-        path: artifacts/BowlerStudioInstall-macos-arm.zip
+        path: ${{ steps.locate.outputs.dir }}
 
   # ---------------------------------------------------------------------
-  # Release: only runs on tag pushes, once all platform builds succeed
+  # Release: only runs on tag pushes, once all platform builds succeed.
+  # Zips each extracted install directory fresh, right before attaching
+  # it to the release, so nothing gets zipped twice.
   # ---------------------------------------------------------------------
   release:
     runs-on: ubuntu-latest
@@ -251,19 +252,19 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: BowlerStudioInstall-linux
-        path: dist
+        path: extracted/linux
 
     - name: Download Windows BowlerStudioInstall artifact
       uses: actions/download-artifact@v4
       with:
         name: BowlerStudioInstall-windows
-        path: dist
+        path: extracted/windows
 
     - name: Download macOS ARM BowlerStudioInstall artifact
       uses: actions/download-artifact@v4
       with:
         name: BowlerStudioInstall-macos-arm
-        path: dist
+        path: extracted/macos-arm
 
     - name: Download bowler-kernel.jar artifact
       uses: actions/download-artifact@v4
@@ -271,7 +272,26 @@ jobs:
         name: bowler-kernel-jar
         path: dist
 
-    - name: List downloaded release assets
+    - name: Zip extracted install directories
+      run: |
+        mkdir -p dist
+        cd extracted/linux && zip -r "$GITHUB_WORKSPACE/dist/BowlerStudioInstall-linux.zip" . && cd "$GITHUB_WORKSPACE"
+        cd extracted/windows && zip -r "$GITHUB_WORKSPACE/dist/BowlerStudioInstall-windows.zip" . && cd "$GITHUB_WORKSPACE"
+        cd extracted/macos-arm && zip -r "$GITHUB_WORKSPACE/dist/BowlerStudioInstall-macos-arm.zip" . && cd "$GITHUB_WORKSPACE"
+
+    - name: Unzip bowler-kernel.jar artifact if needed
+      run: |
+        cd dist
+        if file bowler-kernel.jar | grep -qi "zip archive"; then
+          echo "Downloaded artifact is a zip wrapper, extracting the real jar..."
+          mv bowler-kernel.jar bowler-kernel.jar.artifact.zip
+          unzip -o bowler-kernel.jar.artifact.zip -d .
+          rm -f bowler-kernel.jar.artifact.zip
+        fi
+        ls -la bowler-kernel.jar
+        cd "$GITHUB_WORKSPACE"
+
+    - name: List release assets
       run: ls -la dist
 
     - name: Create Release
