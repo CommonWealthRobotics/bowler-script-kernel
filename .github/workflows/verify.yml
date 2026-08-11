@@ -209,7 +209,7 @@ jobs:
     - name: Install Blender, FreeCAD, OpenSCAD, MeshLab
       timeout-minutes: 30
       run: |
-        brew install --cask blender freecad meshlab openscad@snapshot
+        brew install --cask inkscape blender freecad meshlab openscad@snapshot
     - name: Add CAD/3D tool binaries to PATH
       timeout-minutes: 30
       run: |
@@ -276,7 +276,7 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir -p artifacts
-        find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
+        find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.dmg" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
         cd "$HOME/bin/BowlerStudioInstall"
         zip -r "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" .
         cd "$GITHUB_WORKSPACE"
