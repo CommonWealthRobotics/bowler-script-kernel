@@ -169,6 +169,7 @@ public class Manipulation {
 	private boolean resizeAllowed = true;
 	private TransformNR setGlobalPose;
 	private TransformNR inLocal;
+	private long pressedTime;
 
 	public void addEventListener(EventHandler<MouseEvent> r) {
 		if (eventListeners.contains(r))
@@ -278,6 +279,7 @@ public class Manipulation {
 	}
 
 	private void pressed(MouseEvent event) {
+		pressedTime = System.currentTimeMillis();
 		setState(DragState.Dragging);
 		new Thread(() -> {
 			event.consume();
@@ -290,6 +292,11 @@ public class Manipulation {
 	}
 
 	private void dragged(MouseEvent event, MouseEvent event2) {
+		long l = System.currentTimeMillis() - pressedTime;
+		if (l < 200) {
+			Log.debug("Drag prevented, too fast " + l);
+			return;
+		}
 
 		if (resizeAllowed && (getState() == DragState.Dragging)) {
 
