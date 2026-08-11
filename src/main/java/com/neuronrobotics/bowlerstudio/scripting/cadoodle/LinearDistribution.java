@@ -64,17 +64,19 @@ public class LinearDistribution extends AbstractAddFrom {
 			x = mm;
 			y = mm;
 		}
-		for (int z = 0; z < objectX.getMM(); z++) {
+		for (int z = 0; z < objectZ.getMM(); z++) {
 			for (int i = 0; i < objectX.getMM(); i++) {
 				boolean isSkipRow = i % 2 != 0 && hex;
 
-				for (int j = (i == 0 ? 1 : 0); j < (isSkipRow ? objectY.getMM() - 1 : objectY.getMM()); j++) {
+				for (int j = ((i == 0 && z == 0) ? 1 : 0); j < (isSkipRow
+						? objectY.getMM() - 1
+						: objectY.getMM()); j++) {
 
 					double y2 = y * j;
 					double x2 = x * i;
 					if (isSkipRow)
 						y2 += y / 2;
-					TransformNR tf = new TransformNR(x2, y2, z*x);
+					TransformNR tf = new TransformNR(x2, y2, z * y);
 
 					Bounds b;
 					try {
@@ -88,7 +90,9 @@ public class LinearDistribution extends AbstractAddFrom {
 									c.setParameter(getDb(), rad);
 									c.setParameter(getDb(), objectX);
 									c.setParameter(getDb(), objectY);
+									c.setParameter(getDb(), objectZ);
 									c.setParameter(getDb(), hexLin);
+
 								}
 								return copyPasteMoved;
 							}
@@ -108,8 +112,7 @@ public class LinearDistribution extends AbstractAddFrom {
 							ArrayList<String> c = constituants(back, from);
 							if (c.size() < 1) {
 								new RuntimeException("A radial distribution must have at least 1 constituants!")
-										.printStackTrace();
-								;
+										.printStackTrace();;
 								continue;
 							}
 							String newGroupName;
