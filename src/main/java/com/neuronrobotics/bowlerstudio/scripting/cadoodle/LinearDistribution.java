@@ -46,6 +46,9 @@ public class LinearDistribution extends AbstractAddFrom {
 		LengthParameter objectY = new LengthParameter(getDb(), getName() + "_CaDoodle_Y", (double) 3,
 				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
 						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
+		LengthParameter objectZ = new LengthParameter(getDb(), getName() + "_CaDoodle_Z", (double) 1,
+				new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
+						15.0, 16.0, 17.0, 18.0, 19.0, 20.0)));
 		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Spacing", 21.0,
 				new ArrayList<>(Arrays.asList(0.001, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 20.0, 30.0,
 						40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 1000.0)));
@@ -61,68 +64,70 @@ public class LinearDistribution extends AbstractAddFrom {
 			x = mm;
 			y = mm;
 		}
-		for (int i = 0; i < objectX.getMM(); i++) {
-			boolean isSkipRow = i % 2 != 0 && hex;
+		for (int z = 0; z < objectX.getMM(); z++) {
+			for (int i = 0; i < objectX.getMM(); i++) {
+				boolean isSkipRow = i % 2 != 0 && hex;
 
-			for (int j = (i == 0 ? 1 : 0); j < (isSkipRow ? objectY.getMM() - 1 : objectY.getMM()); j++) {
+				for (int j = (i == 0 ? 1 : 0); j < (isSkipRow ? objectY.getMM() - 1 : objectY.getMM()); j++) {
 
-				double y2 = y * j;
-				double x2 = x * i;
-				if (isSkipRow)
-					y2 += y / 2;
-				TransformNR tf = new TransformNR(x2, y2, 0);
+					double y2 = y * j;
+					double x2 = x * i;
+					if (isSkipRow)
+						y2 += y / 2;
+					TransformNR tf = new TransformNR(x2, y2, z*x);
 
-				Bounds b;
-				try {
-					b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
-					cpMap.clear();
-					CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
-						@Override
-						public ArrayList<CSG> process(CSG ic, int depth) {
-							ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, tf, b);
-							for (CSG c : copyPasteMoved) {
-								c.setParameter(getDb(), rad);
-								c.setParameter(getDb(), objectX);
-								c.setParameter(getDb(), objectY);
-								c.setParameter(getDb(), hexLin);
-							}
-							return copyPasteMoved;
-						}
-					}, 1);
-				} catch (BoundsComputFailure e) {
-					Log.error(e);
-				}
-
-
-				for (String from : cpMap.keySet()) {
-					CSG source;
+					Bounds b;
 					try {
-						source = CaDoodleFile.getByName(back, from);
-					} catch (NameMissingException e) {
-						continue;
+						b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
+						cpMap.clear();
+						CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
+							@Override
+							public ArrayList<CSG> process(CSG ic, int depth) {
+								ArrayList<CSG> copyPasteMoved = copyPasteMoved(ic, depth, tf, b);
+								for (CSG c : copyPasteMoved) {
+									c.setParameter(getDb(), rad);
+									c.setParameter(getDb(), objectX);
+									c.setParameter(getDb(), objectY);
+									c.setParameter(getDb(), hexLin);
+								}
+								return copyPasteMoved;
+							}
+						}, 1);
+					} catch (BoundsComputFailure e) {
+						Log.error(e);
 					}
-					if (source.isGroupResult()) {
-						ArrayList<String> c = constituants(back, from);
-						if (c.size() < 1) {
-							new RuntimeException("A radial distribution must have at least 1 constituants!")
-									.printStackTrace();;
-							continue;
-						}
-						String newGroupName;
+
+					for (String from : cpMap.keySet()) {
+						CSG source;
 						try {
-							newGroupName = CaDoodleFile.getByName(back, cpMap.get(from)).getName();
+							source = CaDoodleFile.getByName(back, from);
 						} catch (NameMissingException e) {
 							continue;
 						}
-						for (String s : c) {
-							CSG dest;
+						if (source.isGroupResult()) {
+							ArrayList<String> c = constituants(back, from);
+							if (c.size() < 1) {
+								new RuntimeException("A radial distribution must have at least 1 constituants!")
+										.printStackTrace();
+								;
+								continue;
+							}
+							String newGroupName;
 							try {
-								dest = CaDoodleFile.getByName(back, s);
+								newGroupName = CaDoodleFile.getByName(back, cpMap.get(from)).getName();
 							} catch (NameMissingException e) {
 								continue;
 							}
-							dest.removeGroupMembership(from);
-							dest.addGroupMembership(newGroupName);
+							for (String s : c) {
+								CSG dest;
+								try {
+									dest = CaDoodleFile.getByName(back, s);
+								} catch (NameMissingException e) {
+									continue;
+								}
+								dest.removeGroupMembership(from);
+								dest.addGroupMembership(newGroupName);
+							}
 						}
 					}
 				}
