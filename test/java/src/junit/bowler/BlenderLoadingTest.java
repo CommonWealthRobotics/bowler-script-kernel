@@ -23,7 +23,7 @@ public class BlenderLoadingTest {
 		CSG cube = new Cube(100).toCSG();
 		CSG remeshed = GeometrySimplification.remesh(cube, 10.0, CSGDatabase.getInstance());
 		if (remeshed.getNumberOfTriangles() == cube.getNumberOfTriangles())
-			fail("Blender failed to remesh "+remeshed.getNumberOfTriangles());
+			fail("Blender failed to remesh " + remeshed.getNumberOfTriangles());
 		com.neuronrobotics.sdk.common.Log.error("Remeshing produced: " + remeshed.getNumberOfTriangles());
 	}
 
