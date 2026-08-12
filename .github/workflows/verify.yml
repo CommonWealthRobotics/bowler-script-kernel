@@ -98,7 +98,6 @@ jobs:
 
     - name: Zip BowlerStudioInstall
       timeout-minutes: 30
-      if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir -p artifacts
         find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
@@ -107,6 +106,11 @@ jobs:
         zip -r "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" .
         cd "$GITHUB_WORKSPACE"
         mv "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" artifacts/BowlerStudioInstall-linux.zip
+    - name: List BowlerStudioInstall
+      timeout-minutes: 30
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        ls -al $HOME/bin/BowlerStudioInstall/
 
     - name: Upload BowlerStudioInstall artifact (Linux)
       timeout-minutes: 30
@@ -173,7 +177,6 @@ jobs:
 
     - name: Zip BowlerStudioInstall
       timeout-minutes: 30
-      if: startsWith(github.ref, 'refs/tags/')
       run: |
         New-Item -ItemType Directory -Force -Path artifacts | Out-Null
         Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall" -File | Where-Object { $_.Extension -in ".zip",".tar",".gz",".tgz",".xz",".7z",".rar" -or $_.Name -match '\.(tar\.gz|tar\.xz)$' } | Remove-Item -Force
@@ -183,6 +186,7 @@ jobs:
         Compress-Archive -Path * -DestinationPath $tempZip
         Pop-Location
         Move-Item -Force $tempZip "artifacts\BowlerStudioInstall-windows.zip"
+        Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall"
 
     - name: Upload BowlerStudioInstall artifact (Windows)
       timeout-minutes: 30
@@ -275,7 +279,6 @@ jobs:
 
     - name: Zip BowlerStudioInstall
       timeout-minutes: 30
-      if: startsWith(github.ref, 'refs/tags/')
       run: |
         mkdir -p artifacts
         find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.dmg" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
@@ -284,7 +287,11 @@ jobs:
         zip -r "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" .
         cd "$GITHUB_WORKSPACE"
         mv "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" artifacts/BowlerStudioInstall-macos-arm.zip
-
+    - name: List BowlerStudioInstall
+      timeout-minutes: 30
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        ls -al $HOME/bin/BowlerStudioInstall/
     - name: Upload BowlerStudioInstall artifact (macOS ARM)
       timeout-minutes: 30
       if: startsWith(github.ref, 'refs/tags/')
