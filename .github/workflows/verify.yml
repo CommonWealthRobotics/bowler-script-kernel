@@ -104,7 +104,7 @@ jobs:
         find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
         cd "$HOME/bin/BowlerStudioInstall"
         rm -rf eclipse/plugins/org.eclipse.justj.openjdk*
-        zip -r "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" .
+        zip -r  -9  "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" .
         cd "$GITHUB_WORKSPACE"
         mv "$RUNNER_TEMP/BowlerStudioInstall-linux.zip" artifacts/BowlerStudioInstall-linux.zip
     - name: List BowlerStudioInstall
@@ -185,7 +185,7 @@ jobs:
         Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall\eclipse\plugins" -Directory -Filter "org.eclipse.justj.openjdk*" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
         $tempZip = Join-Path $Env:RUNNER_TEMP "BowlerStudioInstall-windows.zip"
         Push-Location "$HOME\bin\BowlerStudioInstall"
-        Compress-Archive -Path * -DestinationPath $tempZip
+        Compress-Archive -Path * -DestinationPath $tempZip -CompressionLevel Optimal
         Pop-Location
         Move-Item -Force $tempZip "artifacts\BowlerStudioInstall-windows.zip"
         Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall"
@@ -287,7 +287,7 @@ jobs:
         find "$HOME/bin/BowlerStudioInstall" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.dmg" -o -iname "*.tar" -o -iname "*.tar.gz" -o -iname "*.tar.xz" -o -iname "*.tgz" -o -iname "*.gz" -o -iname "*.xz" -o -iname "*.7z" -o -iname "*.rar" \) -delete
         cd "$HOME/bin/BowlerStudioInstall"
         rm -rf eclipse/plugins/org.eclipse.justj.openjdk*
-        zip -r "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" .
+        zip -r -9 "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" .
         cd "$GITHUB_WORKSPACE"
         mv "$RUNNER_TEMP/BowlerStudioInstall-macos-arm.zip" artifacts/BowlerStudioInstall-macos-arm.zip
     - name: List BowlerStudioInstall
