@@ -274,7 +274,7 @@ public class DownloadManager {
 	// -------------------------------------------------------------------------
 
 	public static void main(String[] args) {
-		for (String name : new String[]{"inkscape", "blender", "freecad", "openscad"}) {
+		for (String name : new String[] { "inkscape", "blender", "freecad", "openscad" }) {
 			Optional<Path> result = findExecutable(name);
 			System.out.printf("%-10s → %s%n", name, result.map(Path::toString).orElse("not found"));
 		}
@@ -547,7 +547,8 @@ public class DownloadManager {
 			if (fromJavaHome.isPresent())
 				return fromJavaHome.get().toFile();
 		}
-		ArrayList<String> filesInGit = null;;
+		ArrayList<String> filesInGit = null;
+		;
 		try {
 			filesInGit = ScriptingEngine.filesInGit(editorsURL);
 		} catch (Exception e) {
@@ -654,6 +655,7 @@ public class DownloadManager {
 							}
 							// sfx
 							if (type.toLowerCase().contains("sfx")) {
+
 								sfx(jvmArchive, bindir + targetdir);
 							}
 							// extractTarXz
@@ -784,18 +786,24 @@ public class DownloadManager {
 			command.add(sfxArchive.getAbsolutePath());
 			command.add("-y");
 			command.add("-o\"" + tempDir.toAbsolutePath() + "\"");
-
+			Log.debug("Running: " + command);
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.directory(new File("."));
-			pb.inheritIO();
+			pb.redirectErrorStream(true); // merge stderr into stdout so one reader catches both
 
 			Process process = pb.start();
+
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					Log.debug(line);
+				}
+			}
 
 			int exit = process.waitFor();
 			if (exit != 0) {
 				throw new IOException("Self-extracting archive failed with exit code " + exit);
 			}
-
 			Path target = Paths.get(targetDir);
 			Files.createDirectories(target);
 
@@ -1213,7 +1221,8 @@ public class DownloadManager {
 			}
 		} catch (Throwable ex) {
 			downloadEvents.finishDownload();
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 			new File(inputFile).delete();
 			throw ex;
 		}
@@ -1428,7 +1437,8 @@ public class DownloadManager {
 			out.flush();
 			out.close();
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);;
+			com.neuronrobotics.sdk.common.Log.error(ex);
+			;
 			output.delete();
 		}
 		exe.delete();
