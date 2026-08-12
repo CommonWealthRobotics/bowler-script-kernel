@@ -274,7 +274,7 @@ public class DownloadManager {
 	// -------------------------------------------------------------------------
 
 	public static void main(String[] args) {
-		for (String name : new String[] { "inkscape", "blender", "freecad", "openscad" }) {
+		for (String name : new String[]{"inkscape", "blender", "freecad", "openscad"}) {
 			Optional<Path> result = findExecutable(name);
 			System.out.printf("%-10s → %s%n", name, result.map(Path::toString).orElse("not found"));
 		}
@@ -547,8 +547,7 @@ public class DownloadManager {
 			if (fromJavaHome.isPresent())
 				return fromJavaHome.get().toFile();
 		}
-		ArrayList<String> filesInGit = null;
-		;
+		ArrayList<String> filesInGit = null;;
 		try {
 			filesInGit = ScriptingEngine.filesInGit(editorsURL);
 		} catch (Exception e) {
@@ -1221,8 +1220,7 @@ public class DownloadManager {
 			}
 		} catch (Throwable ex) {
 			downloadEvents.finishDownload();
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			new File(inputFile).delete();
 			throw ex;
 		}
@@ -1437,8 +1435,7 @@ public class DownloadManager {
 			out.flush();
 			out.close();
 		} catch (Exception ex) {
-			com.neuronrobotics.sdk.common.Log.error(ex);
-			;
+			com.neuronrobotics.sdk.common.Log.error(ex);;
 			output.delete();
 		}
 		exe.delete();
