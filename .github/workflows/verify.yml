@@ -49,8 +49,8 @@ jobs:
     - name: Install libraries
       timeout-minutes: 30
       run: |
-          sudo apt update
-          sudo apt install libgtk2.0-0
+          sudo add-apt-repository ppa:freecad-maintainers/freecad-stable
+          sudo apt install -y wget  freecad inkscape blender  meshlab libgtk2.0-0
 
 
     - name: Pull a JavaFX JDK
