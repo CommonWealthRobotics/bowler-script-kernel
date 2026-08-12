@@ -50,8 +50,8 @@ jobs:
       timeout-minutes: 30
       run: |
           sudo add-apt-repository ppa:freecad-maintainers/freecad-stable
-          sudo apt install -y wget  freecad inkscape blender  meshlab libgtk2.0-0
-
+          sudo apt install -y wget  freecad inkscape  meshlab libgtk2.0-0
+          sudo snap install blender --classic
 
     - name: Pull a JavaFX JDK
       timeout-minutes: 30
