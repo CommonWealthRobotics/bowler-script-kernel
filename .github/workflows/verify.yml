@@ -180,7 +180,7 @@ jobs:
       timeout-minutes: 60
       run: |
         New-Item -ItemType Directory -Force -Path artifacts | Out-Null
-        Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall" -File | Where-Object { $_.Extension -in ".zip",".tar",".gz",".tgz",".xz",".7z",".rar" -or $_.Name -match '\.(tar\.gz|tar\.xz)$' } | Remove-Item -Force
+        Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall" -File | Where-Object { $_.Extension -in ".zip",".sfx",".tar",".gz",".tgz",".xz",".7z",".rar" -or $_.Name -match '\.(tar\.gz|tar\.xz)$' } | Remove-Item -Force
         Get-ChildItem -Path "$HOME\bin\BowlerStudioInstall\eclipse\plugins" -Directory -Filter "org.eclipse.justj.openjdk*" -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
         $tempZip = Join-Path $Env:RUNNER_TEMP "BowlerStudioInstall-windows.zip"
         $7z = Get-Command 7z.exe -ErrorAction SilentlyContinue
@@ -360,7 +360,16 @@ jobs:
         release_name: ${{ github.ref_name }}
         draft: false
         prerelease: false
-
+    - name: Upload bowler-kernel.jar asset
+      timeout-minutes: 30
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/bowler-kernel.jar
+        asset_name: bowler-kernel.jar
+        asset_content_type: application/jar
     - name: Upload Linux BowlerStudioInstall asset
       timeout-minutes: 30
       uses: actions/upload-release-asset@v1
@@ -370,6 +379,18 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: dist/BowlerStudioInstall-linux.zip
         asset_name: BowlerStudioInstall-linux.zip
+        asset_content_type: application/zip
+
+
+    - name: Upload macOS ARM BowlerStudioInstall asset
+      timeout-minutes: 30
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/BowlerStudioInstall-macos-arm.zip
+        asset_name: BowlerStudioInstall-macos-arm.zip
         asset_content_type: application/zip
 
     - name: Upload Windows BowlerStudioInstall asset
@@ -383,24 +404,3 @@ jobs:
         asset_name: BowlerStudioInstall-windows.zip
         asset_content_type: application/zip
 
-    - name: Upload macOS ARM BowlerStudioInstall asset
-      timeout-minutes: 30
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/BowlerStudioInstall-macos-arm.zip
-        asset_name: BowlerStudioInstall-macos-arm.zip
-        asset_content_type: application/zip
-
-    - name: Upload bowler-kernel.jar asset
-      timeout-minutes: 30
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/bowler-kernel.jar
-        asset_name: bowler-kernel.jar
-        asset_content_type: application/jar
