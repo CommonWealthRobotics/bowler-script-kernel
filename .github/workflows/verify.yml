@@ -248,7 +248,7 @@ jobs:
 
     - name: Pull a JavaFX JDK (macOS arm64)
       timeout-minutes: 30
-      run: curl -L -O https://cdn.azul.com/zulu/bin/zulu25.36.15-ca-fx-jdk25.0.4-macosx_aarch64.tar.gz
+      run: curl -L -O https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
 
     - name: After JDK download, list directory contents
       timeout-minutes: 30
@@ -259,7 +259,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 25
-        jdkFile: zulu25.36.15-ca-fx-jdk25.0.4-macosx_aarch64.tar.gz
+        jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
 
     - name: Shadow Jar
       timeout-minutes: 30
