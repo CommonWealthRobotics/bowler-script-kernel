@@ -55,7 +55,7 @@ jobs:
 
     - name: Pull a JavaFX JDK
       timeout-minutes: 30
-      run: wget https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
+      run: wget https://cdn.azul.com/zulu/bin/zulu25.36.15-ca-fx-jdk25.0.4-linux_x64.tar.gz
 
     - name: After JDK download, list directory contnts
       timeout-minutes: 30
@@ -66,7 +66,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 25
-        jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-linux_x64.tar.gz
+        jdkFile: zulu25.36.15-ca-fx-jdk25.0.4-linux_x64.tar.gz
     - name: Shadow Jar
       timeout-minutes: 30
       run: ./gradlew spotlessCheck shadowJar
@@ -148,7 +148,7 @@ jobs:
 
     - name: Pull a JavaFX JDK
       timeout-minutes: 30
-      run: Invoke-WebRequest -Uri "https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip" -OutFile "zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip"
+      run: Invoke-WebRequest -Uri "https://cdn.azul.com/zulu/bin/zulu25.36.15-ca-fx-jdk25.0.4-win_x64.zip" -OutFile "zulu25.36.15-ca-fx-jdk25.0.4-win_x64.zip"
 
     - name: After JDK download, list directory contents
       timeout-minutes: 30
@@ -159,7 +159,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 25
-        jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-win_x64.zip
+        jdkFile: zulu25.36.15-ca-fx-jdk25.0.4-win_x64.zip
 
     - name: Shadow Jar
       timeout-minutes: 30
@@ -248,7 +248,7 @@ jobs:
 
     - name: Pull a JavaFX JDK (macOS arm64)
       timeout-minutes: 30
-      run: curl -L -O https://cdn.azul.com/zulu/bin/zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
+      run: curl -L -O https://cdn.azul.com/zulu/bin/zulu25.36.15-ca-fx-jdk25.0.4-macosx_aarch64.tar.gz
 
     - name: After JDK download, list directory contents
       timeout-minutes: 30
@@ -259,7 +259,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 25
-        jdkFile: zulu25.32.21-ca-fx-jdk25.0.2-macosx_aarch64.tar.gz
+        jdkFile: zulu25.36.15-ca-fx-jdk25.0.4-macosx_aarch64.tar.gz
 
     - name: Shadow Jar
       timeout-minutes: 30
