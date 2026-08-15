@@ -593,9 +593,15 @@ public class CaDoodleFile {
 									}
 								}
 								getOperations().add(op);
-
 								process(op);
-								setSaveImage(getCurrentState(), op);
+								new Thread(() -> {
+									try {
+										setSaveImage(getCurrentState(), op);
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}).start();
 							} catch (Exception ex) {
 								com.neuronrobotics.sdk.common.Log.error(ex);;
 							}
