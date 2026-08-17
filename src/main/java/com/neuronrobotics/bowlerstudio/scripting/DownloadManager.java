@@ -537,7 +537,7 @@ public class DownloadManager {
 	}
 
 	public static File getDestinationDir(String exeType) {
-		return new File(bindir + exeType);
+		return new File(getBindir() + exeType);
 	}
 
 	private static File getExecutable(String exeType, IExternalEditor editor, String executable, boolean justChecking) {
@@ -587,8 +587,8 @@ public class DownloadManager {
 							environment = (Map<String, String>) o;
 						} else
 							environment = new HashMap<>();
-						File dest = new File(bindir + targetdir);
-						String cmd = bindir + targetdir + delim() + exeInZip;
+						File dest = new File(getBindir() + targetdir);
+						String cmd = getBindir() + targetdir + delim() + exeInZip;
 						if (ospath != null) {
 							String string = ospath + delim() + exeInZip;
 							if (new File(string).exists())
@@ -600,7 +600,7 @@ public class DownloadManager {
 						if (object != null)
 							version = object.toString();
 						boolean toDelete = false;
-						File versionFile = new File(bindir + targetdir + delim() + "version-cadoodle.txt");
+						File versionFile = new File(getBindir() + targetdir + delim() + "version-cadoodle.txt");
 						if (version != null) {
 							if (!versionFile.exists()) {
 								toDelete = true;
@@ -612,7 +612,7 @@ public class DownloadManager {
 							}
 							if (toDelete) {
 								Log.debug("Deleting cached toolchain for version");
-								File directoryToBeDeleted = new File(bindir + targetdir + delim());
+								File directoryToBeDeleted = new File(getBindir() + targetdir + delim());
 								deleteDirectory(directoryToBeDeleted);
 								directoryToBeDeleted.mkdirs();
 							}
@@ -635,34 +635,34 @@ public class DownloadManager {
 									environment = (Map<String, String>) o;
 								} else
 									environment = new HashMap<>();
-								dest = new File(bindir + targetdir);
-								cmd = bindir + targetdir + "/" + exeInZip;
+								dest = new File(getBindir() + targetdir);
+								cmd = getBindir() + targetdir + "/" + exeInZip;
 								saveFile(file, gson.toJson(database));
 							}
 
-							File jvmArchive = download("", jvmURL, 800000000, bindir, name + "." + type, exeType);
+							File jvmArchive = download("", jvmURL, 800000000, getBindir(), name + "." + type, exeType);
 
 							if (dest.exists()) {
 								com.neuronrobotics.sdk.common.Log.error("Erasing stale dir " + dest.getAbsolutePath());
 								deleteDirectory(dest);
 							}
 							if (type.toLowerCase().contains("zip")) {
-								unzip(jvmArchive, bindir + targetdir);
+								unzip(jvmArchive, getBindir() + targetdir);
 							}
 							if (type.toLowerCase().contains("tar.gz")) {
-								untar(jvmArchive, bindir + targetdir);
+								untar(jvmArchive, getBindir() + targetdir);
 							}
 							// sfx
 							if (type.toLowerCase().contains("sfx")) {
 
-								sfx(jvmArchive, bindir + targetdir);
+								sfx(jvmArchive, getBindir() + targetdir);
 							}
 							// extractTarXz
 							if (type.toLowerCase().contains("tar.xz")) {
-								extractTarXz(jvmArchive.getAbsolutePath(), bindir + targetdir);
+								extractTarXz(jvmArchive.getAbsolutePath(), getBindir() + targetdir);
 							}
 							if (type.toLowerCase().contains("dmg")) {
-								dmgExtract(jvmArchive, bindir + targetdir, exeInZip);
+								dmgExtract(jvmArchive, getBindir() + targetdir, exeInZip);
 							}
 							if (type.toLowerCase().contains("appimage") || type.toLowerCase().contains("exe")
 									|| type.toLowerCase().contains("msi") || type.toLowerCase().contains("jar")) {
@@ -671,9 +671,9 @@ public class DownloadManager {
 							// extract7zArchive
 							if (type.toLowerCase().contains("7z")) {
 								if (isWin() && !exeType.contentEquals("sevenzip")) {
-									extract7zSystemCall(jvmArchive.getAbsolutePath(), bindir + targetdir);
+									extract7zSystemCall(jvmArchive.getAbsolutePath(), getBindir() + targetdir);
 								} else
-									extract7zArchive(jvmArchive.getAbsolutePath(), bindir + targetdir);
+									extract7zArchive(jvmArchive.getAbsolutePath(), getBindir() + targetdir);
 							}
 							Object installer = vm.get("installer");
 							if (installer != null) {
@@ -735,7 +735,7 @@ public class DownloadManager {
 									com.neuronrobotics.sdk.common.Log.error("Running " + exeType + " Configuration "
 											+ (i + 1) + " of " + configs.size());
 									ArrayList<String> toRun = new ArrayList<>();
-									toRun.add(bindir + targetdir + "/" + configexe);
+									toRun.add(getBindir() + targetdir + "/" + configexe);
 									String[] conf = configs.get(i).split(" ");
 									for (int j = 0; j < conf.length; j++) {
 										toRun.add(conf[j]);
@@ -744,7 +744,7 @@ public class DownloadManager {
 
 									// com.neuronrobotics.sdk.common.Log.error(toRun);
 
-									Thread thread = run(errorcheckerEditor, new File(bindir), System.out, toRun);
+									Thread thread = run(errorcheckerEditor, new File(getBindir()), System.out, toRun);
 									thread.join();
 									if (ev != 0) {
 										throw new RuntimeException(
@@ -757,8 +757,13 @@ public class DownloadManager {
 						} else {
 							com.neuronrobotics.sdk.common.Log.debug("Not extraction, Application exists " + cmd);
 						}
-						if (version != null)
-							Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
+						if (version != null) {
+							try {
+								Files.writeString(Paths.get(versionFile.getAbsolutePath()), version);
+							} catch (Exception ex) {
+								// cant create version file because of install version
+							}
+						}
 						return new File(cmd);
 					}
 					errorTxt += ("Failed to find key in matching file " + exeType + " for OS " + key + "\n");
@@ -769,6 +774,7 @@ public class DownloadManager {
 			}
 			errorTxt += exeType + ".json not found!\n";
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 		errorTxt += "\nExecutable for OS: " + key + " has no entry for " + exeType + " from " + filesInGit + " in "
@@ -908,11 +914,11 @@ public class DownloadManager {
 
 	private static void standaloneEXE(String type, String name, String targetdir, String cmd)
 			throws InterruptedException {
-		File dir = new File(bindir + targetdir);
+		File dir = new File(getBindir() + targetdir);
 		if (!dir.exists())
 			dir.mkdirs();
 		try {
-			Files.move(Paths.get(bindir + name + "." + type), Paths.get(cmd), StandardCopyOption.REPLACE_EXISTING);
+			Files.move(Paths.get(getBindir() + name + "." + type), Paths.get(cmd), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			// Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
@@ -1391,8 +1397,8 @@ public class DownloadManager {
 				// });
 			}
 		});
-		File folder = new File(bindir + version + "/");
-		File exe = new File(bindir + version + "/" + filename);
+		File folder = new File(getBindir() + version + "/");
+		File exe = new File(getBindir() + version + "/" + filename);
 
 		if (!folder.exists() || !exe.exists()) {
 
@@ -1512,6 +1518,20 @@ public class DownloadManager {
 	public static boolean isDownloadedAlready(String string) {
 		File f = DownloadManager.getRunExecutable(string, null, true);
 		return f.exists();
+	}
+
+	public static String getBindir() {
+		String bd = System.getenv("BOWLER_PLUGIN_LOCATION");
+		if (bd != null && bd.length() > 0) {
+			if (bd.endsWith(delim()))
+				return bd;
+			return bd + delim();
+		}
+		return bindir;
+	}
+
+	public static void setBindir(String bindir) {
+		DownloadManager.bindir = bindir;
 	}
 
 }
