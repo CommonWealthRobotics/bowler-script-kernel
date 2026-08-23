@@ -60,7 +60,6 @@ public class MobileBaseBuilder {
 	public MobileBaseBuilder copyFrom(MobileBase source, String newName) {
 		try {
 			mobileBase.setScriptingName(newName);
-
 			// Copy engines
 			if (source.getGitCadEngine() != null) {
 				mobileBase.setGitCadEngine(copyGitFile(source.getGitCadEngine(), gitURL));
@@ -94,7 +93,8 @@ public class MobileBaseBuilder {
 			mobileBase.setFiducialToGlobalTransform(source.getRobotToFiducialTransform());
 			mobileBase.setIMUFromCentroid(source.getIMUFromCentroid());
 		} catch (Exception e) {
-			Log.error("Failed to copy from source MobileBase: " + e.getMessage());
+			Log.error("Failed to copy from source MobileBase:");
+			Log.error(e);
 		}
 		return this;
 	}
@@ -379,7 +379,7 @@ public class MobileBaseBuilder {
 
 	private DHParameterKinematics copyDHParameterKinematics(DHParameterKinematics source) throws Exception {
 		// Create a copy by serializing and deserializing XML
-		String xml = source.getXml();
+		String xml = source.getAppendageXml();
 		DHParameterKinematics copy = new DHParameterKinematics(null, IOUtils.toInputStream(xml, "UTF-8"));
 
 		// Copy git engines
