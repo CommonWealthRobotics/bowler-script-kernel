@@ -329,19 +329,22 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				poss.put(bodyName, mujocoToTransformNR(getmRuntime().getBodyPose(bodyName)));
 			}
 			BowlerKernel.runLater(() -> {
-				for (Iterator<String> iterator = getmRuntime().getBodyNames().iterator(); iterator.hasNext();) {
-					String name = iterator.next();
-					TransformNR local = poss.get(name);
-					ArrayList<CSG> mapNameToCSGParts = getMapNameToCSGParts(name);
-					for (int i = 0; i < mapNameToCSGParts.size(); i++) {
-						CSG bodyBall = mapNameToCSGParts.get(i);
-						if (bodyBall.hasManipulator())
-							try {
-								TransformFactory.nrToAffine(local, bodyBall.getManipulator());
-							} catch (MissingManipulatorException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+				MuJoCoModelManager tmpRuntime = mRuntime;
+				if (tmpRuntime != null) {
+					for (Iterator<String> iterator = tmpRuntime.getBodyNames().iterator(); iterator.hasNext();) {
+						String name = iterator.next();
+						TransformNR local = poss.get(name);
+						ArrayList<CSG> mapNameToCSGParts = getMapNameToCSGParts(name);
+						for (int i = 0; i < mapNameToCSGParts.size(); i++) {
+							CSG bodyBall = mapNameToCSGParts.get(i);
+							if (bodyBall.hasManipulator())
+								try {
+									TransformFactory.nrToAffine(local, bodyBall.getManipulator());
+								} catch (MissingManipulatorException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+						}
 					}
 				}
 				poss.clear();
@@ -1024,16 +1027,14 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	/**
-	 * @param timestep
-	 *            the timestep to set
+	 * @param timestep the timestep to set
 	 */
 	public void setTimestep(double timestep) {
 		this.timestep = timestep;
 	}
 
 	/**
-	 * @param iterations
-	 *            the iterations to set
+	 * @param iterations the iterations to set
 	 */
 	public void setIterations(int iterations) {
 		this.iterations = iterations;
@@ -1087,8 +1088,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	/**
-	 * @param mRuntime
-	 *            the mRuntime to set
+	 * @param mRuntime the mRuntime to set
 	 */
 	public void setmRuntime(MuJoCoModelManager mRuntime) {
 		this.mRuntime = mRuntime;
@@ -1117,8 +1117,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	}
 
 	/**
-	 * @param integratorType
-	 *            the integratorType to set
+	 * @param integratorType the integratorType to set
 	 */
 	public void setIntegratorType(IntegratorType integratorType) {
 		this.integratorType = integratorType;
