@@ -206,15 +206,10 @@ public class CaDoodleFile {
 	}
 
 	private void memoryCheck() {
-		if (getFreeMemory() > 85) {
+		if (getFreeMemory() > 95) {
 			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
-			CaDoodleOperation op = getCurrentOperation();
-			List<CSG> back = cache.get(op);
-
-			cache.clear();
-			cache.put(op, back);
 			System.gc();
-			com.neuronrobotics.sdk.common.Log.debug("Memory use down to: " + getFreeMemory());
+			com.neuronrobotics.sdk.common.Log.error("Memory use down to: " + getFreeMemory());
 		} else {
 			// com.neuronrobotics.sdk.common.Log.debug("Memory use: " + getFreeMemory());
 		}
