@@ -904,8 +904,8 @@ public class BowlerKernel {
 				try {
 					r.run();
 				} catch (Throwable t) {
-					t.printStackTrace();
-					ex.printStackTrace();
+					Log.error(ex);
+					Log.error(t);
 				}
 
 			});
