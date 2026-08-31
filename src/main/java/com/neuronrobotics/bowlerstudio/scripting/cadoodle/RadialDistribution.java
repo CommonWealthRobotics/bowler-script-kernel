@@ -44,13 +44,17 @@ public class RadialDistribution extends AbstractAddFrom {
 						15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 100.0)));
 		LengthParameter rad = new LengthParameter(getDb(), getName() + "_CaDoodle_Radius", 20.0, new ArrayList<>(Arrays
 				.asList(0.001, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 20.0, 30.0, 40.0, 50.0, 500.0)));
-		for (int i = 0; i < objectCount.getMM(); i++) {
+		double count = objectCount.getMM();
+		double mm = rad.getMM();
+
+		for (int i = 0; i < count; i++) {
 			cpMap.clear();
-			double angle = 360.0 / objectCount.getMM() * ((double) i);
-			TransformNR tf = new TransformNR(rad.getMM(), 0, 0);
+			double angle = 360.0 / count * ((double) i);
+			TransformNR tf = new TransformNR(mm, 0, 0);
 			TransformNR rot = new TransformNR(new RotationNR(0, angle, 0));
 			TransformNR loc = rot.times(tf);
 			Bounds b;
+			
 			try {
 				b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
 				CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
@@ -181,7 +185,7 @@ public class RadialDistribution extends AbstractAddFrom {
 			if (inWorkplaneBounds == null)
 				inWorkplaneBounds = new HashMap<String, Bounds>();
 			List<CSG> selectedCSG = getSelectedCSG(names, incoming);
-			return CaDoodleFile.getBounds(selectedCSG, workplane, inWorkplaneBounds, null);
+			return CaDoodleFile.getBounds(selectedCSG, workplane, inWorkplaneBounds, selectedCSG);
 		} else {
 			throw new RuntimeException("Align can not be initialized without bounds!");
 		}
