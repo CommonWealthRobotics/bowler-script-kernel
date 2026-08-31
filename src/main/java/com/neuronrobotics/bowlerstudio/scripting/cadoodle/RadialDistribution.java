@@ -54,7 +54,7 @@ public class RadialDistribution extends AbstractAddFrom {
 			TransformNR rot = new TransformNR(new RotationNR(0, angle, 0));
 			TransformNR loc = rot.times(tf);
 			Bounds b;
-			
+
 			try {
 				b = getBounds(incoming, getCaDoodleFile().getBoundsCache());
 				CaDoodleFile.applyToAllConstituantElements(false, names, back, new ICadoodleRecursiveEvent() {
