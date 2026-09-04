@@ -1528,8 +1528,9 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return branchNames;
 	}
 
-	public static void pullFromFile(File targetDirectory, File sourceDirectory, String branch) throws IOException,
-			CheckoutConflictException, NoHeadException, InvalidRemoteException, WrongRepositoryStateException {
+	public static void pullFromFile(File targetDirectory, File sourceDirectory, String branch, boolean checkoutCommit)
+			throws IOException, CheckoutConflictException, NoHeadException, InvalidRemoteException,
+			WrongRepositoryStateException {
 
 		if (!sourceDirectory.exists()) {
 			throw new IOException("Source repository does not exist: " + sourceDirectory.getAbsolutePath());
@@ -1543,7 +1544,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		Repository sourceRepo = new FileRepository(new File(sourceDirectory, ".git").getAbsoluteFile());
 		openGit(sourceRepo, sourceGit -> {
 			String sourceBranch = sourceRepo.getBranch();
-
+			String sourceCommit = sourceGit.getRepository().resolve("HEAD").name();
+			com.neuronrobotics.sdk.common.Log.info("Checking out target to source commit " + sourceCommit);
 			openGit(localRepo, git -> {
 				try {
 					// Make sure the local repository has a remote pointing at
@@ -1568,10 +1570,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 					}
 
 					command.call();
-
-					String sourceCommit = sourceGit.getRepository().resolve("HEAD").name();
-					com.neuronrobotics.sdk.common.Log.info("Checking out target to source commit " + sourceCommit);
-					git.checkout().setName(sourceCommit).setForced(false).call();
+					if (checkoutCommit)
+						git.checkout().setName(sourceCommit).setForced(false).call();
 
 				} catch (CheckoutConflictException e) {
 					throw e;
