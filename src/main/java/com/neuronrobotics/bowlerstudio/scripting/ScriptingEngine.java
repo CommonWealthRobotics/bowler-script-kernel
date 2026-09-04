@@ -42,6 +42,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RefSpec;
 import org.jsoup.Jsoup;
@@ -492,10 +493,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param code
-	 *            file content of the code to be executed
-	 * @param args
-	 *            the incoming arguments as a list of objects
+	 * @param code file content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
 	public static Object inlineScriptRun(CSGDatabaseInstance instance, File code, ArrayList<Object> args,
@@ -516,10 +515,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param line
-	 *            the text content of the code to be executed
-	 * @param args
-	 *            the incoming arguments as a list of objects
+	 * @param line the text content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
 	public static Object inlineScriptStringRun(CSGDatabaseInstance instance, String line, ArrayList<Object> args,
@@ -1192,10 +1189,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param code
-	 *            file content of the code to be executed
-	 * @param args
-	 *            the incoming arguments as a list of objects
+	 * @param code file content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
 	@Deprecated
@@ -1220,10 +1215,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 * This interface is for adding additional language support.
 	 *
-	 * @param line
-	 *            the text content of the code to be executed
-	 * @param args
-	 *            the incoming arguments as a list of objects
+	 * @param line the text content of the code to be executed
+	 * @param args the incoming arguments as a list of objects
 	 * @return the objects returned form the code that ran
 	 */
 	@Deprecated
@@ -1533,6 +1526,69 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			branchNames.add(ref.getName());
 		}
 		return branchNames;
+	}
+
+	public static void pullFromFile(File targetDirectory, File sourceDirectory, String branch) throws IOException,
+			CheckoutConflictException, NoHeadException, InvalidRemoteException, WrongRepositoryStateException {
+
+		if (!sourceDirectory.exists()) {
+			throw new IOException("Source repository does not exist: " + sourceDirectory.getAbsolutePath());
+		}
+
+		if (!targetDirectory.exists()) {
+			targetDirectory.mkdirs();
+		}
+
+		Repository localRepo = new FileRepository(new File(targetDirectory, ".git").getAbsoluteFile());
+		Repository sourceRepo = new FileRepository(new File(sourceDirectory, ".git").getAbsoluteFile());
+		openGit(sourceRepo, sourceGit -> {
+			String sourceBranch = sourceRepo.getBranch();
+
+			openGit(localRepo, git -> {
+				try {
+					// Make sure the local repository has a remote pointing at
+					// the source repository.
+					StoredConfig config = git.getRepository().getConfig();
+
+					String remoteURI = sourceDirectory.getAbsolutePath();
+
+					config.setString("remote", "myfile", "url", remoteURI);
+					config.setString("remote", "myfile", "fetch", "+refs/heads/*:refs/remotes/origin/*");
+					config.save();
+
+					PullCommand command = git.pull().setRemote("myfile")
+							.setProgressMonitor(getProgressMoniter("Pulling ", remoteURI));
+
+					if (branch != null) {
+						command.setRemoteBranchName(branch);
+					} else {
+						if (sourceBranch != null) {
+							command.setRemoteBranchName(sourceBranch);
+						}
+					}
+
+					command.call();
+
+					String sourceCommit = sourceGit.getRepository().resolve("HEAD").name();
+					com.neuronrobotics.sdk.common.Log.info("Checking out target to source commit " + sourceCommit);
+					git.checkout().setName(sourceCommit).setForced(false).call();
+
+				} catch (CheckoutConflictException e) {
+					throw e;
+				} catch (WrongRepositoryStateException e) {
+					com.neuronrobotics.sdk.common.Log.error(e);
+					throw e;
+				} catch (InvalidRemoteException e) {
+					throw e;
+				} catch (NoHeadException e) {
+					throw e;
+				} catch (GitAPIException e) {
+					com.neuronrobotics.sdk.common.Log.error(e);
+					throw new RuntimeException("sourceDirectory " + sourceDirectory + " targetDirectory "
+							+ targetDirectory + " branch " + branch + " " + e.getMessage(), e);
+				}
+			});
+		});
 	}
 
 	public static void pull(String remoteURI, String branch) throws IOException, CheckoutConflictException,
@@ -2120,8 +2176,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	/**
 	 * Fork a git repo
 	 *
-	 * @param sourceURL
-	 *            the URL of the source repo
+	 * @param sourceURL the URL of the source repo
 	 * @return the URL of the target repo
 	 * @throws Exception
 	 */
@@ -2398,6 +2453,19 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	public static File getRepositoryCloneDirectory(String remoteURI) {
 		if (remoteURI.endsWith("/"))
 			throw new RuntimeException("URL needs to end in .git, no trailing slash " + remoteURI);
+		if (isNotURL(remoteURI)) {
+			try {
+				String pathname = remoteURI.endsWith(".git") ? "" : DownloadManager.delim() + ".git";
+				File file = new File(remoteURI + pathname);
+				if (file.exists()) {
+					return new File(remoteURI);
+				}
+			} catch (Exception ex) {
+				// not a file
+				ex.printStackTrace();
+			}
+			throw new RuntimeException("Not a URL nor a file: " + remoteURI);
+		}
 		if (!remoteURI.endsWith(".git"))
 			throw new RuntimeException("URL needs to end in .git " + remoteURI);
 		String[] colinSplit = remoteURI.split(":");
