@@ -1085,6 +1085,10 @@ public class DownloadManager {
 	 * }
 	 */
 	public static void unzip(File path, String dir) throws Exception {
+		unzip(path, dir, null);
+	}
+
+	public static void unzip(File path, String dir, String toSkipPrefix) throws Exception {
 		com.neuronrobotics.sdk.common.Log.debug("Unzipping " + path.getName() + " into " + dir);
 		Path destFolderPath = new File(dir).toPath();
 
@@ -1092,6 +1096,11 @@ public class DownloadManager {
 			Enumeration<ZipArchiveEntry> entries = zipFile.getEntries();
 			while (entries.hasMoreElements()) {
 				ZipArchiveEntry entry = entries.nextElement();
+				if (toSkipPrefix != null)
+					if (entry.getName().startsWith(toSkipPrefix)) {
+						Log.debug("Skipping extraction of " + entry.getName());
+						continue;
+					}
 				Path entryPath = destFolderPath.resolve(entry.getName());
 				if (entryPath.normalize().startsWith(destFolderPath.normalize())) {
 					if (entry.isDirectory()) {
