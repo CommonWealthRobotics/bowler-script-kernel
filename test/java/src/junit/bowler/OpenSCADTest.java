@@ -8,12 +8,14 @@ import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 
+import eu.mihosoft.vrl.v3d.parametrics.CSGDatabase;
+
 public class OpenSCADTest {
 
 	@Test
 	public void test() {
 		try {
-			ScriptingEngine.inlineFileScriptRun(new File("OpenScadScrit.scad"), null);
+			ScriptingEngine.inlineFileScriptRun(CSGDatabase.getInstance(), new File("OpenScadScript.scad"), null);
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
