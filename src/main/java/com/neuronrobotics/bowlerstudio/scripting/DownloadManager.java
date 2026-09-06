@@ -822,25 +822,25 @@ public class DownloadManager {
 	}
 
 	private static void copyDirectory(Path source, Path target) throws IOException {
-		System.out.println("Copy "+source+" to "+target);
-	    Files.walk(source).forEach(path -> {
-	        try {
-	            Path dest = target.resolve(source.relativize(path));
+		System.out.println("Copy " + source + " to " + target);
+		Files.walk(source).forEach(path -> {
+			try {
+				Path dest = target.resolve(source.relativize(path));
 
-	            if (Files.isSymbolicLink(path)) {
-	                Path linkTarget = Files.readSymbolicLink(path);
-	                Files.deleteIfExists(dest);
-	                Files.createSymbolicLink(dest, linkTarget);
-	            } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-	                Files.createDirectories(dest);
-	            } else {
-	                Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-	            }
-	        } catch (IOException e) {
-	            throw new UncheckedIOException(e);
-	        }
-	    });
-		System.out.println("Finish Copy "+source+" to "+target);
+				if (Files.isSymbolicLink(path)) {
+					Path linkTarget = Files.readSymbolicLink(path);
+					Files.deleteIfExists(dest);
+					Files.createSymbolicLink(dest, linkTarget);
+				} else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+					Files.createDirectories(dest);
+				} else {
+					Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+				}
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		});
+		System.out.println("Finish Copy " + source + " to " + target);
 
 	}
 
