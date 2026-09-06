@@ -27,6 +27,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -524,7 +525,8 @@ public class DownloadManager {
 		if (justChecking)
 			return;
 		for (int i = 0; i < 1; i++) {
-			if (getExecutable(exeType, editor, executable, justChecking).exists()) {
+			File executable2 = getExecutable(exeType, editor, executable, justChecking);
+			if (executable2.exists()) {
 				return;
 			}
 			com.neuronrobotics.sdk.common.Log.error(new RuntimeException("Download or extraction failed, retrying"));
@@ -820,19 +822,26 @@ public class DownloadManager {
 	}
 
 	private static void copyDirectory(Path source, Path target) throws IOException {
-		Files.walk(source).forEach(path -> {
-			try {
-				Path dest = target.resolve(source.relativize(path));
+		System.out.println("Copy "+source+" to "+target);
+	    Files.walk(source).forEach(path -> {
+	        try {
+	            Path dest = target.resolve(source.relativize(path));
 
-				if (Files.isDirectory(path)) {
-					Files.createDirectories(dest);
-				} else {
-					Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-				}
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-		});
+	            if (Files.isSymbolicLink(path)) {
+	                Path linkTarget = Files.readSymbolicLink(path);
+	                Files.deleteIfExists(dest);
+	                Files.createSymbolicLink(dest, linkTarget);
+	            } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+	                Files.createDirectories(dest);
+	            } else {
+	                Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+	            }
+	        } catch (IOException e) {
+	            throw new UncheckedIOException(e);
+	        }
+	    });
+		System.out.println("Finish Copy "+source+" to "+target);
+
 	}
 
 	private static void deleteRecursive(Path root) throws IOException {
