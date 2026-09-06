@@ -331,4 +331,13 @@ public class VitaminBomManager {
 		}
 	}
 
+	public int getBomItemCount() {
+		int count=0;
+		for (String keys : database.keySet()) {
+			ArrayList<VitaminLocation> arrayList = database.get(keys);
+			count+=arrayList.size();
+		}
+		return count;
+	}
+
 }
