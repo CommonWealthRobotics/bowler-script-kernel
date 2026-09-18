@@ -50,6 +50,7 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 		registerType("UnLock", UnLock.class);
 		registerType("Sweep", Sweep.class);
 		registerType("WireMeshView", WireMeshView.class);
+		registerType("Xor", Xor.class);
 	}
 
 	private void registerType(String typeName, Class<? extends CaDoodleOperation> clazz) {
