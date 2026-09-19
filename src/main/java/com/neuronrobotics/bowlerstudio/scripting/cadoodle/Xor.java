@@ -48,10 +48,9 @@ public class Xor extends AbstractAddFrom {
 		boolean nomove = false;
 		PrepForManufacturing mfg = null;
 		String mobileBase = null;
-
-		for (CSG c : incoming) {
-
-			for (String s : names) {
+		back.addAll(incoming);
+		for (String s : names){
+			 for (CSG c : incoming) {
 				if (c.getName().contentEquals(s)) {
 					if (c.isNoScale())
 						noscale = true;
@@ -70,7 +69,7 @@ public class Xor extends AbstractAddFrom {
 							manip = c.getManipulator();
 							c = c.transformed(TransformFactory.nrToCSG(TransformFactory.affineToNr(manip)))
 									.syncProperties(getCaDoodleFile().getCsgDBinstance(), c)
-									.setRegenerate(c.getRegenerate()).setName(name);
+									.setRegenerate(c.getRegenerate()).setName(s);
 
 						} catch (MissingManipulatorException e) {
 							// TODO Auto-generated catch block
@@ -81,8 +80,8 @@ public class Xor extends AbstractAddFrom {
 						mfg = c.getManufacturing();
 					}
 					toXor.add(c);
-				} else
-					back.add(c);
+					back.remove(c);
+				} 
 			}
 		}
 		CSG intersection = Group.intersect(toXor);
