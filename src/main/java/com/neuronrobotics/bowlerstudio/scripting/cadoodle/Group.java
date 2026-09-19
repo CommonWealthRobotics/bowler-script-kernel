@@ -160,7 +160,7 @@ public class Group extends AbstractAddFrom {
 		return back;
 	}
 
-	private CSG intersect(ArrayList<CSG> solids) {
+	public static CSG intersect(ArrayList<CSG> solids) {
 		CSG first = solids.get(0);
 		for (int i = 1; i < solids.size(); i++) {
 			first = first.intersect(solids.get(i));
