@@ -49,8 +49,8 @@ public class Xor extends AbstractAddFrom {
 		PrepForManufacturing mfg = null;
 		String mobileBase = null;
 		back.addAll(incoming);
-		for (String s : names){
-			 for (CSG c : incoming) {
+		for (String s : names) {
+			for (CSG c : incoming) {
 				if (c.getName().contentEquals(s)) {
 					if (c.isNoScale())
 						noscale = true;
@@ -81,7 +81,7 @@ public class Xor extends AbstractAddFrom {
 					}
 					toXor.add(c);
 					back.remove(c);
-				} 
+				}
 			}
 		}
 		CSG intersection = Group.intersect(toXor);
