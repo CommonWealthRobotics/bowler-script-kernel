@@ -2,12 +2,17 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -76,6 +82,9 @@ public class CaDoodleFile {
 	private TransformNR workplane = new TransformNR();
 	@Expose(serialize = true, deserialize = true)
 	private CaDoodleParameters parameters;
+	@Expose(serialize = true, deserialize = true)
+	private int frozenIndex = -1;
+
 	private HashMap<String, Bounds> boundsCache = new HashMap<String, Bounds>();
 	private File self;
 	// @Expose (serialize = false, deserialize = false)
@@ -173,6 +182,121 @@ public class CaDoodleFile {
 	// opIndex);
 	// return cacheFile.exists();
 	// }
+	public int getFrozenIndex() {
+		return frozenIndex;
+	}
+
+	public void setFrozenIndex(int frozenIndex) {
+		this.frozenIndex = frozenIndex;
+		CaDoodleOperation op = getOperations().get(frozenIndex - 1);
+		List<CSG> cachedCopy = getStateAtOperation(op);
+		File cacheFile = toOperationCacheFile(op);
+		if (frozenIndex > 0) {
+			if (cacheFile.exists())
+				cacheFile.delete();
+			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
+				oos.writeObject(cachedCopy);
+				Log.debug("Saved " + cacheFile.getAbsolutePath());
+				for (int i = 0; i < frozenIndex; i++) {
+					CaDoodleOperation optoRm = getOperations().get(i);
+					List<CSG> back = cache.remove(optoRm);
+					back.clear();
+				}
+				System.gc();
+			} catch (Exception ex) {
+				Log.error(ex);
+				throw new RuntimeException(ex);
+			}
+		} else {
+			if (cacheFile.exists())
+				cacheFile.delete();
+		}
+	}
+
+	public Optional<List<CSG>> getFrozenCache() {
+		if (frozenIndex < 1)
+			return Optional.empty();
+		CaDoodleOperation op = getOperations().get(frozenIndex - 1);
+		File cacheFile = toOperationCacheFile(op);
+		if (!cacheFile.exists())
+			return Optional.empty();
+		Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
+		// Log.error(new Exception());
+		ObjectInputStream ois = null;
+		try {
+			ois = new ObjectInputStream(new FileInputStream(cacheFile));
+			Optional<List<CSG>> ofNullable = Optional.ofNullable((List<CSG>) ois.readObject());
+			if (ofNullable.isPresent())
+				cache.put(op, ofNullable.get());
+			ois.close();
+			return ofNullable;
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			if (ois != null)
+				try {
+					ois.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			return Optional.empty();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Optional.empty();
+		}
+
+	}
+
+	private static final Pattern NON_LATIN = Pattern.compile("[^\\w\\-.]");
+	private static final Pattern WHITESPACE = Pattern.compile("[\\s]+");
+	private static final Pattern MULTI_DASH = Pattern.compile("-{2,}");
+	private static final Pattern EDGE_DASH = Pattern.compile("^-+|-+$");
+
+	public static String slugify(String input) {
+		if (input == null || input.isBlank()) {
+			return "untitled";
+		}
+
+		// Normalize accented characters (é -> e, etc.)
+		String normalized = Normalizer.normalize(input, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
+
+		// Replace whitespace with dashes
+		String noWhitespace = WHITESPACE.matcher(normalized.trim()).replaceAll("-");
+
+		// Strip anything that isn't a word char, dash, or dot
+		String slug = NON_LATIN.matcher(noWhitespace).replaceAll("");
+
+		// Collapse multiple dashes, trim leading/trailing dashes
+		slug = MULTI_DASH.matcher(slug).replaceAll("-");
+		slug = EDGE_DASH.matcher(slug).replaceAll("");
+
+		// Avoid empty result after stripping
+		if (slug.isEmpty()) {
+			slug = "untitled";
+		}
+
+		// Avoid leading dash/dot causing hidden-file or flag confusion
+		while (slug.startsWith(".") || slug.startsWith("-")) {
+			slug = slug.substring(1);
+		}
+
+		// Truncate to a safe length (255 bytes is the typical ext4/most-FS limit)
+		byte[] bytes = slug.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+		if (bytes.length > 255) {
+			slug = new String(bytes, 0, 255, java.nio.charset.StandardCharsets.UTF_8);
+			// Trim in case truncation split a multi-byte char or left a trailing dash/dot
+			slug = slug.replaceAll("[-.]+$", "");
+		}
+
+		return slug.isEmpty() ? "untitled" : slug;
+	}
+
+	private File toOperationCacheFile(CaDoodleOperation op) {
+		return new File(
+				getObjectDir().getAbsolutePath() + delim() + opToIndex(op) + "_" + slugify(op.toString()) + ".csglist");
+	}
 
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
 		try {
@@ -184,35 +308,26 @@ public class CaDoodleFile {
 		} catch (Exception ex) {
 			// skipping no toolkit exceptions
 		}
-		// if (cache.get(op) == null && isInitialized()) {
-		// try {
-		// int opIndex = opToIndex(op);
-		// File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() +
-		// opIndex + ".csg");
-		// if (cacheFile.exists()) {
-		// Log.debug("Loading Cached Objects from file: " +
-		// cacheFile.getAbsolutePath());
-		// // Log.error(new Exception());
-		// ObjectInputStream ois = new ObjectInputStream(new
-		// FileInputStream(cacheFile));
-		// cache.put(op, (List<CSG>) ois.readObject());
-		// ois.close();
-		// }
-		// } catch (Exception ex) {
-		// Log.error(ex);
-		// }
-		// }
+		if (cache.get(op) == null && isInitialized()) {
+			try {
+				int opIndex = opToIndex(op);
+				File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() + opIndex + ".csg");
+				if (cacheFile.exists()) {
+					Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
+					// Log.error(new Exception());
+					ObjectInputStream ois = new ObjectInputStream(new FileInputStream(cacheFile));
+					cache.put(op, (List<CSG>) ois.readObject());
+					ois.close();
+				}
+			} catch (Exception ex) {
+				Log.error(ex);
+			}
+		}
 		return cache.get(op);
 	}
 
 	private void memoryCheck() {
-		if (getFreeMemory() > 95) {
-			com.neuronrobotics.sdk.common.Log.error("\n\nClearing Memory use: " + getFreeMemory() + "\n\n");
-			System.gc();
-			com.neuronrobotics.sdk.common.Log.error("Memory use down to: " + getFreeMemory());
-		} else {
-			// com.neuronrobotics.sdk.common.Log.debug("Memory use: " + getFreeMemory());
-		}
+
 	}
 
 	private void placeCSGsInCache(CaDoodleOperation op, List<CSG> cachedCopyIn) {
@@ -229,22 +344,6 @@ public class CaDoodleFile {
 			Log.error(e);
 		}
 		cache.put(op, cachedCopy);
-		// executor.submit(() -> {
-		// File cacheFile = new File(getObjectDir().getAbsolutePath() + delim() +
-		// opToIndex(op) + ".csg");
-		// if (cacheFile.exists() && !isInitialized())
-		// return;
-		// if (cacheFile.exists())
-		// cacheFile.delete();
-		// try (ObjectOutputStream oos = new ObjectOutputStream(new
-		// FileOutputStream(cacheFile))) {
-		// oos.writeObject(cachedCopy);
-		// Log.debug("Saved " + cacheFile.getAbsolutePath());
-		// } catch (Exception ex) {
-		// Log.error(ex);
-		// throw new RuntimeException(ex);
-		// }
-		// });
 
 	}
 
@@ -1702,4 +1801,5 @@ public class CaDoodleFile {
 		BezierPath.setMaximumInterpolationStep((double) getTextResolutionPoints());
 		Log.debug("Setting path resolution to " + TextResolutionPoints);
 	}
+
 }

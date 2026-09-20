@@ -80,4 +80,8 @@ public abstract class CaDoodleOperation {
 		}
 		return null;
 	}
+
+	public String toString() {
+		return getType();
+	}
 }
