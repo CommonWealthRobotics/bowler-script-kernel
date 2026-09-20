@@ -191,7 +191,7 @@ public class CaDoodleFile {
 		if (fi > 0) {
 			CaDoodleOperation op = getOperations().get(fi - 1);
 			List<CSG> cachedCopy = getStateAtOperation(op);
-			File cacheFile = toOperationCacheFile(op);
+			File cacheFile = toOperationCacheFile(getOperations().get(fi));
 			if (cacheFile.exists())
 				cacheFile.delete();
 			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
@@ -211,13 +211,14 @@ public class CaDoodleFile {
 			}
 		} else {
 			if (frozenIndex > 0) {
-				CaDoodleOperation op = getOperations().get(frozenIndex - 1);
+				CaDoodleOperation op = getOperations().get(frozenIndex);
 				File cacheFile = toOperationCacheFile(op);
 				if (cacheFile.exists())
 					cacheFile.delete();
 			}
 		}
 		this.frozenIndex = fi;
+		fireSaveSuggestion();
 
 	}
 
@@ -236,7 +237,7 @@ public class CaDoodleFile {
 		if (frozenIndex < 1)
 			return Optional.empty();
 		CaDoodleOperation op = getOperations().get(frozenIndex - 1);
-		List<CSG> state = getStateAtOperation(op);
+		List<CSG> state = getStateAtOperation(getOperations().get(frozenIndex));
 		if (state.size() == 0)
 			return Optional.empty();
 		ArrayList<String> names = new ArrayList<String>();
@@ -249,7 +250,7 @@ public class CaDoodleFile {
 		if (frozenIndex < 1)
 			return Optional.empty();
 		CaDoodleOperation op = getOperations().get(frozenIndex - 1);
-		File cacheFile = toOperationCacheFile(op);
+		File cacheFile = toOperationCacheFile(getOperations().get(frozenIndex));
 		if (!cacheFile.exists())
 			return Optional.empty();
 		Log.debug("Loading Cached Objects from file: " + cacheFile.getAbsolutePath());
@@ -326,8 +327,8 @@ public class CaDoodleFile {
 	}
 
 	private File toOperationCacheFile(CaDoodleOperation op) {
-		return new File(
-				getObjectDir().getAbsolutePath() + delim() + opToIndex(op) + "_" + slugify(op.toString()) + ".csglist");
+		return new File(getObjectDir().getAbsolutePath() + delim() + (opToIndex(op) + 1) + "_" + slugify(op.toString())
+				+ ".csglist");
 	}
 
 	private List<CSG> getCachedCSGs(CaDoodleOperation op) {
@@ -445,6 +446,8 @@ public class CaDoodleFile {
 			setPercentInitialized(((double) frozenIndex) / (double) getOperations().size());
 			starting = frozenIndex;
 			currentIndex = frozenIndex;
+		} else {
+			frozenIndex = -1;
 		}
 		for (int i = starting; i < getOperations().size(); i++) {
 			CaDoodleOperation op = getOperations().get(i);
@@ -1759,9 +1762,8 @@ public class CaDoodleFile {
 
 	public File getObjectDir() {
 		if (objectDir == null) {
-			objectDir = new File(getImageCacheDir().getAbsolutePath() + delim() + "objectCache");
-			if (!getObjectDir().exists())
-				getObjectDir().mkdir();
+			File parent = getSelf().getAbsoluteFile().getParentFile();
+			objectDir = new File(parent.getAbsolutePath());
 		}
 		return objectDir;
 	}
