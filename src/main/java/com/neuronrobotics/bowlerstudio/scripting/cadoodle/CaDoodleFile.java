@@ -436,7 +436,17 @@ public class CaDoodleFile {
 		if (indexStarting > opperations.size())
 			indexStarting = opperations.size();
 		ArrayList<CaDoodleOperation> toRem = new ArrayList<CaDoodleOperation>();
-		for (int i = 0; i < getOperations().size(); i++) {
+		int starting = 0;
+		if (getFrozenCache().isPresent()) {
+			Log.debug("Loading Model from Cache at " + frozenIndex);
+
+			CaDoodleOperation op = getOperations().get(frozenIndex - 1);
+			op.setCaDoodleFile(this);
+			setPercentInitialized(((double) frozenIndex) / (double) getOperations().size());
+			starting = frozenIndex;
+			currentIndex = frozenIndex;
+		}
+		for (int i = starting; i < getOperations().size(); i++) {
 			CaDoodleOperation op = getOperations().get(i);
 			if (op == null)
 				continue;
@@ -1267,9 +1277,9 @@ public class CaDoodleFile {
 			throw new SaveOverwriteException("Uninitialized");
 		if (initializing && !ignoreUninitialized)
 			throw new SaveOverwriteException("Still initializing");
-		if (saveing)
+		if (isSaveing())
 			throw new SaveOverwriteException("Saving right now");
-		saveing = true;
+		setSaveing(true);
 		try {
 			if (timeCreated < 0)
 				timeCreated = System.currentTimeMillis();
@@ -1299,10 +1309,10 @@ public class CaDoodleFile {
 
 		} catch (Throwable t) {
 			Log.error(t);
-			saveing = false;
+			setSaveing(false);
 			throw new SaveOverwriteException(t);
 		}
-		saveing = false;
+		setSaveing(false);
 		return getSelf();
 	}
 
@@ -1832,6 +1842,14 @@ public class CaDoodleFile {
 		TextResolutionPoints = textResolutionPoints;
 		BezierPath.setMaximumInterpolationStep((double) getTextResolutionPoints());
 		Log.debug("Setting path resolution to " + TextResolutionPoints);
+	}
+
+	public boolean isSaveing() {
+		return saveing;
+	}
+
+	public void setSaveing(boolean saveing) {
+		this.saveing = saveing;
 	}
 
 }
