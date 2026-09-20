@@ -186,31 +186,63 @@ public class CaDoodleFile {
 		return frozenIndex;
 	}
 
-	public void setFrozenIndex(int frozenIndex) {
-		this.frozenIndex = frozenIndex;
-		CaDoodleOperation op = getOperations().get(frozenIndex - 1);
-		List<CSG> cachedCopy = getStateAtOperation(op);
-		File cacheFile = toOperationCacheFile(op);
-		if (frozenIndex > 0) {
+	public void setFrozenIndex(int fi) {
+
+		if (fi > 0) {
+			CaDoodleOperation op = getOperations().get(fi - 1);
+			List<CSG> cachedCopy = getStateAtOperation(op);
+			File cacheFile = toOperationCacheFile(op);
 			if (cacheFile.exists())
 				cacheFile.delete();
 			try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheFile))) {
 				oos.writeObject(cachedCopy);
 				Log.debug("Saved " + cacheFile.getAbsolutePath());
-				for (int i = 0; i < frozenIndex; i++) {
+				for (int i = 0; i < fi; i++) {
 					CaDoodleOperation optoRm = getOperations().get(i);
+					if (optoRm == op)
+						break;
 					List<CSG> back = cache.remove(optoRm);
-					back.clear();
+					if (back != null)
+						back.clear();
 				}
 				System.gc();
 			} catch (Exception ex) {
 				Log.error(ex);
-				throw new RuntimeException(ex);
 			}
 		} else {
-			if (cacheFile.exists())
-				cacheFile.delete();
+			if (frozenIndex > 0) {
+				CaDoodleOperation op = getOperations().get(frozenIndex - 1);
+				File cacheFile = toOperationCacheFile(op);
+				if (cacheFile.exists())
+					cacheFile.delete();
+			}
 		}
+		this.frozenIndex = fi;
+
+	}
+
+	public boolean isNameInFrozenCache(String name) {
+		Optional<List<String>> names = getFrozenCacheNames();
+		if (names.isEmpty())
+			return false;
+		for (String s : names.get()) {
+			if (s.contentEquals(name))
+				return true;
+		}
+		return false;
+	}
+
+	public Optional<List<String>> getFrozenCacheNames() {
+		if (frozenIndex < 1)
+			return Optional.empty();
+		CaDoodleOperation op = getOperations().get(frozenIndex - 1);
+		List<CSG> state = getStateAtOperation(op);
+		if (state.size() == 0)
+			return Optional.empty();
+		ArrayList<String> names = new ArrayList<String>();
+		for (CSG c : state)
+			names.add(c.getName());
+		return Optional.of(names);
 	}
 
 	public Optional<List<CSG>> getFrozenCache() {
