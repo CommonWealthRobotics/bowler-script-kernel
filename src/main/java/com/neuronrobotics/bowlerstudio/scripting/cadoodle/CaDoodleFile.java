@@ -84,7 +84,9 @@ public class CaDoodleFile {
 	private CaDoodleParameters parameters;
 	@Expose(serialize = true, deserialize = true)
 	private int frozenIndex = -1;
-
+	@Expose(serialize = true, deserialize = true)
+	private HashSet<Integer> frozenSteps;
+	
 	private HashMap<String, Bounds> boundsCache = new HashMap<String, Bounds>();
 	private File self;
 	// @Expose (serialize = false, deserialize = false)
@@ -185,9 +187,16 @@ public class CaDoodleFile {
 	public int getFrozenIndex() {
 		return frozenIndex;
 	}
-
+	public void clearFrozenIndex(int fi) {
+		getFrozenSteps().remove(fi);
+		frozenIndex=-1;
+		for(Integer i:getFrozenSteps()) {
+			if(i>frozenIndex)
+				frozenIndex=i;
+		}
+		setFrozenIndex(frozenIndex);
+	}
 	public void setFrozenIndex(int fi) {
-
 		if (fi > 0) {
 			CaDoodleOperation op = getOperations().get(fi - 1);
 			List<CSG> cachedCopy = getStateAtOperation(op);
@@ -218,6 +227,8 @@ public class CaDoodleFile {
 			}
 		}
 		this.frozenIndex = fi;
+		if(!getFrozenSteps().contains(fi))
+			getFrozenSteps().add(fi);
 		fireSaveSuggestion();
 
 	}
@@ -236,7 +247,6 @@ public class CaDoodleFile {
 	public Optional<List<String>> getFrozenCacheNames() {
 		if (frozenIndex < 1)
 			return Optional.empty();
-		CaDoodleOperation op = getOperations().get(frozenIndex - 1);
 		List<CSG> state = getStateAtOperation(getOperations().get(frozenIndex));
 		if (state.size() == 0)
 			return Optional.empty();
@@ -445,6 +455,7 @@ public class CaDoodleFile {
 			op.setCaDoodleFile(this);
 			setPercentInitialized(((double) frozenIndex) / (double) getOperations().size());
 			starting = frozenIndex;
+			getFrozenSteps().add(frozenIndex);
 			currentIndex = frozenIndex;
 		} else {
 			frozenIndex = -1;
@@ -1853,5 +1864,13 @@ public class CaDoodleFile {
 	public void setSaveing(boolean saveing) {
 		this.saveing = saveing;
 	}
+
+	public HashSet<Integer> getFrozenSteps() {
+		if(frozenSteps==null)
+			frozenSteps=new HashSet<Integer>();
+		return frozenSteps;
+	}
+
+
 
 }
