@@ -190,12 +190,19 @@ public class CaDoodleFile {
 
 	public void clearFrozenIndex(int fi) {
 		getFrozenSteps().remove(fi);
+		if (frozenIndex == fi) {
+			CaDoodleOperation op = getOperations().get(frozenIndex);
+			File cacheFile = toOperationCacheFile(op);
+			if (cacheFile.exists())
+				cacheFile.delete();
+		}
 		int myfi = -1;
 		for (Integer i : getFrozenSteps()) {
-			if (i > myfi)
+			if (i > myfi && i > 0)
 				myfi = i;
 		}
-		setFrozenIndex(myfi);
+		this.frozenIndex = myfi;
+		fireSaveSuggestion();
 	}
 
 	public void setFrozenIndex(int fi) {
@@ -220,17 +227,11 @@ public class CaDoodleFile {
 			} catch (Exception ex) {
 				Log.error(ex);
 			}
-		} else {
-			if (frozenIndex > 0) {
-				CaDoodleOperation op = getOperations().get(frozenIndex);
-				File cacheFile = toOperationCacheFile(op);
-				if (cacheFile.exists())
-					cacheFile.delete();
-			}
 		}
 		this.frozenIndex = fi;
-		if (!getFrozenSteps().contains(fi))
-			getFrozenSteps().add(fi);
+		if (fi > 0)
+			if (!getFrozenSteps().contains(fi))
+				getFrozenSteps().add(fi);
 		fireSaveSuggestion();
 
 	}
@@ -450,18 +451,24 @@ public class CaDoodleFile {
 			indexStarting = opperations.size();
 		ArrayList<CaDoodleOperation> toRem = new ArrayList<CaDoodleOperation>();
 		int starting = 0;
-		if (getFrozenCache().isPresent()) {
-			Log.debug("Loading Model from Cache at " + frozenIndex);
+		if (frozenIndex < 0)
+			getFrozenSteps().clear();
+		while (frozenIndex > 0 && getFrozenSteps().size() > 0)
+			if (getFrozenCache().isPresent()) {
+				Log.debug("Loading Model from Cache at " + frozenIndex);
 
-			CaDoodleOperation op = getOperations().get(frozenIndex - 1);
-			op.setCaDoodleFile(this);
-			setPercentInitialized(((double) frozenIndex) / (double) getOperations().size());
-			starting = frozenIndex;
-			getFrozenSteps().add(frozenIndex);
-			currentIndex = frozenIndex;
-		} else {
-			frozenIndex = -1;
-		}
+				CaDoodleOperation op = getOperations().get(frozenIndex - 1);
+				op.setCaDoodleFile(this);
+				setPercentInitialized(((double) frozenIndex) / (double) getOperations().size());
+				starting = frozenIndex;
+				if (frozenIndex > 0)
+					getFrozenSteps().add(frozenIndex);
+				currentIndex = frozenIndex;
+				break;
+			} else {
+				// clear teps with stale caches
+				clearFrozenIndex(frozenIndex);
+			}
 		for (int i = starting; i < getOperations().size(); i++) {
 			CaDoodleOperation op = getOperations().get(i);
 			if (op == null)
