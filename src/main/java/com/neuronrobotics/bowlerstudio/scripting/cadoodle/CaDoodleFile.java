@@ -86,7 +86,7 @@ public class CaDoodleFile {
 	private int frozenIndex = -1;
 	@Expose(serialize = true, deserialize = true)
 	private HashSet<Integer> frozenSteps;
-	
+
 	private HashMap<String, Bounds> boundsCache = new HashMap<String, Bounds>();
 	private File self;
 	// @Expose (serialize = false, deserialize = false)
@@ -187,15 +187,17 @@ public class CaDoodleFile {
 	public int getFrozenIndex() {
 		return frozenIndex;
 	}
+
 	public void clearFrozenIndex(int fi) {
 		getFrozenSteps().remove(fi);
-		frozenIndex=-1;
-		for(Integer i:getFrozenSteps()) {
-			if(i>frozenIndex)
-				frozenIndex=i;
+		int myfi = -1;
+		for (Integer i : getFrozenSteps()) {
+			if (i > myfi)
+				myfi = i;
 		}
-		setFrozenIndex(frozenIndex);
+		setFrozenIndex(myfi);
 	}
+
 	public void setFrozenIndex(int fi) {
 		if (fi > 0) {
 			CaDoodleOperation op = getOperations().get(fi - 1);
@@ -227,7 +229,7 @@ public class CaDoodleFile {
 			}
 		}
 		this.frozenIndex = fi;
-		if(!getFrozenSteps().contains(fi))
+		if (!getFrozenSteps().contains(fi))
 			getFrozenSteps().add(fi);
 		fireSaveSuggestion();
 
@@ -1866,11 +1868,10 @@ public class CaDoodleFile {
 	}
 
 	public HashSet<Integer> getFrozenSteps() {
-		if(frozenSteps==null)
-			frozenSteps=new HashSet<Integer>();
+		if (frozenSteps == null)
+			frozenSteps = new HashSet<Integer>();
 		return frozenSteps;
 	}
-
 
 
 }
