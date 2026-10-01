@@ -6,6 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.neuronrobotics.bowlerstudio.scripting.Build123dLoader;
+import com.neuronrobotics.bowlerstudio.scripting.CuratedColorPalette;
+
+import javafx.scene.paint.Color;
+
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -130,7 +134,8 @@ public class CaDoodleVitamin {
 			});
 			// back.getStorage().set("PreviousName", name);
 			// back.setIsAlwaysShow(true);
-			back.setColor(Build123dLoader.stringToColor(typencoming));
+			Color generatedColor = Build123dLoader.stringToColor(typencoming);
+			back.setColor(CuratedColorPalette.nearest(generatedColor));
 			return back;
 		} catch (Exception e) {
 			// Auto-generated catch block
