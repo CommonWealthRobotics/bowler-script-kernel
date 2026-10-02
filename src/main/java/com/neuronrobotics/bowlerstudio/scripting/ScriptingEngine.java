@@ -2451,7 +2451,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	}
 
 	public static File getRepositoryCloneDirectory(String remoteURI) {
-		remoteURI=remoteURI.trim();
+		remoteURI = remoteURI.trim();
 		if (remoteURI.endsWith("/"))
 			throw new RuntimeException("URL needs to end in .git, no trailing slash " + remoteURI);
 		if (isNotURL(remoteURI)) {
