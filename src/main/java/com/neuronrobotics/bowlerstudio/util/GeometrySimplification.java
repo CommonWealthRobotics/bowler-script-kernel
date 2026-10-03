@@ -48,8 +48,9 @@ public class GeometrySimplification {
 	 * @param threshhold
 	 *            the threshhold value (default is 0.002
 	 * @return A new SVG file that is changed
+	 * @throws Exception 
 	 */
-	public static File simplifySVG(File incoming) {
+	public static File simplifySVG(File incoming) throws Exception {
 		return simplifySVG(incoming, 0.002);
 	}
 
@@ -61,8 +62,9 @@ public class GeometrySimplification {
 	 * @param threshhold
 	 *            the threshhold value (default is 0.002
 	 * @return A new SVG file that is changed
+	 * @throws Exception 
 	 */
-	public static File simplifySVG(File incoming, double threshhold) {
+	public static File simplifySVG(File incoming, double threshhold) throws Exception {
 		try {
 			File inkscape = DownloadManager.getConfigExecutable("inkscape", null);
 			File svg = File.createTempFile(incoming.getName(), ".svg");
@@ -79,6 +81,6 @@ public class GeometrySimplification {
 			// Auto-generated catch block
 			e.printStackTrace();
 		}
-		return incoming;
+		throw new Exception("Failed to run Inkscape");
 	}
 }

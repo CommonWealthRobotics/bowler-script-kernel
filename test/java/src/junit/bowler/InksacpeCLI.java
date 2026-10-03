@@ -11,7 +11,7 @@ import com.neuronrobotics.bowlerstudio.util.GeometrySimplification;
 public class InksacpeCLI {
 
 	@Test
-	public void test() {
+	public void test() throws Exception {
 		GeometrySimplification.simplifySVG(new File("Test.SVG"));
 	}
 
