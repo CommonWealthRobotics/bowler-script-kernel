@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.neuronrobotics.bowlerstudio.util.GeometrySimplification;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Polygon;
@@ -24,11 +25,8 @@ public class SvgLoader implements IScriptingLanguage {
 			SVGLoad s = new SVGLoad(code.toURI());
 			return run(s);
 		} catch (Exception e) {
-			com.neuronrobotics.sdk.common.Log.error(e);
-			com.neuronrobotics.sdk.common.Log.error("SVG had error, attempting to fix " + code.getAbsolutePath());
-			File tmp = GeometrySimplification.simplifySVG(code);
-			SVGLoad s = new SVGLoad(tmp.toURI());
-			return run(s);
+			Log.error(e);
+			return new ArrayList<CSG>();
 		}
 	}
 
