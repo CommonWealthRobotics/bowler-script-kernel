@@ -1604,13 +1604,14 @@ public class CaDoodleFile {
 	public TransformNR getWorkplane() {
 		if (workplane == null)
 			workplane = new TransformNR();
-		if(!isWorkplaneNotOrigin(workplane)) {
-			workplane=new TransformNR();
+		if (!isWorkplaneNotOrigin(workplane)) {
+			workplane = new TransformNR();
 		}
 		RotationNR r = workplane.getRotation();
 		r.normalize();
 		return workplane;
 	}
+
 	public static boolean isWorkplaneNotOrigin(TransformNR w) {
 
 		double epsilon = 0.1;
@@ -1626,9 +1627,10 @@ public class CaDoodleFile {
 			return true;
 		return false;
 	}
+
 	public void setWorkplane(TransformNR workplane) {
-		if(!isWorkplaneNotOrigin(workplane)) {
-			workplane=new TransformNR();
+		if (!isWorkplaneNotOrigin(workplane)) {
+			workplane = new TransformNR();
 		}
 		this.workplane = workplane;
 		try {
