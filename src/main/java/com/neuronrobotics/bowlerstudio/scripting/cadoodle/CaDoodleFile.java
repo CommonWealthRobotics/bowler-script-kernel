@@ -1604,12 +1604,32 @@ public class CaDoodleFile {
 	public TransformNR getWorkplane() {
 		if (workplane == null)
 			workplane = new TransformNR();
+		if(!isWorkplaneNotOrigin(workplane)) {
+			workplane=new TransformNR();
+		}
 		RotationNR r = workplane.getRotation();
 		r.normalize();
 		return workplane;
 	}
+	public static boolean isWorkplaneNotOrigin(TransformNR w) {
 
+		double epsilon = 0.1;
+		RotationNR r = w.getRotation();
+		if ((Math.abs(w.getZ()) > epsilon))
+			return true;
+
+		double abs2 = Math.abs(r.getRotationElevationDegrees());
+		double abs3 = Math.abs(r.getRotationTiltDegrees());
+
+		boolean b = (abs2 > epsilon) || (abs3 > epsilon);
+		if (b)
+			return true;
+		return false;
+	}
 	public void setWorkplane(TransformNR workplane) {
+		if(!isWorkplaneNotOrigin(workplane)) {
+			workplane=new TransformNR();
+		}
 		this.workplane = workplane;
 		try {
 			// clear all bounds and recompute with the workplane
