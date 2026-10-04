@@ -95,7 +95,9 @@ public class AddFromFile extends AbstractAddFrom {
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
 				flattenedCSGs = new ArrayList<CSG>();
-				flattenedCSGs.add(new Cube(10).toCSG().setColor(javafx.scene.paint.Color.HOTPINK));
+			}
+			if (flattenedCSGs.size() == 0) {
+				flattenedCSGs.add(new Cube(20).toCSG().setColor(javafx.scene.paint.Color.HOTPINK));
 			}
 			for (int i = 0; i < flattenedCSGs.size(); i++) {
 				CSG csg = flattenedCSGs.get(i);

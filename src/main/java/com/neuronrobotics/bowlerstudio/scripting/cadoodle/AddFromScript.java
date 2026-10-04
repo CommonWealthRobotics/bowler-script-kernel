@@ -79,10 +79,14 @@ public class AddFromScript extends AbstractAddFrom {
 			ArrayList<CSG> collect = new ArrayList<>();
 			collect.addAll(flaten);
 			if (collect.size() == 0) {
-				collect.add(new Cube(20).toCSG().setColor(Color.PINK));
+				collect.add(new Cube(20).toCSG().setColor(Color.HOTPINK));
 			}
 			for (int i = 0; i < collect.size(); i++) {
 				CSG csg = collect.get(i);
+				if (isDoodle && csg.isInGroup()) {
+					Log.debug("Not adding to return, " + csg.getName() + " " + csg.getUserDefinedName());
+					continue;
+				}
 				if (isDoodle) {
 					csg.setStorage(new PropertyStorage());
 				}
