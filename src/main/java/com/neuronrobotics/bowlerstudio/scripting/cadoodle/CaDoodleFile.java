@@ -1487,8 +1487,8 @@ public class CaDoodleFile {
 			if (cache.get(csg.getName()) == null || forceClear || cache.size() == 0) {
 				if (Platform.isFxApplicationThread())
 					Log.error(new RuntimeException("Computed bounds in UI thread!"));
-				else
-					Log.debug("Computing bounds for " + csg.getName());
+				//				else
+				//					Log.debug("Computing bounds for " + csg.getName());
 				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
 				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
 
