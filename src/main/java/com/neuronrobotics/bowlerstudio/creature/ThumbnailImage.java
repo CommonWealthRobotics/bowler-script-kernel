@@ -14,7 +14,6 @@ import javax.imageio.ImageIO;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
-import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 
@@ -24,22 +23,32 @@ import eu.mihosoft.vrl.v3d.MissingManipulatorException;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import javafx.application.Platform;
+import javafx.geometry.Point3D;
+import javafx.scene.AmbientLight;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
-import javafx.scene.transform.Transform;
-import javafx.scene.PerspectiveCamera;
 import javafx.scene.transform.Affine;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.PointLight;
 
 public class ThumbnailImage implements ImagePorviderInterface {
+	public static final String CACHE_VERSION = "11";
+	private static final int THUMBNAIL_MARGIN = 24;
+	private static final double CAMERA_AZIMUTH = -40.0;
+	private static final double CAMERA_ELEVATION = 31.0;
+
 	private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
 	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
 
@@ -89,7 +98,7 @@ public class ThumbnailImage implements ImagePorviderInterface {
 		if (!bounds.getMax().epsilonEquals(bounds2.getMax(), 0.01)) {
 			return false;
 		}
-		if (a.isHole() != b.isHide())
+		if (a.isHole() != b.isHole())
 			return false;
 		if (a.isWireFrame() != b.isWireFrame())
 			return false;
@@ -102,6 +111,79 @@ public class ThumbnailImage implements ImagePorviderInterface {
 			return false;
 		}
 		return true;
+	}
+
+	private static Affine thumbnailView(javafx.geometry.Bounds bounds, double distance) {
+		double azimuth = Math.toRadians(CAMERA_AZIMUTH);
+		double elevation = Math.toRadians(CAMERA_ELEVATION);
+
+		Point3D cameraDirection = new Point3D(Math.cos(elevation) * Math.cos(azimuth),
+				Math.cos(elevation) * Math.sin(azimuth), Math.sin(elevation));
+		Point3D forward = cameraDirection.multiply(-1);
+		Point3D right = forward.crossProduct(new Point3D(0, 0, 1)).normalize();
+		Point3D up = right.crossProduct(forward).normalize();
+		Point3D center = new Point3D((bounds.getMinX() + bounds.getMaxX()) / 2,
+				(bounds.getMinY() + bounds.getMaxY()) / 2, (bounds.getMinZ() + bounds.getMaxZ()) / 2);
+
+		Affine view = new Affine();
+		view.setMxx(right.getX());
+		view.setMxy(right.getY());
+		view.setMxz(right.getZ());
+		view.setTx(-right.dotProduct(center));
+
+		view.setMyx(-up.getX());
+		view.setMyy(-up.getY());
+		view.setMyz(-up.getZ());
+		view.setTy(up.dotProduct(center));
+
+		view.setMzx(forward.getX());
+		view.setMzy(forward.getY());
+		view.setMzz(forward.getZ());
+		view.setTz(distance - forward.dotProduct(center));
+		return view;
+	}
+
+	private WritableImage fitThumbnail(WritableImage source) {
+		PixelReader reader = source.getPixelReader();
+		int minX = imageSize;
+		int minY = imageSize;
+		int maxX = -1;
+		int maxY = -1;
+
+		for (int y = 0; y < imageSize; y++) {
+			for (int x = 0; x < imageSize; x++) {
+				int alpha = (reader.getArgb(x, y) >>> 24) & 0xff;
+				if (alpha <= 2)
+					continue;
+
+				minX = Math.min(minX, x);
+				minY = Math.min(minY, y);
+				maxX = Math.max(maxX, x);
+				maxY = Math.max(maxY, y);
+			}
+		}
+
+		if (maxX < minX || maxY < minY)
+			return source;
+
+		double sourceWidth = maxX - minX + 1;
+		double sourceHeight = maxY - minY + 1;
+		double available = imageSize - THUMBNAIL_MARGIN * 2.0;
+		double scale = Math.min(available / sourceWidth, available / sourceHeight);
+		double width = sourceWidth * scale;
+		double height = sourceHeight * scale;
+
+		Canvas canvas = new Canvas(imageSize, imageSize);
+		GraphicsContext graphics = canvas.getGraphicsContext2D();
+		graphics.drawImage(source, minX, minY, sourceWidth, sourceHeight, (imageSize - width) / 2,
+				(imageSize - height) / 2, width, height);
+
+		SnapshotParameters params = new SnapshotParameters();
+		params.setFill(Color.TRANSPARENT);
+
+		WritableImage result = new WritableImage(imageSize, imageSize);
+		canvas.snapshot(params, result);
+		return result;
 	}
 
 	public WritableImage get(CSGDatabaseInstance instance, List<CSG> incomingToDisplay, File image)
@@ -166,11 +248,8 @@ public class ThumbnailImage implements ImagePorviderInterface {
 
 		// Add all meshes to the group
 
-		double yOffset = (b.getMax().y - b.getMin().y) / 2;
-		double xOffset = (b.getMax().x - b.getMin().x) / 2;
 		double zCenter = (b.getMax().z - b.getMin().z) / 2;
-		// Create a group to hold all the meshes
-		Group root = new Group();
+		Group content = new Group();
 
 		for (CSG csg : csgList) {
 			if (csg.isHide())
@@ -179,88 +258,102 @@ public class ThumbnailImage implements ImagePorviderInterface {
 				continue;
 			try {
 				if (!views.containsKey(csg.getName())) {
-					PhongMaterial material = new PhongMaterial();
 					MeshView newMesh = csg.movez(-zCenter).newMesh();
+
 					if (csg.isHole()) {
-						material.setDiffuseColor(new Color(0.25, 0.25, 0.25, 0.75));
+						PhongMaterial material = new PhongMaterial(new Color(0.25, 0.25, 0.25, 0.75));
+						material.setSpecularColor(Color.BLACK);
 						newMesh.setMaterial(material);
 						newMesh.setOpacity(0.25);
+					} else if (newMesh.getMaterial() instanceof PhongMaterial) {
+						PhongMaterial material = (PhongMaterial) newMesh.getMaterial();
+						material.setSpecularColor(Color.BLACK);
 					}
+
 					if (csg.isWireFrame())
 						newMesh.setDrawMode(DrawMode.LINE);
 					else
 						newMesh.setDrawMode(DrawMode.FILL);
-					material.setSpecularColor(material.getDiffuseColor());
+
 					newMesh.setCullFace(CullFace.BACK);
 					views.put(csg.getName(), newMesh);
 					csgs.put(csg.getName(), csg);
 					Log.debug("Adding to thumbnail " + csg.getName());
 				}
-				root.getChildren().add(views.get(csg.getName()));
+				content.getChildren().add(views.get(csg.getName()));
 
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
 			}
 		}
 
-		// Calculate the bounds of all CSGs combined
-		double totalz = b.getMax().z - b.getMin().z;
-		double totaly = b.getMax().y - b.getMin().y;
-		double totalx = b.getMax().x - b.getMin().x;
-
-		// Create a perspective camera
 		PerspectiveCamera camera = new PerspectiveCamera(true);
-
-		// Calculate camera position to fit all objects in view
-		double maxDimension = Math.max(totalx, Math.max(totaly, totalz));
-		double cameraDistance = (maxDimension / Math.tan(Math.toRadians(camera.getFieldOfView() / 2))) * 0.8;
-
-		TransformNR camoffset = new TransformNR(xOffset, yOffset, 0);
-		TransformNR camDist = new TransformNR(0, 0, -cameraDistance);
-		TransformNR rot = new TransformNR(new RotationNR(-150, 45, 0));
-
-		TransformNR times = camoffset.times(rot.times(camDist));
 
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<WritableImage> imageRef = new AtomicReference<>();
 		BowlerKernel.runLater(() -> {
-			Affine af = TransformFactory.nrToAffine(times);
 			try {
-				camera.getTransforms().add(af);
-				Scene scene = new Scene(root, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
+				javafx.geometry.Bounds rendered = content.getBoundsInLocal();
+
+				double width = rendered.getWidth();
+				double height = rendered.getHeight();
+				double depth = rendered.getDepth();
+				double radius = Math.sqrt(width * width + height * height + depth * depth) / 2;
+
+				double halfFov = Math.toRadians(camera.getFieldOfView() / 2);
+				double cameraDistance = Math.max(1.0, radius / Math.sin(halfFov) * 1.2);
+
+				content.getTransforms().add(thumbnailView(rendered, cameraDistance));
+
+				AmbientLight ambient = new AmbientLight(Color.color(0.38, 0.38, 0.38));
+
+				PointLight key = new PointLight(Color.color(0.56, 0.56, 0.56));
+				key.setConstantAttenuation(1);
+				key.setLinearAttenuation(0);
+				key.setQuadraticAttenuation(0);
+				key.setTranslateX(-radius * 1.4);
+				key.setTranslateY(-radius * 1.8);
+				key.setTranslateZ(cameraDistance - radius * 1.8);
+
+				PointLight fill = new PointLight(Color.color(0.10, 0.10, 0.10));
+				fill.setConstantAttenuation(1);
+				fill.setLinearAttenuation(0);
+				fill.setQuadraticAttenuation(0);
+				fill.setTranslateX(radius * 1.4);
+				fill.setTranslateY(radius * 0.6);
+				fill.setTranslateZ(cameraDistance - radius);
+
+				Group sceneRoot = new Group(content, ambient, key, fill);
+				Scene scene = new Scene(sceneRoot, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
 				scene.setFill(Color.TRANSPARENT);
 				scene.setCamera(camera);
 
-				// Set up snapshot parameters
-				SnapshotParameters params = new SnapshotParameters();
-				params.setFill(Color.TRANSPARENT);
-				params.setCamera(camera);
-				params.setDepthBuffer(true);
-				params.setTransform(Transform.scale(1, 1));
-				// Set the near and far clip
-				camera.setNearClip(0.1); // Set the near clip plane
-				camera.setFarClip(9000.0); // Set the far clip plane
+				camera.setNearClip(0.1);
+				camera.setFarClip(Math.max(9000.0, cameraDistance + radius * 2));
+
 				WritableImage snapshot = new WritableImage(imageSize, imageSize);
-				imageRef.set(snapshot);
-				root.snapshot(params, snapshot);
-				root.getChildren().clear();
+				scene.snapshot(snapshot);
+
+				imageRef.set(fitThumbnail(snapshot));
 			} catch (Throwable t) {
 				Log.error(t);
 			} finally {
-				latch.countDown(); // Signal completion
+				// Cached MeshViews must be detached before they can be reused.
+				content.getChildren().clear();
+				latch.countDown();
 			}
 		});
-		boolean completed = false;
 		try {
-			completed = latch.await(2, TimeUnit.SECONDS);
+			if (!latch.await(2, TimeUnit.SECONDS))
+				throw new NoImageException("JavaFX thread did not complete within 2 seconds");
 		} catch (InterruptedException e) {
-
+			Thread.currentThread().interrupt();
+			throw new NoImageException("Interrupted while waiting for JavaFX thumbnail rendering");
 		}
 
-		if (!completed) {
-			throw new NoImageException("JavaFX thread did not complete within 2 seconds");
-		}
-
-		return imageRef.get();
+		WritableImage result = imageRef.get();
+		if (result == null)
+			throw new NoImageException("JavaFX thumbnail rendering failed");
+		return result;
 	}
 }
