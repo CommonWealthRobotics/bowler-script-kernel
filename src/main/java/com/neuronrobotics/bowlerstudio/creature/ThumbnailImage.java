@@ -46,19 +46,20 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 
 public class ThumbnailImage implements ImagePorviderInterface {
-	public static final String CACHE_VERSION = "13";
-	private static final int THUMBNAIL_MARGIN = 24;
+	public static final String CACHE_VERSION = "17";
+	private static final int RENDER_SCALE = 3;
+	private static final int THUMBNAIL_MARGIN = 24 * RENDER_SCALE;
 	private static final double CAMERA_AZIMUTH = -40.0;
 	private static final double CAMERA_ELEVATION = 31.0;
 	private static final double FEATURE_EDGE_ANGLE_DEGREES = 35.0;
 	private static final double FEATURE_EDGE_TOPOLOGY_TOLERANCE = 0.00001;
 	private static final double FEATURE_EDGE_STITCH_TOLERANCE = 0.002;
-	private static final double FEATURE_EDGE_WIDTH_PX = 2.0;
+	private static final double FEATURE_EDGE_WIDTH_PX = 2.0 * RENDER_SCALE;
 
 	private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
 	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
 
-	private int imageSize = 300;
+	private int imageSize = 300 * RENDER_SCALE;
 
 	public Bounds getSellectedBounds(List<CSG> incomingToDisplay) {
 		Vector3d min = null;
