@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.threed.FeatureEdgeExtractor;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
 import com.neuronrobotics.sdk.common.Log;
 
@@ -39,15 +40,20 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
+import javafx.scene.shape.TriangleMesh;
 import javafx.scene.transform.Affine;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 
 public class ThumbnailImage implements ImagePorviderInterface {
-	public static final String CACHE_VERSION = "11";
+	public static final String CACHE_VERSION = "13";
 	private static final int THUMBNAIL_MARGIN = 24;
 	private static final double CAMERA_AZIMUTH = -40.0;
 	private static final double CAMERA_ELEVATION = 31.0;
+	private static final double FEATURE_EDGE_ANGLE_DEGREES = 35.0;
+	private static final double FEATURE_EDGE_TOPOLOGY_TOLERANCE = 0.00001;
+	private static final double FEATURE_EDGE_STITCH_TOLERANCE = 0.002;
+	private static final double FEATURE_EDGE_WIDTH_PX = 2.0;
 
 	private HashMap<String, CSG> csgs = new HashMap<String, CSG>();
 	private HashMap<String, MeshView> views = new HashMap<String, MeshView>();
@@ -140,6 +146,102 @@ public class ThumbnailImage implements ImagePorviderInterface {
 		view.setMzy(forward.getY());
 		view.setMzz(forward.getZ());
 		view.setTz(distance - forward.dotProduct(center));
+		return view;
+	}
+
+	private static void addFeatureEdgeMeshPoint(List<Float> points, Point3D point) {
+		points.add((float) point.getX());
+		points.add((float) point.getY());
+		points.add((float) point.getZ());
+	}
+
+	private static void addFeatureEdgeMeshFace(List<Integer> faces, int a, int b, int c) {
+		faces.add(a);
+		faces.add(0);
+		faces.add(b);
+		faces.add(0);
+		faces.add(c);
+		faces.add(0);
+	}
+
+	private static void addFeatureEdgePrism(List<Float> points, List<Integer> faces, FeatureEdgeExtractor.Edge edge,
+			double radius, double zOffset) {
+		Point3D a = new Point3D(edge.a.x, edge.a.y, edge.a.z + zOffset);
+		Point3D b = new Point3D(edge.b.x, edge.b.y, edge.b.z + zOffset);
+		Point3D direction = b.subtract(a);
+
+		if (direction.magnitude() < 1e-9)
+			return;
+
+		direction = direction.normalize();
+
+		Point3D reference = Math.abs(direction.getY()) < 0.9 ? new Point3D(0, 1, 0) : new Point3D(1, 0, 0);
+
+		Point3D u = direction.crossProduct(reference).normalize().multiply(radius);
+		Point3D v = direction.crossProduct(u).normalize().multiply(radius);
+
+		Point3D[] ringA = {a.add(u).add(v), a.add(u).subtract(v), a.subtract(u).subtract(v), a.subtract(u).add(v)};
+
+		Point3D[] ringB = {b.add(u).add(v), b.add(u).subtract(v), b.subtract(u).subtract(v), b.subtract(u).add(v)};
+
+		int base = points.size() / 3;
+
+		for (Point3D point : ringA)
+			addFeatureEdgeMeshPoint(points, point);
+
+		for (Point3D point : ringB)
+			addFeatureEdgeMeshPoint(points, point);
+
+		for (int i = 0; i < 4; i++) {
+			int j = (i + 1) % 4;
+
+			addFeatureEdgeMeshFace(faces, base + i, base + j, base + 4 + j);
+			addFeatureEdgeMeshFace(faces, base + i, base + 4 + j, base + 4 + i);
+		}
+
+		addFeatureEdgeMeshFace(faces, base, base + 2, base + 1);
+		addFeatureEdgeMeshFace(faces, base, base + 3, base + 2);
+
+		addFeatureEdgeMeshFace(faces, base + 4, base + 5, base + 6);
+		addFeatureEdgeMeshFace(faces, base + 4, base + 6, base + 7);
+	}
+
+	private static MeshView buildFeatureEdgeMesh(List<FeatureEdgeExtractor.Edge> edges, double radius, double zOffset) {
+		if (edges.isEmpty())
+			return null;
+
+		List<Float> points = new ArrayList<>();
+		List<Integer> faces = new ArrayList<>();
+
+		for (FeatureEdgeExtractor.Edge edge : edges)
+			addFeatureEdgePrism(points, faces, edge, radius, zOffset);
+
+		if (points.isEmpty())
+			return null;
+
+		TriangleMesh mesh = new TriangleMesh();
+
+		float[] pointArray = new float[points.size()];
+		for (int i = 0; i < points.size(); i++)
+			pointArray[i] = points.get(i);
+
+		int[] faceArray = new int[faces.size()];
+		for (int i = 0; i < faces.size(); i++)
+			faceArray[i] = faces.get(i);
+
+		mesh.getPoints().setAll(pointArray);
+		mesh.getTexCoords().setAll(0f, 0f);
+		mesh.getFaces().setAll(faceArray);
+
+		PhongMaterial material = new PhongMaterial(Color.BLACK);
+		material.setSpecularColor(Color.BLACK);
+
+		MeshView view = new MeshView(mesh);
+		view.setMaterial(material);
+		view.setCullFace(CullFace.NONE);
+		view.setMouseTransparent(true);
+		view.setDepthTest(javafx.scene.DepthTest.ENABLE);
+
 		return view;
 	}
 
@@ -250,6 +352,7 @@ public class ThumbnailImage implements ImagePorviderInterface {
 
 		double zCenter = (b.getMax().z - b.getMin().z) / 2;
 		Group content = new Group();
+		List<FeatureEdgeExtractor.Edge> featureEdges = new ArrayList<>();
 
 		for (CSG csg : csgList) {
 			if (csg.isHide())
@@ -282,6 +385,10 @@ public class ThumbnailImage implements ImagePorviderInterface {
 				}
 				content.getChildren().add(views.get(csg.getName()));
 
+				if (!csg.isWireFrame())
+					featureEdges.addAll(FeatureEdgeExtractor.extract(csg, FEATURE_EDGE_ANGLE_DEGREES,
+							FEATURE_EDGE_TOPOLOGY_TOLERANCE, FEATURE_EDGE_STITCH_TOLERANCE));
+
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
 			}
@@ -302,28 +409,23 @@ public class ThumbnailImage implements ImagePorviderInterface {
 
 				double halfFov = Math.toRadians(camera.getFieldOfView() / 2);
 				double cameraDistance = Math.max(1.0, radius / Math.sin(halfFov) * 1.2);
+				double worldPerPixel = 2.0 * cameraDistance * Math.tan(halfFov) / imageSize;
+
+				MeshView edgeMesh = buildFeatureEdgeMesh(featureEdges, worldPerPixel * FEATURE_EDGE_WIDTH_PX * 0.5,
+						-zCenter);
+
+				if (edgeMesh != null)
+					content.getChildren().add(edgeMesh);
 
 				content.getTransforms().add(thumbnailView(rendered, cameraDistance));
 
-				AmbientLight ambient = new AmbientLight(Color.color(0.38, 0.38, 0.38));
-
-				PointLight key = new PointLight(Color.color(0.56, 0.56, 0.56));
+				AmbientLight ambient = new AmbientLight(Color.color(0.52, 0.52, 0.52));
+				PointLight key = new PointLight(Color.color(0.64, 0.64, 0.64));
 				key.setConstantAttenuation(1);
 				key.setLinearAttenuation(0);
 				key.setQuadraticAttenuation(0);
-				key.setTranslateX(-radius * 1.4);
-				key.setTranslateY(-radius * 1.8);
-				key.setTranslateZ(cameraDistance - radius * 1.8);
 
-				PointLight fill = new PointLight(Color.color(0.10, 0.10, 0.10));
-				fill.setConstantAttenuation(1);
-				fill.setLinearAttenuation(0);
-				fill.setQuadraticAttenuation(0);
-				fill.setTranslateX(radius * 1.4);
-				fill.setTranslateY(radius * 0.6);
-				fill.setTranslateZ(cameraDistance - radius);
-
-				Group sceneRoot = new Group(content, ambient, key, fill);
+				Group sceneRoot = new Group(content, ambient, key);
 				Scene scene = new Scene(sceneRoot, imageSize, imageSize, true, SceneAntialiasing.BALANCED);
 				scene.setFill(Color.TRANSPARENT);
 				scene.setCamera(camera);
