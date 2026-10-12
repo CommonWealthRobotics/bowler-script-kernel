@@ -449,17 +449,17 @@ public class CaDoodleFile {
 		opperations = opperations.stream().filter(Objects::nonNull).collect(Collectors.toCollection(ArrayList::new));
 		if (indexStarting > opperations.size())
 			indexStarting = opperations.size();
-		ArrayList<CaDoodleOperation> toRem = new ArrayList<CaDoodleOperation>();
 		int starting = 0;
 		if (frozenIndex < 0)
 			getFrozenSteps().clear();
-		while (frozenIndex > 0 && getFrozenSteps().size() > 0)
+		int size = getOperations().size();
+		while (frozenIndex > 0 && getFrozenSteps().size() > 0) {
 			if (getFrozenCache().isPresent()) {
 				Log.debug("Loading Model from Cache at " + frozenIndex);
 
 				CaDoodleOperation op = getOperations().get(frozenIndex - 1);
 				op.setCaDoodleFile(this);
-				setPercentInitialized(((double) frozenIndex) / (double) getOperations().size());
+				setPercentInitialized(((double) frozenIndex) / (double) size);
 				starting = frozenIndex;
 				if (frozenIndex > 0)
 					getFrozenSteps().add(frozenIndex);
@@ -469,27 +469,23 @@ public class CaDoodleFile {
 				// clear teps with stale caches
 				clearFrozenIndex(frozenIndex);
 			}
-		for (int i = starting; i < getOperations().size(); i++) {
+		}
+		for (int i = starting; i < size; i++) {
 			CaDoodleOperation op = getOperations().get(i);
 			if (op == null)
 				continue;
 			op.setCaDoodleFile(this);
-			setPercentInitialized(((double) i) / (double) getOperations().size());
+			setPercentInitialized(((double) i) / (double) size);
 			// if(!inCache(op))
 			try {
+				getSaveUpdate().renderSplashFrame((int) (getPercentInitialized() * 100.0), "Init " + i + " of " + size);
 				process(op);
 				setSaveImage(getCurrentState(), op);
 			} catch (Throwable t) {
 				com.neuronrobotics.sdk.common.Log.error(t);
-				// indexStarting = i ;
-				// break;
-				// toRem.add(op);
 			}
+
 		}
-		// operations.removeAll(toRem);
-		// if(indexStarting>operations.size()) {
-		// indexStarting = operations.size();
-		// }
 
 		setPercentInitialized(1);
 		try {

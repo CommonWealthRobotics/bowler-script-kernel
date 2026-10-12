@@ -309,7 +309,10 @@ public class AddFromFile extends AbstractAddFrom {
 	}
 
 	public static File getFile(String name, CaDoodleFile cf) {
-		String strValue = cf.getSelf().getAbsolutePath();
+		File self = cf.getSelf();
+		if (self == null)
+			return null;
+		String strValue = self.getAbsolutePath();
 		File parentFile = new File(strValue).getParentFile();
 		File stl = null;
 		for (File f : parentFile.listFiles()) {
