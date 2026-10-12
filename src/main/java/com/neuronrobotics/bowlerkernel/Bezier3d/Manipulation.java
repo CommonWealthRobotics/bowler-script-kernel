@@ -311,8 +311,8 @@ public class Manipulation {
 
 				if (zMove) {
 					z = newWorldPos.getZ() - startingPointWorld.getZ();
-					if (!scaleMove)
-						z -= 5.0; // Adjust for arrow offset of 5.0mm
+					//					if (!scaleMove)
+					//						z -= 5.0; // Adjust for arrow offset of 5.0mm
 				} else {
 					x = newWorldPos.getX() - startingPointWorld.getX();
 					y = newWorldPos.getY() - startingPointWorld.getY();
@@ -624,7 +624,7 @@ public class Manipulation {
 	}
 
 	public void setIncrement(double value) {
-		this.snapGridValue = value;
+		snapGridValue = value;
 	}
 
 	public TransformNR getCurrentPose() {
