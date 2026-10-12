@@ -496,18 +496,24 @@ public class CaDoodleFile {
 			setCurrentIndex(indexStarting);
 			fireOnUpdate(getCurrentOperation());
 			loadImageFromFile();
-			for (ICaDoodleStateUpdate l : listeners) {
-				try {
-					l.onInitializationDone();
-				} catch (Throwable e) {
-					com.neuronrobotics.sdk.common.Log.error(e);
-				}
-			}
+			initializing = false;
+			fireInitializationDone();
 			updateBoM();
 		} catch (Throwable t) {
 			Log.error(t);
+			initializing = false;
 		}
-		initializing = false;
+
+	}
+
+	private void fireInitializationDone() {
+		for (ICaDoodleStateUpdate l : listeners) {
+			try {
+				l.onInitializationDone();
+			} catch (Throwable e) {
+				com.neuronrobotics.sdk.common.Log.error(e);
+			}
+		}
 	}
 
 	public void updateBoM() {
