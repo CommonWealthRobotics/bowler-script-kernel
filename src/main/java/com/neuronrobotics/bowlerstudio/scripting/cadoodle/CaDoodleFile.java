@@ -1489,8 +1489,8 @@ public class CaDoodleFile {
 			if (cache.get(csg.getName()) == null || forceClear || cache.size() == 0) {
 				if (Platform.isFxApplicationThread())
 					Log.error(new RuntimeException("Computed bounds in UI thread!"));
-				//				else
-				//					Log.debug("Computing bounds for " + csg.getName());
+				// else
+				// Log.debug("Computing bounds for " + csg.getName());
 				// Log.error(new RuntimeException("Computing bounds for " + csg.getName()));
 				Transform inverse = TransformFactory.nrToCSG(frame).inverse();
 
@@ -1615,18 +1615,21 @@ public class CaDoodleFile {
 	}
 
 	public static boolean isWorkplaneNotOrigin(TransformNR w) {
+		try {
+			double epsilon = 0.1;
+			RotationNR r = w.getRotation();
+			if ((Math.abs(w.getZ()) > epsilon))
+				return true;
 
-		double epsilon = 0.1;
-		RotationNR r = w.getRotation();
-		if ((Math.abs(w.getZ()) > epsilon))
-			return true;
+			double abs2 = Math.abs(r.getRotationElevationDegrees());
+			double abs3 = Math.abs(r.getRotationTiltDegrees());
 
-		double abs2 = Math.abs(r.getRotationElevationDegrees());
-		double abs3 = Math.abs(r.getRotationTiltDegrees());
-
-		boolean b = (abs2 > epsilon) || (abs3 > epsilon);
-		if (b)
-			return true;
+			boolean b = (abs2 > epsilon) || (abs3 > epsilon);
+			if (b)
+				return true;
+		} catch (Exception ex) {
+			Log.error(ex);
+		}
 		return false;
 	}
 
@@ -1903,6 +1906,5 @@ public class CaDoodleFile {
 			frozenSteps = new HashSet<Integer>();
 		return frozenSteps;
 	}
-
 
 }
