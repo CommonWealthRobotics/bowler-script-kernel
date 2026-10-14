@@ -16,7 +16,7 @@ public final class FeatureEdgeExtractor {
 		public final Vector3d a;
 		public final Vector3d b;
 
-		private Edge(Vector3d a, Vector3d b) {
+		public Edge(Vector3d a, Vector3d b) {
 			this.a = a;
 			this.b = b;
 		}
