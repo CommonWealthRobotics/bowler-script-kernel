@@ -39,7 +39,7 @@ public class StepFileTest {
 	private static final double STITCH_TOLERANCE = 0.002;
 
 	// --- round trip: what this class writes, it reads back ---
-	
+
 	@Test
 	public void exportsRoundTripThroughItsOwnReader() throws Exception {
 		for (String name : new String[]{"cuboid_export.step", "hole_export.step", "cylinder_export.step"}) {
