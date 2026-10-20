@@ -91,8 +91,8 @@ final class Triangulator {
 		for (int i = 0; i < outer.size(); i++)
 			for (int j = 0; j < hole.size(); j++)
 				candidates.add(new int[]{i, j});
-		candidates.sort(Comparator.comparingDouble(pair -> distance(vertices.get(outer.get(pair[0])),
-				vertices.get(hole.get(pair[1])))));
+		candidates.sort(Comparator
+				.comparingDouble(pair -> distance(vertices.get(outer.get(pair[0])), vertices.get(hole.get(pair[1])))));
 
 		for (int[] candidate : candidates) {
 			int at = candidate[0];

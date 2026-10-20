@@ -411,8 +411,7 @@ final class StepBRepWrite {
 		 * itself, so a vertex the outline reaches twice starts a new loop instead of
 		 * being crossed.
 		 */
-		private int[] next(Map<Integer, List<int[]>> byStart, Map<Long, Boolean> visited, int[] at,
-				Vector3d normal) {
+		private int[] next(Map<Integer, List<int[]>> byStart, Map<Long, Boolean> visited, int[] at, Vector3d normal) {
 			double[] incoming = direction(point(at[1]), point(at[0]));
 			int[] best = null;
 			double bestAngle = 0;
