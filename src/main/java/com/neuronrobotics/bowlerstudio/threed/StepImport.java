@@ -4,15 +4,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.vecmath.Matrix4d;
 
 import com.neuronrobotics.bowlerstudio.threed.StepReader.Instance;
 import com.neuronrobotics.bowlerstudio.threed.StepReader.StepException;
 import com.neuronrobotics.bowlerstudio.threed.StepReader.Value;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.scene.paint.Color;
 
@@ -21,6 +27,11 @@ import javafx.scene.paint.Color;
  * geometric curve sets and BRep topology. Geometry is returned in the model's
  * own length unit converted to millimetres, matching what {@link STEPFile}
  * writes.
+ *
+ * <p>
+ * An assembly is returned as one shape per placed part, with each part moved to
+ * where its occurrence puts it. Colours a file assigns to its geometry come
+ * through on the shape.
  */
 public final class StepImport {
 
@@ -29,16 +40,18 @@ public final class StepImport {
 	private StepImport() {
 	}
 
-	/** One shape from the file: its mesh plus any free edges. */
+	/** One shape from the file: its mesh plus any free edges, and its colour. */
 	public static final class Shape {
 		private final String name;
 		private final CSG mesh;
 		private final List<FeatureEdgeExtractor.Edge> edges;
+		private final Color color;
 
-		private Shape(String name, CSG mesh, List<FeatureEdgeExtractor.Edge> edges) {
+		private Shape(String name, CSG mesh, List<FeatureEdgeExtractor.Edge> edges, Color color) {
 			this.name = name;
 			this.mesh = mesh;
 			this.edges = Collections.unmodifiableList(edges);
+			this.color = color;
 		}
 
 		public String getName() {
@@ -53,6 +66,11 @@ public final class StepImport {
 		/** Free edges, either from curve sets or from BRep topology. */
 		public List<FeatureEdgeExtractor.Edge> getEdges() {
 			return edges;
+		}
+
+		/** The colour the file assigned to this shape, or null when it named none. */
+		public Color getColor() {
+			return color;
 		}
 	}
 
@@ -123,46 +141,71 @@ public final class StepImport {
 
 	public static List<Shape> readShapes(InputStream stream) throws IOException {
 		StepReader reader = StepReader.parse(stream);
-		List<Instance> representations = representations(reader);
+		Map<Integer, Color> colours = StepStyles.byItem(reader);
+		Map<Integer, List<Transform>> placements = placements(reader);
 		List<Shape> shapes = new ArrayList<>();
 
-		for (Instance representation : representations) {
+		for (Instance representation : representations(reader)) {
 			double scale = lengthScale(reader, representation);
-			String name = text(reader.attribute(representation, "REPRESENTATION", "name"));
+			Color colour = colourOf(reader, representation, colours);
 
-			// a solid model is one shape in its own right, so a representation that
-			// holds several of them yields several shapes rather than one merged mesh
-			List<Instance> solids = new ArrayList<>();
-			List<Instance> items = new ArrayList<>();
-			for (Value item : reader.list(reader.attribute(representation, "REPRESENTATION", "items"))) {
-				Instance instance = reader.instance(item);
-				if (StepBRep.isSolidModel(instance))
-					solids.add(instance);
-				else
-					items.add(instance);
-			}
+			// a rep that an assembly places is drawn once per occurrence, moved each
+			// time; a rep nothing places stands on its own
+			List<Transform> transforms = placements.get(representation.id());
+			if (transforms == null)
+				transforms = Collections.singletonList(null);
 
-			if (!solids.isEmpty()) {
-				for (Instance solid : solids) {
-					MeshBuilder mesh = new MeshBuilder(scale);
-					List<FeatureEdgeExtractor.Edge> edges = new ArrayList<>();
-					StepBRep.read(reader, solid, scale, mesh, edges);
-					shapes.add(new Shape(text(reader.attribute(solid, "REPRESENTATION_ITEM", "name")), mesh.toCsg(name),
-							unique(edges, scale)));
-				}
-			}
-
-			if (!items.isEmpty()) {
-				MeshBuilder mesh = new MeshBuilder(scale);
-				List<FeatureEdgeExtractor.Edge> edges = new ArrayList<>();
-				for (Instance item : items)
-					readItem(reader, item, scale, mesh, edges);
-				if (!mesh.isEmpty() || !edges.isEmpty())
-					shapes.add(new Shape(name, mesh.toCsg(name), unique(edges, scale)));
+			for (Transform transform : transforms) {
+				List<Shape> placed = readRepresentation(reader, representation, scale, colour, transform);
+				shapes.addAll(placed);
 			}
 		}
 
 		return distinct(shapes);
+	}
+
+	private static List<Shape> readRepresentation(StepReader reader, Instance representation, double scale,
+			Color colour, Transform transform) {
+		String name = text(reader.attribute(representation, "REPRESENTATION", "name"));
+
+		// placements are written in the file's own unit, so scale their translation
+		// to millimetres along with the geometry they place
+		Transform placement = scalePlacement(transform, scale);
+
+		// a solid model is one shape in its own right, so a representation that
+		// holds several of them yields several shapes rather than one merged mesh
+		List<Instance> solids = new ArrayList<>();
+		List<Instance> items = new ArrayList<>();
+		for (Value item : reader.list(reader.attribute(representation, "REPRESENTATION", "items"))) {
+			Instance instance = reader.instance(item);
+			if (StepBRep.isSolidModel(instance))
+				solids.add(instance);
+			else
+				items.add(instance);
+		}
+
+		List<Shape> shapes = new ArrayList<>();
+
+		if (!solids.isEmpty()) {
+			for (Instance solid : solids) {
+				MeshBuilder mesh = new MeshBuilder(scale);
+				List<FeatureEdgeExtractor.Edge> edges = new ArrayList<>();
+				StepBRep.read(reader, solid, scale, mesh, edges);
+				shapes.add(place(placement, new Shape(text(reader.attribute(solid, "REPRESENTATION_ITEM", "name")),
+						mesh.toCsg(name, colour), unique(edges, scale), colour)));
+			}
+		}
+
+		if (!items.isEmpty()) {
+			MeshBuilder mesh = new MeshBuilder(scale);
+			List<FeatureEdgeExtractor.Edge> edges = new ArrayList<>();
+			for (Instance item : items)
+				readItem(reader, item, scale, mesh, edges);
+			if (!mesh.isEmpty() || !edges.isEmpty())
+				shapes.add(place(placement, new Shape(name, mesh.toCsg(name, colour), unique(edges, scale), colour)));
+		}
+
+		return shapes;
 	}
 
 	/**
@@ -186,6 +229,198 @@ public final class StepImport {
 
 	private static String key(double x, double y, double z, double tolerance) {
 		return Math.round(x / tolerance) + "," + Math.round(y / tolerance) + "," + Math.round(z / tolerance);
+	}
+
+	// --- assemblies: where each representation sits ---
+
+	/** One part occurrence: the representation that is placed, and where. */
+	private static final class Occurrence {
+		private final int parent;
+		private final int child;
+		private final Transform transform;
+
+		private Occurrence(int parent, int child, Transform transform) {
+			this.parent = parent;
+			this.child = child;
+			this.transform = transform;
+		}
+	}
+
+	/**
+	 * World placement per representation id. An assembly relates each part's
+	 * representation to the assembly's, through a
+	 * {@code CONTEXT_DEPENDENT_SHAPE_REPRESENTATION} and its transformation, so
+	 * following those relations from the parts nothing places gives every part its
+	 * place. A representation with no mapping is a root and needs no placement.
+	 */
+	private static Map<Integer, List<Transform>> placements(StepReader reader) {
+		Map<Integer, List<Occurrence>> children = new HashMap<>();
+		Set<Integer> placed = new LinkedHashSet<>();
+
+		for (Instance instance : reader.instances().values()) {
+			Occurrence occurrence = occurrence(reader, instance);
+			if (occurrence == null)
+				continue;
+			int parent = occurrence.parent;
+			children.computeIfAbsent(parent, unused -> new ArrayList<>()).add(occurrence);
+			placed.add(occurrence.child);
+		}
+
+		if (placed.isEmpty())
+			return Map.of();
+
+		Map<Integer, List<Transform>> placements = new HashMap<>();
+		for (Instance representation : representations(reader))
+			if (!placed.contains(representation.id()))
+				descend(representation.id(), null, children, placements, new LinkedHashSet<>());
+
+		return placements;
+	}
+
+	/** Reads one assembly relation, or null when the instance is not one. */
+	private static Occurrence occurrence(StepReader reader, Instance instance) {
+		if (!instance.is("CONTEXT_DEPENDENT_SHAPE_REPRESENTATION"))
+			return null;
+
+		Instance relation = reader.optionalInstance(
+				reader.attribute(instance, "CONTEXT_DEPENDENT_SHAPE_REPRESENTATION", "representation_relation"));
+		if (relation == null || !relation.is("REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION"))
+			return null;
+
+		// rep_1 is the part's own representation, rep_2 the assembly's; both are
+		// references, since a relationship relates representations rather than
+		// repeating them
+		Instance child = reader.optionalInstance(reader.attribute(relation, "REPRESENTATION_RELATIONSHIP", "rep_1"));
+		Instance parent = reader.optionalInstance(reader.attribute(relation, "REPRESENTATION_RELATIONSHIP", "rep_2"));
+		if (child == null || parent == null || child.id() == parent.id())
+			return null;
+
+		Transform transform = transformOf(reader, reader.optionalInstance(reader.attribute(relation,
+				"REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION", "transformation_operator")));
+		if (transform == null)
+			return null;
+
+		return new Occurrence(parent.id(), child.id(), transform);
+	}
+
+	/**
+	 * The placement an {@code ITEM_DEFINED_TRANSFORMATION} describes. Its first
+	 * item is the frame the part is defined at within the assembly and the second
+	 * the frame the occurrence refers to, so the part moves by the first inverted,
+	 * composed with the second.
+	 */
+	private static Transform transformOf(StepReader reader, Instance transformation) {
+		if (transformation == null || !transformation.is("ITEM_DEFINED_TRANSFORMATION"))
+			return null;
+
+		double[] inAssembly = frame(reader, reader
+				.optionalInstance(reader.attribute(transformation, "ITEM_DEFINED_TRANSFORMATION", "transform_item_1")));
+		double[] inPart = frame(reader, reader
+				.optionalInstance(reader.attribute(transformation, "ITEM_DEFINED_TRANSFORMATION", "transform_item_2")));
+		if (inPart == null)
+			return null;
+		if (inAssembly == null)
+			return new Transform(new Matrix4d(inPart));
+
+		return new Transform(new Matrix4d(multiply(inverse(inAssembly), inPart)));
+	}
+
+	private static void descend(int representation, Transform world, Map<Integer, List<Occurrence>> children,
+			Map<Integer, List<Transform>> placements, Set<Integer> path) {
+		placements.computeIfAbsent(representation, unused -> new ArrayList<>()).add(world);
+
+		if (!path.add(representation))
+			return; // a cycle cannot place anything new
+		for (Occurrence occurrence : children.getOrDefault(representation, List.of()))
+			descend(occurrence.child, compose(world, occurrence.transform), children, placements, path);
+		path.remove(representation);
+	}
+
+	private static Transform compose(Transform parent, Transform child) {
+		if (parent == null)
+			return child;
+		Matrix4d result = (Matrix4d) parent.getInternalMatrix().clone();
+		result.mul(child.getInternalMatrix());
+		return new Transform(result);
+	}
+
+	/** A placement as a row-major 4x4: the origin and the axes of its frame. */
+	private static double[] frame(StepReader reader, Instance placement) {
+		if (placement == null || !StepReader.kindOf(placement, "AXIS2_PLACEMENT_3D"))
+			return null;
+
+		double[][] frame = StepCurves.placement(reader, placement);
+		double[] origin = frame[0];
+		double[] x = frame[1];
+		double[] y = frame[2];
+		double[] z = frame[3];
+
+		return new double[]{x[0], y[0], z[0], origin[0], x[1], y[1], z[1], origin[1], x[2], y[2], z[2], origin[2], 0, 0,
+				0, 1};
+	}
+
+	/** Row-major matrix product. */
+	private static double[] multiply(double[] a, double[] b) {
+		double[] result = new double[16];
+		for (int row = 0; row < 4; row++)
+			for (int column = 0; column < 4; column++) {
+				double sum = 0;
+				for (int k = 0; k < 4; k++)
+					sum += a[row * 4 + k] * b[k * 4 + column];
+				result[row * 4 + column] = sum;
+			}
+		return result;
+	}
+
+	/** Inverse of a rigid frame: its rotation is orthonormal, so transpose it. */
+	private static double[] inverse(double[] m) {
+		double[] result = new double[16];
+		result[0] = m[0];
+		result[1] = m[4];
+		result[2] = m[8];
+		result[4] = m[1];
+		result[5] = m[5];
+		result[6] = m[9];
+		result[8] = m[2];
+		result[9] = m[6];
+		result[10] = m[10];
+		result[3] = -(m[0] * m[3] + m[4] * m[7] + m[8] * m[11]);
+		result[7] = -(m[1] * m[3] + m[5] * m[7] + m[9] * m[11]);
+		result[11] = -(m[2] * m[3] + m[6] * m[7] + m[10] * m[11]);
+		result[15] = 1;
+		return result;
+	}
+
+	/**
+	 * Scales a placement's translation from the file's unit to millimetres. A
+	 * placement's rotation carries no unit, so only the origin moves.
+	 */
+	private static Transform scalePlacement(Transform transform, double scale) {
+		if (transform == null || scale == 1.0)
+			return transform;
+
+		Matrix4d matrix = (Matrix4d) transform.getInternalMatrix().clone();
+		matrix.m03 *= scale;
+		matrix.m13 *= scale;
+		matrix.m23 *= scale;
+		return new Transform(matrix);
+	}
+
+	/** Moves a shape to its occurrence, when it is in an assembly. */
+	private static Shape place(Transform transform, Shape shape) {
+		if (transform == null)
+			return shape;
+
+		CSG mesh = shape.getMesh();
+		if (mesh != null)
+			mesh = mesh.transformed(transform);
+
+		List<FeatureEdgeExtractor.Edge> edges = new ArrayList<>();
+		for (FeatureEdgeExtractor.Edge edge : shape.getEdges())
+			edges.add(new FeatureEdgeExtractor.Edge(transform.transform(edge.a.clone()),
+					transform.transform(edge.b.clone())));
+
+		return new Shape(shape.getName(), mesh, edges, shape.getColor());
 	}
 
 	private static void readItem(StepReader reader, Instance item, double scale, MeshBuilder mesh,
@@ -302,6 +537,31 @@ public final class StepImport {
 		return new double[]{point[0] * factor, point[1] * factor, point[2] * factor};
 	}
 
+	// --- colour ---
+
+	/** The colour of a representation, from any of the items it holds. */
+	private static Color colourOf(StepReader reader, Instance representation, Map<Integer, Color> colours) {
+		if (colours.isEmpty())
+			return null;
+
+		for (Value item : reader.list(reader.attribute(representation, "REPRESENTATION", "items"))) {
+			Instance instance = reader.instance(item);
+			Color colour = colours.get(instance.id());
+			if (colour != null)
+				return colour;
+
+			// a tessellated solid or shell wraps its coloured faces
+			if (instance.is("TESSELLATED_SOLID") || instance.is("TESSELLATED_SHELL")) {
+				for (Value nested : reader.list(reader.attribute(instance, instance.primaryEntity(), "items"))) {
+					colour = colours.get(reader.instance(nested).id());
+					if (colour != null)
+						return colour;
+				}
+			}
+		}
+		return null;
+	}
+
 	// --- representations and units ---
 
 	/**
@@ -318,7 +578,7 @@ public final class StepImport {
 		return shapes;
 	}
 
-	/** Drops shapes whose geometry repeats an earlier shape. */
+	/** Drops shapes whose geometry and colour repeat an earlier shape. */
 	private static List<Shape> distinct(List<Shape> shapes) {
 		List<Shape> distinct = new ArrayList<>();
 		java.util.Set<String> keys = new java.util.LinkedHashSet<>();
@@ -348,6 +608,8 @@ public final class StepImport {
 			key.append(round(bounds.maxX)).append(',').append(round(bounds.maxY)).append(',')
 					.append(round(bounds.maxZ));
 		}
+		key.append('|');
+		key.append(shape.getColor());
 		return key.toString();
 	}
 
@@ -516,6 +778,10 @@ public final class StepImport {
 		}
 
 		CSG toCsg(String name) {
+			return toCsg(name, IMPORT_COLOR);
+		}
+
+		CSG toCsg(String name, Color color) {
 			if (triangles.isEmpty())
 				return null;
 
@@ -533,7 +799,7 @@ public final class StepImport {
 				flatTriangles[i * 3 + 2] = triangles.get(i)[2];
 			}
 
-			CSG csg = new CSG(flat, flatTriangles, IMPORT_COLOR);
+			CSG csg = new CSG(flat, flatTriangles, color == null ? IMPORT_COLOR : color);
 			if (name != null && !name.isBlank())
 				csg.setName(name);
 			return csg;

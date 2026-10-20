@@ -33,13 +33,21 @@ final class StepBRep {
 		}
 	}
 
-	/** The faces owned directly by a solid or surface model. */
+	/**
+	 * The faces owned directly by a solid or surface model. A surface model names
+	 * a set of shells rather than faces, and each shell is a connected face set,
+	 * so its shells are flattened into the faces they hold.
+	 */
 	static Value boundaryOf(StepReader reader, Instance model) {
 		if (model.is("MANIFOLD_SOLID_BREP"))
 			return reader.attribute(reader.instance(reader.attribute(model, "MANIFOLD_SOLID_BREP", "outer")),
 					"CONNECTED_FACE_SET", "cfs_faces");
-		if (model.is("SHELL_BASED_SURFACE_MODEL"))
-			return reader.attribute(model, "SHELL_BASED_SURFACE_MODEL", "sbsm_boundary");
+		if (model.is("SHELL_BASED_SURFACE_MODEL")) {
+			List<Value> faces = new ArrayList<>();
+			for (Value shell : reader.list(reader.attribute(model, "SHELL_BASED_SURFACE_MODEL", "sbsm_boundary")))
+				faces.addAll(reader.list(reader.attribute(reader.instance(shell), "CONNECTED_FACE_SET", "cfs_faces")));
+			return Value.list(faces);
+		}
 		return reader.attribute(model, "CONNECTED_FACE_SET", "cfs_faces");
 	}
 
@@ -51,45 +59,49 @@ final class StepBRep {
 	private static void readFace(StepReader reader, Instance face, double scale, MeshBuilder mesh,
 			List<FeatureEdgeExtractor.Edge> edges) {
 		List<Value> bounds = reader.list(reader.attribute(face, "FACE_SURFACE", "bounds"));
-
-		if (bounds.size() == 1) {
-			List<double[]> points = loopPoints(reader, outerLoop(reader, bounds.get(0)), scale, edges);
-			if (isPlanar(points))
-				addPlanarFace(points, mesh);
+		// a face that names no bound has no geometry to place, though its surface
+		// may still be referenced by the rest of the model
+		if (bounds.isEmpty())
 			return;
-		}
 
 		List<List<double[]>> loops = new ArrayList<>();
 		for (Value boundReference : bounds)
 			loops.add(loopPoints(reader, outerLoop(reader, boundReference), scale, edges));
 
+		// the bound a face marks as its outer one is the outer loop; when none is
+		// marked, the one enclosing the most area is
 		int outer = 0;
-		for (int i = 1; i < loops.size(); i++)
-			if (signedArea(loops.get(i)) > signedArea(loops.get(outer)))
+		for (int i = 0; i < loops.size(); i++)
+			if (isOuter(reader, bounds.get(i)))
+				outer = i;
+		for (int i = 0; i < loops.size(); i++)
+			if (!isOuter(reader, bounds.get(i)) && signedArea(loops.get(i)) > signedArea(loops.get(outer)))
 				outer = i;
 
 		if (!isPlanar(loops.get(outer)))
-			return; // curved face with holes: only its edges are meaningful
+			return; // curved face: only its edges are meaningful
 
-		List<double[]> polygon = new ArrayList<>(loops.get(outer));
-		for (int i = 0; i < loops.size(); i++)
-			if (i != outer)
-				polygon.addAll(loops.get(i));
+		List<List<Integer>> indices = new ArrayList<>();
+		for (List<double[]> loop : loops) {
+			List<Integer> index = new ArrayList<>();
+			for (double[] point : loop)
+				index.add(mesh.vertex(point));
+			indices.add(index);
+		}
 
-		mesh.addPolygon(polygon);
+		List<List<Integer>> holes = new ArrayList<>(indices);
+		holes.remove(outer);
+		for (int[] triangle : Triangulator.triangulate(indices.get(outer), holes, mesh.positions()))
+			mesh.addTriangle(triangle[0], triangle[1], triangle[2]);
 	}
 
 	private static Instance outerLoop(StepReader reader, Value bound) {
 		return reader.instance(reader.attribute(reader.instance(bound), "FACE_BOUND", "bound"));
 	}
 
-	/** Triangulates a face that lies in a plane; curved faces contribute no mesh. */
-	private static void addPlanarFace(List<double[]> points, MeshBuilder mesh) {
-		List<Integer> indices = new ArrayList<>();
-		for (double[] point : points)
-			indices.add(mesh.vertex(point));
-		for (int[] triangle : Triangulator.triangulate(indices, mesh.positions()))
-			mesh.addTriangle(triangle[0], triangle[1], triangle[2]);
+	/** True when a bound is the face's own outer one. */
+	private static boolean isOuter(StepReader reader, Value bound) {
+		return reader.instance(bound).is("FACE_OUTER_BOUND");
 	}
 
 	/**

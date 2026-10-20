@@ -11,6 +11,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import com.neuronrobotics.bowlerstudio.scripting.BlenderLoader;
 import com.neuronrobotics.bowlerstudio.scripting.FreecadLoader;
+import com.neuronrobotics.bowlerstudio.threed.STEPFile;
 import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 
 import eu.mihosoft.vrl.v3d.CSG;
@@ -88,6 +89,7 @@ public class CadFileExporter {
 		ArrayList<CSG> svgParts = new ArrayList<>();
 		ArrayList<CSG> blendParts = new ArrayList<>();
 		ArrayList<CSG> freecadParts = new ArrayList<>();
+		ArrayList<CSG> stepParts = new ArrayList<>();
 		ArrayList<CSG> parts3mf = new ArrayList<>();
 		String svgName = null;
 		String blendName = null;
@@ -153,6 +155,10 @@ public class CadFileExporter {
 						}
 						freecadParts.add(manufactured);
 					}
+					if (format.toLowerCase().contains("step")) {
+						ui.setCsg(manufactured, null);
+						stepParts.add(manufactured);
+					}
 					if (format.toLowerCase().contains("3mf")) {
 						// allCadStl.add(makeBlender(nameBase,manufactured));//
 						ui.setCsg(manufactured, null);
@@ -174,6 +180,9 @@ public class CadFileExporter {
 		if (freecadParts.size() > 0) {
 			allCadStl.add(makeFreecad(directoryWherePartsGo, freecadParts));// default to stl
 		}
+		if (stepParts.size() > 0) {
+			allCadStl.add(makeStep(directoryWherePartsGo, stepParts));// default to stl
+		}
 		if (parts3mf.size() > 0) {
 			try {
 				allCadStl.add(make3mf(directoryWherePartsGo, parts3mf));
@@ -190,6 +199,13 @@ public class CadFileExporter {
 		}
 		com.neuronrobotics.sdk.common.Log.debug("Finished Export!");
 		return allCadStl;
+	}
+
+	private File makeStep(String nameBase, List<CSG> current) throws IOException {
+		File step = new File(nameBase + ".step");
+		com.neuronrobotics.sdk.common.Log.debug("STEP Writing " + step.getAbsolutePath());
+		new STEPFile(current).write(step);
+		return step;
 	}
 
 	private File makeFreecad(String nameBase, List<CSG> current) throws IOException {

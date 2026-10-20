@@ -290,6 +290,19 @@ final class StepReader {
 	}
 
 	/**
+	 * True when every part of an instance is registered, so its attributes can be
+	 * resolved. A complex instance that carries an unregistered part cannot be
+	 * read at all, since the parts serialize in order and an unknown arity makes
+	 * the following parts' positions unknowable.
+	 */
+	static boolean supports(Instance instance) {
+		for (String part : instance.entities())
+			if (!OWN.containsKey(part))
+				return false;
+		return true;
+	}
+
+	/**
 	 * Like {@link #attribute}, but null when the instance simply does not have that
 	 * attribute, for asking whether an entity is of a kind rather than reading it.
 	 */
@@ -459,6 +472,31 @@ final class StepReader {
 		subtype("GEOMETRIC_REPRESENTATION_CONTEXT", "REPRESENTATION_CONTEXT", "dimensions");
 		subtype("GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT", null, "uncertainty");
 		subtype("GLOBAL_UNIT_ASSIGNED_CONTEXT", null, "units");
+
+		// --- product structure: what turns several shapes into an assembly ---
+		subtype("PRODUCT_DEFINITION_SHAPE", null, "name", "description", "definition");
+		subtype("PRODUCT_DEFINITION_RELATIONSHIP", null, "id", "name", "description", "relating_product_definition",
+				"related_product_definition");
+		subtype("NEXT_ASSEMBLY_USAGE_OCCURRENCE", "PRODUCT_DEFINITION_RELATIONSHIP", "reference_designator");
+		subtype("REPRESENTATION_RELATIONSHIP", null, "name", "description", "rep_1", "rep_2");
+		subtype("SHAPE_REPRESENTATION_RELATIONSHIP", "REPRESENTATION_RELATIONSHIP");
+		subtype("REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION", "REPRESENTATION_RELATIONSHIP",
+				"transformation_operator");
+		subtype("ITEM_DEFINED_TRANSFORMATION", null, "name", "description", "transform_item_1", "transform_item_2");
+		subtype("CONTEXT_DEPENDENT_SHAPE_REPRESENTATION", null, "representation_relation",
+				"represented_product_relation");
+
+		// --- presentation: colours attached to geometry ---
+		subtype("STYLED_ITEM", "REPRESENTATION_ITEM", "styles", "item");
+		subtype("PRESENTATION_STYLE_ASSIGNMENT", null, "styles");
+		subtype("SURFACE_STYLE_USAGE", null, "side", "style");
+		subtype("SURFACE_SIDE_STYLE", null, "name", "styles");
+		subtype("SURFACE_STYLE_FILL_AREA", null, "fill_area");
+		subtype("FILL_AREA_STYLE", null, "name", "fill_styles");
+		subtype("FILL_AREA_STYLE_COLOUR", null, "name", "fill_colour");
+		subtype("COLOUR_RGB", null, "name", "red", "green", "blue");
+		subtype("DRAUGHTING_PRE_DEFINED_COLOUR", "REPRESENTATION_ITEM");
+		subtype("CURVE_STYLE", null, "name", "curve_font", "curve_width", "curve_colour");
 	}
 
 	// --- tokenizer ---

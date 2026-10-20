@@ -1,6 +1,7 @@
 package com.neuronrobotics.bowlerstudio.threed;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -12,11 +13,11 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Vector3d;
+import javafx.scene.paint.Color;
 
 /**
- * A CSG's geometry: the mesh, the feature edges extracted from it, and the
- * geometry read back out of a STEP file.
+ * Writes CSG geometry as a STEP file, either a single part or an assembly of
+ * several, and reads the geometry back out of a STEP file.
  */
 public final class STEPFile {
 
@@ -24,40 +25,106 @@ public final class STEPFile {
 	private static final String PROTOCOL = "ap242_managed_model_based_3d_engineering_mim_lf";
 	private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-	private final CSG csg;
-	private final List<FeatureEdgeExtractor.Edge> edges;
+	/** Feature edge extraction defaults, for callers that do not choose their own. */
+	public static final double DEFAULT_ANGLE_DEGREES = 35.0;
+	public static final double DEFAULT_TOPOLOGY_TOLERANCE = 0.00001;
+	public static final double DEFAULT_STITCH_TOLERANCE = 0.002;
+
+	private static final String ASSEMBLY_NAME = "assembly";
+
+	/** One part to write: its geometry and the feature edges taken from it. */
+	private static final class Part {
+		private final CSG csg;
+		private final List<FeatureEdgeExtractor.Edge> edges;
+
+		private Part(CSG csg, List<FeatureEdgeExtractor.Edge> edges) {
+			this.csg = csg;
+			this.edges = edges;
+		}
+
+		private String name() {
+			String name = csg.getName();
+			return name == null || name.isBlank() ? "shape" : name.trim();
+		}
+	}
+
+	private final List<Part> parts;
 	private final List<StepImport.Shape> shapes;
 
-	public STEPFile(CSG csg, double angleDegrees, double topologyRepairTolerance, double stitchTolerance) {
-		if (csg == null)
-			throw new IllegalArgumentException("csg must not be null");
+	/** One part with the default feature edge settings. */
+	public STEPFile(CSG csg) {
+		this(Collections.singletonList(csg), DEFAULT_ANGLE_DEGREES, DEFAULT_TOPOLOGY_TOLERANCE,
+				DEFAULT_STITCH_TOLERANCE);
+	}
 
-		this.csg = csg;
-		this.edges = Collections.unmodifiableList(new ArrayList<>(
-				FeatureEdgeExtractor.extract(csg, angleDegrees, topologyRepairTolerance, stitchTolerance)));
+	/** An assembly of parts with the default feature edge settings. */
+	public STEPFile(List<CSG> csgs) {
+		this(csgs, DEFAULT_ANGLE_DEGREES, DEFAULT_TOPOLOGY_TOLERANCE, DEFAULT_STITCH_TOLERANCE);
+	}
+
+	public STEPFile(CSG csg, double angleDegrees, double topologyRepairTolerance, double stitchTolerance) {
+		this(Collections.singletonList(csg), angleDegrees, topologyRepairTolerance, stitchTolerance);
+	}
+
+	/**
+	 * The parts to write. Each keeps its own coordinates, so an assembly places
+	 * every part where it already is.
+	 */
+	public STEPFile(List<CSG> csgs, double angleDegrees, double topologyRepairTolerance, double stitchTolerance) {
+		if (csgs == null || csgs.isEmpty())
+			throw new IllegalArgumentException("csgs must not be empty");
+
+		List<Part> parts = new ArrayList<>();
+		for (CSG csg : csgs) {
+			if (csg == null)
+				throw new IllegalArgumentException("csgs must not contain null");
+			parts.add(new Part(csg,
+					FeatureEdgeExtractor.extract(csg, angleDegrees, topologyRepairTolerance, stitchTolerance)));
+		}
+		this.parts = Collections.unmodifiableList(parts);
 		this.shapes = List.of();
 	}
 
 	/** Reads geometry from a STEP file, see {@link StepImport#readShapes(InputStream)}. */
 	public STEPFile(InputStream step) throws IOException {
-		this.csg = null;
-		this.edges = List.of();
+		this.parts = List.of();
 		this.shapes = StepImport.readShapes(step);
 	}
 
-	/** The CSG this instance was built from, or null after reading a STEP file. */
-	public CSG getCsg() {
-		return csg;
+	/**
+	 * Reads every file into its own STEPFile, one per file, in the order given.
+	 * Use this to import a set of STEP files at once.
+	 */
+	public static List<STEPFile> read(List<File> files) throws IOException {
+		List<STEPFile> read = new ArrayList<>();
+		for (File file : files)
+			try (InputStream stream = new FileInputStream(file)) {
+				read.add(new STEPFile(stream));
+			}
+		return read;
 	}
 
-	/** Feature edges of {@link #getCsg()}, in extraction order. */
+	/** The first part's CSG, or null after reading a STEP file. */
+	public CSG getCsg() {
+		return parts.isEmpty() ? null : parts.get(0).csg;
+	}
+
+	/** Feature edges of {@link #getCsg()}, empty after reading a STEP file. */
 	public List<FeatureEdgeExtractor.Edge> getEdges() {
-		return edges;
+		return parts.isEmpty() ? List.of() : parts.get(0).edges;
+	}
+
+	/** The CSGs to write, in order; empty after reading a STEP file. */
+	public List<CSG> getParts() {
+		List<CSG> csgs = new ArrayList<>();
+		for (Part part : parts)
+			csgs.add(part.csg);
+		return Collections.unmodifiableList(csgs);
 	}
 
 	/**
 	 * Geometry read from a STEP file: one shape per representation, each with its
-	 * mesh and any edges. Empty when this instance was built from a CSG.
+	 * mesh and any edges. Empty when this instance was built from CSGs.
 	 */
 	public List<StepImport.Shape> getShapes() {
 		return shapes;
@@ -73,178 +140,215 @@ public final class STEPFile {
 	}
 
 	/**
-	 * The mesh as a single {@code TRIANGULATED_SURFACE_SET} plus the feature edges
-	 * as a {@code GEOMETRIC_CURVE_SET} of straight curves, in millimetres.
+	 * Every part as BRep topology in millimetres: its coplanar triangles become
+	 * planar faces bounded by connected wires, so a reader shows a solid with
+	 * selectable faces. Several parts become a STEP assembly with one product per
+	 * part.
 	 */
 	public String toStep() {
-		return render(name() + ".step", name());
+		if (parts.isEmpty())
+			throw new IllegalStateException("No geometry to export: this instance was read from a STEP file");
+
+		StepEmitter emitter = new StepEmitter();
+		String fileName;
+		if (parts.size() == 1) {
+			fileName = parts.get(0).name() + ".step";
+			part(emitter, parts.get(0));
+		} else {
+			fileName = ASSEMBLY_NAME + ".step";
+			assembly(emitter, parts);
+		}
+		return file(fileName, emitter.text());
 	}
 
 	public void write(File file) throws IOException {
 		Files.write(file.toPath(), toStep().getBytes(StandardCharsets.UTF_8));
 	}
 
-	private String render(String fileName, String productName) {
-		Emitter emitter = new Emitter();
+	/** The file for one part, with no assembly structure around it. */
+	private static void part(StepEmitter emitter, Part part) {
+		Contexts contexts = contexts(emitter);
+		Product product = product(emitter, contexts, part.name());
 
-		long applicationContext = emitter.add("APPLICATION_CONTEXT('mechanical design')");
-		emitter.add("APPLICATION_PROTOCOL_DEFINITION('international standard','" + PROTOCOL + "',2020,#"
-				+ applicationContext + ")");
-		long productContext = emitter.add("PRODUCT_CONTEXT('',#" + applicationContext + ",'mechanical')");
-		long product = emitter
-				.add("PRODUCT(" + quote(productName) + "," + quote(productName) + ",'',(#" + productContext + "))");
-		long formation = emitter.add("PRODUCT_DEFINITION_FORMATION('','',#" + product + ")");
-		long definitionContext = emitter
-				.add("PRODUCT_DEFINITION_CONTEXT('part definition',#" + applicationContext + ",'design')");
-		long definition = emitter.add("PRODUCT_DEFINITION('design','',#" + formation + ",#" + definitionContext + ")");
-		long definitionShape = emitter.add("PRODUCT_DEFINITION_SHAPE('','',#" + definition + ")");
+		List<Long> items = StepBRepWrite.items(emitter, part.csg, part.name());
+		// a representation must carry a shape, so a part with no mesh cannot be
+		// written on its own
+		if (items.size() < 2)
+			throw new IllegalStateException("No geometry to export for part " + part.name());
+
+		long representation = emitter.add("ADVANCED_BREP_SHAPE_REPRESENTATION(" + quote(part.name()) + ","
+				+ references(items) + ",#" + contexts.representation + ")");
+		emitter.add("SHAPE_DEFINITION_REPRESENTATION(#" + product.definitionShape + ",#" + representation + ")");
+		colour(emitter, part.csg, contexts.representation, items);
+	}
+
+	/**
+	 * The file for several parts: an assembly product whose representation places
+	 * one occurrence of every part product, following the AP242 assembly pattern
+	 * of {@code NEXT_ASSEMBLY_USAGE_OCCURRENCE} plus a transformed relationship.
+	 */
+	private static void assembly(StepEmitter emitter, List<Part> parts) {
+		Contexts contexts = contexts(emitter);
+		Product assembly = product(emitter, contexts, ASSEMBLY_NAME);
+
+		long[] definitions = new long[parts.size()];
+		long[] partPlacements = new long[parts.size()];
+		long[] representations = new long[parts.size()];
+		for (int i = 0; i < parts.size(); i++) {
+			Part part = parts.get(i);
+			Product product = product(emitter, contexts, part.name());
+			definitions[i] = product.definition;
+
+			// the part's own representation, at its own coordinates, reaches the
+			// solid through the item list, so only the geometry is coloured
+			List<Long> items = StepBRepWrite.items(emitter, part.csg, part.name());
+			List<Long> geometry = items.size() > 1 ? List.of(items.get(1)) : items;
+			partPlacements[i] = placement(emitter);
+
+			List<Long> representationItems = new ArrayList<>();
+			representationItems.add(partPlacements[i]);
+			representationItems.addAll(geometry);
+
+			representations[i] = emitter.add("ADVANCED_BREP_SHAPE_REPRESENTATION(" + quote(part.name()) + ","
+					+ references(representationItems) + ",#" + contexts.representation + ")");
+			emitter.add(
+					"SHAPE_DEFINITION_REPRESENTATION(#" + product.definitionShape + ",#" + representations[i] + ")");
+			colour(emitter, part.csg, contexts.representation, geometry);
+		}
+
+		List<Long> assemblyItems = new ArrayList<>();
+		long[] assemblyPlacements = new long[parts.size()];
+		for (int i = 0; i < parts.size(); i++) {
+			assemblyPlacements[i] = placement(emitter);
+			assemblyItems.add(assemblyPlacements[i]);
+		}
+
+		long assemblyRepresentation = emitter.add("SHAPE_REPRESENTATION(" + quote(ASSEMBLY_NAME) + ","
+				+ references(assemblyItems) + ",#" + contexts.representation + ")");
+		emitter.add(
+				"SHAPE_DEFINITION_REPRESENTATION(#" + assembly.definitionShape + ",#" + assemblyRepresentation + ")");
+
+		for (int i = 0; i < parts.size(); i++) {
+			String name = parts.get(i).name();
+			long occurrence = emitter.add("NEXT_ASSEMBLY_USAGE_OCCURRENCE(" + quote(Integer.toString(i)) + ","
+					+ quote(name) + "," + quote(name) + ",#" + assembly.definition + ",#" + definitions[i] + ","
+					+ quote(name) + ")");
+			long occurrenceShape = emitter.add("PRODUCT_DEFINITION_SHAPE('','',#" + occurrence + ")");
+			long transform = emitter.add(
+					"ITEM_DEFINED_TRANSFORMATION('','',#" + assemblyPlacements[i] + ",#" + partPlacements[i] + ")");
+			long relationship = emitter
+					.add("(REPRESENTATION_RELATIONSHIP(" + quote(name) + "," + quote(name) + ",#" + representations[i]
+							+ ",#" + assemblyRepresentation + ")REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION(#"
+							+ transform + ")SHAPE_REPRESENTATION_RELATIONSHIP())");
+			emitter.add("CONTEXT_DEPENDENT_SHAPE_REPRESENTATION(#" + relationship + ",#" + occurrenceShape + ")");
+		}
+	}
+
+	/** The representation-wide entities every product in the file refers to. */
+	private static final class Contexts {
+		private final long product;
+		private final long definition;
+		private final long representation;
+
+		private Contexts(long product, long definition, long representation) {
+			this.product = product;
+			this.definition = definition;
+			this.representation = representation;
+		}
+	}
+
+	private static Contexts contexts(StepEmitter emitter) {
+		long application = emitter.add("APPLICATION_CONTEXT('mechanical design')");
+		emitter.add("APPLICATION_PROTOCOL_DEFINITION('international standard','" + PROTOCOL + "',2020,#" + application
+				+ ")");
+
+		long product = emitter.add("PRODUCT_CONTEXT('',#" + application + ",'mechanical')");
+		long definition = emitter.add("PRODUCT_DEFINITION_CONTEXT('part definition',#" + application + ",'design')");
 
 		long lengthUnit = emitter.add("(LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.))");
 		long uncertainty = emitter.add("UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-6),#" + lengthUnit
 				+ ",'distance_accuracy_value','')");
-		long context = emitter
+		long representation = emitter
 				.add("(GEOMETRIC_REPRESENTATION_CONTEXT(3)GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#" + uncertainty
 						+ "))GLOBAL_UNIT_ASSIGNED_CONTEXT((#" + lengthUnit + "))REPRESENTATION_CONTEXT('3D',''))");
 
-		int vertexCount = (int) csg.getVertCount();
-		List<int[]> triangles = triangleIndices(csg.getTriangles(), vertexCount);
-		List<FeatureEdgeExtractor.Edge> segments = segments();
+		return new Contexts(product, definition, representation);
+	}
 
-		List<Long> items = new ArrayList<>();
-		if (!triangles.isEmpty())
-			items.add(mesh(emitter, triangles, vertexCount));
-		if (!segments.isEmpty())
-			items.add(curveSet(emitter, segments));
+	/** A product definition and the shape definition that gives it geometry. */
+	private static final class Product {
+		private final long definition;
+		private final long definitionShape;
 
-		if (items.isEmpty())
-			throw new IllegalStateException("No geometry to export");
+		private Product(long definition, long definitionShape) {
+			this.definition = definition;
+			this.definitionShape = definitionShape;
+		}
+	}
 
+	private static Product product(StepEmitter emitter, Contexts contexts, String name) {
+		long product = emitter.add("PRODUCT(" + quote(name) + "," + quote(name) + ",'',(#" + contexts.product + "))");
+		long formation = emitter.add("PRODUCT_DEFINITION_FORMATION('','',#" + product + ")");
+		long definition = emitter
+				.add("PRODUCT_DEFINITION('design','',#" + formation + ",#" + contexts.definition + ")");
+		long definitionShape = emitter.add("PRODUCT_DEFINITION_SHAPE('','',#" + definition + ")");
+		return new Product(definition, definitionShape);
+	}
+
+
+	private static long placement(StepEmitter emitter) {
+		long origin = emitter.add("CARTESIAN_POINT('',(0.0,0.0,0.0))");
+		long axis = emitter.add("DIRECTION('',(0.0,0.0,1.0))");
+		long direction = emitter.add("DIRECTION('',(1.0,0.0,0.0))");
+		return emitter.add("AXIS2_PLACEMENT_3D('',#" + origin + ",#" + axis + ",#" + direction + ")");
+	}
+
+	/**
+	 * Attaches the part's colour to its geometry, as a
+	 * {@code MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION} holding a
+	 * styled item with a surface and curve style, which is how readers expect a
+	 * colour to reach solid and wireframe geometry.
+	 */
+	private static void colour(StepEmitter emitter, CSG csg, long context, List<Long> geometry) {
+		Color color = csg.getColor();
+		if (color == null || color.getOpacity() == 0)
+			return;
+
+		int red = (int) Math.round(color.getRed() * 255);
+		int green = (int) Math.round(color.getGreen() * 255);
+		int blue = (int) Math.round(color.getBlue() * 255);
+
+		long rgb = emitter.add("COLOUR_RGB(''," + channel(red) + "," + channel(green) + "," + channel(blue) + ")");
+		long fillColour = emitter.add("FILL_AREA_STYLE_COLOUR('',#" + rgb + ")");
+		long fillStyle = emitter.add("FILL_AREA_STYLE('',(#" + fillColour + "))");
+		long fillArea = emitter.add("SURFACE_STYLE_FILL_AREA(#" + fillStyle + ")");
+		long sideStyle = emitter.add("SURFACE_SIDE_STYLE('',(#" + fillArea + "))");
+		long surfaceUsage = emitter.add("SURFACE_STYLE_USAGE(.BOTH.,#" + sideStyle + ")");
+		long curveFont = emitter.add("DRAUGHTING_PRE_DEFINED_CURVE_FONT('continuous')");
+		long curveStyle = emitter.add("CURVE_STYLE('',#" + curveFont + ",POSITIVE_LENGTH_MEASURE(0.1),#" + rgb + ")");
+		long assignment = emitter.add("PRESENTATION_STYLE_ASSIGNMENT((#" + surfaceUsage + ",#" + curveStyle + "))");
+
+		List<Long> styled = new ArrayList<>();
+		for (Long item : geometry)
+			styled.add(emitter.add("STYLED_ITEM('colour',(#" + assignment + "),#" + item + ")"));
+
+		emitter.add("MECHANICAL_DESIGN_GEOMETRIC_PRESENTATION_REPRESENTATION(''," + references(styled) + ",#" + context
+				+ ")");
+	}
+
+	/** A colour channel as the real number a STEP file writes, 0 to 1. */
+	private static String channel(int value) {
+		return Double.toString(value / 255.0);
+	}
+
+	private static String references(List<Long> items) {
 		StringBuilder references = new StringBuilder("(");
 		for (int i = 0; i < items.size(); i++) {
 			if (i > 0)
 				references.append(',');
 			references.append('#').append(items.get(i));
 		}
-		references.append(')');
-
-		long representation = emitter
-				.add("SHAPE_REPRESENTATION(" + quote(productName) + "," + references + ",#" + context + ")");
-		emitter.add("SHAPE_DEFINITION_REPRESENTATION(#" + definitionShape + ",#" + representation + ")");
-
-		StringBuilder file = new StringBuilder();
-		file.append("ISO-10303-21;\n");
-		file.append("HEADER;\n");
-		file.append("FILE_DESCRIPTION(('CaDoodle CSG'),'2;1');\n");
-		file.append("FILE_NAME(").append(quote(fileName)).append(',')
-				.append(quote(LocalDateTime.now().format(TIMESTAMP)))
-				.append(",('CaDoodle'),('CaDoodle'),'STEPFile','CaDoodle','');\n");
-		file.append("FILE_SCHEMA(('").append(SCHEMA).append("'));\n");
-		file.append("ENDSEC;\n");
-		file.append("DATA;\n");
-		file.append(emitter.out);
-		file.append("ENDSEC;\n");
-		file.append("END-ISO-10303-21;\n");
-		return file.toString();
-	}
-
-	/** 1-based triangle indices, degenerate triangles dropped, or empty if unusable. */
-	private static List<int[]> triangleIndices(long[] triangles, int vertexCount) {
-		List<int[]> indices = new ArrayList<>();
-
-		if (triangles == null || vertexCount == 0)
-			return indices;
-
-		for (int t = 0; t + 2 < triangles.length; t += 3) {
-			int a = (int) triangles[t];
-			int b = (int) triangles[t + 1];
-			int c = (int) triangles[t + 2];
-
-			if (a == b || b == c || c == a)
-				continue;
-			if (a < 0 || b < 0 || c < 0 || a >= vertexCount || b >= vertexCount || c >= vertexCount)
-				throw new IllegalArgumentException(
-						"Triangle " + (t / 3) + " references a vertex outside 0.." + (vertexCount - 1));
-
-			indices.add(new int[]{a + 1, b + 1, c + 1});
-		}
-
-		return indices;
-	}
-
-	/** Edges of non-zero length; a STEP DIRECTION cannot be the zero vector. */
-	private List<FeatureEdgeExtractor.Edge> segments() {
-		List<FeatureEdgeExtractor.Edge> segments = new ArrayList<>();
-		for (FeatureEdgeExtractor.Edge edge : edges) {
-			double dx = edge.b.x - edge.a.x;
-			double dy = edge.b.y - edge.a.y;
-			double dz = edge.b.z - edge.a.z;
-			if (dx * dx + dy * dy + dz * dz > 0)
-				segments.add(edge);
-		}
-		return segments;
-	}
-
-	private long mesh(Emitter emitter, List<int[]> triangles, int vertexCount) {
-		StringBuilder points = new StringBuilder("(");
-		for (int vertex = 0; vertex < vertexCount; vertex++) {
-			if (vertex > 0)
-				points.append(',');
-			points.append(point(csg.getVertex_X(vertex), csg.getVertex_Y(vertex), csg.getVertex_Z(vertex)));
-		}
-		points.append(')');
-
-		StringBuilder indices = new StringBuilder("(");
-		for (int t = 0; t < triangles.size(); t++) {
-			int[] triangle = triangles.get(t);
-			if (t > 0)
-				indices.append(',');
-			indices.append('(').append(triangle[0]).append(',').append(triangle[1]).append(',').append(triangle[2])
-					.append(')');
-		}
-		indices.append(')');
-
-		long coordinates = emitter.add("COORDINATES_LIST(''," + vertexCount + "," + points + ")");
-
-		return emitter
-				.add("TRIANGULATED_SURFACE_SET('mesh',#" + coordinates + "," + vertexCount + ",(),()," + indices + ")");
-	}
-
-	private static long curveSet(Emitter emitter, List<FeatureEdgeExtractor.Edge> segments) {
-		StringBuilder references = new StringBuilder("(");
-		for (int i = 0; i < segments.size(); i++) {
-			FeatureEdgeExtractor.Edge edge = segments.get(i);
-			if (i > 0)
-				references.append(',');
-			references.append('#').append(curve(emitter, edge.a, edge.b));
-		}
-		references.append(')');
-
-		return emitter.add("GEOMETRIC_CURVE_SET('edges'," + references + ")");
-	}
-
-	/** Straight segment from a to b as a LINE trimmed by its two end points. */
-	private static long curve(Emitter emitter, Vector3d a, Vector3d b) {
-		double dx = b.x - a.x;
-		double dy = b.y - a.y;
-		double dz = b.z - a.z;
-		double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-		long origin = emitter.add("CARTESIAN_POINT(''," + point(a) + ")");
-		long direction = emitter.add("DIRECTION(''," + point(dx / length, dy / length, dz / length) + ")");
-		long vector = emitter.add("VECTOR('',#" + direction + "," + real(length) + ")");
-		long line = emitter.add("LINE('',#" + origin + ",#" + vector + ")");
-		long start = emitter.add("CARTESIAN_POINT(''," + point(a) + ")");
-		long end = emitter.add("CARTESIAN_POINT(''," + point(b) + ")");
-
-		return emitter.add("TRIMMED_CURVE('',#" + line + ",(#" + start + "),(#" + end + "),.T.,.CARTESIAN.)");
-	}
-
-	private static String point(Vector3d point) {
-		return point(point.x, point.y, point.z);
-	}
-
-	private static String point(double x, double y, double z) {
-		return "(" + real(x) + "," + real(y) + "," + real(z) + ")";
+		return references.append(')').toString();
 	}
 
 	private static String real(double value) {
@@ -268,19 +372,21 @@ public final class STEPFile {
 		return escaped.append('\'').toString();
 	}
 
-	private String name() {
-		String name = csg.getName();
-		return name == null || name.isBlank() ? "shape" : name.trim();
+	private static String file(String fileName, String data) {
+		StringBuilder file = new StringBuilder();
+		file.append("ISO-10303-21;\n");
+		file.append("HEADER;\n");
+		file.append("FILE_DESCRIPTION(('CaDoodle CSG'),'2;1');\n");
+		file.append("FILE_NAME(").append(quote(fileName)).append(',')
+				.append(quote(LocalDateTime.now().format(TIMESTAMP)))
+				.append(",('CaDoodle'),('CaDoodle'),'STEPFile','CaDoodle','');\n");
+		file.append("FILE_SCHEMA(('").append(SCHEMA).append("'));\n");
+		file.append("ENDSEC;\n");
+		file.append("DATA;\n");
+		file.append(data);
+		file.append("ENDSEC;\n");
+		file.append("END-ISO-10303-21;\n");
+		return file.toString();
 	}
 
-	private static final class Emitter {
-		private final StringBuilder out = new StringBuilder();
-		private long nextId;
-
-		private long add(String entity) {
-			long id = ++nextId;
-			out.append('#').append(id).append('=').append(entity).append(';').append('\n');
-			return id;
-		}
-	}
 }
