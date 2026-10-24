@@ -101,30 +101,47 @@ public final class StepBRepWrite {
 			return 0;
 		TickToc.tic("emit faces " + name);
 		List<Long> faces = new ArrayList<>();
+		/** The loops actually written, so the shell can be checked as emitted. */
+		List<List<List<Integer>>> written = new ArrayList<>();
 		int emitted = 0;
 		int fellBack = 0;
-		for (List<Integer> triangles : mesh.faces)
-			if (mesh.representsExactly(triangles)) {
-				faces.add(mesh.face(emitter, triangles, mesh.loops(triangles), name));
-				emitted++;
-			} else {
-				// the face's outline cannot be triangulated back into the surface it
-				// holds: writing it would leave a hole there. A CAD package shows the
-				// same shape either way, so the exact per-triangle faces are written
-				// instead, which cover the surface by construction.
-				for (int index : triangles)
-					faces.add(mesh.triangleFace(emitter, index, name));
-				fellBack++;
-			}
+		for (List<Integer> triangles : mesh.faces) {
+			// a coplanar group can hold several disconnected regions, and a STEP face
+			// can only bound one: its first loop is the outline and the rest are holes
+			// cut out of it. So each region is written as a face of its own.
+			List<List<Integer>> regions = mesh.regions(triangles);
+			for (List<Integer> region : regions)
+				if (mesh.representsExactly(region)) {
+					List<List<Integer>> loops = mesh.loops(region);
+					written.add(loops);
+					faces.add(mesh.face(emitter, region, loops, name));
+					emitted++;
+				} else {
+					// this region's outline cannot be triangulated back into the surface
+					// it holds, so writing it would leave a hole there. A CAD package
+					// shows the same shape either way, so the exact per-triangle faces
+					// are written instead, which cover it by construction. Only this
+					// region falls back, so the rest of the group stays stitched.
+					for (int index : region) {
+						written.add(List.of(mesh.triangleLoop(index)));
+						faces.add(mesh.triangleFace(emitter, index, name));
+					}
+					fellBack++;
+				}
+		}
 		if (fellBack > 0)
-			Log.debug("StepBRepWrite.solid: " + fellBack + " of " + mesh.faces.size()
-					+ " face(s) could not be bounded exactly, written per triangle");
+			Log.debug("StepBRepWrite.solid: " + fellBack + " region(s) of " + mesh.faces.size()
+					+ " coplanar group(s) could not be bounded exactly, written per triangle");
 		Log.debug("StepBRepWrite.solid: emitted " + emitted + " faces for " + name);
 		if (faces.isEmpty())
 			return 0;
 
-		boolean closed = mesh.isEdgeManifold();
-		Log.debug("StepBRepWrite.solid: " + name + " is " + (closed ? "closed" : "open"));
+		// the shell is a solid only when the topology actually written is watertight,
+		// so ask the loops that were emitted rather than the mesh they came from: the
+		// two differ when a region fell back to per-triangle faces
+		boolean closed = isWatertight(written);
+		Log.debug("StepBRepWrite.solid: " + name + " is " + (closed ? "closed" : "open") + " ("
+				+ unpairedEdges(written) + " unpaired edge(s) in the written loops)");
 		String shellKind = closed ? "CLOSED_SHELL" : "OPEN_SHELL";
 		long shell = emitter.add(shellKind + "(''," + references(faces) + ")");
 		if (closed)
@@ -136,11 +153,45 @@ public final class StepBRepWrite {
 	}
 
 	/**
+	 * True when the loops written close a surface: every directed edge appears once
+	 * and the same edge reversed appears once, so each is shared by exactly two
+	 * faces.
+	 */
+	private static boolean isWatertight(List<List<List<Integer>>> faces) {
+		return unpairedEdges(faces) == 0 && !faces.isEmpty();
+	}
+
+	/** How many directed edges of the written loops lack their opposite. */
+	private static int unpairedEdges(List<List<List<Integer>>> faces) {
+		Map<Long, Integer> directions = new HashMap<>();
+		for (List<List<Integer>> loops : faces)
+			for (List<Integer> loop : loops)
+				for (int i = 0; i < loop.size(); i++)
+					directions.merge(directed(loop.get(i), loop.get((i + 1) % loop.size())), 1, Integer::sum);
+
+		if (directions.isEmpty())
+			return 1;
+		int unpaired = 0;
+		for (Map.Entry<Long, Integer> entry : directions.entrySet()) {
+			if (entry.getValue() != 1) {
+				unpaired++;
+				continue;
+			}
+			int from = (int) (entry.getKey() >> 32);
+			int to = (int) (entry.getKey() & 0xffffffffL);
+			if (!Integer.valueOf(1).equals(directions.get(directed(to, from))))
+				unpaired++;
+		}
+		return unpaired;
+	}
+
+	/**
 	 * The planar faces this writer derives from the mesh: their plane and the
-	 * boundary loops they are written with, largest loop first. A group whose loops
-	 * cannot reproduce its surface is written as one face per triangle, and this
-	 * reports it that way too, so the list matches the file. Use this to check an
-	 * export against what a reader reconstructs from the file.
+	 * boundary loops they are written with, largest loop first. A coplanar group is
+	 * split into its connected regions and each becomes a face of its own, mirroring
+	 * what the file holds so this can be checked against a reader. A region whose
+	 * loops cannot reproduce its surface is written as one face per triangle, and
+	 * this reports it that way too.
 	 */
 	public static List<StepFace> faces(CSG csg) {
 		double[] vertices = csg.getVertices();
@@ -150,12 +201,15 @@ public final class StepBRepWrite {
 			return faces;
 
 		Mesh mesh = new Mesh(vertices, sourceTriangles);
-		for (List<Integer> triangles : mesh.faces)
-			if (mesh.representsExactly(triangles))
-				faces.add(mesh.describe(triangles));
-			else
-				for (int index : triangles)
-					faces.add(mesh.describeTriangle(index));
+		for (List<Integer> triangles : mesh.faces) {
+			List<List<Integer>> regions = mesh.regions(triangles);
+			for (List<Integer> region : regions)
+				if (mesh.representsExactly(region))
+					faces.add(mesh.describe(region));
+				else
+					for (int index : region)
+						faces.add(mesh.describeTriangle(index));
+		}
 		return faces;
 	}
 
@@ -605,9 +659,9 @@ public final class StepBRepWrite {
 
 		// --- face and loop emission ---
 
-		private long face(StepEmitter emitter, List<Integer> face, List<List<Integer>> loops, String name) {
-			int first = triangles.get(face.get(0))[0];
-			Vector3d normal = normal(triangles.get(face.get(0)));
+		private long face(StepEmitter emitter, List<Integer> region, List<List<Integer>> loops, String name) {
+			int first = triangles.get(region.get(0))[0];
+			Vector3d normal = normal(triangles.get(region.get(0)));
 			// a face of no area still needs a plane, or it cannot be written; any
 			// direction will do, since the loop encloses nothing
 			if (normal == null)
@@ -628,65 +682,39 @@ public final class StepBRepWrite {
 		}
 
 		/**
-		 * True when writing a face's loops reproduces the surface its triangles
-		 * describe, so a reader triangulating those loops gets the same area back.
+		 * True when the loops written for a region enclose the same area the region's
+		 * triangles cover.
 		 *
 		 * <p>
-		 * A face's loops are the outline of a planar region, and a reader fills that
-		 * region by ear clipping. That is exact only while the region is the region
-		 * the triangles occupy. A face can pinch, or its outline can cross itself
-		 * where two parts of the face meet only at a corner, and then the filled
-		 * region differs from the mesh by the area between the two: a hole. Rather
-		 * than write a face that quietly loses that area, this compares the two and
-		 * lets the caller fall back.
+		 * Equal area is the right test, not equal triangles: a reader re-triangulates a
+		 * face from its loops, and the triangles it picks are generally not the ones
+		 * the mesh held. A square cut along one diagonal reads back cut along the
+		 * other, which is the same surface. What must never differ is how much area the
+		 * face covers: the outer loop less its holes has to match the triangles
+		 * exactly, or the file describes a surface the mesh does not have.
 		 */
-		private boolean representsExactly(List<Integer> face) {
-			Vector3d normal = normal(triangles.get(face.get(0)));
+		private boolean representsExactly(List<Integer> region) {
+			Vector3d normal = normal(triangles.get(region.get(0)));
 			if (normal == null)
 				return false;
 
-			double trianglesArea = 0;
-			for (int index : face)
-				trianglesArea += Math.abs(area(asLoop(triangles.get(index)), normal)) / 2;
-
-			List<List<Integer>> loops = loops(face, normal);
+			List<List<Integer>> loops = loops(region, normal);
 			if (loops.isEmpty())
 				return false;
 
-			// fill the loops exactly as a reader does: the outer one less its holes
-			List<double[]> positions = new ArrayList<>();
-			int max = 0;
-			for (List<Integer> loop : loops)
-				for (int vertex : loop)
-					max = Math.max(max, vertex);
-			while (positions.size() <= max)
-				positions.add(null);
-			for (List<Integer> loop : loops)
-				for (int vertex : loop)
-					positions.set(vertex, point(vertex));
+			double trianglesArea = 0;
+			for (int index : region)
+				trianglesArea += Math.abs(area(asLoop(triangles.get(index)), normal)) / 2;
 
-			List<List<Integer>> holes = new ArrayList<>(loops.subList(1, loops.size()));
-			double filledArea = 0;
-			for (int[] piece : Triangulator.triangulate(loops.get(0), holes, positions))
-				filledArea += triangleArea(piece, positions);
+			// the outer loop, less every hole inside it
+			double loopsArea = Math.abs(area(loops.get(0), normal)) / 2;
+			for (int i = 1; i < loops.size(); i++)
+				loopsArea -= Math.abs(area(loops.get(i), normal)) / 2;
 
-			// any real difference between what the loops enclose and what the triangles
-			// cover is a hole the file would not describe
-			double tolerance = Math.max(1e-9, trianglesArea * 1e-6);
-			return Math.abs(trianglesArea - filledArea) <= tolerance;
-		}
-
-		/** The area of one triangulated piece, whose entries index the point list. */
-		private static double triangleArea(int[] piece, List<double[]> positions) {
-			double[] a = positions.get(piece[0]);
-			double[] b = positions.get(piece[1]);
-			double[] c = positions.get(piece[2]);
-			if (a == null || b == null || c == null)
-				return 0;
-			double ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
-			double vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
-			double nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-			return Math.sqrt(nx * nx + ny * ny + nz * nz) / 2;
+			// any real difference is a hole the file would not describe, or surface it
+			// would add
+			double tolerance = Math.max(1e-12, trianglesArea * 1e-9);
+			return Math.abs(trianglesArea - loopsArea) <= tolerance;
 		}
 
 		private static List<Integer> asLoop(int[] triangle) {
@@ -695,6 +723,11 @@ public final class StepBRepWrite {
 			loop.add(triangle[1]);
 			loop.add(triangle[2]);
 			return loop;
+		}
+
+		/** A single triangle as the one loop that bounds it exactly. */
+		private List<Integer> triangleLoop(int index) {
+			return asLoop(triangles.get(index));
 		}
 
 		/** One ADVANCED_FACE over a single triangle, which covers it exactly. */
@@ -720,7 +753,9 @@ public final class StepBRepWrite {
 			if (normal == null)
 				normal = new Vector3d(0, 0, 1);
 			List<List<double[]>> points = new ArrayList<>();
-			for (List<Integer> loop : loops(face)) {
+			// the same normal the face is written with, so the loops described here are
+			// exactly the loops in the file
+			for (List<Integer> loop : loops(face, normal)) {
 				List<double[]> loopPoints = new ArrayList<>();
 				for (int vertex : loop)
 					loopPoints.add(point(vertex));
@@ -803,7 +838,66 @@ public final class StepBRepWrite {
 			}
 
 			loops.sort((a, b) -> Double.compare(Math.abs(area(b, normal)), Math.abs(area(a, normal))));
+
+			// A face's first loop is its outer bound and every other loop is a hole cut
+			// out of it. That is only true when all the cycles lie inside one another.
+			// A coplanar group can also hold two separate regions, which meet at a
+			// vertex or not at all; writing the second as a hole would subtract it, and
+			// that is a missing face. So the cycles are sorted into regions first, and
+			// each region becomes a face of its own.
 			return loops;
+		}
+
+		/**
+		 * A coplanar group split into its connected regions: sets of triangles that
+		 * share edges with one another.
+		 *
+		 * <p>
+		 * A STEP face has exactly one outer bound, and every other bound it names is a
+		 * hole cut out of that outline. A group of coplanar triangles can cover two
+		 * areas that touch only at a vertex, or not at all. Writing such a group as one
+		 * face makes the second area a hole, which subtracts it: that is the missing
+		 * face. Splitting the group at the edges it does not share keeps each region's
+		 * outline whole.
+		 */
+		private List<List<Integer>> regions(List<Integer> face) {
+			Map<Integer, Integer> parent = new LinkedHashMap<>();
+			for (int index : face)
+				parent.put(index, index);
+
+			// union any two of the group's triangles that share an edge
+			Map<Long, Integer> owner = new HashMap<>();
+			for (int index : face)
+				for (int i = 0; i < 3; i++) {
+					int[] triangle = triangles.get(index);
+					long key = key(triangle[i], triangle[(i + 1) % 3]);
+					Integer other = owner.putIfAbsent(key, index);
+					if (other != null && other != index)
+						union(parent, other, index);
+				}
+
+			Map<Integer, List<Integer>> byRoot = new LinkedHashMap<>();
+			for (int index : face)
+				byRoot.computeIfAbsent(find(parent, index), unused -> new ArrayList<>()).add(index);
+			return new ArrayList<>(byRoot.values());
+		}
+
+		private static int find(Map<Integer, Integer> parent, int index) {
+			int root = index;
+			while (parent.get(root) != root)
+				root = parent.get(root);
+			// flatten, so repeated queries stay cheap
+			int at = index;
+			while (parent.get(at) != root) {
+				int next = parent.get(at);
+				parent.put(at, root);
+				at = next;
+			}
+			return root;
+		}
+
+		private static void union(Map<Integer, Integer> parent, int a, int b) {
+			parent.put(find(parent, a), find(parent, b));
 		}
 
 		/** How many different vertices a loop visits. */
@@ -811,6 +905,10 @@ public final class StepBRepWrite {
 			return new LinkedHashSet<>(loop).size();
 		}
 
+		/** The boundary loops of a region, from its first triangle's normal. */
+		private List<List<Integer>> loops(List<Integer> region) {
+			return loops(region, normal(triangles.get(region.get(0))));
+		}
 		/**
 		 * The unvisited boundary edge leaving a vertex that turns tightest from the
 		 * one just walked. Turning tightest keeps the outline on the same side of
@@ -952,11 +1050,6 @@ public final class StepBRepWrite {
 		}
 
 		// --- mesh facts ---
-
-		/** The boundary loops of a face, from the face's first triangle's normal. */
-		private List<List<Integer>> loops(List<Integer> face) {
-			return loops(face, normal(triangles.get(face.get(0))));
-		}
 
 		/**
 		 * True when the repaired mesh is edge-manifold and closed: every undirected

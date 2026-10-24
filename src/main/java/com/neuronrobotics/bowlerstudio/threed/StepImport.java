@@ -545,6 +545,10 @@ public final class StepImport {
 				}
 				mesh.setVertices(moved);
 				mesh.setTriangles(mesh.getTriangles().clone());
+				// moving the vertices invalidates the measured volume, and the volume is
+				// what proves the shape is still a closed solid, so measure it again
+				if (CSG.getDefaultOptionType() == OptType.Manifold3d)
+					MeshBuilder.measure(mesh);
 			} else
 				// a mirror turns the surface inside out, which only the general path
 				// knows how to express
@@ -975,16 +979,34 @@ public final class StepImport {
 			CSG csg = new CSG(flat, flatTriangles, color == null ? IMPORT_COLOR : color);
 			if (name != null && !name.isBlank())
 				csg.setName(name);
-			// A tessellation is the source mesh itself. Running it through the kernel
-			// to measure it would renumber its vertices, so its own indices are kept.
-			if (!exact && CSG.getDefaultOptionType() == OptType.Manifold3d) {
-				try {
-					csg = CSG.getManifold().calculateAreaAndSurfaceArea(csg);
-				} catch (Throwable e) {
-					throw new RuntimeException(e);
-				}
-			}
+			// Every mesh a loader hands back is measured, because measuring it is how the
+			// kernel checks it is manifold: a mesh that is not closed has no volume and
+			// the kernel says so. The measurement must not renumber the triangles, or a
+			// tessellated round trip would stop reproducing the source, so the result is
+			// taken for its numbers only and the caller's own vertex and index order is
+			// kept.
+			if (CSG.getDefaultOptionType() == OptType.Manifold3d)
+				measure(csg);
 			return csg;
+		}
+
+		/**
+		 * Runs the mesh through the kernel to measure it, which is also the check that
+		 * it is manifold, and copies the measured volume and surface area back onto the
+		 * mesh without disturbing its own vertex or triangle order.
+		 *
+		 * @throws RuntimeException
+		 *             when the kernel rejects the mesh as non-manifold
+		 */
+		static void measure(CSG csg) {
+			CSG measured;
+			try {
+				measured = CSG.getManifold().calculateAreaAndSurfaceArea(csg);
+			} catch (Throwable e) {
+				throw new RuntimeException("STEP geometry is not a manifold solid", e);
+			}
+			csg.setVolume(measured.getVolume());
+			csg.setSurfaceArea(measured.getSurfaceArea());
 		}
 	}
 }

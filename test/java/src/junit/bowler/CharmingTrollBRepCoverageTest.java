@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.threed.STEPFile;
+import com.neuronrobotics.bowlerstudio.threed.StepFace;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
 
@@ -79,6 +80,192 @@ public class CharmingTrollBRepCoverageTest {
 			CSG mesh = read.getImported().get(i);
 			assertTrue("part " + i + " must have triangles from its BRep", mesh.getTriCount() > 0);
 			Log.debug("BRep part " + i + ": " + mesh.getVertCount() + "v/" + mesh.getTriCount() + "t");
+		}
+	}
+
+	/**
+	 * The strict requirement: the fixed triangles the BRep faces are read back into
+	 * must be exactly the source mesh's triangles, with nothing added and nothing
+	 * lost. A hole fails this, and so does any face whose loops a reader fills with
+	 * different triangles than the mesh holds.
+	 */
+	@Test
+	public void theBRepReadsBackAsExactlyTheSourceMesh() throws Exception {
+		List<CSG> parts = source();
+		List<CSG> read = readBRep(export(parts)).getImported();
+
+		for (int i = 0; i < parts.size(); i++) {
+			CSG expected = parts.get(i);
+			CSG actual = read.get(i);
+
+			assertEquals("part " + i + " must come back with the same triangle count", expected.getTriCount(),
+					actual.getTriCount());
+			assertEquals("part " + i + " must come back with the same vertex count", expected.getVertCount(),
+					actual.getVertCount());
+
+			// compare as sets of triangles, since a reader is free to order them its
+			// own way, but the triangles themselves must be the source's own
+			java.util.Set<String> expectedTriangles = triangleSet(expected);
+			java.util.Set<String> actualTriangles = triangleSet(actual);
+			java.util.Set<String> missing = new java.util.TreeSet<>(expectedTriangles);
+			missing.removeAll(actualTriangles);
+			java.util.Set<String> extra = new java.util.TreeSet<>(actualTriangles);
+			extra.removeAll(expectedTriangles);
+
+			Log.debug("part " + i + " exactness: " + missing.size() + " source triangles missing, " + extra.size()
+					+ " unexpected triangles");
+			assertTrue("part " + i + " must lose no triangle, missing " + missing.size() + " of "
+					+ expectedTriangles.size(), missing.isEmpty());
+			assertTrue("part " + i + " must gain no triangle, found " + extra.size() + " extra", extra.isEmpty());
+		}
+	}
+
+	/** A mesh's triangles as exact coordinate triples, so equality is geometric. */
+	private static java.util.Set<String> triangleSet(CSG csg) {
+		double[] vertices = csg.getVertices();
+		long[] triangles = csg.getTriangles();
+		java.util.Set<String> set = new java.util.HashSet<>();
+		for (int t = 0; t + 2 < triangles.length; t += 3) {
+			String[] corners = new String[3];
+			for (int corner = 0; corner < 3; corner++) {
+				int at = (int) triangles[t + corner] * 3;
+				corners[corner] = pointKey(vertices[at], vertices[at + 1], vertices[at + 2]);
+			}
+			java.util.Arrays.sort(corners);
+			set.add(corners[0] + "|" + corners[1] + "|" + corners[2]);
+		}
+		return set;
+	}
+
+	private static String pointKey(double x, double y, double z) {
+		// a micron of a millimetre, well below any feature of these parts
+		return Math.round(x * 1e3) + "," + Math.round(y * 1e3) + "," + Math.round(z * 1e3);
+	}
+
+	private static String pointKey(double[] point) {
+		return pointKey(point[0], point[1], point[2]);
+	}
+
+	@Test
+	public void noPartIsReadAsItsTessellationByAccident() throws Exception {
+		List<CSG> parts = source();
+		STEPFile read = readBRep(export(parts));
+
+		// a tessellation supplies the mesh of its BRep twin; it is never a shape of
+		// its own. If it leaked through as one, this would be twice the part count,
+		// and the BRep assertions elsewhere would silently be checking it instead.
+		assertEquals("a tessellation must not appear as a shape of its own", parts.size(), read.getShapes().size());
+	}
+
+	/**
+	 * The BRep's own loops must be watertight: every directed edge of every face
+	 * bound must be matched by the same edge in the opposite direction on the face
+	 * across it. That is what a reader stitches, and an unmatched edge is a hole in
+	 * the solid no matter how good the tessellation is.
+	 *
+	 * <p>
+	 * This is checked on the face data itself, not on anything the writer computed,
+	 * so a face that was dropped or written with a bad loop shows up here.
+	 */
+	@Test
+	public void theBRepLoopsAreWatertight() throws Exception {
+		List<CSG> parts = source();
+		for (int i = 0; i < parts.size(); i++) {
+			List<StepFace> faces = com.neuronrobotics.bowlerstudio.threed.StepBRepWrite.faces(parts.get(i));
+			java.util.Map<String, Integer> directed = new java.util.HashMap<>();
+			for (StepFace face : faces)
+				for (List<double[]> loop : face.loops)
+					for (int at = 0; at < loop.size(); at++) {
+						String key = pointKey(loop.get(at)) + ">" + pointKey(loop.get((at + 1) % loop.size()));
+						directed.merge(key, 1, Integer::sum);
+					}
+
+			int unmatched = 0;
+			List<String> examples = new ArrayList<>();
+			for (java.util.Map.Entry<String, Integer> entry : directed.entrySet()) {
+				String key = entry.getKey();
+				int split = key.indexOf('>');
+				String reverse = key.substring(split + 1) + ">" + key.substring(0, split);
+				if (!Integer.valueOf(1).equals(directed.get(reverse))) {
+					unmatched++;
+					if (examples.size() < 5)
+						examples.add(key);
+				}
+				if (entry.getValue() != 1)
+					unmatched++;
+			}
+			Log.debug("watertight part " + i + ": " + faces.size() + " face(s), " + directed.size() + " directed edge(s), "
+					+ unmatched + " unmatched, e.g. " + examples);
+			assertEquals("part " + i + " BRep loops must be watertight, unmatched edges e.g. " + examples, 0, unmatched);
+		}
+	}
+
+	/**
+	 * Coplanar triangles must stay stitched into one face. Falling back to a face
+	 * per triangle also "covers" the surface, so coverage alone cannot catch that
+	 * regression; this asserts the export actually merges coplanar neighbours, which
+	 * is what makes the BRep usable and what a CAD package relies on.
+	 */
+	@Test
+	public void coplanarTrianglesAreStitchedIntoOneFace() throws Exception {
+		List<CSG> parts = source();
+		for (int i = 0; i < parts.size(); i++) {
+			CSG part = parts.get(i);
+			List<StepFace> faces = com.neuronrobotics.bowlerstudio.threed.StepBRepWrite.faces(part);
+			// a stitched face covers several triangles; per-triangle faces cover one
+			// each, which would leave as many faces as triangles
+			Log.debug("stitching part " + i + ": " + faces.size() + " face(s) for " + part.getTriCount()
+					+ " triangles");
+			assertTrue("part " + i + " must stitch coplanar triangles, but wrote " + faces.size()
+					+ " faces for " + part.getTriCount() + " triangles", faces.size() * 2 < part.getTriCount());
+		}
+	}
+
+	/**
+	 * A loaded mesh must be manifold. Measuring a mesh is how the kernel decides
+	 * that: a surface with a hole has no enclosed volume, so the kernel refuses it.
+	 * Both readings of the file are checked, because a CAD package uses the BRep
+	 * while the tessellation is what the round trip relies on.
+	 */
+	@Test
+	public void everyLoadedMeshIsManifoldAndHasVolume() throws Exception {
+		List<CSG> parts = source();
+		File written = export(parts);
+
+		for (boolean preferTessellation : new boolean[]{true, false}) {
+			STEPFile read;
+			try (FileInputStream in = new FileInputStream(written)) {
+				read = new STEPFile(in, preferTessellation);
+			}
+			String which = preferTessellation ? "tessellation" : "BRep";
+
+			List<CSG> meshes = read.getImported();
+			assertEquals(which + ": every part must load", parts.size(), meshes.size());
+			for (int i = 0; i < meshes.size(); i++) {
+				CSG mesh = meshes.get(i);
+				double expected = volume(parts.get(i));
+
+				// the loader measured it, which is the manifold check the kernel ran
+				assertTrue(which + " part " + i + " must have been measured, volume is " + mesh.getVolume(),
+						mesh.getVolume() != 0);
+				Log.debug(which + " part " + i + ": volume " + mesh.getVolume() + ", expected " + expected);
+				assertEquals(which + " part " + i + " must be a closed solid of the source's volume", expected,
+						mesh.getVolume(), Math.abs(expected) * 1e-4);
+
+				// and it must survive the kernel's own check a second time, from its own
+				// triangles: a mesh with a hole throws here
+				assertEquals(which + " part " + i + " must re-measure to the same volume", mesh.getVolume(),
+						remeasuredVolume(mesh), Math.abs(expected) * 1e-4);
+			}
+		}
+	}
+
+	/** Re-measures a mesh, which throws when the kernel finds it is not manifold. */
+	private static double remeasuredVolume(CSG mesh) throws Exception {
+		try {
+			return CSG.getManifold().calculateAreaAndSurfaceArea(mesh).getVolume();
+		} catch (Throwable e) {
+			throw new AssertionError("the loaded mesh is not manifold: " + e.getMessage(), e);
 		}
 	}
 
