@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import com.neuronrobotics.sdk.common.Log;
+import com.neuronrobotics.sdk.common.TickToc;
 import javafx.scene.paint.Color;
 
 /**
@@ -87,8 +89,20 @@ public final class STEPFile {
 
 	/** Reads geometry from a STEP file, see {@link StepImport#readShapes(InputStream)}. */
 	public STEPFile(InputStream step) throws IOException {
+		this(step, true);
+	}
+
+	/**
+	 * Reads geometry from a STEP file.
+	 *
+	 * @param preferTessellation
+	 *            when false, a part the file describes both as BRep topology and as
+	 *            a tessellation is read from its BRep faces, which is what a CAD
+	 *            package shows; use this to check that the BRep covers the mesh.
+	 */
+	public STEPFile(InputStream step, boolean preferTessellation) throws IOException {
 		this.parts = List.of();
-		this.shapes = StepImport.readShapes(step);
+		this.shapes = StepImport.readShapes(step, preferTessellation);
 	}
 
 	/**
@@ -112,6 +126,15 @@ public final class STEPFile {
 	/** Feature edges of {@link #getCsg()}, empty after reading a STEP file. */
 	public List<FeatureEdgeExtractor.Edge> getEdges() {
 		return parts.isEmpty() ? List.of() : parts.get(0).edges;
+	}
+
+	/**
+	 * The planar faces the first part is written as: their planes and boundary
+	 * loops. Empty after reading a STEP file; see {@link #getShapes()} for the
+	 * faces a file described.
+	 */
+	public List<StepFace> getFaces() {
+		return parts.isEmpty() ? List.of() : StepBRepWrite.faces(parts.get(0).csg);
 	}
 
 	/** The CSGs to write, in order; empty after reading a STEP file. */
@@ -140,15 +163,18 @@ public final class STEPFile {
 	}
 
 	/**
-	 * Every part as BRep topology in millimetres: its coplanar triangles become
-	 * planar faces bounded by connected wires, so a reader shows a solid with
-	 * selectable faces. Several parts become a STEP assembly with one product per
-	 * part.
+	 * Every part in millimetres: its coplanar triangles as BRep faces bounded by
+	 * connected wires, so a CAD package shows a solid with selectable faces, plus a
+	 * tessellated representation of the mesh itself so a reader reproduces the
+	 * source triangles exactly. Several parts become a STEP assembly with one
+	 * product per part.
 	 */
 	public String toStep() {
 		if (parts.isEmpty())
 			throw new IllegalStateException("No geometry to export: this instance was read from a STEP file");
 
+		Log.debug("STEPFile.toStep: " + parts.size() + " part(s)");
+		TickToc.tic("toStep");
 		StepEmitter emitter = new StepEmitter();
 		String fileName;
 		if (parts.size() == 1) {
@@ -158,6 +184,7 @@ public final class STEPFile {
 			fileName = ASSEMBLY_NAME + ".step";
 			assembly(emitter, parts);
 		}
+		Log.debug("STEPFile.toStep: emitted " + emitter.text().length() + " characters");
 		return file(fileName, emitter.text());
 	}
 
@@ -179,7 +206,23 @@ public final class STEPFile {
 		long representation = emitter.add("ADVANCED_BREP_SHAPE_REPRESENTATION(" + quote(part.name()) + ","
 				+ references(items) + ",#" + contexts.representation + ")");
 		emitter.add("SHAPE_DEFINITION_REPRESENTATION(#" + product.definitionShape + ",#" + representation + ")");
+		tessellation(emitter, part, contexts, representation);
 		colour(emitter, part.csg, contexts.representation, items);
+	}
+
+	/**
+	 * The part's mesh as its own representation, related to the BRep one. A CAD
+	 * package reads the BRep; a reader that can use the tessellation reproduces
+	 * the source triangles exactly instead of re-triangulating the faces.
+	 */
+	private static void tessellation(StepEmitter emitter, Part part, Contexts contexts, long brep) {
+		long tessellated = StepTessellatedWrite.representation(emitter, part.csg, part.name(), contexts.representation);
+		if (tessellated == 0)
+			return;
+		// plain relationship: the tessellation describes the same shape, at the same
+		// coordinates, so there is nothing to transform
+		emitter.add("SHAPE_REPRESENTATION_RELATIONSHIP(" + quote(part.name()) + ","
+				+ quote("tessellation of the BRep") + ",#" + brep + ",#" + tessellated + ")");
 	}
 
 	/**
@@ -213,6 +256,7 @@ public final class STEPFile {
 					+ references(representationItems) + ",#" + contexts.representation + ")");
 			emitter.add(
 					"SHAPE_DEFINITION_REPRESENTATION(#" + product.definitionShape + ",#" + representations[i] + ")");
+			tessellation(emitter, part, contexts, representations[i]);
 			colour(emitter, part.csg, contexts.representation, geometry);
 		}
 

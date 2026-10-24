@@ -7,6 +7,8 @@ import com.neuronrobotics.bowlerstudio.threed.StepImport.MeshBuilder;
 import com.neuronrobotics.bowlerstudio.threed.StepReader.Instance;
 import com.neuronrobotics.bowlerstudio.threed.StepReader.Value;
 
+import eu.mihosoft.vrl.v3d.Vector3d;
+
 /**
  * Reads BRep topology: every face of a solid or surface model is triangulated
  * from its bound loops, and every edge is emitted as a straight segment.
@@ -34,21 +36,69 @@ final class StepBRep {
 	}
 
 	/**
+	 * The faces of a solid or surface model as topology: each face's plane and its
+	 * boundary loops, in the order the file writes them. A face whose surface is
+	 * not a plane is skipped, since a plane is what {@link StepFace} describes.
+	 */
+	static List<StepFace> faces(StepReader reader, Instance model, double scale) {
+		List<StepFace> faces = new ArrayList<>();
+		for (Value faceReference : reader.list(boundaryOf(reader, model))) {
+			Instance face = reader.instance(faceReference);
+			if (!StepReader.kindOf(face, "FACE_SURFACE"))
+				continue;
+			StepFace described = describe(reader, face, scale);
+			if (described != null)
+				faces.add(described);
+		}
+		return faces;
+	}
+
+	private static StepFace describe(StepReader reader, Instance face, double scale) {
+		Instance surface = reader.optionalInstance(reader.attribute(face, "FACE_SURFACE", "face_geometry"));
+		if (surface == null || !surface.is("PLANE"))
+			return null;
+
+		Instance placement = reader
+				.optionalInstance(reader.attribute(surface, "ELEMENTARY_SURFACE", "position"));
+		if (placement == null)
+			return null;
+		double[][] frame = StepCurves.placement(reader, placement);
+		double[] origin = StepImport.scaled(frame[0], scale);
+		double[] axis = frame[3];
+		// the writer marks a face as agreeing with its plane, so the file's own
+		// direction is the face's normal; a face marked the other way faces opposite
+		Value sameSense = reader.attribute(face, "FACE_SURFACE", "same_sense");
+		boolean forward = sameSense == null || sameSense.kind() != Value.Kind.ENUM || reader.isTrue(sameSense);
+		Vector3d normal = new Vector3d(axis[0], axis[1], axis[2]);
+		if (!forward)
+			normal = normal.negated();
+
+		List<List<double[]>> loops = new ArrayList<>();
+		for (Value boundReference : reader.list(reader.attribute(face, "FACE_SURFACE", "bounds")))
+			loops.add(loopPoints(reader, outerLoop(reader, boundReference), scale, new ArrayList<>()));
+		return new StepFace(origin, normal, loops);
+	}
+
+	/**
 	 * The faces owned directly by a solid or surface model. A surface model names
 	 * a set of shells rather than faces, and each shell is a connected face set,
 	 * so its shells are flattened into the faces they hold.
 	 */
 	static Value boundaryOf(StepReader reader, Instance model) {
 		if (model.is("MANIFOLD_SOLID_BREP"))
-			return reader.attribute(reader.instance(reader.attribute(model, "MANIFOLD_SOLID_BREP", "outer")),
-					"CONNECTED_FACE_SET", "cfs_faces");
+			return facesOf(reader, reader.instance(reader.attribute(model, "MANIFOLD_SOLID_BREP", "outer")));
 		if (model.is("SHELL_BASED_SURFACE_MODEL")) {
 			List<Value> faces = new ArrayList<>();
 			for (Value shell : reader.list(reader.attribute(model, "SHELL_BASED_SURFACE_MODEL", "sbsm_boundary")))
-				faces.addAll(reader.list(reader.attribute(reader.instance(shell), "CONNECTED_FACE_SET", "cfs_faces")));
+				faces.addAll(reader.list(facesOf(reader, reader.instance(shell))));
 			return Value.list(faces);
 		}
-		return reader.attribute(model, "CONNECTED_FACE_SET", "cfs_faces");
+		return facesOf(reader, model);
+	}
+
+	/** The faces a shell or connected face set holds. */
+	private static Value facesOf(StepReader reader, Instance shell) {
+		return reader.attribute(shell, "CONNECTED_FACE_SET", "cfs_faces");
 	}
 
 	/** Models that describe their own solid, read as one shape each. */

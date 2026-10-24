@@ -16,8 +16,11 @@ import javax.vecmath.Matrix4d;
 import com.neuronrobotics.bowlerstudio.threed.StepReader.Instance;
 import com.neuronrobotics.bowlerstudio.threed.StepReader.StepException;
 import com.neuronrobotics.bowlerstudio.threed.StepReader.Value;
+import com.neuronrobotics.sdk.common.Log;
+import com.neuronrobotics.sdk.common.TickToc;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.CSG.OptType;
 import eu.mihosoft.vrl.v3d.Transform;
 import eu.mihosoft.vrl.v3d.Vector3d;
 import javafx.scene.paint.Color;
@@ -46,12 +49,15 @@ public final class StepImport {
 		private final CSG mesh;
 		private final List<FeatureEdgeExtractor.Edge> edges;
 		private final Color color;
+		private final List<StepFace> faces;
 
-		private Shape(String name, CSG mesh, List<FeatureEdgeExtractor.Edge> edges, Color color) {
+		private Shape(String name, CSG mesh, List<FeatureEdgeExtractor.Edge> edges, Color color,
+				List<StepFace> faces) {
 			this.name = name;
 			this.mesh = mesh;
 			this.edges = Collections.unmodifiableList(edges);
 			this.color = color;
+			this.faces = Collections.unmodifiableList(faces);
 		}
 
 		public String getName() {
@@ -71,6 +77,11 @@ public final class StepImport {
 		/** The colour the file assigned to this shape, or null when it named none. */
 		public Color getColor() {
 			return color;
+		}
+
+		/** Planar BRep faces the file described, in file order; empty for a mesh only shape. */
+		public List<StepFace> getFaces() {
+			return faces;
 		}
 	}
 
@@ -140,12 +151,54 @@ public final class StepImport {
 	}
 
 	public static List<Shape> readShapes(InputStream stream) throws IOException {
+		return readShapes(stream, true);
+	}
+
+	/**
+	 * Reads the geometry in a STEP file.
+	 *
+	 * @param preferTessellation
+	 *            when true, a part the file describes both as BRep topology and as
+	 *            a tessellation of the same mesh is returned as the tessellation's
+	 *            triangles, which are the exact source mesh. When false, such a part
+	 *            is returned as its BRep faces triangulated, which is what a CAD
+	 *            package sees, so the BRep's own coverage can be checked.
+	 */
+	public static List<Shape> readShapes(InputStream stream, boolean preferTessellation) throws IOException {
+		Log.debug("StepImport.readShapes: parse");
+		TickToc.tic("parse STEP");
 		StepReader reader = StepReader.parse(stream);
+		Log.debug("StepImport.readShapes: " + reader.instances().size() + " entities");
+		TickToc.tic("index styles");
 		Map<Integer, Color> colours = StepStyles.byItem(reader);
+		TickToc.tic("index placements");
 		Map<Integer, List<Transform>> placements = placements(reader);
 		List<Shape> shapes = new ArrayList<>();
 
+		// A file may describe one part twice: as BRep topology and as a tessellation
+		// of the same shape. The BRep carries the part's placement, its faces and its
+		// edges; the tessellation carries the exact mesh. Read them together so the
+		// shape keeps its placement but gets the mesh the file actually stored.
+		Map<Integer, Integer> tessellatedToBRep = tessellationRelationships(reader);
+		Log.debug("StepImport.readShapes: " + tessellatedToBRep.size() + " BRep/tessellation pair(s)");
+		Map<Integer, CSG> tessellations = new HashMap<>();
+		if (preferTessellation)
+			for (Map.Entry<Integer, Integer> relationship : tessellatedToBRep.entrySet()) {
+				Instance tessellated = reader.instances().get(relationship.getKey());
+				if (tessellated != null) {
+					TickToc.tic("read tessellation " + relationship.getKey());
+					tessellations.put(relationship.getValue(), readTessellation(reader, tessellated));
+				}
+			}
+
+		TickToc.tic("read representations");
 		for (Instance representation : representations(reader)) {
+			// a tessellation is never a shape of its own: it either supplies the mesh
+			// of its BRep twin or is ignored, so preferring the BRep does not make the
+			// tessellation appear as a second shape
+			if (tessellatedToBRep.containsKey(representation.id()))
+				continue;
+
 			double scale = lengthScale(reader, representation);
 			Color colour = colourOf(reader, representation, colours);
 
@@ -156,16 +209,72 @@ public final class StepImport {
 				transforms = Collections.singletonList(null);
 
 			for (Transform transform : transforms) {
-				List<Shape> placed = readRepresentation(reader, representation, scale, colour, transform);
+				List<Shape> placed = readRepresentation(reader, representation, scale, colour, transform,
+						tessellations.get(representation.id()));
 				shapes.addAll(placed);
 			}
 		}
 
+		Log.debug("StepImport.readShapes: " + shapes.size() + " shape(s) before dedup");
 		return distinct(shapes);
 	}
 
+	/** The exact mesh a tessellated representation holds, or null when it holds none. */
+	private static CSG readTessellation(StepReader reader, Instance representation) {
+		double scale = lengthScale(reader, representation);
+		String name = text(reader.attribute(representation, "REPRESENTATION", "name"));
+		MeshBuilder mesh = new MeshBuilder(scale);
+		for (Value item : reader.list(reader.attribute(representation, "REPRESENTATION", "items")))
+			readItem(reader, reader.instance(item), scale, mesh, new ArrayList<>());
+		return mesh.toCsg(name, IMPORT_COLOR);
+	}
+
+	/**
+	 * True when a representation carries indexed triangles rather than topology,
+	 * so it reproduces the source mesh exactly.
+	 */
+	private static boolean isTessellated(StepReader reader, Instance representation) {
+		for (Value item : reader.list(reader.attribute(representation, "REPRESENTATION", "items"))) {
+			Instance instance = reader.instance(item);
+			if (StepReader.kindOf(instance, "TESSELLATED_SURFACE_SET")
+					|| StepReader.kindOf(instance, "TESSELLATED_FACE"))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Tessellated representation to the BRep representation that describes the same
+	 * shape, as the file's {@code SHAPE_REPRESENTATION_RELATIONSHIP} states. Names
+	 * are not reliable: several parts of one model often share a name.
+	 */
+	private static Map<Integer, Integer> tessellationRelationships(StepReader reader) {
+		Map<Integer, Integer> relationships = new HashMap<>();
+		for (Instance instance : reader.instances().values()) {
+			if (!StepReader.kindOf(instance, "REPRESENTATION_RELATIONSHIP"))
+				continue;
+			Instance first = reader
+					.optionalInstance(reader.attribute(instance, "REPRESENTATION_RELATIONSHIP", "rep_1"));
+			Instance second = reader
+					.optionalInstance(reader.attribute(instance, "REPRESENTATION_RELATIONSHIP", "rep_2"));
+			if (first == null || second == null)
+				continue;
+
+			if (isTessellated(reader, second) && isBRep(reader, first))
+				relationships.put(second.id(), first.id());
+			else if (isTessellated(reader, first) && isBRep(reader, second))
+				relationships.put(first.id(), second.id());
+		}
+		return relationships;
+	}
+
+	private static boolean isBRep(StepReader reader, Instance representation) {
+		return StepReader.kindOf(representation, "ADVANCED_BREP_SHAPE_REPRESENTATION")
+				|| StepReader.kindOf(representation, "MANIFOLD_SURFACE_SHAPE_REPRESENTATION");
+	}
+
 	private static List<Shape> readRepresentation(StepReader reader, Instance representation, double scale,
-			Color colour, Transform transform) {
+			Color colour, Transform transform, CSG exactMesh) {
 		String name = text(reader.attribute(representation, "REPRESENTATION", "name"));
 
 		// placements are written in the file's own unit, so scale their translation
@@ -191,18 +300,28 @@ public final class StepImport {
 				MeshBuilder mesh = new MeshBuilder(scale);
 				List<FeatureEdgeExtractor.Edge> edges = new ArrayList<>();
 				StepBRep.read(reader, solid, scale, mesh, edges);
+				// the tessellation, when the file has one, is the exact mesh of this
+				// solid; the BRep only contributes the topology a mesh cannot express
+				CSG source = exactMesh != null ? exactMesh : mesh.toCsg(name, colour);
+				if (source != null && colour != null)
+					source.setColor(colour);
 				shapes.add(place(placement, new Shape(text(reader.attribute(solid, "REPRESENTATION_ITEM", "name")),
-						mesh.toCsg(name, colour), unique(edges, scale), colour)));
+						source, unique(edges, scale), colour, StepBRep.faces(reader, solid, scale))));
 			}
 		}
 
 		if (!items.isEmpty()) {
 			MeshBuilder mesh = new MeshBuilder(scale);
 			List<FeatureEdgeExtractor.Edge> edges = new ArrayList<>();
+			List<StepFace> faces = new ArrayList<>();
 			for (Instance item : items)
 				readItem(reader, item, scale, mesh, edges);
+			for (Instance item : items)
+				if (StepBRep.isSolidModel(item))
+					faces.addAll(StepBRep.faces(reader, item, scale));
 			if (!mesh.isEmpty() || !edges.isEmpty())
-				shapes.add(place(placement, new Shape(name, mesh.toCsg(name, colour), unique(edges, scale), colour)));
+				shapes.add(place(placement, new Shape(name, mesh.toCsg(name, colour), unique(edges, scale), colour,
+						faces)));
 		}
 
 		return shapes;
@@ -412,15 +531,58 @@ public final class StepImport {
 			return shape;
 
 		CSG mesh = shape.getMesh();
-		if (mesh != null)
-			mesh = mesh.transformed(transform);
+		if (mesh != null) {
+			// move the points in place: the occurrence only moves a part, so the mesh
+			// keeps its own vertex order and indices
+			double[] vertices = mesh.getVertices();
+			if (vertices != null && !transform.isMirror()) {
+				double[] moved = new double[vertices.length];
+				for (int i = 0; i < vertices.length; i += 3) {
+					Vector3d point = transform.transform(new Vector3d(vertices[i], vertices[i + 1], vertices[i + 2]));
+					moved[i] = point.x;
+					moved[i + 1] = point.y;
+					moved[i + 2] = point.z;
+				}
+				mesh.setVertices(moved);
+				mesh.setTriangles(mesh.getTriangles().clone());
+			} else
+				// a mirror turns the surface inside out, which only the general path
+				// knows how to express
+				mesh = mesh.transformed(transform);
+		}
 
 		List<FeatureEdgeExtractor.Edge> edges = new ArrayList<>();
 		for (FeatureEdgeExtractor.Edge edge : shape.getEdges())
 			edges.add(new FeatureEdgeExtractor.Edge(transform.transform(edge.a.clone()),
 					transform.transform(edge.b.clone())));
 
-		return new Shape(shape.getName(), mesh, edges, shape.getColor());
+		return new Shape(shape.getName(), mesh, edges, shape.getColor(), moved(transform, shape.getFaces()));
+	}
+
+	/** Moves faces to an occurrence's frame, so they describe the shape where it sits. */
+	private static List<StepFace> moved(Transform transform, List<StepFace> faces) {
+		List<StepFace> moved = new ArrayList<>(faces.size());
+		for (StepFace face : faces) {
+			List<List<double[]>> loops = new ArrayList<>(face.loops.size());
+			for (List<double[]> loop : face.loops) {
+				List<double[]> points = new ArrayList<>(loop.size());
+				for (double[] p : loop)
+					points.add(vector(transform.transform(new Vector3d(p[0], p[1], p[2]))));
+				loops.add(points);
+			}
+			// take the normal from two transformed points, so a translation is not
+			// applied to a direction
+			double[] origin = vector(transform.transform(new Vector3d(face.origin[0], face.origin[1], face.origin[2])));
+			Vector3d along = transform.transform(new Vector3d(face.origin[0] + face.normal.x,
+					face.origin[1] + face.normal.y, face.origin[2] + face.normal.z));
+			Vector3d normal = new Vector3d(along.x - origin[0], along.y - origin[1], along.z - origin[2]).normalized();
+			moved.add(new StepFace(origin, normal, loops));
+		}
+		return moved;
+	}
+
+	private static double[] vector(Vector3d v) {
+		return new double[]{v.x, v.y, v.z};
 	}
 
 	private static void readItem(StepReader reader, Instance item, double scale, MeshBuilder mesh,
@@ -452,11 +614,7 @@ public final class StepImport {
 		List<Value> points = reader.list(reader.attribute(coordinates, "COORDINATES_LIST", "position_coords"));
 		List<Value> triangles = reader.list(reader.attribute(set, "TRIANGULATED_SURFACE_SET", "triangles"));
 
-		for (Value triangle : triangles) {
-			List<Value> indices = triangle.list();
-			mesh.addTriangle(indexed(points, indices.get(0), scale), indexed(points, indices.get(1), scale),
-					indexed(points, indices.get(2), scale));
-		}
+		mesh.setMesh(points, triangles, scale);
 	}
 
 	private static void readTriangulatedFace(StepReader reader, Instance face, double scale, MeshBuilder mesh) {
@@ -464,11 +622,7 @@ public final class StepImport {
 		List<Value> points = reader.list(reader.attribute(coordinates, "COORDINATES_LIST", "position_coords"));
 		List<Value> triangles = reader.list(reader.attribute(face, "TRIANGULATED_FACE", "triangles"));
 
-		for (Value triangle : triangles) {
-			List<Value> indices = triangle.list();
-			mesh.addTriangle(indexed(points, indices.get(0), scale), indexed(points, indices.get(1), scale),
-					indexed(points, indices.get(2), scale));
-		}
+		mesh.setMesh(points, triangles, scale);
 	}
 
 	private static void readTessellatedFace(StepReader reader, Instance face, double scale, MeshBuilder mesh) {
@@ -722,6 +876,8 @@ public final class StepImport {
 		private final Map<String, Integer> indices = new LinkedHashMap<>();
 		private final List<double[]> vertices = new ArrayList<>();
 		private final List<int[]> triangles = new ArrayList<>();
+		/** True once the builder took a tessellation's own indices verbatim. */
+		private boolean exact;
 
 		private MeshBuilder(double factor) {
 			this.factor = factor;
@@ -768,6 +924,23 @@ public final class StepImport {
 			triangles.add(new int[]{a, b, c});
 		}
 
+		/**
+		 * Takes a tessellation's own point list and indices, keeping both exactly as
+		 * the file wrote them: no welding, no reordering. That is what makes a
+		 * tessellated round trip reproduce the source mesh.
+		 */
+		void setMesh(List<Value> points, List<Value> triangles, double factor) {
+			exact = true;
+			int base = vertices.size();
+			for (Value point : points)
+				vertices.add(scaled(point, factor));
+			for (Value triangle : triangles) {
+				List<Value> indices = triangle.list();
+				this.triangles.add(new int[]{base + (int) indices.get(0).number() - 1,
+						base + (int) indices.get(1).number() - 1, base + (int) indices.get(2).number() - 1});
+			}
+		}
+
 		boolean isEmpty() {
 			return triangles.isEmpty();
 		}
@@ -802,6 +975,15 @@ public final class StepImport {
 			CSG csg = new CSG(flat, flatTriangles, color == null ? IMPORT_COLOR : color);
 			if (name != null && !name.isBlank())
 				csg.setName(name);
+			// A tessellation is the source mesh itself. Running it through the kernel
+			// to measure it would renumber its vertices, so its own indices are kept.
+			if (!exact && CSG.getDefaultOptionType() == OptType.Manifold3d) {
+				try {
+					csg = CSG.getManifold().calculateAreaAndSurfaceArea(csg);
+				} catch (Throwable e) {
+					throw new RuntimeException(e);
+				}
+			}
 			return csg;
 		}
 	}
