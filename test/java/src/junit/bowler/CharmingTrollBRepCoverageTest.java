@@ -194,9 +194,10 @@ public class CharmingTrollBRepCoverageTest {
 				if (entry.getValue() != 1)
 					unmatched++;
 			}
-			Log.debug("watertight part " + i + ": " + faces.size() + " face(s), " + directed.size() + " directed edge(s), "
-					+ unmatched + " unmatched, e.g. " + examples);
-			assertEquals("part " + i + " BRep loops must be watertight, unmatched edges e.g. " + examples, 0, unmatched);
+			Log.debug("watertight part " + i + ": " + faces.size() + " face(s), " + directed.size()
+					+ " directed edge(s), " + unmatched + " unmatched, e.g. " + examples);
+			assertEquals("part " + i + " BRep loops must be watertight, unmatched edges e.g. " + examples, 0,
+					unmatched);
 		}
 	}
 
@@ -214,10 +215,10 @@ public class CharmingTrollBRepCoverageTest {
 			List<StepFace> faces = com.neuronrobotics.bowlerstudio.threed.StepBRepWrite.faces(part);
 			// a stitched face covers several triangles; per-triangle faces cover one
 			// each, which would leave as many faces as triangles
-			Log.debug("stitching part " + i + ": " + faces.size() + " face(s) for " + part.getTriCount()
-					+ " triangles");
-			assertTrue("part " + i + " must stitch coplanar triangles, but wrote " + faces.size()
-					+ " faces for " + part.getTriCount() + " triangles", faces.size() * 2 < part.getTriCount());
+			Log.debug(
+					"stitching part " + i + ": " + faces.size() + " face(s) for " + part.getTriCount() + " triangles");
+			assertTrue("part " + i + " must stitch coplanar triangles, but wrote " + faces.size() + " faces for "
+					+ part.getTriCount() + " triangles", faces.size() * 2 < part.getTriCount());
 		}
 	}
 

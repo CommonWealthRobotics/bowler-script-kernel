@@ -1,6 +1,5 @@
 package com.neuronrobotics.bowlerstudio.threed;
 
-import java.util.List;
 
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
@@ -35,8 +34,8 @@ final class StepTessellatedWrite {
 		if (vertices == null || triangles == null || triangles.length < 3 || vertices.length < 9)
 			return 0;
 
-		Log.debug("StepTessellatedWrite: writing " + (vertices.length / 3) + " vertices, "
-				+ (triangles.length / 3) + " triangles for " + name);
+		Log.debug("StepTessellatedWrite: writing " + (vertices.length / 3) + " vertices, " + (triangles.length / 3)
+				+ " triangles for " + name);
 		TickToc.tic("write tessellation " + name);
 		long coordinates = coordinates(emitter, vertices);
 		// a triangulated surface set is a tessellated surface set with an index list

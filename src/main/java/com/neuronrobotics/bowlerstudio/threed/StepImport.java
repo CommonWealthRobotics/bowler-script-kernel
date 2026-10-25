@@ -51,8 +51,7 @@ public final class StepImport {
 		private final Color color;
 		private final List<StepFace> faces;
 
-		private Shape(String name, CSG mesh, List<FeatureEdgeExtractor.Edge> edges, Color color,
-				List<StepFace> faces) {
+		private Shape(String name, CSG mesh, List<FeatureEdgeExtractor.Edge> edges, Color color, List<StepFace> faces) {
 			this.name = name;
 			this.mesh = mesh;
 			this.edges = Collections.unmodifiableList(edges);
@@ -320,8 +319,8 @@ public final class StepImport {
 				if (StepBRep.isSolidModel(item))
 					faces.addAll(StepBRep.faces(reader, item, scale));
 			if (!mesh.isEmpty() || !edges.isEmpty())
-				shapes.add(place(placement, new Shape(name, mesh.toCsg(name, colour), unique(edges, scale), colour,
-						faces)));
+				shapes.add(place(placement,
+						new Shape(name, mesh.toCsg(name, colour), unique(edges, scale), colour, faces)));
 		}
 
 		return shapes;

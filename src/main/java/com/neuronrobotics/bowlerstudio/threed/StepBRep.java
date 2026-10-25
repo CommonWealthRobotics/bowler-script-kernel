@@ -58,8 +58,7 @@ final class StepBRep {
 		if (surface == null || !surface.is("PLANE"))
 			return null;
 
-		Instance placement = reader
-				.optionalInstance(reader.attribute(surface, "ELEMENTARY_SURFACE", "position"));
+		Instance placement = reader.optionalInstance(reader.attribute(surface, "ELEMENTARY_SURFACE", "position"));
 		if (placement == null)
 			return null;
 		double[][] frame = StepCurves.placement(reader, placement);
@@ -157,41 +156,59 @@ final class StepBRep {
 	/**
 	 * True when the loop lies in a plane. A loop whose points are collinear, such as
 	 * a meridian of a cylinder, is trivially planar.
+	 *
+	 * <p>
+	 * The plane is the loop's own best fit, taken from Newell's normal: the normal
+	 * of a polygon is the sum of its triangles' normals weighted by their areas, so
+	 * the sliver edges a faceted BRep holds between its facets, a ten-millionth of
+	 * the model across, contribute almost nothing. Building the normal from the
+	 * first two edges instead lets such a sliver decide it, and a face that is flat
+	 * to the last bit of a double is then rejected as curved and left out of the
+	 * mesh entirely, which is the gap this must never leave.
 	 */
 	private static boolean isPlanar(List<double[]> points) {
 		if (points.size() < 4)
 			return true;
 
-		double[] origin = points.get(0);
-		double[] first = null;
-		for (int i = 1; i < points.size() && first == null; i++)
-			first = subtract(points.get(i), origin);
+		double[] normal = newell(points);
+		double length = Math.sqrt(dot(normal, normal));
+		if (length == 0)
+			return true; // collinear or retraced: any plane holds it
 
-		if (first == null)
-			return true;
-
-		double[] normal = null;
-		for (int i = 1; i < points.size(); i++) {
-			double[] candidate = cross(first, subtract(points.get(i), origin));
-			double length = Math.sqrt(dot(candidate, candidate));
-			if (length > 1e-9) {
-				normal = new double[]{candidate[0] / length, candidate[1] / length, candidate[2] / length};
-				break;
-			}
-		}
-
-		if (normal == null)
-			return true; // all points are collinear
+		normal = new double[]{normal[0] / length, normal[1] / length, normal[2] / length};
+		double[] centre = centroid(points);
 
 		double extent = 0;
-		for (double[] point : points) {
-			double[] offset = subtract(point, origin);
-			extent = Math.max(extent, Math.abs(dot(offset, normal)));
-		}
-		return extent <= 1e-6 * (1 + scaleOf(points));
+		for (double[] point : points)
+			extent = Math.max(extent, Math.abs(dot(subtract(point, centre), normal)));
+		return extent <= 1e-6 * (1 + magnitude(points));
 	}
 
-	private static double scaleOf(List<double[]> points) {
+	/** The Newell normal of a loop: the sum of its triangles' normals weighted by area. */
+	private static double[] newell(List<double[]> points) {
+		double[] normal = new double[]{0, 0, 0};
+		for (int i = 0; i < points.size(); i++) {
+			double[] a = points.get(i);
+			double[] b = points.get((i + 1) % points.size());
+			normal[0] += (a[1] - b[1]) * (a[2] + b[2]);
+			normal[1] += (a[2] - b[2]) * (a[0] + b[0]);
+			normal[2] += (a[0] - b[0]) * (a[1] + b[1]);
+		}
+		return normal;
+	}
+
+	private static double[] centroid(List<double[]> points) {
+		double[] centre = new double[]{0, 0, 0};
+		for (double[] point : points)
+			for (int axis = 0; axis < 3; axis++)
+				centre[axis] += point[axis];
+		for (int axis = 0; axis < 3; axis++)
+			centre[axis] /= points.size();
+		return centre;
+	}
+
+	/** The largest coordinate a loop reaches, the scale its rounding is relative to. */
+	private static double magnitude(List<double[]> points) {
 		double extent = 0;
 		for (double[] point : points)
 			for (int axis = 0; axis < 3; axis++)
@@ -201,10 +218,6 @@ final class StepBRep {
 
 	private static double[] subtract(double[] a, double[] b) {
 		return new double[]{a[0] - b[0], a[1] - b[1], a[2] - b[2]};
-	}
-
-	private static double[] cross(double[] a, double[] b) {
-		return new double[]{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
 	}
 
 	private static double dot(double[] a, double[] b) {

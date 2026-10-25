@@ -110,9 +110,9 @@ public final class StepBRepWrite {
 			// can only bound one: its first loop is the outline and the rest are holes
 			// cut out of it. So each region is written as a face of its own.
 			List<List<Integer>> regions = mesh.regions(triangles);
-			for (List<Integer> region : regions)
-				if (mesh.representsExactly(region)) {
-					List<List<Integer>> loops = mesh.loops(region);
+			for (List<Integer> region : regions) {
+				List<List<Integer>> loops = mesh.stitchable(region);
+				if (loops != null) {
 					written.add(loops);
 					faces.add(mesh.face(emitter, region, loops, name));
 					emitted++;
@@ -128,6 +128,7 @@ public final class StepBRepWrite {
 					}
 					fellBack++;
 				}
+			}
 		}
 		if (fellBack > 0)
 			Log.debug("StepBRepWrite.solid: " + fellBack + " region(s) of " + mesh.faces.size()
@@ -140,8 +141,8 @@ public final class StepBRepWrite {
 		// so ask the loops that were emitted rather than the mesh they came from: the
 		// two differ when a region fell back to per-triangle faces
 		boolean closed = isWatertight(written);
-		Log.debug("StepBRepWrite.solid: " + name + " is " + (closed ? "closed" : "open") + " ("
-				+ unpairedEdges(written) + " unpaired edge(s) in the written loops)");
+		Log.debug("StepBRepWrite.solid: " + name + " is " + (closed ? "closed" : "open") + " (" + unpairedEdges(written)
+				+ " unpaired edge(s) in the written loops)");
 		String shellKind = closed ? "CLOSED_SHELL" : "OPEN_SHELL";
 		long shell = emitter.add(shellKind + "(''," + references(faces) + ")");
 		if (closed)
@@ -203,12 +204,13 @@ public final class StepBRepWrite {
 		Mesh mesh = new Mesh(vertices, sourceTriangles);
 		for (List<Integer> triangles : mesh.faces) {
 			List<List<Integer>> regions = mesh.regions(triangles);
-			for (List<Integer> region : regions)
-				if (mesh.representsExactly(region))
+			for (List<Integer> region : regions) {
+				if (mesh.stitchable(region) != null)
 					faces.add(mesh.describe(region));
 				else
 					for (int index : region)
 						faces.add(mesh.describeTriangle(index));
+			}
 		}
 		return faces;
 	}
@@ -271,11 +273,21 @@ public final class StepBRepWrite {
 			if (sourceTriangles == null)
 				return;
 
-			// as it stands, every triangle kept: dropping a degenerate one would leave
-			// its neighbours' edges one sided and open the surface it is part of
+			// as it stands, every triangle with an area is kept: dropping one would leave
+			// its neighbours' edges one sided and open the surface it is part of. A
+			// triangle naming one vertex twice has no edge to pair and no face to be.
 			List<int[]> raw = new ArrayList<>(sourceTriangles.length / 3);
-			for (int t = 0; t + 2 < sourceTriangles.length; t += 3)
-				raw.add(new int[]{(int) sourceTriangles[t], (int) sourceTriangles[t + 1], (int) sourceTriangles[t + 2]});
+			for (int t = 0; t + 2 < sourceTriangles.length; t += 3) {
+				int a = (int) sourceTriangles[t];
+				int b = (int) sourceTriangles[t + 1];
+				int c = (int) sourceTriangles[t + 2];
+				// a triangle that names one vertex twice has an edge of no length and no
+				// area, so it cannot be a face and has no edge to pair; keeping it would
+				// write a line entity with a zero-length vector
+				if (a == b || b == c || c == a)
+					continue;
+				raw.add(new int[]{a, b, c});
+			}
 			triangles.addAll(raw);
 			if (isEdgeManifold()) {
 				Log.debug("StepBRepWrite: source mesh is already edge-manifold, used as it stands");
@@ -587,7 +599,24 @@ public final class StepBRepWrite {
 			for (int[] piece : Triangulator.triangulate(outline, positions))
 				if (normal(piece) != null)
 					pieces.add(piece);
-			return pieces.isEmpty() ? List.of(triangle) : pieces;
+			// the pieces must add up to the triangle they came from; a triangulation
+			// that dropped part of the outline would leave it with no face over it, so
+			// the triangle is kept whole instead and the shell is reported as open
+			Vector3d normal = normal(triangle);
+			if (normal == null)
+				return List.of(triangle);
+			double whole = Math.abs(area(asLoop(triangle), normal));
+			if (pieces.isEmpty() || Math.abs(areaOf(pieces) - whole) > 2 * planeTolerance * diagonal(points))
+				return List.of(triangle);
+			return pieces;
+		}
+
+		/** Twice the total area the given triangles cover. */
+		private double areaOf(List<int[]> pieces) {
+			double total = 0;
+			for (int[] piece : pieces)
+				total += Math.abs(area(asLoop(piece), normal(piece)));
+			return total;
 		}
 
 		/** Appends a vertex unless the previous one is the same point. */
@@ -693,15 +722,10 @@ public final class StepBRepWrite {
 		 * face covers: the outer loop less its holes has to match the triangles
 		 * exactly, or the file describes a surface the mesh does not have.
 		 */
-		private boolean representsExactly(List<Integer> region) {
+		private boolean representsExactly(List<Integer> region, List<List<Integer>> loops) {
 			Vector3d normal = normal(triangles.get(region.get(0)));
-			if (normal == null)
+			if (normal == null || loops.isEmpty())
 				return false;
-
-			List<List<Integer>> loops = loops(region, normal);
-			if (loops.isEmpty())
-				return false;
-
 			double trianglesArea = 0;
 			for (int index : region)
 				trianglesArea += Math.abs(area(asLoop(triangles.get(index)), normal)) / 2;
@@ -715,6 +739,104 @@ public final class StepBRepWrite {
 			// would add
 			double tolerance = Math.max(1e-12, trianglesArea * 1e-9);
 			return Math.abs(trianglesArea - loopsArea) <= tolerance;
+		}
+
+		/**
+		 * The loops a region may be written with, or null when it must fall back to one
+		 * face per triangle.
+		 *
+		 * <p>
+		 * A region can be written as one face only when its loops enclose exactly the
+		 * area its triangles cover, and when every one of those triangles lies inside
+		 * the outer loop and outside the holes. Either test failing means the face would
+		 * describe a surface the mesh does not have, and a reader would show a gap where
+		 * the triangles it did not cover used to be.
+		 */
+		private List<List<Integer>> stitchable(List<Integer> region) {
+			if (normal(triangles.get(region.get(0))) == null)
+				return null;
+			List<List<Integer>> loops = loops(region);
+			if (!representsExactly(region, loops) || !covers(region, loops))
+				return null;
+			return loops;
+		}
+
+		/**
+		 * True when every triangle of the region lies inside the loops that are
+		 * written for it.
+		 *
+		 * <p>
+		 * Equal area is necessary but not sufficient. A face's first loop is its
+		 * outline and the others are holes cut out of it, so a region whose cycles the
+		 * walk returns in a different arrangement than the triangles fill — a spur it
+		 * dropped, a cycle the tightest-turn rule sent the other way round, two areas
+		 * it split at a pinch vertex — can enclose the same total area while covering a
+		 * different part of the plane. The region's triangles would then have no face
+		 * over them, which is the gap this writer must never leave. Checking a point of
+		 * each triangle against the loops it is written with rejects that case, and the
+		 * caller falls back to the per-triangle faces, which cover it by construction.
+		 */
+		private boolean covers(List<Integer> region, List<List<Integer>> loops) {
+			Vector3d normal = normal(triangles.get(region.get(0)));
+			if (normal == null || loops.isEmpty())
+				return false;
+			Vector3d u = perpendicularTo(normal);
+			Vector3d v = normal.cross(u);
+			for (int index : region) {
+				double[] centre = centroid(triangles.get(index));
+				// the outline, less every hole, is the surface the face describes; a point
+				// this close to a loop lies on it rather than clearly inside or outside
+				if (locate(loops.get(0), centre, u, v) == OUTSIDE)
+					return false;
+				for (int hole = 1; hole < loops.size(); hole++)
+					if (locate(loops.get(hole), centre, u, v) == INSIDE)
+						return false;
+			}
+			return true;
+		}
+
+		private double[] centroid(int[] triangle) {
+			double[] a = point(triangle[0]);
+			double[] b = point(triangle[1]);
+			double[] c = point(triangle[2]);
+			return new double[]{(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3};
+		}
+
+		private static final int OUTSIDE = -1;
+		private static final int BOUNDARY = 0;
+		private static final int INSIDE = 1;
+
+		/**
+		 * Where a point of the face's plane lies relative to a loop: inside it, outside
+		 * it, or on it. Inside and outside come from the winding number about the
+		 * face's normal, which holds whatever direction the loop was walked in.
+		 */
+		private int locate(List<Integer> loop, double[] p, Vector3d u, Vector3d v) {
+			double x = p[0] * u.x + p[1] * u.y + p[2] * u.z;
+			double y = p[0] * v.x + p[1] * v.y + p[2] * v.z;
+			double winding = 0;
+			boolean onBoundary = false;
+			for (int i = 0; i < loop.size(); i++) {
+				double[] a = point(loop.get(i));
+				double[] b = point(loop.get((i + 1) % loop.size()));
+				double ax = a[0] * u.x + a[1] * u.y + a[2] * u.z;
+				double ay = a[0] * v.x + a[1] * v.y + a[2] * v.z;
+				double bx = b[0] * u.x + b[1] * u.y + b[2] * u.z;
+				double by = b[0] * v.x + b[1] * v.y + b[2] * v.z;
+				double side = (bx - ax) * (y - ay) - (x - ax) * (by - ay);
+				double along = (bx - ax) * (x - ax) + (by - ay) * (y - ay);
+				double length = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
+				// within the weld distance of the loop, a point is on it: its side is
+				// then decided by rounding rather than by geometry
+				if (along >= 0 && along <= length && Math.abs(side) <= weldTolerance * Math.sqrt(length))
+					onBoundary = true;
+				if (ay <= y) {
+					if (by > y && side > 0)
+						winding++;
+				} else if (by <= y && side < 0)
+					winding--;
+			}
+			return onBoundary ? BOUNDARY : winding != 0 ? INSIDE : OUTSIDE;
 		}
 
 		private static List<Integer> asLoop(int[] triangle) {
@@ -734,6 +856,8 @@ public final class StepBRepWrite {
 		private long triangleFace(StepEmitter emitter, int index, String name) {
 			int[] triangle = triangles.get(index);
 			Vector3d normal = normal(triangle);
+			// a triangle whose points are collinear encloses nothing, so its loop is
+			// still writable and still pairs with its neighbours; any direction planes it
 			if (normal == null)
 				normal = new Vector3d(0, 0, 1);
 			long plane = plane(emitter, point(triangle[0]), normal, name);
@@ -817,24 +941,24 @@ public final class StepBRepWrite {
 
 				List<Integer> loop = new ArrayList<>();
 				int[] at = edge;
+				int[] walked = null;
 				while (at != null && !Boolean.TRUE.equals(visited.get(key(at[0], at[1])))) {
 					visited.put(key(at[0], at[1]), Boolean.TRUE);
 					loop.add(at[0]);
+					walked = at;
 					at = next(byStart, visited, at, normal);
 				}
-				// Every cycle is kept. Dropping one takes its edges out of the topology,
-				// which leaves the face across them one sided and opens the shell, and a
-				// face with no bound at all is worse still: it covers its entire plane.
+				// Only a walk that comes back to the edge it started from is a cycle; the
+				// loop is emitted as consecutive vertices, so its last edge is implied.
+				// A walk that dead-ends would be closed by that implied edge, which no
+				// triangle of the face has: the file would name an edge that bounds
+				// nothing and leave the edges it did walk unmatched, which is a gap.
+				// Dropping such a walk instead makes the region fall back to a face per
+				// triangle, so its surface is still covered.
+				boolean closed = walked != null && walked[1] == edge[0];
 				// The area a cycle encloses only decides which bound is the outer one.
-				if (distinct(loop) >= 3)
+				if (closed && distinct(loop) >= 3)
 					loops.add(loop);
-			}
-
-			// last resort, so a face is never written without a bound: one of its own
-			// triangles bounds it
-			if (loops.isEmpty() && !face.isEmpty()) {
-				int[] triangle = triangles.get(face.get(0));
-				loops.add(List.of(triangle[0], triangle[1], triangle[2]));
 			}
 
 			loops.sort((a, b) -> Double.compare(Math.abs(area(b, normal)), Math.abs(area(a, normal))));
@@ -909,6 +1033,7 @@ public final class StepBRepWrite {
 		private List<List<Integer>> loops(List<Integer> region) {
 			return loops(region, normal(triangles.get(region.get(0))));
 		}
+
 		/**
 		 * The unvisited boundary edge leaving a vertex that turns tightest from the
 		 * one just walked. Turning tightest keeps the outline on the same side of
@@ -1110,8 +1235,8 @@ public final class StepBRepWrite {
 			}
 			return edges.size() + " edges, " + unpaired + " with no opposite side (shortest "
 					+ (unpaired == 0 ? "-" : Double.toString(shortest)) + "), " + doubled
-					+ " used more than once each way, weld tolerance " + weldTolerance + ", dropped "
-					+ droppedCollapsed + " collapsed and " + droppedFlat + " flat triangles";
+					+ " used more than once each way, weld tolerance " + weldTolerance + ", dropped " + droppedFlat
+					+ " flat triangles";
 		}
 
 		/** The triangle's unit normal, or null when it has no area to face. */

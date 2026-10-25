@@ -221,8 +221,8 @@ public final class STEPFile {
 			return;
 		// plain relationship: the tessellation describes the same shape, at the same
 		// coordinates, so there is nothing to transform
-		emitter.add("SHAPE_REPRESENTATION_RELATIONSHIP(" + quote(part.name()) + ","
-				+ quote("tessellation of the BRep") + ",#" + brep + ",#" + tessellated + ")");
+		emitter.add("SHAPE_REPRESENTATION_RELATIONSHIP(" + quote(part.name()) + "," + quote("tessellation of the BRep")
+				+ ",#" + brep + ",#" + tessellated + ")");
 	}
 
 	/**
