@@ -31,6 +31,13 @@ public final class STEPFile {
 	public static final double DEFAULT_ANGLE_DEGREES = 35.0;
 	public static final double DEFAULT_TOPOLOGY_TOLERANCE = 0.00001;
 	public static final double DEFAULT_STITCH_TOLERANCE = 0.002;
+	/**
+	 * The distance accuracy a file declares when its geometry is too small to
+	 * measure, and the floor below which it is never declared: a STEP reader's own
+	 * arithmetic is good to about this much.
+	 */
+	private static final double DEFAULT_DISTANCE_ACCURACY = 1e-9;
+	private static final double MINIMUM_DISTANCE_ACCURACY = 1e-12;
 
 	private static final String ASSEMBLY_NAME = "assembly";
 
@@ -194,7 +201,7 @@ public final class STEPFile {
 
 	/** The file for one part, with no assembly structure around it. */
 	private static void part(StepEmitter emitter, Part part) {
-		Contexts contexts = contexts(emitter);
+		Contexts contexts = contexts(emitter, distanceAccuracy(List.of(part)));
 		Product product = product(emitter, contexts, part.name());
 
 		List<Long> items = StepBRepWrite.items(emitter, part.csg, part.name());
@@ -231,7 +238,7 @@ public final class STEPFile {
 	 * of {@code NEXT_ASSEMBLY_USAGE_OCCURRENCE} plus a transformed relationship.
 	 */
 	private static void assembly(StepEmitter emitter, List<Part> parts) {
-		Contexts contexts = contexts(emitter);
+		Contexts contexts = contexts(emitter, distanceAccuracy(parts));
 		Product assembly = product(emitter, contexts, ASSEMBLY_NAME);
 
 		long[] definitions = new long[parts.size()];
@@ -301,7 +308,15 @@ public final class STEPFile {
 		}
 	}
 
-	private static Contexts contexts(StepEmitter emitter) {
+	/**
+	 * The file's shared context. The distance accuracy it declares is the
+	 * resolution a reader must not merge vertices below: a file whose own edges are
+	 * shorter than that says two distinct points are the same point, and a CAD
+	 * package then collapses them, tearing the shell into open pieces. So it is
+	 * taken from the geometry actually written, never assumed: see
+	 * {@link #distanceAccuracy(List)}.
+	 */
+	private static Contexts contexts(StepEmitter emitter, double distanceAccuracy) {
 		long application = emitter.add("APPLICATION_CONTEXT('mechanical design')");
 		emitter.add("APPLICATION_PROTOCOL_DEFINITION('international standard','" + PROTOCOL + "',2020,#" + application
 				+ ")");
@@ -310,13 +325,41 @@ public final class STEPFile {
 		long definition = emitter.add("PRODUCT_DEFINITION_CONTEXT('part definition',#" + application + ",'design')");
 
 		long lengthUnit = emitter.add("(LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.))");
-		long uncertainty = emitter.add("UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-6),#" + lengthUnit
-				+ ",'distance_accuracy_value','')");
+		long uncertainty = emitter.add("UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(" + real(distanceAccuracy) + "),#"
+				+ lengthUnit + ",'distance_accuracy_value','')");
 		long representation = emitter
 				.add("(GEOMETRIC_REPRESENTATION_CONTEXT(3)GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#" + uncertainty
 						+ "))GLOBAL_UNIT_ASSIGNED_CONTEXT((#" + lengthUnit + "))REPRESENTATION_CONTEXT('3D',''))");
 
 		return new Contexts(product, definition, representation);
+	}
+
+	/**
+	 * The shortest distance between two distinct vertices the file will carry, as
+	 * the file's own distance accuracy. A reader merges points closer than this, so
+	 * it must sit below the shortest edge written or the merge tears the shell.
+	 * Below it by a wide margin: the accuracy is a tolerance, and a reader is
+	 * entitled to use it in full.
+	 */
+	private static double distanceAccuracy(List<Part> parts) {
+		double shortest = Double.MAX_VALUE;
+		for (Part part : parts) {
+			double[] vertices = part.csg.getVertices();
+			if (vertices == null)
+				continue;
+			for (int i = 0; i + 5 < vertices.length; i += 3)
+				for (int j = i + 3; j + 2 < vertices.length; j += 3) {
+					double dx = vertices[i] - vertices[j];
+					double dy = vertices[i + 1] - vertices[j + 1];
+					double dz = vertices[i + 2] - vertices[j + 2];
+					double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+					if (distance > 0)
+						shortest = Math.min(shortest, distance);
+				}
+		}
+		if (shortest == Double.MAX_VALUE)
+			return DEFAULT_DISTANCE_ACCURACY;
+		return Math.max(MINIMUM_DISTANCE_ACCURACY, shortest * 1e-3);
 	}
 
 	/** A product definition and the shape definition that gives it geometry. */

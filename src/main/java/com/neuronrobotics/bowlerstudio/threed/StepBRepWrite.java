@@ -597,7 +597,10 @@ public final class StepBRepWrite {
 
 			List<int[]> pieces = new ArrayList<>();
 			for (int[] piece : Triangulator.triangulate(outline, positions))
-				if (normal(piece) != null)
+				// a piece of no area covers nothing and has no direction of its own: its
+				// cross product is rounding noise. Written as a face it would give a bound
+				// that walks a line back on itself, which a reader cannot triangulate.
+				if (normal(piece) != null && !negligible(piece))
 					pieces.add(piece);
 			// the pieces must add up to the triangle they came from; a triangulation
 			// that dropped part of the outline would leave it with no face over it, so
@@ -606,9 +609,37 @@ public final class StepBRepWrite {
 			if (normal == null)
 				return List.of(triangle);
 			double whole = Math.abs(area(asLoop(triangle), normal));
+			// a sliver covers nothing, so its pieces cover it wholly by covering nothing
+			if (negligible(triangle))
+				return pieces;
 			if (pieces.isEmpty() || Math.abs(areaOf(pieces) - whole) > 2 * planeTolerance * diagonal(points))
 				return List.of(triangle);
 			return pieces;
+		}
+
+		/**
+		 * True when a triangle covers no surface: it is a sliver, its height above its
+		 * longest edge being below the mesh's plane tolerance. Its three points then lie
+		 * on one line, so it has no direction of its own, and a face written from it
+		 * would have a bound that walks that line back on itself, which a reader cannot
+		 * triangulate. The cross product is compared unnormalised: normalising a
+		 * near-zero one turns rounding noise into a direction that looks real.
+		 */
+		private boolean negligible(int[] triangle) {
+			double[] a = point(triangle[0]);
+			double[] b = point(triangle[1]);
+			double[] c = point(triangle[2]);
+			double ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+			double vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+			double nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+			double twiceArea = Math.sqrt(nx * nx + ny * ny + nz * nz);
+			// relative to the triangle's own size, so a sliver counts as one whatever
+			// the model's units are: its height above its longest edge is below the
+			// mesh's own plane tolerance
+			double longest = Math.max(Math.sqrt(ux * ux + uy * uy + uz * uz),
+					Math.max(Math.sqrt(vx * vx + vy * vy + vz * vz),
+							distance(b, c)));
+			return twiceArea <= planeTolerance * longest;
 		}
 
 		/** Twice the total area the given triangles cover. */
