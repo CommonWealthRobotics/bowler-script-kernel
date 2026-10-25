@@ -213,7 +213,9 @@ public class StepExportCoverageTest {
 	}
 
 	private static String key(double[] point) {
-		return Math.round(point[0] * 1e6) + "," + Math.round(point[1] * 1e6) + "," + Math.round(point[2] * 1e6);
+		// exact: a mesh may hold edges shorter than any fixed resolution, and rounding
+		// the coordinates would merge their endpoints into edges the file never has
+		return point[0] + "," + point[1] + "," + point[2];
 	}
 
 	private static double[] centre(double[] vertices, long[] triangles, int at) {

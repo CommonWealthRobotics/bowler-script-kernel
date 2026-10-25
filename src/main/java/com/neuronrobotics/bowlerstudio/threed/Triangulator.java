@@ -45,14 +45,27 @@ final class Triangulator {
 				clipped = true;
 				break;
 			}
-			if (!clipped)
+			if (clipped)
+				continue;
+
+			// No convex ear is left. That is normally a vertex whose two edges are
+			// collinear, which a tessellated mesh produces wherever a long edge was cut
+			// at a point on it. Clipping such a vertex emits a triangle of no area, which
+			// covers nothing, and removes the vertex so clipping can go on. Without this
+			// the clipper stalls and the fan below emits the same edge twice, which a
+			// reader turns into a non-manifold seam.
+			if (!clipCollinear(remaining, vertices, normal, triangles))
 				break; // self intersecting or non planar: fall through to the fan
 		}
 
+		// Whatever is left is only what ear clipping could not remove: its ears were
+		// near-collinear or repeated points, which a fan skips. Fanning the *original*
+		// loop here would re-cover the part already clipped, so the face would be
+		// counted twice over and a reader would build it wrong.
 		if (remaining.size() == 3)
 			triangles.add(new int[]{remaining.get(0), remaining.get(1), remaining.get(2)});
 		else
-			fan(loop, triangles);
+			fan(remaining, triangles);
 
 		return triangles;
 	}
@@ -60,9 +73,14 @@ final class Triangulator {
 	/**
 	 * Triangulates the region an outer loop bounds, less the region each hole
 	 * bounds. Every hole is spliced into the outer loop along a bridge that
-	 * crosses no loop, which turns the region into one simple polygon. A hole with
-	 * no clear bridge to reach it is filled in instead, which is what a region
-	 * with no triangulation available would have to do anyway.
+	 * crosses no loop, which turns the region into one simple polygon.
+	 *
+	 * <p>
+	 * An empty result means the region could not be cut at all. A hole with no clear
+	 * bridge is the usual cause, and it is deliberately not filled in: filling it
+	 * would describe surface the region does not have, which is a face covering a
+	 * hole the mesh has. The caller decides what to do instead, and the writer falls
+	 * back to one face per triangle, which covers the region exactly.
 	 */
 	static List<int[]> triangulate(List<Integer> outer, List<List<Integer>> holes, List<double[]> vertices) {
 		List<Integer> merged = new ArrayList<>(outer);
@@ -70,7 +88,7 @@ final class Triangulator {
 		for (List<Integer> hole : holes) {
 			List<Integer> spliced = splice(merged, hole, vertices, normal);
 			if (spliced == null)
-				return triangulate(outer, vertices);
+				return List.of();
 			merged = spliced;
 		}
 		return triangulate(merged, vertices);
@@ -170,6 +188,58 @@ final class Triangulator {
 	private static double distance(double[] a, double[] b) {
 		double dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2];
 		return dx * dx + dy * dy + dz * dz;
+	}
+
+	/**
+	 * Removes one vertex whose two edges are collinear, emitting the triangle of no
+	 * area that clipping it leaves. True when it removed one.
+	 *
+	 * <p>
+	 * The triangle is kept even though it covers nothing: its two short edges are the
+	 * ones the polygon's boundary has there, so the face still describes the same
+	 * outline. It is the caller's business whether a face of no area is worth writing.
+	 */
+	private static boolean clipCollinear(List<Integer> remaining, List<double[]> vertices, double[] normal,
+			List<int[]> triangles) {
+		for (int i = 0; i < remaining.size(); i++) {
+			int previous = remaining.get((i - 1 + remaining.size()) % remaining.size());
+			int current = remaining.get(i);
+			int next = remaining.get((i + 1) % remaining.size());
+			if (Math.abs(cross(vertices.get(previous), vertices.get(current), vertices.get(next), normal)) > 0)
+				continue;
+			// turn could be a spike, which is not a point on an edge: only a true straight
+			// run may be clipped, or the outline would be changed rather than shortened
+			if (!between(vertices.get(previous), vertices.get(current), vertices.get(next)))
+				continue;
+			triangles.add(new int[]{previous, current, next});
+			remaining.remove(i);
+			return true;
+		}
+		return false;
+	}
+
+	/** True when the middle point lies within the segment its neighbours span. */
+	private static boolean between(double[] a, double[] b, double[] c) {
+		double ab = dot(a, b, c);
+		double lengthSquared = squared(subtract(c, a));
+		// a spike folds back on itself; a point on an edge lies within the span
+		return lengthSquared > 0 && ab >= 0 && ab <= lengthSquared;
+	}
+
+	/** Squared length of a vector. */
+	private static double squared(double[] v) {
+		return v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+	}
+
+	/** Dot product of (b-a) with (c-a). */
+	private static double dot(double[] a, double[] b, double[] c) {
+		double abx = b[0] - a[0], aby = b[1] - a[1], abz = b[2] - a[2];
+		double acx = c[0] - a[0], acy = c[1] - a[1], acz = c[2] - a[2];
+		return abx * acx + aby * acy + abz * acz;
+	}
+
+	private static double[] subtract(double[] a, double[] b) {
+		return new double[]{a[0] - b[0], a[1] - b[1], a[2] - b[2]};
 	}
 
 	private static void fan(List<Integer> loop, List<int[]> triangles) {

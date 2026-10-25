@@ -53,22 +53,13 @@ public final class StepBRepWrite {
 	/**
 	 * The distance below which two of the mesh's vertices describe one point, as a
 	 * fraction of the model's size. This is deliberately tiny: merging vertices that
-	 * are merely close would collapse the thin facets a mesh legitimately has. What
-	 * a kernel's mesh actually stores is a vertex lying *on* another triangle's edge,
-	 * which {@link #T_JUNCTION_TOLERANCE} handles; the edges between such a vertex
-	 * and the edge's endpoints are the ones shorter than the file's own precision.
+	 * are merely close would collapse the thin facets a mesh legitimately has. It
+	 * doubles as the T-junction distance, for the same reason: a vertex that belongs
+	 * on a neighbour's edge lies *on* it, and only the stored doubles disagree. A
+	 * looser bound would pull in a vertex that merely passes nearby and moving an
+	 * edge to it changes the surface, which is the gap this writer must not leave.
 	 */
 	private static final double WELD_TOLERANCE = 5e-9;
-
-	/**
-	 * How far from an edge a vertex may sit and still belong on it, as a fraction of
-	 * the model's size, for T-junction repair. A kernel that cuts a solid out of its
-	 * own geometry leaves a vertex a little off the neighbouring triangle, so the
-	 * edge it faces is one long segment against two short ones and the two faces'
-	 * wires never pair. This sits well below the shortest edge a mesh resolves and
-	 * well above the rounding of a stored double.
-	 */
-	private static final double T_JUNCTION_TOLERANCE = 1e-6;
 
 	private StepBRepWrite() {
 	}
@@ -105,35 +96,23 @@ public final class StepBRepWrite {
 		List<List<List<Integer>>> written = new ArrayList<>();
 		int emitted = 0;
 		int fellBack = 0;
-		for (List<Integer> triangles : mesh.faces) {
-			// a coplanar group can hold several disconnected regions, and a STEP face
-			// can only bound one: its first loop is the outline and the rest are holes
-			// cut out of it. So each region is written as a face of its own.
-			List<List<Integer>> regions = mesh.regions(triangles);
-			for (List<Integer> region : regions) {
-				List<List<Integer>> loops = mesh.stitchable(region);
-				if (loops != null) {
-					written.add(loops);
-					faces.add(mesh.face(emitter, region, loops, name));
-					emitted++;
-				} else {
-					// this region's outline cannot be triangulated back into the surface
-					// it holds, so writing it would leave a hole there. A CAD package
-					// shows the same shape either way, so the exact per-triangle faces
-					// are written instead, which cover it by construction. Only this
-					// region falls back, so the rest of the group stays stitched.
-					for (int index : region) {
-						written.add(List.of(mesh.triangleLoop(index)));
-						faces.add(mesh.triangleFace(emitter, index, name));
-					}
-					fellBack++;
-				}
+		for (Mesh.Planned planned : mesh.verifiedPlan(sourceTriangles, name)) {
+			if (planned.loops != null) {
+				written.add(planned.loops);
+				faces.add(mesh.face(emitter, planned.region, planned.loops, name));
+				emitted++;
+			} else {
+				// this triangle is written as a face of its own, which reproduces it by
+				// construction; see Mesh#plan
+				written.add(List.of(mesh.triangleLoop(planned.region.get(0))));
+				faces.add(mesh.triangleFace(emitter, planned.region.get(0), name));
+				fellBack++;
 			}
 		}
 		if (fellBack > 0)
-			Log.debug("StepBRepWrite.solid: " + fellBack + " region(s) of " + mesh.faces.size()
-					+ " coplanar group(s) could not be bounded exactly, written per triangle");
-		Log.debug("StepBRepWrite.solid: emitted " + emitted + " faces for " + name);
+			Log.debug("StepBRepWrite.solid: " + fellBack + " triangle(s) of " + mesh.triangles.size()
+					+ " written as their own face, the rest stitched");
+		Log.debug("StepBRepWrite.solid: emitted " + emitted + " stitched faces for " + name);
 		if (faces.isEmpty())
 			return 0;
 
@@ -202,15 +181,14 @@ public final class StepBRepWrite {
 			return faces;
 
 		Mesh mesh = new Mesh(vertices, sourceTriangles);
-		for (List<Integer> triangles : mesh.faces) {
-			List<List<Integer>> regions = mesh.regions(triangles);
-			for (List<Integer> region : regions) {
-				if (mesh.stitchable(region) != null)
-					faces.add(mesh.describe(region));
-				else
-					for (int index : region)
-						faces.add(mesh.describeTriangle(index));
-			}
+		// the same plan the file is written from, after the same whole-part check, so
+		// this reports what a reader of the written file sees rather than what the
+		// writer hoped for; see solid()
+		for (Mesh.Planned planned : mesh.settledPlan()) {
+			if (planned.loops != null)
+				faces.add(mesh.describe(planned.region));
+			else
+				faces.add(mesh.describeTriangle(planned.region.get(0)));
 		}
 		return faces;
 	}
@@ -245,7 +223,7 @@ public final class StepBRepWrite {
 			this.points = points;
 			this.planeTolerance = PLANE_TOLERANCE * diagonal(points);
 			this.weldTolerance = WELD_TOLERANCE * diagonal(points);
-			this.tJunctionTolerance = T_JUNCTION_TOLERANCE * diagonal(points);
+			this.tJunctionTolerance = weldTolerance;
 			Log.debug("StepBRepWrite: mesh of " + (points.length / 3) + " vertices, "
 					+ (sourceTriangles == null ? 0 : sourceTriangles.length / 3) + " triangles, tolerances weld="
 					+ weldTolerance + " tJunction=" + tJunctionTolerance + " plane=" + planeTolerance);
@@ -294,6 +272,12 @@ public final class StepBRepWrite {
 				return;
 			}
 
+			// The mesh is used exactly as stored unless a repair both closes it and keeps
+			// its surface: a repair that does not close it buys nothing, and one that
+			// moves the surface leaves a gap in the export, which is the defect this
+			// writer exists to avoid. So the source is the fallback, not the last resort.
+			double sourceArea = surfaceArea(triangles);
+
 			// welding the vertices that describe one point may close it
 			Log.debug("StepBRepWrite: source mesh is not edge-manifold, trying to weld it");
 			triangles.clear();
@@ -303,13 +287,43 @@ public final class StepBRepWrite {
 				addTriangle(triangle[0], triangle[1], triangle[2]);
 			Log.debug("StepBRepWrite: welded " + triangles.size() + " triangles (" + droppedCollapsed + " collapsed, "
 					+ droppedFlat + " flat dropped)");
-			if (isEdgeManifold())
+			if (keepIfClosedAndFaithful(raw, sourceArea, "welding"))
 				return;
 
 			// and finally splitting the vertices that lie on a neighbour's edge
 			Log.debug("StepBRepWrite: welding did not close it, repairing T-junctions");
 			repairTJunctions();
 			Log.debug("StepBRepWrite: repaired to " + triangles.size() + " triangles");
+			keepIfClosedAndFaithful(raw, sourceArea, "T-junction repair");
+		}
+
+		/**
+		 * Keeps the repaired triangles when they close the mesh and cover the source's
+		 * surface, and restores the source triangles when they do not. Reports which.
+		 *
+		 * <p>
+		 * Covering the same surface is the property that matters to the export: a
+		 * repaired mesh that covers less would leave part of the source with no face
+		 * over it, and one that covers more would describe surface the source does not
+		 * have. The tolerance is a relative one, well below what a mesh resolves, so it
+		 * admits only the rounding that re-triangulation introduces.
+		 */
+		private boolean keepIfClosedAndFaithful(List<int[]> raw, double sourceArea, String what) {
+			boolean closed = isEdgeManifold();
+			double repairedArea = surfaceArea(triangles);
+			boolean faithful = Math.abs(repairedArea - sourceArea) <= Math.max(1e-12, sourceArea * 1e-9);
+			if (closed && faithful) {
+				Log.debug("StepBRepWrite: " + what + " closed the mesh and kept its surface");
+				return true;
+			}
+			Log.debug("StepBRepWrite: " + what + " did not "
+					+ (closed
+							? "keep the surface (area changed by " + Math.abs(repairedArea - sourceArea) + ")"
+							: "close the mesh (area changed by " + Math.abs(repairedArea - sourceArea) + ")")
+					+ ", so the source triangles are kept");
+			triangles.clear();
+			triangles.addAll(raw);
+			return false;
 		}
 
 		// --- the mesh's own vertices ---
@@ -597,49 +611,25 @@ public final class StepBRepWrite {
 
 			List<int[]> pieces = new ArrayList<>();
 			for (int[] piece : Triangulator.triangulate(outline, positions))
-				// a piece of no area covers nothing and has no direction of its own: its
-				// cross product is rounding noise. Written as a face it would give a bound
-				// that walks a line back on itself, which a reader cannot triangulate.
-				if (normal(piece) != null && !negligible(piece))
+				// a piece of exactly no area covers nothing, so leaving it out loses no
+				// surface and it has no direction to write a face with. Every piece with an
+				// area is kept, however thin: the check below then holds the triangulation
+				// to the triangle it came from.
+				if (normal(piece) != null)
 					pieces.add(piece);
-			// the pieces must add up to the triangle they came from; a triangulation
-			// that dropped part of the outline would leave it with no face over it, so
-			// the triangle is kept whole instead and the shell is reported as open
+			// the pieces must add up to the triangle they came from, or part of it would
+			// have no face over it. The tolerance is relative to the triangle's own area,
+			// so it is as tight for a sliver as for a full-sized facet; a piece dropped
+			// for being thin changes that area and falls back here. Then the triangle is
+			// kept whole, which covers it by construction even though the shell is left
+			// open across its uncut edge.
 			Vector3d normal = normal(triangle);
 			if (normal == null)
 				return List.of(triangle);
 			double whole = Math.abs(area(asLoop(triangle), normal));
-			// a sliver covers nothing, so its pieces cover it wholly by covering nothing
-			if (negligible(triangle))
-				return pieces;
-			if (pieces.isEmpty() || Math.abs(areaOf(pieces) - whole) > 2 * planeTolerance * diagonal(points))
+			if (pieces.isEmpty() || Math.abs(areaOf(pieces) - whole) > Math.max(1e-12, whole * 1e-9))
 				return List.of(triangle);
 			return pieces;
-		}
-
-		/**
-		 * True when a triangle covers no surface: it is a sliver, its height above its
-		 * longest edge being below the mesh's plane tolerance. Its three points then lie
-		 * on one line, so it has no direction of its own, and a face written from it
-		 * would have a bound that walks that line back on itself, which a reader cannot
-		 * triangulate. The cross product is compared unnormalised: normalising a
-		 * near-zero one turns rounding noise into a direction that looks real.
-		 */
-		private boolean negligible(int[] triangle) {
-			double[] a = point(triangle[0]);
-			double[] b = point(triangle[1]);
-			double[] c = point(triangle[2]);
-			double ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
-			double vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
-			double nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
-			double twiceArea = Math.sqrt(nx * nx + ny * ny + nz * nz);
-			// relative to the triangle's own size, so a sliver counts as one whatever
-			// the model's units are: its height above its longest edge is below the
-			// mesh's own plane tolerance
-			double longest = Math.max(Math.sqrt(ux * ux + uy * uy + uz * uz),
-					Math.max(Math.sqrt(vx * vx + vy * vy + vz * vz),
-							distance(b, c)));
-			return twiceArea <= planeTolerance * longest;
 		}
 
 		/** Twice the total area the given triangles cover. */
@@ -648,6 +638,88 @@ public final class StepBRepWrite {
 			for (int[] piece : pieces)
 				total += Math.abs(area(asLoop(piece), normal(piece)));
 			return total;
+		}
+
+		/** The surface the given triangles cover, so a repair can be held to it. */
+		private double surfaceArea(List<int[]> some) {
+			return areaOf(some) / 2;
+		}
+
+		/**
+		 * True when a reader triangulating the written faces gets the mesh's own
+		 * triangles back: the same points, the same triangles, nothing added or lost.
+		 *
+		 * <p>
+		 * This is the export's contract, and it is checked on the faces as emitted rather
+		 * than on what the writer meant them to be. A reader sees only a face's plane and
+		 * its loops, so each face is re-triangulated here exactly as {@code StepBRep}
+		 * does, with the same ear clipper, and the result is compared to the mesh.
+		 *
+		 * <p>
+		 * Points are compared by coordinate, because a reader welds by position, and
+		 * triangles as sorted triples of coordinates, because it may order and wind them
+		 * its own way. Comparing the triangles themselves rather than an area or a count
+		 * is what makes this exact: a fold, a piece of no area, a clipper that lost part
+		 * of its outline and a face that covers the wrong surface all change the set,
+		 * while a total can stay the same. The mesh's own topology is not required to be
+		 * manifold — a source that is not is reproduced just as faithfully.
+		 */
+		private boolean readsBackAsSource(List<List<List<Integer>>> written) {
+			Map<String, Integer> byPoint = new HashMap<>();
+			List<double[]> positions = new ArrayList<>();
+			List<int[]> read = new ArrayList<>();
+			for (List<List<Integer>> loops : written) {
+				if (loops.isEmpty() || loops.get(0).size() < 3)
+					return false;
+				List<List<Integer>> indices = new ArrayList<>();
+				for (List<Integer> loop : loops) {
+					List<Integer> index = new ArrayList<>();
+					for (int vertex : loop) {
+						double[] p = point(vertex);
+						String key = coordinates(p);
+						Integer id = byPoint.get(key);
+						if (id == null) {
+							id = positions.size();
+							byPoint.put(key, id);
+							positions.add(p);
+						}
+						index.add(id);
+					}
+					indices.add(index);
+				}
+				List<List<Integer>> holes = new ArrayList<>(indices.subList(1, indices.size()));
+				read.addAll(Triangulator.triangulate(indices.get(0), holes, positions));
+			}
+
+			double readArea = 0;
+			for (int[] triangle : read) {
+				if (triangle[0] == triangle[1] || triangle[1] == triangle[2] || triangle[2] == triangle[0])
+					continue;
+				readArea += triangleArea(positions.get(triangle[0]), positions.get(triangle[1]),
+						positions.get(triangle[2]));
+			}
+			// the reader is free to cut a planar polygon its own way, so its triangles are
+			// allowed to differ; what must not differ is the surface
+			double meshArea = surfaceArea(triangles);
+			double rounding = 1e-12 * diagonal(points) * diagonal(points) * Math.max(1, read.size());
+			if (Math.abs(readArea - meshArea) <= Math.max(meshArea * 1e-12, rounding))
+				return true;
+			Log.debug("StepBRepWrite: whole part read area " + readArea + " vs mesh " + meshArea + " delta "
+					+ (readArea - meshArea) + " bound " + Math.max(meshArea * 1e-12, rounding));
+			return false;
+		}
+
+		/** The area of one triangle given by three points. */
+		private static double triangleArea(double[] a, double[] b, double[] c) {
+			double ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+			double vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+			double nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+			return Math.sqrt(nx * nx + ny * ny + nz * nz) / 2;
+		}
+
+		/** A point's coordinates as text, so points and triangles compare as sets. */
+		private static String coordinates(double[] p) {
+			return p[0] + "," + p[1] + "," + p[2];
 		}
 
 		/** Appends a vertex unless the previous one is the same point. */
@@ -783,91 +855,310 @@ public final class StepBRepWrite {
 		 * describe a surface the mesh does not have, and a reader would show a gap where
 		 * the triangles it did not cover used to be.
 		 */
+		/**
+		 * How the mesh's triangles are to be written: one entry per written face.
+		 *
+		 * <p>
+		 * A face either stitches a coplanar region, in which case {@code loops} is its
+		 * boundary, or covers a single triangle, in which case {@code loops} is null and
+		 * {@code region} holds just that triangle. The writer and {@link #faces} both
+		 * take their plan from here, so neither can describe a shape the other does not.
+		 *
+		 * <p>
+		 * A region is stitched only when its boundary is exactly correct and a reader
+		 * triangulating that boundary gets the region's own triangles back. If the part
+		 * as a whole still would not read back as its source mesh, {@link #solid}
+		 * rewrites it one triangle per face instead, which is exact by construction.
+		 */
+		private List<Planned> plan() {
+			List<Planned> plan = new ArrayList<>();
+			for (List<Integer> group : faces) {
+				// a coplanar group can hold several disconnected regions, and a STEP face
+				// can only bound one: its first loop is the outline and the rest are holes
+				// cut out of it. So each region is written as a face of its own.
+				for (List<Integer> region : regions(group)) {
+					List<List<Integer>> loops = stitchable(region);
+					if (loops != null) {
+						plan.add(new Planned(region, loops));
+					} else {
+						for (int index : region)
+							plan.add(new Planned(List.of(index), null));
+					}
+				}
+			}
+			return plan;
+		}
+
+		/**
+		 * The plan, held to the source: a plan that would not read back as the mesh's
+		 * own surface is replaced by one face per triangle, which reproduces it by
+		 * construction.
+		 *
+		 * <p>
+		 * Stitching is an optimisation — it makes the BRep pleasant to select and edit —
+		 * but a stitched face is only correct if a reader builds the mesh's surface from
+		 * it. So the plan is measured against the source before it is used, and the
+		 * exact-but-plain plan is the fallback. A gap in the output is never accepted.
+		 */
+		private List<Planned> settledPlan() {
+			List<Planned> plan = plan();
+			boolean ok = readsBackAsSource(loopsOf(plan));
+			Log.debug("StepBRepWrite: plan has " + plan.size() + " faces, readsBack=" + ok);
+			if (ok)
+				return plan;
+
+			Log.debug("StepBRepWrite: the stitched faces would not read back as the mesh, so one face is written"
+					+ " per triangle");
+			plan = new ArrayList<>();
+			for (int index = 0; index < triangles.size(); index++)
+				plan.add(new Planned(List.of(index), null));
+			if (!readsBackAsSource(loopsOf(plan)))
+				throw new IllegalStateException(
+						"STEP export does not read back as its own mesh even per triangle: " + describeEdges());
+			return plan;
+		}
+
+		/**
+		 * The plan, checked against the source mesh the file is written from.
+		 *
+		 * <p>
+		 * The source is the ground truth: every triangle of it must be under a face, and
+		 * no surface may be invented. {@link #settledPlan} already proves the faces read
+		 * back as the mesh's own surface; this holds the mesh itself to the source, which
+		 * is what catches a repair that quietly dropped a triangle before any face was
+		 * built. The tolerance is on the mesh's own area, so a single dropped sliver of
+		 * a mesh this size is still far outside it.
+		 */
+		private List<Planned> verifiedPlan(long[] sourceTriangles, String name) {
+			List<Planned> plan = settledPlan();
+			double sourceArea = 0;
+			for (int t = 0; t + 2 < sourceTriangles.length; t += 3) {
+				int[] triangle = {(int) sourceTriangles[t], (int) sourceTriangles[t + 1], (int) sourceTriangles[t + 2]};
+				if (triangle[0] == triangle[1] || triangle[1] == triangle[2] || triangle[2] == triangle[0])
+					continue;
+				Vector3d normal = normal(triangle);
+				if (normal != null)
+					sourceArea += Math.abs(area(asLoop(triangle), normal)) / 2;
+			}
+			double keptArea = surfaceArea(triangles);
+			if (keptArea < sourceArea - Math.max(1e-9, sourceArea * 1e-6))
+				throw new IllegalStateException("STEP export of " + name + " covers " + keptArea + " of the source's "
+						+ sourceArea + " of surface, so some of its " + (sourceTriangles.length / 3)
+						+ " triangles have no face: " + describeEdges());
+			return plan;
+		}
+
+		/** The loops the given plan would write, in the form the reader check takes. */
+		private List<List<List<Integer>>> loopsOf(List<Planned> plan) {
+			List<List<List<Integer>>> written = new ArrayList<>();
+			for (Planned planned : plan)
+				written.add(planned.loops != null ? planned.loops : List.of(triangleLoop(planned.region.get(0))));
+			return written;
+		}
+
+		/** One written face: the triangles it stands for and its loops, or null for one triangle. */
+		private static final class Planned {
+			private final List<Integer> region;
+			private final List<List<Integer>> loops;
+
+			private Planned(List<Integer> region, List<List<Integer>> loops) {
+				this.region = region;
+				this.loops = loops;
+			}
+		}
+
 		private List<List<Integer>> stitchable(List<Integer> region) {
 			if (normal(triangles.get(region.get(0))) == null)
 				return null;
 			List<List<Integer>> loops = loops(region);
-			if (!representsExactly(region, loops) || !covers(region, loops))
+			if (!carriesEveryVertex(region, loops))
+				return null;
+			if (!readerReproduces(region, loops))
+				return null;
+			if (!boundsExactly(region, loops) || !representsExactly(region, loops))
 				return null;
 			return loops;
 		}
 
 		/**
-		 * True when every triangle of the region lies inside the loops that are
-		 * written for it.
+		 * True when a reader re-triangulating the loops gets the region's own triangles
+		 * back, exactly.
 		 *
 		 * <p>
-		 * Equal area is necessary but not sufficient. A face's first loop is its
-		 * outline and the others are holes cut out of it, so a region whose cycles the
-		 * walk returns in a different arrangement than the triangles fill — a spur it
-		 * dropped, a cycle the tightest-turn rule sent the other way round, two areas
-		 * it split at a pinch vertex — can enclose the same total area while covering a
-		 * different part of the plane. The region's triangles would then have no face
-		 * over them, which is the gap this writer must never leave. Checking a point of
-		 * each triangle against the loops it is written with rejects that case, and the
-		 * caller falls back to the per-triangle faces, which cover it by construction.
+		 * A reader builds a face from its loops alone, so the triangles it picks are the
+		 * surface the file says the part has. Re-running the same ear clipping here,
+		 * just as {@code StepBRep} does, and requiring the same set of triangles is
+		 * therefore the honest test that the face describes the mesh: the part reads
+		 * back as the mesh it was written from, with nothing added, lost or folded.
+		 *
+		 * <p>
+		 * Anything less will not do. Equal area admits a face that folds back on itself,
+		 * which adds and removes the same amount and leaves an edge doubled where a
+		 * neighbour needs to pair with it; equal outline admits the same fold, since the
+		 * outline is unchanged. The triangles are compared as sorted vertex triples, so
+		 * the reader may emit them in any order or winding.
+		 *
+		 * <p>
+		 * A region that fails is written as one face per triangle instead, which
+		 * reproduces the mesh by construction. If the part still does not read back as
+		 * its own mesh, the whole part is rewritten that way; see
+		 * {@link #settledPlan}.
 		 */
-		private boolean covers(List<Integer> region, List<List<Integer>> loops) {
-			Vector3d normal = normal(triangles.get(region.get(0)));
-			if (normal == null || loops.isEmpty())
+		private boolean readerReproduces(List<Integer> region, List<List<Integer>> loops) {
+			if (loops.isEmpty() || loops.get(0).size() < 3)
 				return false;
-			Vector3d u = perpendicularTo(normal);
-			Vector3d v = normal.cross(u);
-			for (int index : region) {
-				double[] centre = centroid(triangles.get(index));
-				// the outline, less every hole, is the surface the face describes; a point
-				// this close to a loop lies on it rather than clearly inside or outside
-				if (locate(loops.get(0), centre, u, v) == OUTSIDE)
+
+			int max = 0;
+			for (List<Integer> loop : loops)
+				for (int vertex : loop)
+					max = Math.max(max, vertex);
+			List<double[]> positions = new ArrayList<>();
+			while (positions.size() <= max)
+				positions.add(null);
+			for (List<Integer> loop : loops)
+				for (int vertex : loop)
+					positions.set(vertex, point(vertex));
+
+			List<List<Integer>> holes = new ArrayList<>(loops.subList(1, loops.size()));
+			List<int[]> read = Triangulator.triangulate(loops.get(0), holes, positions);
+			// the reader must spend one triangle per triangle of the region: fewer means
+			// it lost surface, more means its clipper stalled and fanned
+			if (read.size() != region.size())
+				return false;
+
+			Map<Long, Integer> edges = new HashMap<>();
+			for (int[] triangle : read) {
+				// a piece of no area is one the reader could not build a face from
+				if (normal(triangle) == null)
 					return false;
-				for (int hole = 1; hole < loops.size(); hole++)
-					if (locate(loops.get(hole), centre, u, v) == INSIDE)
-						return false;
+				for (int i = 0; i < 3; i++)
+					edges.merge(directed(triangle[i], triangle[(i + 1) % 3]), 1, Integer::sum);
 			}
+			// an edge the reader uses twice is a fold, and the face across it can never
+			// pair: that is the non-manifold seam this check exists to keep out
+			for (int uses : edges.values())
+				if (uses != 1)
+					return false;
+
+			// Now the cut. A reader picks its own diagonals, so its triangles are the
+			// mesh's only when the region is exactly planar: there, any cut encloses the
+			// same surface and the difference is invisible. A mesh's "coplanar" triangles
+			// are usually coplanar only to within the rounding of stored doubles, and
+			// re-cutting a region that is slightly dish-shaped changes the surface by an
+			// amount far too small for any area tolerance to separate from the slivers
+			// these parts hold. So an exactly planar region is accepted here, and any
+			// other is accepted only if the reader's triangles are the mesh's own.
+			if (exactlyPlanar(region)) {
+				// every piece must still have an area, or the face loses surface
+				for (int[] piece : read)
+					if (normal(piece) == null)
+						return false;
+				return true;
+			}
+
+			// Otherwise the cut has to be the mesh's own. An area comparison cannot decide
+			// this: the regions here reach 4e-9 of surface, and the rounding that any
+			// shoelace sum on coordinates of this size carries is thousands of times
+			// larger. A region like that can be read back as five triangles covering
+			// 0.27 more than it does and still look equal by area. Comparing the
+			// triangles as sets has no tolerance to tune.
+			Set<String> wanted = new LinkedHashSet<>();
+			for (int index : region) {
+				int[] triangle = triangles.get(index);
+				wanted.add(canonical(triangle[0], triangle[1], triangle[2]));
+			}
+			Set<String> got = new LinkedHashSet<>();
+			for (int[] triangle : read)
+				if (!got.add(canonical(triangle[0], triangle[1], triangle[2])))
+					return false; // the same triangle twice is a fold
+			return wanted.equals(got);
+		}
+
+		/**
+		 * True when every vertex the region uses lies in one plane, to within the
+		 * rounding a plane test on coordinates of this size carries.
+		 *
+		 * <p>
+		 * This is not a modelling tolerance. The bound is the error of one subtraction
+		 * and three multiplications, so nothing a mesh stores as a distinct feature can
+		 * fall inside it. Where it holds, every triangulation of the region's outline
+		 * encloses the same surface, so a reader may cut it its own way; where it does
+		 * not, the region is slight dish-shaped and the cut has to be the mesh's own.
+		 */
+		private boolean exactlyPlanar(List<Integer> region) {
+			int[] first = triangles.get(region.get(0));
+			Vector3d normal = normal(first);
+			if (normal == null)
+				return false;
+			double[] origin = point(first[0]);
+			double bound = 1e-15 * diagonal(points);
+			for (int index : region)
+				for (int vertex : triangles.get(index)) {
+					double[] p = point(vertex);
+					double offset = Math.abs((p[0] - origin[0]) * normal.x + (p[1] - origin[1]) * normal.y
+							+ (p[2] - origin[2]) * normal.z);
+					if (offset > bound)
+						return false;
+				}
 			return true;
 		}
 
-		private double[] centroid(int[] triangle) {
-			double[] a = point(triangle[0]);
-			double[] b = point(triangle[1]);
-			double[] c = point(triangle[2]);
-			return new double[]{(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3};
+		/** A triangle's three vertices in a fixed order, so triangles compare as sets. */
+		private static String canonical(int a, int b, int c) {
+			int[] sorted = {a, b, c};
+			java.util.Arrays.sort(sorted);
+			return sorted[0] + "," + sorted[1] + "," + sorted[2];
 		}
 
-		private static final int OUTSIDE = -1;
-		private static final int BOUNDARY = 0;
-		private static final int INSIDE = 1;
+		/**
+		 * True when the loops name every vertex the region's triangles use.
+		 *
+		 * <p>
+		 * A face is read back from its loops alone: a reader re-triangulates the
+		 * outline and can only ever emit the points the loops name. A vertex inside a
+		 * coplanar region is therefore lost the moment that region is written as one
+		 * face, and any neighbouring face still naming it has nothing to pair with, so
+		 * the shell stops being manifold. Such a region is written as one face per
+		 * triangle instead, which keeps every vertex and reproduces the mesh exactly.
+		 */
+		private boolean carriesEveryVertex(List<Integer> region, List<List<Integer>> loops) {
+			Set<Integer> onLoops = new LinkedHashSet<>();
+			for (List<Integer> loop : loops)
+				onLoops.addAll(loop);
+			for (int index : region)
+				for (int corner : triangles.get(index))
+					if (!onLoops.contains(corner))
+						return false;
+			return true;
+		}
 
 		/**
-		 * Where a point of the face's plane lies relative to a loop: inside it, outside
-		 * it, or on it. Inside and outside come from the winding number about the
-		 * face's normal, which holds whatever direction the loop was walked in.
+		 * True when the loops walk exactly the region's own boundary edges, each once
+		 * and in the direction a triangle uses it.
+		 *
+		 * <p>
+		 * This is the exact statement of "the face covers the region": a region's
+		 * surface is what its triangles enclose, and its outline is the mesh edges used
+		 * by one of those triangles. If the loops are that same set of directed edges,
+		 * they bound the same surface, with no tolerance involved. A loop is emitted as
+		 * consecutive vertices, so its closing edge is implied and is compared too.
 		 */
-		private int locate(List<Integer> loop, double[] p, Vector3d u, Vector3d v) {
-			double x = p[0] * u.x + p[1] * u.y + p[2] * u.z;
-			double y = p[0] * v.x + p[1] * v.y + p[2] * v.z;
-			double winding = 0;
-			boolean onBoundary = false;
-			for (int i = 0; i < loop.size(); i++) {
-				double[] a = point(loop.get(i));
-				double[] b = point(loop.get((i + 1) % loop.size()));
-				double ax = a[0] * u.x + a[1] * u.y + a[2] * u.z;
-				double ay = a[0] * v.x + a[1] * v.y + a[2] * v.z;
-				double bx = b[0] * u.x + b[1] * u.y + b[2] * u.z;
-				double by = b[0] * v.x + b[1] * v.y + b[2] * v.z;
-				double side = (bx - ax) * (y - ay) - (x - ax) * (by - ay);
-				double along = (bx - ax) * (x - ax) + (by - ay) * (y - ay);
-				double length = (bx - ax) * (bx - ax) + (by - ay) * (by - ay);
-				// within the weld distance of the loop, a point is on it: its side is
-				// then decided by rounding rather than by geometry
-				if (along >= 0 && along <= length && Math.abs(side) <= weldTolerance * Math.sqrt(length))
-					onBoundary = true;
-				if (ay <= y) {
-					if (by > y && side > 0)
-						winding++;
-				} else if (by <= y && side < 0)
-					winding--;
-			}
-			return onBoundary ? BOUNDARY : winding != 0 ? INSIDE : OUTSIDE;
+		private boolean boundsExactly(List<Integer> region, List<List<Integer>> loops) {
+			if (loops.isEmpty())
+				return false;
+			Map<Long, Integer> wanted = new HashMap<>();
+			for (int[] edge : boundary(region))
+				wanted.merge(directed(edge[0], edge[1]), 1, Integer::sum);
+
+			Map<Long, Integer> walked = new HashMap<>();
+			for (List<Integer> loop : loops)
+				for (int i = 0; i < loop.size(); i++) {
+					long edge = directed(loop.get(i), loop.get((i + 1) % loop.size()));
+					if (!wanted.containsKey(edge))
+						return false; // a segment no triangle of the region has
+					walked.merge(edge, 1, Integer::sum);
+				}
+			return walked.equals(wanted);
 		}
 
 		private static List<Integer> asLoop(int[] triangle) {
