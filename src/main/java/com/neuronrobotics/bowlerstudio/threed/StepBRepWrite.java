@@ -26,18 +26,20 @@ import eu.mihosoft.vrl.v3d.Vector3d;
  * does not close yields a surface model, which is still valid.
  *
  * <p>
- * Four properties keep the result a solid rather than a pile of slivers. A face
- * holds triangles that lie in one plane, not merely triangles with parallel
- * normals: two triangles with the same normal but different offsets make the face
- * they share curved, which a reader rejects. Every triangle is kept, however thin
- * it is: a dropped triangle leaves its neighbours' edges one sided, which opens
- * the shell, and a reader fills the gap with a face of no volume. Vertices that a
- * mesh stores apart but that describe one point are unified first, because the
- * edges between them are shorter than the file's own precision and a reader
- * cannot close a wire over them. And a vertex left in the middle of a neighbour's
- * edge is split into that edge, so the two faces across it name the same vertices
- * and can pair; without that the shell is open by index even though it is closed
- * in space.
+ * The mesh is the ground truth and is written as it is stored: no triangle is
+ * added, and none is moved or dropped. A face holds triangles that lie in one
+ * plane, not merely triangles with parallel normals, because two triangles with
+ * the same normal but different offsets make the face between them curved. Every
+ * triangle is kept, however thin: a dropped one leaves its neighbours' edges one
+ * sided, which opens the shell, and a reader fills that gap with a face of no
+ * volume.
+ *
+ * <p>
+ * The one thing that is unified is a point the mesh stores as several vertices.
+ * Those are the same point, so naming them separately would only invite a reader
+ * to weld them itself; see {@link Mesh#prepare}. Nothing else about the mesh is
+ * repaired — a mesh whose own indices do not pair is written as it is, and a
+ * kernel that cannot stitch it is reporting a limit of its own resolution.
  */
 public final class StepBRepWrite {
 
@@ -211,22 +213,17 @@ public final class StepBRepWrite {
 		private final Map<Integer, Long> vertices = new HashMap<>();
 		private final double planeTolerance;
 		private final double weldTolerance;
-		private final double tJunctionTolerance;
 		/** A mesh vertex to the vertex that represents it. */
-		private final Map<Integer, Integer> weldMap = new HashMap<>();
-		private final Map<Long, List<Integer>> weldGrid = new HashMap<>();
 		/** Triangles the source had and this mesh could not keep, for diagnostics. */
 		private int droppedCollapsed;
-		private int droppedFlat;
 
 		private Mesh(double[] points, long[] sourceTriangles) {
 			this.points = points;
 			this.planeTolerance = PLANE_TOLERANCE * diagonal(points);
 			this.weldTolerance = WELD_TOLERANCE * diagonal(points);
-			this.tJunctionTolerance = weldTolerance;
 			Log.debug("StepBRepWrite: mesh of " + (points.length / 3) + " vertices, "
 					+ (sourceTriangles == null ? 0 : sourceTriangles.length / 3) + " triangles, tolerances weld="
-					+ weldTolerance + " tJunction=" + tJunctionTolerance + " plane=" + planeTolerance);
+					+ weldTolerance + " plane=" + planeTolerance);
 			TickToc.tic("prepare mesh");
 			prepare(sourceTriangles);
 			TickToc.tic("index");
@@ -237,157 +234,98 @@ public final class StepBRepWrite {
 		}
 
 		/**
-		 * Takes the source triangles, interfering with them as little as possible.
+		 * Takes the source triangles exactly as stored.
 		 *
 		 * <p>
-		 * A mesh a kernel produced is already edge-manifold by its own indices, so it
-		 * is used exactly as it stands: welding or splitting it could only turn a
-		 * closed surface into an open one. Only a mesh that is not already manifold is
-		 * repaired, first by unifying the vertices that describe one point, then by
-		 * splitting a vertex that lies on a neighbour's edge into that edge. Each step
-		 * is kept only if it actually closes the surface.
+		 * The only interference is unifying a point the mesh stores as several
+		 * vertices, and only when that is provably exact. See the body.
 		 */
 		private void prepare(long[] sourceTriangles) {
 			if (sourceTriangles == null)
 				return;
-
-			// as it stands, every triangle with an area is kept: dropping one would leave
-			// its neighbours' edges one sided and open the surface it is part of. A
-			// triangle naming one vertex twice has no edge to pair and no face to be.
+			// The mesh is written as it is stored. Every triangle the source holds is
+			// written, and none is invented: the source is the ground truth, and a writer
+			// that split edges or snapped vertices would be exporting a different shape.
+			// Repairing a mesh is its owner's business, not the file writer's.
+			//
+			// A triangle naming one vertex twice has no edge to pair and no area to face,
+			// so no face can describe it; it is the one thing that has to be left out.
 			List<int[]> raw = new ArrayList<>(sourceTriangles.length / 3);
 			for (int t = 0; t + 2 < sourceTriangles.length; t += 3) {
 				int a = (int) sourceTriangles[t];
 				int b = (int) sourceTriangles[t + 1];
 				int c = (int) sourceTriangles[t + 2];
-				// a triangle that names one vertex twice has an edge of no length and no
-				// area, so it cannot be a face and has no edge to pair; keeping it would
-				// write a line entity with a zero-length vector
-				if (a == b || b == c || c == a)
+				if (a == b || b == c || c == a) {
+					droppedCollapsed++;
 					continue;
+				}
 				raw.add(new int[]{a, b, c});
 			}
+			if (droppedCollapsed > 0)
+				Log.debug(
+						"StepBRepWrite: " + droppedCollapsed + " triangle(s) name a vertex twice and cannot be faced");
 			triangles.addAll(raw);
-			if (isEdgeManifold()) {
-				Log.debug("StepBRepWrite: source mesh is already edge-manifold, used as it stands");
+			if (isEdgeManifold())
 				return;
-			}
 
-			// The mesh is used exactly as stored unless a repair both closes it and keeps
-			// its surface: a repair that does not close it buys nothing, and one that
-			// moves the surface leaves a gap in the export, which is the defect this
-			// writer exists to avoid. So the source is the fallback, not the last resort.
-			double sourceArea = surfaceArea(triangles);
-
-			// welding the vertices that describe one point may close it
-			Log.debug("StepBRepWrite: source mesh is not edge-manifold, trying to weld it");
+			// A mesh can also close in space while its own indices say otherwise, because
+			// one point is stored as several vertices. Unifying those is the one thing
+			// that is not a change of shape: the points are the same point, and the file
+			// would otherwise name the same position twice, which a reader welds anyway.
+			//
+			// It is kept only when it is provably exact: the mesh must close, the same
+			// triangles must survive, and none may collapse. Welding that moved a vertex
+			// or lost a sliver would be exporting a different mesh, so it is dropped.
 			triangles.clear();
-			droppedCollapsed = 0;
-			droppedFlat = 0;
+			Map<Integer, Integer> representative = representatives();
 			for (int[] triangle : raw)
-				addTriangle(triangle[0], triangle[1], triangle[2]);
-			Log.debug("StepBRepWrite: welded " + triangles.size() + " triangles (" + droppedCollapsed + " collapsed, "
-					+ droppedFlat + " flat dropped)");
-			if (keepIfClosedAndFaithful(raw, sourceArea, "welding"))
+				triangles.add(new int[]{representative.getOrDefault(triangle[0], triangle[0]),
+						representative.getOrDefault(triangle[1], triangle[1]),
+						representative.getOrDefault(triangle[2], triangle[2])});
+			if (isEdgeManifold() && triangles.size() == raw.size())
 				return;
-
-			// and finally splitting the vertices that lie on a neighbour's edge
-			Log.debug("StepBRepWrite: welding did not close it, repairing T-junctions");
-			repairTJunctions();
-			Log.debug("StepBRepWrite: repaired to " + triangles.size() + " triangles");
-			keepIfClosedAndFaithful(raw, sourceArea, "T-junction repair");
+			triangles.clear();
+			triangles.addAll(raw);
 		}
 
 		/**
-		 * Keeps the repaired triangles when they close the mesh and cover the source's
-		 * surface, and restores the source triangles when they do not. Reports which.
+		 * A vertex to the vertex that represents it, for every vertex that describes a
+		 * point another vertex already describes.
 		 *
 		 * <p>
-		 * Covering the same surface is the property that matters to the export: a
-		 * repaired mesh that covers less would leave part of the source with no face
-		 * over it, and one that covers more would describe surface the source does not
-		 * have. The tolerance is a relative one, well below what a mesh resolves, so it
-		 * admits only the rounding that re-triangulation introduces.
+		 * "Describes the same point" means within the weld distance, which is a fraction
+		 * of the model's own size rather than any modelling tolerance: it is the
+		 * precision below which the file itself cannot tell two positions apart. The
+		 * lookup is through a grid of cells one weld distance across, so a vertex only
+		 * has to be compared with those in the cells touching it.
 		 */
-		private boolean keepIfClosedAndFaithful(List<int[]> raw, double sourceArea, String what) {
-			boolean closed = isEdgeManifold();
-			double repairedArea = surfaceArea(triangles);
-			boolean faithful = Math.abs(repairedArea - sourceArea) <= Math.max(1e-12, sourceArea * 1e-9);
-			if (closed && faithful) {
-				Log.debug("StepBRepWrite: " + what + " closed the mesh and kept its surface");
-				return true;
+		private Map<Integer, Integer> representatives() {
+			Map<Integer, Integer> representative = new HashMap<>();
+			Map<Long, List<Integer>> grid = new HashMap<>();
+			for (int vertex = 0; vertex < points.length / 3; vertex++) {
+				double[] p = point(vertex);
+				long x = (long) Math.floor(p[0] / weldTolerance);
+				long y = (long) Math.floor(p[1] / weldTolerance);
+				long z = (long) Math.floor(p[2] / weldTolerance);
+				Integer found = null;
+				for (long dx = -1; dx <= 1 && found == null; dx++)
+					for (long dy = -1; dy <= 1 && found == null; dy++)
+						for (long dz = -1; dz <= 1 && found == null; dz++)
+							for (int candidate : grid.getOrDefault(cell(x + dx, y + dy, z + dz), List.of()))
+								if (distance(point(candidate), p) <= weldTolerance) {
+									found = candidate;
+									break;
+								}
+				if (found != null)
+					representative.put(vertex, found);
+				else
+					grid.computeIfAbsent(cell(x, y, z), unused -> new ArrayList<>()).add(vertex);
 			}
-			Log.debug("StepBRepWrite: " + what + " did not "
-					+ (closed
-							? "keep the surface (area changed by " + Math.abs(repairedArea - sourceArea) + ")"
-							: "close the mesh (area changed by " + Math.abs(repairedArea - sourceArea) + ")")
-					+ ", so the source triangles are kept");
-			triangles.clear();
-			triangles.addAll(raw);
-			return false;
-		}
-
-		// --- the mesh's own vertices ---
-
-		/**
-		 * Takes the mesh's triangles, welding the vertices that describe one point
-		 * first. A triangle that welding collapses to a line is dropped: it bounds no
-		 * area, so no face needs it.
-		 */
-		private void addTriangle(int a, int b, int c) {
-			a = weld(a);
-			b = weld(b);
-			c = weld(c);
-			if (a == b || b == c || c == a) {
-				droppedCollapsed++;
-				return;
-			}
-			int[] triangle = new int[]{a, b, c};
-			if (normal(triangle) == null) {
-				droppedFlat++;
-				return; // a triangle of no area has no plane
-			}
-			triangles.add(triangle);
-		}
-
-		/**
-		 * The representative of a mesh vertex, welding any vertices that lie within
-		 * the weld distance of one another. The representative keeps its own
-		 * coordinates, so a welded mesh still describes the source's surface: the
-		 * vertices it unifies are the same point to the precision a STEP file can
-		 * carry.
-		 */
-		private int weld(int vertex) {
-			Integer existing = weldMap.get(vertex);
-			if (existing != null)
-				return existing;
-
-			double[] p = point(vertex);
-			long x = (long) Math.floor(p[0] / weldTolerance);
-			long y = (long) Math.floor(p[1] / weldTolerance);
-			long z = (long) Math.floor(p[2] / weldTolerance);
-
-			// a point within the weld distance lies in this cell or one next to it
-			for (long dx = -1; dx <= 1; dx++)
-				for (long dy = -1; dy <= 1; dy++)
-					for (long dz = -1; dz <= 1; dz++)
-						for (int candidate : weldGrid.getOrDefault(cell(x + dx, y + dy, z + dz), List.of()))
-							if (distance(point(candidate), p) <= weldTolerance) {
-								weldMap.put(vertex, candidate);
-								return candidate;
-							}
-
-			weldGrid.computeIfAbsent(cell(x, y, z), unused -> new ArrayList<>()).add(vertex);
-			weldMap.put(vertex, vertex);
-			return vertex;
+			return representative;
 		}
 
 		private static long cell(long x, long y, long z) {
 			return (x * 73856093L) ^ (y * 19349663L) ^ (z * 83492791L);
-		}
-
-		private static double distance(double[] a, double[] b) {
-			double dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2];
-			return Math.sqrt(dx * dx + dy * dy + dz * dz);
 		}
 
 		private double[] point(int vertex) {
@@ -403,233 +341,9 @@ public final class StepBRepWrite {
 			}
 		}
 
-		/**
-		 * Splits every triangle edge that another vertex lies on, so the mesh becomes
-		 * edge-manifold by its own indices.
-		 *
-		 * <p>
-		 * A mesh a kernel cut out of its own geometry stores a point that lies on
-		 * another triangle's edge as a vertex of its own. Geometrically the surface is
-		 * closed there, but by index the long edge and the two short ones it faces do
-		 * not pair, so a reader cannot stitch the shell. Splitting the long edge at
-		 * that vertex puts the same vertex in both faces' wires.
-		 *
-		 * <p>
-		 * This follows {@link FeatureEdgeExtractor}'s approach. Only an edge used by
-		 * one triangle can be a T-junction: an edge used twice already meets another
-		 * triangle along its whole length. So the mesh is indexed in one pass, and the
-		 * candidate vertices for each of those few boundary edges are found through
-		 * three pre-sorted coordinate arrays and a binary search on the tightest axis,
-		 * which keeps this near linear instead of comparing every edge to every
-		 * vertex.
-		 */
-		private void repairTJunctions() {
-			// a split can expose a vertex that lay beyond the first, so repeat; each
-			// round only ever reuses existing vertices, so this settles quickly
-			for (int round = 0; round < 8; round++) {
-				if (!repairRound())
-					return;
-			}
-			Log.debug("StepBRepWrite: T-junction repair stopped at its round limit");
-		}
-
-		/** One pass of the repair. True when it split anything. */
-		private boolean repairRound() {
-			// count how many triangles use each edge, in one pass
-			Map<Long, Integer> uses = new HashMap<>();
-			for (int[] triangle : triangles)
-				for (int i = 0; i < 3; i++)
-					uses.merge(key(triangle[i], triangle[(i + 1) % 3]), 1, Integer::sum);
-
-			// only the vertices that end an edge used once can be a T-junction, and
-			// only an edge used once can receive one
-			List<Integer> endpoints = new ArrayList<>();
-			for (Map.Entry<Long, Integer> entry : uses.entrySet()) {
-				if (entry.getValue() != 1)
-					continue;
-				endpoints.add((int) (entry.getKey() >> 32));
-				endpoints.add((int) (entry.getKey() & 0xffffffffL));
-			}
-			if (endpoints.isEmpty())
-				return false;
-
-			List<Integer> unique = new ArrayList<>(new LinkedHashSet<>(endpoints));
-			int[] byX = sortedBy(unique, 0);
-			int[] byY = sortedBy(unique, 1);
-			int[] byZ = sortedBy(unique, 2);
-
-			List<int[]> repaired = new ArrayList<>(triangles.size());
-			boolean changed = false;
-			for (int[] triangle : triangles)
-				// an edge used twice already meets its neighbour along its whole length,
-				// so only a boundary edge can carry a T-junction; splitting a shared one
-				// would tear the surface instead
-				for (int[] piece : splitTriangle(triangle, uses, byX, byY, byZ)) {
-					repaired.add(piece);
-					changed |= piece != triangle;
-				}
-			if (!changed)
-				return false;
-
-			triangles.clear();
-			triangles.addAll(repaired);
-			return true;
-		}
-
-		/** Vertex ids ordered along one axis, for binary searching a box. */
-		private int[] sortedBy(List<Integer> vertices, int axis) {
-			List<Integer> order = new ArrayList<>(vertices);
-			order.sort((a, b) -> Double.compare(coordinate(a, axis), coordinate(b, axis)));
-			int[] result = new int[order.size()];
-			for (int i = 0; i < result.length; i++)
-				result[i] = order.get(i);
-			return result;
-		}
-
-		private double coordinate(int vertex, int axis) {
-			return points[vertex * 3 + axis];
-		}
-
-		/**
-		 * The vertices lying on the segment between two vertices, other than its
-		 * endpoints, in order from {@code from} to {@code to}.
-		 */
-		private List<Integer> verticesOn(int from, int to, int[] byX, int[] byY, int[] byZ) {
-			double[] a = point(from);
-			double[] b = point(to);
-			double minX = Math.min(a[0], b[0]) - tJunctionTolerance;
-			double maxX = Math.max(a[0], b[0]) + tJunctionTolerance;
-			double minY = Math.min(a[1], b[1]) - tJunctionTolerance;
-			double maxY = Math.max(a[1], b[1]) + tJunctionTolerance;
-			double minZ = Math.min(a[2], b[2]) - tJunctionTolerance;
-			double maxZ = Math.max(a[2], b[2]) + tJunctionTolerance;
-
-			// search along whichever axis the segment spans least, so few candidates
-			// are scanned
-			int[] order = byX;
-			double low = minX;
-			double high = maxX;
-			double spanX = maxX - minX, spanY = maxY - minY, spanZ = maxZ - minZ;
-			if (spanY < spanX && spanY <= spanZ) {
-				order = byY;
-				low = minY;
-				high = maxY;
-			} else if (spanZ < spanX) {
-				order = byZ;
-				low = minZ;
-				high = maxZ;
-			}
-
-			int axis = order == byX ? 0 : order == byY ? 1 : 2;
-			int start = lowerBound(order, axis, low);
-			int end = upperBound(order, axis, high);
-
-			double dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
-			double lengthSquared = dx * dx + dy * dy + dz * dz;
-			if (lengthSquared == 0)
-				return List.of();
-
-			List<double[]> cuts = new ArrayList<>();
-			for (int i = start; i < end; i++) {
-				int vertex = order[i];
-				if (vertex == from || vertex == to)
-					continue;
-				double[] p = point(vertex);
-				if (p[0] < minX || p[0] > maxX || p[1] < minY || p[1] > maxY || p[2] < minZ || p[2] > maxZ)
-					continue;
-				double t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy + (p[2] - a[2]) * dz) / lengthSquared;
-				if (t <= 1e-9 || t >= 1 - 1e-9)
-					continue;
-				double x = a[0] + dx * t, y = a[1] + dy * t, z = a[2] + dz * t;
-				double off = (p[0] - x) * (p[0] - x) + (p[1] - y) * (p[1] - y) + (p[2] - z) * (p[2] - z);
-				if (off > tJunctionTolerance * tJunctionTolerance)
-					continue;
-				cuts.add(new double[]{t, vertex});
-			}
-
-			cuts.sort((left, right) -> Double.compare(left[0], right[0]));
-			List<Integer> vertices = new ArrayList<>(cuts.size());
-			for (double[] cut : cuts)
-				vertices.add((int) cut[1]);
-			return vertices;
-		}
-
-		private int lowerBound(int[] order, int axis, double value) {
-			int low = 0, high = order.length;
-			while (low < high) {
-				int mid = (low + high) >>> 1;
-				if (coordinate(order[mid], axis) < value)
-					low = mid + 1;
-				else
-					high = mid;
-			}
-			return low;
-		}
-
-		private int upperBound(int[] order, int axis, double value) {
-			int low = 0, high = order.length;
-			while (low < high) {
-				int mid = (low + high) >>> 1;
-				if (coordinate(order[mid], axis) <= value)
-					low = mid + 1;
-				else
-					high = mid;
-			}
-			return low;
-		}
-
-		/**
-		 * The triangles one triangle becomes once each edge is cut at the vertices
-		 * lying on it. The cuts turn it into a polygon with the same outline, which is
-		 * re-triangulated; a plain fan would put triangles of no area along the cut
-		 * edge when the cut vertex sits beside the fan origin.
-		 */
-		private List<int[]> splitTriangle(int[] triangle, Map<Long, Integer> uses, int[] byX, int[] byY, int[] byZ) {
-			List<Integer> outline = new ArrayList<>();
-			for (int i = 0; i < 3; i++) {
-				int from = triangle[i];
-				int to = triangle[(i + 1) % 3];
-				add(outline, from);
-				if (uses.get(key(from, to)) == 1)
-					for (int vertex : verticesOn(from, to, byX, byY, byZ))
-						add(outline, vertex);
-			}
-			if (outline.size() == 3 && outline.get(0) == triangle[0] && outline.get(1) == triangle[1]
-					&& outline.get(2) == triangle[2])
-				return List.of(triangle);
-
-			// the triangulator indexes its point list by the loop's own entries, so the
-			// list has to be addressed by the mesh's vertex numbers
-			List<double[]> positions = new ArrayList<>();
-			int max = 0;
-			for (int vertex : outline)
-				max = Math.max(max, vertex);
-			while (positions.size() <= max)
-				positions.add(null);
-			for (int vertex : outline)
-				positions.set(vertex, point(vertex));
-
-			List<int[]> pieces = new ArrayList<>();
-			for (int[] piece : Triangulator.triangulate(outline, positions))
-				// a piece of exactly no area covers nothing, so leaving it out loses no
-				// surface and it has no direction to write a face with. Every piece with an
-				// area is kept, however thin: the check below then holds the triangulation
-				// to the triangle it came from.
-				if (normal(piece) != null)
-					pieces.add(piece);
-			// the pieces must add up to the triangle they came from, or part of it would
-			// have no face over it. The tolerance is relative to the triangle's own area,
-			// so it is as tight for a sliver as for a full-sized facet; a piece dropped
-			// for being thin changes that area and falls back here. Then the triangle is
-			// kept whole, which covers it by construction even though the shell is left
-			// open across its uncut edge.
-			Vector3d normal = normal(triangle);
-			if (normal == null)
-				return List.of(triangle);
-			double whole = Math.abs(area(asLoop(triangle), normal));
-			if (pieces.isEmpty() || Math.abs(areaOf(pieces) - whole) > Math.max(1e-12, whole * 1e-9))
-				return List.of(triangle);
-			return pieces;
+		private static double distance(double[] a, double[] b) {
+			double dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2];
+			return Math.sqrt(dx * dx + dy * dy + dz * dz);
 		}
 
 		/** Twice the total area the given triangles cover. */
@@ -720,13 +434,6 @@ public final class StepBRepWrite {
 		/** A point's coordinates as text, so points and triangles compare as sets. */
 		private static String coordinates(double[] p) {
 			return p[0] + "," + p[1] + "," + p[2];
-		}
-
-		/** Appends a vertex unless the previous one is the same point. */
-		private void add(List<Integer> outline, int vertex) {
-			if (!outline.isEmpty() && distance(point(outline.get(outline.size() - 1)), point(vertex)) <= weldTolerance)
-				return;
-			outline.add(vertex);
 		}
 
 		// --- grouping into faces ---
@@ -1557,8 +1264,7 @@ public final class StepBRepWrite {
 			}
 			return edges.size() + " edges, " + unpaired + " with no opposite side (shortest "
 					+ (unpaired == 0 ? "-" : Double.toString(shortest)) + "), " + doubled
-					+ " used more than once each way, weld tolerance " + weldTolerance + ", dropped " + droppedFlat
-					+ " flat triangles";
+					+ " used more than once each way, weld tolerance " + weldTolerance + " flat triangles";
 		}
 
 		/** The triangle's unit normal, or null when it has no area to face. */
