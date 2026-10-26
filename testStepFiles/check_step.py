@@ -1,19 +1,28 @@
 """Validate STEP files: FreeCAD/OCC's own checks plus a scan of the raw STEP entities.
 
+CI use (one command; exit status 0 = pass, nonzero = fail):
+
+    STEP_FILES="out/*.step" freecadcmd check_step.py | tee gate.log
+    test "${PIPESTATUS[0]}" -eq 0 && grep -q "^GATE: PASS" gate.log
+
+Interactive / library use:
+
     freecadcmd -c "import sys; sys.path.insert(0, '.');
-                   from check_step import gate; gate('a.step', 'b.step')"
+                   from check_step import check; check('a.step', 'b.step')"
 
-`check` returns True only when every file passes. `gate` does the same and exits
-the process with status 0/1 so CI can use it.
-
+`check` prints one block per file and returns True only when every file passes.
 Post-import checks see the shape AFTER OCC's import-time healing, so the raw
 STEP text is also scanned for what the exporter actually wrote.
+
+Note: when STEP_FILES is set, importing this module runs the gate and exits.
 """
 
+import glob
 import math
 import os
 import re
 import sys
+import traceback
 
 import Part
 
@@ -34,12 +43,6 @@ def check(*paths, bopCheck=True, expectedVolume=None, volumeRelTol=1e-3,
     for path in paths:
         ok = report(path, bopCheck, expectedVolume, volumeRelTol, maxTolerance) and ok
     return ok
-
-
-def gate(*paths, **kwargs):
-    ok = check(*paths, **kwargs)
-    sys.stdout.flush()
-    os._exit(0 if ok else 1)  # freecadcmd ignores return values
 
 
 def scanText(path):
@@ -89,9 +92,9 @@ def report(path, bopCheck=True, expectedVolume=None, volumeRelTol=1e-3,
         counts, fileUncertainty = scanText(path)
         print(f"   STEP entities       {counts}")
         print(f"   file uncertainty    {fileUncertainty}")
-        if counts["MANIFOLD_SOLID_BREP"] + counts["BREP_WITH_VOIDS"] != 1:
-            problems.append("file holds %d solid BREP entities, expected 1"
-                            % (counts["MANIFOLD_SOLID_BREP"] + counts["BREP_WITH_VOIDS"]))
+        solidCount = counts["MANIFOLD_SOLID_BREP"] + counts["BREP_WITH_VOIDS"]
+        if solidCount != 1:
+            problems.append(f"file holds {solidCount} solid BREP entities, expected 1")
         for n in ("OPEN_SHELL", "SHELL_BASED_SURFACE_MODEL", "GEOMETRIC_CURVE_SET"):
             if counts[n]:
                 problems.append(f"file contains {counts[n]} {n} (not a closed solid)")
@@ -189,3 +192,35 @@ def finish(problems):
         print(f"   PROBLEM: {problem}")
     print(f"   -> {'OK' if not problems else 'FAILED'}\n")
     return not problems
+
+
+def main():
+    """CI entry point. Every outcome ends in os._exit because freecadcmd ignores
+    return values and can exit 0 after an uncaught exception.
+
+    Exit codes: 0 pass, 1 check failed, 2 no files matched, 3 exception.
+    A final "GATE: PASS" / "GATE: FAIL" line is printed for CI to grep.
+    """
+    code = 3
+    try:
+        # paths come from the environment because freecadcmd mangles sys.argv
+        patterns = os.environ.get("STEP_FILES", "").split()
+        paths = sorted(p for pat in patterns for p in glob.glob(pat))
+        if not paths:
+            print("GATE: FAIL (no STEP files matched STEP_FILES=%r)" % patterns)
+            code = 2
+        else:
+            ok = check(*paths)
+            print("GATE: PASS" if ok else "GATE: FAIL")
+            code = 0 if ok else 1
+    except BaseException:
+        traceback.print_exc()
+        print("GATE: FAIL (exception)")
+        code = 3
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(code)
+
+
+if __name__ == "__main__" or os.environ.get("STEP_FILES"):
+    main()
