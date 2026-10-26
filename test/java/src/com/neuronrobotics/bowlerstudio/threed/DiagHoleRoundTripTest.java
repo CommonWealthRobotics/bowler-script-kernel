@@ -54,9 +54,9 @@ public class DiagHoleRoundTripTest {
 					net -= Math.abs(DiagHolesTest.projected(face.loops.get(h), face.normal)) / 2;
 				readArea += net;
 			}
-			System.out.println("DIAG shape " + i + " writerHoles=" + writerWithHoles + " readFaces="
-					+ readFaces.size() + " readHoles=" + readWithHoles + " sourceArea=" + trim(sourceArea) + " readArea="
-					+ trim(readArea) + " delta=" + trim(readArea - sourceArea));
+			System.out.println("DIAG shape " + i + " writerHoles=" + writerWithHoles + " readFaces=" + readFaces.size()
+					+ " readHoles=" + readWithHoles + " sourceArea=" + trim(sourceArea) + " readArea=" + trim(readArea)
+					+ " delta=" + trim(readArea - sourceArea));
 		}
 	}
 

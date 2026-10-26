@@ -18,9 +18,11 @@ public class DiagGateExportTest {
 	@Test
 	public void export() throws Throwable {
 		CSG.setDefaultOptType(OptType.Manifold3d);
-		System.out.println("GATEWELD weld=" + System.getenv("STEP_WELD") + " always=" + System.getenv("STEP_ALWAYSWELD"));
+		System.out
+				.println("GATEWELD weld=" + System.getenv("STEP_WELD") + " always=" + System.getenv("STEP_ALWAYSWELD"));
 		System.out.println("GATESWEEP minweld=" + System.getenv("STEP_MINWELD"));
-		System.out.println("GATESWEEP minweld=" + System.getenv("STEP_MINWELD") + " always=" + System.getenv("STEP_ALWAYS"));
+		System.out.println(
+				"GATESWEEP minweld=" + System.getenv("STEP_MINWELD") + " always=" + System.getenv("STEP_ALWAYS"));
 		File out = new File("/tmp/gate_out");
 		out.mkdirs();
 		for (File stale : out.listFiles())

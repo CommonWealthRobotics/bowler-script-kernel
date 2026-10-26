@@ -1,15 +1,10 @@
 package com.neuronrobotics.bowlerstudio.threed;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Vector3d;
 
 /**
  * A plate with a true through hole: both flat caps are annuli, so the writer
@@ -22,8 +17,8 @@ public class DiagGroupTest {
 	public void diag() throws Throwable {
 		CSG plate = new eu.mihosoft.vrl.v3d.Cube(40, 40, 6).toCSG()
 				.difference(new eu.mihosoft.vrl.v3d.Cylinder(8, 20, 32).toCSG().move(0, 0, -10));
-		System.out.println("DIAG plate tris=" + plate.getTriCount() + " area=" + trim(area(plate))
-				+ " expectedArea=" + trim(2 * 40 * 40 + 4 * 40 * 6 - 2 * Math.PI * 64 + 2 * Math.PI * 8 * 6));
+		System.out.println("DIAG plate tris=" + plate.getTriCount() + " area=" + trim(area(plate)) + " expectedArea="
+				+ trim(2 * 40 * 40 + 4 * 40 * 6 - 2 * Math.PI * 64 + 2 * Math.PI * 8 * 6));
 
 		List<StepFace> faces = StepBRepWrite.faces(plate);
 		double total = 0;

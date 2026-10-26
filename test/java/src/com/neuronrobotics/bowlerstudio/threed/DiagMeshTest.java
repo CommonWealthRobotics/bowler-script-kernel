@@ -75,10 +75,11 @@ public class DiagMeshTest {
 				for (int index : groups.get(g)) {
 					int[] tri = triangles.get(index);
 					Vector3d n = (Vector3d) normal.invoke(mesh, tri);
-					double area = n == null ? 0
+					double area = n == null
+							? 0
 							: Math.abs((Double) areaMethod.invoke(mesh, asLoop.invoke(null, tri), n)) / 2;
-					System.out.println("DIAG   tri " + index + " " + tri[0] + "," + tri[1] + "," + tri[2] + " area="
-							+ area);
+					System.out.println(
+							"DIAG   tri " + index + " " + tri[0] + "," + tri[1] + "," + tri[2] + " area=" + area);
 				}
 			}
 		}

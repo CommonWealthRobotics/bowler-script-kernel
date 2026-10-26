@@ -86,8 +86,8 @@ public class DiagFaceValidityTest {
 				facesAffected++;
 		}
 		System.out.println("DIAG " + label + " faces=" + faces.size() + " facesAffected=" + facesAffected
-				+ " repeatedVertex=" + repeatedVertex + " zeroLengthEdges=" + zeroLength + " collinearTriples=" + collinear
-				+ " wholeLoopCollinear=" + collinearAll + " shortLoops=" + shortLoop);
+				+ " repeatedVertex=" + repeatedVertex + " zeroLengthEdges=" + zeroLength + " collinearTriples="
+				+ collinear + " wholeLoopCollinear=" + collinearAll + " shortLoops=" + shortLoop);
 		for (String example : examples)
 			System.out.println("DIAG   " + example);
 	}
@@ -104,8 +104,8 @@ public class DiagFaceValidityTest {
 		double vx = c[0] - b[0], vy = c[1] - b[1], vz = c[2] - b[2];
 		double cx = uy * vz - uz * vy, cy = uz * vx - ux * vz, cz = ux * vy - uy * vx;
 		double magnitude = Math.sqrt(cx * cx + cy * cy + cz * cz);
-		double scale = Math.max(1, Math.max(Math.sqrt(ux * ux + uy * uy + uz * uz),
-				Math.sqrt(vx * vx + vy * vy + vz * vz)));
+		double scale = Math.max(1,
+				Math.max(Math.sqrt(ux * ux + uy * uy + uz * uz), Math.sqrt(vx * vx + vy * vy + vz * vz)));
 		return magnitude <= 1e-9 * scale * scale;
 	}
 

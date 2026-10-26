@@ -13,9 +13,8 @@ public class DiagExportTest {
 	public void diag() throws Throwable {
 		String out = "/tmp/steps";
 		new File(out).mkdirs();
-		write(out + "/plate_through_hole.step",
-				new eu.mihosoft.vrl.v3d.Cube(40, 40, 6).toCSG()
-						.difference(new eu.mihosoft.vrl.v3d.Cylinder(8, 20, 32).toCSG().move(0, 0, -10)));
+		write(out + "/plate_through_hole.step", new eu.mihosoft.vrl.v3d.Cube(40, 40, 6).toCSG()
+				.difference(new eu.mihosoft.vrl.v3d.Cylinder(8, 20, 32).toCSG().move(0, 0, -10)));
 		write(out + "/two_holes.step",
 				new eu.mihosoft.vrl.v3d.Cube(40, 40, 6).toCSG()
 						.difference(new eu.mihosoft.vrl.v3d.Cylinder(5, 20, 16).toCSG().move(-10, 0, -10))
@@ -29,9 +28,8 @@ public class DiagExportTest {
 		write(out + "/sphere.step", new eu.mihosoft.vrl.v3d.Sphere(10, 24, 12).toCSG());
 		write(out + "/cube.step", new eu.mihosoft.vrl.v3d.Cube(10).toCSG());
 		write(out + "/cylinder.step", new eu.mihosoft.vrl.v3d.Cylinder(5, 20, 32).toCSG());
-		write(out + "/sphere_cut.step",
-				new eu.mihosoft.vrl.v3d.Cube(20, 20, 4).toCSG()
-						.difference(new eu.mihosoft.vrl.v3d.Sphere(6, 24, 12).toCSG().move(10, 10, 2)));
+		write(out + "/sphere_cut.step", new eu.mihosoft.vrl.v3d.Cube(20, 20, 4).toCSG()
+				.difference(new eu.mihosoft.vrl.v3d.Sphere(6, 24, 12).toCSG().move(10, 10, 2)));
 		System.out.println("DIAG written to " + out);
 	}
 

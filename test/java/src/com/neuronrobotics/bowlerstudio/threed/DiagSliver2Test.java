@@ -8,7 +8,6 @@ import java.util.List;
 import org.junit.Test;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Vector3d;
 
 /** Reports the exact coordinates of the degenerate mesh triangle. */
 public class DiagSliver2Test {

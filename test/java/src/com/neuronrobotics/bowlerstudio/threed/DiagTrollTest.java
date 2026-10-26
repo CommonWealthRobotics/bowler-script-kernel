@@ -22,8 +22,10 @@ public class DiagTrollTest {
 		for (java.util.Map.Entry<Long, Integer> e : dir.entrySet()) {
 			long from = e.getKey() >>> 32, to = e.getKey() & 0xffffffffL;
 			Integer rev = dir.get((to << 32) | (from & 0xffffffffL));
-			if (e.getValue() != 1) doubled++;
-			if (rev == null) unpaired++;
+			if (e.getValue() != 1)
+				doubled++;
+			if (rev == null)
+				unpaired++;
 		}
 		System.out.println("DIAGTROLL tris=" + t.length / 3 + " verts=" + csg.getVertCount() + " unpaired=" + unpaired
 				+ " doubled=" + doubled);

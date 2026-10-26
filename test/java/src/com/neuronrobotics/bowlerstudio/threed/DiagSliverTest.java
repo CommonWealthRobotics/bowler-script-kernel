@@ -1,12 +1,10 @@
 package com.neuronrobotics.bowlerstudio.threed;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Vector3d;
 
 /** Finds the sliver that becomes a zero-area face, and its neighbours. */
 public class DiagSliverTest {
@@ -39,8 +37,8 @@ public class DiagSliverTest {
 			for (int i = 1; i < face.loops.size(); i++)
 				net -= Math.abs(DiagHolesTest.projected(face.loops.get(i), face.normal)) / 2;
 			if (Math.abs(net) < 1e-9) {
-				System.out.println("DIAG zeroAreaFace normal=(" + face.normal.x + "," + face.normal.y + ","
-						+ face.normal.z + ")");
+				System.out.println(
+						"DIAG zeroAreaFace normal=(" + face.normal.x + "," + face.normal.y + "," + face.normal.z + ")");
 				for (List<double[]> loop : face.loops)
 					for (double[] p : loop)
 						System.out.println("DIAG   loop point (" + p[0] + "," + p[1] + "," + p[2] + ")");

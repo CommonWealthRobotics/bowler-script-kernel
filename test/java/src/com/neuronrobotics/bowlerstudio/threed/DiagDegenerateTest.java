@@ -1,12 +1,10 @@
 package com.neuronrobotics.bowlerstudio.threed;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Vector3d;
 
 /**
  * A plate with a square through hole. Reports the writer's faces that enclose no
@@ -52,8 +50,8 @@ public class DiagDegenerateTest {
 					for (List<double[]> loop : face.loops)
 						loopSizes.append(loop.size()).append('/');
 					System.out.println("DIAG zeroAreaFace loops=" + loopSizes + " normal=(" + face.normal.x + ","
-							+ face.normal.y + "," + face.normal.z + ") origin=(" + face.origin[0] + ","
-							+ face.origin[1] + "," + face.origin[2] + ")");
+							+ face.normal.y + "," + face.normal.z + ") origin=(" + face.origin[0] + "," + face.origin[1]
+							+ "," + face.origin[2] + ")");
 					for (List<double[]> loop : face.loops)
 						for (double[] p : loop)
 							System.out.println("DIAG   point (" + p[0] + "," + p[1] + "," + p[2] + ")");

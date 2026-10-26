@@ -32,11 +32,14 @@ public class DiagTrollWeld2Test {
 		for (java.util.Map.Entry<Long, Integer> e : dir.entrySet()) {
 			long from = e.getKey() >>> 32, to = e.getKey() & 0xffffffffL;
 			Integer rev = dir.get((to << 32) | (from & 0xffffffffL));
-			if (e.getValue() != 1) doubled++;
-			if (rev == null) unpaired++;
+			if (e.getValue() != 1)
+				doubled++;
+			if (rev == null)
+				unpaired++;
 		}
 		Field wf = mc.getDeclaredField("weldTolerance");
 		wf.setAccessible(true);
-		System.out.println("DIAGTROLL2 weldTol=" + wf.get(mesh) + " writerTris=" + tris.size() + " unpairedDirected=" + unpaired + " doubled=" + doubled);
+		System.out.println("DIAGTROLL2 weldTol=" + wf.get(mesh) + " writerTris=" + tris.size() + " unpairedDirected="
+				+ unpaired + " doubled=" + doubled);
 	}
 }

@@ -306,8 +306,8 @@ public final class StepBRepWrite {
 			List<int[]> pairs = closePairs(parent);
 			// nearest first, so the pairs that are most plainly one point are joined before
 			// any pair that is only near by accident
-			pairs.sort((a, b) -> Double.compare(distance(point(a[0]), point(a[1])),
-					distance(point(b[0]), point(b[1]))));
+			pairs.sort(
+					(a, b) -> Double.compare(distance(point(a[0]), point(a[1])), distance(point(b[0]), point(b[1]))));
 
 			int joined = 0;
 			// Joins are ordered nearest first, but a join rejected early can become sound once
@@ -316,23 +316,23 @@ public final class StepBRepWrite {
 			boolean progress = true;
 			while (progress) {
 				progress = false;
-			for (int[] pair : pairs) {
-				int first = find(parent, pair[0]);
-				int second = find(parent, pair[1]);
-				if (first == second)
-					continue;
-				// try the join on a copy: find compresses paths, so undoing the join on the
-				// live array would leave other vertices pointing at a root that no longer
-				// joins them
-				int[] trial = parent.clone();
-				trial[find(trial, second)] = find(trial, first);
-				if (!staysManifold(raw, trial)) {
-					continue;
+				for (int[] pair : pairs) {
+					int first = find(parent, pair[0]);
+					int second = find(parent, pair[1]);
+					if (first == second)
+						continue;
+					// try the join on a copy: find compresses paths, so undoing the join on the
+					// live array would leave other vertices pointing at a root that no longer
+					// joins them
+					int[] trial = parent.clone();
+					trial[find(trial, second)] = find(trial, first);
+					if (!staysManifold(raw, trial)) {
+						continue;
+					}
+					parent = trial;
+					joined++;
+					progress = true;
 				}
-				parent = trial;
-				joined++;
-				progress = true;
-			}
 			}
 			Log.debug("StepBRepWrite: joined " + joined + " of " + pairs.size() + " coincident vertex pairs");
 			return parent;
@@ -743,8 +743,8 @@ public final class StepBRepWrite {
 					covered[index] = true;
 			for (int index = 0; index < covered.length; index++)
 				if (!covered[index])
-					throw new IllegalStateException("STEP export left triangle " + index + " out of every face: "
-							+ describeEdges());
+					throw new IllegalStateException(
+							"STEP export left triangle " + index + " out of every face: " + describeEdges());
 			return plan;
 		}
 

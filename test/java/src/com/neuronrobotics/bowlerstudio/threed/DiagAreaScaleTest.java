@@ -48,9 +48,9 @@ public class DiagAreaScaleTest {
 						belowRel1e9++;
 				}
 			}
-			System.out.println("DIAG shape" + s + " tris=" + csg.getTriCount() + " diagonal=" + String.format("%.3f", diagonal)
-					+ " smallestArea=" + smallest + " smallest/diag^2=" + smallestRatio + " trisWithRatio<=1e-9="
-					+ belowRel1e9);
+			System.out.println("DIAG shape" + s + " tris=" + csg.getTriCount() + " diagonal="
+					+ String.format("%.3f", diagonal) + " smallestArea=" + smallest + " smallest/diag^2="
+					+ smallestRatio + " trisWithRatio<=1e-9=" + belowRel1e9);
 		}
 	}
 

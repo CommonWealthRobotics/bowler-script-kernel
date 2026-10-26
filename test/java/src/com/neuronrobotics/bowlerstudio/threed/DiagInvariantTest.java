@@ -7,7 +7,6 @@ import java.util.List;
 import org.junit.Test;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Vector3d;
 
 /**
  * Checks the invariants a CAD kernel needs from the written faces: every face
@@ -63,8 +62,8 @@ public class DiagInvariantTest {
 				if (distinct.size() < 3) {
 					degenerateLoop++;
 					if (examples.size() < 5)
-						examples.add("loop with " + distinct.size() + " distinct points of "
-								+ face.loops.get(i).size());
+						examples.add(
+								"loop with " + distinct.size() + " distinct points of " + face.loops.get(i).size());
 				}
 			}
 			if (Math.abs(net) < 1e-9) {
@@ -97,9 +96,9 @@ public class DiagInvariantTest {
 				doubled++;
 		}
 
-		System.out.println("DIAG " + label + " tris=" + source.getTriCount() + " faces=" + faces.size()
-				+ " zeroArea=" + zeroArea + " degenerateLoop=" + degenerateLoop + " shortLoop=" + shortLoop
-				+ " nonPlanar=" + offPlane + " unpairedEdges=" + unpaired + " doubledEdges=" + doubled);
+		System.out.println("DIAG " + label + " tris=" + source.getTriCount() + " faces=" + faces.size() + " zeroArea="
+				+ zeroArea + " degenerateLoop=" + degenerateLoop + " shortLoop=" + shortLoop + " nonPlanar=" + offPlane
+				+ " unpairedEdges=" + unpaired + " doubledEdges=" + doubled);
 		for (String example : examples)
 			System.out.println("DIAG   " + example);
 	}
