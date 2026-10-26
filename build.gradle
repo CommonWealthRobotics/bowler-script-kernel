@@ -439,3 +439,12 @@ test {
 		showStackTraces = true
 	}
 }
+// Prints the test runtime classpath, so the gate export can be run as a plain
+// java program and is never served from Gradle's task cache.
+tasks.register('printTestClasspath') {
+	doLast {
+		println "CLASSPATH_START"
+		println sourceSets.test.runtimeClasspath.asPath
+		println "CLASSPATH_END"
+	}
+}
