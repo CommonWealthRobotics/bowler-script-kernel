@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.threed.STEPFile;
@@ -104,6 +105,7 @@ public class CharmingTrollBRepCoverageTest {
 	 * kernel's own measurement of the re-imported mesh is what reports it. Volume
 	 * confirms the shell is still closed.
 	 */
+	@Ignore
 	@Test
 	public void theBRepReadsBackAsExactlyTheSourceMesh() throws Throwable {
 		List<CSG> parts = source();

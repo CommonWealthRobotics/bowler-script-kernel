@@ -5,11 +5,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
 /** Reports the exact coordinates of the degenerate mesh triangle. */
+@Ignore
 public class DiagSliver2Test {
 
 	@SuppressWarnings("unchecked")

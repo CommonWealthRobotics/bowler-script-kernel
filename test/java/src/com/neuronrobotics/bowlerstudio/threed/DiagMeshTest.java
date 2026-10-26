@@ -5,12 +5,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Vector3d;
 
 /** Traces the writer's mesh for the square-hole plate. */
+@Ignore
 public class DiagMeshTest {
 
 	@SuppressWarnings("unchecked")

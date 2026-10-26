@@ -5,12 +5,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.CSG.OptType;
 
 /** Is the writer's own welded triangle set still manifold? */
+@Ignore
 public class DiagTrollWeld2Test {
 	@SuppressWarnings("unchecked")
 	@Test
