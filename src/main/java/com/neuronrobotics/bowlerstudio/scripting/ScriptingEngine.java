@@ -167,6 +167,10 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 	private static File lastFile;
 	private static TransportConfigCallback transportConfigCallback = new SshTransportConfigCallback();
 
+	static TransportConfigCallback getTransportConfigCallback() {
+		return transportConfigCallback;
+	}
+
 	// UsernamePasswordCredentialsProvider(name,
 	// password);
 	private static ArrayList<IGithubLoginListener> loginListeners = new ArrayList<IGithubLoginListener>();
@@ -300,7 +304,7 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 	}
 
-	private static ProgressMonitor getProgressMoniter(String type, String remoteURI) {
+	static ProgressMonitor getProgressMoniter(String type, String remoteURI) {
 		String reponame = getRepositoryCloneDirectory(remoteURI).getName();
 
 		RuntimeException e = new RuntimeException();
@@ -1089,6 +1093,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 				pull(remoteURI, branch);
 			} catch (java.lang.RuntimeException exp) {
 			}
+			// push submodules first so their commits exist on their remotes
+			// before the parent references them
+			openGit(localRepo, git -> {
+				SubmoduleManager.pushSubmodulesRecursive(git);
+			});
 			String c = content;
 			openGit(localRepo, git -> {
 				// latest version
@@ -1816,6 +1825,11 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 
 		}
 
+		// recursively check out any submodules of this repository
+		openGit(remoteURI, git -> {
+			SubmoduleManager.updateSubmodulesRecursive(git);
+		});
+
 	}
 
 	private static void shallowCheckout(String remoteURI, String branch, Git git) throws GitAPIException,
@@ -2514,6 +2528,8 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 			return;
 		}
 		try {
+			// commit submodule changes first so this commit records their new ids
+			SubmoduleManager.commitSubmodulesRecursive(passedRef, message);
 			passedRef.commit().setAll(true).setMessage(message).call();
 			ArrayList<Runnable> arrayList = onCommitEventListeners.get(url);
 			if (arrayList != null) {
@@ -2661,6 +2677,21 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		}
 		contents += filepattern;
 		pushCodeToGit(url, null, ".gitignore", contents, "Adding ignore for " + filepattern);
+	}
+
+	/**
+	 * Check that the given file is a directory at the top level of a git
+	 * repository, then recursively scan its contents for other git
+	 * repositories. Any nested repository that is not yet a submodule of the
+	 * repository it resides within is converted into one (git data absorbed
+	 * under the parent's .git/modules, .gitmodules entry written, gitlink
+	 * staged). Nothing is committed by this call.
+	 *
+	 * @param repoDir the top level directory of a git repository
+	 * @return the nested repositories that were converted to submodules
+	 */
+	public static List<File> convertNestedReposToSubmodules(File repoDir) {
+		return SubmoduleManager.convertNestedReposToSubmodules(repoDir);
 	}
 
 	public static String getAppName() {
