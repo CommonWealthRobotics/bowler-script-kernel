@@ -399,6 +399,9 @@ public class ThumbnailImage implements ImagePorviderInterface {
 
 		CountDownLatch latch = new CountDownLatch(1);
 		AtomicReference<WritableImage> imageRef = new AtomicReference<>();
+		// This render + snapshot work does not touch the main stage scene;
+		// run it directly instead of through BowlerKernel.runLater, which
+		// executes inline on the caller (FX) thread and stalls drag handling
 		BowlerKernel.runLater(() -> {
 			try {
 				javafx.geometry.Bounds rendered = content.getBoundsInLocal();

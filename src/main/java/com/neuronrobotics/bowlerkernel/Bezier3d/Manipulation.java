@@ -170,6 +170,11 @@ public class Manipulation {
 	private TransformNR setGlobalPose;
 	private TransformNR inLocal;
 	private long pressedTime;
+	// Drag events arrive faster than FX pulses; at most one pending affine
+	// write per matrix keeps the FX queue from flooding while dragging.
+	// latestGlobal holds the newest pose; the single queued write applies it.
+	private volatile boolean fxWritePending = false;
+	private volatile TransformNR latestGlobal = null;
 
 	public void addEventListener(EventHandler<MouseEvent> r) {
 		if (eventListeners.contains(r))
@@ -523,8 +528,15 @@ public class Manipulation {
 		currentPoseNR.setY(newY);
 		currentPoseNR.setZ(newZ);
 		setInLocal(global);
+		latestGlobal = global;
+		// Called from any thread; only the first call of a burst enqueues the
+		// write, and that write applies whatever pose is newest when it runs
+		if (fxWritePending)
+			return;
+		fxWritePending = true;
 		BowlerKernel.runLater(() -> {
-			TransformFactory.nrToAffine(global, manipulationMatrix);
+			fxWritePending = false;
+			TransformFactory.nrToAffine(latestGlobal, manipulationMatrix);
 		});
 	}
 
