@@ -426,6 +426,11 @@ public class CaDoodleFile {
 		// if (initializing)
 		// throw new RuntimeException("Can not initialize while initializing.");
 		fireInitializationStart();
+		if (!isWorkplaneNotOrigin(workplane)) {
+			workplane = new TransformNR();
+		}
+		RotationNR r = workplane.getRotation();
+		r.normalize();
 		BezierPath.setMaximumInterpolationStep(TextResolutionPoints);
 		getImageEngine();
 		initializing = true;
@@ -1606,11 +1611,6 @@ public class CaDoodleFile {
 	public TransformNR getWorkplane() {
 		if (workplane == null)
 			workplane = new TransformNR();
-		if (!isWorkplaneNotOrigin(workplane)) {
-			workplane = new TransformNR();
-		}
-		RotationNR r = workplane.getRotation();
-		r.normalize();
 		return workplane;
 	}
 
