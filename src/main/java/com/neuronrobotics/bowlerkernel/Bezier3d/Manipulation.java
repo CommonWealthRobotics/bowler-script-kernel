@@ -175,6 +175,8 @@ public class Manipulation {
 	// latestGlobal holds the newest pose; the single queued write applies it.
 	private volatile boolean fxWritePending = false;
 	private volatile TransformNR latestGlobal = null;
+	// Test hook: number of affine applications that reached the matrix
+	public long affineWritesForTest = 0;
 
 	public void addEventListener(EventHandler<MouseEvent> r) {
 		if (eventListeners.contains(r))
@@ -534,10 +536,16 @@ public class Manipulation {
 		if (fxWritePending)
 			return;
 		fxWritePending = true;
-		BowlerKernel.runLater(() -> {
-			fxWritePending = false;
-			TransformFactory.nrToAffine(latestGlobal, manipulationMatrix);
-		});
+		// Same pattern as fireSave(): the bare thread is the hop that
+		// escapes the current FX event so the coalescing flag means
+		// something, and BowlerKernel.runLater then queues the write
+		new Thread(() -> {
+			BowlerKernel.runLater(() -> {
+				fxWritePending = false;
+				affineWritesForTest++;
+				TransformFactory.nrToAffine(latestGlobal, manipulationMatrix);
+			});
+		}, "Manipulation affine write").start();
 	}
 
 	public static IInteractiveUIElementProvider getUi() {
