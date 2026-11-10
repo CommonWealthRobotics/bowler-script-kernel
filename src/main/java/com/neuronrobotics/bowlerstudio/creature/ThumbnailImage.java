@@ -447,7 +447,7 @@ public class ThumbnailImage implements ImagePorviderInterface {
 			}
 		});
 		try {
-			if (!latch.await(2, TimeUnit.SECONDS))
+			if (!latch.await(10, TimeUnit.SECONDS))
 				throw new NoImageException("JavaFX thread did not complete within 2 seconds");
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
