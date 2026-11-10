@@ -216,12 +216,12 @@ public class Manipulation {
 
 	}
 
-	public void fireSave() {
-		new Thread(() -> {
-			fireSaveSynchronous();
-
-		}).start();
-	}
+	//	public void fireSave(Runnable r) {
+	//		new Thread(() -> {
+	//			fireSaveSynchronous();
+	//			r.run();
+	//		}).start();
+	//	}
 
 	public void fireSaveSynchronous() {
 
@@ -389,8 +389,9 @@ public class Manipulation {
 
 			if (event != null)
 				event.consume();
-
-			fireSave();
+			new Thread(() -> {
+				fireSaveSynchronous();
+			}).start();
 		}
 	}
 
@@ -536,16 +537,11 @@ public class Manipulation {
 		if (fxWritePending)
 			return;
 		fxWritePending = true;
-		// Same pattern as fireSave(): the bare thread is the hop that
-		// escapes the current FX event so the coalescing flag means
-		// something, and BowlerKernel.runLater then queues the write
-		new Thread(() -> {
-			BowlerKernel.runLater(() -> {
-				fxWritePending = false;
-				affineWritesForTest++;
-				TransformFactory.nrToAffine(latestGlobal, manipulationMatrix);
-			});
-		}, "Manipulation affine write").start();
+		BowlerKernel.runLater(() -> {
+			fxWritePending = false;
+			affineWritesForTest++;
+			TransformFactory.nrToAffine(latestGlobal, manipulationMatrix);
+		});
 	}
 
 	public static IInteractiveUIElementProvider getUi() {
