@@ -10,12 +10,14 @@ import com.neuronrobotics.bowlerstudio.creature.LimbOption;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseBuilder;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.AbstractAddFrom;
+import com.neuronrobotics.bowlerstudio.scripting.cadoodle.ICadoodleOperationUndo;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 
-public class AddRobotLimb extends AbstractAddFrom {
+public class AddRobotLimb extends AbstractAddFrom implements ICadoodleOperationUndo {
 	@Expose(serialize = true, deserialize = true)
 	private String builderName;
 	@Expose(serialize = true, deserialize = true)
@@ -37,6 +39,33 @@ public class AddRobotLimb extends AbstractAddFrom {
 	@Override
 	public File getFile() throws NoSuchFileException {
 		throw new NoSuchFileException("");
+	}
+
+	@Override
+	public void undo() {
+		Log.debug("Undo " + name);
+		if (getBuilderName() == null)
+			return;
+		MobileBaseBuilder builder = getRobots().get(getBuilderName());
+		if (builder == null)
+			return;
+		builder.removeLimb(this);
+	}
+
+	@Override
+	public void redo() {
+		Log.debug("Redo " + name);
+		if (getBuilderName() == null)
+			return;
+		MobileBaseBuilder builder = getRobots().get(getBuilderName());
+		if (builder == null)
+			return;
+		builder.addLimb(this, forceLoad);
+		try {
+			builder.build(getDb());
+		} catch (Exception e) {
+			com.neuronrobotics.sdk.common.Log.error(e);
+		}
 	}
 
 	@Override
