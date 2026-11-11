@@ -141,6 +141,25 @@ public class RobotStackUndoTest {
 		assertEquals("The tip should keep its height while the base slides", wheelTipBeforeMove.getZ(),
 				wheelTipAfterMove.getZ(), TOLERANCE_MM);
 
+		// 5b: undoing the base move must put the base back where it started,
+		// then redo must reapply the move before the test continues
+		cf.back();
+		DHParameterKinematics afterUndoBase = cf.getRobots().get(robotName).getMobileBase()
+				.getLimbByName(addLimb.getName());
+		assertPosition("wheel base after base-move undo", wheelBaseBeforeMove,
+				afterUndoBase.getRobotToFiducialTransform());
+		awaitTip(afterUndoBase, wheelTipBeforeMove, "base-move undo");
+		assertPosition("wheel tip after base-move undo", wheelTipBeforeMove,
+				afterUndoBase.getCurrentTaskSpaceTransform());
+		log("STEP5b base-move undo: base=" + afterUndoBase.getRobotToFiducialTransform().toSimpleString() + " tip="
+				+ afterUndoBase.getCurrentTaskSpaceTransform().toSimpleString());
+		cf.forward();
+		DHParameterKinematics afterRedoBase = cf.getRobots().get(robotName).getMobileBase()
+				.getLimbByName(addLimb.getName());
+		awaitTip(afterRedoBase, wheelTipAfterMove, "base-move redo");
+		assertPosition("wheel base after base-move redo", wheelBaseAfterMove,
+				afterRedoBase.getRobotToFiducialTransform());
+
 		// 6: move the wheel set point the way the tip handle does: state the
 		// target as the forward kinematics of a joint-space vector driven off
 		// the current target, so it is reachable by construction
@@ -173,6 +192,26 @@ public class RobotStackUndoTest {
 		assertTrue("The wheel joints must track the set point, travel=" + jointTravel, jointTravel > 1);
 		log("STEP6 target=" + target.toSimpleString() + " joints before=" + Arrays.toString(jointsBefore) + " target="
 				+ Arrays.toString(jointsTarget) + " after=" + Arrays.toString(jointsAfter));
+
+		// 6b: undoing the set point move must roll the kinematics back one
+		// step, then redo must reapply it before the test continues
+		cf.back();
+		DHParameterKinematics afterUndoSetpoint = cf.getRobots().get(robotName).getMobileBase()
+				.getLimbByName(addLimb.getName());
+		assertPosition("wheel base after set point undo", wheelBaseAfterMove,
+				afterUndoSetpoint.getRobotToFiducialTransform());
+		awaitTip(afterUndoSetpoint, wheelTipAfterMove, "set point undo");
+		assertPosition("wheel tip after set point undo", wheelTipAfterMove,
+				afterUndoSetpoint.getCurrentTaskSpaceTransform());
+		double[] jointsUndone = afterUndoSetpoint.getCurrentJointSpaceTarget();
+		for (int i = 0; i < jointsBefore.length; i++)
+			assertEquals("Joint " + i + " must roll back on set point undo", jointsBefore[i], jointsUndone[i],
+					TOLERANCE_MM);
+		log("STEP6b set point undo: base=" + afterUndoSetpoint.getRobotToFiducialTransform().toSimpleString()
+				+ " joints=" + Arrays.toString(jointsUndone));
+		cf.forward();
+		awaitTip(cf.getRobots().get(robotName).getMobileBase().getLimbByName(addLimb.getName()), target,
+				"set point redo");
 
 		// snapshot the redo target state before undoing
 		TransformNR wheelBaseFinal = afterTipMove.getRobotToFiducialTransform().copy();
