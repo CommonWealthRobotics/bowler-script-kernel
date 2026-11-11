@@ -20,6 +20,7 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -413,6 +414,12 @@ public class MobileBaseBuilder {
 		// timeline order: the limb must exist before its modifications run
 		ArrayList<CaDoodleOperation> ordered = new ArrayList<CaDoodleOperation>(operations);
 		ordered.sort((a, b) -> Integer.compare(getOperationIndex(a), getOperationIndex(b)));
+		// each undone modification stores the limb state from before it ran,
+		// so only the earliest undone one per limb may write: snapshots taken
+		// after it describe newer states and would roll the limb forward again
+		// keying on scripting name keeps a stale kinematics reference from
+		// bypassing the rule after a limb was re-created
+		HashSet<String> undoneApplied = new HashSet<String>();
 		for (int i = 0; i < ordered.size(); i++) {
 			CaDoodleOperation op = ordered.get(i);
 			if (AddRobotController.class.isInstance(op)) {
@@ -463,6 +470,10 @@ public class MobileBaseBuilder {
 				ModifyLimb mod = (ModifyLimb) op;
 				DHParameterKinematics kin = mod.getLimb();
 				if (kin == null)
+					continue;
+				if (mod.isUndo() && !undoneApplied.add(kin.getScriptingName()))
+					// a later undone modification must stay silent or it
+					// would undo the rollback done by the one below it
 					continue;
 
 				TransformNR base = mod.getBase();
