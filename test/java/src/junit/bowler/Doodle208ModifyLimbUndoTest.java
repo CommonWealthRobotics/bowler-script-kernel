@@ -3,6 +3,7 @@ package junit.bowler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -109,6 +110,7 @@ public class Doodle208ModifyLimbUndoTest {
 		assertBase("after undoing the move", beforeMove, afterUndo);
 		awaitTip(afterUndo, SECOND_MOVE_TIP, "move undo");
 		assertTip("after undoing the move", SECOND_MOVE_TIP, afterUndo);
+		assertWheelPartsAt("after undoing the move");
 
 		// 4: redo re-applies the move
 		cf.forward();
@@ -133,11 +135,51 @@ public class Doodle208ModifyLimbUndoTest {
 
 		// 6: redo the whole way forward through every location
 		cf.forward();
-		assertBase("after redoing the fixture's first move", FIRST_MOVE, robotBase.getLimbByName(limbName));
+		DHParameterKinematics redoOne = robotBase.getLimbByName(limbName);
+		assertBase("after redoing the fixture's first move", FIRST_MOVE, redoOne);
+		awaitTip(redoOne, FIRST_MOVE_TIP, "first move redo");
+		assertTip("after redoing the fixture's first move", FIRST_MOVE_TIP, redoOne);
 		cf.forward();
-		assertBase("after redoing the fixture's second move", SECOND_MOVE, robotBase.getLimbByName(limbName));
+		DHParameterKinematics redoTwo = robotBase.getLimbByName(limbName);
+		assertBase("after redoing the fixture's second move", SECOND_MOVE, redoTwo);
+		awaitTip(redoTwo, SECOND_MOVE_TIP, "second move redo");
+		assertTip("after redoing the fixture's second move", SECOND_MOVE_TIP, redoTwo);
 		cf.forward();
-		assertBase("after redoing the move", moveTarget, robotBase.getLimbByName(limbName));
+		DHParameterKinematics redoThree = robotBase.getLimbByName(limbName);
+		assertBase("after redoing the move", moveTarget, redoThree);
+		awaitTip(redoThree, moveTargetTip, "move redo again");
+		assertTip("after redoing the move", moveTargetTip, redoThree);
+		// the rendered wheel CAD has to track the limb as well: it is what the
+		// UI actually draws, so a stale mesh reads as "redo did nothing"
+		assertWheelPartsAt("redo forward complete");
+
+		// 7: undo past the limb add: the wheel must vanish and the limb object
+		// is destroyed with it
+		while (cf.isBackAvailable()) {
+			cf.back();
+			boolean stillThere = false;
+			for (CSG c : cf.getCurrentState())
+				if (c.getLimbName().isPresent() && c.getLimbName().get().contentEquals(limbName))
+					stillThere = true;
+			if (!stillThere)
+				break;
+		}
+		assertEquals("The wheel limb must be gone after undoing its add", 0, robotBase.getAllDHChains().size());
+		assertWheelPartsGone("undo past the add");
+
+		// 8: redo the add: the limb comes back as a new object, and every
+		// reprocessed move must land the wheel back at the last stored move,
+		// with the rendered mesh welded to the live limb
+		while (cf.isForwardAvailable())
+			cf.forward();
+		DHParameterKinematics redone = robotBase.getLimbByName(limbName);
+		assertNotNull("The wheel limb did not come back on redo", redone);
+		// redoing everything re-applies every move, ending at the test's own
+		// move target, exactly like stepping forward one op at a time
+		assertBase("after redo past the add", moveTarget, redone);
+		awaitTip(redone, moveTargetTip, "redo past the add");
+		assertTip("after redo past the add", moveTargetTip, redone);
+		assertWheelPartsAt("redo past the add");
 
 		for (MobileBase mb : cf.getMobileBases())
 			mb.disconnect();
@@ -157,6 +199,52 @@ public class Doodle208ModifyLimbUndoTest {
 		assertEquals(when + " tip X", expected.getX(), actual.getX(), TOLERANCE_MM);
 		assertEquals(when + " tip Y", expected.getY(), actual.getY(), TOLERANCE_MM);
 		assertEquals(when + " tip Z", expected.getZ(), actual.getZ(), TOLERANCE_MM);
+	}
+
+	// every wheel CSG must be present with the limb live: the rendered mesh
+	// position is what makes redo look broken in the app
+	private static void assertWheelPartsAt(String when) throws Exception {
+		int parts = 0;
+		for (CSG c : cf.getCurrentState()) {
+			if (!c.getLimbName().isPresent() || !c.getLimbName().get().contentEquals(limbName))
+				continue;
+			parts++;
+			// the mesh rides a manipulator Affine baked into the CSG; it must
+			// belong to the live limb, not a limb object that was destroyed by
+			// an undo and replaced on redo
+			javafx.scene.transform.Affine manip = null;
+			try {
+				manip = c.getManipulator();
+			} catch (eu.mihosoft.vrl.v3d.MissingManipulatorException e) {
+				// no manipulator is fine for non-limb-linked parts
+			}
+			DHParameterKinematics live = robotBase.getLimbByName(limbName);
+			boolean tracked = manip == null;
+			String how = manip == null ? "no-manipulator" : "untracked";
+			for (int i = 0; i < live.getNumberOfLinks() && manip != null; i++) {
+				javafx.scene.transform.Affine linkAffine = (javafx.scene.transform.Affine) live.getChain().getLinks()
+						.get(i).getListener();
+				if (linkAffine == manip)
+					tracked = true;
+			}
+			if (manip == live.getRootListener()) {
+				tracked = true;
+				how = "root-affine";
+			} else if (tracked) {
+				how = "link-affine";
+			}
+			log(when + " wheel part " + c.getName() + " manipulator=" + how);
+			assertTrue(when + ": wheel part " + c.getName() + " is welded to a dead limb Affine", tracked);
+			log(when + " wheel part " + c.getName() + " min=" + c.getMinX() + "," + c.getMinY() + "," + c.getMinZ()
+					+ " max=" + c.getMaxX() + "," + c.getMaxY() + "," + c.getMaxZ());
+		}
+		assertTrue("Wheel parts missing from the rendered state at " + when, parts > 0);
+	}
+
+	private static void assertWheelPartsGone(String when) {
+		for (CSG c : cf.getCurrentState())
+			if (c.getLimbName().isPresent() && c.getLimbName().get().contentEquals(limbName))
+				fail(when + ": wheel part " + c.getName() + " survived undoing the limb add");
 	}
 
 	// polls until the limb's tip converges on the target or times out; the
