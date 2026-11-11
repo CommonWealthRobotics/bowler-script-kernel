@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,6 +31,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory;
+import com.neuronrobotics.bowlerstudio.threed.STEPFile;
 import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
@@ -118,7 +122,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	public static void addCSGToFreeCAD(File freecadModel, CSG toSlice, List<Transform> slicePlanes) throws IOException {
-		File tmp = getTmpSTL(toSlice);
+		File tmp = getTmpSTEP(toSlice);
 		String name = toSlice.getName();
 		if (name.length() == 0) {
 			name = "CSG_TO_FREECAD";
@@ -143,7 +147,20 @@ public class FreecadLoader implements IScriptingLanguage {
 				}
 
 			}
-		addSTLToFreecad(freecadModel, tmp, name);
+		addSTEPToFreecad(freecadModel, tmp, name);
+	}
+
+	/** Writes the CSG to a temporary STEP file and returns it. */
+	public static File getTmpSTEP(CSG csg) throws IOException {
+		String name = csg.getName();
+		if (name.length() == 0)
+			name = "CSG_EXPORT";
+		Path tempDir = Paths.get(ScriptingEngine.getWorkspace().getAbsolutePath(), "tmp");
+		Files.createDirectories(tempDir);
+		File step = File.createTempFile(name, ".step", tempDir.toFile());
+		step.deleteOnExit();
+		new STEPFile(csg).write(step);
+		return step;
 	}
 
 	public static void addSVGToFreeCAD(File freecadModel, File SVG, Transform pose, String name, String bodyName) {
@@ -189,6 +206,26 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadModel.getAbsolutePath());
 			args.add(stlToAdd.getAbsolutePath());
 			args.add(meshName);
+			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
+		} catch (Throwable t) {
+			com.neuronrobotics.sdk.common.Log.error(t);
+		}
+	}
+
+	public static void addSTEPToFreecad(File freecadModel, File stepToAdd, String name) {
+		File freecad = DownloadManager.getConfigExecutable("freecad", null);
+		try {
+			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
+					"importSTEP.py");
+			ArrayList<String> args = new ArrayList<>();
+
+			args.add(freecad.getAbsolutePath());
+
+			args.add("-c");
+			args.add(export.getAbsolutePath());
+			args.add(freecadModel.getAbsolutePath());
+			args.add(stepToAdd.getAbsolutePath());
+			args.add(name);
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
