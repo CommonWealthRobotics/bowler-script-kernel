@@ -438,7 +438,7 @@ public class AddFromFile extends AbstractAddFrom {
 		return filenamePart;
 	}
 
-	private void setFilenamePart(String filenamePart) {
+	protected void setFilenamePart(String filenamePart) {
 		this.filenamePart = filenamePart;
 	}
 }
