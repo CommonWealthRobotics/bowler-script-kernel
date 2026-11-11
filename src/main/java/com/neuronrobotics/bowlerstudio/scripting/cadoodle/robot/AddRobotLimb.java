@@ -25,6 +25,8 @@ public class AddRobotLimb extends AbstractAddFrom implements ICadoodleOperationU
 	@Expose(serialize = true, deserialize = true)
 	private TransformNR location = null;
 	@Expose(serialize = true, deserialize = true)
+	private TransformNR asAddedBase = null;
+	@Expose(serialize = true, deserialize = true)
 	private List<String> names;
 	public boolean forceLoad = false;
 	private DHParameterKinematics kin;
@@ -130,6 +132,19 @@ public class AddRobotLimb extends AbstractAddFrom implements ICadoodleOperationU
 		if (location == null)
 			location = new TransformNR();
 		return location;
+	}
+
+	/**
+	 * @return the base this limb was created at, or null before the first
+	 *         build
+	 */
+	public TransformNR getAsAddedBase() {
+		return asAddedBase;
+	}
+
+	public AddRobotLimb setAsAddedBase(TransformNR asAddedBase) {
+		this.asAddedBase = asAddedBase;
+		return this;
 	}
 
 	public String getBuilderName() {

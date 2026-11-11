@@ -1,0 +1,370 @@
+{
+  "opperations": [
+    {
+      "type": "AddFromScript",
+      "data": {
+        "gitULR": "https://github.com/CommonWealthRobotics/CaDoodle-Example-Objects.git",
+        "fileRel": "cube.groovy",
+        "location": {
+          "x": 16.0,
+          "y": 0.0,
+          "z": -1.0E-6,
+          "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "preventBoM": false,
+        "name": "Tidy_Goliath_EIHM3h0U7Q"
+      }
+    },
+    {
+      "type": "Resize",
+      "data": {
+        "names": [
+          "Tidy_Goliath_EIHM3h0U7Q"
+        ],
+        "height": {
+          "x": 58.5,
+          "y": 23.5,
+          "z": 19.999999,
+          "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "leftFront": {
+          "x": 111.0,
+          "y": 57.0,
+          "z": 0.0,
+          "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "rightRear": {
+          "x": 6.0,
+          "y": -10.0,
+          "z": 0.0,
+          "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "workplane": {
+          "x": 0.0,
+          "y": 0.0,
+          "z": 0.0,
+          "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "referenceBounds": {
+          "center": {
+            "x": 16.0,
+            "y": 0.0,
+            "z": 9.999998999999999
+          },
+          "bounds": {
+            "x": 20.0,
+            "y": 20.0,
+            "z": 20.0
+          },
+          "min": {
+            "x": 6.0,
+            "y": -10.0,
+            "z": -1.0E-6
+          },
+          "max": {
+            "x": 26.0,
+            "y": 10.0,
+            "z": 19.999999
+          }
+        }
+      }
+    },
+    {
+      "type": "MakeRobot",
+      "data": {
+        "assignedAsBase": [
+          "Tidy_Goliath_EIHM3h0U7Q"
+        ],
+        "name": "Luminous_Leprechaun_frH2KwRDY0"
+      }
+    },
+    {
+      "type": "AddRobotController",
+      "data": {
+        "builderName": "Luminous_Leprechaun_frH2KwRDY0",
+        "controller": {
+          "type": "Micro:BIT ElecFreak",
+          "imageGit": "https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git",
+          "imageFile": "microbit.png",
+          "vitaminType": [
+            "microbit"
+          ],
+          "vitaminSize": [
+            "elecfreak"
+          ],
+          "vitaminPose": [
+            {
+              "x": 0.0,
+              "y": 0.0,
+              "z": 0.0,
+              "rotation": {
+                "w": 1.0,
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              }
+            }
+          ],
+          "linkDeviceName": "microbit-virtual",
+          "linkDeviceType": "virtual",
+          "provides": {
+            "servoChannels": 8,
+            "vexV5Motors": 0,
+            "hiwonderBus": 0,
+            "dynamixelBus": 0,
+            "steppers": 0,
+            "motorChannels": 2,
+            "analogSensorChannels": 8,
+            "cameras": 0,
+            "digitalSensorChannels": 8,
+            "inertialSensors": 1,
+            "distanceSensors": 0,
+            "pointCloudSensors": 0,
+            "voltages": [
+              3.7,
+              5.0
+            ],
+            "batteryWattHour": 1.48,
+            "batteryPeakWatt": 4.44
+          }
+        },
+        "location": {
+          "x": 58.5,
+          "y": 23.5,
+          "z": 19.999999,
+          "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "names": [
+          "Tidy_Goliath_EIHM3h0U7Q"
+        ],
+        "name": "Delightful_Rocket_h9LnecDn4o"
+      }
+    },
+    {
+      "type": "MoveCenter",
+      "data": {
+        "location": {
+          "x": 13.0,
+          "y": 0.0,
+          "z": 0.0,
+          "rotation": {
+            "w": 1.0,
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        "names": [
+          "Delightful_Rocket_h9LnecDn4o"
+        ],
+        "name": "Cosmic_Windglider_ReosHHgixr",
+        "dropMode": false
+      }
+    },
+    {
+      "type": "AddRobotLimb",
+      "data": {
+        "builderName": "Luminous_Leprechaun_frH2KwRDY0",
+        "limb": {
+          "type": "wheel",
+          "name": "Servo Fixed Wheel",
+          "url": "https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git",
+          "file": "defaultFixedServo.xml",
+          "composite": false,
+          "consumes": {
+            "servoChannels": 1,
+            "vexV5Motors": 0,
+            "hiwonderBus": 0,
+            "dynamixelBus": 0,
+            "steppers": 0,
+            "motorChannels": 0,
+            "analogSensorChannels": 0,
+            "cameras": 0,
+            "digitalSensorChannels": 0,
+            "inertialSensors": 0,
+            "distanceSensors": 0,
+            "pointCloudSensors": 0,
+            "voltages": [
+              3.7,
+              5.0,
+              6.0
+            ],
+            "batteryWattHour": 0.0,
+            "batteryPeakWatt": 1.28
+          }
+        },
+        "location": {
+          "x": 90.0,
+          "y": 57.0,
+          "z": 9.0,
+          "rotation": {
+            "w": 0.5,
+            "x": -0.4999999999999999,
+            "y": -0.5,
+            "z": -0.5000000000000001
+          }
+        },
+        "names": [
+          "Tidy_Goliath_EIHM3h0U7Q"
+        ],
+        "name": "Stellar_Skiff_4tv9JiUooK"
+      }
+    },
+    {
+      "type": "ModifyLimb",
+      "data": {
+        "limbName": "Stellar_Skiff_4tv9JiUooK",
+        "base": {
+          "x": 21.0,
+          "y": 59.0,
+          "z": 9.0,
+          "rotation": {
+            "w": 0.7071067811865476,
+            "x": 0.7071067811865475,
+            "y": 1.570092458683775E-16,
+            "z": 6.972611193684197E-32
+          }
+        },
+        "tip": {
+          "x": 44.0,
+          "y": 59.00000000000001,
+          "z": 9.000000000000004,
+          "rotation": {
+            "w": 0.7071067811865476,
+            "x": 0.7071067811865475,
+            "y": 1.4335626814828666E-16,
+            "z": -1.3652977720090766E-17
+          }
+        },
+        "jointHomeValues": [
+          4.425119556818806E-15
+        ],
+        "basePrevious": {
+          "x": 90.0,
+          "y": 57.0,
+          "z": 9.0,
+          "rotation": {
+            "w": 0.7071067811865476,
+            "x": 0.7071067811865475,
+            "y": 1.570092458683775E-16,
+            "z": 6.972611193684197E-32
+          }
+        },
+        "jointHomeValuesPrevious": [
+          0.0
+        ],
+        "names": [
+          "Stellar_Skiff_4tv9JiUooK_2"
+        ],
+        "name": "Teeming_Explorer_TiRnU0VuKF"
+      }
+    },
+    {
+      "type": "ModifyLimb",
+      "data": {
+        "limbName": "Stellar_Skiff_4tv9JiUooK",
+        "base": {
+          "x": 22.0,
+          "y": 17.0,
+          "z": 9.0,
+          "rotation": {
+            "w": 0.7071067811865476,
+            "x": 0.7071067811865475,
+            "y": 1.570092458683775E-16,
+            "z": 6.972611193684197E-32
+          }
+        },
+        "tip": {
+          "x": 45.0,
+          "y": 17.000000000000004,
+          "z": 9.000000000000004,
+          "rotation": {
+            "w": 0.7071067811865476,
+            "x": 0.7071067811865475,
+            "y": 1.297032904281958E-16,
+            "z": -2.7305955440181622E-17
+          }
+        },
+        "jointHomeValues": [
+          4.425119556818806E-15
+        ],
+        "basePrevious": {
+          "x": 21.0,
+          "y": 59.0,
+          "z": 9.0,
+          "rotation": {
+            "w": 0.7071067811865476,
+            "x": 0.7071067811865475,
+            "y": 1.570092458683775E-16,
+            "z": 6.972611193684197E-32
+          }
+        },
+        "jointHomeValuesPrevious": [
+          4.425119556818806E-15
+        ],
+        "names": [
+          "Stellar_Skiff_4tv9JiUooK_2"
+        ],
+        "name": "Burgeoning_Blimp_NuzHEHZudh"
+      }
+    }
+  ],
+  "currentIndex": 8,
+  "TextResolutionPoints": 0.5,
+  "timeCreated": 1794057626042,
+  "projectName": "Robot Test",
+  "rulerLocation": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "rotation": {
+      "w": 1.0,
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  },
+  "workplane": {
+    "x": 0.0,
+    "y": 0.0,
+    "z": 0.0,
+    "rotation": {
+      "w": 1.0,
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  },
+  "frozenIndex": -1,
+  "frozenSteps": []
+}

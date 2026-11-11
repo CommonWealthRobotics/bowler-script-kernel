@@ -1,0 +1,219 @@
+<root>
+<mobilebase>
+	<cadEngine>
+		<git>https://github.com/madhephaestus/carl-the-hexapod.git</git>
+		<file>ThreeDPrintCad.groovy</file>
+	</cadEngine>
+	<driveEngine>
+		<git>https://github.com/madhephaestus/carl-the-hexapod.git</git>
+		<file>WalkingDriveEngine.groovy</file>
+	</driveEngine>
+
+<name>Luminous_Leprechaun_frH2KwRDY0-mobilbase.xml</name>
+<drivable>
+
+<name>Stellar_Skiff_4tv9JiUooK</name>
+	<cadEngine>
+		<git>
+				https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git</git>
+		<file>servoWheelCad.groovy</file>
+	</cadEngine>
+	<kinematics>
+		<git>https://github.com/madhephaestus/carl-the-hexapod.git</git>
+		<file>DefaultDhSolver.groovy</file>
+	</kinematics>
+<link>
+	<name>wheel</name>
+	<deviceName>virtualDev</deviceName>
+	<type>virtual</type>
+	<index>0</index>
+	<scale>1.0</scale>
+	<upperLimit>2.147483647E9</upperLimit>
+	<lowerLimit>-2.147483647E9</lowerLimit>
+	<upperVelocity>328.0</upperVelocity>
+	<lowerVelocity>-328.0</lowerVelocity>
+	<staticOffset>0.0</staticOffset>
+	<deviceTheoreticalMax>2.147483647E9</deviceTheoreticalMax>
+	<deviceTheoreticalMin>-2.147483648E9</deviceTheoreticalMin>
+	<isLatch>true</isLatch>
+	<indexLatch>145.0</indexLatch>
+	<isStopOnLatch>false</isStopOnLatch>
+	<homingTPS>10000000</homingTPS>
+
+	<vitamins>
+
+		<vitamin>
+			<name>tire</name>
+			<type>oRing</type>
+			<id>2inchOD</id>
+			<pose>
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>5.0</z>
+	<rotw>0.0</rotw>
+	<rotx>0.7071067811865476</rotx>
+	<roty>0.0</roty>
+	<rotz>0.7071067811865476</rotz>
+			</pose>
+			<frame>origin</frame>
+			<script>false</script>
+		</vitamin>
+
+		<vitamin>
+			<name>shaft</name>
+			<type>hobbyServoHorn</type>
+			<id>standardMicro1</id>
+			<pose>
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+			</pose>
+			<frame>origin</frame>
+			<script>false</script>
+		</vitamin>
+
+		<vitamin>
+			<name>electroMechanical</name>
+			<type>hobbyServo</type>
+			<id>mg92b</id>
+			<pose>
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>-5.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+			</pose>
+			<frame>lastlink</frame>
+			<script>false</script>
+		</vitamin>
+
+	</vitamins>
+	<passive>false</passive>
+	<mass>0.01</mass>
+	<centerOfMassFromCentroid>
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>0.0</rotx>
+	<roty>0.0</roty>
+	<rotz>0.0</rotz>
+</centerOfMassFromCentroid>
+	<imuFromCentroid>
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+</imuFromCentroid>
+
+	<DHParameters>
+		<Delta>0.0</Delta>
+		<Theta>0.0</Theta>
+		<Radius>23.0</Radius>
+		<Alpha>0.0</Alpha>
+	</DHParameters>
+
+</link>
+
+<ZframeToRAS
+>
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+
+</ZframeToRAS>
+
+<baseToZframe>
+
+	<x>21.0</x>
+	<y>59.0</y>
+	<z>9.0</z>
+	<rotw>0.7071067811865476</rotw>
+	<rotx>-0.7071067811865475</rotx>
+	<roty>-1.570092458683775E-16</roty>
+	<rotz>-6.972611193684197E-32</rotz>
+
+</baseToZframe>
+
+</drivable>
+
+<ZframeToRAS>
+
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+
+</ZframeToRAS>
+
+<baseToZframe>
+
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+
+</baseToZframe>
+	<mass>0.5</mass>
+	<centerOfMassFromCentroid>
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+</centerOfMassFromCentroid>
+	<imuFromCentroid>
+	<x>0.0</x>
+	<y>0.0</y>
+	<z>0.0</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+</imuFromCentroid>
+
+	<vitamins>
+
+		<vitamin>
+			<name>Delightful_Rocket_h9LnecDn4o_0_0</name>
+			<type>microbit</type>
+			<id>elecfreak</id>
+			<pose>
+	<x>58.5</x>
+	<y>23.5</y>
+	<z>19.999999</z>
+	<rotw>1.0</rotw>
+	<rotx>-0.0</rotx>
+	<roty>-0.0</roty>
+	<rotz>-0.0</rotz>
+			</pose>
+			<frame>default</frame>
+			<script>false</script>
+		</vitamin>
+
+	</vitamins>
+
+</mobilebase>
+
+</root>
