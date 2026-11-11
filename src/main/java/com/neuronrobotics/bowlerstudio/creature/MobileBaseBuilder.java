@@ -409,8 +409,12 @@ public class MobileBaseBuilder {
 		String filename = (xmlName != null) ? xmlName : mobileBase.getScriptingName();
 		mobileBase.setGitSelfSource(new String[]{gitURL, filename});
 		ArrayList<ModifyLimb> toRemove = new ArrayList<ModifyLimb>();
-		for (int i = 0; i < operations.size(); i++) {
-			CaDoodleOperation op = operations.get(i);
+		// undo/redo churn reorders the operations list, so apply them in
+		// timeline order: the limb must exist before its modifications run
+		ArrayList<CaDoodleOperation> ordered = new ArrayList<CaDoodleOperation>(operations);
+		ordered.sort((a, b) -> Integer.compare(getOperationIndex(a), getOperationIndex(b)));
+		for (int i = 0; i < ordered.size(); i++) {
+			CaDoodleOperation op = ordered.get(i);
 			if (AddRobotController.class.isInstance(op)) {
 				AddRobotController con = (AddRobotController) op;
 				for (VitaminLocation l : con.getVitamins(con.getName() + "_" + i)) {
@@ -474,8 +478,9 @@ public class MobileBaseBuilder {
 						kin.setDesiredJointSpaceVector(tip, best);
 						//Thread.sleep((long) (best*1000.0));
 					} catch (Exception ex) {
-						// com.neuronrobotics.sdk.common.Log.error(ex);
-						;
+						com.neuronrobotics.sdk.common.Log
+								.error("Failed to apply set point on " + kin.getScriptingName());
+						com.neuronrobotics.sdk.common.Log.error(ex);
 						// toRemove.add(mod);
 					}
 				}
@@ -487,6 +492,16 @@ public class MobileBaseBuilder {
 		// Push to git
 		ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
 		return mobileBase;
+	}
+
+	// timeline position of an operation, unknown operations sort last so limbs
+	// are always created before any modification that references them
+	private int getOperationIndex(CaDoodleOperation op) {
+		try {
+			return op.getCaDoodleFile().opToIndex(op);
+		} catch (Exception e) {
+			return Integer.MAX_VALUE;
+		}
 	}
 
 	public void addController(AddRobotController controller) {
