@@ -37,19 +37,19 @@ public abstract class ConvertToFileOperation extends AddFromFile {
 		// remove the selected objects, they are replaced by the converted file
 		ArrayList<CSG> back = new ArrayList<CSG>();
 		back.addAll(incoming);
+		List<CSG> selected = new ArrayList<CSG>();
+		for (String n : names) {
+			try {
+				CSG byName = CaDoodleFile.getByName(incoming, n);
+				back.remove(byName);
+				selected.add(byName);
+			} catch (NameMissingException e) {
+				com.neuronrobotics.sdk.common.Log.error(e);
+			}
+		}
 		// create the file in the doodle directory when it is not there yet
 		File target = newTargetFile();
 		if (!target.exists()) {
-			List<CSG> selected = new ArrayList<CSG>();
-			for (String n : names) {
-				try {
-					CSG byName = CaDoodleFile.getByName(incoming, n);
-					back.remove(byName);
-					selected.add(byName);
-				} catch (NameMissingException e) {
-					com.neuronrobotics.sdk.common.Log.error(e);
-				}
-			}
 			if (selected.size() == 0)
 				throw new RuntimeException("No selected objects to convert to " + getExtension());
 			try {
