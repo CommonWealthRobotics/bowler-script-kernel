@@ -210,6 +210,9 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	public void undo() {
 		Log.debug("Undo " + name);
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
+		checkLimb(builder);
+		// roll the set point back to where it was before this modification,
+		// then rebuild so the kinematics reflect the pre-modification state
 		setUndo(true);
 		// com.neuronrobotics.sdk.common.Log.debug("Undo ModifyLimb");
 		try {
@@ -224,6 +227,8 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	public void redo() {
 		Log.debug("Redo " + name);
 		MobileBaseBuilder builder = getRobots().get(getBuilderName());
+		checkLimb(builder);
+		// reapply the modification by rebuilding with the undo flag cleared
 		setUndo(false);
 		// com.neuronrobotics.sdk.common.Log.debug("Redo ModifyLimb");
 		try {
@@ -232,6 +237,17 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 			// TODO Auto-generated catch block
 			com.neuronrobotics.sdk.common.Log.error(e);
 		}
+	}
+
+	// The limb kinematics are re-created when the AddRobotLimb operation is
+	// redone, so a stale reference must be refreshed by scripting name
+	private void checkLimb(MobileBaseBuilder builder) {
+		if (builder == null || limbName == null)
+			return;
+		DHParameterKinematics current = builder.getMobileBase().getLimbByName(limbName);
+		if (current == null || current == getLimb())
+			return;
+		setLimb(current);
 	}
 
 	/**
