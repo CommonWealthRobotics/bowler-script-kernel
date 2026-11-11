@@ -181,6 +181,51 @@ public class Doodle208ModifyLimbUndoTest {
 		assertTip("after redo past the add", moveTargetTip, redone);
 		assertWheelPartsAt("redo past the add");
 
+		// 9: the app's limb-handle lifecycle: each selection creates a fresh
+		// ModifyLimb (LimbControlManager.show), the drag mutates its base
+		// live and the commit clears the flag and adds it. Repeat that
+		// commit cycle with new op objects, then verify every undo/redo
+		// still lands on exact locations
+		TransformNR spotA = new TransformNR(moveTarget.getX(), moveTarget.getY() + 10, moveTarget.getZ())
+				.times(new TransformNR(moveTarget.getRotation()));
+		TransformNR spotB = new TransformNR(moveTarget.getX(), moveTarget.getY() + 20, moveTarget.getZ())
+				.times(new TransformNR(moveTarget.getRotation()));
+		TransformNR tipA = new TransformNR(moveTargetTip.getX(), moveTargetTip.getY() + 10, moveTargetTip.getZ());
+		TransformNR tipB = new TransformNR(moveTargetTip.getX(), moveTargetTip.getY() + 20, moveTargetTip.getZ());
+		// selection time: a fresh op with the undo flag set like show() does
+		ModifyLimb heldA = new ModifyLimb().setLimb(robotBase.getLimbByName(limbName))
+				.setNames(new ArrayList<String>(wheelParts)).setBase(spotA);
+		heldA.setUndo(true);
+		heldA.setUndo(false);
+		cf.addOperation(heldA).join();
+		DHParameterKinematics atA = robotBase.getLimbByName(limbName);
+		assertBase("app cycle A", spotA, atA);
+		awaitTip(atA, tipA, "app cycle A");
+		assertTip("app cycle A", tipA, atA);
+
+		// a second drag re-selects: a new op object for the new position
+		ModifyLimb heldB = new ModifyLimb().setLimb(robotBase.getLimbByName(limbName))
+				.setNames(new ArrayList<String>(wheelParts)).setBase(spotB);
+		heldB.setUndo(true);
+		heldB.setUndo(false);
+		cf.addOperation(heldB).join();
+		DHParameterKinematics atB = robotBase.getLimbByName(limbName);
+		assertBase("app cycle B", spotB, atB);
+		awaitTip(atB, tipB, "app cycle B");
+		assertTip("app cycle B", tipB, atB);
+
+		// undo the second commit: back to A
+		cf.back();
+		assertBase("app cycle B undo", spotA, robotBase.getLimbByName(limbName));
+		// undo the first commit: back to moveTarget
+		cf.back();
+		assertBase("app cycle A undo", moveTarget, robotBase.getLimbByName(limbName));
+		// redo both
+		cf.forward();
+		assertBase("app cycle A redo", spotA, robotBase.getLimbByName(limbName));
+		cf.forward();
+		assertBase("app cycle B redo", spotB, robotBase.getLimbByName(limbName));
+
 		for (MobileBase mb : cf.getMobileBases())
 			mb.disconnect();
 		cf.close();

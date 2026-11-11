@@ -20,7 +20,6 @@ import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 import org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -414,12 +413,6 @@ public class MobileBaseBuilder {
 		// timeline order: the limb must exist before its modifications run
 		ArrayList<CaDoodleOperation> ordered = new ArrayList<CaDoodleOperation>(operations);
 		ordered.sort((a, b) -> Integer.compare(getOperationIndex(a), getOperationIndex(b)));
-		// each undone modification stores the limb state from before it ran,
-		// so only the earliest undone one per limb may write: snapshots taken
-		// after it describe newer states and would roll the limb forward again
-		// keying on scripting name keeps a stale kinematics reference from
-		// bypassing the rule after a limb was re-created
-		HashSet<String> undoneApplied = new HashSet<String>();
 		for (int i = 0; i < ordered.size(); i++) {
 			CaDoodleOperation op = ordered.get(i);
 			if (AddRobotController.class.isInstance(op)) {
@@ -466,36 +459,8 @@ public class MobileBaseBuilder {
 					}
 				}
 			}
-			if (ModifyLimb.class.isInstance(op)) {
-				ModifyLimb mod = (ModifyLimb) op;
-				DHParameterKinematics kin = mod.getLimb();
-				if (kin == null)
-					continue;
-				if (mod.isUndo() && !undoneApplied.add(kin.getScriptingName()))
-					// a later undone modification must stay silent or it
-					// would undo the rollback done by the one below it
-					continue;
-
-				TransformNR base = mod.getBase();
-				if (base != null) {
-					// com.neuronrobotics.sdk.common.Log.debug("Base set to " + base);
-					kin.setRobotToFiducialTransform(base);
-				}
-				double[] tip = mod.getTip();
-				if (tip != null) {
-					try {
-
-						double best = kin.getBestTime(tip);
-						kin.setDesiredJointSpaceVector(tip, best);
-						//Thread.sleep((long) (best*1000.0));
-					} catch (Exception ex) {
-						com.neuronrobotics.sdk.common.Log
-								.error("Failed to apply set point on " + kin.getScriptingName());
-						com.neuronrobotics.sdk.common.Log.error(ex);
-						// toRemove.add(mod);
-					}
-				}
-			}
+			if (ModifyLimb.class.isInstance(op))
+				applyModification((ModifyLimb) op, ordered);
 		}
 		operations.removeAll(toRemove);
 		getCadManager().render();
@@ -503,6 +468,69 @@ public class MobileBaseBuilder {
 		// Push to git
 		ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
 		return mobileBase;
+	}
+
+	// Rebuilds the limb state from the modification timeline. The cursor
+	// decides what each entry carries: entries inside it apply their
+	// committed values, the first entry at or after it restores its stored
+	// pre-commit snapshot, and later undone entries stay silent.
+	// Position-based, because the limb-handle UI re-commits the same op
+	// object and one object can sit at two timeline indices; the stored
+	// snapshot carries the as-added state when nothing was committed before
+	private void applyModification(ModifyLimb first, ArrayList<CaDoodleOperation> ordered) {
+		String limbName = first.getLimb() == null ? null : first.getLimb().getScriptingName();
+		if (limbName == null)
+			return;
+		DHParameterKinematics kin = null;
+		boolean undoneRestored = false;
+		int cursor = -1;
+		if (first.getCaDoodleFile() != null)
+			cursor = first.getCaDoodleFile().getCurrentIndex();
+		for (int i = 0; i < ordered.size(); i++) {
+			CaDoodleOperation op = ordered.get(i);
+			if (!ModifyLimb.class.isInstance(op))
+				continue;
+			ModifyLimb mod = (ModifyLimb) op;
+			if (mod.getLimb() == null || !mod.getLimb().getScriptingName().contentEquals(limbName))
+				continue;
+			if (kin == null)
+				kin = mod.getLimb();
+			int opIndex = getOperationIndex(op);
+			// undone means past the cursor, or sitting exactly on it with the
+			// undo flag raised (back() steps the cursor down before undo()
+			// runs). An entry on the cursor with the flag clear is the op
+			// being committed right now: process() applies it before the
+			// cursor increments
+			boolean committed = opIndex != Integer.MAX_VALUE
+					&& (opIndex < cursor || (opIndex == cursor && !mod.isUndo()));
+			if (committed) {
+				applyValues(kin, mod, mod.getBase(), mod.getTip());
+				undoneRestored = false;
+			} else if (!undoneRestored) {
+				// first undone entry: hand the limb back to where the last
+				// committed entry left it: the entry's stored snapshot was
+				// captured at its commit and holds exactly that state, which
+				// the committed values of earlier entries cannot reproduce
+				// (an entry may move only the tip while its predecessors
+				// moved only the base)
+				applyValues(kin, mod, mod.getBase(), mod.getTip());
+				undoneRestored = true;
+			}
+		}
+	}
+
+	private void applyValues(DHParameterKinematics kin, ModifyLimb mod, TransformNR base, double[] tip) {
+		if (base != null)
+			kin.setRobotToFiducialTransform(base);
+		if (tip != null) {
+			try {
+				double best = kin.getBestTime(tip);
+				kin.setDesiredJointSpaceVector(tip, best);
+			} catch (Exception ex) {
+				com.neuronrobotics.sdk.common.Log.error("Failed to apply set point on " + kin.getScriptingName());
+				com.neuronrobotics.sdk.common.Log.error(ex);
+			}
+		}
 	}
 
 	// timeline position of an operation, unknown operations sort last so limbs
