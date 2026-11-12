@@ -55,21 +55,18 @@ public class FreecadLoader implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
 			ArrayList<Object> args) throws Exception {
-		File stl = File.createTempFile(code.getName(), ".stl");
-		stl.deleteOnExit();
-		toSTLFile(code, stl);
-		CSG back;
-		try {
-			back = Vitamins.get(db, true, stl, true);
-
-			back.setColor(Color.BLUE);
-		} catch (Throwable e) {
-			Log.error(e);
-			back = new eu.mihosoft.vrl.v3d.Cube(20).toCSG().setColor(Color.PINK);
-		}
-		//back.snapPoints();
-		back.setNoScale(true);
-		return back;
+		// export the model to a temporary 3MF and read that back; a 3MF carries
+		// one closed mesh per object, so every solid survives the round trip
+		File threeMF = File.createTempFile(code.getName(), ".3mf");
+		threeMF.deleteOnExit();
+		to3MFFile(code, threeMF);
+		List<CSG> imported = CSG.fromThreeMF(threeMF.toPath());
+		if (imported.isEmpty())
+			throw new IOException("FreeCAD model exported no geometry: " + code);
+		for (CSG csg : imported)
+			// keep the colour the 3MF carries; only size handling is forced
+			csg.setNoScale(true);
+		return imported.size() == 1 ? imported.get(0) : imported;
 	}
 
 	@Override
@@ -213,6 +210,15 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	public static void addSTEPToFreecad(File freecadModel, File stepToAdd, String name) {
+		addSTEPToFreecad(freecadModel, stepToAdd, name, null);
+	}
+
+	/**
+	 * Adds a STEP file to a FreeCAD model. The optional colours manifest maps
+	 * each solid's index to its colour, kept through headless FreeCAD as a
+	 * dynamic property on the imported feature.
+	 */
+	public static void addSTEPToFreecad(File freecadModel, File stepToAdd, String name, File colorsManifest) {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
@@ -246,6 +252,31 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(export.getAbsolutePath());
 			args.add(freecadModel.getAbsolutePath());
 			args.add(stlout.getAbsolutePath());
+
+			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
+		} catch (Throwable t) {
+			com.neuronrobotics.sdk.common.Log.error(t);
+		}
+	}
+
+	/**
+	 * Exports the FreeCAD model to a 3MF file, one closed mesh per solid, which
+	 * every solid in the model survives.
+	 */
+	public static void to3MFFile(File freecadModel, File threeMFout)
+			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		File freecad = DownloadManager.getConfigExecutable("freecad", null);
+		try {
+			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
+					"export3MF.py");
+			ArrayList<String> args = new ArrayList<>();
+
+			args.add(freecad.getAbsolutePath());
+
+			args.add("-c");
+			args.add(export.getAbsolutePath());
+			args.add(freecadModel.getAbsolutePath());
+			args.add(threeMFout.getAbsolutePath());
 
 			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
