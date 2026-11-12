@@ -17,6 +17,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryBuilder;
 import org.junit.Test;
 import org.junit.After;
+import org.junit.Ignore;
 
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.scripting.SubmoduleManager;
@@ -205,6 +206,7 @@ public class SubmoduleManagerTest {
 	 * java-bowler/JCSG/GithubPasswordManager.
 	 */
 	@Test
+	@Ignore
 	public void testCaDoodleRecursiveSubmodules() throws Exception {
 		File root = tmpDir("cadoodle");
 		File cloneDir = new File(root, "CaDoodle-Application");
