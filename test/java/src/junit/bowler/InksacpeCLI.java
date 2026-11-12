@@ -15,8 +15,8 @@ public class InksacpeCLI {
 	public void test() throws Exception {
 		try {
 			GeometrySimplification.simplifySVG(new File("Test.SVG"));
-		}catch(Exception ex) {
-			if(OSUtil.isWindows())
+		} catch (Exception ex) {
+			if (OSUtil.isWindows())
 				ex.printStackTrace();
 			else
 				throw ex;
