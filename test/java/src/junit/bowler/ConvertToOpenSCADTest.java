@@ -84,8 +84,8 @@ public class ConvertToOpenSCADTest {
 
 		// opening the script in OpenSCAD loads the live geometry
 		List<CSG> loaded = CSG.fromThreeMF(threeMF.toPath());
-		assertEquals("3MF holds both spheres", 2, loaded.size());
-		assertEquals("3MF carries the colour", Color.RED, loaded.get(1).getColor());
+		assertEquals("3MF holds the selected sphere", 1, loaded.size());
+		assertEquals("3MF carries the colour", Color.RED, loaded.get(0).getColor());
 
 		cf.save();
 		cf.close();
@@ -100,9 +100,12 @@ public class ConvertToOpenSCADTest {
 		ConvertToOpenSCAD convert = new ConvertToOpenSCAD().setNames(Arrays.asList(selected));
 		cf.addOperation(convert).join();
 
+		File target = convert.getFile();
 		File threeMF = new File(convert.getFile().getParentFile(),
-				convert.getFile().getName().split("\\.")[0] + ".3mf");
+				target.getName().split("\\.")[0] + ".3mf");
 		assertTrue("3MF was created", threeMF.exists());
+		// the script must stay frozen, only the 3MF is live data
+		String scad = new String(java.nio.file.Files.readAllBytes(target.toPath()));
 		long lastModified = threeMF.lastModified();
 
 		cf.save();
@@ -112,6 +115,8 @@ public class ConvertToOpenSCADTest {
 		CaDoodleFile loaded = CaDoodleFile.fromFile(self);
 		assertTrue("timeline keeps the convert operation", loaded.getOperations().get(2) instanceof ConvertToOpenSCAD);
 		assertTrue("the 3MF was re-written on replay", threeMF.lastModified() > lastModified);
+		assertEquals("the script was not rewritten on replay", scad,
+				new String(java.nio.file.Files.readAllBytes(target.toPath())));
 		loaded.close();
 	}
 }
