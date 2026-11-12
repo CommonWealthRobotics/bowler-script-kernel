@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -22,9 +25,23 @@ import javafx.scene.paint.Color;
 
 public class OpenSCADLoader implements IScriptingLanguage {
 
+	private static final Pattern THREE_MF_IMPORT = Pattern
+			.compile("import\\s*\\(\\s*\"([^\"]*\\.3[mM][fF])\"\\s*\\)\\s*;?");
+
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
 			ArrayList<Object> args) throws Exception {
+		// a script that is a plain import of 3MF files needs no OpenSCAD
+		// binary: the 3MFs are read natively so the per-object colours
+		// survive and the live geometry is picked up on every regeneration
+		List<File> threeMFs = importedThreeMFs(code);
+		if (threeMFs != null) {
+			ArrayList<CSG> loaded = new ArrayList<>();
+			for (File threeMF : threeMFs)
+				loaded.addAll(CSG.fromThreeMF(threeMF.toPath()));
+			return loaded;
+		}
+
 		Path tempDir = Paths.get(ScriptingEngine.getWorkspace().getAbsolutePath(), "tmp");
 		Files.createDirectories(tempDir);
 		File stl = File.createTempFile(sanitizeString(code.getName()), ".stl", tempDir.toFile());
@@ -52,6 +69,24 @@ public class OpenSCADLoader implements IScriptingLanguage {
 
 			}
 		stl.delete();
+		return back;
+	}
+
+	/**
+	 * Returns the 3MF files a script imports when every non-empty line is a
+	 * 3MF import, or null when the script is anything else.
+	 */
+	public static List<File> importedThreeMFs(File script) throws IOException {
+		ArrayList<File> back = new ArrayList<>();
+		for (String line : Files.readAllLines(script.toPath())) {
+			String trimmed = line.trim();
+			if (trimmed.isEmpty())
+				continue;
+			Matcher matcher = THREE_MF_IMPORT.matcher(trimmed);
+			if (!matcher.matches())
+				return null;
+			back.add(new File(script.getAbsoluteFile().getParentFile(), matcher.group(1)));
+		}
 		return back;
 	}
 

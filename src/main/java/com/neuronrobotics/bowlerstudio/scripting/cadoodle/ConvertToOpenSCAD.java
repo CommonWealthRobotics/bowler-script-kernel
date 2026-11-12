@@ -15,8 +15,8 @@ import com.neuronrobotics.manifold3d.NonManifoldShapeError;
  * OpenSCAD file with the normal add-file procedure. The geometry travels in a
  * 3MF file beside the script; the script only imports that 3MF. Unlike the
  * Blender and FreeCAD conversions the 3MF is re-written from the source shapes
- * every time the operation runs, so the OpenSCAD file always operates on live
- * data and stays valid after timeline replays.
+ * every time the operation runs, so the OpenSCAD file operates on live data
+ * while the script itself stays frozen once created.
  */
 public class ConvertToOpenSCAD extends ConvertToFileOperation {
 
@@ -26,17 +26,12 @@ public class ConvertToOpenSCAD extends ConvertToFileOperation {
 	}
 
 	@Override
-	public boolean rewritesFileEachRun() {
-		return true;
-	}
-
-	@Override
 	public ConvertToOpenSCAD setNames(List<String> names) {
 		return (ConvertToOpenSCAD) super.setNames(names);
 	}
 
 	@Override
-	protected void writeFile(File target, List<CSG> selected) throws IOException {
+	protected void refreshLiveFiles(List<CSG> selected) throws IOException {
 		// the 3MF beside the script carries the live geometry, colours included
 		File threeMF = newThreeMFFile();
 		try {
@@ -46,9 +41,12 @@ public class ConvertToOpenSCAD extends ConvertToFileOperation {
 		}
 		if (!threeMF.exists())
 			throw new IOException("Failed to export the shapes to " + threeMF);
+	}
 
+	@Override
+	protected void writeFile(File target, List<CSG> selected) throws IOException {
 		// the script is only an import of that 3MF, so it survives every rewrite
-		String script = "import(\"" + threeMF.getName() + "\");\n";
+		String script = "import(\"" + newThreeMFFile().getName() + "\");\n";
 		Files.write(target.toPath(), script.getBytes(StandardCharsets.UTF_8));
 	}
 

@@ -28,12 +28,12 @@ public abstract class ConvertToFileOperation extends AddFromFile {
 	protected abstract void writeFile(File target, List<CSG> selected) throws IOException;
 
 	/**
-	 * True when the file must be regenerated from the source shapes on every
-	 * run of the operation, so the external tool always works on live data
-	 * instead of a snapshot frozen at creation time.
+	 * Refreshes companion data from the source shapes on every run of the
+	 * operation. Snapshot conversions keep their file frozen at creation
+	 * time, so the default does nothing; live-data conversions re-export the
+	 * sources here so the external tool always operates on current geometry.
 	 */
-	protected boolean rewritesFileEachRun() {
-		return false;
+	protected void refreshLiveFiles(List<CSG> selected) throws IOException {
 	}
 
 	@Override
@@ -56,21 +56,22 @@ public abstract class ConvertToFileOperation extends AddFromFile {
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
-		// create the file in the doodle directory; re-writing ops regenerate it
-		// from the sources every run, others keep the file once it exists
+		// refresh the live data from the sources every run, then create the
+		// file in the doodle directory only when it is not there yet
 		File target = newTargetFile();
-		if (!target.exists() || rewritesFileEachRun()) {
-			if (selected.size() == 0)
-				throw new RuntimeException("No selected objects to convert to " + getExtension());
-			try {
+		try {
+			if (selected.size() != 0)
+				refreshLiveFiles(selected);
+			if (!target.exists() && selected.size() != 0)
 				writeFile(target, selected);
-			} catch (IOException e) {
-				com.neuronrobotics.sdk.common.Log.error(e);
-				throw new RuntimeException(e);
-			}
+		} catch (IOException e) {
+			com.neuronrobotics.sdk.common.Log.error(e);
+			throw new RuntimeException(e);
 		}
 		if (!target.exists())
-			throw new RuntimeException("Conversion to " + getExtension() + " failed: " + target);
+			throw new RuntimeException(
+					selected.size() == 0 ? "No selected objects to convert to " + getExtension()
+							: "Conversion to " + getExtension() + " failed: " + target);
 
 		// add the file with the normal AddFromFile procedure
 		setFilenamePart(target.getName().split("\\.")[0]);
