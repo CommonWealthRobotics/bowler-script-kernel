@@ -27,6 +27,15 @@ public abstract class ConvertToFileOperation extends AddFromFile {
 	 */
 	protected abstract void writeFile(File target, List<CSG> selected) throws IOException;
 
+	/**
+	 * True when the file must be regenerated from the source shapes on every
+	 * run of the operation, so the external tool always works on live data
+	 * instead of a snapshot frozen at creation time.
+	 */
+	protected boolean rewritesFileEachRun() {
+		return false;
+	}
+
 	@Override
 	public String getType() {
 		return "ConvertTo" + getExtension();
@@ -47,9 +56,10 @@ public abstract class ConvertToFileOperation extends AddFromFile {
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 		}
-		// create the file in the doodle directory when it is not there yet
+		// create the file in the doodle directory; re-writing ops regenerate it
+		// from the sources every run, others keep the file once it exists
 		File target = newTargetFile();
-		if (!target.exists()) {
+		if (!target.exists() || rewritesFileEachRun()) {
 			if (selected.size() == 0)
 				throw new RuntimeException("No selected objects to convert to " + getExtension());
 			try {

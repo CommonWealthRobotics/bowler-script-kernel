@@ -24,6 +24,7 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 		registerType("AddFromScript", AddFromScript.class);
 		registerType("ConvertToBlender", ConvertToBlender.class);
 		registerType("ConvertToFreeCAD", ConvertToFreeCAD.class);
+		registerType("ConvertToscad", ConvertToOpenSCAD.class);
 		registerType("AddRobotController", AddRobotController.class);
 		registerType("AddRobotLimb", AddRobotLimb.class);
 		registerType("Align", Align.class);
