@@ -382,7 +382,7 @@ public class DownloadManager {
 			pb.redirectInput(ProcessBuilder.Redirect.from(stdinSink));
 		// startinf the process
 		Log.debug("Running command:\n");
-		Log.debug(cmd);
+		out.println("\n"+cmd);
 
 		Log.debug("\nIn " + dir.getAbsolutePath());
 		Log.debug("\n\n");
@@ -400,7 +400,7 @@ public class DownloadManager {
 			if (s != null)
 				out.println(s);
 			if (e != null)
-				Log.error(e);
+				out.println(e);
 			//
 		}
 		process.waitFor();

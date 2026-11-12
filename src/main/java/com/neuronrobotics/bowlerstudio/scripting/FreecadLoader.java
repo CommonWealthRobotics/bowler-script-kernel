@@ -56,7 +56,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			ArrayList<Object> args) throws Exception {
 		// export the model to a temporary 3MF and read that back; a 3MF carries
 		// one closed mesh per object, so every solid survives the round trip
-		File threeMF = File.createTempFile(code.getName(), ".3mf");
+		File threeMF = File.createTempFile(code.getName().replace("FCStd", ""), ".3mf");
 		threeMF.deleteOnExit();
 		to3MFFile(code, threeMF);
 		List<CSG> imported = CSG.fromThreeMF(threeMF.toPath());
