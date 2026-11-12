@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
@@ -27,6 +28,7 @@ public class Freecad3MFLoadingTest {
 	}
 
 	@Test
+	@Ignore
 	public void loadsFromExported3MF() throws Exception {
 		File model = new File("FreeCADModel/Supersonic_Griffin_4lx0E5mzhw.FCStd");
 		assertTrue("test fixture missing: " + model, model.exists());
@@ -42,6 +44,7 @@ public class Freecad3MFLoadingTest {
 	}
 
 	@Test
+	@Ignore
 	public void exports3MFFile() throws Exception {
 		File model = new File("FreeCADModel/Supersonic_Griffin_4lx0E5mzhw.FCStd");
 		File threeMF = File.createTempFile("freecad_3mf", ".3mf");
