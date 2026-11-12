@@ -1094,8 +1094,14 @@ public class CaDoodleFile {
 		int ni = newIndex + 1;
 		boolean forward = ci < ni;
 		if (forward) {
-			for (int i = ci; i < ni + 1; i++) {
+			// redo exactly the ops being crossed: forward() enters
+			// operations[newCursor-1], so the already-applied current op at
+			// ci-1 must not be redone a second time. The cursor steps with
+			// each redo: undo/redo handlers read it to decide applied vs
+			// undone, exactly as forward() provides it
+			for (int i = ci + 1; i <= ni; i++) {
 				try {
+					setCurrentIndex(i);
 					CaDoodleOperation op = opperations.get(i - 1);
 					if (ICadoodleOperationUndo.class.isInstance(op)) {
 						ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
@@ -1106,7 +1112,13 @@ public class CaDoodleFile {
 				}
 			}
 		} else {
-			for (int i = ni; i < ci + 1; i++) {
+			// undo exactly the ops being crossed, newest first like back()
+			// does, stepping the cursor down before each undo: undo handlers
+			// read the cursor to decide applied vs undone, exactly as
+			// back() provides it. The op inside the target cursor at ni-1
+			// must stay applied
+			for (int i = ci; i > ni; i--) {
+				setCurrentIndex(i - 1);
 				CaDoodleOperation op = opperations.get(i - 1);
 				if (ICadoodleOperationUndo.class.isInstance(op)) {
 					ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;

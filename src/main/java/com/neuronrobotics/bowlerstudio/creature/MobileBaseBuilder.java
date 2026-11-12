@@ -7,6 +7,8 @@ import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotControll
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.AddRobotLimb;
 import com.neuronrobotics.bowlerstudio.scripting.cadoodle.robot.ModifyLimb;
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics;
+import com.neuronrobotics.sdk.addons.kinematics.AbstractLink;
+import com.neuronrobotics.sdk.addons.kinematics.DHLink;
 import com.neuronrobotics.sdk.addons.kinematics.LinkConfiguration;
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase;
 import com.neuronrobotics.sdk.addons.kinematics.VitaminLocation;
@@ -437,6 +439,11 @@ public class MobileBaseBuilder {
 					// TODO add the channel mapping here
 					kin.connect();
 					kin.zero();
+					// a redo after an undo re-creates the limb object while
+					// the timeline cache still welds its CAD to the destroyed
+					// object's render Affines; hand the Affines over or every
+					// later undo/redo moves a mesh nothing displays
+					transferRenderAffines(limb.getKinematics(), kin);
 					limb.setKinematics(kin);
 					switch (limb.getLimb().getType()) {
 						case arm :
@@ -468,6 +475,28 @@ public class MobileBaseBuilder {
 		// Push to git
 		ScriptingEngine.pushCodeToGit(gitURL, null, filename, mobileBase.getXml(), "Builder Write XML", true);
 		return mobileBase;
+	}
+
+	// Moves the render Affines of a destroyed limb onto its replacement so
+	// cached CSGs welded to them keep tracking the live limb
+	private void transferRenderAffines(DHParameterKinematics from, DHParameterKinematics to) {
+		if (from == null || to == null)
+			return;
+		if (from.getRootListener() != null && to.getRootListener() == null)
+			to.setRootListener(from.getRootListener());
+		if (from.getNumberOfLinks() != to.getNumberOfLinks())
+			return;
+		for (int i = 0; i < to.getNumberOfLinks(); i++) {
+			DHLink oldLink = from.getChain().getLinks().get(i);
+			DHLink newLink = to.getChain().getLinks().get(i);
+			if (oldLink.getListener() != null && newLink.getListener() == null)
+				newLink.setListener(oldLink.getListener());
+			AbstractLink oldAbstract = from.getAbstractLink(i);
+			AbstractLink newAbstract = to.getAbstractLink(i);
+			if (oldAbstract.getGlobalPositionListener() != null
+					&& newAbstract.getGlobalPositionListener() == null)
+				newAbstract.setGlobalPositionListener(oldAbstract.getGlobalPositionListener());
+		}
 	}
 
 	// Rebuilds the limb state from the modification timeline. The cursor
