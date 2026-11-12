@@ -16,8 +16,7 @@ import eu.mihosoft.vrl.v3d.JavaFXInitializer;
 
 /**
  * Loading a FreeCAD model must export a 3MF file and read the 3MF's meshes, so
- * every solid in the model survives the load, and the colour the model was
- * converted with is not replaced by the loader.
+ * every solid in the model survives the load.
  */
 public class Freecad3MFLoadingTest {
 
