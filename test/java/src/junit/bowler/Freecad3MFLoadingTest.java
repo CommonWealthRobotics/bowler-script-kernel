@@ -13,7 +13,6 @@ import com.neuronrobotics.bowlerstudio.scripting.FreecadLoader;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.JavaFXInitializer;
-import javafx.scene.paint.Color;
 
 /**
  * Loading a FreeCAD model must export a 3MF file and read the 3MF's meshes, so

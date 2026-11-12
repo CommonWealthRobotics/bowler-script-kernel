@@ -493,8 +493,7 @@ public class MobileBaseBuilder {
 				newLink.setListener(oldLink.getListener());
 			AbstractLink oldAbstract = from.getAbstractLink(i);
 			AbstractLink newAbstract = to.getAbstractLink(i);
-			if (oldAbstract.getGlobalPositionListener() != null
-					&& newAbstract.getGlobalPositionListener() == null)
+			if (oldAbstract.getGlobalPositionListener() != null && newAbstract.getGlobalPositionListener() == null)
 				newAbstract.setGlobalPositionListener(oldAbstract.getGlobalPositionListener());
 		}
 	}

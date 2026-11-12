@@ -69,9 +69,9 @@ public abstract class ConvertToFileOperation extends AddFromFile {
 			throw new RuntimeException(e);
 		}
 		if (!target.exists())
-			throw new RuntimeException(
-					selected.size() == 0 ? "No selected objects to convert to " + getExtension()
-							: "Conversion to " + getExtension() + " failed: " + target);
+			throw new RuntimeException(selected.size() == 0
+					? "No selected objects to convert to " + getExtension()
+					: "Conversion to " + getExtension() + " failed: " + target);
 
 		// add the file with the normal AddFromFile procedure
 		setFilenamePart(target.getName().split("\\.")[0]);
