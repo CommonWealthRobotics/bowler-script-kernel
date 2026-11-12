@@ -63,7 +63,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		if (imported.isEmpty())
 			throw new IOException("FreeCAD model exported no geometry: " + code);
 		for (CSG csg : imported)
-			// keep the colour the 3MF carries; only size handling is forced
+			// keep the geometry the 3MF carries; only size handling is forced
 			csg.setNoScale(true);
 		return imported.size() == 1 ? imported.get(0) : imported;
 	}
@@ -209,15 +209,6 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	public static void addSTEPToFreecad(File freecadModel, File stepToAdd, String name) {
-		addSTEPToFreecad(freecadModel, stepToAdd, name, null);
-	}
-
-	/**
-	 * Adds a STEP file to a FreeCAD model. The optional colours manifest maps
-	 * each solid's index to its colour, kept through headless FreeCAD as a
-	 * dynamic property on the imported feature.
-	 */
-	public static void addSTEPToFreecad(File freecadModel, File stepToAdd, String name, File colorsManifest) {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
