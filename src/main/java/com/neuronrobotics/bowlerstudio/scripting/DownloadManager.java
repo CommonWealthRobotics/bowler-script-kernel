@@ -374,6 +374,12 @@ public class DownloadManager {
 		}
 		// setting the directory
 		pb.directory(dir);
+		// headless tool runs must not read the caller's stdin: consoles like
+		// FreeCAD wait for an EOF on stdin after their script completes and
+		// would hang the run forever
+		File stdinSink = new File(File.separator + "dev" + File.separator + "null");
+		if (stdinSink.exists())
+			pb.redirectInput(ProcessBuilder.Redirect.from(stdinSink));
 		// startinf the process
 		Log.debug("Running command:\n");
 		Log.debug(cmd);
