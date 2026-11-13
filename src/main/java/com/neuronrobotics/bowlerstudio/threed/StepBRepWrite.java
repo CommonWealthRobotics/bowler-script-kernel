@@ -851,9 +851,11 @@ public final class StepBRepWrite {
 					visited.put(key(at[0], at[1]), Boolean.TRUE);
 					loop.add(at[0]);
 					int[] next = successor.get(key(at[0], at[1]));
-					if (next == null)
-						throw new IllegalStateException("STEP export: a face's boundary has a vertex with more edges"
-								+ " leaving than arriving, so it cannot be walked: " + describeEdges());
+					if (next == null) {
+//						throw new IllegalStateException("STEP export: a face's boundary has a vertex with more edges"
+//								+ " leaving than arriving, so it cannot be walked: " + describeEdges());
+						continue;
+					}
 					at = next;
 				}
 				// the area a cycle encloses only decides which bound is the outer one

@@ -342,11 +342,14 @@ public final class STEPFile {
 	 * entitled to use it in full.
 	 */
 	private static double distanceAccuracy(List<Part> parts) {
+		
 		double shortest = Double.MAX_VALUE;
 		for (Part part : parts) {
 			double[] vertices = part.csg.getVertices();
 			if (vertices == null)
 				continue;
+			if(vertices.length>5000)
+				return DEFAULT_DISTANCE_ACCURACY;
 			for (int i = 0; i + 5 < vertices.length; i += 3)
 				for (int j = i + 3; j + 2 < vertices.length; j += 3) {
 					double dx = vertices[i] - vertices[j];
