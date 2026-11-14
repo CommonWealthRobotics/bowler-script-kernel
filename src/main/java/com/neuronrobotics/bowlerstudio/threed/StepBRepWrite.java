@@ -133,7 +133,8 @@ public final class StepBRepWrite {
 				// this triangle is written as a face of its own; where the fold pass
 				// spliced a folded neighbour's tip into its walk, the planned loop is
 				// that walk, and its edges pair with the neighbours across the fold
-				List<Integer> loop = planned.loops != null ? planned.loops.get(0)
+				List<Integer> loop = planned.loops != null
+						? planned.loops.get(0)
 						: mesh.triangleLoop(planned.region.get(0));
 				written.add(List.of(loop));
 				faces.add(mesh.triangleFace(emitter, planned.region.get(0), loop, name));
@@ -396,8 +397,8 @@ public final class StepBRepWrite {
 							}
 				grid.computeIfAbsent(cell(x, y, z), unused -> new ArrayList<>()).add(vertex);
 			}
-			pairs.sort((a, b) -> Double.compare(distance(point(a[0]), point(a[1])),
-					distance(point(b[0]), point(b[1]))));
+			pairs.sort(
+					(a, b) -> Double.compare(distance(point(a[0]), point(a[1])), distance(point(b[0]), point(b[1]))));
 
 			int[] parent = new int[count];
 			for (int vertex = 0; vertex < count; vertex++)
@@ -440,20 +441,29 @@ public final class StepBRepWrite {
 				// surface, and dropping it lets the neighbours pair across the loss. So
 				// every remaining pair within a reader's resolution that carries an edge
 				// is forced here, and the sweep above runs again on the changed mesh.
+				// The bound is the reader's SEWING distance, not its confusion: a
+				// reader sews faces together by merging the vertices their wires share
+				// within a working tolerance far above the confusion, so two corners
+				// inside that tolerance are one corner to the shell it builds whether
+				// or not its arithmetic can tell them apart — the shell splits along
+				// the seam their faces make. The weld distance itself is the bound the
+				// candidates were chosen at, and every pair in the list is within it.
 				for (int[] pair : pairs) {
 					int first = find(parent, pair[0]);
 					int second = find(parent, pair[1]);
 					if (first == second)
 						continue;
 					double distance = distance(point(pair[0]), point(pair[1]));
-					if (distance > READER_RESOLUTION)
+					if (distance > weldTolerance)
 						continue;
-					// pairs that carry an edge are the two sides of a wall the part
-					// legitimately has: fusing them would double the surface and the
-					// shell would read as self-intersecting. Only folds that meet at a
-					// bare vertex are fused.
-					if (byEdge.containsKey(key(pair[0], pair[1])))
-						continue;
+					// A pair that carries an edge would be the two sides of a wall the
+					// part has — but at this distance the wall is a sliver of no
+					// measurable height, and the file cannot carry the distinction
+					// anyway: a reader welds the two vertices on sight, the faces
+					// between them fold into each other, and the shell it builds
+					// splits apart along the seam. Fusing removes the sliver instead,
+					// which moves no surface a reader measures, and the sweep above
+					// holds the pairing as with any other join.
 					trialJoin(parent, second, first);
 					forcedAny = true;
 					progress = true;
@@ -478,8 +488,8 @@ public final class StepBRepWrite {
 				}
 				triangles.add(new int[]{a, b, c});
 			}
-			Log.debug("StepBRepWrite: joined " + joined + " close pair(s) (forced "
-					+ (forcedAny ? "yes" : "no") + "), collapsing " + dead + " triangle(s)");
+			Log.debug("StepBRepWrite: joined " + joined + " close pair(s) (forced " + (forcedAny ? "yes" : "no")
+					+ "), collapsing " + dead + " triangle(s)");
 		}
 
 		/** Joins two roots in the weld's own array, without touching any other vertex. */
@@ -976,7 +986,7 @@ public final class StepBRepWrite {
 			for (int index : degenerates) {
 				int[] flat = triangles.get(index);
 				int tip = tipOf(flat);
-				// the tip's two neighbours in the triangle
+				// the two ends of the line the triangle collapses to
 				int other1 = -1;
 				int other2 = -1;
 				for (int corner : flat) {
@@ -992,14 +1002,11 @@ public final class StepBRepWrite {
 				// is skipped — the welding has already pulled the corners together
 				if (distance(point(tip), point(other1)) == 0 || distance(point(tip), point(other2)) == 0)
 					continue;
-				for (int i = 0; i < 3; i++) {
-					int from = flat[i];
-					int to = flat[(i + 1) % 3];
-					if (from == tip || to == tip) {
-						long edge = key(from, to);
-						foldOver.computeIfAbsent(edge, unused -> new ArrayList<>()).add(tip);
-					}
-				}
+				// the segment the fold detours: the long edge the dropped face spans,
+				// NOT the tip's own short edges, which already end at the tip and
+				// would write a segment from the tip to itself
+				long longEdge = key(other1, other2);
+				foldOver.computeIfAbsent(longEdge, unused -> new ArrayList<>()).add(tip);
 			}
 			if (foldOver.isEmpty())
 				return plan;
@@ -1058,7 +1065,16 @@ public final class StepBRepWrite {
 				if (spliced != null) {
 					if (out == null)
 						out = new ArrayList<>(loops);
-					out.set(at, List.copyOf(spliced));
+					// two tips chained back to back can sit at the same point — two
+					// folds meeting at one corner of the band. A loop through that
+					// point twice is one a reader cannot carry: its sewing merges the
+					// two visits and the face between them comes out with no bounds.
+					// The repeated visits collapse to one, which is the same walk.
+					List<Integer> single = new ArrayList<>(spliced.size());
+					for (Integer vertex : spliced)
+						if (single.isEmpty() || !single.get(single.size() - 1).equals(vertex))
+							single.add(vertex);
+					out.set(at, List.copyOf(single));
 					// the tips this loop swallowed are its boundary now: the carrier on
 					// the far side of the band walks the band's spine straight, which is
 					// exactly the pairing the dropped faces left open — so each folded
@@ -1410,19 +1426,20 @@ public final class StepBRepWrite {
 		 * where its two boundary edges meet and the one the shifted loop moves.
 		 */
 		private int tipOf(int[] flat) {
-			int tip = flat[0];
-			double best = Double.MAX_VALUE;
+			// the tip lies on the line between the other two, so the side it is
+			// opposite is the longest: exactly collinear corners leave the
+			// round-trip metric all ~0 and the choice to floating point noise
+			int longest = 0;
+			double longestLength = -1;
 			for (int i = 0; i < 3; i++) {
-				int at = flat[i];
-				double span = distance(point(flat[(i + 1) % 3]), point(flat[(i + 2) % 3]));
-				double roundTrip = distance(point(at), point(flat[(i + 1) % 3]))
-						+ distance(point(at), point(flat[(i + 2) % 3])) - span;
-				if (roundTrip < best) {
-					best = roundTrip;
-					tip = at;
+				double length = distance(point(flat[i]), point(flat[(i + 1) % 3]));
+				if (length > longestLength) {
+					longestLength = length;
+					longest = i;
 				}
 			}
-			return tip;
+			// side i runs corner i -> corner i+1, so corner i+2 is the one off it
+			return flat[(longest + 2) % 3];
 		}
 
 		/**
