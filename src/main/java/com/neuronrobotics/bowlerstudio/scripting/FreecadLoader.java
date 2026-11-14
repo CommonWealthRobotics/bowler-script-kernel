@@ -70,7 +70,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		for (CSG csg : imported) {
 			// keep the geometry the 3MF carries; only size handling is forced
 			csg.setNoScale(true);
-			if(csg.getVertCount()<4) {
+			if (csg.getVertCount() < 4) {
 				throw new RuntimeException("Nothing imported, this is not a model");
 			}
 		}

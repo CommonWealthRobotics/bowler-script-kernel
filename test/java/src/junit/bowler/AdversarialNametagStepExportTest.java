@@ -60,8 +60,7 @@ public class AdversarialNametagStepExportTest {
 		// so the FreeCAD scripts resolve through the same git cache the app uses and
 		// the run leaves its files where a run of the app would leave them
 		String relative = ScriptingEngine.getWorkingDirectory().getAbsolutePath();
-		File workspace = new File(relative + DownloadManager.delim() + "CaDoodle-workspace"
-				+ DownloadManager.delim());
+		File workspace = new File(relative + DownloadManager.delim() + "CaDoodle-workspace" + DownloadManager.delim());
 		workspace.mkdirs();
 		ScriptingEngine.setWorkspace(workspace);
 
@@ -100,10 +99,12 @@ public class AdversarialNametagStepExportTest {
 		String text = new String(Files.readAllBytes(step.toPath()), StandardCharsets.UTF_8);
 		int count = count(text, "MANIFOLD_SOLID_BREP");
 		boolean contains = text.contains("CLOSED_SHELL");
-//		assertTrue("the export must hold one solid BRep, not a surface model",
-//				1 == count && contains);
-//		assertEquals("a solid must not be written as an open shell", 0, count(text, "OPEN_SHELL"));
-//		assertEquals("a solid must not be written as a surface model", 0, count(text, "SHELL_BASED_SURFACE_MODEL"));
+		Log.debug("exported entities: MANIFOLD_SOLID_BREP " + count + ", CLOSED_SHELL " + contains + ", OPEN_SHELL "
+				+ count(text, "OPEN_SHELL") + ", SHELL_BASED_SURFACE_MODEL " + count(text, "SHELL_BASED_SURFACE_MODEL")
+				+ ", ADVANCED_FACE " + count(text, "ADVANCED_FACE"));
+		assertTrue("the export must hold one solid BRep, not a surface model", 1 == count && contains);
+		assertEquals("a solid must not be written as an open shell", 0, count(text, "OPEN_SHELL"));
+		assertEquals("a solid must not be written as a surface model", 0, count(text, "SHELL_BASED_SURFACE_MODEL"));
 
 		// STEP -> FreeCAD: the import the app runs on an exported file
 		File fcStd = new File(work, "Marvelous_Champion_Nametag.FCStd");
@@ -120,11 +121,10 @@ public class AdversarialNametagStepExportTest {
 		File report = new File(work, "check_step_report.json");
 		runGate(step, report);
 		String reportText = new String(Files.readAllBytes(report.toPath()), StandardCharsets.UTF_8);
-		assertTrue("the FreeCAD gate wrote an empty report at " + report.getAbsolutePath(),
-				reportText.length() > 0);
-		assertTrue("the FreeCAD gate reported problems in the STEP export; its report is "
-				+ report.getAbsolutePath() + ":\n" + reportText,
-				reportText.contains("\"pass\": true"));
+		Log.debug("the FreeCAD gate report:\n" + reportText);
+		assertTrue("the FreeCAD gate wrote an empty report at " + report.getAbsolutePath(), reportText.length() > 0);
+		assertTrue("the FreeCAD gate reported problems in the STEP export; its report is " + report.getAbsolutePath()
+				+ ":\n" + reportText, reportText.contains("\"pass\": true"));
 
 		// 3MF -> CSG: loading through Manifold throws on a mesh that is not manifold,
 		// so the load itself is the manifold check the loop ends with

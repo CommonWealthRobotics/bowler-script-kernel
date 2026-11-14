@@ -20,7 +20,7 @@ public class ThreeMFLoader implements IScriptingLanguage {
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 
 	@Override
