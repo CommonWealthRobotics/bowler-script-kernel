@@ -225,7 +225,7 @@ public final class STEPFile {
 		if (CSG.getDefaultOptionType() != CSG.OptType.Manifold3d || CSG.getManifold() == null)
 			return csg;
 		try {
-			CSG simplified = CSG.getManifold().simplify(csg, READER_RESOLUTION_MM);
+			CSG simplified = CSG.simplify(csg, READER_RESOLUTION_MM);
 			// simplify's tolerance is a target, not a guarantee: an adversarial mesh
 			// can still carry facets and vertices nanometres apart, and those are
 			// exactly the faces a reader refuses and a solid's volume poisons. The
