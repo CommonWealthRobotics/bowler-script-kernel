@@ -55,7 +55,7 @@ public class AdversarialNametagStepExportTest {
 	private static CSG reference;
 
 	@BeforeClass
-	public static void setUp() throws Exception {
+	public static void setUp() throws Throwable {
 		// the working directory is the app's own: CaDoodle-workspace under Documents,
 		// so the FreeCAD scripts resolve through the same git cache the app uses and
 		// the run leaves its files where a run of the app would leave them
@@ -143,6 +143,11 @@ public class AdversarialNametagStepExportTest {
 			assertTrue("the round trip's " + names[at] + " " + got + " must match the reference's " + wanted
 					+ " within " + BOUNDS_TOLERANCE, Math.abs(got - wanted) <= BOUNDS_TOLERANCE);
 		}
+	}
+
+	/** The occurrences of a token in the file text, for the entity counts. */
+	private static int count(String text, String token) {
+		return text.split(java.util.regex.Pattern.quote(token), -1).length - 1;
 	}
 
 	/** The mesh written as a STEP file, the export the app would produce. */

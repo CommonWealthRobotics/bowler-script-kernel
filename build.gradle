@@ -425,6 +425,8 @@ tasks.withType(JavaExec).configureEach {
 //    testLogging.showCauses = true
 //}
 test {
+	// the STEP round-trip tests hold tens-of-megabytes of BRep text in memory
+	maxHeapSize = "8g"
 	testLogging {
 		// Show which test is running
 		events "passed", "skipped", "failed", "standardOut", "standardError"

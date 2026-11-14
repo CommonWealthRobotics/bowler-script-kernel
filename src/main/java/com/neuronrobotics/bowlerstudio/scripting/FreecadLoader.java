@@ -115,11 +115,22 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add("-c");
 			args.add(newFile.getAbsolutePath());
 			args.add(freecadGenFile.getAbsolutePath());
-			legacySystemRun(null, freecadGenFile.getAbsoluteFile().getParentFile(), System.out, args);
+			legacySystemRun(headlessEnvironment(), freecadGenFile.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
 
+	}
+
+	/**
+	 * The environment the FreeCAD CLI runs under: no display is available when the
+	 * CLI is scripted from a test or a background export, and without this Qt aborts
+	 * the whole process before the script runs.
+	 */
+	private static Map<String, String> headlessEnvironment() {
+		Map<String, String> env = new HashMap<>();
+		env.put("QT_QPA_PLATFORM", "offscreen");
+		return env;
 	}
 
 	public static void addCSGToFreeCAD(File freecadModel, CSG incoming) throws IOException {
@@ -191,7 +202,7 @@ public class FreecadLoader implements IScriptingLanguage {
 					+ "\"");
 			args.add(name);
 			args.add(bodyName);
-			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
+			legacySystemRun(headlessEnvironment(), export.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
@@ -211,7 +222,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadModel.getAbsolutePath());
 			args.add(stlToAdd.getAbsolutePath());
 			args.add(meshName);
-			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
+			legacySystemRun(headlessEnvironment(), export.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
@@ -231,7 +242,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadModel.getAbsolutePath());
 			args.add(stepToAdd.getAbsolutePath());
 			args.add(name);
-			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
+			legacySystemRun(headlessEnvironment(), export.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
@@ -252,7 +263,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadModel.getAbsolutePath());
 			args.add(stlout.getAbsolutePath());
 
-			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
+			legacySystemRun(headlessEnvironment(), export.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
@@ -277,7 +288,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecadModel.getAbsolutePath());
 			args.add(threeMFout.getAbsolutePath());
 
-			legacySystemRun(null, export.getAbsoluteFile().getParentFile(), System.out, args);
+			legacySystemRun(headlessEnvironment(), export.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
@@ -300,7 +311,7 @@ public class FreecadLoader implements IScriptingLanguage {
 			// advancedSystemRun(null, freecadModel.getAbsoluteFile().getParentFile(),
 			// System.out, args);
 			// else
-			legacySystemRun(null, freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
+			legacySystemRun(headlessEnvironment(), freecadModel.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}

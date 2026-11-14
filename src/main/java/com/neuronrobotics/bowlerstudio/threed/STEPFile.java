@@ -182,18 +182,54 @@ public final class STEPFile {
 
 		Log.debug("STEPFile.toStep: " + parts.size() + " part(s)");
 		TickToc.tic("toStep");
+		// A mesh can carry facets and edges thinner than any BRep kernel resolves: a
+		// boolean near a seam, an STL of folded sheet metal. Written as they are, those
+		// faces are refused and the shell comes apart. Manifold's own simplify is the
+		// pass that merges them, and it runs here — at the file's front door — so every
+		// face written is one a reader can build. The parts are rebuilt from the
+		// cleaned meshes, with the feature edges re-extracted to match.
+		List<Part> writing = new ArrayList<>();
+		for (Part part : parts) {
+			CSG cleaned = simplifyForBRep(part.csg);
+			writing.add(cleaned == part.csg ? part
+					: new Part(cleaned, FeatureEdgeExtractor.extract(cleaned, DEFAULT_ANGLE_DEGREES,
+							DEFAULT_TOPOLOGY_TOLERANCE, DEFAULT_STITCH_TOLERANCE)));
+		}
 		StepEmitter emitter = new StepEmitter();
 		String fileName;
-		if (parts.size() == 1) {
-			fileName = parts.get(0).name() + ".step";
-			part(emitter, parts.get(0));
+		if (writing.size() == 1) {
+			fileName = writing.get(0).name() + ".step";
+			part(emitter, writing.get(0));
 		} else {
 			fileName = ASSEMBLY_NAME + ".step";
-			assembly(emitter, parts);
+			assembly(emitter, writing);
 		}
 		Log.debug("STEPFile.toStep: emitted " + emitter.text().length() + " characters");
 		return file(fileName, emitter.text());
 	}
+
+	/**
+	 * The mesh with its sub-resolution facets merged, when the Manifold kernel is the
+	 * active engine; the mesh itself when it is not. The tolerance is the resolution a
+	 * STEP reader works to, so nothing the merge moves is surface a reader measures.
+	 */
+	private static CSG simplifyForBRep(CSG csg) {
+		if (CSG.getDefaultOptionType() != CSG.OptType.Manifold3d || CSG.getManifold() == null)
+			return csg;
+		try {
+			CSG simplified = CSG.getManifold().simplify(csg, READER_RESOLUTION_MM);
+			// the simplified mesh carries no sub-resolution features, so the writer's
+			// weld has nothing left to judge and is skipped
+			com.neuronrobotics.bowlerstudio.threed.StepBRepWrite.markAlreadyClean();
+			return simplified;
+		} catch (Throwable t) {
+			Log.error(t);
+			return csg;
+		}
+	}
+
+	/** The merge distance for the BRep-facing cleanup, in millimetres. */
+	private static final double READER_RESOLUTION_MM = 1e-5;
 
 	public void write(File file) throws IOException {
 		Files.write(file.toPath(), toStep().getBytes(StandardCharsets.UTF_8));
