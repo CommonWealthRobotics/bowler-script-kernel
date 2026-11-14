@@ -109,7 +109,7 @@ public class AdversarialNametagStepExportTest {
 		assertTrue("the FreeCAD import wrote no document", fcStd.isFile() && fcStd.length() > 0);
 
 		// FreeCAD -> 3MF: the export the app runs on a FreeCAD model
-		File threeMF = new File(work, "Marvelous_Champion_Nametag.3mf");
+		File threeMF = new File(work, "Marvelous_Champion_Nametag_exported.3mf");
 		FreecadLoader.to3MFFile(fcStd, threeMF);
 		assertTrue("the FreeCAD 3MF export wrote no file", threeMF.isFile() && threeMF.length() > 0);
 
