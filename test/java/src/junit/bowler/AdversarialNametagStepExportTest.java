@@ -49,7 +49,10 @@ public class AdversarialNametagStepExportTest {
 	/** How far the round-tripped bounds may sit from the reference's, in millimetres. */
 	private static final double BOUNDS_TOLERANCE = 0.00001;
 
-	private static final long GATE_TIMEOUT_MILLISECONDS = 1_800_000;
+	// for this model a healthy export's gate finishes in seconds; a gate that
+	// outlives half a minute is chewing on geometry FreeCAD cannot resolve, so
+	// it is a failure of the export and must fail the test, not wait it out
+	private static final long GATE_TIMEOUT_MILLISECONDS = 30_000;
 
 	/** The reference CSG, loaded once. */
 	private static CSG reference;
@@ -177,8 +180,16 @@ public class AdversarialNametagStepExportTest {
 		command.add("-c");
 		command.add(gateScript.getAbsolutePath());
 		ProcessBuilder builder = new ProcessBuilder(command);
+		// the gate is a headless scripted FreeCAD run, so it needs the environment the
+		// app's own FreeCAD steps run under: without it Qt aborts the process before
+		// the script's Python even starts, and the report is never written
+		builder.environment().putAll(java.util.Map.of("QT_QPA_PLATFORM", "offscreen"));
 		builder.environment().put("STEP_FILES", step.getAbsolutePath());
 		builder.environment().put("ROUND_TRIP_JSON", report.getAbsolutePath());
+		// a scripted FreeCAD run waits for an EOF on stdin after its script completes,
+		// so it must never read the caller's console, or the run hangs forever
+		builder.redirectInput(ProcessBuilder.Redirect.from(new File(java.io.File.separator + "dev"
+				+ java.io.File.separator + "null")));
 		builder.redirectErrorStream(true);
 		File log = new File(step.getParentFile(), "check_step.log");
 		builder.redirectOutput(log);
