@@ -38,7 +38,11 @@ public class OpenSCADLoader implements IScriptingLanguage {
 		if (threeMFs != null) {
 			ArrayList<CSG> loaded = new ArrayList<>();
 			for (File threeMF : threeMFs)
-				loaded.addAll(CSG.fromThreeMF(threeMF.toPath()));
+				try {
+					loaded.addAll(CSG.fromThreeMF(threeMF.toPath()));
+				} catch (Throwable e) {
+					throw new RuntimeException(e);
+				}
 			return loaded;
 		}
 

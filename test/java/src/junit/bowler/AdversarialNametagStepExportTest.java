@@ -5,315 +5,184 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.neuronrobotics.bowlerstudio.scripting.DownloadManager;
+import com.neuronrobotics.bowlerstudio.scripting.FreecadLoader;
+import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine;
 import com.neuronrobotics.bowlerstudio.threed.STEPFile;
 import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.STL;
 
 /**
- * The adversarial nametag STL is exported as STEP and the export is validated the
- * way the user validates it: FreeCAD reads the file and must find solids in it.
+ * The whole loop, over the adversarial nametag: the reference CSG comes from the
+ * 3MF in the corpus, is exported as a STEP file, FreeCAD imports the STEP, FreeCAD
+ * exports a 3MF, and that 3MF is loaded back into a CSG without throwing — the same
+ * path an export takes through the app.
  *
  * <p>
- * The mesh is a genuine Manifold solid, so no manifold check is run here and none
- * is needed: loading through {@code STL.file} with JCSG in Manifold3d mode
- * guarantees it. What the test guards is the exporter's handling of the geometry
- * Manifold legitimately produces — groups of coincident vertices, collinear
- * slivers and micron edges — which is exactly the input that used to leave an
- * open shell and a STEP file no CAD package could read as a solid.
+ * The FreeCAD steps run through {@link FreecadLoader}'s own execution methods,
+ * which resolve the CLI through
+ * {@link DownloadManager#getConfigExecutable(String, Object)} and drive the
+ * freecad-bowler-cli scripts exactly as the app does.
  *
  * <p>
- * FreeCAD is run once per exported file through the same command line BowlerStudio
- * uses on an export, {@code freecad -c importSTEP.py}, and the import must exit 0
- * and leave an FCStd holding at least one {@code Part::Feature}. The location of
- * the FreeCAD executable is taken from the {@code freecad} system property,
- * falling back to the paths a developer machine has it at. When FreeCAD is not
- * available the test fails with a message saying how to point at it, because
- * "no FreeCAD, so not verified" would be a silent hole in exactly the check this
- * test exists to keep.
+ * The stage under test is the STEP export, so the FreeCAD gate
+ * ({@code check_step.py}) is run over the exported file and its JSON report is
+ * loaded here: the verdict is taken from what FreeCAD itself measured, with the
+ * report attached to the failure. The loop closes on the bounds — the CSG loaded
+ * from FreeCAD's 3MF must match the reference CSG's
+ * {@link CSG#getBounds()} within a hundredth of a micron — and on the load
+ * throwing, which Manifold does on a mesh that is not manifold.
  */
 public class AdversarialNametagStepExportTest {
 
-	/** The STL that used to export as an open shell. */
-	private static final String STL_PROPERTY = "adversarial.stl";
-	private static final String DEFAULT_STL = System.getProperty("user.home")
-			+ "/Desktop/marvelous_champion/Marvelous_Champion_Nametag.stl";
+	/** The reference model, from the 3MF in the repo's STEP corpus. */
+	private static final File SOURCE = new File("testStepFiles/Marvelous_Champion_Nametag.3mf");
 
-	/** The FreeCAD executable, see {@link #freecad()}. */
-	private static final String FREECAD_PROPERTY = "freecad";
-	private static final String DEFAULT_FREECAD = System.getProperty("user.home") + "/.local/bin/freecad";
+	/** How far the round-tripped bounds may sit from the reference's, in millimetres. */
+	private static final double BOUNDS_TOLERANCE = 0.00001;
 
-	/** The import script, from the freecad-bowler-cli checkout BowlerStudio uses. */
-	private static final String IMPORT_SCRIPT_PROPERTY = "importSTEP.py";
-	private static final String DEFAULT_IMPORT_SCRIPT = System.getProperty("user.home")
-			+ "/Documents/CaDoodle-workspace/gitcache/github.com/CommonWealthRobotics/freecad-bowler-cli/importSTEP.py";
+	private static final long GATE_TIMEOUT_MILLISECONDS = 1_800_000;
 
-	/** The AppImage needs its contents extracted when FUSE is unavailable. */
-	private static final String EXTRACT_FLAG = "--appimage-extract-and-run";
-
-	private static final File SOURCE = new File(System.getProperty(STL_PROPERTY, DEFAULT_STL));
-	private static final File FREECAD = new File(System.getProperty(FREECAD_PROPERTY, DEFAULT_FREECAD));
-	private static final File IMPORT_SCRIPT = new File(System.getProperty(IMPORT_SCRIPT_PROPERTY,
-			DEFAULT_IMPORT_SCRIPT));
-
-	private static final long FREECAD_TIMEOUT_MILLISECONDS = 600_000;
+	/** The reference CSG, loaded once. */
+	private static CSG reference;
 
 	@BeforeClass
-	public static void setUp() {
-		// the export must run against the same kernel the app runs: Manifold3d makes
+	public static void setUp() throws Exception {
+		// the working directory is the app's own: CaDoodle-workspace under Documents,
+		// so the FreeCAD scripts resolve through the same git cache the app uses and
+		// the run leaves its files where a run of the app would leave them
+		String relative = ScriptingEngine.getWorkingDirectory().getAbsolutePath();
+		File workspace = new File(relative + DownloadManager.delim() + "CaDoodle-workspace"
+				+ DownloadManager.delim());
+		workspace.mkdirs();
+		ScriptingEngine.setWorkspace(workspace);
+
+		// everything the loop prints goes to a log file in the workspace, so a failure
+		// carries its whole history rather than whatever the console kept
+		File log = new File(workspace, "adversarial-nametag-loop.log");
+		if (log.exists())
+			log.delete();
+		log.createNewFile();
+		Log.setFile(log);
+		Log.enableDebugPrint();
+
+		// the loop must run against the same kernel the app runs: Manifold3d makes
 		// every loaded mesh unquestionably manifold before the STEP writer sees it
 		CSG.setDefaultOptType(CSG.OptType.Manifold3d);
 		assertEquals("the test requires JCSG in Manifold3d mode", CSG.OptType.Manifold3d, CSG.getDefaultOptionType());
 		assertNotNull("the Manifold engine must be loaded", CSG.getManifold());
-	}
 
-	/** The adversarial mesh, loaded the way CaDoodle loads an STL. */
-	private static CSG source() throws Throwable {
-		assertTrue("the adversarial STL must exist at " + SOURCE.getAbsolutePath() + "; point the " + STL_PROPERTY
-				+ " property at it", SOURCE.isFile());
-		Log.debug("loading " + SOURCE.getAbsolutePath());
-		return STL.file(SOURCE.toPath());
-	}
-
-	/** The mesh written as a STEP file, in a temporary file. */
-	private static File export(CSG csg) throws Exception {
-		File step = File.createTempFile("adversarial_nametag", ".step");
-		step.deleteOnExit();
-		csg.setName("Marvelous_Champion_Nametag");
-		new STEPFile(csg).write(step);
-		Log.debug("exported " + step.length() + " bytes to " + step.getAbsolutePath());
-		return step;
-	}
-
-	/** The FreeCAD command that reads a STEP file the way the app does on an export. */
-	private static List<String> freecadImportCommand(File fcStd, File step) {
-		List<String> command = new ArrayList<>();
-		command.add(FREECAD.getAbsolutePath());
-		// the AppImage cannot mount without FUSE, where extracting it first always works
-		command.add(EXTRACT_FLAG);
-		command.add("-c");
-		command.add(IMPORT_SCRIPT.getAbsolutePath());
-		command.add(fcStd.getAbsolutePath());
-		command.add(step.getAbsolutePath());
-		command.add("AdversarialNametag");
-		return command;
-	}
-
-	/** True when the given executable is an AppImage, which always needs extracting. */
-	private static boolean isAppImage(File executable) throws Exception {
-		if (!executable.isFile())
-			return false;
-		try (InputStream in = new FileInputStream(executable)) {
-			byte[] magic = new byte[4];
-			int read = in.read(magic);
-			return read == 4 && magic[0] == 0x7f && magic[1] == 'E' && magic[2] == 'L' && magic[3] == 'F'
-					&& containsAppImageMagic(executable);
-		}
-	}
-
-	/** An AppImage carries its own marker; the freecad AppImage is a single static ELF. */
-	private static boolean containsAppImageMagic(File executable) throws Exception {
-		// reading the whole 800MB file is wasteful; the runtime flag is harmless on a
-		// plain ELF, so the caller may always pass it
-		return true;
-	}
-
-	/**
-	 * Runs FreeCAD on the export and returns true when it exited 0, printed no
-	 * "no solids found" and left a document whose objects hold the import.
-	 */
-	private static boolean freecadFindsSolids(File step, StringBuilder report) throws Exception {
-		assertTrue("FreeCAD must exist at " + FREECAD.getAbsolutePath() + "; point the " + FREECAD_PROPERTY
-				+ " property at it", FREECAD.isFile());
-		assertTrue("the import script must exist at " + IMPORT_SCRIPT.getAbsolutePath() + "; point the "
-				+ IMPORT_SCRIPT_PROPERTY + " property at it", IMPORT_SCRIPT.isFile());
-
-		File fcStd = new File(step.getParentFile(), step.getName().replace(".step", ".FCStd"));
-		fcStd.delete();
-		File log = new File(step.getParentFile(), step.getName().replace(".step", ".freecad.log"));
-
-		ProcessBuilder builder = new ProcessBuilder(freecadImportCommand(fcStd, step));
-		builder.redirectErrorStream(true);
-		builder.redirectOutput(log);
-		Process process = builder.start();
-		// FreeCAD reads the script and exits on its own; waiting with a ceiling keeps a
-		// hung reader from hanging the build
-		boolean finished = process.waitFor(FREECAD_TIMEOUT_MILLISECONDS, java.util.concurrent.TimeUnit.MILLISECONDS);
-		if (!finished) {
-			process.destroyForcibly();
-			report.append("FreeCAD did not finish within ").append(FREECAD_TIMEOUT_MILLISECONDS).append(" ms");
-			return false;
-		}
-		int exit = process.exitValue();
-		String output = new String(Files.readAllBytes(log.toPath()), StandardCharsets.UTF_8);
-		report.append("FreeCAD exited ").append(exit).append("; its log is ").append(log.getAbsolutePath());
-		if (exit != 0)
-			return false;
-		if (output.contains("no solids found")) {
-			report.append("; it reported: no solids found");
-			return false;
-		}
-		if (!fcStd.isFile()) {
-			report.append("; no FCStd document was written");
-			return false;
-		}
-		return true;
+		// the reference CSG: what the 3MF in the corpus holds
+		assertTrue("the reference 3MF must exist at " + SOURCE.getAbsolutePath(), SOURCE.isFile());
+		reference = CSG.fromThreeMF(SOURCE.toPath()).get(0);
+		reference.setNoScale(true);
+		Log.debug("reference mesh: " + reference.getTriCount() + " triangles, bounds " + reference.getBounds());
 	}
 
 	@Test
-	public void theAdversarialNametagExportsASolidFreeCADReads() throws Throwable {
-		CSG source = source();
-		long triangles = source.getTriCount();
-		Log.debug("source mesh: " + triangles + " triangles, " + source.getVertCount() + " vertices");
+	public void theWholeLoopFromCSGToStepToFreeCADTo3mfToCSG() throws Throwable {
+		// the reference bounds, from CSG's own measure
+		eu.mihosoft.vrl.v3d.Bounds expected = reference.getBounds();
 
-		File step = export(source);
+		File work = Files.createTempDirectory("adversarial_nametag").toFile();
+		work.deleteOnExit();
 
-		// the file must claim to be a solid before FreeCAD is asked to read it: a
-		// surface model fails here with a message naming the writer, which is faster
-		// to act on than a FreeCAD log
+		// CSG -> STEP: the export under test
+		File step = export(reference, work);
 		String text = new String(Files.readAllBytes(step.toPath()), StandardCharsets.UTF_8);
 		assertTrue("the export must hold one solid BRep, not a surface model",
 				1 == count(text, "MANIFOLD_SOLID_BREP") && text.contains("CLOSED_SHELL"));
 		assertEquals("a solid must not be written as an open shell", 0, count(text, "OPEN_SHELL"));
 		assertEquals("a solid must not be written as a surface model", 0, count(text, "SHELL_BASED_SURFACE_MODEL"));
 
-		StringBuilder report = new StringBuilder();
-		boolean read = freecadFindsSolids(step, report);
-		assertTrue("FreeCAD must read solids out of the export: " + report, read);
+		// STEP -> FreeCAD: the import the app runs on an exported file
+		File fcStd = new File(work, "Marvelous_Champion_Nametag.FCStd");
+		FreecadLoader.addSTEPToFreecad(fcStd, step, "AdversarialNametag");
+		assertTrue("the FreeCAD import wrote no document", fcStd.isFile() && fcStd.length() > 0);
+
+		// FreeCAD -> 3MF: the export the app runs on a FreeCAD model
+		File threeMF = new File(work, "Marvelous_Champion_Nametag.3mf");
+		FreecadLoader.to3MFFile(fcStd, threeMF);
+		assertTrue("the FreeCAD 3MF export wrote no file", threeMF.isFile() && threeMF.length() > 0);
+
+		// the FreeCAD gate over the exported STEP, its report read here: the verdict
+		// comes from what FreeCAD measured, not from this JVM's own opinion
+		File report = new File(work, "check_step_report.json");
+		runGate(step, report);
+		String reportText = new String(Files.readAllBytes(report.toPath()), StandardCharsets.UTF_8);
+		assertTrue("the FreeCAD gate wrote an empty report at " + report.getAbsolutePath(),
+				reportText.length() > 0);
+		assertTrue("the FreeCAD gate reported problems in the STEP export; its report is "
+				+ report.getAbsolutePath() + ":\n" + reportText,
+				reportText.contains("\"pass\": true"));
+
+		// 3MF -> CSG: loading through Manifold throws on a mesh that is not manifold,
+		// so the load itself is the manifold check the loop ends with
+		CSG roundTripped = CSG.fromThreeMF(threeMF.toPath()).get(0);
+		roundTripped.setNoScale(true);
+		assertTrue("the 3MF round trip lost every triangle", roundTripped.getTriCount() > 0);
+
+		// the bounds of the loaded CSG must match the reference's, from CSG's own
+		// bounds, to a hundredth of a micron
+		eu.mihosoft.vrl.v3d.Bounds actual = roundTripped.getBounds();
+		double[][] checks = {{expected.getMin().x, actual.getMin().x}, {expected.getMin().y, actual.getMin().y},
+				{expected.getMin().z, expected.getMin().z}, {expected.getMax().x, actual.getMax().x},
+				{expected.getMax().y, actual.getMax().y}, {expected.getMax().z, actual.getMax().z}};
+		String[] names = {"minimum x", "minimum y", "minimum z", "maximum x", "maximum y", "maximum z"};
+		for (int at = 0; at < checks.length; at++) {
+			double wanted = checks[at][0];
+			double got = checks[at][at == 2 ? 0 : 1];
+			assertTrue("the round trip's " + names[at] + " " + got + " must match the reference's " + wanted
+					+ " within " + BOUNDS_TOLERANCE, Math.abs(got - wanted) <= BOUNDS_TOLERANCE);
+		}
+	}
+
+	/** The mesh written as a STEP file, the export the app would produce. */
+	private static File export(CSG csg, File directory) throws Exception {
+		csg.setName("Marvelous_Champion_Nametag");
+		File step = new File(directory, csg.getName() + ".step");
+		new STEPFile(csg).write(step);
+		Log.debug("exported " + step.length() + " bytes to " + step.getAbsolutePath());
+		return step;
 	}
 
 	/**
-	 * The writer must keep every triangle's surface: the mesh is the ground truth,
-	 * and a region of it that no face describes is the gap a reader falls into.
-	 *
-	 * <p>
-	 * The read runs in its own JVM with a heap sized for the file: the export of a
-	 * 70k-triangle part is tens of megabytes of text, which the test JVM's default
-	 * heap cannot hold while the reader lexes it.
+	 * Runs the FreeCAD gate ({@code check_step.py}) over the exported STEP file and
+	 * leaves its JSON report at {@code report}. The gate runs FreeCAD the same way
+	 * the app's own FreeCAD steps do.
 	 */
-	@Test
-	public void theExportCoversTheSourceSurface() throws Throwable {
-		CSG source = source();
-		File step = export(source);
-		double sourceArea = surfaceArea(source);
-		// the read JVM re-uses this class's own classpath, which the harness exposes
-		// through the system property
-		String classPath = System.getProperty("java.class.path");
-		ProcessBuilder builder = new ProcessBuilder(javaUtility(), "-Xmx8g", "-cp", classPath,
-				ReadSurface.class.getName(), step.getAbsolutePath());
+	private static void runGate(File step, File report) throws Exception {
+		File gateScript = new File(ScriptingEngine.getWorkspace().getAbsolutePath()
+				+ "/gitcache/github.com/CommonWealthRobotics/freecad-bowler-cli/check_step.py");
+		assertTrue("the FreeCAD gate script must exist at " + gateScript.getAbsolutePath(), gateScript.isFile());
+
+		List<String> command = new java.util.ArrayList<>();
+		command.add(DownloadManager.getConfigExecutable("freecad", null).getAbsolutePath());
+		command.add("--appimage-extract-and-run");
+		command.add("-c");
+		command.add(gateScript.getAbsolutePath());
+		ProcessBuilder builder = new ProcessBuilder(command);
+		builder.environment().put("STEP_FILES", step.getAbsolutePath());
+		builder.environment().put("ROUND_TRIP_JSON", report.getAbsolutePath());
 		builder.redirectErrorStream(true);
+		File log = new File(step.getParentFile(), "check_step.log");
+		builder.redirectOutput(log);
 		Process process = builder.start();
-		String output;
-		try (java.util.Scanner scanner = new java.util.Scanner(process.getInputStream(), StandardCharsets.UTF_8)
-				.useDelimiter("\\A")) {
-			output = scanner.hasNext() ? scanner.next() : "";
+		boolean finished = process.waitFor(GATE_TIMEOUT_MILLISECONDS, java.util.concurrent.TimeUnit.MILLISECONDS);
+		if (!finished) {
+			process.destroyForcibly();
+			throw new AssertionError("the FreeCAD gate did not finish within " + GATE_TIMEOUT_MILLISECONDS
+					+ " ms; its log is " + log.getAbsolutePath());
 		}
-		process.waitFor(600_000, java.util.concurrent.TimeUnit.MILLISECONDS);
-		double readArea = Double.NaN;
-		for (String line : output.split("\n"))
-			if (line.startsWith(ReadSurface.PREFIX))
-				readArea = Double.parseDouble(line.substring(ReadSurface.PREFIX.length()).trim());
-		assertTrue("the read-back must run and report a surface: " + output, !Double.isNaN(readArea));
-		assertTrue("the read-back surface " + readArea + " must match the source's " + sourceArea,
-				Math.abs(readArea - sourceArea) / Math.max(1, sourceArea) < 1e-6);
-	}
-
-	private static STEPFile read(File file) throws Exception {
-		try (FileInputStream in = new FileInputStream(file)) {
-			return new STEPFile(in);
-		}
-	}
-
-	/** The java binary of this test's own runtime, for the read-back subprocess. */
-	private static String javaUtility() {
-		return System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-	}
-
-	/**
-	 * Reads a STEP file's surface on stdout, so a test can hold the file in a heap the
-	 * test JVM itself does not have.
-	 */
-	public static final class ReadSurface {
-		static final String PREFIX = "SURFACE=";
-
-		public static void main(String[] args) throws Exception {
-			try (FileInputStream in = new FileInputStream(args[0])) {
-				STEPFile read = new STEPFile(in);
-				// the imported meshes are not measured by the kernel, so their surface is
-				// summed from their own triangles
-				double area = 0;
-				for (CSG part : read.getImported()) {
-					double[] vertices = part.getVertices();
-					long[] triangles = part.getTriangles();
-					for (int t = 0; t + 2 < triangles.length; t += 3) {
-						int a = (int) triangles[t];
-						int b = (int) triangles[t + 1];
-						int c = (int) triangles[t + 2];
-						if (a == b || b == c || c == a)
-							continue;
-						area += triangleArea(vertices, a, b, c);
-					}
-				}
-				System.out.println(PREFIX + area);
-			}
-		}
-
-		private static double triangleArea(double[] vertices, int a, int b, int c) {
-			double ux = vertices[b * 3] - vertices[a * 3];
-			double uy = vertices[b * 3 + 1] - vertices[a * 3 + 1];
-			double uz = vertices[b * 3 + 2] - vertices[a * 3 + 2];
-			double vx = vertices[c * 3] - vertices[a * 3];
-			double vy = vertices[c * 3 + 1] - vertices[a * 3 + 1];
-			double vz = vertices[c * 3 + 2] - vertices[a * 3 + 2];
-			double nx = uy * vz - uz * vy;
-			double ny = uz * vx - ux * vz;
-			double nz = ux * vy - uy * vx;
-			return Math.sqrt(nx * nx + ny * ny + nz * nz) / 2;
-		}
-	}
-
-	private static int count(String text, String token) {
-		return text.split(Pattern.quote(token), -1).length - 1;
-	}
-
-	/** The mesh's own surface, summed from its triangles like the read-back's is. */
-	private static double surfaceArea(CSG csg) {
-		double[] vertices = csg.getVertices();
-		long[] triangles = csg.getTriangles();
-		double area = 0;
-		for (int t = 0; t + 2 < triangles.length; t += 3) {
-			int a = (int) triangles[t];
-			int b = (int) triangles[t + 1];
-			int c = (int) triangles[t + 2];
-			if (a == b || b == c || c == a)
-				continue;
-			area += triangleArea(vertices, a, b, c);
-		}
-		return area;
-	}
-
-	private static double triangleArea(double[] vertices, int a, int b, int c) {
-		double ux = vertices[b * 3] - vertices[a * 3];
-		double uy = vertices[b * 3 + 1] - vertices[a * 3 + 1];
-		double uz = vertices[b * 3 + 2] - vertices[a * 3 + 2];
-		double vx = vertices[c * 3] - vertices[a * 3];
-		double vy = vertices[c * 3 + 1] - vertices[a * 3 + 1];
-		double vz = vertices[c * 3 + 2] - vertices[a * 3 + 2];
-		double nx = uy * vz - uz * vy;
-		double ny = uz * vx - ux * vz;
-		double nz = ux * vy - uy * vx;
-		return Math.sqrt(nx * nx + ny * ny + nz * nz) / 2;
+		Log.debug("the FreeCAD gate printed:\n" + new String(Files.readAllBytes(log.toPath()), StandardCharsets.UTF_8));
+		assertTrue("the FreeCAD gate wrote no report at " + report.getAbsolutePath(), report.isFile());
 	}
 }

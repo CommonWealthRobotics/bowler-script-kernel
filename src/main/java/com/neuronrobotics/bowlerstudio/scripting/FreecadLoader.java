@@ -59,12 +59,21 @@ public class FreecadLoader implements IScriptingLanguage {
 		File threeMF = File.createTempFile(code.getName().replace("FCStd", ""), ".3mf");
 		threeMF.deleteOnExit();
 		to3MFFile(code, threeMF);
-		List<CSG> imported = CSG.fromThreeMF(threeMF.toPath());
+		List<CSG> imported;
+		try {
+			imported = CSG.fromThreeMF(threeMF.toPath());
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
 		if (imported.isEmpty())
 			throw new IOException("FreeCAD model exported no geometry: " + code);
-		for (CSG csg : imported)
+		for (CSG csg : imported) {
 			// keep the geometry the 3MF carries; only size handling is forced
 			csg.setNoScale(true);
+			if(csg.getVertCount()<4) {
+				throw new RuntimeException("Nothing imported, this is not a model");
+			}
+		}
 		return imported.size() == 1 ? imported.get(0) : imported;
 	}
 

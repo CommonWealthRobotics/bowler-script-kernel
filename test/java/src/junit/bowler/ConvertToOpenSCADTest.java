@@ -27,18 +27,18 @@ import javafx.scene.paint.Color;
 public class ConvertToOpenSCADTest {
 
 	@Before
-	public void setup() throws Exception {
+	public void setup() throws Throwable {
 		BowlerKernel.startupProcedures();
 		JavaFXInitializer.go();
 	}
 
-	private CaDoodleFile newProject(File self) throws Exception {
+	private CaDoodleFile newProject(File self) throws Throwable {
 		CaDoodleFile cf = new CaDoodleFile().setSelf(self).setProjectName("OpenSCAD Convert Test");
 		cf.initialize();
 		return cf;
 	}
 
-	private String addTwoSpheres(CaDoodleFile cf) throws Exception {
+	private String addTwoSpheres(CaDoodleFile cf) throws Throwable {
 		AddFromScript sphere1 = new AddFromScript().set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
 				"sphere.groovy");
 		AddFromScript sphere2 = new AddFromScript().set("https://github.com/madhephaestus/CaDoodle-Example-Objects.git",
@@ -51,7 +51,7 @@ public class ConvertToOpenSCADTest {
 	}
 
 	@Test
-	public void convertsToOpenSCAD() throws Exception {
+	public void convertsToOpenSCAD() throws Throwable {
 		File self = new File("doodle/ConvertOpenSCADTest.doodle");
 		CaDoodleFile cf = newProject(self);
 		String selected = addTwoSpheres(cf);
@@ -92,7 +92,7 @@ public class ConvertToOpenSCADTest {
 	}
 
 	@Test
-	public void threeMFIsRewrittenOnReplay() throws Exception {
+	public void threeMFIsRewrittenOnReplay() throws Throwable {
 		File self = new File("doodle/ConvertOpenSCADReplayTest.doodle");
 		CaDoodleFile cf = newProject(self);
 		String selected = addTwoSpheres(cf);

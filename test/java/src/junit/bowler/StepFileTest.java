@@ -41,7 +41,7 @@ public class StepFileTest {
 	// --- round trip: what this class writes, it reads back ---
 
 	@Test
-	public void exportsRoundTripThroughItsOwnReader() throws Exception {
+	public void exportsRoundTripThroughItsOwnReader() throws Throwable {
 		for (String name : new String[]{"cuboid_export.step", "hole_export.step", "cylinder_export.step"}) {
 			STEPFile written = export(new File(CORPUS, name));
 			CSG source = written.getCsg();
@@ -77,7 +77,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void exportBoundsSurviveTheRoundTrip() throws Exception {
+	public void exportBoundsSurviveTheRoundTrip() throws Throwable {
 		STEPFile written = export(new File(CORPUS, "hole_export.step"));
 		StepImport.Bounds source = StepImport.Bounds.of(written.getCsg());
 		StepImport.Bounds read = StepImport.Bounds.of(read(new File(CORPUS, "hole_export.step")).getImported().get(0));
@@ -91,7 +91,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void exportBeforeLoadIsUnchanged() throws Exception {
+	public void exportBeforeLoadIsUnchanged() throws Throwable {
 		STEPFile step = export(new File(CORPUS, "cuboid_export.step"));
 		assertNotNull("a written file has a source CSG", step.getCsg());
 		assertEquals("a written file has no imported shapes", 0, step.getShapes().size());
@@ -103,7 +103,7 @@ public class StepFileTest {
 	// --- loading files written by other tools ---
 
 	@Test
-	public void loadsTessellatedMeshFromOcct() throws Exception {
+	public void loadsTessellatedMeshFromOcct() throws Throwable {
 		CSG mesh = firstMesh("box_brep.step");
 		assertEquals("octant vertex count", 8, mesh.getVertCount());
 		assertEquals("octant triangle count", 12, mesh.getTriCount());
@@ -114,7 +114,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void loadsBrepSolidLoopsAsEdges() throws Exception {
+	public void loadsBrepSolidLoopsAsEdges() throws Throwable {
 		// the flat caps of a cylinder are faceted, so they tessellate, and the whole
 		// outline comes through as edge loops
 		StepImport.Shape shape = firstShape("cylinder_brep.step");
@@ -128,7 +128,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void loadsWireframeCurves() throws Exception {
+	public void loadsWireframeCurves() throws Throwable {
 		STEPFile step = read(new File(CORPUS, "wireframe.step"));
 		assertEquals("a wireframe has no mesh", 0, step.getImported().size());
 		assertEquals("one wireframe shape", 1, step.getShapes().size());
@@ -141,7 +141,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void convertsNonMillimetreUnits() throws Exception {
+	public void convertsNonMillimetreUnits() throws Throwable {
 		// this file's own context assigns a conversion based unit of one inch, and
 		// one of its parts is 50 x 60 x 100 of those units, so 1270 x 1524 x 2540 mm
 		STEPFile step = read(new File(CORPUS, "inch_units_ap214.step"));
@@ -165,7 +165,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void loadsRealWorldAp214Brep() throws Exception {
+	public void loadsRealWorldAp214Brep() throws Throwable {
 		// a screw whose planar faces tessellate and whose edges are B-splines
 		StepImport.Shape shape = firstShape("screw_ap214.step");
 		assertNotNull("the screw has a mesh", shape.getMesh());
@@ -181,7 +181,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void readsEveryFileInTheCorpusWithoutFailing() throws Exception {
+	public void readsEveryFileInTheCorpusWithoutFailing() throws Throwable {
 		List<String> failures = new ArrayList<>();
 		for (File file : corpus()) {
 			try (FileInputStream in = new FileInputStream(file)) {
@@ -194,7 +194,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void rejectsMalformedInput() throws Exception {
+	public void rejectsMalformedInput() throws Throwable {
 		try {
 			StepImport.readShapes(new java.io.ByteArrayInputStream("not a step file".getBytes("UTF-8")));
 			assertTrue("malformed input should not be accepted", false);
@@ -207,7 +207,7 @@ public class StepFileTest {
 	// --- assemblies: several parts in one file ---
 
 	@Test
-	public void exportsAssemblyAsSeveralShapes() throws Exception {
+	public void exportsAssemblyAsSeveralShapes() throws Throwable {
 		List<CSG> parts = new ArrayList<>();
 		parts.add(new eu.mihosoft.vrl.v3d.Cube(10).toCSG().setName("left").move(-15, 0, 0));
 		parts.add(new eu.mihosoft.vrl.v3d.Cube(10).toCSG().setName("right").move(15, 0, 0));
@@ -238,7 +238,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void assemblyOfOnePartIsNotAnAssembly() throws Exception {
+	public void assemblyOfOnePartIsNotAnAssembly() throws Throwable {
 		List<CSG> parts = new ArrayList<>();
 		parts.add(new eu.mihosoft.vrl.v3d.Cube(10).toCSG().setName("only"));
 
@@ -247,7 +247,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void rejectsAnEmptyAssembly() throws Exception {
+	public void rejectsAnEmptyAssembly() throws Throwable {
 		try {
 			new STEPFile(new ArrayList<CSG>());
 			assertTrue("an empty part list should not be accepted", false);
@@ -257,7 +257,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void importsAssemblyPartsAtTheirWorldPlacements() throws Exception {
+	public void importsAssemblyPartsAtTheirWorldPlacements() throws Throwable {
 		List<CSG> meshes = new STEPFile(new FileInputStream(new File(CORPUS, "inch_units_ap214.step"))).getImported();
 		assertTrue("the assembly has several parts", meshes.size() >= 4);
 
@@ -280,14 +280,14 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void importsAssignedColours() throws Exception {
+	public void importsAssignedColours() throws Throwable {
 		// the revolve part is filed with a yellow colour, which reaches its geometry
 		StepImport.Shape shape = firstShape("revolve_ap214.step");
 		assertEquals("the file's yellow should come through", javafx.scene.paint.Color.YELLOW, shape.getColor());
 	}
 
 	@Test
-	public void exportsAndImportsAColour() throws Exception {
+	public void exportsAndImportsAColour() throws Throwable {
 		CSG source = new eu.mihosoft.vrl.v3d.Cube(10).toCSG().setName("tinted")
 				.setColor(javafx.scene.paint.Color.web("#3399cc"));
 
@@ -303,7 +303,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void readsAListOfFilesIntoAListOfStepFiles() throws Exception {
+	public void readsAListOfFilesIntoAListOfStepFiles() throws Throwable {
 		List<File> files = new ArrayList<>();
 		files.add(new File(CORPUS, "cuboid_export.step"));
 		files.add(new File(CORPUS, "hole_export.step"));
@@ -315,7 +315,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void stepLoaderImportsAPart() throws Exception {
+	public void stepLoaderImportsAPart() throws Throwable {
 		Object imported = new com.neuronrobotics.bowlerstudio.scripting.StepLoader().inlineScriptRun(null,
 				new File(CORPUS, "cuboid_export.step"), new ArrayList<>());
 		assertTrue("one part comes back as a CSG", imported instanceof CSG);
@@ -325,7 +325,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void stepLoaderImportsAnAssemblyAsAListOfParts() throws Exception {
+	public void stepLoaderImportsAnAssemblyAsAListOfParts() throws Throwable {
 		Object imported = new com.neuronrobotics.bowlerstudio.scripting.StepLoader().inlineScriptRun(null,
 				new File(CORPUS, "inch_units_ap214.step"), new ArrayList<>());
 		assertTrue("an assembly comes back as a list of CSGs", imported instanceof List);
@@ -333,7 +333,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void exportsASolidAsClosedBRep() throws Exception {
+	public void exportsASolidAsClosedBRep() throws Throwable {
 		CSG cube = new eu.mihosoft.vrl.v3d.Cube(10).toCSG().setName("cube");
 		File written = File.createTempFile("brep_export", ".step");
 		written.deleteOnExit();
@@ -352,7 +352,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void readsBackItsOwnBRepExport() throws Exception {
+	public void readsBackItsOwnBRepExport() throws Throwable {
 		CSG cube = new eu.mihosoft.vrl.v3d.Cube(10).toCSG().setName("cube");
 		File written = File.createTempFile("brep_roundtrip", ".step");
 		written.deleteOnExit();
@@ -368,7 +368,7 @@ public class StepFileTest {
 	// --- a meshed part with near degenerate facets ---
 
 	@Test
-	public void exportsAPartWithThinFacetsAsOneSolid() throws Exception {
+	public void exportsAPartWithThinFacetsAsOneSolid() throws Throwable {
 		// this mesh has facets a few nanometres across, so its vertices are closer
 		// than the file's own length precision; welding them is what lets a reader
 		// close the wires, and dropping the facets instead would open the shell
@@ -385,7 +385,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void exportsAPartWithThinFacetsWithoutLosingArea() throws Exception {
+	public void exportsAPartWithThinFacetsWithoutLosingArea() throws Throwable {
 		CSG source = threeMf("Pointer_Hand_star.3mf");
 		File written = File.createTempFile("hand_area", ".step");
 		written.deleteOnExit();
@@ -402,7 +402,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void readsAPartWithThinFacets() throws Exception {
+	public void readsAPartWithThinFacets() throws Throwable {
 		// the hand's shell is a surface model, which the reader must flatten into the
 		// faces it holds rather than read as a face itself. Its facets are far
 		// smaller than the model, so the mesh it describes is the source mesh
@@ -415,7 +415,7 @@ public class StepFileTest {
 	}
 
 	@Test
-	public void importsAPartWithFacesThatHaveHoles() throws Exception {
+	public void importsAPartWithFacesThatHaveHoles() throws Throwable {
 		// the file's largest part is a box with four holes bored through one face.
 		// Filling the holes in, as reading only the outer loop would, gives 1.287e7
 		// square millimetres; the part itself is 1.589e7, and its curved faces are
@@ -439,13 +439,13 @@ public class StepFileTest {
 	}
 
 	/** Writes the named CSG again, to compare against what a load produces. */
-	private static STEPFile export(File file) throws Exception {
+	private static STEPFile export(File file) throws Throwable {
 		String name = require(file).getName().replace(".step", "");
 		CSG csg = fixture(name);
 		return new STEPFile(csg, ANGLE, TOPOLOGY_TOLERANCE, STITCH_TOLERANCE);
 	}
 
-	private static CSG fixture(String name) throws Exception {
+	private static CSG fixture(String name) throws Throwable {
 		switch (name) {
 			case "cuboid_export" :
 				return new eu.mihosoft.vrl.v3d.Cube(10).toCSG();
@@ -460,7 +460,7 @@ public class StepFileTest {
 		}
 	}
 
-	private static STEPFile read(File file) throws Exception {
+	private static STEPFile read(File file) throws Throwable {
 		try (FileInputStream in = new FileInputStream(require(file))) {
 			return new STEPFile(in);
 		}
@@ -472,26 +472,26 @@ public class StepFileTest {
 		return file;
 	}
 
-	private static CSG firstMesh(String name) throws Exception {
+	private static CSG firstMesh(String name) throws Throwable {
 		CSG mesh = firstShape(name).getMesh();
 		assertNotNull(name + " should have a mesh", mesh);
 		return mesh;
 	}
 
 	/** The mesh of a 3mf fixture, which is the source geometry for the exports. */
-	private static CSG threeMf(String name) throws Exception {
+	private static CSG threeMf(String name) throws Throwable {
 		List<CSG> parts = CSG.fromThreeMF(require(new File(CORPUS, name)).toPath());
 		assertFalse(name + " should hold a part", parts.isEmpty());
 		return parts.get(0);
 	}
 
-	private static StepImport.Shape firstShape(String name) throws Exception {
+	private static StepImport.Shape firstShape(String name) throws Throwable {
 		List<StepImport.Shape> shapes = read(new File(CORPUS, name)).getShapes();
 		assertFalse(name + " should have a shape", shapes.isEmpty());
 		return shapes.get(0);
 	}
 
-	private static int edges(String name) throws Exception {
+	private static int edges(String name) throws Throwable {
 		int total = 0;
 		for (StepImport.Shape shape : read(new File(CORPUS, name)).getShapes())
 			total += shape.getEdges().size();

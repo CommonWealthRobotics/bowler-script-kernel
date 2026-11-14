@@ -57,7 +57,7 @@ public class CharmingTrollStepRoundTripTest {
 	}
 
 	/** The 3MF's own meshes, one per object, which are the ground truth. */
-	private static List<CSG> source() throws Exception {
+	private static List<CSG> source() throws Throwable {
 		Log.debug("source: reading " + SOURCE);
 		TickToc.tic("load 3MF");
 		File file = new File(CORPUS, SOURCE);
@@ -75,7 +75,7 @@ public class CharmingTrollStepRoundTripTest {
 	}
 
 	/** A STEP file written from the given parts, in a temporary file. */
-	private static File export(List<CSG> parts) throws Exception {
+	private static File export(List<CSG> parts) throws Throwable {
 		Log.debug("export: writing " + parts.size() + " part(s) to STEP");
 		TickToc.tic("write STEP");
 		File written = File.createTempFile("charming_troll", ".step");
@@ -85,7 +85,7 @@ public class CharmingTrollStepRoundTripTest {
 		return written;
 	}
 
-	private static STEPFile read(File file) throws Exception {
+	private static STEPFile read(File file) throws Throwable {
 		Log.debug("read: parsing " + file.getAbsolutePath());
 		TickToc.tic("read STEP");
 		try (FileInputStream in = new FileInputStream(file)) {
@@ -96,7 +96,7 @@ public class CharmingTrollStepRoundTripTest {
 	// --- the mesh itself ---
 
 	@Test
-	public void exportedStepReproducesTheSourceMeshExactly() throws Exception {
+	public void exportedStepReproducesTheSourceMeshExactly() throws Throwable {
 		Log.debug("---- exportedStepReproducesTheSourceMeshExactly ----");
 		List<CSG> parts = source();
 		File export = export(parts);
@@ -131,7 +131,7 @@ public class CharmingTrollStepRoundTripTest {
 	}
 
 	@Test
-	public void exportedStepAddsNoPointsAndLosesNone() throws Exception {
+	public void exportedStepAddsNoPointsAndLosesNone() throws Throwable {
 		Log.debug("---- exportedStepAddsNoPointsAndLosesNone ----");
 		List<CSG> parts = source();
 		STEPFile imported = read(export(parts));
@@ -153,7 +153,7 @@ public class CharmingTrollStepRoundTripTest {
 	// --- the surface a CAD package shows ---
 
 	@Test
-	public void exportedFacesMatchWhatTheReaderReconstructs() throws Exception {
+	public void exportedFacesMatchWhatTheReaderReconstructs() throws Throwable {
 		Log.debug("---- exportedFacesMatchWhatTheReaderReconstructs ----");
 		List<CSG> parts = source();
 		STEPFile imported = read(export(parts));
@@ -192,7 +192,7 @@ public class CharmingTrollStepRoundTripTest {
 	}
 
 	@Test
-	public void everyExportedFaceIsPlanarAndBounded() throws Exception {
+	public void everyExportedFaceIsPlanarAndBounded() throws Throwable {
 		Log.debug("---- everyExportedFaceIsPlanarAndBounded ----");
 		int partIndex = 0;
 		for (CSG part : source()) {
@@ -214,7 +214,7 @@ public class CharmingTrollStepRoundTripTest {
 	}
 
 	@Test
-	public void aSolidIsWrittenAsAClosedShell() throws Exception {
+	public void aSolidIsWrittenAsAClosedShell() throws Throwable {
 		Log.debug("---- aSolidIsWrittenAsAClosedShell ----");
 		List<CSG> parts = source();
 		File written = export(parts);
@@ -239,7 +239,7 @@ public class CharmingTrollStepRoundTripTest {
 	}
 
 	@Test
-	public void theTessellationIsRelatedToTheBRep() throws Exception {
+	public void theTessellationIsRelatedToTheBRep() throws Throwable {
 		Log.debug("---- theTessellationIsRelatedToTheBRep ----");
 		List<CSG> parts = source();
 		TickToc.tic("build STEP text");

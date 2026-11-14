@@ -52,7 +52,7 @@ public class CharmingTrollBRepCoverageTest {
 		TickToc.tic("test start");
 	}
 
-	private static List<CSG> source() throws Exception {
+	private static List<CSG> source() throws Throwable {
 		File file = new File(CORPUS, SOURCE);
 		assertTrue("the 3MF fixture must exist at " + file.getAbsolutePath(), file.isFile());
 		List<CSG> parts = CSG.fromThreeMF(file.toPath());
@@ -60,7 +60,7 @@ public class CharmingTrollBRepCoverageTest {
 		return parts;
 	}
 
-	private static File export(List<CSG> parts) throws Exception {
+	private static File export(List<CSG> parts) throws Throwable {
 		File written = File.createTempFile("charming_troll_brep", ".step");
 		written.deleteOnExit();
 		new STEPFile(parts).write(written);
@@ -68,14 +68,14 @@ public class CharmingTrollBRepCoverageTest {
 	}
 
 	/** Reads the file's BRep faces, not its tessellation. */
-	private static STEPFile readBRep(File file) throws Exception {
+	private static STEPFile readBRep(File file) throws Throwable {
 		try (FileInputStream in = new FileInputStream(file)) {
 			return new STEPFile(in, false);
 		}
 	}
 
 	@Test
-	public void theBRepIsReadableWithoutTheTessellation() throws Exception {
+	public void theBRepIsReadableWithoutTheTessellation() throws Throwable {
 		List<CSG> parts = source();
 		STEPFile read = readBRep(export(parts));
 
@@ -161,7 +161,7 @@ public class CharmingTrollBRepCoverageTest {
 	}
 
 	@Test
-	public void noPartIsReadAsItsTessellationByAccident() throws Exception {
+	public void noPartIsReadAsItsTessellationByAccident() throws Throwable {
 		List<CSG> parts = source();
 		STEPFile read = readBRep(export(parts));
 
@@ -182,7 +182,7 @@ public class CharmingTrollBRepCoverageTest {
 	 * so a face that was dropped or written with a bad loop shows up here.
 	 */
 	@Test
-	public void theBRepLoopsAreWatertight() throws Exception {
+	public void theBRepLoopsAreWatertight() throws Throwable {
 		List<CSG> parts = source();
 		for (int i = 0; i < parts.size(); i++) {
 			List<StepFace> faces = com.neuronrobotics.bowlerstudio.threed.StepBRepWrite.faces(parts.get(i));
@@ -222,7 +222,7 @@ public class CharmingTrollBRepCoverageTest {
 	 * is what makes the BRep usable and what a CAD package relies on.
 	 */
 	@Test
-	public void coplanarTrianglesAreStitchedIntoOneFace() throws Exception {
+	public void coplanarTrianglesAreStitchedIntoOneFace() throws Throwable {
 		List<CSG> parts = source();
 		for (int i = 0; i < parts.size(); i++) {
 			CSG part = parts.get(i);
@@ -246,7 +246,7 @@ public class CharmingTrollBRepCoverageTest {
 	 * while the tessellation is what the round trip relies on.
 	 */
 	@Test
-	public void everyLoadedMeshIsManifoldAndHasVolume() throws Exception {
+	public void everyLoadedMeshIsManifoldAndHasVolume() throws Throwable {
 		List<CSG> parts = source();
 		File written = export(parts);
 
@@ -279,7 +279,7 @@ public class CharmingTrollBRepCoverageTest {
 	}
 
 	/** Re-measures a mesh, which throws when the kernel finds it is not manifold. */
-	private static double remeasuredVolume(CSG mesh) throws Exception {
+	private static double remeasuredVolume(CSG mesh) throws Throwable {
 		try {
 			return CSG.getManifold().calculateAreaAndSurfaceArea(mesh).getVolume();
 		} catch (Throwable e) {
@@ -288,7 +288,7 @@ public class CharmingTrollBRepCoverageTest {
 	}
 
 	@Test
-	public void theBRepEnclosesTheSameVolumeAsTheSourceMesh() throws Exception {
+	public void theBRepEnclosesTheSameVolumeAsTheSourceMesh() throws Throwable {
 		List<CSG> parts = source();
 		List<CSG> read = readBRep(export(parts)).getImported();
 
@@ -304,7 +304,7 @@ public class CharmingTrollBRepCoverageTest {
 	}
 
 	@Test
-	public void theBRepCoversTheSameSurfaceAreaAsTheSourceMesh() throws Exception {
+	public void theBRepCoversTheSameSurfaceAreaAsTheSourceMesh() throws Throwable {
 		List<CSG> parts = source();
 		List<CSG> read = readBRep(export(parts)).getImported();
 
@@ -319,7 +319,7 @@ public class CharmingTrollBRepCoverageTest {
 	}
 
 	@Test
-	public void everySourceTriangleIsCoveredByABRepFace() throws Exception {
+	public void everySourceTriangleIsCoveredByABRepFace() throws Throwable {
 		List<CSG> parts = source();
 		List<CSG> read = readBRep(export(parts)).getImported();
 
@@ -340,7 +340,7 @@ public class CharmingTrollBRepCoverageTest {
 	}
 
 	@Test
-	public void theBRepAndTheTessellationDescribeTheSameShape() throws Exception {
+	public void theBRepAndTheTessellationDescribeTheSameShape() throws Throwable {
 		List<CSG> parts = source();
 		File written = export(parts);
 

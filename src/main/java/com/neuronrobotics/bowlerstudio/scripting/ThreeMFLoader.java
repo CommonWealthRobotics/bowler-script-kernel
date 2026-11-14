@@ -15,7 +15,12 @@ public class ThreeMFLoader implements IScriptingLanguage {
 	@Override
 	public Object inlineScriptRun(eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance db, File code,
 			ArrayList<Object> args) throws Exception {
-		return CSG.fromThreeMF(code.toPath());
+		try {
+			return CSG.fromThreeMF(code.toPath());
+		} catch (Throwable e) {
+			throw new RuntimeException(e);
+		}
+		
 	}
 
 	@Override
