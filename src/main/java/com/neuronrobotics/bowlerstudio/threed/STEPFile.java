@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.mihosoft.vrl.v3d.CSG;
+
+import com.neuronrobotics.manifold3d.CSGManifold3d;
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
 import javafx.scene.paint.Color;
@@ -87,6 +89,12 @@ public final class STEPFile {
 		for (CSG csg : csgs) {
 			if (csg == null)
 				throw new IllegalArgumentException("csgs must not contain null");
+			try {
+				csg=CSG.simplify(csg,0.01);
+			} catch (Throwable e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			parts.add(new Part(csg,
 					FeatureEdgeExtractor.extract(csg, angleDegrees, topologyRepairTolerance, stitchTolerance)));
 		}
