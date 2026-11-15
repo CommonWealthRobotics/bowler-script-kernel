@@ -266,8 +266,10 @@ public class FreecadLoader implements IScriptingLanguage {
 		try {
 			File count = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
 					"count_solids.py");
-			// freecadcmd treats trailing file arguments as documents to import, so
-			// the paths travel as environment variables, the way check_step.py does
+			// the paths travel as trailing arguments, the way importSTEP.py takes
+			// them — that works under every launcher the app resolves; the script
+			// also accepts FCSTD_FILE/SOLIDS_REPORT for a freecadcmd caller, whose
+			// launcher imports trailing file arguments as documents
 			Map<String, String> env = headlessEnvironment();
 			env.put("FCSTD_FILE", freecadModel.getAbsolutePath());
 			env.put("SOLIDS_REPORT", report.getAbsolutePath());
@@ -275,6 +277,8 @@ public class FreecadLoader implements IScriptingLanguage {
 			args.add(freecad.getAbsolutePath());
 			args.add("-c");
 			args.add(count.getAbsolutePath());
+			args.add(freecadModel.getAbsolutePath());
+			args.add(report.getAbsolutePath());
 			legacySystemRun(env, count.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
