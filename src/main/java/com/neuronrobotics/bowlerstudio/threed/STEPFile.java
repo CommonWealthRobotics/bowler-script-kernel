@@ -88,12 +88,7 @@ public final class STEPFile {
 		for (CSG csg : csgs) {
 			if (csg == null)
 				throw new IllegalArgumentException("csgs must not contain null");
-			try {
-				csg = CSG.simplify(csg, 0.01);
-			} catch (Throwable e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			csg = simplifyForBRep(csg);
 			parts.add(new Part(csg,
 					FeatureEdgeExtractor.extract(csg, angleDegrees, topologyRepairTolerance, stitchTolerance)));
 		}
@@ -225,12 +220,15 @@ public final class STEPFile {
 		if (CSG.getDefaultOptionType() != CSG.OptType.Manifold3d || CSG.getManifold() == null)
 			return csg;
 		try {
-			CSG simplified = CSG.simplify(csg, READER_RESOLUTION_MM);
-			// simplify's tolerance is a target, not a guarantee: an adversarial mesh
-			// can still carry facets and vertices nanometres apart, and those are
-			// exactly the faces a reader refuses and a solid's volume poisons. The
-			// weld judges every join on the mesh's own pairing, so it runs on the
-			// simplified mesh like on any other.
+			CSG simplified = csg;
+			for (int round = 0; round < SIMPLIFY_ROUNDS; round++) {
+				CSG next = CSG.simplify(simplified, BREP_RESOLUTION_MM);
+				if (next.getTriCount() == simplified.getTriCount()) {
+					simplified = next;
+					break;
+				}
+				simplified = next;
+			}
 			return simplified;
 		} catch (Throwable t) {
 			Log.error(t);
@@ -238,8 +236,16 @@ public final class STEPFile {
 		}
 	}
 
-	/** The merge distance for the BRep-facing cleanup, in millimetres. */
-	private static final double READER_RESOLUTION_MM = 1e-5;
+	/** The most simplify passes the BRep-facing cleanup may take to settle. */
+	private static final int SIMPLIFY_ROUNDS = 8;
+
+	/**
+	 * The mesh's cleanup tolerance, in millimetres: the BRep export's own working
+	 * resolution. Manifold's simplify collapses the edges and merges the coplanar
+	 * facets shorter than this, which are exactly the geometry no BRep kernel can
+	 * carry, and it moves no surface further.
+	 */
+	public static final double BREP_RESOLUTION_MM = 0.05;
 
 	public void write(File file) throws IOException {
 		Files.write(file.toPath(), toStep().getBytes(StandardCharsets.UTF_8));

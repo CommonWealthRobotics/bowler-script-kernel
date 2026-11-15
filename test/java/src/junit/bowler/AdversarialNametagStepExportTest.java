@@ -188,8 +188,8 @@ public class AdversarialNametagStepExportTest {
 		builder.environment().put("ROUND_TRIP_JSON", report.getAbsolutePath());
 		// a scripted FreeCAD run waits for an EOF on stdin after its script completes,
 		// so it must never read the caller's console, or the run hangs forever
-		builder.redirectInput(ProcessBuilder.Redirect.from(new File(java.io.File.separator + "dev"
-				+ java.io.File.separator + "null")));
+		builder.redirectInput(ProcessBuilder.Redirect
+				.from(new File(java.io.File.separator + "dev" + java.io.File.separator + "null")));
 		builder.redirectErrorStream(true);
 		File log = new File(step.getParentFile(), "check_step.log");
 		builder.redirectOutput(log);

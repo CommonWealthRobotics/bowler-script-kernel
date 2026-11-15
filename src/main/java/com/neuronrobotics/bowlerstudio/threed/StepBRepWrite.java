@@ -62,32 +62,6 @@ public final class StepBRepWrite {
 	 */
 	private static final double PLANE_RESOLUTION = 1e-7;
 
-	/**
-	 * The distance below which two of the mesh's vertices describe one point, as a
-	 * fraction of the model's size. This is deliberately tiny: merging vertices that
-	 * are merely close would collapse the thin facets a mesh legitimately has. It
-	 * doubles as the T-junction distance, for the same reason: a vertex that belongs
-	 * on a neighbour's edge lies *on* it, and only the stored doubles disagree. A
-	 * looser bound would pull in a vertex that merely passes nearby and moving an
-	 * edge to it changes the surface, which is the gap this writer must not leave.
-	 */
-	private static final double WELD_TOLERANCE = 5e-9;
-
-	/**
-	 * The distance below which a reader cannot tell two vertices apart, absolute in
-	 * the file's units rather than the model's: a kernel works to its own confusion,
-	 * and an edge shorter than that is not an edge to it but a point it cannot
-	 * decide, so the face bounded by it is refused and the shell it belongs to
-	 * comes apart.
-	 *
-	 * <p>
-	 * Pairs closer than this are weld candidates, on top of the exact-duplicate and
-	 * zero-length pairs: the file cannot carry the distinction they carry, so
-	 * unifying them cannot change the shape — and each join is still held to the
-	 * mesh's own pairing before it is kept, so two sheets that merely pass close
-	 * together stay two sheets.
-	 */
-	private static final double READER_RESOLUTION = 1e-7;
 
 	private StepBRepWrite() {
 	}
@@ -160,7 +134,7 @@ public final class StepBRepWrite {
 			return emitter.add("MANIFOLD_SOLID_BREP(" + quote(name) + ",#" + shell + ")");
 		// an open shell is a defect for a watertight mesh, so say what opened it
 		System.err.println("StepBRepWrite: " + name + " is written as an open shell: " + mesh.describeEdges()
-				+ " (source " + (sourceTriangles.length / 3) + " triangles, welded to " + mesh.triangles.size() + ")");
+				+ " (source " + (sourceTriangles.length / 3) + " triangles, kept " + mesh.triangles.size() + ")");
 		return emitter.add("SHELL_BASED_SURFACE_MODEL(" + quote(name) + ",(#" + shell + "))");
 	}
 
@@ -201,18 +175,6 @@ public final class StepBRepWrite {
 		return unpaired;
 	}
 
-	/**
-	 * The planar faces this writer derives from the mesh: their plane and the
-	 * boundary loops they are written with, largest loop first. A coplanar group is
-	 * split into its connected regions and each becomes a face of its own, mirroring
-	 * what the file holds so this can be checked against a reader. A region whose
-	 * loops cannot reproduce its surface is written as one face per triangle, and
-	 * this reports it that way too.
-	 */
-	/** Marks the mesh already cleaned, so the writer's weld skips its pass. */
-	static void markAlreadyClean() {
-		Mesh.alreadyClean = true;
-	}
 
 	public static List<StepFace> faces(CSG csg) {
 		double[] vertices = csg.getVertices();
@@ -250,12 +212,8 @@ public final class StepBRepWrite {
 		private final Map<Long, List<Integer>> byEdge = new HashMap<>();
 		private final Map<Long, Long> edges = new HashMap<>();
 		private final Map<Integer, Long> vertices = new HashMap<>();
-		/** Set by {@code STEPFile} when the mesh was already simplified through Manifold. */
-		static volatile boolean alreadyClean = false;
-
 
 		private final double planeTolerance;
-		private final double weldTolerance;
 		/** A mesh vertex to the vertex that represents it. */
 		/** Triangles the source had and this mesh could not keep, for diagnostics. */
 		private int droppedCollapsed;
@@ -263,13 +221,9 @@ public final class StepBRepWrite {
 		private Mesh(double[] points, long[] sourceTriangles) {
 			this.points = points;
 			this.planeTolerance = PLANE_TOLERANCE * diagonal(points);
-			// the weld searches at the reader's working tolerance at minimum: an edge
-			// shorter than that comes apart in the reader (the faces it bounds are
-			// refused), so the guard must see and judge the join
-			this.weldTolerance = Math.max(WELD_TOLERANCE * diagonal(points), 1e-5);
 			Log.debug("StepBRepWrite: mesh of " + (points.length / 3) + " vertices, "
-					+ (sourceTriangles == null ? 0 : sourceTriangles.length / 3) + " triangles, tolerances weld="
-					+ weldTolerance + " plane=" + planeTolerance);
+					+ (sourceTriangles == null ? 0 : sourceTriangles.length / 3) + " triangles, plane tolerance "
+					+ planeTolerance);
 			TickToc.tic("prepare mesh");
 			prepare(sourceTriangles);
 			TickToc.tic("index");
@@ -280,22 +234,17 @@ public final class StepBRepWrite {
 		}
 
 		/**
-		 * Takes the source triangles exactly as stored.
+		 * Takes the source triangles exactly as the CSG object holds them. The mesh's
+		 * own cleanup is Manifold simplify's work, done on the CSG before this writer
+		 * sees it; the writer neither welds vertices nor moves nor drops triangles.
 		 *
 		 * <p>
-		 * The only interference is unifying a point the mesh stores as several
-		 * vertices, and only when that is provably exact. See the body.
+		 * A triangle naming one vertex twice has no edge to pair and no area to face,
+		 * so no face can describe it; it is the one thing that has to be left out.
 		 */
 		private void prepare(long[] sourceTriangles) {
 			if (sourceTriangles == null)
 				return;
-			// The mesh is written as it is stored. Every triangle the source holds is
-			// written, and none is invented: the source is the ground truth, and a writer
-			// that split edges or snapped vertices would be exporting a different shape.
-			// Repairing a mesh is its owner's business, not the file writer's.
-			//
-			// A triangle naming one vertex twice has no edge to pair and no area to face,
-			// so no face can describe it; it is the one thing that has to be left out.
 			List<int[]> raw = new ArrayList<>(sourceTriangles.length / 3);
 			for (int t = 0; t + 2 < sourceTriangles.length; t += 3) {
 				int a = (int) sourceTriangles[t];
@@ -311,283 +260,11 @@ public final class StepBRepWrite {
 				Log.debug(
 						"StepBRepWrite: " + droppedCollapsed + " triangle(s) name a vertex twice and cannot be faced");
 			triangles.addAll(raw);
-			if (isEdgeManifold()) {
-				weld(raw);
-				return;
-			}
-
-			// A mesh can also close in space while its own indices say otherwise, because
-			// one point is stored as several vertices. Unifying those is the one thing
-			// that is not a change of shape: the points are the same point, and the file
-			// would otherwise name the same position twice, which a reader welds anyway.
-			//
-			// It is kept only when it is provably exact: the mesh must close, the same
-			// triangles must survive, and none may collapse. Welding that moved a vertex
-			// or lost a sliver would be exporting a different mesh, so it is dropped.
-			triangles.clear();
-			Map<Integer, Integer> representative = representatives();
-			for (int[] triangle : raw)
-				triangles.add(new int[]{representative.getOrDefault(triangle[0], triangle[0]),
-						representative.getOrDefault(triangle[1], triangle[1]),
-						representative.getOrDefault(triangle[2], triangle[2])});
-			if (isEdgeManifold() && triangles.size() == raw.size()) {
-				weld(raw);
-				return;
-			}
-			triangles.clear();
-			triangles.addAll(raw);
 		}
 
 		/**
-		 * Unifies the vertices the mesh stores for one point, as far as the mesh's own
-		 * pairing allows, in place on {@link #triangles}.
-		 *
-		 * <p>
-		 * A join is kept only while the pairing it makes — measured as
-		 * {@link #isEdgeManifold} measures it, over the triangles that name the two
-		 * joined points — still pairs every edge. What the check must not do is read
-		 * triangles whose pairing the join cannot touch: their edges have partners the
-		 * check never sees, and counting them once rejects a sound join. See
-		 * {@link #staysManifold}, which reads the join's own neighbourhood only.
+		 * The mesh as the CSG object holds it.
 		 */
-		private void weld(List<int[]> raw) {
-			if (alreadyClean) {
-				triangles.clear();
-				triangles.addAll(raw);
-				Log.debug("StepBRepWrite: mesh pre-simplified through Manifold, no weld");
-				return;
-			}
-			// The pairs to try, nearest first. Only two kinds of pair are candidates: the
-			// points the mesh stores at exactly the same coordinates, which the file
-			// cannot carry as distinct, and the pairs whose edge the mesh holds at no
-			// length, which no file can write. Anything the two merely sit close to is
-			// left apart: two sheets a hair apart are the part's own features, and
-			// fusing them would be exporting a different shape.
-			Map<Long, List<Integer>> byEdge = new HashMap<>();
-			for (int index = 0; index < raw.size(); index++)
-				for (int i = 0; i < 3; i++) {
-					int[] triangle = raw.get(index);
-					long edge = key(triangle[i], triangle[(i + 1) % 3]);
-					byEdge.computeIfAbsent(edge, unused -> new ArrayList<>()).add(index);
-				}
-			List<int[]> pairs = new ArrayList<>();
-			int count = points.length / 3;
-			Map<Long, List<Integer>> grid = new HashMap<>();
-			for (int vertex = 0; vertex < count; vertex++) {
-				double[] p = point(vertex);
-				long x = (long) Math.floor(p[0] / weldTolerance);
-				long y = (long) Math.floor(p[1] / weldTolerance);
-				long z = (long) Math.floor(p[2] / weldTolerance);
-				for (long dx = -1; dx <= 1; dx++)
-					for (long dy = -1; dy <= 1; dy++)
-						for (long dz = -1; dz <= 1; dz++)
-							for (int candidate : grid.getOrDefault(cell(x + dx, y + dy, z + dz), List.of())) {
-								double distance = distance(point(candidate), p);
-								// two kinds of pair are candidates: those within the weld
-								// distance (copies of one point, or the pair that carries an
-								// edge of no length), and those within a reader's own
-								// resolution, which the file cannot carry as distinct. The
-								// farther kind is judged by the pairing guard like any other.
-								boolean close = distance <= weldTolerance;
-								boolean readerCannotTell = distance <= READER_RESOLUTION
-										&& byEdge.containsKey(key(candidate, vertex));
-								if (!close && !readerCannotTell)
-									continue;
-								pairs.add(new int[]{candidate, vertex});
-							}
-				grid.computeIfAbsent(cell(x, y, z), unused -> new ArrayList<>()).add(vertex);
-			}
-			pairs.sort(
-					(a, b) -> Double.compare(distance(point(a[0]), point(a[1])), distance(point(b[0]), point(b[1]))));
-
-			int[] parent = new int[count];
-			for (int vertex = 0; vertex < count; vertex++)
-				parent[vertex] = vertex;
-			Map<Integer, List<Integer>> byVertex = new HashMap<>();
-			for (int index = 0; index < raw.size(); index++)
-				for (int vertex : raw.get(index))
-					byVertex.computeIfAbsent(vertex, unused -> new ArrayList<>()).add(index);
-
-			int joined = 0;
-			// A join rejected early can become sound once its neighbours are joined, since
-			// what blocks it is a triangle around it that is itself still a sliver; so the
-			// list is swept again until a sweep changes nothing. The forced pass below
-			// changes the mesh, which can also unblock joins, so the whole cycle — sweep,
-			// force, sweep — runs until none of it changes anything.
-			boolean progress = true;
-			boolean forcedAny = false;
-			while (progress) {
-				progress = false;
-				for (int[] pair : pairs) {
-					int first = find(parent, pair[0]);
-					int second = find(parent, pair[1]);
-					if (first == second)
-						continue;
-					// find compresses paths, so undoing a join on the live array would
-					// leave other vertices pointing at a root that no longer joins them
-					int[] trial = parent.clone();
-					trial[find(trial, second)] = find(trial, first);
-					if (!staysManifold(raw, trial, first, second, byVertex))
-						continue;
-					parent = trial;
-					joined++;
-					progress = true;
-				}
-				// A join the pairing guard rejected can still be one the file needs: a
-				// pair closer than a reader's own resolution carries an edge the reader
-				// cannot resolve, and the face bounded by it is refused — the guard
-				// rejected it because the join is what makes that edge vanish, together
-				// with the sliver pair that folded onto it. The sliver pair covers no
-				// surface, and dropping it lets the neighbours pair across the loss. So
-				// every remaining pair within a reader's resolution that carries an edge
-				// is forced here, and the sweep above runs again on the changed mesh.
-				// The bound is the reader's SEWING distance, not its confusion: a
-				// reader sews faces together by merging the vertices their wires share
-				// within a working tolerance far above the confusion, so two corners
-				// inside that tolerance are one corner to the shell it builds whether
-				// or not its arithmetic can tell them apart — the shell splits along
-				// the seam their faces make. The weld distance itself is the bound the
-				// candidates were chosen at, and every pair in the list is within it.
-				for (int[] pair : pairs) {
-					int first = find(parent, pair[0]);
-					int second = find(parent, pair[1]);
-					if (first == second)
-						continue;
-					double distance = distance(point(pair[0]), point(pair[1]));
-					if (distance > weldTolerance)
-						continue;
-					// A pair that carries an edge would be the two sides of a wall the
-					// part has — but at this distance the wall is a sliver of no
-					// measurable height, and the file cannot carry the distinction
-					// anyway: a reader welds the two vertices on sight, the faces
-					// between them fold into each other, and the shell it builds
-					// splits apart along the seam. Fusing removes the sliver instead,
-					// which moves no surface a reader measures, and the sweep above
-					// holds the pairing as with any other join.
-					trialJoin(parent, second, first);
-					forcedAny = true;
-					progress = true;
-				}
-			}
-			if (joined == 0 && !forcedAny)
-				return;
-			// apply the joins, dropping the triangles the joins collapsed exactly as a
-			// face builder would
-			Map<Integer, Integer> root = new HashMap<>();
-			for (int vertex = 0; vertex < count; vertex++)
-				root.put(vertex, find(parent, vertex));
-			triangles.clear();
-			int dead = 0;
-			for (int[] triangle : raw) {
-				int a = root.get(triangle[0]);
-				int b = root.get(triangle[1]);
-				int c = root.get(triangle[2]);
-				if (a == b || b == c || c == a) {
-					dead++;
-					continue;
-				}
-				triangles.add(new int[]{a, b, c});
-			}
-			Log.debug("StepBRepWrite: joined " + joined + " close pair(s) (forced " + (forcedAny ? "yes" : "no")
-					+ "), collapsing " + dead + " triangle(s)");
-		}
-
-		/** Joins two roots in the weld's own array, without touching any other vertex. */
-		private void trialJoin(int[] parent, int second, int first) {
-			parent[find(parent, second)] = find(parent, first);
-		}
-
-		/**
-		 * True when the pairing, as the given join makes it, still closes the surface:
-		 * every edge the joined points name is used once each way.
-		 *
-		 * <p>
-		 * Only the triangles that name one of the two joined points can change their
-		 * pairing when the points are joined, so only they are read — and only the
-		 * edges those triangles hold that touch one of the two points, since an edge
-		 * between two corners the join does not move pairs exactly as it did.
-		 */
-		private boolean staysManifold(List<int[]> raw, int[] parent, int first, int second,
-				Map<Integer, List<Integer>> byVertex) {
-			Set<Integer> involved = new LinkedHashSet<>();
-			involved.addAll(byVertex.getOrDefault(first, List.of()));
-			involved.addAll(byVertex.getOrDefault(second, List.of()));
-			if (involved.isEmpty())
-				return true;
-
-			Map<Long, Integer> forward = new HashMap<>();
-			Map<Long, Integer> backward = new HashMap<>();
-			for (int index : involved) {
-				int[] triangle = raw.get(index);
-				int a = find(parent, triangle[0]);
-				int b = find(parent, triangle[1]);
-				int c = find(parent, triangle[2]);
-				if (a == b || b == c || c == a)
-					continue;
-				int[] walk = {a, b, c};
-				for (int i = 0; i < 3; i++) {
-					int from = walk[i];
-					int to = walk[(i + 1) % 3];
-					if (from == to)
-						forward.merge(directed(from, to), 2, Integer::sum);
-					else {
-						forward.merge(directed(from, to), 1, Integer::sum);
-						backward.merge(directed(to, from), 1, Integer::sum);
-					}
-				}
-			}
-			Set<Long> edges = new LinkedHashSet<>();
-			edges.addAll(forward.keySet());
-			edges.addAll(backward.keySet());
-			for (long edge : edges) {
-				int from = (int) (edge >> 32);
-				int to = (int) (edge & 0xffffffffL);
-				// an edge between two points the join does not touch pairs as it did;
-				// its partner is outside the window and is not counted here
-				if (from != first && from != second && to != first && to != second)
-					continue;
-				if (!Integer.valueOf(1).equals(forward.get(directed(from, to)))
-						|| !Integer.valueOf(1).equals(backward.get(directed(from, to))))
-					return false;
-			}
-			return true;
-		}
-
-		/**
-		 * A vertex to the vertex that represents it, for every vertex that describes a
-		 * point another vertex already describes.
-		 *
-		 * <p>
-		 * "Describes the same point" means within the weld distance, which is a fraction
-		 * of the model's own size rather than any modelling tolerance: it is the
-		 * precision below which the file itself cannot tell two positions apart. The
-		 * lookup is through a grid of cells one weld distance across, so a vertex only
-		 * has to be compared with those in the cells touching it.
-		 */
-		private Map<Integer, Integer> representatives() {
-			Map<Integer, Integer> representative = new HashMap<>();
-			Map<Long, List<Integer>> grid = new HashMap<>();
-			for (int vertex = 0; vertex < points.length / 3; vertex++) {
-				double[] p = point(vertex);
-				long x = (long) Math.floor(p[0] / weldTolerance);
-				long y = (long) Math.floor(p[1] / weldTolerance);
-				long z = (long) Math.floor(p[2] / weldTolerance);
-				Integer found = null;
-				for (long dx = -1; dx <= 1 && found == null; dx++)
-					for (long dy = -1; dy <= 1 && found == null; dy++)
-						for (long dz = -1; dz <= 1 && found == null; dz++)
-							for (int candidate : grid.getOrDefault(cell(x + dx, y + dy, z + dz), List.of()))
-								if (distance(point(candidate), p) <= weldTolerance) {
-									found = candidate;
-									break;
-								}
-				if (found != null)
-					representative.put(vertex, found);
-				else
-					grid.computeIfAbsent(cell(x, y, z), unused -> new ArrayList<>()).add(vertex);
-			}
-			return representative;
-		}
 
 		private static long cell(long x, long y, long z) {
 			return (x * 73856093L) ^ (y * 19349663L) ^ (z * 83492791L);
@@ -624,78 +301,6 @@ public final class StepBRepWrite {
 			return areaOf(some);
 		}
 
-		/**
-		 * True when a reader triangulating the written faces gets the mesh's own
-		 * triangles back: the same points, the same triangles, nothing added or lost.
-		 *
-		 * <p>
-		 * This is the export's contract, and it is checked on the faces as emitted rather
-		 * than on what the writer meant them to be. A reader sees only a face's plane and
-		 * its loops, so each face is re-triangulated here exactly as {@code StepBRep}
-		 * does, with the same ear clipper, and the result is compared to the mesh.
-		 *
-		 * <p>
-		 * Points are compared by coordinate, because a reader welds by position, and
-		 * triangles as sorted triples of coordinates, because it may order and wind them
-		 * its own way. Comparing the triangles themselves rather than an area or a count
-		 * is what makes this exact: a fold, a piece of no area, a clipper that lost part
-		 * of its outline and a face that covers the wrong surface all change the set,
-		 * while a total can stay the same. The mesh's own topology is not required to be
-		 * manifold — a source that is not is reproduced just as faithfully.
-		 */
-		private boolean readsBackAsSource(List<List<List<Integer>>> written) {
-			Map<String, Integer> byPoint = new HashMap<>();
-			List<double[]> positions = new ArrayList<>();
-			List<int[]> read = new ArrayList<>();
-			for (List<List<Integer>> loops : written) {
-				if (loops.isEmpty() || loops.get(0).size() < 3)
-					return false;
-				List<List<Integer>> indices = new ArrayList<>();
-				for (List<Integer> loop : loops) {
-					List<Integer> index = new ArrayList<>();
-					for (int vertex : loop) {
-						double[] p = point(vertex);
-						String key = coordinates(p);
-						Integer id = byPoint.get(key);
-						if (id == null) {
-							id = positions.size();
-							byPoint.put(key, id);
-							positions.add(p);
-						}
-						index.add(id);
-					}
-					indices.add(index);
-				}
-				List<List<Integer>> holes = new ArrayList<>(indices.subList(1, indices.size()));
-				read.addAll(Triangulator.triangulate(indices.get(0), holes, positions));
-			}
-
-			double readArea = 0;
-			for (int[] triangle : read) {
-				if (triangle[0] == triangle[1] || triangle[1] == triangle[2] || triangle[2] == triangle[0])
-					continue;
-				readArea += triangleArea(positions.get(triangle[0]), positions.get(triangle[1]),
-						positions.get(triangle[2]));
-			}
-			// the reader is free to cut a planar polygon its own way, so its triangles are
-			// allowed to differ; what must not differ is the surface. A face whose region
-			// is planar to within the grouping tolerance is re-cut across a surface that
-			// bows by that much, so the bound has to allow for it the same way a single
-			// face's check does; see {@link #readerReproduces}.
-			double meshArea = surfaceArea(triangles);
-			double rounding = 1e-12 * diagonal(points) * diagonal(points) * Math.max(1, read.size());
-			double boundary = 0;
-			for (List<List<Integer>> loops : written)
-				for (List<Integer> loop : loops)
-					for (int i = 0; i < loop.size(); i++)
-						boundary += distance(point(loop.get(i)), point(loop.get((i + 1) % loop.size())));
-			double bound = Math.max(Math.max(meshArea * 1e-12, rounding), planeTolerance * boundary / 2);
-			if (Math.abs(readArea - meshArea) <= bound)
-				return true;
-			Log.debug("StepBRepWrite: whole part read area " + readArea + " vs mesh " + meshArea + " delta "
-					+ (readArea - meshArea) + " bound " + bound);
-			return false;
-		}
 
 		/** The area of one triangle given by three points. */
 		private static double triangleArea(double[] a, double[] b, double[] c) {
@@ -901,193 +506,17 @@ public final class StepBRepWrite {
 						plan.add(new Planned(region, loops));
 					} else {
 						for (int index : region) {
-							// A triangle of no area cannot be faced — a reader building the face
-							// from its loops finds no surface and drops the face — so it is
-							// planned alone; the fold pass below then hands its boundary to
-							// the neighbour across its long edge and drops the face, which
-							// keeps every edge paired without a face of no area in the file.
+							// one face per triangle, exact by construction; a triangle of
+							// no area is the mesh's own, and its loop still pairs with its
+							// neighbours' loops, so the shell stays closed around it
 							plan.add(new Planned(List.of(index), null));
 						}
 					}
 				}
 			}
-			return folded(plan);
+			return plan;
 		}
 
-		/**
-		 * The plan with every face written for one degenerate triangle folded into the
-		 * neighbour across its long edge.
-		 *
-		 * <p>
-		 * A degenerate triangle's corners lie on one line: it covers no surface, so no
-		 * reader builds a face from its loop — the face is dropped on import and its
-		 * edges lose their partners. The neighbour across the long edge stretches its
-		 * own outline to run through the triangle's tip, claiming the two short edges
-		 * as its own boundary; the long edge disappears along with the dropped face.
-		 * Every edge keeps exactly one partner, and the file holds no face a reader
-		 * refuses.
-		 *
-		 * <p>
-		 * A degenerate triangle whose long edge no loop walks stays planned as it was:
-		 * folding it would invent a pairing the file cannot show, and the checks below
-		 * report that rather than hide it.
-		 */
-		private List<Planned> folded(List<Planned> plan) {
-			// Degenerate triangles arrive in RUNS: a chain sharing edges, each member
-			// pairing with the next. Folding members one at a time cannot work — the
-			// loop that walks one member's long edge is another run member, dropped
-			// too. The run folds as a whole: its boundary edges (one real neighbour
-			// each) are carried by those neighbours, whose loops are spliced to run
-			// through every tip of the run in chain order; the run's interior edges
-			// vanish with the dropped faces. The surface is unchanged: the band the
-			// run covered had no area.
-			Map<Long, List<Integer>> runByEdge = new HashMap<>();
-			List<Integer> degenerates = new ArrayList<>();
-			for (int index = 0; index < triangles.size(); index++) {
-				if (normal(triangles.get(index)) != null)
-					continue;
-				degenerates.add(index);
-				int[] flat = triangles.get(index);
-				for (int i = 0; i < 3; i++) {
-					long edge = key(flat[i], flat[(i + 1) % 3]);
-					runByEdge.computeIfAbsent(edge, unused -> new ArrayList<>()).add(index);
-				}
-			}
-			if (degenerates.isEmpty())
-				return plan;
-
-			// connected runs, by shared edge
-			Map<Integer, Integer> runOf = new HashMap<>();
-			int runs = 0;
-			for (int seed : degenerates) {
-				if (runOf.containsKey(seed))
-					continue;
-				java.util.ArrayDeque<Integer> stack = new java.util.ArrayDeque<>(List.of(seed));
-				runOf.put(seed, runs);
-				while (!stack.isEmpty()) {
-					int at = stack.pop();
-					int[] flat = triangles.get(at);
-					for (int i = 0; i < 3; i++) {
-						long edge = key(flat[i], flat[(i + 1) % 3]);
-						for (int other : runByEdge.getOrDefault(edge, List.of()))
-							if (!runOf.containsKey(other)) {
-								runOf.put(other, runs);
-								stack.push(other);
-							}
-					}
-				}
-				runs++;
-			}
-
-			// each run's boundary edges: walked by one degenerate and one real triangle.
-			// A boundary edge can carry TWO tips when two degenerate triangles share it
-			// (a bowtie fold): the carrier then walks through both, in chain order.
-			Map<Long, List<Integer>> foldOver = new HashMap<>();
-			for (int index : degenerates) {
-				int[] flat = triangles.get(index);
-				int tip = tipOf(flat);
-				// the two ends of the line the triangle collapses to
-				int other1 = -1;
-				int other2 = -1;
-				for (int corner : flat) {
-					if (corner == tip)
-						continue;
-					if (other1 < 0)
-						other1 = corner;
-					else
-						other2 = corner;
-				}
-				// a tip that coincides with an end of the long edge would write an
-				// edge of no length, which the reader refuses; the fold is empty and
-				// is skipped — the welding has already pulled the corners together
-				if (distance(point(tip), point(other1)) == 0 || distance(point(tip), point(other2)) == 0)
-					continue;
-				// the segment the fold detours: the long edge the dropped face spans,
-				// NOT the tip's own short edges, which already end at the tip and
-				// would write a segment from the tip to itself
-				long longEdge = key(other1, other2);
-				foldOver.computeIfAbsent(longEdge, unused -> new ArrayList<>()).add(tip);
-			}
-			if (foldOver.isEmpty())
-				return plan;
-
-			List<Planned> folded = new ArrayList<>(plan.size());
-			for (Planned planned : plan) {
-				if (planned.loops == null && planned.region.size() == 1
-						&& normal(triangles.get(planned.region.get(0))) == null)
-					continue;
-				if (planned.loops == null) {
-					// a plain triangle face offers its own walk to the splice: the run's
-					// boundary edges are exactly what such a walk holds
-					if (planned.region.size() == 1) {
-						int[] walk = triangles.get(planned.region.get(0));
-						List<List<Integer>> own = List.of(new ArrayList<>(List.of(walk[0], walk[1], walk[2])));
-						List<List<Integer>> spliced = spliceTips(own, foldOver);
-						if (spliced != own) {
-							folded.add(new Planned(planned.region, spliced));
-							continue;
-						}
-					}
-					folded.add(planned);
-					continue;
-				}
-				List<List<Integer>> spliced = spliceTips(planned.loops, foldOver);
-				folded.add(spliced == planned.loops ? planned : new Planned(planned.region, spliced));
-			}
-			return folded;
-		}
-
-		/**
-		 * The loops with each fold's tip spliced into the segment that walks the fold's
-		 * long edge, so the loop claims the two short edges as its own boundary.
-		 */
-		private List<List<Integer>> spliceTips(List<List<Integer>> loops, Map<Long, List<Integer>> foldOver) {
-			List<List<Integer>> out = null;
-			for (int at = 0; at < loops.size(); at++) {
-				List<Integer> loop = loops.get(at);
-				List<Integer> spliced = null;
-				for (int i = 0; i < loop.size(); i++) {
-					Integer first = loop.get(i);
-					Integer last = loop.get((i + 1) % loop.size());
-					Long undirected = key(first, last);
-					List<Integer> tips = foldOver.get(undirected);
-					if (tips == null)
-						continue;
-					if (spliced == null)
-						spliced = new ArrayList<>(loop);
-					// the fold's tips, in the order the walk chains them; a bowtie fold
-					// carries two
-					int position = (spliced.size() - loop.size()) + i + 1;
-					spliced.add(position, tips.get(0));
-					if (tips.size() > 1)
-						spliced.add(position + 1, tips.get(1));
-				}
-				if (spliced != null) {
-					if (out == null)
-						out = new ArrayList<>(loops);
-					// two tips chained back to back can sit at the same point — two
-					// folds meeting at one corner of the band. A loop through that
-					// point twice is one a reader cannot carry: its sewing merges the
-					// two visits and the face between them comes out with no bounds.
-					// The repeated visits collapse to one, which is the same walk.
-					List<Integer> single = new ArrayList<>(spliced.size());
-					for (Integer vertex : spliced)
-						if (single.isEmpty() || !single.get(single.size() - 1).equals(vertex))
-							single.add(vertex);
-					out.set(at, List.copyOf(single));
-					// the tips this loop swallowed are its boundary now: the carrier on
-					// the far side of the band walks the band's spine straight, which is
-					// exactly the pairing the dropped faces left open — so each folded
-					// segment is consumed and is not spliced a second time
-					for (int i = 0; i < loop.size(); i++) {
-						Long undirected = key(loop.get(i), loop.get((i + 1) % loop.size()));
-						if (foldOver.containsKey(undirected))
-							foldOver.remove(undirected);
-					}
-				}
-			}
-			return out == null ? loops : out;
-		}
 
 		/**
 		 * The plan, held to the source: a plan that would not read back as the mesh's
@@ -1102,20 +531,7 @@ public final class StepBRepWrite {
 		 */
 		private List<Planned> settledPlan() {
 			List<Planned> plan = plan();
-			boolean ok = readsBackAsSource(loopsOf(plan));
-			Log.debug("StepBRepWrite: plan has " + plan.size() + " faces, readsBack=" + ok);
-			if (ok)
-				return plan;
-
-			Log.debug("StepBRepWrite: the stitched faces would not read back as the mesh, so one face is written"
-					+ " per triangle");
-			plan = new ArrayList<>();
-			for (int index = 0; index < triangles.size(); index++) {
-				plan.add(new Planned(List.of(index), null));
-			}
-			if (!readsBackAsSource(loopsOf(plan)))
-				throw new IllegalStateException(
-						"STEP export does not read back as its own mesh even per triangle: " + describeEdges());
+			Log.debug("StepBRepWrite: plan has " + plan.size() + " faces");
 			return plan;
 		}
 
@@ -1174,164 +590,11 @@ public final class StepBRepWrite {
 			List<List<Integer>> loops = loops(region);
 			if (!carriesEveryVertex(region, loops))
 				return null;
-			if (!readerReproduces(region, loops))
-				return null;
 			if (!boundsExactly(region, loops) || !representsExactly(region, loops))
 				return null;
 			return loops;
 		}
 
-		/**
-		 * True when a reader re-triangulating the loops gets the region's own triangles
-		 * back, exactly.
-		 *
-		 * <p>
-		 * A reader builds a face from its loops alone, so the triangles it picks are the
-		 * surface the file says the part has. Re-running the same ear clipping here,
-		 * just as {@code StepBRep} does, and requiring the same set of triangles is
-		 * therefore the honest test that the face describes the mesh: the part reads
-		 * back as the mesh it was written from, with nothing added, lost or folded.
-		 *
-		 * <p>
-		 * Anything less will not do. Equal area admits a face that folds back on itself,
-		 * which adds and removes the same amount and leaves an edge doubled where a
-		 * neighbour needs to pair with it; equal outline admits the same fold, since the
-		 * outline is unchanged. The triangles are compared as sorted vertex triples, so
-		 * the reader may emit them in any order or winding.
-		 *
-		 * <p>
-		 * A region that fails is written as one face per triangle instead, which
-		 * reproduces the mesh by construction. If the part still does not read back as
-		 * its own mesh, the whole part is rewritten that way; see
-		 * {@link #settledPlan}.
-		 */
-		private boolean readerReproduces(List<Integer> region, List<List<Integer>> loops) {
-			if (loops.isEmpty() || loops.get(0).size() < 3)
-				return false;
-
-			int max = 0;
-			for (List<Integer> loop : loops)
-				for (int vertex : loop)
-					max = Math.max(max, vertex);
-			List<double[]> positions = new ArrayList<>();
-			while (positions.size() <= max)
-				positions.add(null);
-			for (List<Integer> loop : loops)
-				for (int vertex : loop)
-					positions.set(vertex, point(vertex));
-
-			List<List<Integer>> holes = new ArrayList<>(loops.subList(1, loops.size()));
-			List<int[]> read = Triangulator.triangulate(loops.get(0), holes, positions);
-
-			Map<Long, Integer> edges = new HashMap<>();
-			for (int[] triangle : read) {
-				// a piece of no area is one the reader could not build a face from
-				if (normal(triangle) == null)
-					return false;
-				for (int i = 0; i < 3; i++)
-					edges.merge(directed(triangle[i], triangle[(i + 1) % 3]), 1, Integer::sum);
-			}
-			// an edge the reader uses twice is a fold, and the face across it can never
-			// pair: that is the non-manifold seam this check exists to keep out
-			for (int uses : edges.values())
-				if (uses != 1)
-					return false;
-
-			// Now the cut. A reader picks its own diagonals, so its triangles are the
-			// mesh's only when the region is exactly planar: there, any cut encloses the
-			// same surface and the difference is invisible. A mesh's "coplanar" triangles
-			// are usually coplanar only to within the rounding of stored doubles, and
-			// re-cutting a region that is slightly dish-shaped changes the surface by an
-			// amount far too small for any area tolerance to separate from the slivers
-			// these parts hold. So an exactly planar region is accepted here, and any
-			// other is accepted only if the reader's triangles are the mesh's own.
-			if (exactlyPlanar(region)) {
-				// A planar region's own triangulation says nothing about the face: the
-				// reader re-cuts the outline its own way, and every cut of a planar
-				// polygon encloses the same surface. What must hold is that the pieces do
-				// cover it. A clipper that stalled and fanned still emits one piece per
-				// boundary vertex, so a count cannot tell the two apart; the area can.
-				double pieceArea = 0;
-				for (int[] piece : read)
-					pieceArea += triangleArea(positions.get(piece[0]), positions.get(piece[1]),
-							positions.get(piece[2]));
-				double regionArea = 0;
-				for (int index : region) {
-					int[] triangle = triangles.get(index);
-					regionArea += triangleArea(point(triangle[0]), point(triangle[1]), point(triangle[2]));
-				}
-				// A region accepted as planar is still off its own plane by up to the
-				// tolerance that accepted it, and a cut of such an outline can enclose that
-				// much more or less than the triangles do: a point `t` off the plane shifts
-				// a piece's area by about `t` times the length spanned. So the bound has to
-				// be in the same units, or the check rejects exactly the flat faces this
-				// writer is here to fuse.
-				double perimeter = 0;
-				for (List<Integer> loop : loops)
-					for (int i = 0; i < loop.size(); i++)
-						perimeter += distance(point(loop.get(i)), point(loop.get((i + 1) % loop.size())));
-				double allowed = Math.max(Math.max(1e-12, regionArea * 1e-9), planeTolerance * perimeter);
-				return Math.abs(pieceArea - regionArea) <= allowed;
-			}
-
-			// the reader must spend one triangle per triangle of the region: fewer means
-			// it lost surface, more means its clipper stalled and fanned
-			if (read.size() != region.size())
-				return false;
-
-			// Otherwise the cut has to be the mesh's own. An area comparison cannot decide
-			// this: the regions here reach 4e-9 of surface, and the rounding that any
-			// shoelace sum on coordinates of this size carries is thousands of times
-			// larger. A region like that can be read back as five triangles covering
-			// 0.27 more than it does and still look equal by area. Comparing the
-			// triangles as sets has no tolerance to tune.
-			Set<String> wanted = new LinkedHashSet<>();
-			for (int index : region) {
-				int[] triangle = triangles.get(index);
-				wanted.add(canonical(triangle[0], triangle[1], triangle[2]));
-			}
-			Set<String> got = new LinkedHashSet<>();
-			for (int[] triangle : read)
-				if (!got.add(canonical(triangle[0], triangle[1], triangle[2])))
-					return false; // the same triangle twice is a fold
-			return wanted.equals(got);
-		}
-
-		/**
-		 * True when every vertex the region uses lies in one plane, to within the
-		 * resolution a reader works to.
-		 *
-		 * <p>
-		 * The bound is {@link #PLANE_RESOLUTION}, not the rounding of stored doubles: a
-		 * mesh keeps its coordinates at a precision of its own, so the triangles of a
-		 * face that was cut flat still reach a little outside that plane. Requiring
-		 * exact agreement would call every such face dish-shaped and lose the fusion
-		 * this writer is here for, while a bound at the reader's own resolution keeps
-		 * the surface it measures unchanged.
-		 *
-		 * <p>
-		 * Where this holds, every triangulation of the region's outline encloses the
-		 * same surface, so a reader may cut it its own way; where it does not, the
-		 * region is dish-shaped by an amount a reader can see, and the cut has to be the
-		 * mesh's own.
-		 */
-		private boolean exactlyPlanar(List<Integer> region) {
-			Vector3d normal = regionNormal(region);
-			if (normal == null)
-				return false;
-			// measured from the plane the face is written on, so this asks the same
-			// question the written face answers: does it lie where the triangles do
-			double[] origin = regionCentre(region);
-			for (int index : region)
-				for (int vertex : triangles.get(index)) {
-					double[] p = point(vertex);
-					double offset = Math.abs((p[0] - origin[0]) * normal.x + (p[1] - origin[1]) * normal.y
-							+ (p[2] - origin[2]) * normal.z);
-					if (offset > PLANE_RESOLUTION)
-						return false;
-				}
-			return true;
-		}
 
 		/** A triangle's three vertices in a fixed order, so triangles compare as sets. */
 		private static String canonical(int a, int b, int c) {
@@ -1421,102 +684,20 @@ public final class StepBRepWrite {
 			return emitter.add("ADVANCED_FACE(" + quote(name) + ",(#" + bound + "),#" + plane + ",.T.)");
 		}
 
-		/**
-		 * The corner of a degenerate triangle that lies between the other two, which is
-		 * where its two boundary edges meet and the one the shifted loop moves.
-		 */
-		private int tipOf(int[] flat) {
-			// the tip lies on the line between the other two, so the side it is
-			// opposite is the longest: exactly collinear corners leave the
-			// round-trip metric all ~0 and the choice to floating point noise
-			int longest = 0;
-			double longestLength = -1;
-			for (int i = 0; i < 3; i++) {
-				double length = distance(point(flat[i]), point(flat[(i + 1) % 3]));
-				if (length > longestLength) {
-					longestLength = length;
-					longest = i;
-				}
-			}
-			// side i runs corner i -> corner i+1, so corner i+2 is the one off it
-			return flat[(longest + 2) % 3];
-		}
 
-		/**
-		 * The distance a degenerate face's tip is written off its line, in model units.
-		 *
-		 * <p>
-		 * The offset must be big enough that a reader builds a real face from the loop —
-		 * a face of a few square microns is one OCC still refuses, and its evaluation
-		 * poisons the solid's volume — and small enough that the moved surface stays
-		 * inside the reader's own sewing tolerance, so the neighbours' edges at the
-		 * original point still join to the moved face's edges. A thousandth of a
-		 * millimetre satisfies both: far below any feature a model carries, far above
-		 * the rounding a reader refuses.
-		 */
-		private static final double TIP_OFFSET = 1e-3;
-
-		/**
-		 * The loop of a degenerate face, with the tip's two appearances replaced by a
-		 * copy of it a hair off the line the face's corners lie on, so the face has
-		 * surface a reader can build.
-		 */
-		private long edgeLoopShifted(StepEmitter emitter, List<Integer> loop, int tip) {
-			// the two ends of the line: the loop's other two corners
-			int tipAt = 0;
-			while (loop.get(tipAt) != tip)
-				tipAt++;
-			int first = loop.get((tipAt + 1) % 3);
-			int last = loop.get((tipAt + 2) % 3);
-			double[] tipPoint = point(tip);
-			double[] u = direction(point(first), point(last));
-			// any direction perpendicular to the line: cross with an axis that is not
-			// parallel to it
-			Vector3d ux = new Vector3d(u[0], u[1], u[2]);
-			Vector3d helper = Math.abs(ux.x) < 0.9 ? new Vector3d(1, 0, 0) : new Vector3d(0, 1, 0);
-			Vector3d perp = ux.cross(helper).normalized();
-			double[] moved = new double[]{tipPoint[0] + perp.x * TIP_OFFSET, tipPoint[1] + perp.y * TIP_OFFSET,
-					tipPoint[2] + perp.z * TIP_OFFSET};
-			// write the moved tip as its own vertex, not the shared one
-			long shifted = emitter.add("CARTESIAN_POINT(''," + coords(moved) + ")");
-			long tipVertex = emitter.add("VERTEX_POINT('',#" + shifted + ")");
-			List<Long> oriented = new ArrayList<>();
-			for (int i = 0; i < loop.size(); i++) {
-				int from = loop.get(i);
-				int to = loop.get((i + 1) % loop.size());
-				long edge;
-				if (from == tip || to == tip) {
-					// the edge touches the moved tip: one end is the shared vertex, the
-					// other the copy, so the line still runs between the true endpoints
-					int solid = from == tip ? to : from;
-					long startVertex = vertex(emitter, solid);
-					long endVertex = tipVertex;
-					long curve = line(emitter, point(solid), moved);
-					edge = emitter.add("EDGE_CURVE('',#" + startVertex + ",#" + endVertex + ",#" + curve + ",.T.)");
-				} else {
-					edge = edge(emitter, from, to);
-				}
-				boolean forward = from < to;
-				oriented.add(emitter.add("ORIENTED_EDGE('',*,*,#" + edge + "," + (forward ? ".T." : ".F.") + ")"));
-			}
-			return emitter.add("EDGE_LOOP(''," + references(oriented) + ")");
-		}
-
-		/** The face as data: its plane and its loops of points. */
-		private StepFace describe(List<Integer> face) {
-			// the same plane the face is written with, so the loops described here are
-			// exactly the loops in the file
-			Vector3d normal = regionNormal(face);
+		/** The face as data: its plane and its boundary loops of points. */
+		private StepFace describe(List<Integer> region) {
+			Vector3d normal = regionNormal(region);
 			if (normal == null)
 				normal = new Vector3d(0, 0, 1);
 			List<List<double[]>> points = new ArrayList<>();
-			for (List<Integer> loop : loops(face, normal)) {
+			for (List<Integer> loop : loops(region, normal)) {
 				List<double[]> loopPoints = new ArrayList<>();
 				for (int vertex : loop)
 					loopPoints.add(point(vertex));
 				points.add(loopPoints);
 			}
-			return new StepFace(regionCentre(face), normal, points);
+			return new StepFace(regionCentre(region), normal, points);
 		}
 
 		/** A single triangle as data, the shape written when a group cannot be. */
@@ -1908,7 +1089,7 @@ public final class StepBRepWrite {
 			}
 			return edges.size() + " edges, " + unpaired + " with no opposite side (shortest "
 					+ (unpaired == 0 ? "-" : Double.toString(shortest)) + "), " + doubled
-					+ " used more than once each way, weld tolerance " + weldTolerance + " flat triangles";
+					+ " used more than once each way";
 		}
 
 		/** The triangle's unit normal, or null when it has no area to face. */
