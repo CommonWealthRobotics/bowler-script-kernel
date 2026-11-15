@@ -651,6 +651,9 @@ public final class StepBRepWrite {
 					}
 				}
 			}
+			Log.debug("StepBRepWrite: stitch failures " + stitchFailedNoNormal + " no-normal, "
+					+ stitchFailedMisses + " misses-vertices, " + stitchFailedBounds + " bounds-off, "
+					+ stitchFailedRepresents + " representation-off");
 			planCache = plan;
 			return plan;
 		}
@@ -872,18 +875,27 @@ public final class StepBRepWrite {
 			}
 		}
 
+		private int stitchFailedNoNormal;
+		private int stitchFailedMisses;
+		private int stitchFailedBounds;
+		private int stitchFailedRepresents;
+
 		private List<List<Integer>> stitchable(List<Integer> region) {
-			if (normal(triangles.get(region.get(0))) == null)
+			if (normal(triangles.get(region.get(0))) == null) {
+				stitchFailedNoNormal++;
 				return null;
+			}
 			List<List<Integer>> loops = loops(region);
-			if (!carriesEveryVertex(region, loops))
+			if (!carriesEveryVertex(region, loops)) {
+				stitchFailedMisses++;
 				return null;
+			}
 			if (!boundsExactly(region, loops)) {
-				Log.debug("stitchable: region " + region.size() + " bounds off");
+				stitchFailedBounds++;
 				return null;
 			}
 			if (!representsExactly(region, loops)) {
-				Log.debug("stitchable: region " + region.size() + " representation off");
+				stitchFailedRepresents++;
 				return null;
 			}
 			return loops;
@@ -898,24 +910,32 @@ public final class StepBRepWrite {
 		}
 
 		/**
-		 * True when the loops name every vertex the region's triangles use.
+	 * True when the loops name every vertex of the region that a face outside the
+	 * region also names.
 		 *
 		 * <p>
 		 * A face is read back from its loops alone: a reader re-triangulates the
-		 * outline and can only ever emit the points the loops name. A vertex inside a
-		 * coplanar region is therefore lost the moment that region is written as one
-		 * face, and any neighbouring face still naming it has nothing to pair with, so
-		 * the shell stops being manifold. Such a region is written as one face per
-		 * triangle instead, which keeps every vertex and reproduces the mesh exactly.
+	 * outline and can only ever emit the points the loops name. A vertex that only
+	 * the region's own triangles use is interior to the fused face — losing it
+	 * changes nothing, because no neighbour pairs across it. A vertex a
+	 * neighbouring face also names must survive on the outline, or that face has
+	 * nothing to pair with there and the shell stops being manifold.
 		 */
 		private boolean carriesEveryVertex(List<Integer> region, List<List<Integer>> loops) {
+		Set<Integer> outside = new LinkedHashSet<>();
+		for (int[] edge : boundary(region)) {
+			outside.add(edge[0]);
+			outside.add(edge[1]);
+		}
 			Set<Integer> onLoops = new LinkedHashSet<>();
 			for (List<Integer> loop : loops)
 				onLoops.addAll(loop);
 			for (int index : region)
 				for (int corner : triangles.get(index))
-					if (!onLoops.contains(corner))
-						return false;
+				// a corner the outside names is a shared point the face must carry;
+				// a corner only this region's triangles name is fusable interior
+				if (outside.contains(corner) && !onLoops.contains(corner))
+					return false;
 			return true;
 		}
 
@@ -937,16 +957,6 @@ public final class StepBRepWrite {
 			List<int[]> boundaryEdges = boundary(region);
 			for (int[] edge : boundaryEdges)
 				wanted.merge(directed(edge[0], edge[1]), 1, Integer::sum);
-			if (System.getProperty("stitch.trace") != null && region.size() == 2) {
-				StringBuilder sb = new StringBuilder("TRACE region 2: boundary=");
-				for (int[] e : boundaryEdges)
-					sb.append(e[0]).append("->").append(e[1]).append(" ");
-				sb.append(" walked=");
-				for (List<Integer> loop : loops)
-					for (int i = 0; i < loop.size(); i++)
-						sb.append(loop.get(i)).append("->").append(loop.get((i + 1) % loop.size())).append(" ");
-				Log.debug(sb.toString());
-			}
 
 			Map<Long, Integer> walked = new HashMap<>();
 			for (List<Integer> loop : loops)
