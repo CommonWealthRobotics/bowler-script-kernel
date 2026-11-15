@@ -36,6 +36,7 @@ import com.neuronrobotics.bowlerstudio.vitamins.Vitamins;
 import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR;
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR;
+import com.neuronrobotics.sdk.common.Log;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.ColinearPointsException;
@@ -230,6 +231,7 @@ public class FreecadLoader implements IScriptingLanguage {
 
 	public static void addSTEPToFreecad(File freecadModel, File stepToAdd, String name) {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
+		long start = System.currentTimeMillis();
 		try {
 			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
 					"importSTEP.py");
@@ -245,6 +247,48 @@ public class FreecadLoader implements IScriptingLanguage {
 			legacySystemRun(headlessEnvironment(), export.getAbsoluteFile().getParentFile(), System.out, args);
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
+		}
+		Log.debug("Step Add completed in "+(((double)(System.currentTimeMillis()-start)))/1000.0+" seconds");
+	}
+
+	/**
+	 * True when the FreeCAD document holds at least one Part feature carrying a
+	 * solid shape. This is the verdict the STEP correction loop loads: a STEP that
+	 * comes apart in the import still writes a document, but its features hold
+	 * compounds and shells instead of solids.
+	 */
+	public static boolean documentCarriesSolids(File freecadModel) {
+		if (!freecadModel.isFile() || freecadModel.length() == 0)
+			return false;
+		File freecad = DownloadManager.getConfigExecutable("freecad", null);
+		File report = new File(freecadModel.getParentFile(), freecadModel.getName() + ".solids.json");
+		report.delete();
+		try {
+			File count = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
+					"count_solids.py");
+			// freecadcmd treats trailing file arguments as documents to import, so
+			// the paths travel as environment variables, the way check_step.py does
+			Map<String, String> env = headlessEnvironment();
+			env.put("FCSTD_FILE", freecadModel.getAbsolutePath());
+			env.put("SOLIDS_REPORT", report.getAbsolutePath());
+			ArrayList<String> args = new ArrayList<>();
+			args.add(freecad.getAbsolutePath());
+			args.add("-c");
+			args.add(count.getAbsolutePath());
+			legacySystemRun(env, count.getAbsoluteFile().getParentFile(), System.out, args);
+		} catch (Throwable t) {
+			com.neuronrobotics.sdk.common.Log.error(t);
+			return false;
+		}
+		if (!report.isFile())
+			return false;
+		try {
+			String text = new String(java.nio.file.Files.readAllBytes(report.toPath()),
+					java.nio.charset.StandardCharsets.UTF_8);
+			return text.trim().startsWith("{") && !text.contains("\"solids\": 0");
+		} catch (IOException e) {
+			com.neuronrobotics.sdk.common.Log.error(e);
+			return false;
 		}
 	}
 

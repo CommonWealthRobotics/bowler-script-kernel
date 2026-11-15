@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Vector3d;
 
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
@@ -83,17 +84,42 @@ public final class STEPFile {
 	public STEPFile(List<CSG> csgs, double angleDegrees, double topologyRepairTolerance, double stitchTolerance) {
 		if (csgs == null || csgs.isEmpty())
 			throw new IllegalArgumentException("csgs must not be empty");
-
+		Log.debug("Creating Step from "+csgs.size()+" csgs");
 		List<Part> parts = new ArrayList<>();
 		for (CSG csg : csgs) {
 			if (csg == null)
 				throw new IllegalArgumentException("csgs must not contain null");
-			csg = simplifyForBRep(csg);
-			parts.add(new Part(csg,
-					FeatureEdgeExtractor.extract(csg, angleDegrees, topologyRepairTolerance, stitchTolerance)));
+			// the mesh is decomposed into its connected bodies first: each body
+			// becomes a part of its own, with its own MANIFOLD_SOLID_BREP in the
+			// file, rather than several bodies sharing one shell — which is what a
+			// reader least knows how to sew
+			for (CSG body : decomposeForBRep(csg)) {
+				body = simplifyForBRep(body);
+				parts.add(new Part(body, FeatureEdgeExtractor.extract(body, angleDegrees, topologyRepairTolerance,
+						stitchTolerance)));
+			}
 		}
 		this.parts = Collections.unmodifiableList(parts);
 		this.shapes = List.of();
+	}
+
+	/**
+	 * The connected bodies of the mesh, through the kernel's own
+	 * {@code decompose}: islands of triangles that share edges come out as
+	 * separate solids, each a part of the written assembly. The mesh itself when
+	 * the kernel is not the active engine.
+	 */
+	private static List<CSG> decomposeForBRep(CSG csg) {
+		if (!ManifoldMeshCorrector.available())
+			return List.of(csg);
+		try {
+			List<CSG> bodies = CSG.getManifold().decompose(csg);
+			Log.debug("STEPFile: decomposed into " + bodies.size() + " body(ies)");
+			return bodies;
+		} catch (Throwable t) {
+			Log.error("STEPFile: decompose failed, writing the mesh as one body: " + t);
+			return List.of(csg);
+		}
 	}
 
 	/** Reads geometry from a STEP file, see {@link StepImport#readShapes(InputStream)}. */
@@ -198,6 +224,7 @@ public final class STEPFile {
 					: new Part(cleaned, FeatureEdgeExtractor.extract(cleaned, DEFAULT_ANGLE_DEGREES,
 							DEFAULT_TOPOLOGY_TOLERANCE, DEFAULT_STITCH_TOLERANCE)));
 		}
+		checkSurfaceCoverage(writing);
 		StepEmitter emitter = new StepEmitter();
 		String fileName;
 		if (writing.size() == 1) {
@@ -212,32 +239,73 @@ public final class STEPFile {
 	}
 
 	/**
-	 * The mesh with its sub-resolution facets merged, when the Manifold kernel is the
-	 * active engine; the mesh itself when it is not. The tolerance is the resolution a
-	 * STEP reader works to, so nothing the merge moves is surface a reader measures.
+	 * The written faces against Manifold's own measure of the mesh. Every part's
+	 * faces must cover the mesh's surface: a face OCC later refuses would show up
+	 * here as surface the file plans but cannot deliver, before the file is
+	 * written rather than after a reader complains.
 	 */
-	private static CSG simplifyForBRep(CSG csg) {
-		if (CSG.getDefaultOptionType() != CSG.OptType.Manifold3d || CSG.getManifold() == null)
-			return csg;
-		try {
-			CSG simplified = csg;
-			for (int round = 0; round < SIMPLIFY_ROUNDS; round++) {
-				CSG next = CSG.simplify(simplified, BREP_RESOLUTION_MM);
-				if (next.getTriCount() == simplified.getTriCount()) {
-					simplified = next;
-					break;
+	private static void checkSurfaceCoverage(List<Part> parts) {
+		if (!ManifoldMeshCorrector.available())
+			return;
+		for (Part part : parts) {
+			try {
+				double meshArea = CSG.getManifold().surfaceArea(part.csg);
+				double faceArea = 0;
+				for (StepFace face : StepBRepWrite.faces(part.csg)) {
+					if (!face.isPlanar())
+						continue;
+					// planar face area: the shoelace sum of its outer bound's signed
+					// area, projected on the face's plane
+					for (List<double[]> loop : face.loops)
+						faceArea += Math.abs(signedArea(loop, face.normal));
 				}
-				simplified = next;
+				double loss = meshArea - faceArea;
+				Log.debug("STEPFile.toStep: " + part.name() + " surface " + meshArea + ", faces cover " + faceArea
+						+ " (" + loss + " uncovered)");
+				if (loss > Math.max(1e-6, meshArea * 1e-4))
+					Log.debug("STEPFile.toStep: WARNING " + part.name() + " faces do not cover the mesh surface; "
+							+ "a BRep reader may refuse faces of the written file");
+			} catch (Throwable t) {
+				Log.error("STEPFile.toStep: surface coverage check failed: " + t);
 			}
-			return simplified;
-		} catch (Throwable t) {
-			Log.error(t);
-			return csg;
 		}
 	}
 
-	/** The most simplify passes the BRep-facing cleanup may take to settle. */
-	private static final int SIMPLIFY_ROUNDS = 8;
+	/** The signed area a loop covers, measured in its face's plane. */
+	private static double signedArea(List<double[]> loop, Vector3d normal) {
+		if (loop.size() < 3)
+			return 0;
+		// Newell's method: the projected polygon area is half the loop-sum of
+		// cross products, dotted with the plane normal
+		double nx = 0, ny = 0, nz = 0;
+		for (int i = 0; i < loop.size(); i++) {
+			double[] a = loop.get(i);
+			double[] b = loop.get((i + 1) % loop.size());
+			nx += (a[1] - b[1]) * (a[2] + b[2]);
+			ny += (a[2] - b[2]) * (a[0] + b[0]);
+			nz += (a[0] - b[0]) * (a[1] + b[1]);
+		}
+		return (nx * normal.x + ny * normal.y + nz * normal.z) / 2;
+	}
+
+	/**
+	 * The mesh corrected for BRep export, through the Manifold kernel's own
+	 * operations; the mesh itself when the kernel is not the active engine. The
+	 * tolerance is the resolution a STEP reader works to, so nothing the correction
+	 * moves is surface a reader measures. See {@link ManifoldMeshCorrector}.
+	 */
+	private static CSG simplifyForBRep(CSG csg) {
+		CSG corrected = ManifoldMeshCorrector.correct(csg, BREP_RESOLUTION_MM, BREP_BOUNDS_BUDGET_MM);
+		// the spikes that survive the simplify are thin fans standing off the
+		// surface, which a BRep reader builds as slivers; dissolve them, held to
+		// the same budget. Edges bent more than a right angle stay: a real corner
+		// of the part is not a spike.
+		return ManifoldMeshCorrector.dissolveSpikes(corrected, BREP_RESOLUTION_MM, BREP_BOUNDS_BUDGET_MM,
+				BREP_SHARP_ANGLE_DEGREES);
+	}
+
+	/** Edges bent more than this many degrees are corners, not spikes. */
+	public static final double BREP_SHARP_ANGLE_DEGREES = 119;
 
 	/**
 	 * The mesh's cleanup tolerance, in millimetres: the BRep export's own working
@@ -247,7 +315,15 @@ public final class STEPFile {
 	 */
 	public static final double BREP_RESOLUTION_MM = 0.05;
 
+	/**
+	 * How far the BRep-facing correction may move the mesh's bounds, in
+	 * millimetres: a hundredth of a micron, the same budget the round-trip check
+	 * holds the file to.
+	 */
+	public static final double BREP_BOUNDS_BUDGET_MM = 0.00001;
+
 	public void write(File file) throws IOException {
+		Log.debug("Writing step to "+file.getAbsolutePath());
 		Files.write(file.toPath(), toStep().getBytes(StandardCharsets.UTF_8));
 	}
 

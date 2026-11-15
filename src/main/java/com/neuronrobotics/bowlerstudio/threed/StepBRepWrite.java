@@ -2,6 +2,7 @@ package com.neuronrobotics.bowlerstudio.threed;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -89,7 +90,7 @@ public final class StepBRepWrite {
 
 		Log.debug("StepBRepWrite.solid: start for " + name);
 		TickToc.tic("build mesh " + name);
-		Mesh mesh = new Mesh(vertices, sourceTriangles);
+		Mesh mesh = new Mesh(vertices, sourceTriangles).settledMesh();
 		if (mesh.faces.isEmpty())
 			return 0;
 		TickToc.tic("emit faces " + name);
@@ -183,7 +184,7 @@ public final class StepBRepWrite {
 		if (vertices == null || sourceTriangles == null || sourceTriangles.length < 3)
 			return faces;
 
-		Mesh mesh = new Mesh(vertices, sourceTriangles);
+		Mesh mesh = new Mesh(vertices, sourceTriangles).settledMesh();
 		// the same plan the file is written from, after the same whole-part check, so
 		// this reports what a reader of the written file sees rather than what the
 		// writer hoped for; see solid()
@@ -228,9 +229,141 @@ public final class StepBRepWrite {
 			prepare(sourceTriangles);
 			TickToc.tic("index");
 			index();
+			indexVertices();
 			TickToc.tic("group");
 			group();
 			Log.debug("StepBRepWrite: grouped into " + faces.size() + " faces");
+		}
+
+		/**
+		 * The vertices whose other faces need them as corners, readable as lying on
+		 * a loop segment of this one: a spatial hash of every vertex of the mesh,
+		 * so a segment can ask which points lie along it without scanning them all.
+		 */
+		private final Map<Long, List<Integer>> byCell = new HashMap<>();
+
+		/** The junction index's cell size: a hundredth of the model's extent, far
+		 * coarser than the tolerances, so a segment query walks a few dozen cells
+		 * rather than a few million. */
+		private double junctionCellSize;
+
+		private void indexVertices() {
+			junctionCellSize = Math.max(planeTolerance * 2, diagonal(points) / 100);
+			int count = points.length / 3;
+			for (int vertex = 0; vertex < count; vertex++) {
+				double[] p = point(vertex);
+				byCell.computeIfAbsent(cell(Math.round(p[0] / junctionCellSize),
+						Math.round(p[1] / junctionCellSize), Math.round(p[2] / junctionCellSize)),
+						unused -> new ArrayList<>()).add(vertex);
+			}
+		}
+
+		/**
+		 * The loop's segments expanded through the vertices other faces need on them:
+		 * a T-junction. A neighbouring face's outline can meet this face's along a
+		 * segment of it in several of the mesh's own edges, where this face's
+		 * triangles were merged and the neighbour's were not. The written loop names
+		 * the segment as one edge, the neighbour names its pieces, and a reader sews
+		 * the shell by matching edges one to one — which the two never do. So every
+		 * loop is written through the points the neighbours carry, and the edges
+		 * pair one to one again.
+		 */
+		private int junctionsInserted;
+
+		private List<Integer> throughJunctions(List<Integer> loop, Set<Integer> ownBoundaryVertices) {
+			List<Integer> out = new ArrayList<>(loop.size());
+			for (int at = 0; at < loop.size(); at++) {
+				int a = loop.get(at);
+				int b = loop.get((at + 1) % loop.size());
+				out.add(a);
+				if (a == b)
+					continue;
+				for (int middle : onSegment(a, b))
+					// a vertex this region's own walk already knows needs no insert;
+					// the points inserted are the ones the neighbouring faces' outlines
+					// carry, so the written edges pair one to one. A point that
+					// coincides with either end is already the end under another
+					// index: inserting it would write an edge of no length, which no
+					// neighbour can pair.
+					if (middle != a && middle != b && !ownBoundaryVertices.contains(middle)
+							&& !coincides(middle, a) && !coincides(middle, b)) {
+						out.add(middle);
+						junctionsInserted++;
+					}
+			}
+			// consecutive inserts that landed on the same point collapse to one
+			List<Integer> cleaned = new ArrayList<>(out.size());
+			for (int vertex : out)
+				if (cleaned.isEmpty() || !coincides(cleaned.get(cleaned.size() - 1), vertex))
+					cleaned.add(vertex);
+			if (cleaned.size() > 1 && coincides(cleaned.get(0), cleaned.get(cleaned.size() - 1)))
+				cleaned.remove(cleaned.size() - 1);
+			return cleaned;
+		}
+
+		/** True when two vertices name the same point within the plane tolerance. */
+		private boolean coincides(int a, int b) {
+			return distance(point(a), point(b)) <= planeTolerance;
+		}
+
+		/**
+		 * The vertices that lie on the segment between two points, in order from the
+		 * first towards the second. A vertex counts when it is within the plane
+		 * tolerance of the segment's line and between its ends; the query walks the
+		 * hash cells the segment's box covers, so only nearby points are measured.
+		 */
+		private List<Integer> onSegment(int a, int b) {
+			double[] pa = point(a);
+			double[] pb = point(b);
+			double dx = pb[0] - pa[0], dy = pb[1] - pa[1], dz = pb[2] - pa[2];
+			double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+			if (length == 0)
+				return List.of();
+			double tolerance = junctionCellSize;
+			// walk the cells the segment passes through, one per step of the index's
+			// cell size: a query bounded by the segment's own length in cells
+			long steps = (long) Math.ceil(length / tolerance) + 1;
+			List<Integer> on = new ArrayList<>();
+			Set<Integer> seen = new HashSet<>();
+			for (long step = 0; step <= steps; step++) {
+				double t = (double) step / steps;
+				double px = pa[0] + t * dx, py = pa[1] + t * dy, pz = pa[2] + t * dz;
+				long cx = Math.round(px / tolerance);
+				long cy = Math.round(py / tolerance);
+				long cz = Math.round(pz / tolerance);
+				// a junction lies on the line, so its own cell catches it; the ring
+				// only matters at the two ends, where rounding can push the point
+				// one cell over
+				int ring = step == 0 || step == steps ? 1 : 0;
+				for (long ox = -ring; ox <= ring; ox++)
+					for (long oy = -ring; oy <= ring; oy++)
+						for (long oz = -ring; oz <= ring; oz++) {
+							List<Integer> cellList = byCell.get(cell(cx + ox, cy + oy, cz + oz));
+							if (cellList == null)
+								continue;
+							for (int vertex : cellList) {
+								if (vertex == a || vertex == b || !seen.add(vertex))
+									continue;
+								double[] q = point(vertex);
+								double u = ((q[0] - pa[0]) * dx + (q[1] - pa[1]) * dy + (q[2] - pa[2]) * dz)
+										/ (length * length);
+								if (u <= 0 || u >= 1)
+									continue;
+								double qx = pa[0] + u * dx, qy = pa[1] + u * dy, qz = pa[2] + u * dz;
+								double off = Math.sqrt((q[0] - qx) * (q[0] - qx) + (q[1] - qy) * (q[1] - qy)
+										+ (q[2] - qz) * (q[2] - qz));
+								if (off <= planeTolerance)
+									on.add(vertex);
+							}
+						}
+			}
+			on.sort((x, y) -> {
+				double[] px = point(x), py = point(y);
+				double dxa = px[0] - pa[0], dya = px[1] - pa[1], dza = px[2] - pa[2];
+				double dxb = py[0] - pa[0], dyb = py[1] - pa[1], dzb = py[2] - pa[2];
+				return Double.compare(dxa * dxa + dya * dya + dza * dza, dxb * dxb + dyb * dyb + dzb * dzb);
+			});
+			return on;
 		}
 
 		/**
@@ -494,7 +627,11 @@ public final class StepBRepWrite {
 		 * as a whole still would not read back as its source mesh, {@link #solid}
 		 * rewrites it one triangle per face instead, which is exact by construction.
 		 */
+		private List<Planned> planCache;
+
 		private List<Planned> plan() {
+			if (planCache != null)
+				return planCache;
 			List<Planned> plan = new ArrayList<>();
 			for (List<Integer> group : faces) {
 				// a coplanar group can hold several disconnected regions, and a STEP face
@@ -514,6 +651,7 @@ public final class StepBRepWrite {
 					}
 				}
 			}
+			planCache = plan;
 			return plan;
 		}
 
@@ -534,6 +672,156 @@ public final class StepBRepWrite {
 			Log.debug("StepBRepWrite: plan has " + plan.size() + " faces");
 			return plan;
 		}
+
+		/**
+		 * The mesh whose plan to write from: this one when its plan stitches, or a
+		 * snapped copy when the first repair attempt failed.
+		 *
+		 * <p>
+		 * The first stage repairs a region by stitching its coplanar triangles into
+		 * one face, and falls back to one face per triangle for a region the stitches
+		 * cannot bound. That fallback is exact but hostile to a BRep reader, which
+		 * must build thousands of single-triangle faces and sew them. So a plan with
+		 * fallbacks moves to the next stage: the mesh's own point index is walked and
+		 * every reference to a point within the snap tolerance of another is collapsed
+		 * onto that point's index, and every triangle carrying the snapped index is
+		 * updated to it. A shared edge the two triangles of a face named by two
+		 * different indices then has one name, the loop walk sees it pair, and the
+		 * region stitches.
+		 *
+		 * <p>
+		 * The snapped plan is used only when it stitches strictly more faces than the
+		 * first stage did; a snap that stitched nothing new repaired nothing, and the
+		 * mesh goes out as the exact plan left it.
+		 */
+		private Mesh settledMesh() {
+			List<Planned> plan = plan();
+			int fellBack = 0;
+			for (Planned planned : plan)
+				if (planned.loops == null)
+					fellBack++;
+			if (Boolean.getBoolean("step.snap.disabled"))
+				return this;
+			if (fellBack == 0)
+				return this;
+
+			Log.debug("StepBRepWrite: " + fellBack + " of " + plan.size()
+					+ " planned face(s) fell back to single triangles; snapping near-duplicate points");
+			Mesh snapped = snappedMesh();
+			if (snapped == null)
+				return this;
+
+			List<Planned> snappedPlan = snapped.plan();
+			int stitchedHere = plan.size() - fellBack;
+			int stitchedThere = 0;
+			for (Planned planned : snappedPlan)
+				if (planned.loops != null)
+					stitchedThere++;
+			if (stitchedThere <= stitchedHere) {
+				Log.debug("StepBRepWrite: the snap stitched " + stitchedThere + " of " + snappedPlan.size()
+						+ " face(s), no better than the first stage's " + stitchedHere + "; keeping this mesh");
+				return this;
+			}
+			Log.debug("StepBRepWrite: the snapped mesh stitches " + stitchedThere + " of " + snappedPlan.size()
+					+ " face(s) over this mesh's " + stitchedHere + "; writing from the snapped mesh");
+			return snapped;
+		}
+
+		/**
+		 * The mesh with its near-duplicate points collapsed, or null when there is
+		 * nothing within the snap tolerance to collapse.
+		 *
+		 * <p>
+		 * The snap walks the point index array, unions every point within the snap
+		 * tolerance of an already-seen point onto it through a union-find over the
+		 * indices, and then rewrites every triangle through the representatives: a
+		 * point that was stored under several indices ends referenced by one of them,
+		 * and each triangle's corner is updated to the index that represents it. A
+		 * triangle naming one index twice after the snap has no edge to pair and is
+		 * dropped, exactly as {@link #prepare} drops one from the source.
+		 */
+		private Mesh snappedMesh() {
+			int vertexCount = points.length / 3;
+			if (vertexCount == 0)
+				return null;
+
+			// the snap tolerance is the plane tolerance, the same scale the grouping
+			// holds coplanarity to: close enough that a reader merges the pair, far
+			// enough above the doubles' own rounding that designed points stay apart
+			double snapTolerance = planeTolerance;
+			int[] parent = new int[vertexCount];
+			for (int vertex = 0; vertex < vertexCount; vertex++)
+				parent[vertex] = vertex;
+
+			// walk the points once, hashing each cell and unioning with any earlier
+			// point of the same or a neighbouring cell that the tolerance covers
+			Map<Long, Integer> byCell = new HashMap<>();
+			for (int vertex = 0; vertex < vertexCount; vertex++) {
+				double[] p = point(vertex);
+				long cx = Math.round(p[0] / snapTolerance);
+				long cy = Math.round(p[1] / snapTolerance);
+				long cz = Math.round(p[2] / snapTolerance);
+				for (int dx = -1; dx <= 1; dx++)
+					for (int dy = -1; dy <= 1; dy++)
+						for (int dz = -1; dz <= 1; dz++) {
+							Integer other = byCell.get(cell(cx + dx, cy + dy, cz + dz));
+							if (other == null || distance(p, point(other)) > snapTolerance)
+								continue;
+							parent[find(parent, other)] = find(parent, vertex);
+						}
+				byCell.putIfAbsent(cell(cx, cy, cz), vertex);
+			}
+
+			// each cluster is represented by its lowest index, so the representative
+			// is stable no matter what order the unions ran in
+			int[] smallest = new int[vertexCount];
+			java.util.Arrays.fill(smallest, -1);
+			for (int vertex = 0; vertex < vertexCount; vertex++) {
+				int root = find(parent, vertex);
+				if (smallest[root] == -1 || vertex < smallest[root])
+					smallest[root] = vertex;
+			}
+			int[] snapped = new int[vertexCount];
+			int merged = 0;
+			for (int vertex = 0; vertex < vertexCount; vertex++) {
+				snapped[vertex] = smallest[find(parent, vertex)];
+				if (snapped[vertex] != vertex)
+					merged++;
+			}
+			if (merged == 0)
+				return null;
+
+			// every triangle is updated through the representatives: each corner that
+			// named a snapped-away index now names the point it was snapped onto
+			List<int[]> snappedTriangles = new ArrayList<>(triangles.size());
+			int dropped = 0;
+			for (int[] triangle : triangles) {
+				int a = snapped[triangle[0]];
+				int b = snapped[triangle[1]];
+				int c = snapped[triangle[2]];
+				if (a == b || b == c || c == a) {
+					dropped++;
+					continue;
+				}
+				snappedTriangles.add(new int[]{a, b, c});
+			}
+			Log.debug("StepBRepWrite: snapped " + merged + " point reference(s) onto "
+					+ (vertexCount - merged) + " point(s); " + dropped + " triangle(s) collapsed to a line and dropped");
+			if (snappedTriangles.isEmpty())
+				return null;
+
+			long[] flat = new long[snappedTriangles.size() * 3];
+			for (int i = 0; i < snappedTriangles.size(); i++) {
+				int[] triangle = snappedTriangles.get(i);
+				flat[i * 3] = triangle[0];
+				flat[i * 3 + 1] = triangle[1];
+				flat[i * 3 + 2] = triangle[2];
+			}
+			// the point array is carried whole: the dropped indices are simply no
+			// longer referenced, and their coordinates cost nothing
+			return new Mesh(points, flat);
+		}
+
 
 		/**
 		 * The plan, checked against the source mesh the file is written from.
@@ -590,8 +878,14 @@ public final class StepBRepWrite {
 			List<List<Integer>> loops = loops(region);
 			if (!carriesEveryVertex(region, loops))
 				return null;
-			if (!boundsExactly(region, loops) || !representsExactly(region, loops))
+			if (!boundsExactly(region, loops)) {
+				Log.debug("stitchable: region " + region.size() + " bounds off");
 				return null;
+			}
+			if (!representsExactly(region, loops)) {
+				Log.debug("stitchable: region " + region.size() + " representation off");
+				return null;
+			}
 			return loops;
 		}
 
@@ -640,8 +934,19 @@ public final class StepBRepWrite {
 			if (loops.isEmpty())
 				return false;
 			Map<Long, Integer> wanted = new HashMap<>();
-			for (int[] edge : boundary(region))
+			List<int[]> boundaryEdges = boundary(region);
+			for (int[] edge : boundaryEdges)
 				wanted.merge(directed(edge[0], edge[1]), 1, Integer::sum);
+			if (System.getProperty("stitch.trace") != null && region.size() == 2) {
+				StringBuilder sb = new StringBuilder("TRACE region 2: boundary=");
+				for (int[] e : boundaryEdges)
+					sb.append(e[0]).append("->").append(e[1]).append(" ");
+				sb.append(" walked=");
+				for (List<Integer> loop : loops)
+					for (int i = 0; i < loop.size(); i++)
+						sb.append(loop.get(i)).append("->").append(loop.get((i + 1) % loop.size())).append(" ");
+				Log.debug(sb.toString());
+			}
 
 			Map<Long, Integer> walked = new HashMap<>();
 			for (List<Integer> loop : loops)
@@ -737,6 +1042,11 @@ public final class StepBRepWrite {
 		 * passes become two loops rather than one that crosses itself.
 		 */
 		private List<List<Integer>> loops(List<Integer> face, Vector3d normal) {
+			Set<Integer> ownBoundaryVertices = new HashSet<>();
+			for (int[] edge : boundary(face)) {
+				ownBoundaryVertices.add(edge[0]);
+				ownBoundaryVertices.add(edge[1]);
+			}
 			// the mesh is edge-manifold by index once T-junctions are repaired, so the
 			// boundary edges already pair with the neighbouring face's and need no
 			// further cutting
@@ -781,7 +1091,12 @@ public final class StepBRepWrite {
 			// vertex or not at all; writing the second as a hole would subtract it, and
 			// that is a missing face. So the cycles are sorted into regions first, and
 			// each region becomes a face of its own.
-			return loops;
+			List<List<Integer>> expanded = new ArrayList<>(loops.size());
+			for (List<Integer> loop : loops)
+				expanded.add(throughJunctions(loop, ownBoundaryVertices));
+			if (junctionsInserted > 0)
+				Log.debug("StepBRepWrite: expanded " + junctionsInserted + " junction point(s) into this face's loops");
+			return expanded;
 		}
 
 		/**
@@ -935,9 +1250,12 @@ public final class StepBRepWrite {
 				long key = key(pair[0], pair[1]);
 				if (Boolean.TRUE.equals(repeated.get(key)))
 					continue;
-				if (once.containsKey(key))
+				if (once.containsKey(key)) {
+					// the interior edge is not on the boundary at all: take its first
+					// sighting back out, or it would be walked as one
 					repeated.put(key, Boolean.TRUE);
-				else
+					once.remove(key);
+				} else
 					once.put(key, pair);
 			}
 		}
