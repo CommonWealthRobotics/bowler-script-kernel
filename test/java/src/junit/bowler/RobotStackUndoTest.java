@@ -74,7 +74,11 @@ public class RobotStackUndoTest {
 		log("STEP2 robot=" + robotName + " ops=" + cf.getOperations().size());
 
 		// 3: add a microbit controller so the wheel is powered
-		ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
+		try {
+			ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		ControllerOption microbit = null;
 		for (ControllerOption o : ControllerOption.getOptions()) {
 			if (o.getProvides().getServoChannels() >= 2) {

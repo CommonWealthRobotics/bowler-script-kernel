@@ -252,9 +252,8 @@ public final class StepBRepWrite {
 			int count = points.length / 3;
 			for (int vertex = 0; vertex < count; vertex++) {
 				double[] p = point(vertex);
-				byCell.computeIfAbsent(cell(Math.round(p[0] / junctionCellSize),
-						Math.round(p[1] / junctionCellSize), Math.round(p[2] / junctionCellSize)),
-						unused -> new ArrayList<>()).add(vertex);
+				byCell.computeIfAbsent(cell(Math.round(p[0] / junctionCellSize), Math.round(p[1] / junctionCellSize),
+						Math.round(p[2] / junctionCellSize)), unused -> new ArrayList<>()).add(vertex);
 			}
 		}
 
@@ -285,8 +284,8 @@ public final class StepBRepWrite {
 					// coincides with either end is already the end under another
 					// index: inserting it would write an edge of no length, which no
 					// neighbour can pair.
-					if (middle != a && middle != b && !ownBoundaryVertices.contains(middle)
-							&& !coincides(middle, a) && !coincides(middle, b)) {
+					if (middle != a && middle != b && !ownBoundaryVertices.contains(middle) && !coincides(middle, a)
+							&& !coincides(middle, b)) {
 						out.add(middle);
 						junctionsInserted++;
 					}
@@ -651,9 +650,9 @@ public final class StepBRepWrite {
 					}
 				}
 			}
-			Log.debug("StepBRepWrite: stitch failures " + stitchFailedNoNormal + " no-normal, "
-					+ stitchFailedMisses + " misses-vertices, " + stitchFailedBounds + " bounds-off, "
-					+ stitchFailedRepresents + " representation-off");
+			Log.debug("StepBRepWrite: stitch failures " + stitchFailedNoNormal + " no-normal, " + stitchFailedMisses
+					+ " misses-vertices, " + stitchFailedBounds + " bounds-off, " + stitchFailedRepresents
+					+ " representation-off");
 			planCache = plan;
 			return plan;
 		}
@@ -808,8 +807,8 @@ public final class StepBRepWrite {
 				}
 				snappedTriangles.add(new int[]{a, b, c});
 			}
-			Log.debug("StepBRepWrite: snapped " + merged + " point reference(s) onto "
-					+ (vertexCount - merged) + " point(s); " + dropped + " triangle(s) collapsed to a line and dropped");
+			Log.debug("StepBRepWrite: snapped " + merged + " point reference(s) onto " + (vertexCount - merged)
+					+ " point(s); " + dropped + " triangle(s) collapsed to a line and dropped");
 			if (snappedTriangles.isEmpty())
 				return null;
 
@@ -910,32 +909,32 @@ public final class StepBRepWrite {
 		}
 
 		/**
-	 * True when the loops name every vertex of the region that a face outside the
-	 * region also names.
+		* True when the loops name every vertex of the region that a face outside the
+		* region also names.
 		 *
 		 * <p>
 		 * A face is read back from its loops alone: a reader re-triangulates the
-	 * outline and can only ever emit the points the loops name. A vertex that only
-	 * the region's own triangles use is interior to the fused face — losing it
-	 * changes nothing, because no neighbour pairs across it. A vertex a
-	 * neighbouring face also names must survive on the outline, or that face has
-	 * nothing to pair with there and the shell stops being manifold.
+		* outline and can only ever emit the points the loops name. A vertex that only
+		* the region's own triangles use is interior to the fused face — losing it
+		* changes nothing, because no neighbour pairs across it. A vertex a
+		* neighbouring face also names must survive on the outline, or that face has
+		* nothing to pair with there and the shell stops being manifold.
 		 */
 		private boolean carriesEveryVertex(List<Integer> region, List<List<Integer>> loops) {
-		Set<Integer> outside = new LinkedHashSet<>();
-		for (int[] edge : boundary(region)) {
-			outside.add(edge[0]);
-			outside.add(edge[1]);
-		}
+			Set<Integer> outside = new LinkedHashSet<>();
+			for (int[] edge : boundary(region)) {
+				outside.add(edge[0]);
+				outside.add(edge[1]);
+			}
 			Set<Integer> onLoops = new LinkedHashSet<>();
 			for (List<Integer> loop : loops)
 				onLoops.addAll(loop);
 			for (int index : region)
 				for (int corner : triangles.get(index))
-				// a corner the outside names is a shared point the face must carry;
-				// a corner only this region's triangles name is fusable interior
-				if (outside.contains(corner) && !onLoops.contains(corner))
-					return false;
+					// a corner the outside names is a shared point the face must carry;
+					// a corner only this region's triangles name is fusable interior
+					if (outside.contains(corner) && !onLoops.contains(corner))
+						return false;
 			return true;
 		}
 
@@ -1104,8 +1103,8 @@ public final class StepBRepWrite {
 			List<List<Integer>> expanded = new ArrayList<>(loops.size());
 			for (List<Integer> loop : loops)
 				expanded.add(throughJunctions(loop, ownBoundaryVertices));
-			if (junctionsInserted > 0)
-				Log.debug("StepBRepWrite: expanded " + junctionsInserted + " junction point(s) into this face's loops");
+			//			if (junctionsInserted > 0)
+			//				Log.debug("StepBRepWrite: expanded " + junctionsInserted + " junction point(s) into this face's loops");
 			return expanded;
 		}
 

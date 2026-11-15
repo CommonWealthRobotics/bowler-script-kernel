@@ -58,11 +58,13 @@ public class BlenderLoader implements IScriptingLanguage {
 	}
 
 	public static void toBlenderFile(CSGDatabaseInstance db, CSG stlIn, File blenderfile) throws IOException {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File stl = getTmpSTL(stlIn);
 		toBlenderFile(db, stl, blenderfile);
 	}
 
 	public static void toBlenderFile(CSGDatabaseInstance db, File stl, File blenderfile) {
+		ScriptingEngine.useCaDoodleWorkspace();
 		com.neuronrobotics.sdk.common.Log.debug("Converting to Blender file before loading");
 
 		File stlIn;
@@ -103,6 +105,7 @@ public class BlenderLoader implements IScriptingLanguage {
 	}
 
 	public static void scaleStl(CSGDatabaseInstance db, File incoming, File outgoing, double scale) {
+		ScriptingEngine.useCaDoodleWorkspace();
 		CSG back;
 		try {
 			back = Vitamins.get(db, false, incoming, true).scale(scale);
@@ -124,6 +127,7 @@ public class BlenderLoader implements IScriptingLanguage {
 
 	public static CSG remesh(CSGDatabaseInstance db, CSG incoming, double MMVoxel, CSGDatabaseInstance instance)
 			throws Exception {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File stl = DownloadManager.getTmpSTL(incoming);
 		remeshSTLFile(db, stl, MMVoxel);
 		CSG back;
@@ -138,6 +142,7 @@ public class BlenderLoader implements IScriptingLanguage {
 	}
 
 	public static void remeshSTLFile(CSGDatabaseInstance db, File stlout, double MMVoxel) throws Exception {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File blend = File.createTempFile(stlout.getName(), ".blend");
 		blend.delete();
 		toBlenderFile(db, stlout, blend);
@@ -146,6 +151,7 @@ public class BlenderLoader implements IScriptingLanguage {
 
 	public static void remeshToSTLFile(CSGDatabaseInstance db, File blenderfile, File stlout, double MMVoxel)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File exe = getConfigExecutable("blender", null);
 		File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/blender-bowler-cli.git",
 				"remesh.py");
@@ -168,6 +174,7 @@ public class BlenderLoader implements IScriptingLanguage {
 
 	public static void toSTLFile(CSGDatabaseInstance db, File blenderfile, File stlout)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File exe = getConfigExecutable("blender", null);
 		File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/blender-bowler-cli.git",
 				"export.py");
@@ -189,6 +196,7 @@ public class BlenderLoader implements IScriptingLanguage {
 
 	@Override
 	public void getDefaultContents(File source) {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File exe = getConfigExecutable("blender", null);
 		String absolutePath = source.getAbsolutePath();
 		File parent = new File(absolutePath).getParentFile();

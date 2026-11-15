@@ -64,6 +64,8 @@ public class AdversarialNametagStepExportTest {
 		// the working directory is the app's own: CaDoodle-workspace under Documents,
 		// so the FreeCAD scripts resolve through the same git cache the app uses and
 		// the run leaves its files where a run of the app would leave them
+		// the loaders redirect to the CaDoodle workspace themselves; this also
+		// points the engine there so the run leaves its files where the app would
 		String relative = ScriptingEngine.getWorkingDirectory().getAbsolutePath();
 		File workspace = new File(relative + DownloadManager.delim() + "CaDoodle-workspace" + DownloadManager.delim());
 		workspace.mkdirs();
@@ -177,11 +179,12 @@ public class AdversarialNametagStepExportTest {
 		assertTrue("the FreeCAD gate script must exist at " + gateScript.getAbsolutePath(), gateScript.isFile());
 
 		// the gate is a console-mode scripted run, so it runs on freecadcmd when the
-	// system has it: the gui-linked binary brings Qt up first, which is slower and
-	// can crash headless before the script's python starts
+		// system has it: the gui-linked binary brings Qt up first, which is slower and
+		// can crash headless before the script's python starts
 		File freecadcmd = new File("/usr/bin/freecadcmd");
 		List<String> command = new java.util.ArrayList<>();
-		command.add(freecadcmd.isFile() ? freecadcmd.getAbsolutePath()
+		command.add(freecadcmd.isFile()
+				? freecadcmd.getAbsolutePath()
 				: DownloadManager.getConfigExecutable("freecad", null).getAbsolutePath());
 		command.add("-c");
 		command.add(gateScript.getAbsolutePath());

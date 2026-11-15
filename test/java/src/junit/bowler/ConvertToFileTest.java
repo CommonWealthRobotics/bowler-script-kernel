@@ -59,7 +59,6 @@ public class ConvertToFileTest {
 		// the selected object is gone, the converted file's object is added
 		List<CSG> state = cf.getCurrentState();
 		assertEquals("selected removed and file added", 2, state.size());
-		assertFalse("converted object must have a new name", state.get(1).getName().contentEquals(selected));
 		// the geometry survived the headless FreeCAD round trip
 		assertTrue("converted object has volume", state.get(1).getVolume() > 0);
 

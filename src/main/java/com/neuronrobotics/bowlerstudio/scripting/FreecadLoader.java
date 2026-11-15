@@ -103,6 +103,7 @@ public class FreecadLoader implements IScriptingLanguage {
 
 	@Override
 	public void getDefaultContents(File freecadGenFile) {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File newFile = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
@@ -135,6 +136,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	public static void addCSGToFreeCAD(File freecadModel, CSG incoming) throws IOException {
+		ScriptingEngine.useCaDoodleWorkspace();
 		addCSGToFreeCAD(freecadModel, incoming, incoming.getSlicePlanes());
 	}
 
@@ -210,6 +212,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	public static void addSTLToFreecad(File freecadModel, File stlToAdd, String meshName) {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
@@ -230,6 +233,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	public static void addSTEPToFreecad(File freecadModel, File stepToAdd, String name) {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		long start = System.currentTimeMillis();
 		try {
@@ -248,7 +252,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		} catch (Throwable t) {
 			com.neuronrobotics.sdk.common.Log.error(t);
 		}
-		Log.debug("Step Add completed in "+(((double)(System.currentTimeMillis()-start)))/1000.0+" seconds");
+		Log.debug("Step Add completed in " + (((double) (System.currentTimeMillis() - start))) / 1000.0 + " seconds");
 	}
 
 	/**
@@ -258,6 +262,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	 * compounds and shells instead of solids.
 	 */
 	public static boolean documentCarriesSolids(File freecadModel) {
+		ScriptingEngine.useCaDoodleWorkspace();
 		if (!freecadModel.isFile() || freecadModel.length() == 0)
 			return false;
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
@@ -298,6 +303,7 @@ public class FreecadLoader implements IScriptingLanguage {
 
 	public static void toSTLFile(File freecadModel, File stlout)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
@@ -323,6 +329,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	 */
 	public static void to3MFFile(File freecadModel, File threeMFout)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
+		ScriptingEngine.useCaDoodleWorkspace();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
 			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",

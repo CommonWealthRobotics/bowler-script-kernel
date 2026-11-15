@@ -559,6 +559,24 @@ public class ScriptingEngine {// this subclasses boarder pane for the widgets
 		return workspace;
 	}
 
+	/**
+	 * Points the scripting engine at the CaDoodle workspace when it is still on the
+	 * default one. The FreeCAD and Blender loaders call this before resolving any
+	 * script, so a caller that never chose a workspace — a test harness, a tool
+	 * run, anything that skipped the app's own setup — gets its git cache and its
+	 * config under the same CaDoodle-workspace directory the application uses,
+	 * rather than a second copy of every clone under bowler-workspace. A caller
+	 * that has already set a workspace of its own is left alone.
+	 */
+	public static void useCaDoodleWorkspace() {
+		if (workspace != null && !workspace.getName().equals("bowler-workspace"))
+			return; // the caller chose a workspace deliberately
+		File relative = getWorkingDirectory();
+		File file = new File(relative.getAbsolutePath() + delim + "CaDoodle-workspace" + delim);
+		file.mkdirs();
+		setWorkspace(file);
+	}
+
 	public static void createSymlinkInDocuments(File appDataDir) throws IOException {
 		String userHome = System.getProperty("user.home");
 		Path documentsDir = Paths.get(userHome, "Documents");
