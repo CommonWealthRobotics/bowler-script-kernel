@@ -49,10 +49,12 @@ public class AdversarialNametagStepExportTest {
 	/** How far the round-tripped bounds may sit from the reference's, in millimetres. */
 	private static final double BOUNDS_TOLERANCE = 0.00001;
 
-	// for this model a healthy export's gate finishes in seconds; a gate that
-	// outlives half a minute is chewing on geometry FreeCAD cannot resolve, so
-	// it is a failure of the export and must fail the test, not wait it out
-	private static final long GATE_TIMEOUT_MILLISECONDS = 30_000;
+	// the gate's verdict comes from the round trip it runs inside FreeCAD, and the
+	// same import also carries the self-check (bopCheck) over every face of the
+	// file; a merged-face BRep of this size takes the check a few minutes, so the
+	// budget is minutes rather than seconds — a gate that outlives it is chewing
+	// on geometry FreeCAD cannot resolve, and must fail the test, not wait forever
+	private static final long GATE_TIMEOUT_MILLISECONDS = 600_000;
 
 	/** The reference CSG, loaded once. */
 	private static CSG reference;
@@ -174,9 +176,13 @@ public class AdversarialNametagStepExportTest {
 				+ "/gitcache/github.com/CommonWealthRobotics/freecad-bowler-cli/check_step.py");
 		assertTrue("the FreeCAD gate script must exist at " + gateScript.getAbsolutePath(), gateScript.isFile());
 
+		// the gate is a console-mode scripted run, so it runs on freecadcmd when the
+	// system has it: the gui-linked binary brings Qt up first, which is slower and
+	// can crash headless before the script's python starts
+		File freecadcmd = new File("/usr/bin/freecadcmd");
 		List<String> command = new java.util.ArrayList<>();
-		command.add(DownloadManager.getConfigExecutable("freecad", null).getAbsolutePath());
-		command.add("--appimage-extract-and-run");
+		command.add(freecadcmd.isFile() ? freecadcmd.getAbsolutePath()
+				: DownloadManager.getConfigExecutable("freecad", null).getAbsolutePath());
 		command.add("-c");
 		command.add(gateScript.getAbsolutePath());
 		ProcessBuilder builder = new ProcessBuilder(command);

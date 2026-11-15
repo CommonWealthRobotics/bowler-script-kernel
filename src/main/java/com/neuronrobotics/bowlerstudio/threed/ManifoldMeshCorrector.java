@@ -101,11 +101,13 @@ public final class ManifoldMeshCorrector {
 		try {
 			double keptArea = CSG.getManifold().surfaceArea(current);
 			double keptVolume = CSG.getManifold().volume(current);
-			// simplify merges coplanar facets, which stays inside the surface's own
-			// tolerance, but a lost sliver shows up as surface the corrected mesh no
-			// longer covers; a volume change past the bounds budget means the same
+			// simplify merges coplanar facets, whose micro-relief is surface the
+			// merged mesh no longer carries: a fraction of a percent for a facet
+			// merge, against a lost sliver at several percent. The bounds budget is
+			// the guard that matters; this check only catches a correction that
+			// dropped whole features.
 			double areaLoss = sourceArea - keptArea;
-			if (areaLoss > Math.max(1e-6, sourceArea * 1e-4)
+			if (areaLoss > Math.max(1e-6, sourceArea * 0.01)
 					|| Math.abs(keptVolume - sourceVolume) > volumeBudget(source, boundsBudget)) {
 				Log.debug("ManifoldMeshCorrector: correction covered " + keptArea + " of the source's " + sourceArea
 						+ " of surface (" + (keptVolume - sourceVolume) + " volume), outside the export budget; keeping the source mesh");
@@ -232,9 +234,17 @@ public final class ManifoldMeshCorrector {
 		return drift > boundsBudget;
 	}
 
-	/** The volume change the bounds budget allows, as an area-scaled volume. */
+	/**
+	 * The volume change a facet merge is allowed: a fraction of the solid's own
+	 * volume. Merging coplanar facets removes their micro-relief, which on a
+	 * faceted part is a fraction of a percent; a correction that lost a whole
+	 * feature moves tens of percents. The bounds budget stays the guard that
+	 * holds the surface's position.
+	 */
 	private static double volumeBudget(CSG source, double boundsBudget) {
-		// surface x budget: the volume a uniform skin of the budget thickness adds
-		return Math.max(1e-6, source.getSurfaceArea() * boundsBudget);
+		double volume = source.getVolume();
+		if (volume <= 0)
+			return Math.max(1e-6, source.getSurfaceArea() * boundsBudget);
+		return Math.max(1e-6, Math.abs(volume) * 0.01);
 	}
 }
