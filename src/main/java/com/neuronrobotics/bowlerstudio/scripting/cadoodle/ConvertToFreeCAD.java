@@ -31,22 +31,29 @@ public class ConvertToFreeCAD extends ConvertToFileOperation {
 
 	@Override
 	protected void writeFile(File target, List<CSG> selected) throws IOException {
+		CSG.getProgressMoniter().progressUpdate(0, 100, "Converting CSG to Freecad", null);
 		List<CSG> meshes = selected;
 		int rounds = ManifoldMeshCorrector.MAX_ROUNDS;
 		IOException lastFailure = null;
 		for (int round = 0; round <= rounds; round++) {
 			File step = File.createTempFile(getName() + (round == 0 ? "" : "_corrected" + round), ".step");
 			step.deleteOnExit();
+			CSG.getProgressMoniter().progressUpdate(30, 100, "Converting CSG to STEP", null);
+
 			new STEPFile(meshes).write(step);
 
 			// an empty FreeCAD project, then the STEP added to it
+			CSG.getProgressMoniter().progressUpdate(40, 100, "Creating FreeCAD file", null);
+
 			File attempt = new File(target.getParentFile(), getName() + (round == 0 ? "" : "_" + round) + ".FCStd");
 			new FreecadLoader().getDefaultContents(attempt);
+			CSG.getProgressMoniter().progressUpdate(50, 100, "Converting STEP to FreeCAD", null);
 			FreecadLoader.addSTEPToFreecad(attempt, step, getName());
 
 			// the document FreeCAD wrote is the verdict: a document with no solid
 			// means the STEP came apart in the import, so the meshes are corrected
 			// and the next round is written from them
+			CSG.getProgressMoniter().progressUpdate(60, 100, "Verify STEP to FreeCAD", null);
 			if (FreecadLoader.documentCarriesSolids(attempt)) {
 				if (round > 0)
 					Log.debug("ConvertToFreeCAD: the STEP carried after " + round + " correction round(s)");
