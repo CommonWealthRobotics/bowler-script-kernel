@@ -396,22 +396,59 @@ public class DownloadManager {
 		String s = null;
 		String e = null;
 		Thread.sleep(100);
-		while ((s = stdInput.readLine()) != null || (e = errInput.readLine()) != null) {
-			if (s != null)
-				out.println(s);
-			if (e != null)
-				out.println(e);
-			//
+		// interactive consoles announce themselves on the output; a tool that
+		// falls into one after finishing its work never exits on its own,
+		// because the console reads a stdin that never ends on Windows
+		boolean consoleEntered = false;
+		try {
+			while ((s = stdInput.readLine()) != null || (e = errInput.readLine()) != null) {
+				if (!consoleEntered && (lineAnnouncesConsole(s) || lineAnnouncesConsole(e))) {
+					consoleEntered = true;
+					// the scripted work is done and the console would sit on that
+					// stdin forever, so the tool is stopped instead of waited on
+					com.neuronrobotics.sdk.common.Log
+							.error("Tool entered its interactive console, stopping it to end the run");
+					process.descendants().forEach(ProcessHandle::destroy);
+					process.destroy();
+				}
+				if (s != null)
+					out.println(s);
+				if (e != null)
+					out.println(e);
+				//
+			}
+		} catch (IOException closed) {
+			// destroying the process closes its pipes; a stream that dies after
+			// the console kill is the expected end, anything else is an error
+			if (!consoleEntered)
+				throw closed;
 		}
 		process.waitFor();
 		int ev = process.exitValue();
 		// out.println("Running "+commands);
-		if (ev != 0) {
+		if (ev != 0 && !consoleEntered) {
 			com.neuronrobotics.sdk.common.Log.error("ERROR PROCESS Process exited with " + ev);
+		}
+		if (consoleEntered) {
+			// a polite destroy can be ignored; give it a moment, then force it
+			long giveUpAt = System.currentTimeMillis() + 5000;
+			while (process.isAlive() && System.currentTimeMillis() < giveUpAt)
+				Thread.sleep(100);
+			if (process.isAlive())
+				process.destroyForcibly();
 		}
 		while (process.isAlive()) {
 			Thread.sleep(100);
 		}
+	}
+
+	/**
+	 * True when the tool's output line announces it has entered its interactive
+	 * console, which means its scripted work is finished and the console is
+	 * waiting on a stdin that never ends on Windows CI.
+	 */
+	private static boolean lineAnnouncesConsole(String line) {
+		return line != null && line.contains("FreeCAD Console mode");
 	}
 
 	public static void advancedSystemRun(Map<String, String> envincoming, File dir, PrintStream out,
