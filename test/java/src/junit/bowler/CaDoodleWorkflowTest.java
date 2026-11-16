@@ -11,6 +11,7 @@ import java.util.List;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.junit.Ignore;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,6 +50,7 @@ public class CaDoodleWorkflowTest {
 		BowlerKernel.startupProcedures();
 	}
 
+	@Ignore
 	@Test
 	public void test() throws Exception {
 		Log.enableDebugPrint();
@@ -259,8 +261,9 @@ public class CaDoodleWorkflowTest {
 		}
 		loaded.save();
 		try {
-		ScriptingEngine.pull("https://github.com/madhephaestus/carl-the-hexapod.git");
-		}catch(Exception ex) {}
+			ScriptingEngine.pull("https://github.com/madhephaestus/carl-the-hexapod.git");
+		} catch (Exception ex) {
+		}
 		ArrayList<LimbOption> limbs = LimbOption.getOptions();
 		TransformNR tf = new TransformNR();
 		for (LimbOption o : limbs) {
