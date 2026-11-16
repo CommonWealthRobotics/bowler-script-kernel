@@ -258,7 +258,9 @@ public class CaDoodleWorkflowTest {
 			System.out.println("Added!");
 		}
 		loaded.save();
+		try {
 		ScriptingEngine.pull("https://github.com/madhephaestus/carl-the-hexapod.git");
+		}catch(Exception ex) {}
 		ArrayList<LimbOption> limbs = LimbOption.getOptions();
 		TransformNR tf = new TransformNR();
 		for (LimbOption o : limbs) {
