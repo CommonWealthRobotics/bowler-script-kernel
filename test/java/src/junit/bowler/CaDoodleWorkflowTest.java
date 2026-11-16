@@ -245,7 +245,11 @@ public class CaDoodleWorkflowTest {
 		loaded.addOperation(setText).join();
 
 		loaded.save();
-		ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
+		try {
+			ScriptingEngine.pull(ControllerOption.URL_OF_OPTIONS);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		ArrayList<ControllerOption> controllers = ControllerOption.getOptions();
 		for (ControllerOption o : controllers) {
 			System.out.println("Adding a Controller: " + o);

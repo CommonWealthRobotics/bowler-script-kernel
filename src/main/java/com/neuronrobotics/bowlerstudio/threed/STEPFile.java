@@ -84,7 +84,7 @@ public final class STEPFile {
 	public STEPFile(List<CSG> csgs, double angleDegrees, double topologyRepairTolerance, double stitchTolerance) {
 		if (csgs == null || csgs.isEmpty())
 			throw new IllegalArgumentException("csgs must not be empty");
-		Log.debug("Creating Step from "+csgs.size()+" csgs");
+		Log.debug("Creating Step from " + csgs.size() + " csgs");
 		List<Part> parts = new ArrayList<>();
 		for (CSG csg : csgs) {
 			if (csg == null)
@@ -95,8 +95,8 @@ public final class STEPFile {
 			// reader least knows how to sew
 			for (CSG body : decomposeForBRep(csg)) {
 				body = simplifyForBRep(body);
-				parts.add(new Part(body, FeatureEdgeExtractor.extract(body, angleDegrees, topologyRepairTolerance,
-						stitchTolerance)));
+				parts.add(new Part(body,
+						FeatureEdgeExtractor.extract(body, angleDegrees, topologyRepairTolerance, stitchTolerance)));
 			}
 		}
 		this.parts = Collections.unmodifiableList(parts);
@@ -323,7 +323,7 @@ public final class STEPFile {
 	public static final double BREP_BOUNDS_BUDGET_MM = 0.00001;
 
 	public void write(File file) throws IOException {
-		Log.debug("Writing step to "+file.getAbsolutePath());
+		Log.debug("Writing step to " + file.getAbsolutePath());
 		Files.write(file.toPath(), toStep().getBytes(StandardCharsets.UTF_8));
 	}
 

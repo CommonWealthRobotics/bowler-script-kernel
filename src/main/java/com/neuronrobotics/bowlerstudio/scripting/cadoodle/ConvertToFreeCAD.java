@@ -58,7 +58,8 @@ public class ConvertToFreeCAD extends ConvertToFileOperation {
 				if (round > 0)
 					Log.debug("ConvertToFreeCAD: the STEP carried after " + round + " correction round(s)");
 				// keep the good document under the target's own name
-				java.nio.file.Files.move(attempt.toPath(), target.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+				java.nio.file.Files.move(attempt.toPath(), target.toPath(),
+						java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 				return;
 			}
 			lastFailure = new IOException("FreeCAD read no solid from the STEP on round " + round);

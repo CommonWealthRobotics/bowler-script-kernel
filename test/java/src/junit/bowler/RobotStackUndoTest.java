@@ -95,7 +95,11 @@ public class RobotStackUndoTest {
 
 		// 4: add a wheel limb, forced on so the test does not depend on the
 		// feature metadata published by the controller options file
-		ScriptingEngine.pull("https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git");
+		try {
+			ScriptingEngine.pull("https://github.com/CommonWealthRobotics/BowlerStudioExampleRobots.git");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		LimbOption wheelOption = null;
 		for (LimbOption o : LimbOption.getOptions()) {
 			if ("wheel".contentEquals(o.getType().toString()) && "Servo Fixed Wheel".contentEquals(o.getName())) {

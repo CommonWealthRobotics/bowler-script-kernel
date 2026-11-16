@@ -85,8 +85,8 @@ public final class ManifoldMeshCorrector {
 					next = heal(next);
 				}
 				if (outOfBudget(source, next, boundsBudget)) {
-					Log.debug("ManifoldMeshCorrector: round " + round + " moved the mesh outside the "
-							+ boundsBudget + " mm budget; keeping the previous state");
+					Log.debug("ManifoldMeshCorrector: round " + round + " moved the mesh outside the " + boundsBudget
+							+ " mm budget; keeping the previous state");
 					break;
 				}
 				current = next;
@@ -110,7 +110,8 @@ public final class ManifoldMeshCorrector {
 			if (areaLoss > Math.max(1e-6, sourceArea * 0.01)
 					|| Math.abs(keptVolume - sourceVolume) > volumeBudget(source, boundsBudget)) {
 				Log.debug("ManifoldMeshCorrector: correction covered " + keptArea + " of the source's " + sourceArea
-						+ " of surface (" + (keptVolume - sourceVolume) + " volume), outside the export budget; keeping the source mesh");
+						+ " of surface (" + (keptVolume - sourceVolume)
+						+ " volume), outside the export budget; keeping the source mesh");
 				return source;
 			}
 		} catch (Throwable t) {
@@ -213,8 +214,7 @@ public final class ManifoldMeshCorrector {
 	private static CSG heal(CSG mesh) throws Throwable {
 		for (int pass = 0; pass < MAX_HEAL_PASSES; pass++) {
 			long before = mesh.getTriCount();
-			CSG healed = CSG.getManifold().booleanOp(mesh, mesh,
-					CSGManifold3d.BooleanOp.UNION);
+			CSG healed = CSG.getManifold().booleanOp(mesh, mesh, CSGManifold3d.BooleanOp.UNION);
 			long after = healed.getTriCount();
 			mesh = healed;
 			if (after == before)
@@ -227,8 +227,7 @@ public final class ManifoldMeshCorrector {
 	private static boolean outOfBudget(CSG source, CSG corrected, double boundsBudget) {
 		eu.mihosoft.vrl.v3d.Bounds a = source.getBounds();
 		eu.mihosoft.vrl.v3d.Bounds b = corrected.getBounds();
-		double drift = Math.max(
-				Math.max(Math.abs(b.getMin().x - a.getMin().x), Math.abs(b.getMin().y - a.getMin().y)),
+		double drift = Math.max(Math.max(Math.abs(b.getMin().x - a.getMin().x), Math.abs(b.getMin().y - a.getMin().y)),
 				Math.max(Math.abs(b.getMax().x - a.getMax().x), Math.abs(b.getMax().y - a.getMax().y)));
 		drift = Math.max(drift, Math.max(Math.abs(b.getMin().z - a.getMin().z), Math.abs(b.getMax().z - a.getMax().z)));
 		return drift > boundsBudget;

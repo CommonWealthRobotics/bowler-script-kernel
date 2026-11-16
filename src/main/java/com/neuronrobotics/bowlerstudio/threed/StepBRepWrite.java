@@ -213,6 +213,14 @@ public final class StepBRepWrite {
 		private final Map<Long, List<Integer>> byEdge = new HashMap<>();
 		private final Map<Long, Long> edges = new HashMap<>();
 		private final Map<Integer, Long> vertices = new HashMap<>();
+		/**
+		 * The vertex each point is named by: a point the mesh stores under several
+		 * indices is one point, and a loop, an edge and the triangles across it
+		 * must name it one way or they cannot pair.
+		 */
+		private int[] canonical;
+		/** How many references named a point another index already named. */
+		private int duplicateReferences;
 
 		private final double planeTolerance;
 		/** A mesh vertex to the vertex that represents it. */
@@ -227,12 +235,49 @@ public final class StepBRepWrite {
 					+ planeTolerance);
 			TickToc.tic("prepare mesh");
 			prepare(sourceTriangles);
+			canonicalize();
 			TickToc.tic("index");
 			index();
 			indexVertices();
 			TickToc.tic("group");
 			group();
 			Log.debug("StepBRepWrite: grouped into " + faces.size() + " faces");
+		}
+
+		/**
+		 * Renames every reference to a point the mesh stores under several indices
+		 * onto the lowest of them, so a loop, an edge and the triangles across it
+		 * name a point one way. Distinct points that a junction repair may yet
+		 * treat as one keep their own indices; the repair works on names, not on
+		 * the points, and re-links them itself.
+		 */
+		private void canonicalize() {
+			int count = points.length / 3;
+			canonical = new int[count];
+			for (int vertex = 0; vertex < count; vertex++)
+				canonical[vertex] = vertex;
+			Map<Long, Integer> byPoint = new HashMap<>();
+			for (int vertex = 0; vertex < count; vertex++) {
+				double[] p = point(vertex);
+				// exact equality is the test: a weld that rounds first can collapse
+				// two distinct points of the design, and the BRep is written from
+				// the coordinates as stored
+				long boxed = Double.valueOf(p[0]).hashCode() * 31 + Double.valueOf(p[1]).hashCode();
+				boxed = boxed * 31 + Double.valueOf(p[2]).hashCode();
+				Integer same = byPoint.get(boxed);
+				if (same != null && point(same)[0] == p[0] && point(same)[1] == p[1] && point(same)[2] == p[2]) {
+					canonical[vertex] = same;
+					duplicateReferences++;
+				} else
+					byPoint.put(boxed, vertex);
+			}
+			if (duplicateReferences == 0)
+				return;
+			for (int t = 0; t < triangles.size(); t++) {
+				int[] triangle = triangles.get(t);
+				triangles.set(t, new int[]{canonical[triangle[0]], canonical[triangle[1]], canonical[triangle[2]]});
+			}
+			Log.debug("StepBRepWrite: renamed " + duplicateReferences + " exact-duplicate point reference(s)");
 		}
 
 		/**
@@ -267,8 +312,6 @@ public final class StepBRepWrite {
 		 * loop is written through the points the neighbours carry, and the edges
 		 * pair one to one again.
 		 */
-		private int junctionsInserted;
-
 		private List<Integer> throughJunctions(List<Integer> loop, Set<Integer> ownBoundaryVertices) {
 			List<Integer> out = new ArrayList<>(loop.size());
 			for (int at = 0; at < loop.size(); at++) {
@@ -277,18 +320,7 @@ public final class StepBRepWrite {
 				out.add(a);
 				if (a == b)
 					continue;
-				for (int middle : onSegment(a, b))
-					// a vertex this region's own walk already knows needs no insert;
-					// the points inserted are the ones the neighbouring faces' outlines
-					// carry, so the written edges pair one to one. A point that
-					// coincides with either end is already the end under another
-					// index: inserting it would write an edge of no length, which no
-					// neighbour can pair.
-					if (middle != a && middle != b && !ownBoundaryVertices.contains(middle) && !coincides(middle, a)
-							&& !coincides(middle, b)) {
-						out.add(middle);
-						junctionsInserted++;
-					}
+				out.addAll(edgePieces(a, b, ownBoundaryVertices));
 			}
 			// consecutive inserts that landed on the same point collapse to one
 			List<Integer> cleaned = new ArrayList<>(out.size());
@@ -303,6 +335,56 @@ public final class StepBRepWrite {
 		/** True when two vertices name the same point within the plane tolerance. */
 		private boolean coincides(int a, int b) {
 			return distance(point(a), point(b)) <= planeTolerance;
+		}
+
+		/** A loop's directed edges as written, through the loop's own points. */
+		private static Set<Long> walkedEdges(List<Integer> loop) {
+			Set<Long> edges = new LinkedHashSet<>();
+			for (int i = 0; i < loop.size(); i++)
+				edges.add(directed(loop.get(i), loop.get((i + 1) % loop.size())));
+			return edges;
+		}
+
+		/**
+		 * The undirected boundary edges of every group: the edges a written face can
+		 * name. An edge two triangles of one group share cancels to interior, so it
+		 * is on no face's boundary and no written loop will ever carry it; the set
+		 * is what decides whether a junction point's piece segments will actually be
+		 * named by the faces across them.
+		 */
+		private Set<Long> regionBoundaryEdges;
+
+		private boolean isPieceEdge(int a, int b) {
+			if (regionBoundaryEdges == null) {
+				Set<Long> edges = new HashSet<>();
+				for (List<Integer> group : faces)
+					for (int[] edge : boundary(group))
+						edges.add(key(edge[0], edge[1]));
+				regionBoundaryEdges = edges;
+			}
+			return regionBoundaryEdges.contains(key(a, b));
+		}
+
+		/**
+		 * The junction points a segment splits through, cached: the answer depends
+		 * on the segment alone, and a long segment is asked twice — once when a
+		 * face's loop is written, once when the same edge is checked for it.
+		 */
+		private Map<Long, List<Integer>> splitMiddlesCache;
+
+		private List<Integer> splitMiddles(int a, int b) {
+			long segment = directed(a, b);
+			List<Integer> cached = splitMiddlesCache == null ? null : splitMiddlesCache.get(segment);
+			if (cached != null)
+				return cached;
+			List<Integer> middles = new ArrayList<>();
+			for (int middle : onSegment(a, b))
+				if (isPieceEdge(a, middle) && isPieceEdge(middle, b))
+					middles.add(middle);
+			if (splitMiddlesCache == null)
+				splitMiddlesCache = new HashMap<>();
+			splitMiddlesCache.put(segment, middles);
+			return middles;
 		}
 
 		/**
@@ -415,6 +497,19 @@ public final class StepBRepWrite {
 			}
 		}
 
+		/** The triangles that use a vertex as a corner. */
+		private Map<Integer, List<Integer>> byCornerIndex;
+
+		private List<Integer> byCorner(int vertex) {
+			if (byCornerIndex == null) {
+				byCornerIndex = new HashMap<>();
+				for (int index = 0; index < triangles.size(); index++)
+					for (int corner : triangles.get(index))
+						byCornerIndex.computeIfAbsent(corner, unused -> new ArrayList<>()).add(index);
+			}
+			return byCornerIndex.getOrDefault(vertex, List.of());
+		}
+
 		private static double distance(double[] a, double[] b) {
 			double dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2];
 			return Math.sqrt(dx * dx + dy * dy + dz * dz);
@@ -448,6 +543,48 @@ public final class StepBRepWrite {
 		}
 
 		// --- grouping into faces ---
+
+		/**
+		 * A point's junction links, to the vertices naming the same point of the
+		 * surface under the junction tolerance. Built once from the whole mesh:
+		 * this is the difference a weld under the stricter snap tolerance cannot
+		 * see, and the difference that splits a coplanar face at a seam into a
+		 * strip of per-triangle faces.
+		 */
+		private Map<Integer, List<Integer>> junctionLinks;
+
+		private Map<Integer, List<Integer>> junctionLinks() {
+			if (junctionLinks != null)
+				return junctionLinks;
+			junctionLinks = new HashMap<>();
+			Map<Long, Integer> owner = new HashMap<>();
+			for (int vertex = 0; vertex < points.length / 3; vertex++) {
+				double[] p = point(vertex);
+				long cx = Math.round(p[0] / junctionCellSize);
+				long cy = Math.round(p[1] / junctionCellSize);
+				long cz = Math.round(p[2] / junctionCellSize);
+				for (int dx = -1; dx <= 1; dx++)
+					for (int dy = -1; dy <= 1; dy++)
+						for (int dz = -1; dz <= 1; dz++) {
+							Integer other = owner.get(cell(cx + dx, cy + dy, cz + dz));
+							if (other == null || other == vertex)
+								continue;
+							// the gate is the point tolerance, not the cell size: the
+							// cell is coarse so the hash is cheap, and linking every
+							// vertex of a cell would weld points the design keeps apart
+							if (distance(p, point(other)) > planeTolerance)
+								continue;
+							junctionLinks.computeIfAbsent(other, unused -> new ArrayList<>()).add(vertex);
+							junctionLinks.computeIfAbsent(vertex, unused -> new ArrayList<>()).add(other);
+						}
+				owner.putIfAbsent(cell(cx, cy, cz), vertex);
+			}
+			int links = 0;
+			for (List<Integer> list : junctionLinks.values())
+				links += list.size();
+			Log.debug("StepBRepWrite: " + links / 2 + " junction link(s) across the weld tolerance");
+			return junctionLinks;
+		}
 
 		/** Grows one face from every triangle, absorbing the coplanar neighbours. */
 		private void group() {
@@ -490,6 +627,28 @@ public final class StepBRepWrite {
 							face.add(index);
 							frontier.add(index);
 						}
+					// a seam welds this face's surface to itself: the same point is
+					// stored as two vertices within the junction tolerance, one naming
+					// each sheet's strip. The thin tile through either naming is this
+					// face's triangle — splitting at the weld leaves the tile's
+					// outline unable to pair with the sheet on either side of it.
+					// A triangle joins here when it touches a junction twin of one of
+					// this face's corners, and lies in this face's plane facing the
+					// same way: the same test an edge-adjacent neighbour passes.
+					for (int corner : triangle)
+						for (int twin : junctionLinks().getOrDefault(corner, List.of()))
+							for (int index : byCorner(twin)) {
+								if (used[index])
+									continue;
+								Vector3d candidate = normal(triangles.get(index));
+								if (candidate == null || candidate.dot(normal) <= 0)
+									continue;
+								if (!coplanar(triangles.get(index), origin, normal))
+									continue;
+								used[index] = true;
+								face.add(index);
+								frontier.add(index);
+							}
 				}
 				faces.add(face);
 			}
@@ -671,8 +830,93 @@ public final class StepBRepWrite {
 		 */
 		private List<Planned> settledPlan() {
 			List<Planned> plan = plan();
+			plan = pairedPlan(plan);
 			Log.debug("StepBRepWrite: plan has " + plan.size() + " faces");
 			return plan;
+		}
+
+		/**
+		 * The plan, with the faces whose loops pair worse than their own triangles
+		 * written as their triangles instead.
+		 *
+		 * <p>
+		 * A reader closes the shell by matching each written edge with the same edge
+		 * reversed on the face across it. A fused face can fail that where the
+		 * neighbour names a segment in pieces and this face names it whole, or where
+		 * a fold's two sheets meet along an edge a third face also carries. Its own
+		 * triangles pair by index where the mesh is edge-manifold, so writing them
+		 * is the exact alternative.
+		 *
+		 * <p>
+		 * A face is judged against the rest of the plan, which does not depend on
+		 * it: the loops are kept when, over the edges they and their triangles
+		 * touch, they leave fewer unpaired edges than the triangles would. A mesh
+		 * whose own indices do not pair is not carved into triangles for nothing.
+		 */
+		private List<Planned> pairedPlan(List<Planned> plan) {
+			Map<Long, Integer> rest = new HashMap<>();
+			for (Planned planned : plan) {
+				if (planned.loops == null)
+					for (int index : planned.region)
+						countEdges(triangleLoop(index), rest);
+				else
+					for (List<Integer> loop : planned.loops)
+						countEdges(loop, rest);
+			}
+
+			List<Planned> settled = new ArrayList<>(plan.size());
+			int split = 0;
+			for (Planned planned : plan) {
+				if (planned.loops == null || !pairsBetterAsTriangles(planned, rest)) {
+					settled.add(planned);
+					continue;
+				}
+				for (int index : planned.region)
+					settled.add(new Planned(List.of(index), null));
+				split++;
+			}
+			if (split > 0)
+				Log.debug("StepBRepWrite: " + split + " fused face(s) of " + plan.size()
+						+ " written as their triangles, which pair with the faces around them");
+			return settled;
+		}
+
+		/** Counts the loop's directed edges into the map. */
+		private static void countEdges(List<Integer> loop, Map<Long, Integer> into) {
+			for (int i = 0; i < loop.size(); i++)
+				into.merge(directed(loop.get(i), loop.get((i + 1) % loop.size())), 1, Integer::sum);
+		}
+
+		/**
+		 * True when the region's triangles, written one per face, leave fewer
+		 * unpaired edges against the rest of the plan than this face's loops do.
+		 * Only the edges the two writings differ on can move the count, so the
+		 * comparison walks those alone.
+		 */
+		private boolean pairsBetterAsTriangles(Planned planned, Map<Long, Integer> rest) {
+			Map<Long, Integer> loops = new HashMap<>();
+			for (List<Integer> loop : planned.loops)
+				countEdges(loop, loops);
+			Map<Long, Integer> triangles = new HashMap<>();
+			for (int index : planned.region)
+				countEdges(triangleLoop(index), triangles);
+
+			Set<Long> touched = new LinkedHashSet<>(loops.keySet());
+			touched.addAll(triangles.keySet());
+			int before = 0;
+			int after = 0;
+			for (long edge : touched) {
+				long reverse = directed((int) (edge & 0xffffffffL), (int) (edge >> 32));
+				int loopsForward = rest.getOrDefault(edge, 0) + loops.getOrDefault(edge, 0);
+				int loopsBackward = rest.getOrDefault(reverse, 0) + loops.getOrDefault(reverse, 0);
+				int trianglesForward = rest.getOrDefault(edge, 0) + triangles.getOrDefault(edge, 0);
+				int trianglesBackward = rest.getOrDefault(reverse, 0) + triangles.getOrDefault(reverse, 0);
+				if (loopsForward != loopsBackward)
+					before++;
+				if (trianglesForward != trianglesBackward)
+					after++;
+			}
+			return after < before;
 		}
 
 		/**
@@ -885,6 +1129,22 @@ public final class StepBRepWrite {
 				return null;
 			}
 			List<List<Integer>> loops = loops(region);
+			// a face's first loop bounds its outline and the rest are holes, so the
+			// written edges must all pair with the region's neighbours: an edge the
+			// expansion added or lost is not the mesh's own boundary. Checking the raw
+			// walk against the raw boundary keeps the test and the repair consistent;
+			// checking the expanded loops here would reject every region the
+			// junction repair served, which is the majority near a welded seam.
+			Set<Long> walked = new LinkedHashSet<>();
+			Set<Long> repeated = new LinkedHashSet<>();
+			for (List<Integer> loop : loops)
+				for (long edge : walkedEdges(loop))
+					if (!walked.add(edge))
+						repeated.add(edge);
+			if (!repeated.isEmpty()) {
+				stitchFailedBounds++;
+				return null;
+			}
 			if (!carriesEveryVertex(region, loops)) {
 				stitchFailedMisses++;
 				return null;
@@ -952,20 +1212,59 @@ public final class StepBRepWrite {
 		private boolean boundsExactly(List<Integer> region, List<List<Integer>> loops) {
 			if (loops.isEmpty())
 				return false;
+			// the wanted edges are the boundary as written: a boundary edge whose
+			// segment the junction repair splits is wanted as its pieces, because
+			// that is how this face's loop names it and how the face across it names
+			// it back. The walk and the boundary are then read the same way.
 			Map<Long, Integer> wanted = new HashMap<>();
-			List<int[]> boundaryEdges = boundary(region);
-			for (int[] edge : boundaryEdges)
-				wanted.merge(directed(edge[0], edge[1]), 1, Integer::sum);
-
+			List<int[]> boundary = boundary(region);
+			Set<Integer> ownBoundaryVertices = new HashSet<>();
+			for (int[] e : boundary) {
+				ownBoundaryVertices.add(e[0]);
+				ownBoundaryVertices.add(e[1]);
+			}
+			for (int[] edge : boundary) {
+				List<Integer> pieces = edgePieces(edge[0], edge[1], ownBoundaryVertices);
+				for (int i = 0; i + 1 < pieces.size(); i++)
+					wanted.merge(directed(pieces.get(i), pieces.get(i + 1)), 1, Integer::sum);
+			}
 			Map<Long, Integer> walked = new HashMap<>();
 			for (List<Integer> loop : loops)
 				for (int i = 0; i < loop.size(); i++) {
 					long edge = directed(loop.get(i), loop.get((i + 1) % loop.size()));
-					if (!wanted.containsKey(edge))
-						return false; // a segment no triangle of the region has
 					walked.merge(edge, 1, Integer::sum);
 				}
 			return walked.equals(wanted);
+		}
+
+		/**
+		 * A segment as the written loop names it: the first end, then every junction
+		 * point the segment splits through, then the second end.
+		 *
+		 * <p>
+		 * A candidate only lands between the ends when the piece segments it would
+		 * create are edges a face boundary actually holds — the boundaries the
+		 * faces across this loop will name. A T-junction's pieces qualify; a point
+		 * whose tile edges were fused away does not, and expanding there would split
+		 * a segment whose neighbour names it whole, unpairing the two. A vertex this
+		 * region's own walk already knows needs no insert; a point that coincides
+		 * with either end is already the end under another index, and inserting it
+		 * would write an edge of no length, which no neighbour can pair.
+		 *
+		 * <p>
+		 * {@link #throughJunctions} applies this to a whole loop and
+		 * {@link #boundsExactly} to one boundary edge, so the walk and the check that
+		 * judges it read the boundary the same way.
+		 */
+		private List<Integer> edgePieces(int a, int b, Set<Integer> ownBoundaryVertices) {
+			List<Integer> pieces = new ArrayList<>();
+			pieces.add(a);
+			for (int middle : splitMiddles(a, b))
+				if (middle != a && middle != b && !ownBoundaryVertices.contains(middle) && !coincides(middle, a)
+						&& !coincides(middle, b) && isPieceEdge(a, middle) && isPieceEdge(middle, b))
+					pieces.add(middle);
+			pieces.add(b);
+			return pieces;
 		}
 
 		private static List<Integer> asLoop(int[] triangle) {
@@ -1103,8 +1402,6 @@ public final class StepBRepWrite {
 			List<List<Integer>> expanded = new ArrayList<>(loops.size());
 			for (List<Integer> loop : loops)
 				expanded.add(throughJunctions(loop, ownBoundaryVertices));
-			//			if (junctionsInserted > 0)
-			//				Log.debug("StepBRepWrite: expanded " + junctionsInserted + " junction point(s) into this face's loops");
 			return expanded;
 		}
 
@@ -1237,35 +1534,45 @@ public final class StepBRepWrite {
 		 * sheets' other edges across it, so both stay.
 		 */
 		private List<int[]> boundary(List<Integer> face) {
-			Map<Long, int[]> once = new LinkedHashMap<>();
+			Map<Long, List<int[]>> once = new LinkedHashMap<>();
 			Map<Long, Boolean> repeated = new HashMap<>();
 			for (int index : face)
 				collectEdges(triangles.get(index), once, repeated);
 
 			List<int[]> boundary = new ArrayList<>();
-			// An edge seen twice within one face in OPPOSITE directions is interior to
-			// the face and off its boundary. An edge seen twice in the SAME direction is
-			// the fold line where two sheets of the part meet inside the face: both walks
-			// are real surface, and dropping the pair would leave the walk no way to pair
-			// the sheets' other edges across it, so both stay.
-			boundary.addAll(once.values());
+			// every remaining entry is on the boundary: a single walk, or a fold's
+			// two same-direction walks that each pair with its own neighbour
+			for (List<int[]> walks : once.values())
+				boundary.addAll(walks);
 			return boundary;
 		}
 
-		/** Records the triangle's directed edges, dropping any seen twice. */
-		private void collectEdges(int[] triangle, Map<Long, int[]> once, Map<Long, Boolean> repeated) {
+		/**
+		 * Records the triangle's directed edges. An undirected pair seen a second
+		 * time is resolved by direction: opposite sightings cancel — the edge is
+		 * interior to the face and off its boundary, so its first sighting is taken
+		 * back out — while same-direction sightings are a fold inside the face, and
+		 * both walks stay on the boundary, each pairing with its own neighbour
+		 * across the fold.
+		 */
+		private void collectEdges(int[] triangle, Map<Long, List<int[]>> once, Map<Long, Boolean> repeated) {
 			int[][] pairs = {{triangle[0], triangle[1]}, {triangle[1], triangle[2]}, {triangle[2], triangle[0]}};
 			for (int[] pair : pairs) {
 				long key = key(pair[0], pair[1]);
 				if (Boolean.TRUE.equals(repeated.get(key)))
 					continue;
-				if (once.containsKey(key)) {
-					// the interior edge is not on the boundary at all: take its first
-					// sighting back out, or it would be walked as one
+				List<int[]> seen = once.get(key);
+				if (seen == null) {
+					once.put(key, new ArrayList<>(List.of(pair)));
+				} else if (seen.get(0)[0] == pair[0] && seen.get(0)[1] == pair[1]) {
+					// same direction: a fold, both walks stay
+					repeated.put(key, Boolean.TRUE);
+					seen.add(pair);
+				} else {
+					// opposite directions: interior, off the boundary
 					repeated.put(key, Boolean.TRUE);
 					once.remove(key);
-				} else
-					once.put(key, pair);
+				}
 			}
 		}
 
