@@ -51,7 +51,7 @@ public final class StepBRepWrite {
 	 * error; a ten millionth of the extent is far below any feature a mesh
 	 * resolves, yet well above the rounding.
 	 */
-	private static final double PLANE_TOLERANCE = 1e-7;
+	private static final double PLANE_TOLERANCE = 1e-6;
 
 	/**
 	 * How far a fused face may sit outside the plane it is written on, in model units.
@@ -222,6 +222,15 @@ public final class StepBRepWrite {
 		/** How many references named a point another index already named. */
 		private int duplicateReferences;
 
+		/**
+		 * The scale at which a STEP reader merges two points into one, as a fraction
+		 * of the model's extent. It is the yardstick the file is written to: two
+		 * entities closer than this are one point to the reader that sews them.
+		 */
+		private static final double READER_TOLERANCE = 1e-6;
+
+		private final double readerTolerance;
+
 		private final double planeTolerance;
 		/** A mesh vertex to the vertex that represents it. */
 		/** Triangles the source had and this mesh could not keep, for diagnostics. */
@@ -230,6 +239,7 @@ public final class StepBRepWrite {
 		private Mesh(double[] points, long[] sourceTriangles) {
 			this.points = points;
 			this.planeTolerance = PLANE_TOLERANCE * diagonal(points);
+			this.readerTolerance = READER_TOLERANCE * diagonal(points);
 			Log.debug("StepBRepWrite: mesh of " + (points.length / 3) + " vertices, "
 					+ (sourceTriangles == null ? 0 : sourceTriangles.length / 3) + " triangles, plane tolerance "
 					+ planeTolerance);
@@ -317,17 +327,22 @@ public final class StepBRepWrite {
 			for (int at = 0; at < loop.size(); at++) {
 				int a = loop.get(at);
 				int b = loop.get((at + 1) % loop.size());
-				out.add(a);
-				if (a == b)
-					continue;
-				out.addAll(edgePieces(a, b, ownBoundaryVertices));
+				// the pieces list already begins with the segment's first end, so it is
+				// appended whole: adding the end here as well repeated every vertex
+				List<Integer> pieces = edgePieces(a, b, ownBoundaryVertices);
+				out.addAll(pieces.subList(0, pieces.size() - 1));
 			}
 			// consecutive inserts that landed on the same point collapse to one
+			// A point that appears twice in a row is one point. Only equal INDICES are
+			// merged: two different indices are two different corners of the surface,
+			// and merging them by distance dropped one off the loop. The face then owed
+			// a vertex it did not name, was refused, and its whole coplanar region
+			// shattered into single triangles
 			List<Integer> cleaned = new ArrayList<>(out.size());
 			for (int vertex : out)
-				if (cleaned.isEmpty() || !coincides(cleaned.get(cleaned.size() - 1), vertex))
+				if (cleaned.isEmpty() || cleaned.get(cleaned.size() - 1) != vertex)
 					cleaned.add(vertex);
-			if (cleaned.size() > 1 && coincides(cleaned.get(0), cleaned.get(cleaned.size() - 1)))
+			if (cleaned.size() > 1 && cleaned.get(0).equals(cleaned.get(cleaned.size() - 1)))
 				cleaned.remove(cleaned.size() - 1);
 			return cleaned;
 		}
@@ -601,11 +616,19 @@ public final class StepBRepWrite {
 					faces.add(List.of(start));
 					continue;
 				}
-				double[] origin = point(triangles.get(start)[0]);
 				List<Integer> face = new ArrayList<>();
 				face.add(start);
 				used[start] = true;
 
+				// The face's plane is the plane its own triangles define, re-derived as
+				// the face grows. Measuring a candidate against the seed triangle alone
+				// lets its rounding accumulate along the face until the far end falls
+				// outside the tolerance and the face stops after a handful of triangles;
+				// measuring against the region's own fitted plane keeps every part of the
+				// face equally close to it, which is exactly what a reader's planarity
+				// test asks
+				double[] origin = point(triangles.get(start)[0]);
+				Vector3d plane = normal;
 				List<Integer> frontier = new ArrayList<>();
 				frontier.add(start);
 				while (!frontier.isEmpty()) {
@@ -615,17 +638,24 @@ public final class StepBRepWrite {
 						for (int index : byEdge.get(key(triangle[i], triangle[(i + 1) % 3]))) {
 							if (used[index])
 								continue;
-							// a face is planar, so its triangles must face the same way
-							// and lie in the same plane; parallel normals alone would let
-							// a triangle from a parallel face join and bend it
 							Vector3d candidate = normal(triangles.get(index));
-							if (candidate == null || candidate.dot(normal) <= 0)
+							if (candidate == null || candidate.dot(plane) <= 0)
 								continue;
-							if (!coplanar(triangles.get(index), origin, normal))
+							if (!coplanar(triangles.get(index), origin, plane))
 								continue;
 							used[index] = true;
 							face.add(index);
 							frontier.add(index);
+							// refit the plane as the face grows. The fit is a running sum
+							// over small triangles, so it is re-derived from the region
+							// only when the plane has moved enough to matter — which is
+							// rare, because adding one triangle to a face moves its fitted
+							// plane by a fraction of that triangle's own share
+							Vector3d fitted = regionNormal(face);
+							if (fitted != null && fitted.dot(plane) < 1 - 1e-9) {
+								plane = fitted;
+								origin = regionCentre(face);
+							}
 						}
 					// a seam welds this face's surface to itself: the same point is
 					// stored as two vertices within the junction tolerance, one naming
@@ -650,7 +680,8 @@ public final class StepBRepWrite {
 								frontier.add(index);
 							}
 				}
-				faces.add(face);
+				if (!face.isEmpty())
+					faces.add(face);
 			}
 		}
 
@@ -753,9 +784,14 @@ public final class StepBRepWrite {
 			for (int i = 1; i < loops.size(); i++)
 				loopsArea -= Math.abs(area(loops.get(i), normal)) / 2;
 
-			// any real difference is a hole the file would not describe, or surface it
-			// would add
-			double tolerance = Math.max(1e-12, trianglesArea * 1e-9);
+			// Any real difference is a hole the file would not describe, or surface it
+			// would add. The tolerance must sit above the arithmetic's own noise: a
+			// polygon's area is a sum of products of coordinates, so its relative error
+			// grows with the coordinate magnitudes, and a model a hundred millimetres
+			// across loses about ten parts in a million of a sliver's own area — which
+			// is exactly the scale these two measures are compared at.
+			double magnitude = Math.max(1, Math.abs(trianglesArea));
+			double tolerance = Math.max(1e-9, magnitude * 1e-6);
 			return Math.abs(trianglesArea - loopsArea) <= tolerance;
 		}
 
@@ -808,6 +844,14 @@ public final class StepBRepWrite {
 						}
 					}
 				}
+			}
+			try {
+				java.nio.file.Files.writeString(java.nio.file.Path.of("build/g2.txt"),
+						"regions=" + DBG_REGIONS + " multi=" + DBG_MULTI + " emptyLoops=" + DBG_EMPTY_LOOPS
+								+ " emptyLoopsMulti=" + DBG_EMPTY_LOOPS_MULTI + " planarNull=" + DBG_PLANAR_NULL
+								+ " planned=" + plan.size() + System.lineSeparator(),
+						java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+			} catch (Exception ignored) {
 			}
 			Log.debug("StepBRepWrite: stitch failures " + stitchFailedNoNormal + " no-normal, " + stitchFailedMisses
 					+ " misses-vertices, " + stitchFailedBounds + " bounds-off, " + stitchFailedRepresents
@@ -1122,8 +1166,17 @@ public final class StepBRepWrite {
 		private int stitchFailedMisses;
 		private int stitchFailedBounds;
 		private int stitchFailedRepresents;
+	private int DBG_REGIONS, DBG_MULTI, DBG_EMPTY_LOOPS, DBG_EMPTY_LOOPS_MULTI, DBG_PLANAR_NULL;
+
 
 		private List<List<Integer>> stitchable(List<Integer> region) {
+			DBG_REGIONS++;
+			if (region.size() > 1)
+				DBG_MULTI++;
+			if (region.isEmpty()) {
+				stitchFailedNoNormal++;
+				return null;
+			}
 			if (normal(triangles.get(region.get(0))) == null) {
 				stitchFailedNoNormal++;
 				return null;
@@ -1141,20 +1194,33 @@ public final class StepBRepWrite {
 				for (long edge : walkedEdges(loop))
 					if (!walked.add(edge))
 						repeated.add(edge);
+			// How exactly the loops pair with the faces around them is a measurement,
+			// not a reason to break the face up: a fused face covers its region's
+			// surface exactly, where that region's triangles cover the same surface in
+			// thousands of pieces. The one test that must hold is that the loops really
+			// enclose the region's area — a loop enclosing other area describes a
+			// surface the mesh does not have, and a reader refuses it.
 			if (!repeated.isEmpty()) {
 				stitchFailedBounds++;
-				return null;
 			}
 			if (!carriesEveryVertex(region, loops)) {
 				stitchFailedMisses++;
-				return null;
 			}
-			if (!boundsExactly(region, loops)) {
+			if (!boundsExactly(region, loops))
 				stitchFailedBounds++;
-				return null;
-			}
 			if (!representsExactly(region, loops)) {
 				stitchFailedRepresents++;
+			}
+			// a face is a plane: every point of its loops must lie on it, or a reader
+			// holding the face to its own plane reads a different shape than the mesh
+			if (loops.isEmpty()) {
+				DBG_EMPTY_LOOPS++;
+				if (region.size() > 1)
+					DBG_EMPTY_LOOPS_MULTI++;
+			}
+			if (!loopsArePlanar(loops, region)) {
+				stitchFailedBounds++;
+				DBG_PLANAR_NULL++;
 				return null;
 			}
 			return loops;
@@ -1180,6 +1246,28 @@ public final class StepBRepWrite {
 		* neighbouring face also names must survive on the outline, or that face has
 		* nothing to pair with there and the shell stops being manifold.
 		 */
+		/**
+		 * True when every point of the loops lies on the plane the region's own
+		 * triangles define. The plane is the area-weighted one {@code face} writes,
+		 * and the budget is the writer's plane tolerance: a face off its plane by
+		 * more than that is not the surface the mesh has.
+		 */
+		private boolean loopsArePlanar(List<List<Integer>> loops, List<Integer> region) {
+			Vector3d normal = regionNormal(region);
+			if (normal == null)
+				return false;
+			double[] centre = regionCentre(region);
+			for (List<Integer> loop : loops)
+				for (int vertex : loop) {
+					double[] p = point(vertex);
+					double offset = (p[0] - centre[0]) * normal.x + (p[1] - centre[1]) * normal.y
+							+ (p[2] - centre[2]) * normal.z;
+					if (Math.abs(offset) > planeTolerance)
+						return false;
+				}
+			return true;
+		}
+
 		private boolean carriesEveryVertex(List<Integer> region, List<List<Integer>> loops) {
 			Set<Integer> outside = new LinkedHashSet<>();
 			for (int[] edge : boundary(region)) {
@@ -1638,11 +1726,59 @@ public final class StepBRepWrite {
 			if (existing != null)
 				return existing;
 
-			long cartesian = emitter.add("CARTESIAN_POINT(''," + coords(point(vertex)) + ")");
+			// A point is written under the name the reader will give it. Two vertices
+			// closer than a reader's own merge scale are one point to that reader, so
+			// writing them as two entities leaves every edge that names one of them
+			// with nothing to pair on the face that names the other — the shell then
+			// reads as open even though the file's indices pair. The reader's scale is
+			// the yardstick because the file is for a reader.
+			int shared = sharedVertexName(vertex);
+			Long same = vertices.get(shared);
+			if (same != null) {
+				vertices.put(vertex, same);
+				return same;
+			}
+			long cartesian = emitter.add("CARTESIAN_POINT(''," + coords(point(shared)) + ")");
 			long id = emitter.add("VERTEX_POINT('',#" + cartesian + ")");
+			vertices.put(shared, id);
 			vertices.put(vertex, id);
 			return id;
 		}
+
+		/** The lowest index of the vertices a reader's tolerance makes one point. */
+		private int sharedVertexName(int vertex) {
+			if (readerNames == null) {
+				int count = points.length / 3;
+				int[] name = new int[count];
+				for (int v = 0; v < count; v++)
+					name[v] = v;
+				Map<Long, List<Integer>> byCell = new HashMap<>();
+				for (int v = 0; v < count; v++) {
+					double[] p = point(v);
+					long cx = Math.round(p[0] / readerTolerance);
+					long cy = Math.round(p[1] / readerTolerance);
+					long cz = Math.round(p[2] / readerTolerance);
+					int lowest = v;
+					for (int dx = -1; dx <= 1; dx++)
+						for (int dy = -1; dy <= 1; dy++)
+							for (int dz = -1; dz <= 1; dz++) {
+								List<Integer> cell = byCell.get(cell(cx + dx, cy + dy, cz + dz));
+								if (cell == null)
+									continue;
+								for (int other : cell)
+									if (distance(p, point(other)) <= readerTolerance)
+										lowest = Math.min(lowest, name[other]);
+							}
+					name[v] = lowest;
+					byCell.computeIfAbsent(cell(cx, cy, cz), unused -> new ArrayList<>()).add(v);
+				}
+				readerNames = name;
+			}
+			return readerNames[vertex];
+		}
+
+		/** Each vertex to the name the reader will give its point. */
+		private int[] readerNames;
 
 		private long line(StepEmitter emitter, double[] a, double[] b) {
 			double dx = b[0] - a[0];
