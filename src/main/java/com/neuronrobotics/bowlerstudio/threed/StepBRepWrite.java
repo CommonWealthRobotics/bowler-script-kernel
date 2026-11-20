@@ -80,6 +80,24 @@ public final class StepBRepWrite {
 		return List.of(placement, body);
 	}
 
+    /**
+     * Condition BSP boundary partitions once for both AP242 representations and
+     * body decomposition. Already conforming meshes retain their exact arrays.
+     * The caller's CSG is never changed.
+     */
+    static CSG conformPartitions(CSG source) {
+        if (source.getVertices() == null || source.getTriangles() == null)
+            return source;
+        Mesh mesh = new Mesh(source.getVertices(), source.getTriangles(), false);
+        if (mesh.conformedTriangles == 0)
+            return source;
+        long[] indices = new long[mesh.triangles.size() * 3];
+        for (int i = 0; i < mesh.triangles.size(); i++)
+            for (int j = 0; j < 3; j++)
+                indices[i * 3 + j] = mesh.triangles.get(i)[j];
+        return new CSG(mesh.points, indices, source.getColor()).historySync(source);
+    }
+
 	/** A solid or surface model over the mesh, or 0 when the mesh has no faces. */
 	static long solid(StepEmitter emitter, CSG csg, String name) {
 		double[] vertices = csg.getVertices();
@@ -149,7 +167,7 @@ public final class StepBRepWrite {
 		return unpairedEdges(faces) == 0 && !faces.isEmpty();
 	}
 
-	/** How many directed edges of the written loops lack their opposite. */
+	/** Directed boundary uses that fail the ordinary one-forward/one-reverse contract. */
 	private static int unpairedEdges(List<List<List<Integer>>> faces) {
 		Map<Long, Integer> directions = new HashMap<>();
 		for (List<List<Integer>> loops : faces)
@@ -166,12 +184,12 @@ public final class StepBRepWrite {
 			// a degenerate edge, running from a point to itself, is its own opposite
 			if (from == to)
 				continue;
-			// An edge can also carry more than one pairing when two sheets of the part
-			// meet along it: as many walks one way as the other, each pair closing. That
-			// closes the surface too, so only an imbalance marks the shell open.
+            // A MANIFOLD_SOLID_BREP needs exactly two incident faces. Balanced
+            // multiplicity (for example 2:2) is still a nonmanifold edge and
+            // must not be labeled as one closed solid.
 			int forward = entry.getValue();
 			int backward = directions.getOrDefault(directed(to, from), 0);
-			if (forward != backward)
+			if (forward != 1 || backward != 1)
 				unpaired++;
 		}
 		return unpaired;
@@ -207,7 +225,7 @@ public final class StepBRepWrite {
 
 	/** The mesh, grouped into coplanar faces and sharing vertices and edges. */
 	private static final class Mesh {
-		private final double[] points;
+		private double[] points;
 		private final List<int[]> triangles = new ArrayList<>();
 		private final List<List<Integer>> faces = new ArrayList<>();
 		/** Undirected edge to the triangles that use it, for growing a face. */
@@ -223,24 +241,20 @@ public final class StepBRepWrite {
 		/** How many references named a point another index already named. */
 		private int duplicateReferences;
 
-		/**
-		 * The scale at which a STEP reader merges two points into one, as a fraction
-		 * of the model's extent. It is the yardstick the file is written to: two
-		 * entities closer than this are one point to the reader that sews them.
-		 */
-		private static final double READER_TOLERANCE = 1e-6;
-
-		private final double readerTolerance;
 
 		private final double planeTolerance;
 		/** A mesh vertex to the vertex that represents it. */
 		/** Triangles the source had and this mesh could not keep, for diagnostics. */
 		private int droppedCollapsed;
+        private int conformedTriangles;
 
 		private Mesh(double[] points, long[] sourceTriangles) {
+            this(points, sourceTriangles, true);
+        }
+
+        private Mesh(double[] points, long[] sourceTriangles, boolean groupFaces) {
 			this.points = points;
 			this.planeTolerance = PLANE_TOLERANCE * diagonal(points);
-			this.readerTolerance = READER_TOLERANCE * diagonal(points);
 			Log.debug("StepBRepWrite: mesh of " + (points.length / 3) + " vertices, "
 					+ (sourceTriangles == null ? 0 : sourceTriangles.length / 3) + " triangles, plane tolerance "
 					+ planeTolerance);
@@ -250,8 +264,10 @@ public final class StepBRepWrite {
 			TickToc.tic("index");
 			index();
 			indexVertices();
+			conformBoundaryPartitions();
 			TickToc.tic("group");
-			group();
+            if (groupFaces)
+                group();
 			Log.debug("StepBRepWrite: grouped into " + faces.size() + " faces");
 		}
 
@@ -410,6 +426,10 @@ public final class StepBRepWrite {
 		 * hash cells the segment's box covers, so only nearby points are measured.
 		 */
 		private List<Integer> onSegment(int a, int b) {
+            return onSegment(a, b, planeTolerance, false);
+        }
+
+        private List<Integer> onSegment(int a, int b, double lineTolerance, boolean neighbours) {
 			double[] pa = point(a);
 			double[] pb = point(b);
 			double dx = pb[0] - pa[0], dy = pb[1] - pa[1], dz = pb[2] - pa[2];
@@ -431,7 +451,7 @@ public final class StepBRepWrite {
 				// a junction lies on the line, so its own cell catches it; the ring
 				// only matters at the two ends, where rounding can push the point
 				// one cell over
-				int ring = step == 0 || step == steps ? 1 : 0;
+				int ring = neighbours || step == 0 || step == steps ? 1 : 0;
 				for (long ox = -ring; ox <= ring; ox++)
 					for (long oy = -ring; oy <= ring; oy++)
 						for (long oz = -ring; oz <= ring; oz++) {
@@ -449,7 +469,7 @@ public final class StepBRepWrite {
 								double qx = pa[0] + u * dx, qy = pa[1] + u * dy, qz = pa[2] + u * dz;
 								double off = Math.sqrt((q[0] - qx) * (q[0] - qx) + (q[1] - qy) * (q[1] - qy)
 										+ (q[2] - qz) * (q[2] - qz));
-								if (off <= planeTolerance)
+								if (off <= lineTolerance && canonical[vertex] == vertex)
 									on.add(vertex);
 							}
 						}
@@ -463,10 +483,118 @@ public final class StepBRepWrite {
 			return on;
 		}
 
+        /** Roundoff of the local arithmetic, independent of unrelated model extent. */
+        private double coordinateRoundoff(int... vertices) {
+            double scale = 1;
+            for (int vertex : vertices)
+                for (double coordinate : point(vertex))
+                    scale = Math.max(scale, Math.abs(coordinate));
+            return 32 * Math.ulp(scale);
+        }
+
+        /**
+         * BSP clipping partitions each polygon independently. Consequently a closed
+         * surface can contain A--B opposite B--M--A: geometrically covered, but not
+         * an indexed manifold. STEP requires the same atomic EDGE_CURVEs on both
+         * sides. Conform only existing one-use edges before grouping faces.
+         *
+         * No points are welded or moved and no boundary is capped. Existing points
+         * must lie on an edge to floating-point roundoff (not the model's plane or
+         * snap tolerance). A centre fan retains every boundary segment, including
+         * collinear chains which a corner fan would discard as zero-area triangles.
+         */
+        private void conformBoundaryPartitions() {
+            if (byEdge.values().stream().noneMatch(uses -> uses.size() == 1))
+                return;
+            Set<Integer> boundaryVertices = new HashSet<>();
+            for (Map.Entry<Long, List<Integer>> edge : byEdge.entrySet())
+                if (edge.getValue().size() == 1) {
+                    boundaryVertices.add((int) (edge.getKey() >> 32));
+                    boundaryVertices.add((int) (long) edge.getKey());
+                }
+            Map<Long, List<Integer>> partitions = new HashMap<>();
+            for (Map.Entry<Long, List<Integer>> edge : byEdge.entrySet()) {
+                if (edge.getValue().size() != 1)
+                    continue;
+                int a = (int) (edge.getKey() >> 32), b = (int) (long) edge.getKey();
+                List<Integer> middle = new ArrayList<>(onSegment(a, b, coordinateRoundoff(a, b), true));
+                middle.removeIf(vertex -> !boundaryVertices.contains(vertex));
+                if (!middle.isEmpty())
+                    partitions.put(edge.getKey(), middle);
+            }
+            if (partitions.isEmpty())
+                return;
+            List<int[]> conformed = new ArrayList<>();
+            List<double[]> centres = new ArrayList<>();
+            int originalCount = points.length / 3;
+            for (int[] triangle : triangles) {
+                List<Integer> boundary = new ArrayList<>();
+                boolean split = false;
+                for (int i = 0; i < 3; i++) {
+                    int a = triangle[i], b = triangle[(i + 1) % 3];
+                    boundary.add(a);
+                    List<Integer> middle = partitions.get(key(a, b));
+                    if (middle == null)
+                        continue;
+                    split = true;
+                    if (a < b)
+                        boundary.addAll(middle);
+                    else
+                        for (int j = middle.size() - 1; j >= 0; j--)
+                            boundary.add(middle.get(j));
+                }
+                if (!split) {
+                    conformed.add(triangle);
+                    continue;
+                }
+                double[] a = point(triangle[0]), b = point(triangle[1]), c = point(triangle[2]);
+                double[] centre = new double[3];
+                for (int i = 0; i < 3; i++)
+                    centre[i] = a[i] + (b[i] - a[i]) / 3 + (c[i] - a[i]) / 3;
+                // Refuse an unrepresentable/degenerate fan rather than dropping or
+                // reversing any surface. Keep the original open mesh in that case.
+                double[] normal = triangleCross(a, b, c);
+                double sourceArea = triangleArea(a, b, c), fanArea = 0;
+                boolean safe = sourceArea > 0 && Double.isFinite(sourceArea);
+                for (int i = 0; i < boundary.size(); i++) {
+                    double[] from = point(boundary.get(i)), to = point(boundary.get((i + 1) % boundary.size()));
+                    double[] fanNormal = triangleCross(from, to, centre);
+                    safe &= normal[0] * fanNormal[0] + normal[1] * fanNormal[1] + normal[2] * fanNormal[2] > 0;
+                    fanArea += triangleArea(from, to, centre);
+                }
+                double perimeter = distance(a, b) + distance(b, c) + distance(c, a);
+                double roundoff = coordinateRoundoff(triangle);
+                safe &= Math.abs(fanArea - sourceArea) <= roundoff * perimeter + 32 * Math.ulp(sourceArea);
+                if (!safe) {
+                    conformed.add(triangle);
+                    continue;
+                }
+                int vertex = originalCount + centres.size();
+                centres.add(centre);
+                for (int i = 0; i < boundary.size(); i++)
+                    conformed.add(new int[]{boundary.get(i), boundary.get((i + 1) % boundary.size()), vertex});
+            }
+            conformedTriangles = centres.size();
+            points = java.util.Arrays.copyOf(points, points.length + centres.size() * 3);
+            for (int i = 0; i < centres.size(); i++)
+                System.arraycopy(centres.get(i), 0, points, (originalCount + i) * 3, 3);
+            canonical = java.util.Arrays.copyOf(canonical, points.length / 3);
+            for (int i = originalCount; i < canonical.length; i++)
+                canonical[i] = i;
+            triangles.clear();
+            triangles.addAll(conformed);
+            byEdge.clear();
+            byCell.clear();
+            index();
+            indexVertices();
+            Log.debug("StepBRepWrite: conformed " + centres.size() + " triangle boundaries across "
+                    + partitions.size() + " partitioned edges");
+        }
+
 		/**
-		 * Takes the source triangles exactly as the CSG object holds them. The mesh's
-		 * own cleanup is Manifold simplify's work, done on the CSG before this writer
-		 * sees it; the writer neither welds vertices nor moves nor drops triangles.
+		 * Takes the source triangles exactly as the CSG object holds them. Geometrically covered BSP boundary
+         * partitions are conformed separately before grouping; this never moves
+         * source vertices or caps an uncovered boundary.
 		 *
 		 * <p>
 		 * A triangle naming one vertex twice has no edge to pair and no area to face,
@@ -544,6 +672,12 @@ public final class StepBRepWrite {
 			return areaOf(some);
 		}
 
+
+        private static double[] triangleCross(double[] a, double[] b, double[] c) {
+            double ux=b[0]-a[0], uy=b[1]-a[1], uz=b[2]-a[2];
+            double vx=c[0]-a[0], vy=c[1]-a[1], vz=c[2]-a[2];
+            return new double[]{uy*vz-uz*vy, uz*vx-ux*vz, ux*vy-uy*vx};
+        }
 
 		/** The area of one triangle given by three points. */
 		private static double triangleArea(double[] a, double[] b, double[] c) {
@@ -749,7 +883,9 @@ public final class StepBRepWrite {
 			Vector3d candidate = normal(triangle);
 			if (candidate == null || candidate.dot(plane) <= 0)
 				return false;
-			return coplanar(triangle, origin, plane);
+			// A fused face is emitted on one analytic plane. Use the reader's
+			// plane resolution here, rather than the model-scale junction tolerance.
+			return coplanar(triangle, origin, plane, PLANE_RESOLUTION);
 		}
 
 		/**
@@ -1103,8 +1239,13 @@ public final class StepBRepWrite {
 					settled.add(planned);
 					continue;
 				}
-				for (int index : planned.region)
-					settled.add(new Planned(List.of(index), null));
+				for (List<Integer> loop : planned.loops)
+                    for (int i = 0; i < loop.size(); i++)
+                        rest.merge(directed(loop.get(i), loop.get((i + 1) % loop.size())), -1, Integer::sum);
+                for (int index : planned.region) {
+                    settled.add(new Planned(List.of(index), null));
+                    countEdges(triangleLoop(index), rest);
+                }
 				split++;
 			}
 			if (split > 0)
@@ -1135,17 +1276,19 @@ public final class StepBRepWrite {
 
 			Set<Long> touched = new LinkedHashSet<>(loops.keySet());
 			touched.addAll(triangles.keySet());
+            for (long edge : new ArrayList<>(touched))
+                touched.add(directed((int) edge, (int) (edge >> 32)));
 			int before = 0;
 			int after = 0;
 			for (long edge : touched) {
 				long reverse = directed((int) (edge & 0xffffffffL), (int) (edge >> 32));
-				int loopsForward = rest.getOrDefault(edge, 0) + loops.getOrDefault(edge, 0);
-				int loopsBackward = rest.getOrDefault(reverse, 0) + loops.getOrDefault(reverse, 0);
-				int trianglesForward = rest.getOrDefault(edge, 0) + triangles.getOrDefault(edge, 0);
-				int trianglesBackward = rest.getOrDefault(reverse, 0) + triangles.getOrDefault(reverse, 0);
-				if (loopsForward != loopsBackward)
+				int loopsForward = rest.getOrDefault(edge, 0);
+				int loopsBackward = rest.getOrDefault(reverse, 0);
+				int trianglesForward = loopsForward - loops.getOrDefault(edge, 0) + triangles.getOrDefault(edge, 0);
+				int trianglesBackward = loopsBackward - loops.getOrDefault(reverse, 0) + triangles.getOrDefault(reverse, 0);
+				if (loopsForward > 0 && (loopsForward != 1 || loopsBackward != 1))
 					before++;
-				if (trianglesForward != trianglesBackward)
+				if (trianglesForward > 0 && (trianglesForward != 1 || trianglesBackward != 1))
 					after++;
 			}
 			return after < before;
@@ -1173,6 +1316,20 @@ public final class StepBRepWrite {
 		 * mesh goes out as the exact plan left it.
 		 */
 		private Mesh settledMesh() {
+            // Apply the existing model-scale identification to triangle indices
+            // before grouping, not just to VERTEX_POINT names during emission.
+            // Accept a correction only when it preserves closed indexed topology,
+            // the export bounds budget and the same source-area budget as verifiedPlan.
+            if (!Boolean.getBoolean("step.snap.disabled") && isEdgeManifold()) {
+                Mesh coherent = snappedMesh();
+                if (coherent != null && coherent.isEdgeManifold()
+                        && sameBounds(coherent, STEPFile.BREP_BOUNDS_BUDGET_MM)
+                        && Math.abs(surfaceArea(triangles) - coherent.surfaceArea(coherent.triangles))
+                            <= Math.max(1e-9, surfaceArea(triangles) * 1e-6)) {
+                    Log.debug("StepBRepWrite: using coherent model-scale mesh before face construction");
+                    return coherent;
+                }
+            }
 			List<Planned> plan = plan();
 			int fellBack = 0;
 			for (Planned planned : plan)
@@ -1218,6 +1375,28 @@ public final class StepBRepWrite {
 		 * triangle naming one index twice after the snap has no edge to pair and is
 		 * dropped, exactly as {@link #prepare} drops one from the source.
 		 */
+        private double[] usedBounds() {
+            double[] result = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
+                    Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
+            for (int[] triangle : triangles)
+                for (int vertex : triangle) {
+                    double[] p = point(vertex);
+                    for (int axis = 0; axis < 3; axis++) {
+                        result[axis] = Math.min(result[axis], p[axis]);
+                        result[axis + 3] = Math.max(result[axis + 3], p[axis]);
+                    }
+                }
+            return result;
+        }
+
+        private boolean sameBounds(Mesh other, double budget) {
+            double[] a = usedBounds(), b = other.usedBounds();
+            for (int i = 0; i < 6; i++)
+                if (!Double.isFinite(a[i]) || !Double.isFinite(b[i]) || Math.abs(a[i] - b[i]) > budget)
+                    return false;
+            return true;
+        }
+
 		private Mesh snappedMesh() {
 			int vertexCount = points.length / 3;
 			if (vertexCount == 0)
@@ -1914,59 +2093,14 @@ public final class StepBRepWrite {
 			if (existing != null)
 				return existing;
 
-			// A point is written under the name the reader will give it. Two vertices
-			// closer than a reader's own merge scale are one point to that reader, so
-			// writing them as two entities leaves every edge that names one of them
-			// with nothing to pair on the face that names the other — the shell then
-			// reads as open even though the file's indices pair. The reader's scale is
-			// the yardstick because the file is for a reader.
-			int shared = sharedVertexName(vertex);
-			Long same = vertices.get(shared);
-			if (same != null) {
-				vertices.put(vertex, same);
-				return same;
-			}
-			long cartesian = emitter.add("CARTESIAN_POINT(''," + coords(point(shared)) + ")");
+			// Exact coincident points were canonicalized before grouping. Keep every
+			// remaining vertex distinct: renaming nearby endpoints here would change
+			// the topology while their LINE geometry still uses the original points.
+			long cartesian = emitter.add("CARTESIAN_POINT(''," + coords(point(vertex)) + ")");
 			long id = emitter.add("VERTEX_POINT('',#" + cartesian + ")");
-			vertices.put(shared, id);
 			vertices.put(vertex, id);
 			return id;
 		}
-
-		/** The lowest index of the vertices a reader's tolerance makes one point. */
-		private int sharedVertexName(int vertex) {
-			if (readerNames == null) {
-				int count = points.length / 3;
-				int[] name = new int[count];
-				for (int v = 0; v < count; v++)
-					name[v] = v;
-				Map<Long, List<Integer>> byCell = new HashMap<>();
-				for (int v = 0; v < count; v++) {
-					double[] p = point(v);
-					long cx = Math.round(p[0] / readerTolerance);
-					long cy = Math.round(p[1] / readerTolerance);
-					long cz = Math.round(p[2] / readerTolerance);
-					int lowest = v;
-					for (int dx = -1; dx <= 1; dx++)
-						for (int dy = -1; dy <= 1; dy++)
-							for (int dz = -1; dz <= 1; dz++) {
-								List<Integer> cell = byCell.get(cell(cx + dx, cy + dy, cz + dz));
-								if (cell == null)
-									continue;
-								for (int other : cell)
-									if (distance(p, point(other)) <= readerTolerance)
-										lowest = Math.min(lowest, name[other]);
-							}
-					name[v] = lowest;
-					byCell.computeIfAbsent(cell(cx, cy, cz), unused -> new ArrayList<>()).add(v);
-				}
-				readerNames = name;
-			}
-			return readerNames[vertex];
-		}
-
-		/** Each vertex to the name the reader will give its point. */
-		private int[] readerNames;
 
 		private long line(StepEmitter emitter, double[] a, double[] b) {
 			double dx = b[0] - a[0];
@@ -1982,7 +2116,10 @@ public final class StepBRepWrite {
 			long origin = emitter.add("CARTESIAN_POINT(''," + coords(a) + ")");
 			long direction = emitter.add(
 					"DIRECTION('',(" + real(dx / length) + "," + real(dy / length) + "," + real(dz / length) + "))");
-			long vector = emitter.add("VECTOR('',#" + direction + "," + real(length) + ")");
+			// LINE is unbounded; EDGE_CURVE endpoints trim it. A unit vector
+			// preserves its geometry without a tiny parameter scale that a STEP
+			// reader may reject as a zero vector.
+			long vector = emitter.add("VECTOR('',#" + direction + ",1.)");
 			return emitter.add("LINE('',#" + origin + ",#" + vector + ")");
 		}
 

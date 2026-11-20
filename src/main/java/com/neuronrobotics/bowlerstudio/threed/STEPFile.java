@@ -89,6 +89,10 @@ public final class STEPFile {
 		for (CSG csg : csgs) {
 			if (csg == null)
 				throw new IllegalArgumentException("csgs must not contain null");
+            // BSP polygons may geometrically cover a boundary using different
+            // segment partitions. Both the BRep and retained tessellation need
+            // matching atomic edges, before decomposition or feature extraction.
+            csg = StepBRepWrite.conformPartitions(csg);
 			// the mesh is decomposed into its connected bodies first: each body
 			// becomes a part of its own, with its own MANIFOLD_SOLID_BREP in the
 			// file, rather than several bodies sharing one shell — which is what a
@@ -341,7 +345,7 @@ public final class STEPFile {
 		long representation = emitter.add("ADVANCED_BREP_SHAPE_REPRESENTATION(" + quote(part.name()) + ","
 				+ references(items) + ",#" + contexts.representation + ")");
 		emitter.add("SHAPE_DEFINITION_REPRESENTATION(#" + product.definitionShape + ",#" + representation + ")");
-		tessellation(emitter, part, contexts, representation);
+		tessellation(emitter, part, contexts, representation, items.get(items.size() - 1));
 		colour(emitter, part.csg, contexts.representation, items);
 	}
 
@@ -350,13 +354,14 @@ public final class STEPFile {
 	 * package reads the BRep; a reader that can use the tessellation reproduces
 	 * the source triangles exactly instead of re-triangulating the faces.
 	 */
-	private static void tessellation(StepEmitter emitter, Part part, Contexts contexts, long brep) {
-		long tessellated = StepTessellatedWrite.representation(emitter, part.csg, part.name(), contexts.representation);
+	private static void tessellation(StepEmitter emitter, Part part, Contexts contexts, long brep, long solid) {
+		long tessellated = StepTessellatedWrite.representation(emitter, part.csg, part.name(), contexts.representation, solid);
 		if (tessellated == 0)
 			return;
-		// plain relationship: the tessellation describes the same shape, at the same
-		// coordinates, so there is nothing to transform
-		emitter.add("SHAPE_REPRESENTATION_RELATIONSHIP(" + quote(part.name()) + "," + quote("tessellation of the BRep")
+		// The solid carries the explicit geometric link. Keep this as a general
+        // alternate-representation relation; a shape relation transfers a second
+        // instance of the same BRep in readers such as OCCT.
+		emitter.add("REPRESENTATION_RELATIONSHIP(" + quote(part.name()) + "," + quote("tessellation of the BRep")
 				+ ",#" + brep + ",#" + tessellated + ")");
 	}
 
@@ -391,7 +396,7 @@ public final class STEPFile {
 					+ references(representationItems) + ",#" + contexts.representation + ")");
 			emitter.add(
 					"SHAPE_DEFINITION_REPRESENTATION(#" + product.definitionShape + ",#" + representations[i] + ")");
-			tessellation(emitter, part, contexts, representations[i]);
+			tessellation(emitter, part, contexts, representations[i], items.get(items.size() - 1));
 			colour(emitter, part.csg, contexts.representation, geometry);
 		}
 

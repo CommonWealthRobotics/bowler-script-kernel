@@ -28,7 +28,7 @@ final class StepTessellatedWrite {
 	 * A {@code TESSELLATED_SHAPE_REPRESENTATION} over the mesh, or 0 when the mesh
 	 * has no triangles to describe.
 	 */
-	static long representation(StepEmitter emitter, CSG csg, String name, long context) {
+	static long representation(StepEmitter emitter, CSG csg, String name, long context, long solid) {
 		double[] vertices = csg.getVertices();
 		long[] triangles = csg.getTriangles();
 		if (vertices == null || triangles == null || triangles.length < 3 || vertices.length < 9)
@@ -38,11 +38,14 @@ final class StepTessellatedWrite {
 				+ " triangles for " + name);
 		TickToc.tic("write tessellation " + name);
 		long coordinates = coordinates(emitter, vertices);
-		// a triangulated surface set is a tessellated surface set with an index list
-		// per triangle, so its parameters are: name, coordinates, pnmax, normals,
-		// pnindex, triangles
-		long surface = emitter.add("TRIANGULATED_SURFACE_SET(" + quote(name) + ",#" + coordinates + ",$,$,$,"
-				+ triangles(triangles) + ")");
+		// Retain every mesh vertex and triangle. A solid link lets the reader
+        // attach this alternate representation to the existing BRep rather
+        // than importing an additional face with no analytic surface.
+		long surface = emitter.add("TRIANGULATED_FACE(" + quote(name) + ",#" + coordinates + ","
+                + (vertices.length / 3) + ",(),$,()," + triangles(triangles) + ")");
+        long tessellated = emitter.is(solid, "MANIFOLD_SOLID_BREP")
+                ? emitter.add("TESSELLATED_SOLID(" + quote(name) + ",(#" + surface + "),#" + solid + ")")
+                : surface;
 
 		// the placement keeps the representation's own frame at the origin, matching
 		// what the BRep representation does
@@ -51,7 +54,7 @@ final class StepTessellatedWrite {
 		long reference = emitter.add("DIRECTION('',(1.,0.,0.))");
 		long placement = emitter.add("AXIS2_PLACEMENT_3D('',#" + origin + ",#" + axis + ",#" + reference + ")");
 
-		return emitter.add("TESSELLATED_SHAPE_REPRESENTATION(" + quote(name) + ",(#" + placement + ",#" + surface
+		return emitter.add("TESSELLATED_SHAPE_REPRESENTATION(" + quote(name) + ",(#" + placement + ",#" + tessellated
 				+ "),#" + context + ")");
 	}
 
