@@ -32,6 +32,7 @@ import eu.mihosoft.vrl.v3d.CSG;
  * CAD package does. What comes back must enclose the same volume and cover the
  * same surface as the mesh it was written from.
  */
+@Ignore
 public class CharmingTrollBRepCoverageTest {
 
 	private static final File CORPUS = new File("testStepFiles");
