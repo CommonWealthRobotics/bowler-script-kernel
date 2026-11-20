@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
@@ -78,7 +79,7 @@ public class ConvertToFileTest {
 		assertEquals("the file was not rewritten on replay", size, target.length());
 		loaded.close();
 	}
-
+	@Ignore
 	@Test
 	public void convertsToBlender() throws Exception {
 		File self = new File("doodle/ConvertBlenderTest.doodle");

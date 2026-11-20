@@ -13,6 +13,7 @@ import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
 
 import eu.mihosoft.vrl.v3d.CSG;
+import eu.mihosoft.vrl.v3d.Plane;
 import eu.mihosoft.vrl.v3d.Vector3d;
 
 /**
@@ -608,14 +609,15 @@ public final class StepBRepWrite {
 				if (used[start])
 					continue;
 
-				Vector3d normal = normal(triangles.get(start));
-				// a triangle of no area has no plane of its own, so it becomes a face
-				// alone; the loops still bound it, so it keeps the shell closed
-				if (normal == null) {
-					used[start] = true;
-					faces.add(List.of(start));
+				// A triangle too thin to face anywhere cannot seed a face: the plane it
+				// would contribute is the noise of its own cross product, and every real
+				// coplanar neighbour around it is then rejected by the facing test. It
+				// waits for the pass after growth, which puts it in the face whose plane
+				// holds it. A triangle that collapses to a point or a line is the limit of
+				// this same case, and is thin by {@link #isThin}.
+				if (isThin(triangles.get(start)))
 					continue;
-				}
+				Vector3d normal = normal(triangles.get(start));
 				List<Integer> face = new ArrayList<>();
 				face.add(start);
 				used[start] = true;
@@ -638,10 +640,7 @@ public final class StepBRepWrite {
 						for (int index : byEdge.get(key(triangle[i], triangle[(i + 1) % 3]))) {
 							if (used[index])
 								continue;
-							Vector3d candidate = normal(triangles.get(index));
-							if (candidate == null || candidate.dot(plane) <= 0)
-								continue;
-							if (!coplanar(triangles.get(index), origin, plane))
+							if (!fitsPlane(triangles.get(index), origin, plane))
 								continue;
 							used[index] = true;
 							face.add(index);
@@ -670,10 +669,7 @@ public final class StepBRepWrite {
 							for (int index : byCorner(twin)) {
 								if (used[index])
 									continue;
-								Vector3d candidate = normal(triangles.get(index));
-								if (candidate == null || candidate.dot(normal) <= 0)
-									continue;
-								if (!coplanar(triangles.get(index), origin, normal))
+								if (!fitsPlane(triangles.get(index), origin, plane))
 									continue;
 								used[index] = true;
 								face.add(index);
@@ -683,6 +679,7 @@ public final class StepBRepWrite {
 				if (!face.isEmpty())
 					faces.add(face);
 			}
+			attachThin(used);
 		}
 
 		/** True when every vertex of the triangle lies in the face's plane. */
@@ -695,6 +692,170 @@ public final class StepBRepWrite {
 					return false;
 			}
 			return true;
+		}
+
+		/**
+		 * True when the triangle is too thin to say which way it faces: its height above
+		 * its longest edge is within the JCSG plane epsilon, the resolution the kernel
+		 * itself works to.
+		 *
+		 * <p>
+		 * A triangle's normal is the cross product of two of its edges. When its height
+		 * is within the epsilon, that cross product is at the scale of the rounding of
+		 * the coordinates that produced it, so its direction is noise. At a stitching
+		 * boundary a sliver is stored with all three of its points nearly collinear in
+		 * the face's plane and a tip a few ulps off it, and its normal then comes out
+		 * pointing across the plane — perpendicular to the face's normal — so the facing
+		 * test rejects it although every one of its points lies in the face. It
+		 * therefore neither seeds a face nor is judged by its own normal; see
+		 * {@link #fitsPlane} and {@link #attachThin}.
+		 */
+		private boolean isThin(int[] triangle) {
+			double[] a = point(triangle[0]);
+			double[] b = point(triangle[1]);
+			double[] c = point(triangle[2]);
+			double longest = Math.max(distance(a, b), Math.max(distance(b, c), distance(c, a)));
+			// a triangle collapsed to a point or a line has no longest edge to compare
+			// its height against, and is exactly as unable to face anywhere
+			if (longest == 0)
+				return true;
+			return 2 * triangleArea(a, b, c) / longest <= Plane.getEPSILON();
+		}
+
+		/**
+		 * True when the triangle may join a face being grown on the given plane.
+		 *
+		 * <p>
+		 * A triangle thick enough to have a real normal must face the same way as the
+		 * face and lie in its plane; that is the ordinary coplanarity test. A thin
+		 * triangle is held to the plane alone, and to the plane epsilon the kernel
+		 * works to: its normal can point anywhere, so the only question worth asking is
+		 * whether all three of its points are in the face's plane. Asking for its
+		 * normal instead is what left the sliver out of the face and fractured the
+		 * face around it.
+		 */
+		private boolean fitsPlane(int[] triangle, double[] origin, Vector3d plane) {
+			if (isThin(triangle))
+				return coplanar(triangle, origin, plane, Plane.getEPSILON());
+			Vector3d candidate = normal(triangle);
+			if (candidate == null || candidate.dot(plane) <= 0)
+				return false;
+			return coplanar(triangle, origin, plane);
+		}
+
+		/** True when every vertex of the triangle lies within the given distance of the plane. */
+		private boolean coplanar(int[] triangle, double[] origin, Vector3d normal, double budget) {
+			for (int vertex : triangle) {
+				double[] p = point(vertex);
+				double offset = (p[0] - origin[0]) * normal.x + (p[1] - origin[1]) * normal.y
+						+ (p[2] - origin[2]) * normal.z;
+				if (Math.abs(offset) > budget)
+					return false;
+			}
+			return true;
+		}
+
+		/**
+		 * Adds every triangle left over after growth to the face whose plane holds it.
+		 *
+		 * <p>
+		 * What is left is exactly the thin triangles, which growth skipped as seeds and
+		 * which {@link #fitsPlane} admits only by their points. They are the triangles
+		 * through which two sheets of the surface meet at a weld, and leaving them out
+		 * is what fractures a face: the sliver's edges are the ones the faces on either
+		 * side pair across, so a face that does not carry the sliver has a boundary
+		 * nothing matches.
+		 *
+		 * <p>
+		 * The plane decides, not the normal. A sliver joins a face when all three of its
+		 * points lie within the JCSG plane epsilon of the plane of one of that face's
+		 * own triangles across a shared edge. That triangle's plane is the surface the
+		 * sliver was cut from, so a sliver within the epsilon of it is on the face; the
+		 * face's area-weighted fit is not used here because it is an average over the
+		 * whole face and drifts away from the sliver's own corner, which would admit
+		 * slivers that a reader then refuses as off the face's plane.
+		 *
+		 * <p>
+		 * Among the faces that qualify the largest is chosen: a sliver between two huge
+		 * coplanar sheets belongs to the sheet, not to a lone neighbour. A sliver that
+		 * reaches no qualifying face keeps a face of its own, so that no triangle is
+		 * ever left without one.
+		 */
+		private void attachThin(boolean[] used) {
+			// the face each triangle already belongs to, so a sliver can be matched to
+			// the faces its neighbours are in without scanning every face of the mesh
+			Map<Integer, Integer> faceOf = new HashMap<>();
+			Map<Integer, Double> areas = new HashMap<>();
+			for (int f = 0; f < faces.size(); f++) {
+				double area = 0;
+				for (int index : faces.get(f)) {
+					faceOf.put(index, f);
+					int[] triangle = triangles.get(index);
+					area += triangleArea(point(triangle[0]), point(triangle[1]), point(triangle[2]));
+				}
+				areas.put(f, area);
+			}
+
+			int attached = 0;
+			int lonely = 0;
+			for (int index = 0; index < triangles.size(); index++) {
+				if (used[index])
+					continue;
+				used[index] = true;
+				int[] triangle = triangles.get(index);
+				int best = -1;
+				double bestArea = 0;
+				for (int host : hostsOf(triangle)) {
+					Integer face = faceOf.get(host);
+					if (face == null)
+						continue;
+					// the host's own plane, not the face's average: the sliver was cut
+					// from the surface this triangle lies in
+					int[] hostTriangle = triangles.get(host);
+					if (isThin(hostTriangle))
+						continue;
+					double[] origin = point(hostTriangle[0]);
+					Vector3d normal = normal(hostTriangle);
+					if (normal == null || !coplanar(triangle, origin, normal, Plane.getEPSILON()))
+						continue;
+					if (areas.get(face) > bestArea) {
+						bestArea = areas.get(face);
+						best = face;
+					}
+				}
+				if (best < 0) {
+					faces.add(new ArrayList<>(List.of(index)));
+					lonely++;
+					continue;
+				}
+				faces.get(best).add(index);
+				faceOf.put(index, best);
+				areas.merge(best, triangleArea(point(triangle[0]), point(triangle[1]), point(triangle[2])),
+						Double::sum);
+				attached++;
+			}
+			if (attached > 0 || lonely > 0)
+				Log.debug("StepBRepWrite: " + attached + " thin triangle(s) joined the face whose plane holds them, "
+						+ lonely + " kept a face of their own");
+		}
+
+		/**
+		 * The triangles a sliver can join a face through: those it shares an edge with
+		 * by index, and those naming a junction twin of one of its corners, which is
+		 * how a seam's own naming ties the two sheets across the weld.
+		 */
+		private List<Integer> hostsOf(int[] triangle) {
+			List<Integer> hosts = new ArrayList<>();
+			for (int i = 0; i < 3; i++)
+				for (int index : byEdge.get(key(triangle[i], triangle[(i + 1) % 3])))
+					if (!hosts.contains(index))
+						hosts.add(index);
+			for (int corner : triangle)
+				for (int twin : junctionLinks().getOrDefault(corner, List.of()))
+					for (int index : byCorner(twin))
+						if (!hosts.contains(index))
+							hosts.add(index);
+			return hosts;
 		}
 
 		// --- face and loop emission ---
@@ -772,7 +933,10 @@ public final class StepBRepWrite {
 		 * exactly, or the file describes a surface the mesh does not have.
 		 */
 		private boolean representsExactly(List<Integer> region, List<List<Integer>> loops) {
-			Vector3d normal = normal(triangles.get(region.get(0)));
+			// the region's own fitted normal, not its first triangle's: the first may
+			// be a sliver whose cross product points nowhere, and the area it is
+			// compared at is the region's, which the large triangles decide
+			Vector3d normal = regionNormal(region);
 			if (normal == null || loops.isEmpty())
 				return false;
 			double trianglesArea = 0;
@@ -1166,7 +1330,7 @@ public final class StepBRepWrite {
 		private int stitchFailedMisses;
 		private int stitchFailedBounds;
 		private int stitchFailedRepresents;
-	private int DBG_REGIONS, DBG_MULTI, DBG_EMPTY_LOOPS, DBG_EMPTY_LOOPS_MULTI, DBG_PLANAR_NULL;
+		private int DBG_REGIONS, DBG_MULTI, DBG_EMPTY_LOOPS, DBG_EMPTY_LOOPS_MULTI, DBG_PLANAR_NULL;
 
 
 		private List<List<Integer>> stitchable(List<Integer> region) {
@@ -1177,7 +1341,7 @@ public final class StepBRepWrite {
 				stitchFailedNoNormal++;
 				return null;
 			}
-			if (normal(triangles.get(region.get(0))) == null) {
+			if (regionNormal(region) == null) {
 				stitchFailedNoNormal++;
 				return null;
 			}
@@ -1564,9 +1728,9 @@ public final class StepBRepWrite {
 			return new LinkedHashSet<>(loop).size();
 		}
 
-		/** The boundary loops of a region, from its first triangle's normal. */
+		/** The boundary loops of a region, walked about its own fitted normal. */
 		private List<List<Integer>> loops(List<Integer> region) {
-			return loops(region, normal(triangles.get(region.get(0))));
+			return loops(region, regionNormal(region));
 		}
 
 		/**
