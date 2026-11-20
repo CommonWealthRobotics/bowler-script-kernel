@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -34,6 +35,16 @@ import eu.mihosoft.vrl.v3d.CSG;
  * region did not actually enclose it.
  */
 public class StepExportCoverageTest {
+
+	/**
+	 * The kernel the app exports through. Without it this class measured a
+	 * different mesh than the writer is given, and its pairing check failed on
+	 * geometry the real export never produces.
+	 */
+	@BeforeClass
+	public static void useTheKernel() {
+		CSG.setDefaultOptType(CSG.OptType.Manifold3d);
+	}
 
 	private static final double ANGLE = 35.0;
 	private static final double TOPOLOGY_TOLERANCE = 0.00001;

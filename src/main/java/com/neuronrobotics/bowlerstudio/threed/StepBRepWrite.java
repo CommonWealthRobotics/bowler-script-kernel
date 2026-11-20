@@ -602,93 +602,271 @@ public final class StepBRepWrite {
 			return junctionLinks;
 		}
 
-		/** Grows one face from every triangle, absorbing the coplanar neighbours. */
+		/**
+		 * Groups the triangles into faces: the connected sets of triangles that share
+		 * an edge and lie in one plane.
+		 *
+		 * <p>
+		 * The grouping is decided before any face is grown, from the mesh's own
+		 * adjacency, so the result cannot depend on which triangle happened to be
+		 * visited first. Two triangles that share an edge are one surface when each
+		 * lies in the other's plane: a relation that is symmetric by construction.
+		 * Growing a face greedily instead — asking only whether a candidate fits the
+		 * plane the face had reached so far — rejects a triangle whose own plane is a
+		 * hair off the seed's, which happens all along a tessellated seam, and each
+		 * rejection fractures the face there. The triangles that pass are those the
+		 * seam's own folding left nearly coplanar, so the fracture follows the seam
+		 * exactly: a face comes out in pieces rather than as one plane.
+		 *
+		 * <p>
+		 * A connected set is written as one face when one plane holds all of it. When
+		 * no plane does — two sheets of a fold meeting along an edge — it is cut by the
+		 * fixed-plane growth below, which cannot walk the plane because the plane it
+		 * tests against never changes while a piece grows.
+		 */
 		private void group() {
-			boolean[] used = new boolean[triangles.size()];
-			for (int start = 0; start < triangles.size(); start++) {
-				if (used[start])
-					continue;
+			int count = triangles.size();
 
-				// A triangle too thin to face anywhere cannot seed a face: the plane it
-				// would contribute is the noise of its own cross product, and every real
-				// coplanar neighbour around it is then rejected by the facing test. It
-				// waits for the pass after growth, which puts it in the face whose plane
-				// holds it. A triangle that collapses to a point or a line is the limit of
-				// this same case, and is thin by {@link #isThin}.
-				if (isThin(triangles.get(start)))
-					continue;
-				Vector3d normal = normal(triangles.get(start));
-				List<Integer> face = new ArrayList<>();
-				face.add(start);
-				used[start] = true;
+			// A triangle too thin to say which way it faces is placed after the faces
+			// are built, by the plane that holds it; see {@link #attachThin}. It can
+			// neither seed a face nor bridge one, because a chain of slivers defines no
+			// plane at all.
+			boolean[] thin = new boolean[count];
+			List<Integer> waiting = new ArrayList<>();
+			for (int index = 0; index < count; index++) {
+				thin[index] = isThin(triangles.get(index));
+				if (thin[index])
+					waiting.add(index);
+			}
 
-				// The face's plane is the plane its own triangles define, re-derived as
-				// the face grows. Measuring a candidate against the seed triangle alone
-				// lets its rounding accumulate along the face until the far end falls
-				// outside the tolerance and the face stops after a handful of triangles;
-				// measuring against the region's own fitted plane keeps every part of the
-				// face equally close to it, which is exactly what a reader's planarity
-				// test asks
-				double[] origin = point(triangles.get(start)[0]);
-				Vector3d plane = normal;
+			int[] parent = new int[count];
+			for (int vertex = 0; vertex < count; vertex++)
+				parent[vertex] = vertex;
+			for (int index = 0; index < count; index++) {
+				if (thin[index])
+					continue;
+				int[] triangle = triangles.get(index);
+				for (int i = 0; i < 3; i++)
+					for (int other : byEdge.get(key(triangle[i], triangle[(i + 1) % 3])))
+						if (other > index && !thin[other] && sameSurface(index, other))
+							link(parent, index, other);
+				// a seam welds the surface to itself: the same point is stored as two
+				// vertices within the junction tolerance, one naming each sheet's
+				// strip. The triangle through either naming is this surface's, so it
+				// joins the same set an edge-adjacent neighbour does.
+				for (int corner : triangle)
+					for (int twin : junctionLinks().getOrDefault(corner, List.of()))
+						for (int other : byCorner(twin))
+							if (other > index && !thin[other] && sameSurface(index, other))
+								link(parent, index, other);
+			}
+
+			Map<Integer, List<Integer>> connected = new LinkedHashMap<>();
+			for (int index = 0; index < count; index++)
+				if (!thin[index])
+					connected.computeIfAbsent(find(parent, index), unused -> new ArrayList<>()).add(index);
+
+			for (List<Integer> set : connected.values()) {
+				if (set.size() > 1 && planarSet(set)) {
+					faces.add(set);
+					continue;
+				}
+				// one triangle, or a set no single plane holds: cut it into pieces that
+				// do lie in a plane, each grown against a plane fixed at its seed
+				splitIntoPlanes(set);
+			}
+			mergeCoplanar();
+			attachThin(waiting);
+			// the slivers are placed after the merge, and placing one changes what the
+			// faces hold, so the merge is asked again: a sliver can be the only thing
+			// that made two faces look apart
+			mergeCoplanar();
+		}
+
+		/**
+		 * Joins every two adjacent faces one plane holds, until no pair is left.
+		 *
+		 * <p>
+		 * This is the invariant a face is for: all the coplanar triangles that touch
+		 * are one face. {@link #splitIntoPlanes} can still leave two pieces that one
+		 * plane holds, because a piece grows against the plane fixed at its own seed
+		 * and a later seed's plane is a hair different. Repeating the union until it
+		 * cannot continue makes the result independent of the order the seeds were
+		 * visited in, which is what stops a face coming out in a strip of pieces along
+		 * a seam.
+		 */
+		private void mergeCoplanar() {
+			boolean changed = true;
+			while (changed) {
+				changed = false;
+				Map<Integer, Integer> index = new HashMap<>();
+				for (int f = 0; f < faces.size(); f++)
+					for (int triangle : faces.get(f))
+						index.put(triangle, f);
+				// Every pair of faces whose triangles touch is a candidate: along a
+				// shared edge, or across a weld, where the mesh stores one point under
+				// two indices and the two sheets name it differently. The weld link is
+				// the same one the initial grouping follows; without it a face split at
+				// a seam is never offered its other half, because the two halves share
+				// no edge index at all.
+				Set<Long> seen = new LinkedHashSet<>();
+				List<int[]> candidates = new ArrayList<>();
+				for (List<Integer> owners : touchingTriangles().values())
+					for (int i = 0; i < owners.size(); i++)
+						for (int j = i + 1; j < owners.size(); j++) {
+							Integer first = index.get(owners.get(i));
+							Integer second = index.get(owners.get(j));
+							if (first == null || second == null || first.equals(second))
+								continue;
+							if (seen.add(key(Math.min(first, second), Math.max(first, second))))
+								candidates.add(new int[]{Math.min(first, second), Math.max(first, second)});
+						}
+				// the set being built per merge, so a candidate is judged against the
+				// fused triangles and not against the pair it started from
+				int[] parent = new int[faces.size()];
+				List<List<Integer>> members = new ArrayList<>(faces.size());
+				for (int f = 0; f < faces.size(); f++) {
+					parent[f] = f;
+					members.add(new ArrayList<>(faces.get(f)));
+				}
+				for (int[] candidate : candidates) {
+					int first = find(parent, candidate[0]);
+					int second = find(parent, candidate[1]);
+					if (first == second)
+						continue;
+					List<Integer> union = new ArrayList<>(members.get(first));
+					union.addAll(members.get(second));
+					if (!planarSet(union))
+						continue;
+					parent[second] = first;
+					members.set(first, union);
+					members.set(second, null);
+					changed = true;
+				}
+				if (!changed)
+					return;
+				List<List<Integer>> merged = new ArrayList<>(faces.size());
+				for (List<Integer> set : members)
+					if (set != null)
+						merged.add(set);
+				faces.clear();
+				faces.addAll(merged);
+			}
+		}
+
+		/**
+		 * The triangles that touch each other, keyed by a surface point: those sharing
+		 * an edge, and those naming a junction twin of one of their corners across a
+		 * weld. This is the adjacency the faces are fused over, so a face that a weld
+		 * split in two is offered its other half.
+		 */
+		private Map<Long, List<Integer>> touchingTriangles() {
+			Map<Long, List<Integer>> touching = new HashMap<>();
+			for (Map.Entry<Long, List<Integer>> entry : byEdge.entrySet())
+				touching.put(entry.getKey(), entry.getValue());
+			// A weld's two names for one point are one key, so the triangles on either
+			// side of the seam land in one list. Keyed by the twin pair, which is what
+			// directed() makes: the undirected byEdge keys are a different numbering, so
+			// a twin pair can never collide with an edge and hide it.
+			for (Map.Entry<Integer, List<Integer>> entry : junctionLinks().entrySet()) {
+				int corner = entry.getKey();
+				for (int twin : entry.getValue())
+					if (corner < twin) {
+						List<Integer> together = new ArrayList<>(byCorner(corner));
+						together.addAll(byCorner(twin));
+						touching.put(directed(corner, twin), together);
+					}
+			}
+			return touching;
+		}
+
+		/**
+		 * True when each of the two triangles lies in the other's plane.
+		 *
+		 * <p>
+		 * The test is deliberately symmetric: a triangle accepted by a face's plane
+		 * while its own plane tilts the other way is the first step of a face that
+		 * creeps off its plane. Two thick triangles must also face the same way, since
+		 * opposite-facing sheets are a fold through the surface, not one surface. A
+		 * triangle too thin to have a normal is not asked: {@link #isThin} already
+		 * excluded those, and they join by the plane alone in {@link #attachThin}.
+		 */
+		private boolean sameSurface(int a, int b) {
+			int[] first = triangles.get(a);
+			int[] second = triangles.get(b);
+			Vector3d firstNormal = normal(first);
+			Vector3d secondNormal = normal(second);
+			if (firstNormal == null || secondNormal == null)
+				return false;
+			if (firstNormal.dot(secondNormal) <= 0)
+				return false;
+			return coplanar(second, point(first[0]), firstNormal) && coplanar(first, point(second[0]), secondNormal);
+		}
+
+		/** True when one plane holds every triangle of the set. */
+		private boolean planarSet(List<Integer> set) {
+			Vector3d normal = regionNormal(set);
+			if (normal == null)
+				return false;
+			return holdsEvery(set, normal, regionCentre(set));
+		}
+
+		/** Joins two triangles into one connected set of the mesh. */
+		private static void link(int[] parent, int a, int b) {
+			int first = find(parent, a);
+			int second = find(parent, b);
+			if (first != second)
+				parent[first] = second;
+		}
+
+		/**
+		 * Cuts a set of triangles that no one plane holds into the pieces that do.
+		 *
+		 * <p>
+		 * Each piece grows from its largest triangle with the plane fixed there, so the
+		 * result does not depend on the order the mesh stores its triangles in: the
+		 * largest is unique in practice, and the triangle index breaks a tie. A fixed
+		 * plane is what keeps a piece a plane — refitting as the piece grows lets the
+		 * plane walk across a curved surface, and the piece then spans millimetres no
+		 * reader accepts as one plane.
+		 */
+		private void splitIntoPlanes(List<Integer> set) {
+			List<Integer> seeds = new ArrayList<>(set);
+			seeds.sort((x, y) -> {
+				int byArea = Double.compare(areaOf(List.of(triangles.get(y))), areaOf(List.of(triangles.get(x))));
+				return byArea != 0 ? byArea : Integer.compare(x, y);
+			});
+			Set<Integer> available = new LinkedHashSet<>(set);
+			for (int seed : seeds) {
+				if (!available.remove(seed))
+					continue;
+				Vector3d plane = normal(triangles.get(seed));
+				double[] origin = point(triangles.get(seed)[0]);
+				List<Integer> piece = new ArrayList<>();
+				piece.add(seed);
 				List<Integer> frontier = new ArrayList<>();
-				frontier.add(start);
+				frontier.add(seed);
 				while (!frontier.isEmpty()) {
 					int current = frontier.remove(frontier.size() - 1);
 					int[] triangle = triangles.get(current);
 					for (int i = 0; i < 3; i++)
-						for (int index : byEdge.get(key(triangle[i], triangle[(i + 1) % 3]))) {
-							if (used[index])
+						for (int other : byEdge.get(key(triangle[i], triangle[(i + 1) % 3]))) {
+							if (!available.contains(other))
 								continue;
-							if (!fitsPlane(triangles.get(index), origin, plane))
+							if (!fitsPlane(triangles.get(other), origin, plane))
 								continue;
-							face.add(index);
-							// The refit must not move the plane out from under the triangles
-							// already admitted. Adopting a new fit unconditionally lets the
-							// plane walk: each triangle is judged against the plane as it was
-							// when that triangle arrived, so a face grown across a curved
-							// surface ends up spanning millimetres — a region no reader will
-							// accept as a plane, which shatters it into one face per triangle
-							Vector3d fitted = regionNormal(face);
-							double[] centre = fitted == null ? null : regionCentre(face);
-							boolean keepsPlane = fitted == null || holdsEvery(face, fitted, centre);
-							if (!keepsPlane) {
-								// this triangle cannot join without bending the face off its
-								// plane; it is left for another face, or for its own
-								face.remove(face.size() - 1);
-								continue;
-							}
-							used[index] = true;
-							frontier.add(index);
-							if (fitted.dot(plane) < 1 - 1e-9) {
-								plane = fitted;
-								origin = centre;
-							}
+							available.remove(other);
+							piece.add(other);
+							frontier.add(other);
 						}
-					// a seam welds this face's surface to itself: the same point is
-					// stored as two vertices within the junction tolerance, one naming
-					// each sheet's strip. The thin tile through either naming is this
-					// face's triangle — splitting at the weld leaves the tile's
-					// outline unable to pair with the sheet on either side of it.
-					// A triangle joins here when it touches a junction twin of one of
-					// this face's corners, and lies in this face's plane facing the
-					// same way: the same test an edge-adjacent neighbour passes.
-					for (int corner : triangle)
-						for (int twin : junctionLinks().getOrDefault(corner, List.of()))
-							for (int index : byCorner(twin)) {
-								if (used[index])
-									continue;
-								if (!fitsPlane(triangles.get(index), origin, plane))
-									continue;
-								used[index] = true;
-								face.add(index);
-								frontier.add(index);
-							}
 				}
-				if (!face.isEmpty())
-					faces.add(face);
+				faces.add(piece);
 			}
-			attachThin(used);
+			// A triangle no piece's plane admits is a surface of its own: nothing else
+			// in the set lies in a plane with it, and leaving it out would lose its
+			// surface from the shell.
+			for (int index : available)
+				faces.add(new ArrayList<>(List.of(index)));
 		}
 
 		/** True when every vertex of the triangle lies in the face's plane. */
@@ -805,7 +983,7 @@ public final class StepBRepWrite {
 		 * reaches no qualifying face keeps a face of its own, so that no triangle is
 		 * ever left without one.
 		 */
-		private void attachThin(boolean[] used) {
+		private void attachThin(List<Integer> waiting) {
 			// the face each triangle already belongs to, so a sliver can be matched to
 			// the faces its neighbours are in without scanning every face of the mesh
 			Map<Integer, Integer> faceOf = new HashMap<>();
@@ -822,10 +1000,7 @@ public final class StepBRepWrite {
 
 			int attached = 0;
 			int lonely = 0;
-			for (int index = 0; index < triangles.size(); index++) {
-				if (used[index])
-					continue;
-				used[index] = true;
+			for (int index : waiting) {
 				int[] triangle = triangles.get(index);
 				int best = -1;
 				double bestArea = 0;
@@ -1574,7 +1749,7 @@ public final class StepBRepWrite {
 		}
 
 
-		/** The face as data: its plane and its boundary loops of points. */
+		/** The face as data: its plane, its boundary loops and every point it holds. */
 		private StepFace describe(List<Integer> region) {
 			Vector3d normal = regionNormal(region);
 			if (normal == null)
@@ -1586,7 +1761,26 @@ public final class StepBRepWrite {
 					loopPoints.add(point(vertex));
 				points.add(loopPoints);
 			}
-			return new StepFace(regionCentre(region), normal, points);
+			// every corner the face's triangles name, not only those its outline
+			// carries: a fused face's outline skips the interior vertices, and the
+			// face is a plane over those too
+			Set<Integer> corners = new LinkedHashSet<>();
+			Vector3d normalSum = new Vector3d(0, 0, 0);
+			double area = 0;
+			for (int index : region) {
+				int[] triangle = triangles.get(index);
+				for (int vertex : triangle)
+					corners.add(vertex);
+				double piece = triangleArea(point(triangle[0]), point(triangle[1]), point(triangle[2]));
+				area += piece;
+				Vector3d pieceNormal = normal(triangle);
+				if (pieceNormal != null)
+					normalSum = normalSum.plus(pieceNormal.times(piece));
+			}
+			List<double[]> interior = new ArrayList<>(corners.size());
+			for (int vertex : corners)
+				interior.add(point(vertex));
+			return new StepFace(regionCentre(region), normal, points, interior, normalSum, area, planeTolerance);
 		}
 
 		/** A single triangle as data, the shape written when a group cannot be. */

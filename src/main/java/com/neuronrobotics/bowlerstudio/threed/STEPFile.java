@@ -30,9 +30,17 @@ public final class STEPFile {
 	private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
 	/** Feature edge extraction defaults, for callers that do not choose their own. */
-	public static final double DEFAULT_ANGLE_DEGREES = 35.0;
+	public static final double DEFAULT_ANGLE_DEGREES = 2;
 	public static final double DEFAULT_TOPOLOGY_TOLERANCE = 0.00001;
 	public static final double DEFAULT_STITCH_TOLERANCE = 0.002;
+
+	/**
+	 * How far the model may bend across a face border before that border is a
+	 * feature of the model rather than a crack in a face; see
+	 * {@link StepFaceBorders}. The export's own feature-edge angle, so the edges a
+	 * reader draws and the faces this writer fuses agree.
+	 */
+	public static final double FACE_BORDER_ANGLE_DEGREES = StepFaceBorders.DEFAULT_ANGLE_DEGREES;
 	/**
 	 * The distance accuracy a file declares when its geometry is too small to
 	 * measure, and the floor below which it is never declared: a STEP reader's own
@@ -172,6 +180,25 @@ public final class STEPFile {
 		return parts.isEmpty() ? List.of() : StepBRepWrite.faces(parts.get(0).csg);
 	}
 
+	/**
+	 * The borders of the first part's faces that no feature edge carries and that
+	 * one plane holds: the faces the export fractured, where two pieces of one flat
+	 * surface were written as two faces. Empty is the correct answer; see
+	 * {@link StepFaceBorders}.
+	 */
+	public List<StepFaceBorders.Fracture> getFracturedBorders() {
+		if (parts.isEmpty())
+			return List.of();
+		return StepFaceBorders.fractures(parts.get(0).csg, FACE_BORDER_ANGLE_DEGREES);
+	}
+
+	/** See {@link #getFracturedBorders()}, at a chosen feature-edge angle. */
+	public List<StepFaceBorders.Fracture> getFracturedBorders(double angleDegrees) {
+		if (parts.isEmpty())
+			return List.of();
+		return StepFaceBorders.fractures(parts.get(0).csg, angleDegrees);
+	}
+
 	/** The CSGs to write, in order; empty after reading a STEP file. */
 	public List<CSG> getParts() {
 		List<CSG> csgs = new ArrayList<>();
@@ -290,13 +317,18 @@ public final class STEPFile {
 
 	/**
 	 * The mesh corrected for BRep export, through the Manifold kernel's own
-	 * operations; the mesh itself when the kernel is not the active engine. The
-	 * tolerance is the resolution a STEP reader works to, so nothing the correction
-	 * moves is surface a reader measures. See {@link ManifoldMeshCorrector}.
+	 * operations; the mesh itself when the kernel is not the active engine. See
+	 * {@link ManifoldMeshCorrector}.
+	 *
+	 * <p>
+	 * The collapse tolerance is not fixed: {@link ManifoldMeshCorrector#correct}
+	 * chooses the coarsest one that leaves the part's own shape, because a fixed
+	 * tolerance that is right for one mesh shaves another. The spike dissolve that
+	 * follows is held to the same budget, so it too cannot move the part.
 	 */
 	private static CSG simplifyForBRep(CSG csg) {
 		CSG corrected = ManifoldMeshCorrector.correct(csg, BREP_RESOLUTION_MM, BREP_BOUNDS_BUDGET_MM);
-		// the spikes that survive the simplify are thin fans standing off the
+		// the spikes that survive the collapse are thin fans standing off the
 		// surface, which a BRep reader builds as slivers; dissolve them, held to
 		// the same budget. Edges bent more than a right angle stay: a real corner
 		// of the part is not a spike.
@@ -308,12 +340,13 @@ public final class STEPFile {
 	public static final double BREP_SHARP_ANGLE_DEGREES = 119;
 
 	/**
-	 * The mesh's cleanup tolerance, in millimetres: the BRep export's own working
-	 * resolution. Manifold's simplify collapses the edges and merges the coplanar
-	 * facets shorter than this, which are exactly the geometry no BRep kernel can
-	 * carry, and it moves no surface further.
+	 * The coarsest collapse tolerance the BRep export will use, in millimetres. It is
+	 * a ceiling, not a setting: {@link ManifoldMeshCorrector#correct} starts here and
+	 * halves until the result keeps the part's shape and leaves no edge shorter than
+	 * a reader can sew. A coarse collapse writes fewer, larger faces, which is why it
+	 * is preferred when it is safe.
 	 */
-	public static final double BREP_RESOLUTION_MM = 0.05;
+	public static final double BREP_RESOLUTION_MM = ManifoldMeshCorrector.COARSEST_COLLAPSE_MM;
 
 	/**
 	 * How far the BRep-facing correction may move the mesh's bounds, in
