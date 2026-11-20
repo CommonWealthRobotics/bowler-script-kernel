@@ -642,18 +642,27 @@ public final class StepBRepWrite {
 								continue;
 							if (!fitsPlane(triangles.get(index), origin, plane))
 								continue;
-							used[index] = true;
 							face.add(index);
-							frontier.add(index);
-							// refit the plane as the face grows. The fit is a running sum
-							// over small triangles, so it is re-derived from the region
-							// only when the plane has moved enough to matter — which is
-							// rare, because adding one triangle to a face moves its fitted
-							// plane by a fraction of that triangle's own share
+							// The refit must not move the plane out from under the triangles
+							// already admitted. Adopting a new fit unconditionally lets the
+							// plane walk: each triangle is judged against the plane as it was
+							// when that triangle arrived, so a face grown across a curved
+							// surface ends up spanning millimetres — a region no reader will
+							// accept as a plane, which shatters it into one face per triangle
 							Vector3d fitted = regionNormal(face);
-							if (fitted != null && fitted.dot(plane) < 1 - 1e-9) {
+							double[] centre = fitted == null ? null : regionCentre(face);
+							boolean keepsPlane = fitted == null || holdsEvery(face, fitted, centre);
+							if (!keepsPlane) {
+								// this triangle cannot join without bending the face off its
+								// plane; it is left for another face, or for its own
+								face.remove(face.size() - 1);
+								continue;
+							}
+							used[index] = true;
+							frontier.add(index);
+							if (fitted.dot(plane) < 1 - 1e-9) {
 								plane = fitted;
-								origin = regionCentre(face);
+								origin = centre;
 							}
 						}
 					// a seam welds this face's surface to itself: the same point is
@@ -741,6 +750,21 @@ public final class StepBRepWrite {
 			if (candidate == null || candidate.dot(plane) <= 0)
 				return false;
 			return coplanar(triangle, origin, plane);
+		}
+
+		/**
+		 * True when every triangle of the face lies in the given plane, within the
+		 * writer's plane tolerance. This is the invariant that makes a face a plane: a
+		 * refitted plane is adopted only when the triangles already admitted still lie
+		 * in it, so growth cannot ratchet the face across a curved surface.
+		 */
+		private boolean holdsEvery(List<Integer> face, Vector3d normal, double[] centre) {
+			if (centre == null)
+				return false;
+			for (int index : face)
+				if (!coplanar(triangles.get(index), centre, normal))
+					return false;
+			return true;
 		}
 
 		/** True when every vertex of the triangle lies within the given distance of the plane. */
