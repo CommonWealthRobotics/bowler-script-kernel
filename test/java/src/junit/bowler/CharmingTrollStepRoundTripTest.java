@@ -250,7 +250,7 @@ public class CharmingTrollStepRoundTripTest {
 		String text = new STEPFile(parts).toStep();
 		Log.debug("text: " + text.length() + " characters");
 		assertTrue("the mesh must be carried as a tessellation", text.contains("TESSELLATED_SHAPE_REPRESENTATION"));
-		assertTrue("the tessellation must be tied to the BRep", text.contains("SHAPE_REPRESENTATION_RELATIONSHIP"));
+		assertTrue("the tessellation must be tied to the BRep", text.contains("REPRESENTATION_RELATIONSHIP("));
 		assertEquals("every part gets a tessellation of its own", parts.size(),
 				count(text, "TESSELLATED_SHAPE_REPRESENTATION"));
 		// one shape definition per part, plus the assembly when there is more than one

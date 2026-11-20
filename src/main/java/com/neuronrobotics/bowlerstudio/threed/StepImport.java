@@ -233,6 +233,8 @@ public final class StepImport {
 	 * so it reproduces the source mesh exactly.
 	 */
 	private static boolean isTessellated(StepReader reader, Instance representation) {
+        if (StepReader.kindOf(representation, "TESSELLATED_SHAPE_REPRESENTATION"))
+            return true;
 		for (Value item : reader.list(reader.attribute(representation, "REPRESENTATION", "items"))) {
 			Instance instance = reader.instance(item);
 			if (StepReader.kindOf(instance, "TESSELLATED_SURFACE_SET")
