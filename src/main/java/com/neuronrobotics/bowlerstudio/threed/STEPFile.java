@@ -237,20 +237,11 @@ public final class STEPFile {
 
 		Log.debug("STEPFile.toStep: " + parts.size() + " part(s)");
 		TickToc.tic("toStep");
-		// A mesh can carry facets and edges thinner than any BRep kernel resolves: a
-		// boolean near a seam, an STL of folded sheet metal. Written as they are, those
-		// faces are refused and the shell comes apart. Manifold's own simplify is the
-		// pass that merges them, and it runs here — at the file's front door — so every
-		// face written is one a reader can build. The parts are rebuilt from the
-		// cleaned meshes, with the feature edges re-extracted to match.
-		List<Part> writing = new ArrayList<>();
-		for (Part part : parts) {
-			CSG cleaned = simplifyForBRep(part.csg);
-			writing.add(cleaned == part.csg
-					? part
-					: new Part(cleaned, FeatureEdgeExtractor.extract(cleaned, DEFAULT_ANGLE_DEGREES,
-							DEFAULT_TOPOLOGY_TOLERANCE, DEFAULT_STITCH_TOLERANCE)));
-		}
+		// The parts were corrected when this instance was built, so they are written as
+		// they are: a second collapse would re-derive the topology of a mesh that is
+		// already at its own precision, which drops triangles without making the file
+		// any easier to read.
+		List<Part> writing = parts;
 		checkSurfaceCoverage(writing);
 		StepEmitter emitter = new StepEmitter();
 		String fileName;
@@ -316,42 +307,28 @@ public final class STEPFile {
 	}
 
 	/**
-	 * The mesh corrected for BRep export, through the Manifold kernel's own
-	 * operations; the mesh itself when the kernel is not the active engine. See
-	 * {@link ManifoldMeshCorrector}.
+	 * The mesh corrected for BRep export, through the kernel's own collapse. The mesh
+	 * itself when the kernel is not the active engine. See
+	 * {@link ManifoldMeshCorrector#correct}.
 	 *
 	 * <p>
-	 * The collapse tolerance is not fixed: {@link ManifoldMeshCorrector#correct}
-	 * chooses the coarsest one that leaves the part's own shape, because a fixed
-	 * tolerance that is right for one mesh shaves another. The spike dissolve that
-	 * follows is held to the same budget, so it too cannot move the part.
+	 * The collapse runs at the coarser of the kernel's own precision and a reader's
+	 * merge distance, so it removes both the facets the kernel calls degenerate and the
+	 * edges a reader would fold away, and refuses the result when that moved the solid
+	 * by more than {@link #BREP_BOUNDS_BUDGET_MM}. Nothing in place of a collapse is
+	 * done afterwards: a snap of near-duplicate points would leave two indices naming
+	 * one position, and the zero-area triangles that follow are what fractured the
+	 * faces.
 	 */
 	private static CSG simplifyForBRep(CSG csg) {
-		CSG corrected = ManifoldMeshCorrector.correct(csg, BREP_RESOLUTION_MM, BREP_BOUNDS_BUDGET_MM);
-		// the spikes that survive the collapse are thin fans standing off the
-		// surface, which a BRep reader builds as slivers; dissolve them, held to
-		// the same budget. Edges bent more than a right angle stay: a real corner
-		// of the part is not a spike.
-		return ManifoldMeshCorrector.dissolveSpikes(corrected, BREP_RESOLUTION_MM, BREP_BOUNDS_BUDGET_MM,
-				BREP_SHARP_ANGLE_DEGREES);
+		return ManifoldMeshCorrector.correct(csg, BREP_BOUNDS_BUDGET_MM);
 	}
 
-	/** Edges bent more than this many degrees are corners, not spikes. */
-	public static final double BREP_SHARP_ANGLE_DEGREES = 119;
-
 	/**
-	 * The coarsest collapse tolerance the BRep export will use, in millimetres. It is
-	 * a ceiling, not a setting: {@link ManifoldMeshCorrector#correct} starts here and
-	 * halves until the result keeps the part's shape and leaves no edge shorter than
-	 * a reader can sew. A coarse collapse writes fewer, larger faces, which is why it
-	 * is preferred when it is safe.
-	 */
-	public static final double BREP_RESOLUTION_MM = ManifoldMeshCorrector.COARSEST_COLLAPSE_MM;
-
-	/**
-	 * How far the BRep-facing correction may move the mesh's bounds, in
-	 * millimetres: a hundredth of a micron, the same budget the round-trip check
-	 * holds the file to.
+	 * How far the BRep-facing correction may move the mesh, in millimetres: a
+	 * hundredth of a micron, the same budget the round-trip check holds the file to.
+	 * It is the drift the bounds may show and the thickness of the skin of material
+	 * the correction may move.
 	 */
 	public static final double BREP_BOUNDS_BUDGET_MM = 0.00001;
 

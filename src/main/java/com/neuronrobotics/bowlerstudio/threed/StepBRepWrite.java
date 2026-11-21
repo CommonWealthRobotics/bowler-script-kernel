@@ -91,7 +91,7 @@ public final class StepBRepWrite {
 
 		Log.debug("StepBRepWrite.solid: start for " + name);
 		TickToc.tic("build mesh " + name);
-		Mesh mesh = new Mesh(vertices, sourceTriangles).settledMesh();
+		Mesh mesh = new Mesh(vertices, sourceTriangles);
 		if (mesh.faces.isEmpty())
 			return 0;
 		TickToc.tic("emit faces " + name);
@@ -185,7 +185,7 @@ public final class StepBRepWrite {
 		if (vertices == null || sourceTriangles == null || sourceTriangles.length < 3)
 			return faces;
 
-		Mesh mesh = new Mesh(vertices, sourceTriangles).settledMesh();
+		Mesh mesh = new Mesh(vertices, sourceTriangles);
 		// the same plan the file is written from, after the same whole-part check, so
 		// this reports what a reader of the written file sees rather than what the
 		// writer hoped for; see solid()
@@ -224,11 +224,27 @@ public final class StepBRepWrite {
 		private int duplicateReferences;
 
 		/**
-		 * The scale at which a STEP reader merges two points into one, as a fraction
-		 * of the model's extent. It is the yardstick the file is written to: two
-		 * entities closer than this are one point to the reader that sews them.
+		 * The scale at which a STEP reader merges two points into one, in millimetres:
+		 * the distance accuracy the file declares and the precision OCC's confusion
+		 * value defaults to. It is the yardstick the file is written to — two entities
+		 * closer than this are one point to the reader that sews them.
+		 *
+		 * <p>
+		 * Deliberately absolute rather than a fraction of the model's extent. A
+		 * hundredth-of-a-micron-per-millimetre rule scaled this to 9.9e-5 mm on the
+		 * nametag, ninety thousand times the accuracy the file declares, and the weld
+		 * then folded together points the file says are distinct: FreeCAD read 63
+		 * faces of no area from that file and 39 edges with no partner, and the shape
+		 * came back from the sewn faces unorientable.
+		 *
+		 * <p>
+		 * Still open at this scale: FreeCAD sews the nametag's surviving sub-micron
+		 * slivers into 2 degenerate faces. They come from the fixture itself — its
+		 * smallest source triangle is 9.6e-24 mm&sup2; — and its 3MF export of the
+		 * solid is not manifold as a result. Dissolving those would mean shaving
+		 * geometry, which is the change this scale exists to avoid.
 		 */
-		private static final double READER_TOLERANCE = 1e-6;
+		private static final double READER_TOLERANCE_MM = 1e-7;
 
 		private final double readerTolerance;
 
@@ -240,7 +256,7 @@ public final class StepBRepWrite {
 		private Mesh(double[] points, long[] sourceTriangles) {
 			this.points = points;
 			this.planeTolerance = PLANE_TOLERANCE * diagonal(points);
-			this.readerTolerance = READER_TOLERANCE * diagonal(points);
+			this.readerTolerance = READER_TOLERANCE_MM;
 			Log.debug("StepBRepWrite: mesh of " + (points.length / 3) + " vertices, "
 					+ (sourceTriangles == null ? 0 : sourceTriangles.length / 3) + " triangles, plane tolerance "
 					+ planeTolerance);
@@ -1217,8 +1233,8 @@ public final class StepBRepWrite {
 			} catch (Exception ignored) {
 			}
 			Log.debug("StepBRepWrite: stitch failures " + stitchFailedNoNormal + " no-normal, " + stitchFailedMisses
-					+ " misses-vertices, " + stitchFailedBounds + " bounds-off, " + stitchFailedRepresents
-					+ " representation-off");
+					+ " misses-vertices, " + stitchFailedBounds + " bounds/planarity-off, " + stitchFailedRepresents
+					+ " representation-off of " + DBG_REGIONS + " region(s), " + DBG_MULTI + " with >1 triangle");
 			planCache = plan;
 			return plan;
 		}
@@ -1325,156 +1341,6 @@ public final class StepBRepWrite {
 			}
 			return after < before;
 		}
-
-		/**
-		 * The mesh whose plan to write from: this one when its plan stitches, or a
-		 * snapped copy when the first repair attempt failed.
-		 *
-		 * <p>
-		 * The first stage repairs a region by stitching its coplanar triangles into
-		 * one face, and falls back to one face per triangle for a region the stitches
-		 * cannot bound. That fallback is exact but hostile to a BRep reader, which
-		 * must build thousands of single-triangle faces and sew them. So a plan with
-		 * fallbacks moves to the next stage: the mesh's own point index is walked and
-		 * every reference to a point within the snap tolerance of another is collapsed
-		 * onto that point's index, and every triangle carrying the snapped index is
-		 * updated to it. A shared edge the two triangles of a face named by two
-		 * different indices then has one name, the loop walk sees it pair, and the
-		 * region stitches.
-		 *
-		 * <p>
-		 * The snapped plan is used only when it stitches strictly more faces than the
-		 * first stage did; a snap that stitched nothing new repaired nothing, and the
-		 * mesh goes out as the exact plan left it.
-		 */
-		private Mesh settledMesh() {
-			List<Planned> plan = plan();
-			int fellBack = 0;
-			for (Planned planned : plan)
-				if (planned.loops == null)
-					fellBack++;
-			if (Boolean.getBoolean("step.snap.disabled"))
-				return this;
-			if (fellBack == 0)
-				return this;
-
-			Log.debug("StepBRepWrite: " + fellBack + " of " + plan.size()
-					+ " planned face(s) fell back to single triangles; snapping near-duplicate points");
-			Mesh snapped = snappedMesh();
-			if (snapped == null)
-				return this;
-
-			List<Planned> snappedPlan = snapped.plan();
-			int stitchedHere = plan.size() - fellBack;
-			int stitchedThere = 0;
-			for (Planned planned : snappedPlan)
-				if (planned.loops != null)
-					stitchedThere++;
-			if (stitchedThere <= stitchedHere) {
-				Log.debug("StepBRepWrite: the snap stitched " + stitchedThere + " of " + snappedPlan.size()
-						+ " face(s), no better than the first stage's " + stitchedHere + "; keeping this mesh");
-				return this;
-			}
-			Log.debug("StepBRepWrite: the snapped mesh stitches " + stitchedThere + " of " + snappedPlan.size()
-					+ " face(s) over this mesh's " + stitchedHere + "; writing from the snapped mesh");
-			return snapped;
-		}
-
-		/**
-		 * The mesh with its near-duplicate points collapsed, or null when there is
-		 * nothing within the snap tolerance to collapse.
-		 *
-		 * <p>
-		 * The snap walks the point index array, unions every point within the snap
-		 * tolerance of an already-seen point onto it through a union-find over the
-		 * indices, and then rewrites every triangle through the representatives: a
-		 * point that was stored under several indices ends referenced by one of them,
-		 * and each triangle's corner is updated to the index that represents it. A
-		 * triangle naming one index twice after the snap has no edge to pair and is
-		 * dropped, exactly as {@link #prepare} drops one from the source.
-		 */
-		private Mesh snappedMesh() {
-			int vertexCount = points.length / 3;
-			if (vertexCount == 0)
-				return null;
-
-			// the snap tolerance is the plane tolerance, the same scale the grouping
-			// holds coplanarity to: close enough that a reader merges the pair, far
-			// enough above the doubles' own rounding that designed points stay apart
-			double snapTolerance = planeTolerance;
-			int[] parent = new int[vertexCount];
-			for (int vertex = 0; vertex < vertexCount; vertex++)
-				parent[vertex] = vertex;
-
-			// walk the points once, hashing each cell and unioning with any earlier
-			// point of the same or a neighbouring cell that the tolerance covers
-			Map<Long, Integer> byCell = new HashMap<>();
-			for (int vertex = 0; vertex < vertexCount; vertex++) {
-				double[] p = point(vertex);
-				long cx = Math.round(p[0] / snapTolerance);
-				long cy = Math.round(p[1] / snapTolerance);
-				long cz = Math.round(p[2] / snapTolerance);
-				for (int dx = -1; dx <= 1; dx++)
-					for (int dy = -1; dy <= 1; dy++)
-						for (int dz = -1; dz <= 1; dz++) {
-							Integer other = byCell.get(cell(cx + dx, cy + dy, cz + dz));
-							if (other == null || distance(p, point(other)) > snapTolerance)
-								continue;
-							parent[find(parent, other)] = find(parent, vertex);
-						}
-				byCell.putIfAbsent(cell(cx, cy, cz), vertex);
-			}
-
-			// each cluster is represented by its lowest index, so the representative
-			// is stable no matter what order the unions ran in
-			int[] smallest = new int[vertexCount];
-			java.util.Arrays.fill(smallest, -1);
-			for (int vertex = 0; vertex < vertexCount; vertex++) {
-				int root = find(parent, vertex);
-				if (smallest[root] == -1 || vertex < smallest[root])
-					smallest[root] = vertex;
-			}
-			int[] snapped = new int[vertexCount];
-			int merged = 0;
-			for (int vertex = 0; vertex < vertexCount; vertex++) {
-				snapped[vertex] = smallest[find(parent, vertex)];
-				if (snapped[vertex] != vertex)
-					merged++;
-			}
-			if (merged == 0)
-				return null;
-
-			// every triangle is updated through the representatives: each corner that
-			// named a snapped-away index now names the point it was snapped onto
-			List<int[]> snappedTriangles = new ArrayList<>(triangles.size());
-			int dropped = 0;
-			for (int[] triangle : triangles) {
-				int a = snapped[triangle[0]];
-				int b = snapped[triangle[1]];
-				int c = snapped[triangle[2]];
-				if (a == b || b == c || c == a) {
-					dropped++;
-					continue;
-				}
-				snappedTriangles.add(new int[]{a, b, c});
-			}
-			Log.debug("StepBRepWrite: snapped " + merged + " point reference(s) onto " + (vertexCount - merged)
-					+ " point(s); " + dropped + " triangle(s) collapsed to a line and dropped");
-			if (snappedTriangles.isEmpty())
-				return null;
-
-			long[] flat = new long[snappedTriangles.size() * 3];
-			for (int i = 0; i < snappedTriangles.size(); i++) {
-				int[] triangle = snappedTriangles.get(i);
-				flat[i * 3] = triangle[0];
-				flat[i * 3 + 1] = triangle[1];
-				flat[i * 3 + 2] = triangle[2];
-			}
-			// the point array is carried whole: the dropped indices are simply no
-			// longer referenced, and their coordinates cost nothing
-			return new Mesh(points, flat);
-		}
-
 
 		/**
 		 * The plan, checked against the source mesh the file is written from.

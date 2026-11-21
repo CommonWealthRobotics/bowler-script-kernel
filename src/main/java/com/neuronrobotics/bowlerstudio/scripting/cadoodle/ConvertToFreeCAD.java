@@ -33,9 +33,12 @@ public class ConvertToFreeCAD extends ConvertToFileOperation {
 	protected void writeFile(File target, List<CSG> selected) throws IOException {
 		CSG.getProgressMoniter().progressUpdate(0, 100, "Converting CSG to Freecad", null);
 		List<CSG> meshes = selected;
-		int rounds = ManifoldMeshCorrector.MAX_ROUNDS;
+		// one retry: the writer already collapses the mesh through the kernel when the
+		// STEPFile is built, so a round that corrects again finds a mesh already at its
+		// own precision. A file FreeCAD still refuses is a defect of the export, not
+		// something another round papers over
 		IOException lastFailure = null;
-		for (int round = 0; round <= rounds; round++) {
+		for (int round = 0; round <= 1; round++) {
 			File step = File.createTempFile(getName() + (round == 0 ? "" : "_corrected" + round), ".step");
 			step.deleteOnExit();
 			CSG.getProgressMoniter().progressUpdate(30, 100, "Converting CSG to STEP", null);
@@ -69,12 +72,11 @@ public class ConvertToFreeCAD extends ConvertToFileOperation {
 		throw lastFailure;
 	}
 
-	/** The meshes corrected one round harder, through the Manifold kernel. */
+	/** The meshes corrected for export, through the kernel's own collapse. */
 	private static List<CSG> corrected(List<CSG> meshes) {
 		List<CSG> out = new ArrayList<>();
 		for (CSG mesh : meshes)
-			out.add(ManifoldMeshCorrector.correctHarder(mesh, STEPFile.BREP_RESOLUTION_MM,
-					STEPFile.BREP_BOUNDS_BUDGET_MM));
+			out.add(ManifoldMeshCorrector.correct(mesh, STEPFile.BREP_BOUNDS_BUDGET_MM));
 		return out;
 	}
 
