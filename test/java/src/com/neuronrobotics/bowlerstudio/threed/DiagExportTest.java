@@ -8,7 +8,7 @@ import org.junit.Test;
 import eu.mihosoft.vrl.v3d.CSG;
 
 /** Writes fixed paths so an external validator can check them. */
-public class DiagExportTest {
+public class DiagExportTest extends ManifoldExportTestSupport {
 	@Test
 	public void diag() throws Throwable {
 		String out = "/tmp/steps";

@@ -8,7 +8,7 @@ import org.junit.Test;
 import eu.mihosoft.vrl.v3d.CSG;
 
 /** Writes exports so an external CAD kernel can validate them. */
-public class DiagExport2Test {
+public class DiagExport2Test extends ManifoldExportTestSupport {
 	@Test
 	public void diag() throws Throwable {
 		String out = "/tmp/steps_final2";

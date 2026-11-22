@@ -335,10 +335,9 @@ public final class STEPFile {
 		progress(1, 1, "Writing tessellation for " + part.name());
 		if (tessellated == 0)
 			return;
-		// plain relationship: the tessellation describes the same shape, at the same
-		// coordinates, so there is nothing to transform
-		emitter.add("SHAPE_REPRESENTATION_RELATIONSHIP(" + quote(part.name()) + "," + quote("tessellation of the BRep")
-				+ ",#" + brep + ",#" + tessellated + ")");
+		// Auxiliary mesh association; a shape relationship adds duplicate topology in OCCT.
+		emitter.add("REPRESENTATION_RELATIONSHIP(" + quote(part.name()) + "," + quote("tessellation of the BRep") + ",#"
+				+ brep + ",#" + tessellated + ")");
 	}
 
 	/**

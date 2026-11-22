@@ -244,7 +244,7 @@ public final class StepImport {
 
 	/**
 	 * Tessellated representation to the BRep representation that describes the same
-	 * shape, as the file's {@code SHAPE_REPRESENTATION_RELATIONSHIP} states. Names
+	 * shape, as the file's {@code REPRESENTATION_RELATIONSHIP} states. Names
 	 * are not reliable: several parts of one model often share a name.
 	 */
 	private static Map<Integer, Integer> tessellationRelationships(StepReader reader) {

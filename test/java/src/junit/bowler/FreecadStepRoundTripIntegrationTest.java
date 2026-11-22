@@ -29,6 +29,12 @@ import eu.mihosoft.vrl.v3d.CSG;
 /** Local FreeCAD integration; no application workspace, downloads, or GUI. */
 public class FreecadStepRoundTripIntegrationTest {
 	@Test
+	public void embeddedCubeMeshDoesNotDuplicateBrepGeometry() throws Throwable {
+		roundTrip("freecad-cube-tessellation", STEPFile.ExportMode.PRIMARY,
+				() -> Collections.singletonList(CSG.getManifold().cube(10, 10, 10, true)));
+	}
+
+	@Test
 	public void nametagSurvivesStepAndFreecad() throws Throwable {
 		roundTrip("freecad-step-roundtrip", STEPFile.ExportMode.PRIMARY,
 				() -> CSG.fromThreeMF(new File("testStepFiles/Marvelous_Champion_Nametag.3mf").toPath()));
