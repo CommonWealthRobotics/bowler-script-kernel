@@ -2,7 +2,6 @@ package com.neuronrobotics.bowlerstudio.physics;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,14 +15,21 @@ import javax.xml.bind.JAXBException;
 import org.mujoco.IMujocoController;
 import org.mujoco.MuJoCoModelManager;
 import org.mujoco.MuJoCoXML;
+import org.mujoco.xml.Asset;
+import org.mujoco.xml.Actuator;
+import org.mujoco.xml.Body;
+import org.mujoco.xml.Contact;
+import org.mujoco.xml.Geom;
+import org.mujoco.xml.Joint;
+import org.mujoco.xml.KwBool;
+import org.mujoco.xml.KwBuiltin;
+import org.mujoco.xml.KwEnable;
+import org.mujoco.xml.KwFalseTrueAuto;
+import org.mujoco.xml.KwGeomtype;
+import org.mujoco.xml.KwIntegrator;
+import org.mujoco.xml.KwJointtype;
 import org.mujoco.xml.Mujoco;
-import org.mujoco.xml.Mujoco.Actuator.Builder;
-import org.mujoco.xml.attributetypes.BuiltinType;
-import org.mujoco.xml.attributetypes.FlagSimpleType;
-import org.mujoco.xml.attributetypes.GeomtypeType;
-import org.mujoco.xml.attributetypes.IntegratorType;
-import org.mujoco.xml.attributetypes.JointtypeType;
-import org.mujoco.xml.body.JointType;
+import org.mujoco.xml.Worldbody;
 
 import com.neuronrobotics.bowlerstudio.BowlerKernel;
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseCadManager;
@@ -52,8 +58,8 @@ import javafx.scene.transform.Affine;
 public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	public static final int Density_OF_PLA = 1250;
 	public Mujoco.Builder<Void> builder = null;
-	public Mujoco.Worldbody.Builder<?> globalFrameBody;
-	public Mujoco.Asset.Builder<?> asset;
+	public Worldbody.Builder<?> globalFrameBody;
+	public Asset.Builder<?> asset;
 	public List<MobileBase> bases;
 	public List<CSG> freeObjects;
 	public List<CSG> fixedObjects;
@@ -75,14 +81,14 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	public int condim = 6;
 	public HashMap<String, ArrayList<CSG>> mapNameToCSG = new HashMap<>();
 	public HashMap<Affine, String> affineNameMap = new HashMap<>();
-	public HashMap<String, ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>> geomToCSGMap = new HashMap<>();
-	public HashMap<org.mujoco.xml.body.GeomType.Builder<?>, CSG> geomToSourceCSG = new HashMap<>();
+	public HashMap<String, ArrayList<Geom.Builder<?>>> geomToCSGMap = new HashMap<>();
+	public HashMap<Geom.Builder<?>, CSG> geomToSourceCSG = new HashMap<>();
 	public HashMap<String, AbstractLink> mapNameToLink = new HashMap<>();
 	public CSG floor = new Cube(4000, 4000, 1000).toCSG().toZMax().setName("floor").setColor(Color.PINK);
 	public long timeSinceUIUpdate = 0;
-	public Mujoco.Contact.Builder<?> contacts;
-	public Builder<?> actuators;
-	private IntegratorType integratorType = IntegratorType.RK_4;
+	public Contact.Builder<?> contacts;
+	public Actuator.Builder<?> actuators;
+	private KwIntegrator integratorType = KwIntegrator.RK_4;
 	public HashMap<AbstractLink, Double> gearRatios = new HashMap<>();
 	private CSGDatabaseInstance db;
 
@@ -375,17 +381,17 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	public void initializeModel(String name) {
 		builder = Mujoco.builder().withModel(name);
 
-		builder.addOption().withTimestep(new BigDecimal(getTimestep())).withIterations(getIterations())
-				.withIntegrator(getIntegratorType()).withViscosity(BigDecimal.valueOf(0.00002))
-				.withDensity(BigDecimal.valueOf(1.204)).addFlag().withMulticcd(FlagSimpleType.ENABLE);
+		builder.addOption().withTimestep(getTimestep()).withIterations(getIterations())
+				.withIntegrator(getIntegratorType()).withViscosity(0.00002)
+				.withDensity(1.204).addFlag().withMulticcd(KwEnable.ENABLE);
 		builder.addSize().withMemory("300M");
-		builder.addVisual().addMap().withForce(new BigDecimal(0.1)).withZfar(new BigDecimal(30));
-		builder.addStatistic().withCenter("0 0 0.7");
+		builder.addVisual().addMap().withForce(0.1f).withZfar(30f);
+		builder.addStatistic().withCenter(0d, 0d, 0.7d);
 		asset = builder.addAsset();
-		asset.addTexture().withName("grid").withType("2d").withBuiltin(BuiltinType.CHECKER).withRgb1(".1 .2 .3")
-				.withRgb2(".2 .3 .4").withWidth(512).withHeight(512);
-		asset.addMaterial().withName("grid").withTexture("grid").withTexrepeat("1 1").withTexuniform(true)
-				.withReflectance(BigDecimal.valueOf(0.2));
+		asset.addTexture().withName("grid").withType("2d").withBuiltin(KwBuiltin.CHECKER).withRgb1(0.1, 0.2, 0.3)
+				.withRgb2(0.2, 0.3, 0.4).withWidth(512).withHeight(512);
+		asset.addMaterial().withName("grid").withTexture("grid").withTexrepeat(1f, 1f).withTexuniform(KwBool.TRUE)
+				.withReflectance(0.2f);
 		globalFrameBody = builder.addWorldbody();
 		contacts = builder.addContact();
 		if (fixedObjects == null) {
@@ -430,7 +436,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		loadBase(db, cat, null, new TransformNR());
 	}
 
-	public void loadBase(CSGDatabaseInstance db, MobileBase cat, org.mujoco.xml.BodyarchType.Builder<?> linkBody2,
+	public void loadBase(CSGDatabaseInstance db, MobileBase cat, Body.Builder<?> linkBody2,
 			TransformNR offsetGlobal) throws IOException {
 		if (contacts == null)
 			contacts = builder.addContact();
@@ -445,7 +451,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 
 		int bodyParts = 0;
 
-		org.mujoco.xml.BodyarchType.Builder<?> addBody;
+		Body.Builder<?> addBody;
 		offsetGlobal = offsetGlobal.times(cat.getRobotToFiducialTransform());
 		if (linkBody2 == null) {
 			addBody = globalFrameBody.addBody();
@@ -454,7 +460,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionX() + " "
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionY() + " "
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
-			addBody.withPos(centerString).withQuat(quat);// move the base to 1mm above the z=0 surface
+			addBody.withPos(offsetGlobal.getX() / 1000.0, offsetGlobal.getY() / 1000.0, lowestPoint)
+					.withQuat(offsetGlobal.getRotation().getRotationMatrix2QuaturnionW(),
+							offsetGlobal.getRotation().getRotationMatrix2QuaturnionX(),
+							offsetGlobal.getRotation().getRotationMatrix2QuaturnionY(),
+							offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ());
 			if (freeBase) {
 				addBody.addFreejoint();
 			}
@@ -466,7 +476,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionY() + " "
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
 			addBody = linkBody2.addBody();
-			addBody.withPos(centerString).withQuat(quat);// move the base to 1mm above the z=0 surface
+			addBody.withPos(offsetGlobal.getX() / 1000.0, offsetGlobal.getY() / 1000.0, lowestPoint)
+					.withQuat(offsetGlobal.getRotation().getRotationMatrix2QuaturnionW(),
+							offsetGlobal.getRotation().getRotationMatrix2QuaturnionX(),
+							offsetGlobal.getRotation().getRotationMatrix2QuaturnionY(),
+							offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ());
 
 		}
 		addBody.withName(bodyName);
@@ -541,7 +555,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			transformed = part.transformed(TransformFactory.nrToCSG(offset));
 			transformed.setManipulator(new Affine());
 			putCSGInAssets(nameOfCSG, hull, true);
-			org.mujoco.xml.body.GeomType.Builder<?> geom = addBody.addGeom();
+			Geom.Builder<?> geom = addBody.addGeom();
 			ArrayList<CSG> parts = getMapNameToCSGParts(bodyName);
 			parts.add(transformed);
 			setCSGMeshToGeom(nameOfCSG, geom);
@@ -552,10 +566,14 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					+ center.getRotation().getRotationMatrix2QuaturnionY() + " "
 					+ center.getRotation().getRotationMatrix2QuaturnionZ();
 			geomToSourceCSG.put(geom, part);
-			geom.withPos(centerString).withQuat(quat);
+			geom.withPos(center.getX() / 1000.0, center.getY() / 1000.0, center.getZ() / 1000.0)
+					.withQuat(center.getRotation().getRotationMatrix2QuaturnionW(),
+							center.getRotation().getRotationMatrix2QuaturnionX(),
+							center.getRotation().getRotationMatrix2QuaturnionY(),
+							center.getRotation().getRotationMatrix2QuaturnionZ());
 			if (part.hasMassSet()) {
 				double val = part.getMassKG(mass) * KgtoMujocoMass;
-				geom.withMass(BigDecimal.valueOf(val));
+				geom.withMass(val);
 			} else {
 				com.neuronrobotics.sdk.common.Log.error("\nUsing density for " + part.getName());
 			}
@@ -588,8 +606,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		for (DHParameterKinematics k : cat.getAllDHChains()) {
 			if (k.getScriptingName().contains("Dummy"))
 				continue;
-			org.mujoco.xml.BodyarchType.Builder<?> linkBody = addBody;
-			HashMap<AbstractLink, org.mujoco.xml.BodyarchType.Builder<?>> linkToBulder = new HashMap<>();
+			Body.Builder<?> linkBody = addBody;
+			HashMap<AbstractLink, Body.Builder<?>> linkToBulder = new HashMap<>();
 
 			for (int i = 0; i < k.getNumberOfLinks(); i++) {
 				AbstractLink link = k.getAbstractLink(i);
@@ -606,10 +624,10 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			for (String affineNameMapGet : geomToCSGMap.keySet()) {
 				AbstractLink myLink = mapNameToLink.get(affineNameMapGet);
 				ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
-				ArrayList<org.mujoco.xml.body.GeomType.Builder<?>> geoms = geomToCSGMap.get(affineNameMapGet);
+				ArrayList<Geom.Builder<?>> geoms = geomToCSGMap.get(affineNameMapGet);
 				double linkMass = myLink.getLinkConfiguration().getMassKg();
 				double numPartsWithoutMassLink = 0;
-				for (org.mujoco.xml.body.GeomType.Builder<?> geom : geoms) {
+				for (Geom.Builder<?> geom : geoms) {
 					// println "Mass of "+affineNameMapGet+" is "+mass
 					CSG csg = geomToSourceCSG.get(geom);
 					if (!csg.getStorage().getValue("massKg").isPresent()) {
@@ -618,12 +636,12 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				}
 				if (numPartsWithoutMassLink == 0)
 					numPartsWithoutMassLink = 1;
-				for (org.mujoco.xml.body.GeomType.Builder<?> geom : geoms) {
+				for (Geom.Builder<?> geom : geoms) {
 					// println "Mass of "+affineNameMapGet+" is "+mass
 					CSG csg = geomToSourceCSG.get(geom);
 					if (csg.hasMassSet()) {
 						double val = csg.getMassKG(linkMass / numPartsWithoutMassLink) * KgtoMujocoMass;
-						geom.withMass(BigDecimal.valueOf(val));
+						geom.withMass(val);
 					} else {
 						com.neuronrobotics.sdk.common.Log.error("\nUsing density for " + csg.getName());
 					}
@@ -633,9 +651,9 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		}
 	}
 
-	public org.mujoco.xml.BodyarchType.Builder<?> loadLink(MobileBase cat, DHParameterKinematics l, int index,
-			ArrayList<CSG> cad, org.mujoco.xml.BodyarchType.Builder<?> addBody,
-			HashMap<AbstractLink, org.mujoco.xml.BodyarchType.Builder<?>> linkToBulderMap) {
+	public Body.Builder<?> loadLink(MobileBase cat, DHParameterKinematics l, int index,
+			ArrayList<CSG> cad, Body.Builder<?> addBody,
+			HashMap<AbstractLink, Body.Builder<?>> linkToBulderMap) {
 		AbstractLink link = l.getAbstractLink(index);
 		LinkConfiguration conf = link.getLinkConfiguration();
 
@@ -669,8 +687,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		TransformNR center = conf.getCenterOfMassFromCentroid();
 		String centerString = center.getX() / 1000.0 + " " + center.getY() / 1000.0 + " " + center.getZ() / 1000.0
 				+ " ";
-		org.mujoco.xml.BodyarchType.Builder<?> linkBody = addBody.addBody().withName(name)
-				.withPos(x + " " + y + " " + z).withQuat(quat);
+		Body.Builder<?> linkBody = addBody.addBody().withName(name)
+				.withPos(x, y, z).withQuat(location.getRotation().getRotationMatrix2QuaturnionW(),
+						location.getRotation().getRotationMatrix2QuaturnionX(),
+						location.getRotation().getRotationMatrix2QuaturnionY(),
+						location.getRotation().getRotationMatrix2QuaturnionZ());
 		linkToBulderMap.put(link, linkBody);
 
 		double gear = 660;
@@ -680,20 +701,20 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		String range = lower + " " + upper;
 		String ctrlRange = (lower * gear) + " " + (upper * gear);
 		double rangeVal = upper - lower;
-		JointType.Builder<?> jointBuilder = linkBody.addJoint();
+		Joint.Builder<?> jointBuilder = linkBody.addJoint();
 		String axisJoint = "0 0 1";
 		/// position=0;
-		jointBuilder.withPos("0 0 0")// the kinematic center
-				.withAxis(axisJoint) // rotate about the z axis per dh convention
-				.withRange(ctrlRange) // engineering units range
-				.withRef(BigDecimal.valueOf(0)) // set the reference position on loading as the links 0 degrees value
-				.withType(JointtypeType.HINGE) // hinge type
-				.withLimited(true).withFrictionloss(BigDecimal.valueOf(conf.isPassive() ? 0.0001 : 0.01))// experementally
+		jointBuilder.withPos(0d, 0d, 0d)// the kinematic center
+				.withAxis(0d, 0d, 1d) // rotate about the z axis per dh convention
+				.withRange(lower * gear, upper * gear) // engineering units range
+				.withRef(0d) // set the reference position on loading as the links 0 degrees value
+				.withType(KwJointtype.HINGE) // hinge type
+					.withLimited(KwFalseTrueAuto.TRUE).withFrictionloss(conf.isPassive() ? 0.0001 : 0.01)// experementally
 				// determined
 
 				// .withDamping(BigDecimal.valueOf(0.000001))
 				// .withStiffness(BigDecimal.valueOf(1))
-				.withSolreflimit("4e-3 1").withSolimplimit(".95 .99 1e-3").withName(name);
+				.withSolreflimit(4e-3, 1d).withSolimplimit(0.95, 0.99, 1e-3).withName(name);
 		double forceKgCm = 3.5;// mg92b default
 		Map<String, Object> configELectroMech = Vitamins.getConfiguration(conf.getElectroMechanicalType(),
 				conf.getElectroMechanicalSize());
@@ -707,14 +728,14 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		if (!conf.isPassive()) {
 
 			actuators.addPosition()// A position controller to model a servo
-					.withKp(BigDecimal.valueOf(0.000006)) // experementally determined value
+					.withKp(0.000006) // experementally determined value
 					// .withForcelimited(true)
 					// .withForcerange(range)
-					.withCtrlrange(ctrlRange).withForcerange((-newtonMeterLimit) + " " + newtonMeterLimit)
+					.withCtrlrange(lower * gear, upper * gear).withForcerange(-newtonMeterLimit, newtonMeterLimit)
 					.withName(name)// name the motor
 					.withJoint(name)// which joint this motor powers
-					.withGear("" + gear) // gear ratio between virtual motor and output
-					.withKv(BigDecimal.valueOf(0.00000001)); // damping term experementally determenied
+					.withGear(gear) // gear ratio between virtual motor and output
+					.withKv(0.00000001); // damping term experementally determenied
 			// .withInheritrange(BigDecimal.valueOf(rangeVal));// sets the range of the
 			// control signal to match the limits
 		}
@@ -765,13 +786,13 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 
 							try {
 								putCSGInAssets(geomname, hull, true);
-								org.mujoco.xml.body.GeomType.Builder<?> geom = linkToBulderMap.get(myLink).addGeom();
+								Geom.Builder<?> geom = linkToBulderMap.get(myLink).addGeom();
 								geomToSourceCSG.put(geom, part);
 
 								ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 								if (geomToCSGMap.get(affineNameMapGet) == null) {
 									geomToCSGMap.put(affineNameMapGet,
-											new ArrayList<org.mujoco.xml.body.GeomType.Builder<?>>());
+											new ArrayList<Geom.Builder<?>>());
 								}
 								geomToCSGMap.get(affineNameMapGet).add(geom);
 								parts.add(transformed);
@@ -780,7 +801,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 									// default is 1 0.005 0.0001
 									// println "Setting Wheel Friction for "+part.getName()
 
-									geom.withFriction("2 0.001 0.00005");
+									geom.withFriction(2d, 0.001d, 0.00005d);
 
 								} else {
 									setCSGMeshToGeom(geomname, geom);
@@ -788,7 +809,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 									if (cat.isFoot(myLink)) {
 										// default is 1 0.005 0.0001
 										// println "Setting Foot Friction for "+part.getName()
-										geom.withFriction("1.2 0.001 0.00005");
+										geom.withFriction(1.2d, 0.001d, 0.00005d);
 									}
 								}
 							} catch (IOException e) {
@@ -820,7 +841,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 
 	public void addFreePart(List<CSG> partsIn) throws IOException {
 
-		org.mujoco.xml.BodyarchType.Builder<?> addBody = globalFrameBody.addBody();
+		Body.Builder<?> addBody = globalFrameBody.addBody();
 		String nameOfCSG = null;
 		String nameOfBODY = null;
 		Vector3d centerGroup = null;
@@ -850,8 +871,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			hull.setManipulator(new Affine());
 			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfBODY);
 			putCSGInAssets(nameOfCSG, hull, true);
-			org.mujoco.xml.body.GeomType.Builder<?> geom;
-			geom = addBody.addGeom().withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
+			Geom.Builder<?> geom;
+			geom = addBody.addGeom().withMass(part.getMassKG(0.001));
 			parts.add(hull);
 			setCSGMeshToGeom(nameOfCSG, geom);
 			// }catch(Throwable t) {
@@ -878,11 +899,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			hull.setManipulator(new Affine());
 			ArrayList<CSG> parts = getMapNameToCSGParts(nameOfCSG);
 			putCSGInAssets(nameOfCSG, hull, false);
-			org.mujoco.xml.body.GeomType.Builder<?> geom;
+			Geom.Builder<?> geom;
 
 			geom = globalFrameBody.addGeom();
-			geom.withPos(center.x / 1000.0 + " " + center.y / 1000.0 + " " + center.z / 1000.0 + " ");
-			geom.withMass(BigDecimal.valueOf(part.getMassKG(0.001)));
+			geom.withPos(center.x / 1000.0, center.y / 1000.0, center.z / 1000.0);
+			geom.withMass(part.getMassKG(0.001));
 
 			setCSGMeshToGeom(nameOfCSG, geom);
 
@@ -894,16 +915,16 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		return mapNameToCSG.get(nameOfCSG);
 	}
 
-	public void setCSGMeshToGeom(String nameOfCSG, org.mujoco.xml.body.GeomType.Builder<?> geom) {
-		geom.withName(nameOfCSG).withType(GeomtypeType.MESH).withMesh(nameOfCSG).withCondim(getCondim())
-				.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0)).withMaterial(nameOfCSG);
+	public void setCSGMeshToGeom(String nameOfCSG, Geom.Builder<?> geom) {
+		geom.withName(nameOfCSG).withType(KwGeomtype.MESH).withMesh(nameOfCSG).withCondim(getCondim())
+				.withDensity(Density_OF_PLA / 2.0).withMaterial(nameOfCSG);
 	}
 
-	public void setWheelMeshToGeom(String nameOfCSG, org.mujoco.xml.body.GeomType.Builder<?> geom, CSG part) {
+	public void setWheelMeshToGeom(String nameOfCSG, Geom.Builder<?> geom, CSG part) {
 		String fromto = "0 0 " + part.getMinZ() / 1000.0 + " 0 0 " + part.getMaxZ() / 1000.0;
-		geom.withName(nameOfCSG).withType(GeomtypeType.MESH).withMesh(nameOfCSG).withCondim(getCondim())
-				.withDensity(BigDecimal.valueOf(Density_OF_PLA / 2.0)).withMaterial(nameOfCSG)
-		// .withType(GeomtypeType.CYLINDER).withSize("" + part.getTotalX() / 2000.0)
+		geom.withName(nameOfCSG).withType(KwGeomtype.MESH).withMesh(nameOfCSG).withCondim(getCondim())
+				.withDensity(Density_OF_PLA / 2.0).withMaterial(nameOfCSG)
+		// .withType(KwGeomtype.CYLINDER).withSize(part.getTotalX() / 2000.0)
 		// .withFromto(fromto)
 		// .withCondim(getCondim())
 		// .withDensity(BigDecimal.valueOf(Density_OF_PLA/2.0))
@@ -912,12 +933,12 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		;
 	}
 
-	public void setStartLocation(Vector3d center, org.mujoco.xml.BodyarchType.Builder<?> addBody) {
-		addBody.withPos(center.x / 1000.0 + " " + center.y / 1000.0 + " " + center.z / 1000.0 + " ");
+	public void setStartLocation(Vector3d center, Body.Builder<?> addBody) {
+		addBody.withPos(center.x / 1000.0, center.y / 1000.0, center.z / 1000.0);
 	}
 
-	public void setStartLocation(TransformNR center, org.mujoco.xml.BodyarchType.Builder<?> addBody) {
-		addBody.withPos(center.getX() / 1000.0 + " " + center.getY() / 1000.0 + " " + center.getZ() / 1000.0 + " ");
+	public void setStartLocation(TransformNR center, Body.Builder<?> addBody) {
+		addBody.withPos(center.getX() / 1000.0, center.getY() / 1000.0, center.getZ() / 1000.0);
 	}
 
 	public String toColorString(Color c) {
@@ -974,18 +995,24 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			com.neuronrobotics.sdk.common.Log.error("Loading cache " + tempFile.getName());
 		}
 		if (isFree) {
-			asset.addTexture().withRgb1(toColorString(hull.getColor())).withRgb2(toColorString(hull.getColor()))
-					.withName(nameOfCSG).withType("2d").withBuiltin(BuiltinType.FLAT).withWidth(100).withHeight(100);
+			asset.addTexture().withRgb1((double) hull.getColor().getRed(), (double) hull.getColor().getGreen(),
+					(double) hull.getColor().getBlue())
+					.withRgb2((double) hull.getColor().getRed(), (double) hull.getColor().getGreen(),
+							(double) hull.getColor().getBlue())
+					.withName(nameOfCSG).withType("2d").withBuiltin(KwBuiltin.FLAT).withWidth(100).withHeight(100);
 		} else {
-			asset.addTexture().withRgb1(toColorString(floor.getColor())).withRgb2(toColorString(hull.getColor()))
-					.withName(nameOfCSG).withType("2d").withBuiltin(BuiltinType.GRADIENT).withWidth(100)
+			asset.addTexture().withRgb1((double) floor.getColor().getRed(), (double) floor.getColor().getGreen(),
+					(double) floor.getColor().getBlue())
+					.withRgb2((double) hull.getColor().getRed(), (double) hull.getColor().getGreen(),
+							(double) hull.getColor().getBlue())
+					.withName(nameOfCSG).withType("2d").withBuiltin(KwBuiltin.GRADIENT).withWidth(100)
 					.withHeight(100);
 		}
 		asset.addMaterial().withName(nameOfCSG).withTexture(nameOfCSG)
 
 		;
 
-		asset.addMesh().withFile(tempFile.getName()).withName(nameOfCSG).withScale(".001 .001 .001")// convert from mm
+		asset.addMesh().withFile(tempFile.getName()).withName(nameOfCSG).withScale(0.001, 0.001, 0.001)// convert from mm
 																									// to meters
 		;
 	}
@@ -1112,14 +1139,14 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 	/**
 	 * @return the integratorType
 	 */
-	public IntegratorType getIntegratorType() {
+	public KwIntegrator getIntegratorType() {
 		return integratorType;
 	}
 
 	/**
 	 * @param integratorType the integratorType to set
 	 */
-	public void setIntegratorType(IntegratorType integratorType) {
+	public void setIntegratorType(KwIntegrator integratorType) {
 		this.integratorType = integratorType;
 	}
 }

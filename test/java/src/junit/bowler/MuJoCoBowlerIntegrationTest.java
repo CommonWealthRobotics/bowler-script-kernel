@@ -43,7 +43,7 @@ public class MuJoCoBowlerIntegrationTest {
 		MuJoCoPhysicsManager manager = new MuJoCoPhysicsManager(CSGDatabase.getInstance(), "javaCadTest", bases, free,
 				terrain, new File("./physicsTest"));
 		// manager.setTimestep(0.005);
-		// manager.setIntegratorType(IntegratorType.IMPLICITFAST);
+		// manager.setIntegratorType(KwIntegrator.IMPLICITFAST);
 		manager.generateNewModel(CSGDatabase.getInstance());// generate model before start counting time
 		long start = System.currentTimeMillis();
 		double now = 0;
