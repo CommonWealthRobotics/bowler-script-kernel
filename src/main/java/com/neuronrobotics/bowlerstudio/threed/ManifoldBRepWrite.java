@@ -37,8 +37,8 @@ final class ManifoldBRepWrite {
 			faces.add(writer.face(face, name));
 		long shell = emitter.add("CLOSED_SHELL(" + quote(name) + "," + refs(faces) + ")");
 		long body = emitter.add("MANIFOLD_SOLID_BREP(" + quote(name) + ",#" + shell + ")");
-		return Collections.unmodifiableList(Arrays.asList(
-				writer.placement(new Point(0, 0, 0), new Point(0, 0, 1), new Point(1, 0, 0)), body));
+		return Collections.unmodifiableList(
+				Arrays.asList(writer.placement(new Point(0, 0, 0), new Point(0, 0, 1), new Point(1, 0, 0)), body));
 	}
 
 	static List<StepFace> faces(CSG solid) {

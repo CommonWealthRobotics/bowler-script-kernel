@@ -36,7 +36,8 @@ public class FreecadStepRoundTripIntegrationTest {
 
 	@Test
 	public void snappedTinyEdgeSurvivesFreecad() throws Throwable {
-		roundTrip("freecad-snapping-roundtrip", STEPFile.ExportMode.EDGE_SNAPPING, () -> Arrays.asList(cubeWithTinyEdge()));
+		roundTrip("freecad-snapping-roundtrip", STEPFile.ExportMode.EDGE_SNAPPING,
+				() -> Arrays.asList(cubeWithTinyEdge()));
 	}
 
 	@Test

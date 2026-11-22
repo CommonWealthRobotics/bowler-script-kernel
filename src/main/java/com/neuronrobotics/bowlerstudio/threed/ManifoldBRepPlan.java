@@ -120,7 +120,8 @@ public final class ManifoldBRepPlan {
 			if (!(other instanceof Face))
 				return false;
 			Face that = (Face) other;
-			return Objects.equals(origin, that.origin) && Objects.equals(normal, that.normal) && Objects.equals(loops, that.loops) && Objects.equals(triangleIndices, that.triangleIndices);
+			return Objects.equals(origin, that.origin) && Objects.equals(normal, that.normal)
+					&& Objects.equals(loops, that.loops) && Objects.equals(triangleIndices, that.triangleIndices);
 		}
 
 		@Override
@@ -135,10 +136,10 @@ public final class ManifoldBRepPlan {
 
 		@Override
 		public String toString() {
-			return "Face[origin=" + origin + ", normal=" + normal + ", loops=" + loops + ", triangleIndices=" + triangleIndices + "]";
+			return "Face[origin=" + origin + ", normal=" + normal + ", loops=" + loops + ", triangleIndices="
+					+ triangleIndices + "]";
 		}
 
-		
 
 		public int triangleCount() {
 			return triangleIndices.size();
@@ -181,7 +182,9 @@ public final class ManifoldBRepPlan {
 			if (!(other instanceof Plan))
 				return false;
 			Plan that = (Plan) other;
-			return Objects.equals(faces, that.faces) && triangleCount == that.triangleCount && fallbackRegionCount == that.fallbackRegionCount && fallbackTriangleCount == that.fallbackTriangleCount;
+			return Objects.equals(faces, that.faces) && triangleCount == that.triangleCount
+					&& fallbackRegionCount == that.fallbackRegionCount
+					&& fallbackTriangleCount == that.fallbackTriangleCount;
 		}
 
 		@Override
@@ -196,10 +199,11 @@ public final class ManifoldBRepPlan {
 
 		@Override
 		public String toString() {
-			return "Plan[faces=" + faces + ", triangleCount=" + triangleCount + ", fallbackRegionCount=" + fallbackRegionCount + ", fallbackTriangleCount=" + fallbackTriangleCount + "]";
+			return "Plan[faces=" + faces + ", triangleCount=" + triangleCount + ", fallbackRegionCount="
+					+ fallbackRegionCount + ", fallbackTriangleCount=" + fallbackTriangleCount + "]";
 		}
 
-		
+
 	}
 
 	private static final class Edge {
@@ -512,7 +516,9 @@ public final class ManifoldBRepPlan {
 				fallbackTriangles += region.size();
 				for (int t : region)
 					faces.add(new Face(points[indices[3 * t]], normals[t],
-							Collections.singletonList(Arrays.asList(indices[3 * t], indices[3 * t + 1], indices[3 * t + 2])), Collections.singletonList(t)));
+							Collections.singletonList(
+									Arrays.asList(indices[3 * t], indices[3 * t + 1], indices[3 * t + 2])),
+							Collections.singletonList(t)));
 			}
 		}
 		return new Plan(faces, count, fallbackRegions, fallbackTriangles);

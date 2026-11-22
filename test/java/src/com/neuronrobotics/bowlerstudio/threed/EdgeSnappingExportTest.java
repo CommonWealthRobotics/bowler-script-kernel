@@ -141,11 +141,11 @@ public class EdgeSnappingExportTest {
 		CSG cube = new Cube(1).toCSG();
 		int count = cube.getVertices().length / 3;
 		double[] points = Arrays.copyOf(cube.getVertices(), cube.getVertices().length + 9);
-		System.arraycopy(new double[]{0.123, -0.456, 0, 0.123, -0.456, 0.4, 0.123, -0.456, 0.2},
-				0, points, count * 3, 9);
+		System.arraycopy(new double[]{0.123, -0.456, 0, 0.123, -0.456, 0.4, 0.123, -0.456, 0.2}, 0, points, count * 3,
+				9);
 		long[] triangles = Arrays.copyOf(cube.getTriangles(), cube.getTriangles().length + 6);
-		System.arraycopy(new long[]{count, count + 1, count + 2, count, count + 2, count + 1},
-				0, triangles, cube.getTriangles().length, 6);
+		System.arraycopy(new long[]{count, count + 1, count + 2, count, count + 2, count + 1}, 0, triangles,
+				cube.getTriangles().length, 6);
 		STEPFile export = new STEPFile(new CSG(points, triangles, Color.GRAY), STEPFile.ExportMode.EDGE_SNAPPING);
 		assertEquals(12L, export.getCsg().getTriCount());
 		assertEquals(1, export.getCsg().getVolume(), 1e-12);

@@ -97,7 +97,8 @@ public class ManifoldBRepPlanTest {
 		assertEquals(face.hashCode(), equal.hashCode());
 		assertEquals(plan, equalPlan);
 		assertEquals(plan.hashCode(), equalPlan.hashCode());
-		for (List<?> immutable : Arrays.asList(face.loops(), face.loops().get(0), face.triangleIndices(), plan.faces())) {
+		for (List<?> immutable : Arrays.asList(face.loops(), face.loops().get(0), face.triangleIndices(),
+				plan.faces())) {
 			try {
 				immutable.clear();
 				fail("plan collections must be immutable");

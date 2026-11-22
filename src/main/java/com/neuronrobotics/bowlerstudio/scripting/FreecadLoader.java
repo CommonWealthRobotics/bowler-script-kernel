@@ -339,8 +339,8 @@ public class FreecadLoader implements IScriptingLanguage {
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		File export = File.createTempFile("freecad-3mf-export-", ".py");
 		export.deleteOnExit();
-		try (InputStream resource = FreecadLoader.class.getResourceAsStream(
-				"/com/neuronrobotics/bowlerstudio/scripting/freecad_3mf.py")) {
+		try (InputStream resource = FreecadLoader.class
+				.getResourceAsStream("/com/neuronrobotics/bowlerstudio/scripting/freecad_3mf.py")) {
 			if (resource == null)
 				throw new IOException("Missing bundled FreeCAD 3MF exporter");
 			Files.copy(resource, export.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);

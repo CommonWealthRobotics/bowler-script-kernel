@@ -93,7 +93,8 @@ final class EdgeSnappingMesh {
 			for (int dx = -1; dx <= 1; dx++)
 				for (int dy = -1; dy <= 1; dy++)
 					for (int dz = -1; dz <= 1; dz++)
-						for (int other : cells.getOrDefault(new Cell(x + dx, y + dy, z + dz), Collections.emptyList())) {
+						for (int other : cells.getOrDefault(new Cell(x + dx, y + dy, z + dz),
+								Collections.emptyList())) {
 							double distance = Math.hypot(
 									Math.hypot(points[3 * i] - points[3 * other],
 											points[3 * i + 1] - points[3 * other + 1]),
