@@ -1,5 +1,8 @@
 package com.neuronrobotics.bowlerstudio.threed;
 
+import java.util.Objects;
+
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import eu.mihosoft.vrl.v3d.CSG;
-import eu.mihosoft.vrl.v3d.Vector3d;
+import com.neuronrobotics.manifold3d.NativeMeshCleanup;
 
 import com.neuronrobotics.sdk.common.Log;
 import com.neuronrobotics.sdk.common.TickToc;
@@ -24,6 +27,15 @@ import javafx.scene.paint.Color;
  * several, and reads the geometry back out of a STEP file.
  */
 public final class STEPFile {
+
+	/** Compatibility snapping may alter topology; callers must validate its round trip. */
+	public enum ExportMode {
+		/** Native cleanup and topology-preserving BRep planning. */
+		PRIMARY,
+		/** Extent-relative proximity welding followed by native manifold cleanup. */
+		EDGE_SNAPPING
+	}
+
 
 	private static final String SCHEMA = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF {1 0 10303 442 1 1 4 }";
 	private static final String PROTOCOL = "ap242_managed_model_based_3d_engineering_mim_lf";
@@ -55,7 +67,7 @@ public final class STEPFile {
 
 		private String name() {
 			String name = csg.getName();
-			return name == null || name.isBlank() ? "shape" : name.trim();
+			return name == null || name.codePoints().allMatch(Character::isWhitespace) ? "shape" : name.trim();
 		}
 	}
 
@@ -66,6 +78,19 @@ public final class STEPFile {
 	public STEPFile(CSG csg) {
 		this(Collections.singletonList(csg), DEFAULT_ANGLE_DEGREES, DEFAULT_TOPOLOGY_TOLERANCE,
 				DEFAULT_STITCH_TOLERANCE);
+	}
+
+	public STEPFile(CSG csg, ExportMode mode) {
+		this(Collections.singletonList(csg), mode);
+	}
+
+	public STEPFile(List<CSG> csgs, ExportMode mode) {
+		this(csgs, DEFAULT_ANGLE_DEGREES, DEFAULT_TOPOLOGY_TOLERANCE, DEFAULT_STITCH_TOLERANCE, mode);
+	}
+
+	public STEPFile(CSG csg, double angleDegrees, double topologyRepairTolerance, double stitchTolerance,
+			ExportMode mode) {
+		this(Collections.singletonList(csg), angleDegrees, topologyRepairTolerance, stitchTolerance, mode);
 	}
 
 	/** An assembly of parts with the default feature edge settings. */
@@ -82,6 +107,12 @@ public final class STEPFile {
 	 * every part where it already is.
 	 */
 	public STEPFile(List<CSG> csgs, double angleDegrees, double topologyRepairTolerance, double stitchTolerance) {
+		this(csgs, angleDegrees, topologyRepairTolerance, stitchTolerance, ExportMode.PRIMARY);
+	}
+
+	public STEPFile(List<CSG> csgs, double angleDegrees, double topologyRepairTolerance, double stitchTolerance,
+			ExportMode mode) {
+		Objects.requireNonNull(mode, "mode");
 		if (csgs == null || csgs.isEmpty())
 			throw new IllegalArgumentException("csgs must not be empty");
 		Log.debug("Creating Step from " + csgs.size() + " csgs");
@@ -89,36 +120,31 @@ public final class STEPFile {
 		for (CSG csg : csgs) {
 			if (csg == null)
 				throw new IllegalArgumentException("csgs must not contain null");
-			// the mesh is decomposed into its connected bodies first: each body
-			// becomes a part of its own, with its own MANIFOLD_SOLID_BREP in the
-			// file, rather than several bodies sharing one shell — which is what a
-			// reader least knows how to sew
-			for (CSG body : decomposeForBRep(csg)) {
-				body = simplifyForBRep(body);
+			CSG prepared = mode == ExportMode.EDGE_SNAPPING ? EdgeSnappingMesh.prepare(csg) : csg;
+			// Snapping can create collinear fans; native cleanup must precede face planning.
+			for (CSG body : decomposeForBRep(simplifyForBRep(prepared))) {
 				parts.add(new Part(body,
 						FeatureEdgeExtractor.extract(body, angleDegrees, topologyRepairTolerance, stitchTolerance)));
 			}
 		}
 		this.parts = Collections.unmodifiableList(parts);
-		this.shapes = List.of();
+		this.shapes = Collections.emptyList();
 	}
 
 	/**
 	 * The connected bodies of the mesh, through the kernel's own
 	 * {@code decompose}: islands of triangles that share edges come out as
-	 * separate solids, each a part of the written assembly. The mesh itself when
-	 * the kernel is not the active engine.
+	 * separate solids, each a part of the written assembly.
 	 */
 	private static List<CSG> decomposeForBRep(CSG csg) {
-		if (!ManifoldMeshCorrector.available())
-			return List.of(csg);
 		try {
 			List<CSG> bodies = CSG.getManifold().decompose(csg);
+			for (CSG body : bodies)
+				body.historySync(csg);
 			Log.debug("STEPFile: decomposed into " + bodies.size() + " body(ies)");
 			return bodies;
 		} catch (Throwable t) {
-			Log.error("STEPFile: decompose failed, writing the mesh as one body: " + t);
-			return List.of(csg);
+			throw new IllegalStateException("Cannot decompose STEP solid", t);
 		}
 	}
 
@@ -136,7 +162,7 @@ public final class STEPFile {
 	 *            package shows; use this to check that the BRep covers the mesh.
 	 */
 	public STEPFile(InputStream step, boolean preferTessellation) throws IOException {
-		this.parts = List.of();
+		this.parts = Collections.emptyList();
 		this.shapes = StepImport.readShapes(step, preferTessellation);
 	}
 
@@ -160,7 +186,7 @@ public final class STEPFile {
 
 	/** Feature edges of {@link #getCsg()}, empty after reading a STEP file. */
 	public List<FeatureEdgeExtractor.Edge> getEdges() {
-		return parts.isEmpty() ? List.of() : parts.get(0).edges;
+		return parts.isEmpty() ? Collections.emptyList() : parts.get(0).edges;
 	}
 
 	/**
@@ -169,7 +195,7 @@ public final class STEPFile {
 	 * faces a file described.
 	 */
 	public List<StepFace> getFaces() {
-		return parts.isEmpty() ? List.of() : StepBRepWrite.faces(parts.get(0).csg);
+		return parts.isEmpty() ? Collections.<StepFace>emptyList() : ManifoldBRepWrite.faces(parts.get(0).csg);
 	}
 
 	/** The CSGs to write, in order; empty after reading a STEP file. */
@@ -210,21 +236,7 @@ public final class STEPFile {
 
 		Log.debug("STEPFile.toStep: " + parts.size() + " part(s)");
 		TickToc.tic("toStep");
-		// A mesh can carry facets and edges thinner than any BRep kernel resolves: a
-		// boolean near a seam, an STL of folded sheet metal. Written as they are, those
-		// faces are refused and the shell comes apart. Manifold's own simplify is the
-		// pass that merges them, and it runs here — at the file's front door — so every
-		// face written is one a reader can build. The parts are rebuilt from the
-		// cleaned meshes, with the feature edges re-extracted to match.
-		List<Part> writing = new ArrayList<>();
-		for (Part part : parts) {
-			CSG cleaned = simplifyForBRep(part.csg);
-			writing.add(cleaned == part.csg
-					? part
-					: new Part(cleaned, FeatureEdgeExtractor.extract(cleaned, DEFAULT_ANGLE_DEGREES,
-							DEFAULT_TOPOLOGY_TOLERANCE, DEFAULT_STITCH_TOLERANCE)));
-		}
-		checkSurfaceCoverage(writing);
+		List<Part> writing = parts;
 		StepEmitter emitter = new StepEmitter();
 		String fileName;
 		if (writing.size() == 1) {
@@ -238,82 +250,17 @@ public final class STEPFile {
 		return file(fileName, emitter.text());
 	}
 
-	/**
-	 * The written faces against Manifold's own measure of the mesh. Every part's
-	 * faces must cover the mesh's surface: a face OCC later refuses would show up
-	 * here as surface the file plans but cannot deliver, before the file is
-	 * written rather than after a reader complains.
-	 */
-	private static void checkSurfaceCoverage(List<Part> parts) {
-		if (!ManifoldMeshCorrector.available())
-			return;
-		for (Part part : parts) {
-			try {
-				double meshArea = CSG.getManifold().surfaceArea(part.csg);
-				double faceArea = 0;
-				for (StepFace face : StepBRepWrite.faces(part.csg)) {
-					if (!face.isPlanar())
-						continue;
-					// planar face area: the shoelace sum of its outer bound's signed
-					// area, projected on the face's plane
-					for (List<double[]> loop : face.loops)
-						faceArea += Math.abs(signedArea(loop, face.normal));
-				}
-				double loss = meshArea - faceArea;
-				Log.debug("STEPFile.toStep: " + part.name() + " surface " + meshArea + ", faces cover " + faceArea
-						+ " (" + loss + " uncovered)");
-				if (loss > Math.max(1e-6, meshArea * 1e-4))
-					Log.debug("STEPFile.toStep: WARNING " + part.name() + " faces do not cover the mesh surface; "
-							+ "a BRep reader may refuse faces of the written file");
-			} catch (Throwable t) {
-				Log.error("STEPFile.toStep: surface coverage check failed: " + t);
-			}
-		}
-	}
-
-	/** The signed area a loop covers, measured in its face's plane. */
-	private static double signedArea(List<double[]> loop, Vector3d normal) {
-		if (loop.size() < 3)
-			return 0;
-		// Newell's method: the projected polygon area is half the loop-sum of
-		// cross products, dotted with the plane normal
-		double nx = 0, ny = 0, nz = 0;
-		for (int i = 0; i < loop.size(); i++) {
-			double[] a = loop.get(i);
-			double[] b = loop.get((i + 1) % loop.size());
-			nx += (a[1] - b[1]) * (a[2] + b[2]);
-			ny += (a[2] - b[2]) * (a[0] + b[0]);
-			nz += (a[0] - b[0]) * (a[1] + b[1]);
-		}
-		return (nx * normal.x + ny * normal.y + nz * normal.z) / 2;
-	}
-
-	/**
-	 * The mesh corrected for BRep export, through the Manifold kernel's own
-	 * operations; the mesh itself when the kernel is not the active engine. The
-	 * tolerance is the resolution a STEP reader works to, so nothing the correction
-	 * moves is surface a reader measures. See {@link ManifoldMeshCorrector}.
-	 */
+	/** Cleans once in Manifold before extracting bodies and BRep boundaries. */
 	private static CSG simplifyForBRep(CSG csg) {
-		CSG corrected = ManifoldMeshCorrector.correct(csg, BREP_RESOLUTION_MM, BREP_BOUNDS_BUDGET_MM);
-		// the spikes that survive the simplify are thin fans standing off the
-		// surface, which a BRep reader builds as slivers; dissolve them, held to
-		// the same budget. Edges bent more than a right angle stay: a real corner
-		// of the part is not a spike.
-		return ManifoldMeshCorrector.dissolveSpikes(corrected, BREP_RESOLUTION_MM, BREP_BOUNDS_BUDGET_MM,
-				BREP_SHARP_ANGLE_DEGREES);
+		try {
+			return csg.simplify();
+		} catch (Throwable failure) {
+			throw new IllegalStateException("Cannot simplify STEP solid " + csg.getName(), failure);
+		}
 	}
 
-	/** Edges bent more than this many degrees are corners, not spikes. */
-	public static final double BREP_SHARP_ANGLE_DEGREES = 119;
-
-	/**
-	 * The mesh's cleanup tolerance, in millimetres: the BRep export's own working
-	 * resolution. Manifold's simplify collapses the edges and merges the coplanar
-	 * facets shorter than this, which are exactly the geometry no BRep kernel can
-	 * carry, and it moves no surface further.
-	 */
-	public static final double BREP_RESOLUTION_MM = 0.05;
+	/** Native cleanup precision, in millimetres. */
+	public static final double BREP_RESOLUTION_MM = NativeMeshCleanup.DEFAULT_TOLERANCE;
 
 	/**
 	 * How far the BRep-facing correction may move the mesh's bounds, in
@@ -327,16 +274,19 @@ public final class STEPFile {
 		Files.write(file.toPath(), toStep().getBytes(StandardCharsets.UTF_8));
 	}
 
-	/** The file for one part, with no assembly structure around it. */
-	private static void part(StepEmitter emitter, Part part) {
-		Contexts contexts = contexts(emitter, distanceAccuracy(List.of(part)));
-		Product product = product(emitter, contexts, part.name());
-
-		List<Long> items = StepBRepWrite.items(emitter, part.csg, part.name());
-		// a representation must carry a shape, so a part with no mesh cannot be
-		// written on its own
+	private List<Long> brepItems(StepEmitter emitter, Part part) {
+		List<Long> items = ManifoldBRepWrite.items(emitter, part.csg, part.name());
 		if (items.size() < 2)
 			throw new IllegalStateException("No geometry to export for part " + part.name());
+		return items;
+	}
+
+	/** The file for one part, with no assembly structure around it. */
+	private void part(StepEmitter emitter, Part part) {
+		Contexts contexts = contexts(emitter, distanceAccuracy(Collections.singletonList(part)));
+		Product product = product(emitter, contexts, part.name());
+
+		List<Long> items = brepItems(emitter, part);
 
 		long representation = emitter.add("ADVANCED_BREP_SHAPE_REPRESENTATION(" + quote(part.name()) + ","
 				+ references(items) + ",#" + contexts.representation + ")");
@@ -365,7 +315,7 @@ public final class STEPFile {
 	 * one occurrence of every part product, following the AP242 assembly pattern
 	 * of {@code NEXT_ASSEMBLY_USAGE_OCCURRENCE} plus a transformed relationship.
 	 */
-	private static void assembly(StepEmitter emitter, List<Part> parts) {
+	private void assembly(StepEmitter emitter, List<Part> parts) {
 		Contexts contexts = contexts(emitter, distanceAccuracy(parts));
 		Product assembly = product(emitter, contexts, ASSEMBLY_NAME);
 
@@ -379,8 +329,8 @@ public final class STEPFile {
 
 			// the part's own representation, at its own coordinates, reaches the
 			// solid through the item list, so only the geometry is coloured
-			List<Long> items = StepBRepWrite.items(emitter, part.csg, part.name());
-			List<Long> geometry = items.size() > 1 ? List.of(items.get(1)) : items;
+			List<Long> items = brepItems(emitter, part);
+			List<Long> geometry = items.size() > 1 ? Collections.singletonList(items.get(1)) : items;
 			partPlacements[i] = placement(emitter);
 
 			List<Long> representationItems = new ArrayList<>();

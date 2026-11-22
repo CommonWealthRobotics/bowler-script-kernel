@@ -323,30 +323,44 @@ public class FreecadLoader implements IScriptingLanguage {
 		}
 	}
 
-	/**
-	 * Exports the FreeCAD model to a 3MF file, one closed mesh per solid, which
-	 * every solid in the model survives.
-	 */
+	/** The native process ran but could not export usable solid geometry. */
+	public static final class MeshExportFailure extends IOException {
+		private static final long serialVersionUID = 1L;
+
+		public MeshExportFailure(String message) {
+			super(message);
+		}
+	}
+
+	/** Exports native tessellation with double-precision coordinates and world placements. */
 	public static void to3MFFile(File freecadModel, File threeMFout)
 			throws InvalidRemoteException, TransportException, GitAPIException, IOException, InterruptedException {
 		ScriptingEngine.useCaDoodleWorkspace();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
-		try {
-			File export = ScriptingEngine.fileFromGit("https://github.com/CommonWealthRobotics/freecad-bowler-cli.git",
-					"export3MF.py");
-			ArrayList<String> args = new ArrayList<>();
-
-			args.add(freecad.getAbsolutePath());
-
-			args.add("-c");
-			args.add(export.getAbsolutePath());
-			args.add(freecadModel.getAbsolutePath());
-			args.add(threeMFout.getAbsolutePath());
-
-			legacySystemRun(headlessEnvironment(), export.getAbsoluteFile().getParentFile(), System.out, args);
-		} catch (Throwable t) {
-			com.neuronrobotics.sdk.common.Log.error(t);
+		File export = File.createTempFile("freecad-3mf-export-", ".py");
+		export.deleteOnExit();
+		try (InputStream resource = FreecadLoader.class.getResourceAsStream(
+				"/com/neuronrobotics/bowlerstudio/scripting/freecad_3mf.py")) {
+			if (resource == null)
+				throw new IOException("Missing bundled FreeCAD 3MF exporter");
+			Files.copy(resource, export.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 		}
+		File staging = File.createTempFile("freecad-mesh-", ".3mf", threeMFout.getAbsoluteFile().getParentFile());
+		staging.deleteOnExit();
+		Map<String, String> environment = headlessEnvironment();
+		environment.put("CADOODLE_FREECAD_EXPORT", "1");
+		environment.put("CADOODLE_FREECAD_INPUT", freecadModel.getAbsolutePath());
+		environment.put("CADOODLE_FREECAD_OUTPUT", staging.getAbsolutePath());
+		ArrayList<String> args = new ArrayList<String>();
+		args.add(freecad.getAbsolutePath());
+		args.add("-c");
+		args.add(export.getAbsolutePath());
+		args.add(freecadModel.getAbsolutePath());
+		args.add(staging.getAbsolutePath());
+		legacySystemRun(environment, export.getAbsoluteFile().getParentFile(), System.out, args);
+		if (!staging.isFile() || staging.length() == 0)
+			throw new MeshExportFailure("FreeCAD could not export valid solid meshes from " + freecadModel);
+		Files.move(staging.toPath(), threeMFout.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	public static void open(File freecadModel) {

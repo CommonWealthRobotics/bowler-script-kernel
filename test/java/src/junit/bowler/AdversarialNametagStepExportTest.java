@@ -46,8 +46,6 @@ public class AdversarialNametagStepExportTest {
 	/** The reference model, from the 3MF in the repo's STEP corpus. */
 	private static final File SOURCE = new File("testStepFiles/Marvelous_Champion_Nametag.3mf");
 
-	/** How far the round-tripped bounds may sit from the reference's, in millimetres. */
-	private static final double BOUNDS_TOLERANCE = 0.00001;
 
 	// the gate's verdict comes from the round trip it runs inside FreeCAD, and the
 	// same import also carries the self-check (bopCheck) over every face of the
@@ -139,19 +137,8 @@ public class AdversarialNametagStepExportTest {
 		roundTripped.setNoScale(true);
 		assertTrue("the 3MF round trip lost every triangle", roundTripped.getTriCount() > 0);
 
-		// the bounds of the loaded CSG must match the reference's, from CSG's own
-		// bounds, to a hundredth of a micron
-		eu.mihosoft.vrl.v3d.Bounds actual = roundTripped.getBounds();
-		double[][] checks = {{expected.getMin().x, actual.getMin().x}, {expected.getMin().y, actual.getMin().y},
-				{expected.getMin().z, expected.getMin().z}, {expected.getMax().x, actual.getMax().x},
-				{expected.getMax().y, actual.getMax().y}, {expected.getMax().z, actual.getMax().z}};
-		String[] names = {"minimum x", "minimum y", "minimum z", "maximum x", "maximum y", "maximum z"};
-		for (int at = 0; at < checks.length; at++) {
-			double wanted = checks[at][0];
-			double got = checks[at][at == 2 ? 0 : 1];
-			assertTrue("the round trip's " + names[at] + " " + got + " must match the reference's " + wanted
-					+ " within " + BOUNDS_TOLERANCE, Math.abs(got - wanted) <= BOUNDS_TOLERANCE);
-		}
+		StepRoundTripAssertions.bounds(expected, roundTripped.getBounds());
+		StepRoundTripAssertions.volume(reference.getVolume(), roundTripped.getVolume());
 	}
 
 	/** The occurrences of a token in the file text, for the entity counts. */
@@ -206,6 +193,7 @@ public class AdversarialNametagStepExportTest {
 					+ " ms; its log is " + log.getAbsolutePath());
 		}
 		Log.debug("the FreeCAD gate printed:\n" + new String(Files.readAllBytes(log.toPath()), StandardCharsets.UTF_8));
+		assertEquals("FreeCAD gate failed; log: " + log.getAbsolutePath(), 0, process.exitValue());
 		assertTrue("the FreeCAD gate wrote no report at " + report.getAbsolutePath(), report.isFile());
 	}
 }
