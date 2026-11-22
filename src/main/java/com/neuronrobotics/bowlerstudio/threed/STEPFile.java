@@ -58,9 +58,9 @@ public final class STEPFile {
 	/** One part to write: its geometry and the feature edges taken from it. */
 	private static final class Part {
 		private final CSG csg;
-		private final List<FeatureEdgeExtractor.Edge> edges;
+		private final DeferredFeatureEdges edges;
 
-		private Part(CSG csg, List<FeatureEdgeExtractor.Edge> edges) {
+		private Part(CSG csg, DeferredFeatureEdges edges) {
 			this.csg = csg;
 			this.edges = edges;
 		}
@@ -132,12 +132,12 @@ public final class STEPFile {
 			progress(0, 1, "Decomposing " + scope);
 			List<CSG> bodies = decomposeForBRep(simplified);
 			progress(1, 1, "Decomposing " + scope);
-			progress(0, bodies.size(), "Extracting feature edges for " + scope);
+			progress(0, bodies.size(), "Preparing feature edges for " + scope);
 			for (int bodyIndex = 0; bodyIndex < bodies.size(); bodyIndex++) {
 				CSG body = bodies.get(bodyIndex);
 				parts.add(new Part(body,
-						FeatureEdgeExtractor.extract(body, angleDegrees, topologyRepairTolerance, stitchTolerance)));
-				progress(bodyIndex + 1, bodies.size(), "Extracting feature edges for " + scope);
+						new DeferredFeatureEdges(body, angleDegrees, topologyRepairTolerance, stitchTolerance)));
+				progress(bodyIndex + 1, bodies.size(), "Preparing feature edges for " + scope);
 			}
 		}
 		this.parts = Collections.unmodifiableList(parts);
@@ -199,7 +199,7 @@ public final class STEPFile {
 
 	/** Feature edges of {@link #getCsg()}, empty after reading a STEP file. */
 	public List<FeatureEdgeExtractor.Edge> getEdges() {
-		return parts.isEmpty() ? Collections.emptyList() : parts.get(0).edges;
+		return parts.isEmpty() ? Collections.emptyList() : parts.get(0).edges.get();
 	}
 
 	/**
@@ -261,9 +261,10 @@ public final class STEPFile {
 			fileName = ASSEMBLY_NAME + ".step";
 			assembly(emitter, writing);
 		}
-		Log.debug("STEPFile.toStep: emitted " + emitter.text().length() + " characters");
+		String entities = emitter.text();
+		Log.debug("STEPFile.toStep: emitted " + entities.length() + " characters");
 		progress(0, 1, "Assembling STEP text");
-		String text = file(fileName, emitter.text());
+		String text = file(fileName, entities);
 		progress(1, 1, "Assembling STEP text");
 		return text;
 	}

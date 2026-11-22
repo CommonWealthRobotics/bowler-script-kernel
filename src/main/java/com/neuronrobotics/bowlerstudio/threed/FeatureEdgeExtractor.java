@@ -105,17 +105,22 @@ public final class FeatureEdgeExtractor {
 	public static List<Edge> extract(CSG csg, double angleDegrees, double topologyRepairTolerance,
 			double stitchTolerance) {
 
+		return extract(csg.getVertices(), csg.getTriangles(), angleDegrees, topologyRepairTolerance, stitchTolerance);
+	}
+
+	static List<Edge> extract(double[] positions, long[] triangles, double angleDegrees, double topologyRepairTolerance,
+			double stitchTolerance) {
+
 		List<Edge> visibleEdges = new ArrayList<>();
 
-		long[] triangles = csg.getTriangles();
-		int triangleCount = (int) csg.getTriCount();
+		int triangleCount = triangles == null ? 0 : triangles.length / 3;
 
 		if (triangles == null || triangleCount == 0)
 			return visibleEdges;
 
 		double repairTolerance = Math.max(0.0, topologyRepairTolerance);
 
-		int vertexCount = (int) csg.getVertCount();
+		int vertexCount = positions.length / 3;
 		int[] vertexRemap = null;
 
 		double[] topologyX = null;
@@ -140,9 +145,9 @@ public final class FeatureEdgeExtractor {
 			Map<VertexKey, Integer> canonicalVertices = new HashMap<>();
 
 			for (int vertex = 0; vertex < vertexCount; vertex++) {
-				double x = csg.getVertex_X(vertex);
-				double y = csg.getVertex_Y(vertex);
-				double z = csg.getVertex_Z(vertex);
+				double x = positions[3 * vertex + 0];
+				double y = positions[3 * vertex + 1];
+				double z = positions[3 * vertex + 2];
 
 				long qx = Math.round(x / repairTolerance);
 				long qy = Math.round(y / repairTolerance);
@@ -199,17 +204,17 @@ public final class FeatureEdgeExtractor {
 					continue;
 			}
 
-			double ax = csg.getVertex_X(sourceI0);
-			double ay = csg.getVertex_Y(sourceI0);
-			double az = csg.getVertex_Z(sourceI0);
+			double ax = positions[3 * sourceI0 + 0];
+			double ay = positions[3 * sourceI0 + 1];
+			double az = positions[3 * sourceI0 + 2];
 
-			double bx = csg.getVertex_X(sourceI1);
-			double by = csg.getVertex_Y(sourceI1);
-			double bz = csg.getVertex_Z(sourceI1);
+			double bx = positions[3 * sourceI1 + 0];
+			double by = positions[3 * sourceI1 + 1];
+			double bz = positions[3 * sourceI1 + 2];
 
-			double cx = csg.getVertex_X(sourceI2);
-			double cy = csg.getVertex_Y(sourceI2);
-			double cz = csg.getVertex_Z(sourceI2);
+			double cx = positions[3 * sourceI2 + 0];
+			double cy = positions[3 * sourceI2 + 1];
+			double cz = positions[3 * sourceI2 + 2];
 
 			double ux = bx - ax;
 			double uy = by - ay;
@@ -244,13 +249,13 @@ public final class FeatureEdgeExtractor {
 				CandidateEdge edge = edgeMap.get(edgeKey);
 
 				if (edge == null) {
-					double lowX = vertexRemap == null ? csg.getVertex_X(low) : featureX[low];
-					double lowY = vertexRemap == null ? csg.getVertex_Y(low) : featureY[low];
-					double lowZ = vertexRemap == null ? csg.getVertex_Z(low) : featureZ[low];
+					double lowX = vertexRemap == null ? positions[3 * low + 0] : featureX[low];
+					double lowY = vertexRemap == null ? positions[3 * low + 1] : featureY[low];
+					double lowZ = vertexRemap == null ? positions[3 * low + 2] : featureZ[low];
 
-					double highX = vertexRemap == null ? csg.getVertex_X(high) : featureX[high];
-					double highY = vertexRemap == null ? csg.getVertex_Y(high) : featureY[high];
-					double highZ = vertexRemap == null ? csg.getVertex_Z(high) : featureZ[high];
+					double highX = vertexRemap == null ? positions[3 * high + 0] : featureX[high];
+					double highY = vertexRemap == null ? positions[3 * high + 1] : featureY[high];
+					double highZ = vertexRemap == null ? positions[3 * high + 2] : featureZ[high];
 
 					edge = new CandidateEdge(new Vector3d(lowX, lowY, lowZ), new Vector3d(highX, highY, highZ));
 

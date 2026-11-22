@@ -57,8 +57,8 @@ public class StepExportProgressTest {
 				assertStage(events, stage + " object 1/2", 1);
 				assertStage(events, stage + " object 2/2", 1);
 			}
-			assertStage(events, "Extracting feature edges for object 1/2", 2);
-			assertStage(events, "Extracting feature edges for object 2/2", 1);
+			assertStage(events, "Preparing feature edges for object 1/2", 2);
+			assertStage(events, "Preparing feature edges for object 2/2", 1);
 			assertStage(events, "Writing STEP bodies", 3);
 			assertEquals(3, events.stream()
 					.filter(e -> e.message.startsWith("STEP: Writing BRep for ") && e.current == 1).count());
