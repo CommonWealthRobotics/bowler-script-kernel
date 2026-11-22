@@ -122,6 +122,7 @@ public class AdversarialNametagStepExportTest {
 		File threeMF = new File(work, "Marvelous_Champion_Nametag_exported.3mf");
 		FreecadLoader.to3MFFile(fcStd, threeMF);
 		assertTrue("the FreeCAD 3MF export wrote no file", threeMF.isFile() && threeMF.length() > 0);
+        verifyActualMesh(threeMF, work);
 
 		// the FreeCAD gate over the exported STEP, its report read here: the verdict
 		// comes from what FreeCAD measured, not from this JVM's own opinion
@@ -143,16 +144,44 @@ public class AdversarialNametagStepExportTest {
 		// bounds, to a hundredth of a micron
 		eu.mihosoft.vrl.v3d.Bounds actual = roundTripped.getBounds();
 		double[][] checks = {{expected.getMin().x, actual.getMin().x}, {expected.getMin().y, actual.getMin().y},
-				{expected.getMin().z, expected.getMin().z}, {expected.getMax().x, actual.getMax().x},
+				{expected.getMin().z, actual.getMin().z}, {expected.getMax().x, actual.getMax().x},
 				{expected.getMax().y, actual.getMax().y}, {expected.getMax().z, actual.getMax().z}};
 		String[] names = {"minimum x", "minimum y", "minimum z", "maximum x", "maximum y", "maximum z"};
 		for (int at = 0; at < checks.length; at++) {
 			double wanted = checks[at][0];
-			double got = checks[at][at == 2 ? 0 : 1];
+			double got = checks[at][1];
 			assertTrue("the round trip's " + names[at] + " " + got + " must match the reference's " + wanted
 					+ " within " + BOUNDS_TOLERANCE, Math.abs(got - wanted) <= BOUNDS_TOLERANCE);
 		}
 	}
+
+    /** Verify the actual helper output, including duplicate build instances, before Manifold loads it. */
+    private static void verifyActualMesh(File mesh, File work) throws Exception {
+        File script = new File(work, "step_export_mesh_gate.py");
+        try (java.io.InputStream in = AdversarialNametagStepExportTest.class
+                .getResourceAsStream("/step_export_mesh_gate.py")) {
+            assertNotNull("the actual-mesh checker resource must exist", in);
+            Files.copy(in, script.toPath());
+        }
+        File report = new File(work, "actual_mesh_report.json");
+        File log = new File(work, "actual_mesh_check.log");
+        ProcessBuilder builder = new ProcessBuilder(
+                DownloadManager.getConfigExecutable("freecad", null).getAbsolutePath(),
+                "-c", script.getAbsolutePath());
+        builder.environment().put("QT_QPA_PLATFORM", "offscreen");
+        builder.environment().put("CHECK_3MF", mesh.getAbsolutePath());
+        builder.environment().put("CHECK_JSON", report.getAbsolutePath());
+        builder.redirectErrorStream(true).redirectOutput(log);
+        Process process = builder.start();
+        boolean finished = process.waitFor(60, java.util.concurrent.TimeUnit.SECONDS);
+        if (!finished) {
+            process.destroyForcibly();
+            throw new AssertionError("actual 3MF checker timed out; log: " + log.getAbsolutePath());
+        }
+        assertTrue("actual 3MF checker wrote no report; log: " + log.getAbsolutePath(), report.isFile());
+        assertEquals("actual helper 3MF is invalid or duplicated: " + Files.readString(report.toPath()),
+                0, process.exitValue());
+    }
 
 	/** The occurrences of a token in the file text, for the entity counts. */
 	private static int count(String text, String token) {
@@ -207,5 +236,10 @@ public class AdversarialNametagStepExportTest {
 		}
 		Log.debug("the FreeCAD gate printed:\n" + new String(Files.readAllBytes(log.toPath()), StandardCharsets.UTF_8));
 		assertTrue("the FreeCAD gate wrote no report at " + report.getAbsolutePath(), report.isFile());
+        String gateLog = Files.readString(log.toPath());
+        assertEquals("FreeCAD structural gate failed; round-trip JSON is a separate verdict:\n" + gateLog,
+                0, process.exitValue());
+        assertTrue("FreeCAD must explicitly report structural PASS: " + log.getAbsolutePath(),
+                gateLog.contains("GATE: PASS"));
 	}
 }
