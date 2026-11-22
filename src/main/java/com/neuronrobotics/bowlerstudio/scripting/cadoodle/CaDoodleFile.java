@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -122,7 +123,8 @@ public class CaDoodleFile {
 	private CSGDatabaseInstance csgDBinstance;
 	private File objectDir;
 	private File imageCacheDir;
-	private boolean saveing;
+	private volatile boolean saveing;
+	private final transient ReentrantLock saveLock = new ReentrantLock();
 
 	@Override
 	public String toString() {
@@ -1316,7 +1318,27 @@ public class CaDoodleFile {
 		return save(false);
 	}
 
+	/** Waits for the save slot; call from a background thread. */
+	public File saveWhenReady() throws IOException, SaveOverwriteException, InterruptedException {
+		saveLock.lockInterruptibly();
+		try {
+			return save();
+		} finally {
+			saveLock.unlock();
+		}
+	}
+
 	public File save(boolean ignoreUninitialized) throws IOException, SaveOverwriteException {
+		if (!saveLock.tryLock())
+			throw new SaveOverwriteException("Saving right now");
+		try {
+			return saveLocked(ignoreUninitialized);
+		} finally {
+			saveLock.unlock();
+		}
+	}
+
+	private File saveLocked(boolean ignoreUninitialized) throws IOException, SaveOverwriteException {
 		if (!isInitialized() && !ignoreUninitialized)
 			throw new SaveOverwriteException("Uninitialized");
 		if (initializing && !ignoreUninitialized)
@@ -1353,10 +1375,10 @@ public class CaDoodleFile {
 
 		} catch (Throwable t) {
 			Log.error(t);
-			setSaveing(false);
 			throw new SaveOverwriteException(t);
+		} finally {
+			setSaveing(false);
 		}
-		setSaveing(false);
 		return getSelf();
 	}
 
