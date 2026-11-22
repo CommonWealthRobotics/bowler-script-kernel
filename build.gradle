@@ -179,6 +179,7 @@ repositories {
 		}
 		filter {
 			includeModule("com.github.madhephaestus", "mujoco-java")
+			includeModule("com.github.madhephaestus", "manifold3d")
 		}
 	}
 }
