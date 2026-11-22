@@ -59,6 +59,34 @@ class ThreeMFBehavior(unittest.TestCase):
         self.directory = Path(self.temporary.name)
         self.output = self.directory / "result.3mf"
 
+    def test_progress_is_flushed_during_mesh_and_archive_work(self):
+        shapes = [Part.makeBox(2, 3, 4), Part.makeBox(3, 4, 5)]
+        records = []
+
+        def record(text, **kwargs):
+            fields = text.split("\t", 3)
+            self.assertEqual(fields[0], "CADOODLE_PROGRESS")
+            index, total = int(fields[1]), int(fields[2])
+            self.assertGreaterEqual(index, 0)
+            self.assertLess(index, total)
+            self.assertTrue(kwargs.get("flush"))
+            records.append((index, total, self.output.exists()))
+
+        with mock.patch("builtins.print", side_effect=record):
+            exporter.export_shapes(shapes, self.output)
+        self.assertGreater(len(records), len(shapes))
+        self.assertFalse(records[0][2])
+        self.assertTrue(records[-1][2])
+        self.assertEqual(len(read_meshes(self.output)), len(shapes))
+
+    def test_failed_export_never_reports_a_saved_archive(self):
+        records = []
+        with mock.patch.object(exporter, "_progress", side_effect=lambda *args: records.append(args)):
+            with self.assertRaises(ValueError):
+                exporter.export_shapes([], self.output)
+        self.assertFalse(records)
+        self.assertFalse(self.output.exists())
+
     def document(self):
         doc = FreeCAD.newDocument("ThreeMFBehavior")
         name = doc.Name

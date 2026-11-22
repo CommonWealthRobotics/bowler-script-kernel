@@ -211,8 +211,10 @@ public class CadFileExporter {
 	private File makeFreecad(String nameBase, List<CSG> current) throws IOException {
 		File blend = new File(nameBase + ".FCStd");
 		com.neuronrobotics.sdk.common.Log.debug("FreeCAD Writing " + blend.getAbsolutePath());
-		for (CSG tmp : current)
-			FreecadLoader.addCSGToFreeCAD(blend, tmp);
+		for (int index = 0; index < current.size(); index++) {
+			CSG.getProgressMoniter().progressUpdate(index, current.size(), "FreeCAD: exporting object", null);
+			FreecadLoader.addCSGToFreeCAD(blend, current.get(index));
+		}
 		return blend;
 	}
 

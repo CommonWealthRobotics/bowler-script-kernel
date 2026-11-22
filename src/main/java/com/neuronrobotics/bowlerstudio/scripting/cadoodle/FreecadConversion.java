@@ -43,6 +43,7 @@ final class FreecadConversion {
 			publish(attempt(work, source, name, ExportMode.PRIMARY), target);
 			return ExportMode.PRIMARY;
 		} catch (MeshLoadFailure primaryFailure) {
+			progress(0, 2, "FreeCAD: retrying with edge snapping");
 			Log.error("FreeCAD primary 3MF load failed; trying edge snapping");
 			Log.error(primaryFailure);
 			try {
@@ -65,14 +66,18 @@ final class FreecadConversion {
 		step.deleteOnExit();
 		document.deleteOnExit();
 		mesh.deleteOnExit();
+		progress(0, 4, "FreeCAD: preparing STEP geometry");
 		backend.writeStep(source, step, mode);
+		progress(1, 4, "FreeCAD: importing STEP document");
 		backend.importStep(step, document, name);
 		try {
+			progress(2, 4, "FreeCAD: exporting solid meshes");
 			backend.exportThreeMF(document, mesh);
 		} catch (FreecadLoader.MeshExportFailure failure) {
 			throw new MeshLoadFailure("Cannot export " + mode + " FreeCAD solid meshes: " + document, failure);
 		}
 		try {
+			progress(3, 4, "FreeCAD: loading exported meshes");
 			validate(source, backend.readThreeMF(mesh));
 		} catch (IOException | RuntimeException failure) {
 			throw new MeshLoadFailure("Cannot load " + mode + " FreeCAD 3MF: " + mesh, failure);
@@ -83,7 +88,9 @@ final class FreecadConversion {
 	private static void publish(File document, File target) throws IOException {
 		if (!document.isFile() || document.length() == 0)
 			throw new IOException("FreeCAD produced no document: " + document);
+		progress(0, 2, "FreeCAD: saving verified document");
 		Files.move(document.toPath(), target.toPath());
+		progress(1, 2, "FreeCAD: verified document saved");
 	}
 
 	private static void validate(List<CSG> source, List<CSG> loaded) throws IOException {
@@ -95,7 +102,10 @@ final class FreecadConversion {
 			if (owned)
 				nativeApi = new CSGManifold3d();
 			double actualVolume = 0;
+			int solidIndex = 0;
+			int total = loaded.size() + source.size();
 			for (CSG solid : loaded) {
+				progress(solidIndex++, total, "FreeCAD: checking exported solid");
 				if (solid.getTriCount() == 0)
 					throw new IOException("FreeCAD 3MF contains an empty solid");
 				double volume = nativeApi.volume(solid);
@@ -104,8 +114,10 @@ final class FreecadConversion {
 				actualVolume += volume;
 			}
 			double sourceVolume = 0;
-			for (CSG solid : source)
+			for (CSG solid : source) {
+				progress(solidIndex++, total, "FreeCAD: checking source volume");
 				sourceVolume += nativeApi.volume(solid);
+			}
 			if (!Double.isFinite(sourceVolume) || !Double.isFinite(actualVolume)
 					|| Math.abs(actualVolume - sourceVolume) > Math.max(1e-5, Math.abs(sourceVolume) * 1e-6))
 				throw new IOException("FreeCAD round-trip volume changed from " + sourceVolume + " to " + actualVolume);
@@ -119,6 +131,10 @@ final class FreecadConversion {
 			if (owned && nativeApi != null)
 				nativeApi.close();
 		}
+	}
+
+	private static void progress(int index, int total, String message) {
+		CSG.getProgressMoniter().progressUpdate(index, total, message, null);
 	}
 
 	private static final class MeshLoadFailure extends IOException {

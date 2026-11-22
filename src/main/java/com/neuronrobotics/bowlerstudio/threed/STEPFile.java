@@ -117,14 +117,27 @@ public final class STEPFile {
 			throw new IllegalArgumentException("csgs must not be empty");
 		Log.debug("Creating Step from " + csgs.size() + " csgs");
 		List<Part> parts = new ArrayList<>();
-		for (CSG csg : csgs) {
+		for (int objectIndex = 0; objectIndex < csgs.size(); objectIndex++) {
+			CSG csg = csgs.get(objectIndex);
 			if (csg == null)
 				throw new IllegalArgumentException("csgs must not contain null");
+			String scope = "object " + (objectIndex + 1) + "/" + csgs.size();
+			progress(0, 1, "Preparing " + scope);
 			CSG prepared = mode == ExportMode.EDGE_SNAPPING ? EdgeSnappingMesh.prepare(csg) : csg;
+			progress(1, 1, "Preparing " + scope);
+			progress(0, 1, "Simplifying " + scope);
 			// Snapping can create collinear fans; native cleanup must precede face planning.
-			for (CSG body : decomposeForBRep(simplifyForBRep(prepared))) {
+			CSG simplified = simplifyForBRep(prepared);
+			progress(1, 1, "Simplifying " + scope);
+			progress(0, 1, "Decomposing " + scope);
+			List<CSG> bodies = decomposeForBRep(simplified);
+			progress(1, 1, "Decomposing " + scope);
+			progress(0, bodies.size(), "Extracting feature edges for " + scope);
+			for (int bodyIndex = 0; bodyIndex < bodies.size(); bodyIndex++) {
+				CSG body = bodies.get(bodyIndex);
 				parts.add(new Part(body,
 						FeatureEdgeExtractor.extract(body, angleDegrees, topologyRepairTolerance, stitchTolerance)));
+				progress(bodyIndex + 1, bodies.size(), "Extracting feature edges for " + scope);
 			}
 		}
 		this.parts = Collections.unmodifiableList(parts);
@@ -239,15 +252,20 @@ public final class STEPFile {
 		List<Part> writing = parts;
 		StepEmitter emitter = new StepEmitter();
 		String fileName;
+		progress(0, writing.size(), "Writing STEP bodies");
 		if (writing.size() == 1) {
 			fileName = writing.get(0).name() + ".step";
 			part(emitter, writing.get(0));
+			progress(1, 1, "Writing STEP bodies");
 		} else {
 			fileName = ASSEMBLY_NAME + ".step";
 			assembly(emitter, writing);
 		}
 		Log.debug("STEPFile.toStep: emitted " + emitter.text().length() + " characters");
-		return file(fileName, emitter.text());
+		progress(0, 1, "Assembling STEP text");
+		String text = file(fileName, emitter.text());
+		progress(1, 1, "Assembling STEP text");
+		return text;
 	}
 
 	/** Cleans once in Manifold before extracting bodies and BRep boundaries. */
@@ -257,6 +275,12 @@ public final class STEPFile {
 		} catch (Throwable failure) {
 			throw new IllegalStateException("Cannot simplify STEP solid " + csg.getName(), failure);
 		}
+	}
+
+	static void progress(int completed, int total, String message) {
+		// ICSGProgress uses zero-based indexes; single operations have start/end boundaries.
+		int index = total == 1 ? completed : Math.max(0, completed - 1);
+		CSG.getProgressMoniter().progressUpdate(index, Math.max(2, total), "STEP: " + message, null);
 	}
 
 	/** Native cleanup precision, in millimetres. */
@@ -271,13 +295,18 @@ public final class STEPFile {
 
 	public void write(File file) throws IOException {
 		Log.debug("Writing step to " + file.getAbsolutePath());
-		Files.write(file.toPath(), toStep().getBytes(StandardCharsets.UTF_8));
+		String text = toStep();
+		progress(0, 1, "Writing STEP file " + file.getName());
+		Files.write(file.toPath(), text.getBytes(StandardCharsets.UTF_8));
+		progress(1, 1, "Writing STEP file " + file.getName());
 	}
 
 	private List<Long> brepItems(StepEmitter emitter, Part part) {
+		progress(0, 1, "Writing BRep for " + part.name());
 		List<Long> items = ManifoldBRepWrite.items(emitter, part.csg, part.name());
 		if (items.size() < 2)
 			throw new IllegalStateException("No geometry to export for part " + part.name());
+		progress(1, 1, "Writing BRep for " + part.name());
 		return items;
 	}
 
@@ -301,7 +330,9 @@ public final class STEPFile {
 	 * the source triangles exactly instead of re-triangulating the faces.
 	 */
 	private static void tessellation(StepEmitter emitter, Part part, Contexts contexts, long brep) {
+		progress(0, 1, "Writing tessellation for " + part.name());
 		long tessellated = StepTessellatedWrite.representation(emitter, part.csg, part.name(), contexts.representation);
+		progress(1, 1, "Writing tessellation for " + part.name());
 		if (tessellated == 0)
 			return;
 		// plain relationship: the tessellation describes the same shape, at the same
@@ -343,6 +374,7 @@ public final class STEPFile {
 					"SHAPE_DEFINITION_REPRESENTATION(#" + product.definitionShape + ",#" + representations[i] + ")");
 			tessellation(emitter, part, contexts, representations[i]);
 			colour(emitter, part.csg, contexts.representation, geometry);
+			progress(i + 1, parts.size(), "Writing STEP bodies");
 		}
 
 		List<Long> assemblyItems = new ArrayList<>();

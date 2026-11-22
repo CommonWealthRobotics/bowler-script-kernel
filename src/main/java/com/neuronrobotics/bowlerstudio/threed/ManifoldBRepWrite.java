@@ -29,12 +29,21 @@ final class ManifoldBRepWrite {
 
 	static List<Long> items(StepEmitter emitter, CSG solid, String name) {
 		ManifoldBRepWrite writer = new ManifoldBRepWrite(emitter, solid.getVertices());
+		STEPFile.progress(0, 1, "Planning BRep for " + name);
 		Plan plan = plan(solid.getVertices(), solid.getTriangles());
+		STEPFile.progress(1, 1, "Planning BRep for " + name);
 		if (plan.faces().isEmpty())
 			throw new IllegalArgumentException("Cannot write an empty BRep");
 		List<Long> faces = new ArrayList<>();
-		for (Face face : plan.faces())
+		STEPFile.progress(0, plan.faces().size(), "Writing BRep faces for " + name);
+		for (Face face : plan.faces()) {
 			faces.add(writer.face(face, name));
+			int completed = faces.size();
+			int total = plan.faces().size();
+			// Report whole-percent boundaries; retain actual face counts.
+			if (completed * 100L / total != (completed - 1) * 100L / total)
+				STEPFile.progress(completed, total, "Writing BRep faces for " + name);
+		}
 		long shell = emitter.add("CLOSED_SHELL(" + quote(name) + "," + refs(faces) + ")");
 		long body = emitter.add("MANIFOLD_SOLID_BREP(" + quote(name) + ",#" + shell + ")");
 		return Collections.unmodifiableList(

@@ -62,6 +62,7 @@ public class FreecadLoader implements IScriptingLanguage {
 		to3MFFile(code, threeMF);
 		List<CSG> imported;
 		try {
+			CSG.getProgressMoniter().progressUpdate(0, 2, "FreeCAD: loading converted meshes", null);
 			imported = CSG.fromThreeMF(threeMF.toPath());
 		} catch (Throwable e) {
 			throw new RuntimeException(e);
@@ -75,6 +76,7 @@ public class FreecadLoader implements IScriptingLanguage {
 				throw new RuntimeException("Nothing imported, this is not a model");
 			}
 		}
+		CSG.getProgressMoniter().progressUpdate(1, 2, "FreeCAD: converted meshes loaded", null);
 		return imported.size() == 1 ? imported.get(0) : imported;
 	}
 
@@ -103,6 +105,7 @@ public class FreecadLoader implements IScriptingLanguage {
 
 	@Override
 	public void getDefaultContents(File freecadGenFile) {
+		CSG.getProgressMoniter().progressUpdate(0, 2, "FreeCAD: creating document", null);
 		ScriptingEngine.useCaDoodleWorkspace();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		try {
@@ -233,6 +236,7 @@ public class FreecadLoader implements IScriptingLanguage {
 	}
 
 	public static void addSTEPToFreecad(File freecadModel, File stepToAdd, String name) {
+		CSG.getProgressMoniter().progressUpdate(0, 2, "FreeCAD: importing STEP geometry", null);
 		ScriptingEngine.useCaDoodleWorkspace();
 		File freecad = DownloadManager.getConfigExecutable("freecad", null);
 		long start = System.currentTimeMillis();
@@ -357,7 +361,8 @@ public class FreecadLoader implements IScriptingLanguage {
 		args.add(export.getAbsolutePath());
 		args.add(freecadModel.getAbsolutePath());
 		args.add(staging.getAbsolutePath());
-		legacySystemRun(environment, export.getAbsoluteFile().getParentFile(), System.out, args);
+		legacySystemRun(environment, export.getAbsoluteFile().getParentFile(), new FreecadProgressStream(System.out),
+				args);
 		if (!staging.isFile() || staging.length() == 0)
 			throw new MeshExportFailure("FreeCAD could not export valid solid meshes from " + freecadModel);
 		Files.move(staging.toPath(), threeMFout.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);

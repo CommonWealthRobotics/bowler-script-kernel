@@ -28,6 +28,6 @@ public class ConvertToFreeCAD extends ConvertToFileOperation {
 	protected void writeFile(File target, List<CSG> selected) throws IOException {
 		CSG.getProgressMoniter().progressUpdate(0, 100, "Converting CSG to Freecad", null);
 		FreecadConversion.system().write(target, selected, getName());
-		CSG.getProgressMoniter().progressUpdate(100, 100, "Verified FreeCAD conversion", null);
+		CSG.getProgressMoniter().progressUpdate(99, 100, "Verified FreeCAD conversion", null);
 	}
 }

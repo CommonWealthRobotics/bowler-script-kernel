@@ -21,6 +21,7 @@ import com.neuronrobotics.bowlerstudio.threed.STEPFile.ExportMode;
 
 import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
+import eu.mihosoft.vrl.v3d.ICSGProgress;
 
 public class FreecadConversionTest {
 	private enum Load {
@@ -91,6 +92,52 @@ public class FreecadConversionTest {
 
 	private static List<CSG> source() {
 		return Arrays.asList(new Cube(10).toCSG());
+	}
+
+	@Test
+	public void reportsStagesAndCompletionAfterPublication() throws IOException {
+		ICSGProgress previous = CSG.getProgressMoniter();
+		List<String> messages = new ArrayList<>();
+		File target = target();
+		List<Boolean> published = new ArrayList<>();
+		CSG.setProgressMoniter((index, total, message, shape) -> {
+			assertTrue(index >= 0 && index < total);
+			messages.add(message);
+			published.add(target.isFile());
+		});
+		try {
+			new FreecadConversion(new Backend()).write(target, source(), "test");
+			assertTrue(messages.size() >= 8);
+			assertFalse(published.get(0));
+			assertTrue(published.get(published.size() - 1));
+			assertTrue(messages.stream().distinct().count() >= 8);
+		} finally {
+			CSG.setProgressMoniter(previous);
+		}
+	}
+
+	@Test
+	public void failedExportStopsProgressBeforePublication() throws IOException {
+		ICSGProgress previous = CSG.getProgressMoniter();
+		Backend backend = new Backend();
+		backend.failExport = true;
+		File target = target();
+		List<Integer> stages = new ArrayList<>();
+		CSG.setProgressMoniter((index, total, message, shape) -> {
+			if (total == 4)
+				stages.add(index);
+		});
+		try {
+			try {
+				new FreecadConversion(backend).write(target, source(), "test");
+				fail("export should fail");
+			} catch (IOException expected) {
+				assertEquals(Arrays.asList(0, 1, 2), stages);
+				assertFalse(target.exists());
+			}
+		} finally {
+			CSG.setProgressMoniter(previous);
+		}
 	}
 
 	@Test

@@ -24,6 +24,10 @@ MODEL_RELATIONSHIP = "http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmod
 TESSELLATION_DEFLECTION = 0.1
 
 
+def _progress(index, total, message):
+    print("CADOODLE_PROGRESS\t%d\t%d\t%s" % (index, total, message), flush=True)
+
+
 def _element(namespace, name, attributes=None):
     return ET.Element("{%s}%s" % (namespace, name), attributes or {})
 
@@ -48,6 +52,7 @@ def _mesh(shape, placement):
             raise ValueError("3MF requires each solid to be valid, closed and positive-volume")
     local = shape.copy()
     local.Placement = FreeCAD.Placement()
+    _progress(0, 2, "FreeCAD: tessellating solid")
     vertices, triangles = local.tessellate(TESSELLATION_DEFLECTION)
     if not vertices or not triangles:
         raise ValueError("Solid tessellation must contain vertices and triangles")
@@ -61,12 +66,15 @@ def _mesh(shape, placement):
 
 
 def _export(entries, output):
+    entries = list(entries)
     model = _element(CORE, "model", {"unit": "millimeter"})
     resources = _child(model, "resources")
     build = _child(model, "build")
     count = 0
     for count, (shape, placement, name) in enumerate(entries, 1):
+        _progress(count - 1, len(entries), "FreeCAD: meshing solid %d/%d" % (count, len(entries)))
         vertices, triangles = _mesh(shape, placement)
+        _progress(count - 1, len(entries), "FreeCAD: encoding solid %d/%d" % (count, len(entries)))
         attributes = {"id": str(count), "type": "model"}
         if name is not None:
             attributes["name"] = str(name)
@@ -84,6 +92,7 @@ def _export(entries, output):
             })
         # World-coordinate vertices; omitted build transform is identity.
         _child(build, "item", objectid=str(count))
+        _progress(count - 1, len(entries), "FreeCAD: encoded solid %d/%d" % (count, len(entries)))
     if not count:
         raise ValueError("No solid shapes to export")
 
@@ -97,6 +106,7 @@ def _export(entries, output):
     ET.SubElement(relationships, "{%s}Relationship" % RELATIONSHIPS,
                   Target="/3D/3dmodel.model", Id="rel0", Type=MODEL_RELATIONSHIP)
     # Validate and serialize before opening output; atomic replacement preserves existing files.
+    _progress(0, 2, "FreeCAD: serializing mesh XML")
     parts = (("3D/3dmodel.model", _xml(model)),
              ("[Content_Types].xml", _xml(types)), ("_rels/.rels", _xml(relationships)))
     output = os.path.abspath(os.fspath(output))
@@ -105,9 +115,11 @@ def _export(entries, output):
     try:
         with os.fdopen(descriptor, "wb") as stream:
             with zipfile.ZipFile(stream, "w", zipfile.ZIP_DEFLATED) as archive:
-                for path, data in parts:
+                for index, (path, data) in enumerate(parts):
+                    _progress(index, len(parts), "FreeCAD: compressing mesh archive")
                     archive.writestr(path, data)
         os.replace(temporary, output)
+        _progress(1, 2, "FreeCAD: mesh archive saved")
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
@@ -142,6 +154,7 @@ def _document_entries(document):
 
 def export_document(input_fcstd, output):
     """Open an FCStd document, export its top-level solids, and close it."""
+    _progress(0, 2, "FreeCAD: opening document")
     document = FreeCAD.openDocument(os.fspath(input_fcstd))
     try:
         _export(_document_entries(document), output)
