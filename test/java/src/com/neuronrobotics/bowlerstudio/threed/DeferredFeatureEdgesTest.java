@@ -11,6 +11,19 @@ import eu.mihosoft.vrl.v3d.Cube;
 
 public class DeferredFeatureEdgesTest {
 	@Test
+	public void invalidTopologyIsNotTraversedUntilEdgesAreRequested() {
+		CSG source = new Cube(10).toCSG();
+		source.getTriangles()[0] = source.getVertices().length;
+		DeferredFeatureEdges deferred = new DeferredFeatureEdges(source, 35, 0, .002);
+		try {
+			deferred.get();
+			fail("Extraction must reject the invalid index");
+		} catch (IndexOutOfBoundsException expected) {
+			// Snapshot construction does not traverse topology; extraction does.
+		}
+	}
+
+	@Test
 	public void snapshotSurvivesSourceMutationAndCachesResult() {
 		CSG source = new Cube(10).toCSG();
 		for (double angle : new double[]{0, 35, 180}) {
