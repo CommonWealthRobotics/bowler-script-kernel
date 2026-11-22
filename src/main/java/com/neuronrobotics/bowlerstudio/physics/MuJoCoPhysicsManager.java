@@ -382,8 +382,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		builder = Mujoco.builder().withModel(name);
 
 		builder.addOption().withTimestep(getTimestep()).withIterations(getIterations())
-				.withIntegrator(getIntegratorType()).withViscosity(0.00002)
-				.withDensity(1.204).addFlag().withMulticcd(KwEnable.ENABLE);
+				.withIntegrator(getIntegratorType()).withViscosity(0.00002).withDensity(1.204).addFlag()
+				.withMulticcd(KwEnable.ENABLE);
 		builder.addSize().withMemory("300M");
 		builder.addVisual().addMap().withForce(0.1f).withZfar(30f);
 		builder.addStatistic().withCenter(0d, 0d, 0.7d);
@@ -436,8 +436,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		loadBase(db, cat, null, new TransformNR());
 	}
 
-	public void loadBase(CSGDatabaseInstance db, MobileBase cat, Body.Builder<?> linkBody2,
-			TransformNR offsetGlobal) throws IOException {
+	public void loadBase(CSGDatabaseInstance db, MobileBase cat, Body.Builder<?> linkBody2, TransformNR offsetGlobal)
+			throws IOException {
 		if (contacts == null)
 			contacts = builder.addContact();
 		boolean freeBase = cat.getSteerable().size() > 0 || cat.getDrivable().size() > 0 || cat.getLegs().size() > 0;
@@ -460,11 +460,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionX() + " "
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionY() + " "
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
-			addBody.withPos(offsetGlobal.getX() / 1000.0, offsetGlobal.getY() / 1000.0, lowestPoint)
-					.withQuat(offsetGlobal.getRotation().getRotationMatrix2QuaturnionW(),
-							offsetGlobal.getRotation().getRotationMatrix2QuaturnionX(),
-							offsetGlobal.getRotation().getRotationMatrix2QuaturnionY(),
-							offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ());
+			addBody.withPos(offsetGlobal.getX() / 1000.0, offsetGlobal.getY() / 1000.0, lowestPoint).withQuat(
+					offsetGlobal.getRotation().getRotationMatrix2QuaturnionW(),
+					offsetGlobal.getRotation().getRotationMatrix2QuaturnionX(),
+					offsetGlobal.getRotation().getRotationMatrix2QuaturnionY(),
+					offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ());
 			if (freeBase) {
 				addBody.addFreejoint();
 			}
@@ -476,11 +476,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionY() + " "
 					+ offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ();
 			addBody = linkBody2.addBody();
-			addBody.withPos(offsetGlobal.getX() / 1000.0, offsetGlobal.getY() / 1000.0, lowestPoint)
-					.withQuat(offsetGlobal.getRotation().getRotationMatrix2QuaturnionW(),
-							offsetGlobal.getRotation().getRotationMatrix2QuaturnionX(),
-							offsetGlobal.getRotation().getRotationMatrix2QuaturnionY(),
-							offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ());
+			addBody.withPos(offsetGlobal.getX() / 1000.0, offsetGlobal.getY() / 1000.0, lowestPoint).withQuat(
+					offsetGlobal.getRotation().getRotationMatrix2QuaturnionW(),
+					offsetGlobal.getRotation().getRotationMatrix2QuaturnionX(),
+					offsetGlobal.getRotation().getRotationMatrix2QuaturnionY(),
+					offsetGlobal.getRotation().getRotationMatrix2QuaturnionZ());
 
 		}
 		addBody.withName(bodyName);
@@ -566,11 +566,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 					+ center.getRotation().getRotationMatrix2QuaturnionY() + " "
 					+ center.getRotation().getRotationMatrix2QuaturnionZ();
 			geomToSourceCSG.put(geom, part);
-			geom.withPos(center.getX() / 1000.0, center.getY() / 1000.0, center.getZ() / 1000.0)
-					.withQuat(center.getRotation().getRotationMatrix2QuaturnionW(),
-							center.getRotation().getRotationMatrix2QuaturnionX(),
-							center.getRotation().getRotationMatrix2QuaturnionY(),
-							center.getRotation().getRotationMatrix2QuaturnionZ());
+			geom.withPos(center.getX() / 1000.0, center.getY() / 1000.0, center.getZ() / 1000.0).withQuat(
+					center.getRotation().getRotationMatrix2QuaturnionW(),
+					center.getRotation().getRotationMatrix2QuaturnionX(),
+					center.getRotation().getRotationMatrix2QuaturnionY(),
+					center.getRotation().getRotationMatrix2QuaturnionZ());
 			if (part.hasMassSet()) {
 				double val = part.getMassKG(mass) * KgtoMujocoMass;
 				geom.withMass(val);
@@ -651,9 +651,8 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		}
 	}
 
-	public Body.Builder<?> loadLink(MobileBase cat, DHParameterKinematics l, int index,
-			ArrayList<CSG> cad, Body.Builder<?> addBody,
-			HashMap<AbstractLink, Body.Builder<?>> linkToBulderMap) {
+	public Body.Builder<?> loadLink(MobileBase cat, DHParameterKinematics l, int index, ArrayList<CSG> cad,
+			Body.Builder<?> addBody, HashMap<AbstractLink, Body.Builder<?>> linkToBulderMap) {
 		AbstractLink link = l.getAbstractLink(index);
 		LinkConfiguration conf = link.getLinkConfiguration();
 
@@ -687,11 +686,11 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 		TransformNR center = conf.getCenterOfMassFromCentroid();
 		String centerString = center.getX() / 1000.0 + " " + center.getY() / 1000.0 + " " + center.getZ() / 1000.0
 				+ " ";
-		Body.Builder<?> linkBody = addBody.addBody().withName(name)
-				.withPos(x, y, z).withQuat(location.getRotation().getRotationMatrix2QuaturnionW(),
-						location.getRotation().getRotationMatrix2QuaturnionX(),
-						location.getRotation().getRotationMatrix2QuaturnionY(),
-						location.getRotation().getRotationMatrix2QuaturnionZ());
+		Body.Builder<?> linkBody = addBody.addBody().withName(name).withPos(x, y, z).withQuat(
+				location.getRotation().getRotationMatrix2QuaturnionW(),
+				location.getRotation().getRotationMatrix2QuaturnionX(),
+				location.getRotation().getRotationMatrix2QuaturnionY(),
+				location.getRotation().getRotationMatrix2QuaturnionZ());
 		linkToBulderMap.put(link, linkBody);
 
 		double gear = 660;
@@ -709,7 +708,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 				.withRange(lower * gear, upper * gear) // engineering units range
 				.withRef(0d) // set the reference position on loading as the links 0 degrees value
 				.withType(KwJointtype.HINGE) // hinge type
-					.withLimited(KwFalseTrueAuto.TRUE).withFrictionloss(conf.isPassive() ? 0.0001 : 0.01)// experementally
+				.withLimited(KwFalseTrueAuto.TRUE).withFrictionloss(conf.isPassive() ? 0.0001 : 0.01)// experementally
 				// determined
 
 				// .withDamping(BigDecimal.valueOf(0.000001))
@@ -791,8 +790,7 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 
 								ArrayList<CSG> parts = getMapNameToCSGParts(affineNameMapGet);
 								if (geomToCSGMap.get(affineNameMapGet) == null) {
-									geomToCSGMap.put(affineNameMapGet,
-											new ArrayList<Geom.Builder<?>>());
+									geomToCSGMap.put(affineNameMapGet, new ArrayList<Geom.Builder<?>>());
 								}
 								geomToCSGMap.get(affineNameMapGet).add(geom);
 								parts.add(transformed);
@@ -995,25 +993,26 @@ public class MuJoCoPhysicsManager implements IMujocoController, ITimeProvider {
 			com.neuronrobotics.sdk.common.Log.error("Loading cache " + tempFile.getName());
 		}
 		if (isFree) {
-			asset.addTexture().withRgb1((double) hull.getColor().getRed(), (double) hull.getColor().getGreen(),
-					(double) hull.getColor().getBlue())
+			asset.addTexture()
+					.withRgb1((double) hull.getColor().getRed(), (double) hull.getColor().getGreen(),
+							(double) hull.getColor().getBlue())
 					.withRgb2((double) hull.getColor().getRed(), (double) hull.getColor().getGreen(),
 							(double) hull.getColor().getBlue())
 					.withName(nameOfCSG).withType("2d").withBuiltin(KwBuiltin.FLAT).withWidth(100).withHeight(100);
 		} else {
-			asset.addTexture().withRgb1((double) floor.getColor().getRed(), (double) floor.getColor().getGreen(),
-					(double) floor.getColor().getBlue())
+			asset.addTexture()
+					.withRgb1((double) floor.getColor().getRed(), (double) floor.getColor().getGreen(),
+							(double) floor.getColor().getBlue())
 					.withRgb2((double) hull.getColor().getRed(), (double) hull.getColor().getGreen(),
 							(double) hull.getColor().getBlue())
-					.withName(nameOfCSG).withType("2d").withBuiltin(KwBuiltin.GRADIENT).withWidth(100)
-					.withHeight(100);
+					.withName(nameOfCSG).withType("2d").withBuiltin(KwBuiltin.GRADIENT).withWidth(100).withHeight(100);
 		}
 		asset.addMaterial().withName(nameOfCSG).withTexture(nameOfCSG)
 
 		;
 
 		asset.addMesh().withFile(tempFile.getName()).withName(nameOfCSG).withScale(0.001, 0.001, 0.001)// convert from mm
-																									// to meters
+																										// to meters
 		;
 	}
 

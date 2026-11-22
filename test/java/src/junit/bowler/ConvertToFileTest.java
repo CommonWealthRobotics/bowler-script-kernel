@@ -79,6 +79,7 @@ public class ConvertToFileTest {
 		assertEquals("the file was not rewritten on replay", size, target.length());
 		loaded.close();
 	}
+
 	@Ignore
 	@Test
 	public void convertsToBlender() throws Exception {
