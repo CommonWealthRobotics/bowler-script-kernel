@@ -1064,12 +1064,12 @@ public class CaDoodleFile {
 		if (isBackAvailable())
 			setCurrentIndex(getCurrentIndex() - 1);
 		Log.debug("Back to index " + getCurrentIndex() + " undoing " + op);
-		boundsCache.clear();
-		fireOnUpdate(getCurrentOperation());
 		if (ICadoodleOperationUndo.class.isInstance(op)) {
 			ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
 			un.undo();
 		}
+		boundsCache.clear();
+		fireOnUpdate(getCurrentOperation());
 		fireSaveSuggestion();
 	}
 
@@ -1077,13 +1077,13 @@ public class CaDoodleFile {
 		if (isForwardAvailable())
 			setCurrentIndex(getCurrentIndex() + 1);
 		Log.debug("Forward to index " + getCurrentIndex() + " redoing " + getCurrentOperation());
-		boundsCache.clear();
-		fireOnUpdate(getCurrentOperation());
 		CaDoodleOperation op = getCurrentOperation();
 		if (ICadoodleOperationUndo.class.isInstance(op)) {
 			ICadoodleOperationUndo un = (ICadoodleOperationUndo) op;
 			un.redo();
 		}
+		boundsCache.clear();
+		fireOnUpdate(getCurrentOperation());
 		fireSaveSuggestion();
 	}
 
