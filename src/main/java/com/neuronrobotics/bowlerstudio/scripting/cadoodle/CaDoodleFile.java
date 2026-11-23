@@ -496,7 +496,15 @@ public class CaDoodleFile {
 
 		setPercentInitialized(1);
 		try {
+			// Replay fills every cache; restore live robot state to the saved cursor
+			while (getCurrentIndex() > indexStarting) {
+				CaDoodleOperation op = getCurrentOperation();
+				setCurrentIndex(getCurrentIndex() - 1);
+				if (op instanceof ICadoodleOperationUndo)
+					((ICadoodleOperationUndo) op).undo();
+			}
 			setCurrentIndex(indexStarting);
+			boundsCache.clear();
 			fireOnUpdate(getCurrentOperation());
 			loadImageFromFile();
 			initializing = false;

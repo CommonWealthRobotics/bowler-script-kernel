@@ -439,6 +439,8 @@ tasks.withType(JavaExec).configureEach {
 //    testLogging.showCauses = true
 //}
 test {
+	// Mockito 1.x uses reflective class definition for offline render doubles.
+	jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
 	// the STEP round-trip tests hold tens-of-megabytes of BRep text in memory
 	maxHeapSize = "8g"
 	testLogging {
