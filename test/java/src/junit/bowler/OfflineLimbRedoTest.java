@@ -39,7 +39,7 @@ import eu.mihosoft.vrl.v3d.CSG;
 import eu.mihosoft.vrl.v3d.Cube;
 import eu.mihosoft.vrl.v3d.parametrics.CSGDatabaseInstance;
 
-/** Offline model regression; no CAD scripts, startup, login, or remote repositories. */
+/** Offline model and render-event regression; no CAD scripts, startup, login, or remote repositories. */
 public class OfflineLimbRedoTest {
 	private static final File FIXTURE = new File("testStepFiles/limb-redo");
 	private static final Gson GSON = new Gson();
@@ -136,34 +136,51 @@ public class OfflineLimbRedoTest {
 					inspect(event + " cursor " + file.getCurrentIndex(), file, builder, entries, errors);
 				return null;
 			}));
-			DHParameterKinematics oldWheel = wheel.getKinematics();
-			DHParameterKinematics oldLeg = leg.getKinematics();
-			double[] removedWheel = pose(oldWheel);
-			double[] removedLeg = pose(oldLeg);
-			for (int cursor = startingCursor - 1; cursor >= 5; cursor--) {
-				file.back();
-				inspect("undo " + cursor, file, builder, entries, errors);
-				if (cursor == 8)
-					removedLeg = pose(oldLeg);
-				if (cursor == 5)
-					removedWheel = pose(oldWheel);
-				if (cursor <= 8)
-					compare("undo " + cursor + " detached leg", removedLeg, pose(oldLeg), errors);
-			}
-			for (int cursor = 6; cursor <= file.getOperations().size(); cursor++) {
-				file.forward();
-				inspect("redo " + cursor, file, builder, entries, errors);
-				compare("redo " + cursor + " detached wheel", removedWheel, pose(oldWheel), errors);
-				compare("redo " + cursor + " detached leg", removedLeg, pose(oldLeg), errors);
-				if (cursor == 6 && oldWheel == builder.getMobileBase().getLimbByName(wheel.getName()))
-					errors.add("redo 6 reused deleted wheel");
-				if (cursor == 9 && oldLeg == builder.getMobileBase().getLimbByName(leg.getName()))
-					errors.add("redo 9 reused deleted leg");
+			for (int cycle = 0; cycle < 2; cycle++) {
+				DHParameterKinematics oldWheel = wheel.getKinematics();
+				DHParameterKinematics oldLeg = leg.getKinematics();
+				double[] removedWheel = pose(oldWheel);
+				double[] removedLeg = pose(oldLeg);
+				for (int cursor = file.getCurrentIndex() - 1; cursor >= 5; cursor--) {
+					file.back();
+					inspect("undo " + cursor, file, builder, entries, errors);
+					if (cursor == 8) {
+						removedLeg = pose(oldLeg);
+						OfflineLimbRenderProbe.assertDetached(builder.getMobileBase(), oldLeg);
+					}
+					if (cursor == 5) {
+						removedWheel = pose(oldWheel);
+						OfflineLimbRenderProbe.assertDetached(builder.getMobileBase(), oldWheel);
+					}
+					if (cursor <= 8)
+						compare("undo " + cursor + " detached leg", removedLeg, pose(oldLeg), errors);
+				}
+				for (int cursor = 6; cursor <= file.getOperations().size(); cursor++) {
+					file.forward();
+					inspect("redo " + cursor, file, builder, entries, errors);
+					compare("redo " + cursor + " detached wheel", removedWheel, pose(oldWheel), errors);
+					compare("redo " + cursor + " detached leg", removedLeg, pose(oldLeg), errors);
+					if (cursor == 6)
+						OfflineLimbRenderProbe.assertSharedAffines(oldWheel, wheel.getKinematics());
+					if (cursor == 9)
+						OfflineLimbRenderProbe.assertSharedAffines(oldLeg, leg.getKinematics());
+					if (cursor == 6 && oldWheel == builder.getMobileBase().getLimbByName(wheel.getName()))
+						errors.add("redo 6 reused deleted wheel");
+					if (cursor == 9 && oldLeg == builder.getMobileBase().getLimbByName(leg.getName()))
+						errors.add("redo 9 reused deleted leg");
+				}
 			}
 			assertTrue("Builder must write only to its local directory",
 					Files.isRegularFile(output.resolve("robot.xml")));
 			assertTrue(String.join("\n", errors), errors.isEmpty());
+			DHParameterKinematics replaced = wheel.getKinematics();
+			builder.addLimb(wheel, true);
+			OfflineLimbRenderProbe.assertDetached(builder.getMobileBase(), replaced);
+			DHParameterKinematics cleared = leg.getKinematics();
+			builder.clear(leg);
+			OfflineLimbRenderProbe.assertDetached(builder.getMobileBase(), cleared);
 		} finally {
+			OfflineLimbRenderProbe.clear();
 			for (DHParameterKinematics limb : created)
 				limb.disconnect();
 			builder.getMobileBase().disconnect();
@@ -252,6 +269,7 @@ public class OfflineLimbRedoTest {
 			expected[2] = base.getZ();
 			System.arraycopy(joints, 0, expected, 3, joints.length);
 			compare(step + " live " + add.getName(), expected, pose(live), errors);
+			OfflineLimbRenderProbe.inspect(step, builder.getMobileBase(), live, errors);
 		}
 	}
 

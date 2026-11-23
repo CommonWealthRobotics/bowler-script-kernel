@@ -10,9 +10,11 @@
 - A real `MobileBaseBuilder` overrides only `getCadManager()`. The existing Mockito dependency supplies a no-op renderer and eight local cubes per limb (the history selects mesh suffixes through `_7`). Actual builder `build` and `applyModification` run unchanged.
 - The image provider is mocked and restored after each test. Builder XML, CSG database, and BOM output use a newly created workspace `build/offline-limb-redo-*` directory, removed afterward. The original fixture files are never written.
 
-Coverage includes initialization at cursors 5, 9, 11, and 16; sequential undo to cursor 5; sequential redo through 16; live limb presence, base XYZ, and joint targets at every step; detached original limb poses; and snapshots observed by update/save-suggestion callbacks. Expected undo poses use the next modification's persisted precommit snapshot, including the leg's unrecorded interactive base change before operation 15.
+Coverage includes initialization at cursors 5, 9, 11, and 16; two cycles of sequential undo to cursor 5 and redo through 16; live limb presence, base XYZ, and joint targets at every step; detached original limb poses; and snapshots observed by update/save-suggestion callbacks. Expected undo poses use the next modification's persisted precommit snapshot, including the leg's unrecorded interactive base change before operation 15.
 
-This is a model regression, not a CAD/rendering integration test: it does not validate real meshes, manipulator Affines, task-space convergence, scripts, controllers, or hardware. Notifications are observational and do not repair model state.
+`OfflineLimbRenderProbe` also injects real SDK pose-feedback events and requires exactly one base render notification for each live limb and none for removed limbs. The notification invokes the real renderer's pose sampler; its real transform calculation then updates shared joint Affines on cached, unattached MeshViews. Tests verify finite joint matrices, transformed mesh points, and affine identity across limb recreation. Unrelated asynchronous PID notifications are excluded from the synchronous event count.
+
+This is not a full UI/CAD integration test: it does not run the JavaFX render thread, real generated meshes, task-space convergence, scripts, controllers, or hardware. Model snapshots remain observational; injected render events and detached-node affine updates are confined to the render probe.
 
 Run from the application root:
 

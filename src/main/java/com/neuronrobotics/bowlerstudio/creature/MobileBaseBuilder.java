@@ -445,6 +445,8 @@ public class MobileBaseBuilder {
 					// later undo/redo moves a mesh nothing displays
 					transferRenderAffines(limb.getKinematics(), kin);
 					limb.setKinematics(kin);
+					// Limbs added after base.connect() need their feedback routed to the renderer;
+					kin.addJointSpaceListener(mobileBase);
 					switch (limb.getLimb().getType()) {
 						case arm :
 						case flap :
@@ -638,6 +640,8 @@ public class MobileBaseBuilder {
 		}
 		if (operations.contains(controller)) {
 			DHParameterKinematics kin = mobileBase.getLimbByName(controller.getName());
+			if (kin != null)
+				kin.removeJointSpaceUpdateListener(mobileBase);
 			switch (controller.getLimb().getType()) {
 				case arm :
 				case flap :
@@ -678,6 +682,9 @@ public class MobileBaseBuilder {
 	public void removeLimb(AddRobotLimb controller) {
 		if (operations.contains(controller))
 			operations.remove(controller);
+		DHParameterKinematics limb = mobileBase.getLimbByName(controller.getName());
+		if (limb != null)
+			limb.removeJointSpaceUpdateListener(mobileBase);
 		mobileBase.deleteLimbByName(controller.getName());
 	}
 
@@ -721,6 +728,8 @@ public class MobileBaseBuilder {
 				if (AddRobotLimb.class.isInstance(op)) {
 					AddRobotLimb c = (AddRobotLimb) op;
 					DHParameterKinematics kin = c.getKinematics();
+					if (kin != null)
+						kin.removeJointSpaceUpdateListener(mobileBase);
 					switch (c.getLimb().getType()) {
 						case arm :
 						case flap :
