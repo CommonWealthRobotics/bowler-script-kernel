@@ -163,6 +163,7 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 	 */
 	public ModifyLimb setTip(TransformNR tip) {
 		this.tip = tip;
+		jointHomeValues = null;
 		getTip();
 		return this;
 	}
