@@ -395,7 +395,7 @@ public class AddFromFile extends AbstractAddFrom {
 				com.neuronrobotics.sdk.common.Log.error(e);
 			}
 			return previous;
-		}).setName(name).setUserDefinedName(filenamePart);
+		}).setName(name).setUserDefinedNameIfMissing(filenamePart);
 		MoveCenter.set(task, processedCSG, nrToCSG);
 		return processedCSG;
 	}

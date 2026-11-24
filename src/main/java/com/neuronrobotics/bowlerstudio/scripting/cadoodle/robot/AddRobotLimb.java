@@ -96,8 +96,10 @@ public class AddRobotLimb extends AbstractAddFrom implements ICadoodleOperationU
 				throw new RuntimeException("Failed to create a limb!");
 			MobileBaseCadManager manager = builder.getCadManager();
 			ArrayList<CSG> limbCad = manager.generateCad(getDb(), newLimb);
+			int outputIndex = 1;
 			for (CSG c : limbCad) {
 				c.setName(getOrderedName());
+				c.setUserDefinedNameIfMissing("Limb part " + outputIndex++);
 				c.setLimbName(name);
 				c.setMobileBaseName(getBuilderName());
 				c.setNoScale(true);

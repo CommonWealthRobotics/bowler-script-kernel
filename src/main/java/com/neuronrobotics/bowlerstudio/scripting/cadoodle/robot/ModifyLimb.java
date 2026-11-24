@@ -96,8 +96,10 @@ public class ModifyLimb extends AbstractAddFrom implements ICadoodleOperationUnd
 							back.remove(c);
 						}
 				}
+				int outputIndex = 1;
 				for (CSG c : limbCad) {
 					c.setName(getOrderedName());
+					c.setUserDefinedNameIfMissing("Limb part " + outputIndex++);
 					c.setLimbName(limbName);
 					c.setMobileBaseName(getBuilderName());
 					c.setNoScale(true);

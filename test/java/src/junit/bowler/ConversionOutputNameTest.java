@@ -54,17 +54,18 @@ public class ConversionOutputNameTest {
 			CSG untouched = new Cube(10).toCSG().setName("untouched-id").setUserDefinedName("Keep me");
 			for (int replay = 0; replay < 2; replay++) {
 				List<CSG> result = operation.process(Collections.singletonList(untouched));
-				assertEquals(3, result.size());
+				assertEquals(4, result.size());
 				assertSame(untouched, result.get(0));
 				assertEquals("Keep me", untouched.getUserDefinedName());
-				for (int i = 0; i < 2; i++) {
+				for (int i = 0; i < 3; i++) {
 					CSG output = result.get(i + 1);
 					String expectedId = internalId + (i == 0 ? "" : "_" + i);
 					assertEquals(expectedId, output.getName());
-					assertEquals(label + " " + (i + 1), output.getUserDefinedName());
+					String expectedLabel = i == 2 ? "Script-defined part" : label + " " + (i + 1);
+					assertEquals(expectedLabel, output.getUserDefinedName());
 					CSG regenerated = output.regenerate();
 					assertEquals(expectedId, regenerated.getName());
-					assertEquals(label + " " + (i + 1), regenerated.getUserDefinedName());
+					assertEquals(expectedLabel, regenerated.getUserDefinedName());
 				}
 				assertEquals(internalId, operation.getName());
 				assertEquals(internalId + "." + operation.getExtension(), target.getName());
@@ -92,7 +93,9 @@ public class ConversionOutputNameTest {
 			CSG second = new Cube(12).toCSG();
 			first.setVolume(1000);
 			second.setVolume(1728);
-			return Arrays.asList(first, second);
+			CSG named = new Cube(14).toCSG().setUserDefinedName("Script-defined part");
+			named.setVolume(2744);
+			return Arrays.asList(first, second, named);
 		}
 
 		@Override

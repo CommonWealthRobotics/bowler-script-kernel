@@ -144,7 +144,7 @@ public class Simplify extends CaDoodleOperation {
 			if (result == source)
 				result = source.cloneShallow();
 			result.getStorage().syncProperties(source.getStorage());
-			result.setUserDefinedName("Simplify " + outputIndex);
+			result.setUserDefinedNameIfMissing("Simplify " + outputIndex);
 			result.setName(outputName).setColor(source.getColor());
 			for (LengthParameter parameter : parameters.values())
 				result.setParameter(getDb(), parameter);

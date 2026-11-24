@@ -60,8 +60,7 @@ public class BreakUpTest {
 			assertTrue(part.isHole());
 			assertTrue(part.getName().startsWith(operation.getName() + "_"));
 			assertTrue(part.isUserDefinedName());
-			assertTrue(part.getUserDefinedName().startsWith("Break Up "));
-			assertFalse(part.getUserDefinedName().contains(operation.getName()));
+			assertEquals("Assembly", part.getUserDefinedName());
 			assertEquals("metadata", part.getStorage().getValue("custom").get());
 			assertSame(part, part.regenerate());
 			assertEquals(1, nativeGeometry.decompose(part).size());
@@ -72,8 +71,8 @@ public class BreakUpTest {
 		assertEquals(72, volume, .0001);
 		assertEquals(names(result.subList(1, 3)), operation.getNamesAddedInThisOperation());
 		assertEquals(2, nativeGeometry.decompose(source).size());
-		assertEquals("Break Up 1", result.get(1).getUserDefinedName());
-		assertEquals("Break Up 2", result.get(2).getUserDefinedName());
+		assertEquals("Assembly", result.get(1).getUserDefinedName());
+		assertEquals("Assembly", result.get(2).getUserDefinedName());
 		assertEquals("source", source.getName());
 		assertEquals("Assembly", source.getUserDefinedName());
 	}

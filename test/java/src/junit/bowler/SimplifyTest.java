@@ -196,7 +196,7 @@ public class SimplifyTest {
 		CSG output = op.process(Collections.singletonList(source)).get(0);
 		assertEquals(op.getName() + "_1", output.getName());
 		assertTrue(output.isUserDefinedName());
-		assertEquals("Simplify 1", output.getUserDefinedName());
+		assertEquals("Original", output.getUserDefinedName());
 		assertEquals(Collections.singletonList(output.getName()), op.getNamesAddedInThisOperation());
 		assertEquals(9, output.getParameters(op.getDb()).size());
 		for (String key : output.getParameters(op.getDb()))
