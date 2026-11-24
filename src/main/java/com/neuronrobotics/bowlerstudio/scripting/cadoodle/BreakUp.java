@@ -97,7 +97,7 @@ public class BreakUp extends AbstractAddFrom {
 				// Copy metadata only; exclude upstream parameter and regeneration callbacks
 				part.getStorage().syncProperties(source.getStorage());
 				part.setName(partName).setColor(source.getColor());
-				part.getStorage().delete("UserDefinedName");
+				part.setUserDefinedName("Break Up " + (added.size() + 1));
 				part.getStorage().delete("groupMembership");
 				part.getStorage().delete("GroupResult");
 				part.setRegenerate(previous -> previous);

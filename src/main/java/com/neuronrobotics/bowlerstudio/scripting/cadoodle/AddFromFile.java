@@ -107,7 +107,7 @@ public class AddFromFile extends AbstractAddFrom {
 				}
 				try {
 					CSG processedCSG = processGiven(csg, i, getOrderedName(), file, name, getLocation(),
-							getCaDoodleFile().getCsgDBinstance(), getFilenamePart());
+							getCaDoodleFile().getCsgDBinstance(), getOutputDisplayName(collect.size() + 1));
 					collect.add(processedCSG);
 				} catch (Exception ex) {
 					com.neuronrobotics.sdk.common.Log.error(ex);;
@@ -430,6 +430,10 @@ public class AddFromFile extends AbstractAddFrom {
 	@Override
 	public File getFile() throws NoSuchFileException {
 		return getFile(name, getCaDoodleFile());
+	}
+
+	protected String getOutputDisplayName(int outputIndex) throws NoSuchFileException {
+		return getFilenamePart();
 	}
 
 	public String getFilenamePart() throws NoSuchFileException {

@@ -21,6 +21,11 @@ import com.neuronrobotics.manifold3d.NonManifoldShapeError;
 public class ConvertToOpenSCAD extends ConvertToFileOperation {
 
 	@Override
+	protected String getOutputDisplayName() {
+		return "OpenSCAD model";
+	}
+
+	@Override
 	public String getExtension() {
 		return "scad";
 	}

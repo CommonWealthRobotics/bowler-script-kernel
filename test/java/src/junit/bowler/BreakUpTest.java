@@ -59,7 +59,9 @@ public class BreakUpTest {
 			assertEquals(Color.ORANGE, part.getColor());
 			assertTrue(part.isHole());
 			assertTrue(part.getName().startsWith(operation.getName() + "_"));
-			assertEquals(part.getName(), part.getUserDefinedName());
+			assertTrue(part.isUserDefinedName());
+			assertTrue(part.getUserDefinedName().startsWith("Break Up "));
+			assertFalse(part.getUserDefinedName().contains(operation.getName()));
 			assertEquals("metadata", part.getStorage().getValue("custom").get());
 			assertSame(part, part.regenerate());
 			assertEquals(1, nativeGeometry.decompose(part).size());
@@ -70,6 +72,8 @@ public class BreakUpTest {
 		assertEquals(72, volume, .0001);
 		assertEquals(names(result.subList(1, 3)), operation.getNamesAddedInThisOperation());
 		assertEquals(2, nativeGeometry.decompose(source).size());
+		assertEquals("Break Up 1", result.get(1).getUserDefinedName());
+		assertEquals("Break Up 2", result.get(2).getUserDefinedName());
 		assertEquals("source", source.getName());
 		assertEquals("Assembly", source.getUserDefinedName());
 	}
@@ -114,11 +118,16 @@ public class BreakUpTest {
 		assertEquals("BreakUp", restored.getType());
 		assertEquals(operation.getName(), restored.getName());
 		assertTrue(restored.getNamesAddedInThisOperation().isEmpty());
-		assertEquals(expected, names(restored.process(input)));
+		List<CSG> restoredParts = restored.process(input);
+		assertEquals(expected, names(restoredParts));
+		assertEquals("Break Up 1", restoredParts.get(0).getUserDefinedName());
+		assertEquals("Break Up 4", restoredParts.get(4).getUserDefinedName());
 		assertEquals(operation.getNamesAddedInThisOperation(), restored.getNamesAddedInThisOperation());
 		operation.setNames(Arrays.asList("second"));
 		List<CSG> fewer = operation.process(input);
 		assertSame(first, fewer.get(0));
+		assertEquals("Break Up 1", fewer.get(2).getUserDefinedName());
+		assertEquals("Break Up 2", fewer.get(3).getUserDefinedName());
 		assertEquals(expected.subList(3, 5), operation.getNamesAddedInThisOperation());
 	}
 
@@ -196,7 +205,9 @@ public class BreakUpTest {
 		for (int replay = 0; replay < 2; replay++) {
 			for (CSG part : operation.process(Arrays.asList(source))) {
 				assertTrue(part.getName().startsWith(operation.getName() + "_"));
-				assertEquals(part.getName(), part.getUserDefinedName());
+				assertTrue(part.isUserDefinedName());
+				assertTrue(part.getUserDefinedName().startsWith("Break Up "));
+				assertFalse(part.getUserDefinedName().contains(operation.getName()));
 				assertTrue(part.getParameters(operation.getDb()).isEmpty());
 				assertSame(part, part.regenerate());
 			}

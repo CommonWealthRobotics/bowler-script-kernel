@@ -15,6 +15,11 @@ import eu.mihosoft.vrl.v3d.CSG;
 public class ConvertToBlender extends ConvertToFileOperation {
 
 	@Override
+	protected String getOutputDisplayName() {
+		return "Blender model";
+	}
+
+	@Override
 	public String getExtension() {
 		return "blend";
 	}

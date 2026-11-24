@@ -131,24 +131,24 @@ public class Simplify extends CaDoodleOperation {
 			}
 			String outputName = outputNames.get(source.getName());
 			occupied.add(outputName);
-			result.add(processSelected(source, outputName));
+			result.add(processSelected(source, outputName, addedNames.size() + 1));
 			addedNames.add(outputName);
 		}
 		return result;
 	}
 
-	private CSG processSelected(CSG source, String outputName) {
+	private CSG processSelected(CSG source, String outputName, int outputIndex) {
 		try {
 			CSG result = applyGeometry(source, getSettings());
 			// Disabled stages may return the incoming mesh; keep its snapshot independent
 			if (result == source)
 				result = source.cloneShallow();
 			result.getStorage().syncProperties(source.getStorage());
-			result.getStorage().delete("UserDefinedName");
+			result.setUserDefinedName("Simplify " + outputIndex);
 			result.setName(outputName).setColor(source.getColor());
 			for (LengthParameter parameter : parameters.values())
 				result.setParameter(getDb(), parameter);
-			return result.setRegenerate(previous -> processSelected(source, outputName));
+			return result.setRegenerate(previous -> processSelected(source, outputName, outputIndex));
 		} catch (RuntimeException | Error e) {
 			throw e;
 		} catch (Throwable e) {

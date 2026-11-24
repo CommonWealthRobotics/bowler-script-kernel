@@ -195,13 +195,15 @@ public class SimplifyTest {
 		source.setParameter(op.getDb(), upstream);
 		CSG output = op.process(Collections.singletonList(source)).get(0);
 		assertEquals(op.getName() + "_1", output.getName());
-		assertEquals(output.getName(), output.getUserDefinedName());
+		assertTrue(output.isUserDefinedName());
+		assertEquals("Simplify 1", output.getUserDefinedName());
 		assertEquals(Collections.singletonList(output.getName()), op.getNamesAddedInThisOperation());
 		assertEquals(9, output.getParameters(op.getDb()).size());
 		for (String key : output.getParameters(op.getDb()))
 			assertTrue(op.ownsParameterKey(key));
 		CSG regenerated = output.regenerate();
 		assertEquals(output.getName(), regenerated.getName());
+		assertEquals(output.getUserDefinedName(), regenerated.getUserDefinedName());
 		assertEquals(output.getParameters(op.getDb()), regenerated.getParameters(op.getDb()));
 		assertEquals("Original", source.getUserDefinedName());
 		assertEquals(Collections.singleton("upstream"), new java.util.HashSet<>(source.getParameters(op.getDb())));
@@ -216,12 +218,16 @@ public class SimplifyTest {
 		List<CSG> outputs = op.process(Arrays.asList(first, collision, second));
 		String firstName = outputs.get(0).getName();
 		String secondName = outputs.get(2).getName();
+		assertEquals("Simplify 1", outputs.get(0).getUserDefinedName());
+		assertEquals("Simplify 2", outputs.get(2).getUserDefinedName());
 		assertFalse(firstName.equals(secondName));
 		assertFalse(firstName.equals(collision.getName()));
 		assertSame(collision, outputs.get(1));
 		List<CSG> replay = op.process(Arrays.asList(second, collision, first));
 		assertEquals(secondName, replay.get(0).getName());
 		assertEquals(firstName, replay.get(2).getName());
+		assertEquals("Simplify 1", replay.get(0).getUserDefinedName());
+		assertEquals("Simplify 2", replay.get(2).getUserDefinedName());
 		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
 				.registerTypeAdapterFactory(new CaDoodleJsonOperationAdapterFactory()).create();
 		Simplify restored = attach(
@@ -229,6 +235,8 @@ public class SimplifyTest {
 		List<CSG> reloaded = restored.process(Arrays.asList(first, collision, second));
 		assertEquals(firstName, reloaded.get(0).getName());
 		assertEquals(secondName, reloaded.get(2).getName());
+		assertEquals(outputs.get(0).getUserDefinedName(), reloaded.get(0).getUserDefinedName());
+		assertEquals(outputs.get(2).getUserDefinedName(), reloaded.get(2).getUserDefinedName());
 		op.setNames(Collections.singletonList("missing"));
 		assertSame(first, op.process(Collections.singletonList(first)).get(0));
 		assertTrue(op.getNamesAddedInThisOperation().isEmpty());

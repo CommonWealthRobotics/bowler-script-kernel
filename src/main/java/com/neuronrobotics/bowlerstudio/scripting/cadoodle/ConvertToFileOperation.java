@@ -22,6 +22,14 @@ public abstract class ConvertToFileOperation extends AddFromFile {
 	/** The file extension this conversion writes, without the dot. */
 	public abstract String getExtension();
 
+	/** Imported model display name; independent of file identity */
+	protected abstract String getOutputDisplayName();
+
+	@Override
+	protected String getOutputDisplayName(int outputIndex) {
+		return getOutputDisplayName() + " " + outputIndex;
+	}
+
 	/**
 	 * Writes the selected CSGs into {@code target}, which does not exist yet.
 	 */
@@ -74,7 +82,7 @@ public abstract class ConvertToFileOperation extends AddFromFile {
 					: "Conversion to " + getExtension() + " failed: " + target);
 
 		// add the file with the normal AddFromFile procedure
-		setFilenamePart(target.getName().split("\\.")[0]);
+		setFilenamePart(getOutputDisplayName());
 		return super.process(back);
 	}
 

@@ -15,6 +15,11 @@ import eu.mihosoft.vrl.v3d.CSG;
 public class ConvertToFreeCAD extends ConvertToFileOperation {
 
 	@Override
+	protected String getOutputDisplayName() {
+		return "FreeCAD model";
+	}
+
+	@Override
 	public String getExtension() {
 		return "FCStd";
 	}
