@@ -52,6 +52,7 @@ public class CaDoodleJsonOperationAdapterFactory implements TypeAdapterFactory {
 		registerType("UnGroup", UnGroup.class);
 		registerType("UnLock", UnLock.class);
 		registerType("Sweep", Sweep.class);
+		registerType("Simplify", Simplify.class);
 		registerType("WireMeshView", WireMeshView.class);
 		registerType("Xor", Xor.class);
 	}
