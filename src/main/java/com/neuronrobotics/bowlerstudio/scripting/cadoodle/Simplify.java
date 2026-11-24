@@ -2,10 +2,12 @@ package com.neuronrobotics.bowlerstudio.scripting.cadoodle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.google.gson.annotations.Expose;
 import com.neuronrobotics.manifold3d.MeshProcessing;
@@ -18,6 +20,9 @@ public class Simplify extends CaDoodleOperation {
 	private String name = RandomStringFactory.generateRandomString();
 	@Expose
 	private List<String> names = new ArrayList<>();
+	@Expose
+	private Map<String, String> outputNames = new LinkedHashMap<>();
+	private final List<String> addedNames = new ArrayList<>();
 	private final Map<String, LengthParameter> parameters = new LinkedHashMap<>();
 	@Expose
 	private double simplify = 0.5;
@@ -64,7 +69,7 @@ public class Simplify extends CaDoodleOperation {
 
 	@Override
 	public List<String> getNamesAddedInThisOperation() {
-		return new ArrayList<>(names);
+		return new ArrayList<>(addedNames);
 	}
 
 	public Simplify setNames(List<String> names) {
@@ -104,22 +109,46 @@ public class Simplify extends CaDoodleOperation {
 
 	@Override
 	public List<CSG> process(List<CSG> incoming) {
-		List<CSG> result = new ArrayList<>(incoming.size());
+		addedNames.clear();
+		Set<String> occupied = new HashSet<>();
 		for (CSG source : incoming)
-			result.add(names.contains(source.getName()) ? processSelected(source) : source);
+			occupied.add(source.getName());
+		Set<String> reserved = new HashSet<>(occupied);
+		reserved.addAll(outputNames.values());
+		List<CSG> result = new ArrayList<>(incoming.size());
+		for (CSG source : incoming) {
+			if (!names.contains(source.getName())) {
+				result.add(source);
+				continue;
+			}
+			if (!outputNames.containsKey(source.getName()) || occupied.contains(outputNames.get(source.getName()))) {
+				int index = 1;
+				String candidate;
+				do {
+					candidate = name + "_" + index++;
+				} while (!reserved.add(candidate));
+				outputNames.put(source.getName(), candidate);
+			}
+			String outputName = outputNames.get(source.getName());
+			occupied.add(outputName);
+			result.add(processSelected(source, outputName));
+			addedNames.add(outputName);
+		}
 		return result;
 	}
 
-	private CSG processSelected(CSG source) {
+	private CSG processSelected(CSG source, String outputName) {
 		try {
 			CSG result = applyGeometry(source, getSettings());
-			// Keep the incoming snapshot independent even when all stages are disabled.
+			// Disabled stages may return the incoming mesh; keep its snapshot independent
 			if (result == source)
 				result = source.cloneShallow();
-			result.syncProperties(getDb(), source).setName(source.getName()).setColor(source.getColor());
+			result.getStorage().syncProperties(source.getStorage());
+			result.getStorage().delete("UserDefinedName");
+			result.setName(outputName).setColor(source.getColor());
 			for (LengthParameter parameter : parameters.values())
 				result.setParameter(getDb(), parameter);
-			return result.setRegenerate(previous -> processSelected(source));
+			return result.setRegenerate(previous -> processSelected(source, outputName));
 		} catch (RuntimeException | Error e) {
 			throw e;
 		} catch (Throwable e) {

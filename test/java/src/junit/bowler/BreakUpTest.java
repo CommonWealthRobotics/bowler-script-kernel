@@ -58,7 +58,8 @@ public class BreakUpTest {
 			centers.add(part.getBounds().getCenterX());
 			assertEquals(Color.ORANGE, part.getColor());
 			assertTrue(part.isHole());
-			assertEquals("Assembly", part.getUserDefinedName());
+			assertTrue(part.getName().startsWith(operation.getName() + "_"));
+			assertEquals(part.getName(), part.getUserDefinedName());
 			assertEquals("metadata", part.getStorage().getValue("custom").get());
 			assertSame(part, part.regenerate());
 			assertEquals(1, nativeGeometry.decompose(part).size());
@@ -69,6 +70,8 @@ public class BreakUpTest {
 		assertEquals(72, volume, .0001);
 		assertEquals(names(result.subList(1, 3)), operation.getNamesAddedInThisOperation());
 		assertEquals(2, nativeGeometry.decompose(source).size());
+		assertEquals("source", source.getName());
+		assertEquals("Assembly", source.getUserDefinedName());
 	}
 
 	@Test
@@ -187,12 +190,20 @@ public class BreakUpTest {
 		CSG source = disconnected("source");
 		eu.mihosoft.vrl.v3d.parametrics.LengthParameter parameter = new eu.mihosoft.vrl.v3d.parametrics.LengthParameter(
 				operation.getDb(), "upstream", 2.0, new ArrayList<>(Arrays.asList(1.0, 10.0)));
-		source.setParameter(operation.getDb(), parameter);
-		for (CSG part : operation.process(Arrays.asList(source))) {
-			assertTrue(part.getParameters(operation.getDb()).isEmpty());
-			assertSame(part, part.regenerate());
+		eu.mihosoft.vrl.v3d.parametrics.IParametric callback = (previous, key, value) -> source;
+		source.setParameter(operation.getDb(), parameter, callback);
+		source.setRegenerate(previous -> source);
+		for (int replay = 0; replay < 2; replay++) {
+			for (CSG part : operation.process(Arrays.asList(source))) {
+				assertTrue(part.getName().startsWith(operation.getName() + "_"));
+				assertEquals(part.getName(), part.getUserDefinedName());
+				assertTrue(part.getParameters(operation.getDb()).isEmpty());
+				assertSame(part, part.regenerate());
+			}
 		}
-		assertTrue(source.getParameters(operation.getDb()).contains("upstream"));
+		assertEquals(Collections.singleton("upstream"), source.getParameters(operation.getDb()));
+		assertSame(callback, source.getMapOfparametrics(operation.getDb()).get("upstream"));
+		assertSame(parameter, operation.getDb().get("upstream"));
 	}
 
 }

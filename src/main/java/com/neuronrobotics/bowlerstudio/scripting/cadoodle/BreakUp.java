@@ -94,12 +94,12 @@ public class BreakUp extends AbstractAddFrom {
 				String partName = allocated.get(i);
 				occupied.add(partName);
 				CSG part = parts.get(i);
-				part.syncProperties(getDb(), source).setName(partName).setColor(source.getColor());
+				// Copy metadata only; exclude upstream parameter and regeneration callbacks
+				part.getStorage().syncProperties(source.getStorage());
+				part.setName(partName).setColor(source.getColor());
+				part.getStorage().delete("UserDefinedName");
 				part.getStorage().delete("groupMembership");
 				part.getStorage().delete("GroupResult");
-				// Upstream callbacks would recreate the entire source, not this component.
-				for (String parameter : new ArrayList<>(part.getParameters(getDb())))
-					part.removeParameter(getDb(), parameter);
 				part.setRegenerate(previous -> previous);
 				result.add(part);
 				added.add(partName);
