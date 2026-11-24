@@ -12,7 +12,7 @@ not the previously simplified mesh. The following table lists defaults and units
 
 | Setting | Default | Meaning/options |
 | --- | --- | --- |
-| simplify | 0.01 | Native simplify distance tolerance in model units; UI bounds 0–10 |
+| simplify | 0.5 | Native simplify distance tolerance in model units; UI bounds 0–10 |
 | calculateNormals | 0 | Native normal channel index; integer choices 0, 1, 2, 3 |
 | smoothByNormals | 0 | Native normal channel index; integer choices 0, 1, 2, 3 |
 | normalAngle | 60 | Normal crease angle in degrees; bounds 0–180 |

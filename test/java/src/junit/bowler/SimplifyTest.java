@@ -27,6 +27,27 @@ public class SimplifyTest {
 	}
 
 	@Test
+	public void defaultsSimplifyOnlyWithAdjustableRefinement() throws Exception {
+		Simplify operation = attach(new Simplify());
+		MeshProcessing.Settings defaults = operation.getSettings();
+		assertEquals(.5, defaults.simplify(), 0);
+		assertEquals(0, defaults.calculateNormals());
+		assertEquals(0, defaults.smoothByNormals());
+		assertEquals(0, defaults.smoothOut(), 0);
+		assertEquals(0, defaults.refine());
+		assertEquals(0, defaults.refineToLength(), 0);
+		assertEquals(0, defaults.refineToTolerance(), 0);
+		operation.refineParameter().setMM(2);
+		operation.refineToLengthParameter().setMM(4);
+		operation.refineToToleranceParameter().setMM(.1);
+		MeshProcessing.Settings adjusted = operation.getSettings();
+		assertEquals(.5, adjusted.simplify(), 0);
+		assertEquals(2, adjusted.refine());
+		assertEquals(4, adjusted.refineToLength(), 0);
+		assertEquals(.1, adjusted.refineToTolerance(), .0001);
+	}
+
+	@Test
 	public void parserRoundTripPreservesSettingsAndSelection() {
 		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
 				.registerTypeAdapterFactory(new CaDoodleJsonOperationAdapterFactory()).create();
