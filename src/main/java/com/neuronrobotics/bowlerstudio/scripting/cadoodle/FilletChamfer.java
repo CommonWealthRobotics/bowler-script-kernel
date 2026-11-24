@@ -59,7 +59,7 @@ public class FilletChamfer extends AbstractAddFrom {
 		Transform nrToCSG = TransformFactory.nrToCSG(getWorkplane());
 		ArrayList<CSG> fillet;
 		int numberOfSidesInt = Integer
-				.parseInt(ConfigurationDatabase.get("CaDoodle", "DefaultNumberOfSides", "16").toString()) / 4;
+				.parseInt(ConfigurationDatabase.get("CaDoodle", "DefaultNumberOfSides", "64").toString()) / 4;
 
 		LengthParameter faceCount = new LengthParameter(getDb(), getName() + "_CaDoodle_Num Faces",
 				(double) numberOfSidesInt, new ArrayList<>(Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0,
